@@ -1,0 +1,94 @@
+.homepage {
+  min-height: 100vh;
+  background-color: black;
+  color: white;
+  font-family: sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid gray;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.nav a {
+  margin: 0 1rem;
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.nav a:hover {
+  color: gray;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+
+.hero h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.25rem;
+  color: gray;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.hero button {
+  padding: 1rem 2rem;
+  background: linear-gradient(to right, purple, blue);
+  border: none;
+  border-radius: 1rem;
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.hero button:hover {
+  opacity: 0.9;
+}
+
+.services {
+  background: #111;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.service-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.service-item {
+  background: #222;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.3s;
+}
+
+.service-item:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8);
+}
+
+.footer {
+  padding: 1.5rem;
+  border-top: 1px solid gray;
+  text-align: center;
+  color: gray;
+}
