@@ -50,10 +50,12 @@ export default function B8Careers() {
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setCvForm((prev) => ({ ...prev, cv: e.target.files[0] }));
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setCvForm((prev) => ({ ...prev, cv: files[0] }));
     }
   };
+  
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
