@@ -20,6 +20,13 @@ export default function HomePage() {
     <div className="homepage">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
+      {/* Intro Video Section */}
+      <section className="intro-video">
+        <div className="video-placeholder">
+          <p>Intro Video Placeholder</p>
+        </div>
+      </section>
+
       <section className="hero">
         <h2>Empowering Your Business</h2>
         <p>
@@ -68,13 +75,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Contact Section */}
       <section className="contact-section">
         <h3>Contact Us</h3>
         <form className="contact-form">
           <input type="text" placeholder="Your Name" required />
           <input type="email" placeholder="Your Email" required />
-          <textarea placeholder="Your Message" rows="5" required></textarea>
+          <textarea placeholder="Your Message" required></textarea>
           <button type="submit">Send Message</button>
         </form>
 
@@ -84,7 +90,6 @@ export default function HomePage() {
           <p>Address: 123 B8 Street, Innovation City</p>
         </div>
 
-        {/* Social Media Links */}
         <div className="social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
             <FaLinkedin />
