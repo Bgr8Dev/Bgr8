@@ -14,8 +14,9 @@
 }
 
 .logo {
-  font-size: 2rem;
   font-weight: bold;
+  width: 5px;
+  height: 5px;
 }
 
 .nav a {
@@ -92,3 +93,21 @@
   text-align: center;
   color: gray;
 }
+
+.service-item {
+  background: #222;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.3s, transform 0.3s;
+  color: white;
+  text-decoration: none;
+  display: block;
+}
+
+.service-item:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8);
+  transform: translateY(-5px);
+  color: lightgray;
+}
+

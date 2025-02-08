@@ -1,12 +1,21 @@
-// src/pages/B8Careers.tsx
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
+import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import '../styles/Pages.css';
 
 export default function B8Careers() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className="page">
-      <Navbar />
+      {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       <section className="hero">
         <h1>B8 Careers</h1>
