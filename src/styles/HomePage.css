@@ -111,3 +111,73 @@
   color: lightgray;
 }
 
+/* Contact Section Styles */
+.contact-section {
+  background-color: #111;
+  padding: 4rem 1.5rem;
+  color: white;
+  text-align: center;
+}
+
+.contact-section h3 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 0.75rem;
+  border: 1px solid gray;
+  border-radius: 8px;
+  background-color: #222;
+  color: white;
+}
+
+.contact-form button {
+  padding: 1rem;
+  background: linear-gradient(to right, purple, blue);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.contact-form button:hover {
+  opacity: 0.9;
+}
+
+.contact-info {
+  margin-top: 2rem;
+  color: gray;
+}
+
+.contact-info p {
+  margin: 0.5rem 0;
+}
+
+/* Social Media Links */
+.social-media {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.social-media a {
+  color: white;
+  font-size: 2rem;
+  transition: color 0.3s ease;
+}
+
+.social-media a:hover {
+  color: #888;
+}

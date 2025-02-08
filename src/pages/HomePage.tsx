@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import '../styles/HomePage.css';
 
 export default function HomePage() {
@@ -64,6 +65,39 @@ export default function HomePage() {
             <h4>B8 Careers</h4>
             <p>Join our team to grow and innovate with us.</p>
           </Link>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="contact-section">
+        <h3>Contact Us</h3>
+        <form className="contact-form">
+          <input type="text" placeholder="Your Name" required />
+          <input type="email" placeholder="Your Email" required />
+          <textarea placeholder="Your Message" rows="5" required></textarea>
+          <button type="submit">Send Message</button>
+        </form>
+
+        <div className="contact-info">
+          <p>Email: contact@b8company.com</p>
+          <p>Phone: +123 456 7890</p>
+          <p>Address: 123 B8 Street, Innovation City</p>
+        </div>
+
+        {/* Social Media Links */}
+        <div className="social-media">
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+            <FaLinkedin />
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+            <FaInstagram />
+          </a>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+            <FaYoutube />
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+            <FaTwitter />
+          </a>
         </div>
       </section>
 
