@@ -7,7 +7,7 @@ import '../styles/B8Charity.css';
 
 export default function B8Charity() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [activeCharity, setActiveCharity] = useState(null);
+  const [activeCharity, setActiveCharity] = useState<string | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -92,7 +92,7 @@ export default function B8Charity() {
         {activeCharity && (
           <div className="charity-info-modal" onClick={() => setActiveCharity(null)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h4>{activeCharity.toUpperCase()}</h4>
+              <h4>{activeCharity ? activeCharity.toUpperCase() : ''}</h4>
               <p>Learn about how this charity is making a difference in the community.</p>
               <button onClick={() => setActiveCharity(null)}>Close</button>
             </div>
