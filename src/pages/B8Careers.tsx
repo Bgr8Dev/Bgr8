@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent, ChangeEvent } from 'react';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import '../styles/B8Careers.css';
 
 interface CvFormData {
-    name: string;
-    email: string;
-    phone: string;
-    linkedIn: string;
-    industry: string;
-    professionalWeb: string;
-    otherLinks: string;
-    cv: File | null;
-  }
+  name: string;
+  email: string;
+  phone: string;
+  linkedIn: string;
+  industry: string;
+  professionalWeb: string;
+  otherLinks: string;
+  cv: File | null;
+}
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [cvDatabase, setCvDatabase] = useState([]);
+  const [cvDatabase, setCvDatabase] = useState<CvFormData[]>([]); // Correct typing
   const [cvForm, setCvForm] = useState<CvFormData>({
     name: '',
     email: '',
@@ -50,11 +50,11 @@ export default function B8Careers() {
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setCvForm((prev) => ({ ...prev, cv: e.target.files![0] }));
+    if (e.target.files && e.target.files.length > 0) {
+      setCvForm((prev) => ({ ...prev, cv: e.target.files[0] }));
     }
   };
-  
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -74,90 +74,69 @@ export default function B8Careers() {
         </p>
       </section>
 
-      {/* List of Industries */}
-      <section className="industries-section">
-        <h3>Industries We Work With</h3>
-        <ul>
-          <li>Technology</li>
-          <li>Marketing & Advertising</li>
-          <li>Education</li>
-          <li>Finance</li>
-          <li>Healthcare</li>
-        </ul>
-      </section>
-
-      {/* B8 Education Section with Teacher Sign-Up Form */}
-      <section className="education-section">
-        <h3>B8 Education - Teacher Sign-Up</h3>
-        <form>
-          <input type="text" placeholder="Name" required />
-          <input type="email" placeholder="Email" required />
-          <input type="tel" placeholder="Phone Number" required />
-          <input type="url" placeholder="LinkedIn Profile" required />
-          <label>
-            Upload CV:
-            <input type="file" required />
-          </label>
-          <button type="submit">Sign Up</button>
-        </form>
-      </section>
-
-      {/* CV Database Submission Form */}
+      {/* CV Submission Form */}
       <section className="cv-submission-section">
         <h3>Submit Your CV</h3>
         <form onSubmit={handleCvSubmit}>
           <input
+            name="name"
             type="text"
             placeholder="Name"
             value={cvForm.name}
-            onChange={(e) => setCvForm({ ...cvForm, name: e.target.value })}
+            onChange={handleInputChange}
             required
           />
           <input
+            name="email"
             type="email"
             placeholder="Email"
             value={cvForm.email}
-            onChange={(e) => setCvForm({ ...cvForm, email: e.target.value })}
+            onChange={handleInputChange}
             required
           />
           <input
+            name="phone"
             type="tel"
             placeholder="Phone"
             value={cvForm.phone}
-            onChange={(e) => setCvForm({ ...cvForm, phone: e.target.value })}
+            onChange={handleInputChange}
             required
           />
           <input
+            name="linkedIn"
             type="url"
             placeholder="LinkedIn Profile"
             value={cvForm.linkedIn}
-            onChange={(e) => setCvForm({ ...cvForm, linkedIn: e.target.value })}
+            onChange={handleInputChange}
             required
           />
           <input
+            name="industry"
             type="text"
             placeholder="Industry"
             value={cvForm.industry}
-            onChange={(e) => setCvForm({ ...cvForm, industry: e.target.value })}
+            onChange={handleInputChange}
             required
           />
           <input
+            name="professionalWeb"
             type="url"
             placeholder="Professional Website"
             value={cvForm.professionalWeb}
-            onChange={(e) => setCvForm({ ...cvForm, professionalWeb: e.target.value })}
+            onChange={handleInputChange}
           />
           <input
+            name="otherLinks"
             type="url"
             placeholder="Other Links"
             value={cvForm.otherLinks}
-            onChange={(e) => setCvForm({ ...cvForm, otherLinks: e.target.value })}
+            onChange={handleInputChange}
           />
           <label>
             Upload CV:
             <input
               type="file"
-              onChange={(e) => setCvForm({ ...cvForm, cv: e.target.files[0] })}
+              onChange={handleFileChange}
               required
             />
           </label>
@@ -165,8 +144,8 @@ export default function B8Careers() {
         </form>
       </section>
 
-       {/* CV Database */}
-       {/* <section className="cv-database-section">
+      {/* CV Database */}
+      <section className="cv-database-section">
         <h3>CV Database</h3>
         {cvDatabase.length === 0 ? (
           <p>No CVs submitted yet.</p>
@@ -183,7 +162,7 @@ export default function B8Careers() {
             </div>
           ))
         )}
-      </section> */}
+      </section>
 
       <Footer />
     </div>
