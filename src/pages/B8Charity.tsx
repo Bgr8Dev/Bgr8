@@ -15,6 +15,10 @@ export default function B8Charity() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const handleCharityClick = (charity: string) => {
+    setActiveCharity(charity);
+  };
+
   return (
     <div className="page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
@@ -74,10 +78,11 @@ export default function B8Charity() {
             <div
               key={index}
               className="charity-card"
-              onClick={() => setActiveCharity(charity)}
+              onClick={() => handleCharityClick(charity)}
             >
               <img src={`/assets/${charity}-logo.png`} alt={`Charity ${index + 1}`} />
               <div className="overlay">
+                {/* <p>{charity.toUpperCase()}</p> */}
                 <p>Click to Learn More</p>
               </div>
             </div>

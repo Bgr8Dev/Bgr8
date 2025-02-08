@@ -7,7 +7,7 @@ import '../styles/B8Education.css';
 
 export default function B8Education() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [userType, setUserType] = useState('');
+  const [userType, setUserType] = useState<'student' | 'teacher' | ''>('');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);

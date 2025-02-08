@@ -2,13 +2,23 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import '../styles/B8Careers.css';
+
+interface CvFormData {
+    name: string;
+    email: string;
+    phone: string;
+    linkedIn: string;
+    industry: string;
+    professionalWeb: string;
+    otherLinks: string;
+    cv: File | null;
+  }
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [cvDatabase, setCvDatabase] = useState([]);
-  const [cvForm, setCvForm] = useState({
+  const [cvForm, setCvForm] = useState<CvFormData>({
     name: '',
     email: '',
     phone: '',
@@ -19,7 +29,7 @@ export default function B8Careers() {
     cv: null,
   });
 
-  const handleCvSubmit = (e) => {
+  const handleCvSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCvDatabase([...cvDatabase, cvForm]);
     setCvForm({
@@ -34,6 +44,17 @@ export default function B8Careers() {
     });
   };
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setCvForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setCvForm((prev) => ({ ...prev, cv: e.target.files![0] }));
+    }
+  };
+  
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -144,8 +165,8 @@ export default function B8Careers() {
         </form>
       </section>
 
-      {/* CV Database - Profile List */}
-      <section className="cv-database-section">
+       {/* CV Database */}
+       {/* <section className="cv-database-section">
         <h3>CV Database</h3>
         {cvDatabase.length === 0 ? (
           <p>No CVs submitted yet.</p>
@@ -155,14 +176,14 @@ export default function B8Careers() {
               <h4>{cv.name}</h4>
               <p>Email: {cv.email}</p>
               <p>Phone: {cv.phone}</p>
-              <p>LinkedIn: <a href={cv.linkedIn} target="_blank" rel="noopener noreferrer">{cv.linkedIn}</a></p>
+              <p>LinkedIn: <a href={cv.linkedIn}>{cv.linkedIn}</a></p>
               <p>Industry: {cv.industry}</p>
-              <p>Professional Website: <a href={cv.professionalWeb} target="_blank" rel="noopener noreferrer">{cv.professionalWeb}</a></p>
-              <p>Other Links: <a href={cv.otherLinks} target="_blank" rel="noopener noreferrer">{cv.otherLinks}</a></p>
+              <p>Professional Website: <a href={cv.professionalWeb}>{cv.professionalWeb}</a></p>
+              <p>Other Links: <a href={cv.otherLinks}>{cv.otherLinks}</a></p>
             </div>
           ))
         )}
-      </section>
+      </section> */}
 
       <Footer />
     </div>
