@@ -1,0 +1,111 @@
+/* src/styles/Pages.css */
+.page {
+    min-height: 100vh;
+    background-color: black;
+    color: white;
+    font-family: sans-serif;
+    padding: 2rem;
+  }
+  
+  .hero {
+    text-align: center;
+    padding: 4rem 1.5rem;
+  }
+  
+  .hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: white;
+  }
+  
+  .hero p {
+    font-size: 1.2rem;
+    color: gray;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+  
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .gallery img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    transition: transform 0.3s;
+  }
+  
+  .gallery img:hover {
+    transform: scale(1.05);
+  }
+  
+  .header-video, .intro-about, .companies-worked-with, .social-channels, .pricing-list, .email-submission-form {
+    background-color: #111;
+    padding: 2rem;
+    margin: 1rem 0;
+    text-align: center;
+    border-radius: 10px;
+  }
+  
+  .video-placeholder {
+    background-color: #222;
+    padding: 4rem;
+    border: 2px dashed gray;
+    color: white;
+    border-radius: 10px;
+  }
+  
+  .gallery-item {
+    margin-bottom: 1rem;
+  }
+  
+  .company-logos {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    overflow-x: auto;
+  }
+  
+  .company-logos img {
+    width: 150px;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .pricing-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .pricing-list li {
+    padding: 0.5rem;
+    background-color: #222;
+    margin: 0.5rem 0;
+    border-radius: 5px;
+    color: white;
+  }
+  
+  .email-submission-form input {
+    padding: 0.75rem;
+    width: 60%;
+    border: 1px solid gray;
+    border-radius: 5px;
+    background-color: #222;
+    color: white;
+  }
+  
+  .email-submission-form button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(to right, purple, blue);
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 1rem;
+  }
+  
+  

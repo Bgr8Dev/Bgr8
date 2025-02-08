@@ -3,10 +3,11 @@ import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
-import '../styles/Pages.css';
+import '../styles/B8FootballClub.css';
 
 export default function B8FootballClub() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -18,23 +19,79 @@ export default function B8FootballClub() {
     <div className="page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-      <section className="intro-video">
+      {/* Hero Video Section */}
+      <section className="hero-video">
         <div className="video-placeholder">
-          <p>Intro Video Placeholder</p>
+          <p>Hero Video Placeholder</p>
         </div>
       </section>
 
+      {/* Intro Section */}
+      <section className="intro-section">
+        <h2>Welcome to B8 Football Club</h2>
+        <p>
+          B8 Football Club is more than just a team. We are a community of passionate athletes committed to excellence on and off the field.
+        </p>
+      </section>
+
+      {/* Existing Hero Section */}
       <section className="hero">
         <h1>B8 Football Club</h1>
         <p>Passion, performance, and community through football excellence.</p>
       </section>
 
+      {/* Existing Gallery Section */}
       <section className="gallery">
-        <img src="/assets/football1.jpg" alt="Football Match 1" />
-        <img src="/assets/football2.jpg" alt="Football Match 2" />
-        <img src="/assets/football3.jpg" alt="Football Match 3" />
+        <div className="gallery-item">
+          <img src="/assets/football1.jpg" alt="Football Match 1" />
+          <p>Match 1: Championship League 2023</p>
+        </div>
+        <div className="gallery-item">
+          <img src="/assets/football2.jpg" alt="Football Match 2" />
+          <p>Match 2: Youth Development Camp</p>
+        </div>
+        <div className="gallery-item">
+          <img src="/assets/football3.jpg" alt="Football Match 3" />
+          <p>Match 3: International Friendly</p>
+        </div>
       </section>
 
+      {/* Buy the Kit Section */}
+      <section className="kit-shop">
+        <h3>Buy the Official B8 Kit</h3>
+        <div className="product-card" onClick={() => setIsModalOpen(true)}>
+          <img src="/assets/football1.jpg" alt="B8 Jersey" />
+          <p>B8 Official Jersey - $50</p>
+        </div>
+      </section>
+
+      {/* Modal for Kit Details */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>B8 Official Jersey</h2>
+            <img src="/assets/football1.jpg" alt="B8 Jersey" />
+            <p>
+              High-quality jersey made with breathable fabric, designed for comfort and performance.
+            </p>
+            <p>Price: $50</p>
+            <button onClick={() => alert('Payment functionality will be integrated soon!')}>Buy Now</button>
+            <button className="close-btn" onClick={() => setIsModalOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Player Information Widget */}
+      <section className="player-widget">
+        <h3>Player Spotlight</h3>
+        <div className="player-card">
+          <img src="/assets/player1.jpg" alt="Star Player" />
+          <h4>John Doe - Forward</h4>
+          <p>Goals: 15 | Assists: 10 | Appearances: 20</p>
+        </div>
+      </section>
+
+      {/* Existing Contact Section */}
       <section className="contact-section">
         <h3>Contact Us</h3>
         <form className="contact-form">

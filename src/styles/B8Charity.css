@@ -1,0 +1,142 @@
+/* src/styles/Pages.css */
+.page {
+    min-height: 100vh;
+    background-color: black;
+    color: white;
+    font-family: sans-serif;
+    padding: 2rem;
+  }
+  
+  .hero {
+    text-align: center;
+    padding: 4rem 1.5rem;
+  }
+  
+  .hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: white;
+  }
+  
+  .hero p {
+    font-size: 1.2rem;
+    color: gray;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+  
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .gallery img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    transition: transform 0.3s;
+  }
+  
+  .gallery img:hover {
+    transform: scale(1.05);
+  }
+  .hero-video, .intro-section, .donation-widget, .charity-partners {
+    background-color: #111;
+    padding: 2rem;
+    margin: 1rem 0;
+    text-align: center;
+    border-radius: 10px;
+  }
+  
+  .video-placeholder {
+    background-color: #222;
+    padding: 4rem;
+    border: 2px dashed gray;
+    color: white;
+    border-radius: 10px;
+  }
+  
+  .gallery-item {
+    margin-bottom: 1rem;
+  }
+  
+  .donation-widget input {
+    padding: 0.75rem;
+    border: 1px solid gray;
+    border-radius: 8px;
+    background-color: #222;
+    color: white;
+    margin-bottom: 1rem;
+  }
+  
+  .donation-widget button {
+    padding: 1rem;
+    background: linear-gradient(to right, purple, blue);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .charity-logos {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    justify-content: center;
+  }
+  
+  .charity-card {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  
+  .charity-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .charity-card img {
+    width: 150px;
+    border-radius: 8px;
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+  }
+  
+  .charity-card:hover .overlay {
+    display: flex;
+  }
+  
+  .charity-info-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #222;
+    padding: 2rem;
+    border-radius: 10px;
+    color: white;
+  }
+  
