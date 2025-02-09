@@ -5,31 +5,6 @@
   font-family: sans-serif;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid gray;
-}
-
-.logo {
-  font-weight: bold;
-  width: 5px;
-  height: 5px;
-}
-
-.nav a {
-  margin: 0 1rem;
-  color: white;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.nav a:hover {
-  color: gray;
-}
-
 .hero {
   text-align: center;
   padding: 4rem 1.5rem;
