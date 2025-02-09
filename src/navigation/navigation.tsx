@@ -9,6 +9,7 @@ import B8FootballClub from '../pages/B8FootballClub';
 import B8Charity from '../pages/B8Charity';
 import B8Education from '../pages/B8Education';
 import B8Careers from '../pages/B8Careers';
+import NotFound from '../pages/NotFound';
 
 export default function Navigation() {
   return (
@@ -22,6 +23,7 @@ export default function Navigation() {
       <Route path="/b8-charity" element={<B8Charity />} />
       <Route path="/b8-education" element={<B8Education />} />
       <Route path="/b8-careers" element={<B8Careers />} />
+      <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
     </Routes>
   );
 }

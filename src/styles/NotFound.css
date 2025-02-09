@@ -1,0 +1,23 @@
+.not-found-page {
+    text-align: center;
+    padding: 4rem;
+    color: white;
+    background-color: #111;
+    border-radius: 10px;
+    margin: 2rem;
+  }
+  
+  .not-found-page button {
+    padding: 1rem 2rem;
+    background: linear-gradient(to right, purple, blue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .not-found-page button:hover {
+    background: linear-gradient(to right, blue, purple);
+  }
+  
