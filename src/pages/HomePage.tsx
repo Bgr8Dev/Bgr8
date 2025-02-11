@@ -5,10 +5,21 @@ import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaBullhorn, FaCar, FaTshirt, FaGraduationCap, FaUsers, FaGlobe, FaHeart, FaBriefcase } from 'react-icons/fa';
 import '../styles/HomePage.css';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const services = [
+    { icon: <FaBullhorn size={40} />, title: 'B8 Marketing', description: 'Innovative marketing strategies.', link: '/b8-marketing' },
+    { icon: <FaUsers size={40} />, title: 'BGr8', description: 'Community growth programs.', link: '/bgr8' },
+    { icon: <FaCar size={40} />, title: 'B8 Car Club', description: 'Exclusive car events.', link: '/b8-car-club' },
+    { icon: <FaTshirt size={40} />, title: 'B8 Clothing', description: 'Stylish modern apparel.', link: '/b8-clothing' },
+    { icon: <FaGlobe size={40} />, title: 'B8 Football Club', description: 'Passion for football.', link: '/b8-football-club' },
+    { icon: <FaHeart size={40} />, title: 'B8 Charity', description: 'Impactful charity initiatives.', link: '/b8-charity' },
+    { icon: <FaGraduationCap size={40} />, title: 'B8 Education', description: 'Empowering future generations.', link: '/b8-education' },
+    { icon: <FaBriefcase size={40} />, title: 'B8 Careers', description: 'Grow and innovate with us.', link: '/b8-careers' },
+  ];
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -40,38 +51,13 @@ export default function HomePage() {
       <section className="services">
         <h3>Explore B8</h3>
         <div className="service-list">
-          <Link to="/b8-marketing" className="service-item">
-            <h4>B8 Marketing</h4>
-            <p>Innovative marketing strategies for your brand.</p>
-          </Link>
-          <Link to="/bgr8" className="service-item">
-            <h4>BGr8</h4>
-            <p>Community-focused growth and empowerment programs.</p>
-          </Link>
-          <Link to="/b8-car-club" className="service-item">
-            <h4>B8 Car Club</h4>
-            <p>Exclusive car events, showcases, and clubs.</p>
-          </Link>
-          <Link to="/b8-clothing" className="service-item">
-            <h4>B8 Clothing</h4>
-            <p>Modern and stylish apparel for every occasion.</p>
-          </Link>
-          <Link to="/b8-football-club" className="service-item">
-            <h4>B8 Football Club</h4>
-            <p>Fostering football talent through community and passion.</p>
-          </Link>
-          <Link to="/b8-charity" className="service-item">
-            <h4>B8 Charity</h4>
-            <p>Making a difference through impactful charity initiatives.</p>
-          </Link>
-          <Link to="/b8-education" className="service-item">
-            <h4>B8 Education</h4>
-            <p>Empowering the next generation through education.</p>
-          </Link>
-          <Link to="/b8-careers" className="service-item">
-            <h4>B8 Careers</h4>
-            <p>Join our team to grow and innovate with us.</p>
-          </Link>
+          {services.map((service, index) => (
+            <Link to={service.link} className="service-card" key={index}>
+              <div className="icon-container">{service.icon}</div>
+              <h4>{service.title}</h4>
+              <p>{service.description}</p>
+            </Link>
+          ))}
         </div>
       </section>
 

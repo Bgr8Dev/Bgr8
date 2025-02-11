@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FaFlagCheckered, FaMapMarkerAlt, FaCar, FaGlobe } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
@@ -6,6 +7,17 @@ import '../styles/B8CarClub.css';
 
 export default function B8CarClub() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const upcomingEvents = [
+    { icon: <FaFlagCheckered size={40} />, title: 'Supercar Rally', date: 'June 15, 2024', description: 'High-speed adventure for supercar enthusiasts.' },
+    { icon: <FaCar size={40} />, title: 'Track Day Experience', date: 'July 22, 2024', description: 'Feel the thrill of racing on professional tracks.' },
+    { icon: <FaGlobe size={40} />, title: 'International Car Expo', date: 'September 10, 2024', description: 'Showcasing cars from around the world.' },
+  ];
+
+  const eventLocations = [
+    { icon: <FaMapMarkerAlt size={40} />, location: 'Nürburgring, Germany', description: 'Home of legendary car races.' },
+    { icon: <FaMapMarkerAlt size={40} />, location: 'Miami Beach, USA', description: 'Scenic drives with ocean views.' },
+    { icon: <FaMapMarkerAlt size={40} />, location: 'Tokyo Expressway, Japan', description: 'Urban racing at its finest.' },
+  ];
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -58,11 +70,16 @@ export default function B8CarClub() {
       {/* Updated Event List */}
       <section className="event-list">
         <h3>Upcoming Events</h3>
-        <ul>
-          <li>🚗 Supercar Rally - June 15, 2024</li>
-          <li>🏁 Track Day Experience - July 22, 2024</li>
-          <li>🌍 International Car Expo - September 10, 2024</li>
-        </ul>
+        <div className="event-cards">
+          {upcomingEvents.map((event, index) => (
+            <div className="event-card" key={index}>
+              <div className="icon-container">{event.icon}</div>
+              <h4>{event.title}</h4>
+              <p className="event-date">{event.date}</p>
+              <p className="event-description">{event.description}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Companies We've Worked With */}
@@ -78,12 +95,15 @@ export default function B8CarClub() {
       {/* Location-Based Event Information */}
       <section className="event-locations">
         <h3>Where Our Events Happen</h3>
-        <p>Check out our event locations around the globe:</p>
-        <ul>
-          <li>🏎️ Nürburgring, Germany</li>
-          <li>🏖️ Miami Beach, USA</li>
-          <li>🌉 Tokyo Expressway, Japan</li>
-        </ul>
+        <div className="location-cards">
+          {eventLocations.map((location, index) => (
+            <div className="location-card" key={index}>
+              <div className="icon-container">{location.icon}</div>
+              <h4>{location.location}</h4>
+              <p className="location-description">{location.description}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Sign-Up Form for the Club */}

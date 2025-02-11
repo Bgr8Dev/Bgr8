@@ -3,10 +3,32 @@ import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaChartLine, FaBullhorn, FaCogs } from 'react-icons/fa';
 import '../styles/B8Marketting.css';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  const pricingPlans = [
+    {
+      icon: <FaChartLine size={40} />,
+      title: 'Basic Marketing Package',
+      price: '$500/month',
+      description: 'Perfect for startups looking to establish their online presence.',
+    },
+    {
+      icon: <FaBullhorn size={40} />,
+      title: 'Advanced Marketing Strategy',
+      price: '$1500/month',
+      description: 'Ideal for growing businesses wanting aggressive growth strategies.',
+    },
+    {
+      icon: <FaCogs size={40} />,
+      title: 'Custom Campaigns',
+      price: 'Contact us for pricing',
+      description: 'Tailored solutions for unique marketing needs.',
+    },
+  ];
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -93,12 +115,17 @@ export default function B8Marketing() {
       {/* Pricing List */}
       <section className="pricing-list">
         <h3>Our Pricing</h3>
-        <ul>
-          <li>Basic Marketing Package - $500/month</li>
-          <li>Advanced Marketing Strategy - $1500/month</li>
-          <li>Custom Campaigns - Contact us for pricing</li>
-        </ul>
-      </section>
+        <div className="pricing-cards">
+          {pricingPlans.map((plan, index) => (
+            <div className="pricing-card" key={index}>
+              <div className="icon-container">{plan.icon}</div>
+              <h4>{plan.title}</h4>
+              <p className="price">{plan.price}</p>
+              <p className="description">{plan.description}</p>
+            </div>
+          ))}
+        </div>
+    </section>
 
       {/* Email Submission Form */}
       <section className="email-submission-form">
