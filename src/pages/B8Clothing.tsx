@@ -2,23 +2,26 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import '../styles/B8Clothing.css';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || '';
+
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
   return (
+    <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
     <div className="page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
-
       {/* Hero Video Section */}
       <section className="hero-video">
         <div className="video-placeholder">
@@ -56,21 +59,40 @@ export default function B8Clothing() {
         </div>
       </section>
 
-      {/* Modal for Product Information */}
+
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>B8 Exclusive T-Shirt</h2>
-            <img src="/assets/clothing1.jpg" alt="B8 T-Shirt" />
-            <p>
-              High-quality, comfortable, and stylish t-shirt featuring the exclusive B8 logo. Perfect for any occasion!
-            </p>
-            <p>Price: $30</p>
-            <button onClick={() => alert('Payment functionality will be integrated soon!')}>Buy Now</button>
-            <button className="close-btn" onClick={() => setIsModalOpen(false)}>Close</button>
+          <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+            <div className="modal-content enhanced-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="close-btn" onClick={() => setIsModalOpen(false)}>×</button>
+              <h2 className="modal-title">B8 Exclusive T-Shirt</h2>
+              <img className="modal-image" src="/assets/clothing1.jpg" alt="B8 T-Shirt" />
+              <p className="modal-description">High-quality, comfortable, and stylish t-shirt featuring the exclusive B8 logo. Perfect for any occasion!</p>
+              <p className="modal-price">Price: <strong>$30</strong></p>
+              <div className="paypal-container">
+                <PayPalButtons
+                  style={{
+                    layout: 'vertical',     // Options: 'vertical' or 'horizontal'
+                    color: 'gold',          // Options: 'gold', 'blue', 'silver', 'black', 'white'
+                    shape: 'pill',          // Options: 'rect' or 'pill'
+                    label: 'paypal',        // Options: 'paypal', 'checkout', 'buynow', 'pay', 'installment'
+                    height: 55,             // Adjust button height
+                    tagline: false          // Hide the "Powered by PayPal" tagline
+                  }}
+                  createOrder={(data, actions) => {
+                    return actions.order.create({
+                      purchase_units: [{ amount: { value: '30.00' } }],
+                    });
+                  }}
+                  onApprove={(data, actions) => {
+                    return actions.order.capture().then((details) => {
+                      alert(`Transaction completed by ${details.payer.name.given_name}`);
+                    });
+                  }}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Payment Process Placeholder */}
       <section className="payment-section">
@@ -110,5 +132,6 @@ export default function B8Clothing() {
 
       <Footer />
     </div>
+    </PayPalScriptProvider>
   );
 }

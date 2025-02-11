@@ -121,3 +121,21 @@
     color: white;
   }
   
+  .paypal-container {
+    background: linear-gradient(135deg, #0d1117, #1f2937);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.6);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .paypal-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 191, 255, 0.8);
+  }
+  
+  .paypal-button {
+    border-radius: 10px !important;
+    overflow: hidden;
+  }
+  
