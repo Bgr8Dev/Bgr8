@@ -1,141 +1,180 @@
-/* src/styles/Pages.css */
 .page {
-    min-height: 100vh;
-    background-color: black;
-    color: white;
-    font-family: sans-serif;
-    padding: 2rem;
-  }
-  
-  .hero {
-    text-align: center;
-    padding: 4rem 1.5rem;
-  }
-  
-  .hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: white;
-  }
-  
-  .hero p {
-    font-size: 1.2rem;
-    color: gray;
-    max-width: 600px;
-    margin: 0 auto 2rem;
-  }
-  
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin: 2rem 0;
-  }
-  
-  .gallery img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    transition: transform 0.3s;
-  }
-  
-  .gallery img:hover {
-    transform: scale(1.05);
-  }
+  min-height: 100vh;
+  background-color: black;
+  color: white;
+  font-family: sans-serif;
+  padding: 2rem;
+}
 
-  .hero-video, .intro-section, .shop-section, .payment-section {
-    background-color: #111;
-    padding: 2rem;
-    margin: 1rem 0;
-    text-align: center;
-    border-radius: 10px;
-  }
-  
-  .video-placeholder {
-    background-color: #222;
-    padding: 4rem;
-    border: 2px dashed gray;
-    color: white;
-    border-radius: 10px;
-  }
-  
-  .shop-section .product-card {
-    background-color: #222;
-    padding: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
-  
-  .shop-section .product-card:hover {
-    transform: scale(1.05);
-  }
-  
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background-color: #111;
-    padding: 2rem;
-    border-radius: 10px;
-    text-align: center;
-    color: white;
-    max-width: 400px;
-  }
-  
-  .modal-content img {
-    width: 100%;
-    border-radius: 8px;
-  }
-  
-  .close-btn {
-    background: red;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    margin-top: 1rem;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .payment-section ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .payment-section li {
-    background-color: #222;
-    padding: 0.75rem;
-    margin: 0.5rem 0;
-    border-radius: 5px;
-    color: white;
-  }
-  
-  .paypal-container {
-    background: linear-gradient(135deg, #0d1117, #1f2937);
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.6);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .paypal-container:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(0, 191, 255, 0.8);
-  }
-  
-  .paypal-button {
-    border-radius: 10px !important;
-    overflow: hidden;
-  }
-  
+.hero {
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: gray;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.gallery img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.3s;
+}
+
+.gallery img:hover {
+  transform: scale(1.05);
+}
+
+.hero-video, .intro-section, .shop-section, .payment-section {
+  background-color: #111;
+  padding: 2rem;
+  margin: 1rem 0;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.video-placeholder {
+  background-color: #222;
+  padding: 4rem;
+  border: 2px dashed gray;
+  color: white;
+  border-radius: 10px;
+}
+
+.shop-section .product-card {
+  background-color: #222;
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.shop-section .product-card:hover {
+  transform: scale(1.05);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #111;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-content:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 191, 255, 0.8);
+}
+
+.modal-content img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.close-btn {
+  background: red;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  margin-top: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+  background: darkred;
+}
+
+.payment-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.payment-section li {
+  background-color: #222;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 5px;
+  color: white;
+}
+
+.paypal-container, .googlepay-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: linear-gradient(135deg, #1a1a1a, #333);
+  border: 2px solid #00bfff;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.paypal-container:hover, .googlepay-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.7);
+}
+
+.googlepay-container button {
+  background-color: #ffffff !important;
+  border: none;
+  border-radius: 10px;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.googlepay-container button:hover {
+  background-color: #f1f1f1 !important;
+}
+
+.stripe-button {
+  background: linear-gradient(90deg, #6772e5, #5469d4);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.stripe-button:hover {
+  background: linear-gradient(90deg, #5469d4, #4353b6);
+  transform: scale(1.05);
+}
