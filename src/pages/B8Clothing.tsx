@@ -105,7 +105,7 @@ export default function B8Clothing() {
               <div className="paypal-container">
               <PayPalButtons
                 style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
-                createOrder={(data, actions) => {
+                createOrder={(_data, actions) => {
                   return actions.order.create({
                     intent: "CAPTURE",
                     purchase_units: [
