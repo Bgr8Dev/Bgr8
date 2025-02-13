@@ -105,9 +105,9 @@ export default function B8Clothing() {
               <div className="paypal-container">
               <PayPalButtons
                 style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
-                createOrder={(actions) => {
-                  // Correct usage of createOrder directly from actions
+                createOrder={(data, actions) => {
                   return actions.order.create({
+                    intent: "CAPTURE",
                     purchase_units: [
                       {
                         amount: { currency_code: 'USD', value: '30.00' },
@@ -116,7 +116,7 @@ export default function B8Clothing() {
                   });
                 }}
                 onApprove={async (_data, actions) => {
-                  if (actions && actions.order && actions.order.capture) {
+                  if (actions.order) {
                     try {
                       const details = await actions.order.capture();
                       const name = details.payer?.name?.given_name ?? 'Customer';
@@ -126,10 +126,12 @@ export default function B8Clothing() {
                       alert('Payment failed.');
                     }
                   } else {
-                    alert('Payment was approved but could not be captured.');
+                    console.error('Order actions not available.');
+                    alert('Payment could not be processed.');
                   }
                 }}
               />
+
               </div>
               {/* Google Pay Button */}
               <div className="googlepay-container">
