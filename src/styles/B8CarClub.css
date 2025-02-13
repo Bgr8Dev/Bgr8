@@ -1,6 +1,6 @@
 /* src/styles/B8FootballClub.css */
 
-.page {
+.carclub-page {
   min-height: 100vh;
   background-color: black;
   color: white;
@@ -8,32 +8,32 @@
   padding: 2rem;
 }
 
-.hero {
+.carclub-hero {
   text-align: center;
   padding: 4rem 1.5rem;
 }
 
-.hero h1 {
+.carclub-hero h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
   color: white;
 }
 
-.hero p {
+.carclub-hero p {
   font-size: 1.2rem;
   color: gray;
   max-width: 600px;
   margin: 0 auto 2rem;
 }
 
-.gallery {
+.carclub-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin: 2rem 0;
 }
 
-.gallery-item {
+.carclub-gallery-item {
   background: linear-gradient(145deg, #222, #333);
   padding: 1.5rem;
   border-radius: 15px;
@@ -43,23 +43,23 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-.gallery-item:hover {
+.carclub-gallery-item:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
 }
 
-.gallery img {
+.carclub-gallery img {
   width: 100%;
   height: auto;
   border-radius: 10px;
   transition: transform 0.3s;
 }
 
-.gallery img:hover {
+.carclub-gallery img:hover {
   transform: scale(1.05);
 }
 
-.hero-video, .intro-section, .kit-shop, .player-widget {
+.carclub-hero-video, .carclub-intro-section, .carclub-kit-shop, .carclub-player-widget {
   background-color: #111;
   padding: 2rem;
   margin: 1rem 0;
@@ -67,7 +67,7 @@
   border-radius: 10px;
 }
 
-.video-placeholder {
+.carclub-video-placeholder {
   background-color: #222;
   padding: 4rem;
   border: 2px dashed gray;
@@ -75,7 +75,7 @@
   border-radius: 10px;
 }
 
-.product-card {
+.carclub-product-card {
   background: linear-gradient(145deg, #222, #333);
   padding: 1.5rem;
   border-radius: 15px;
@@ -85,12 +85,12 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-.product-card:hover {
+.carclub-product-card:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
 }
 
-.modal-overlay {
+.carclub-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -103,7 +103,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.carclub-modal-content {
   background: linear-gradient(145deg, #222, #333);
   padding: 2rem;
   border-radius: 15px;
@@ -114,17 +114,17 @@
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.modal-content:hover {
+.carclub-modal-content:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
 }
 
-.modal-content img {
+.carclub-modal-content img {
   width: 100%;
   border-radius: 8px;
 }
 
-.close-btn {
+.carclub-close-btn {
   background: red;
   color: white;
   padding: 0.5rem 1rem;
@@ -135,11 +135,11 @@
   transition: background 0.3s;
 }
 
-.close-btn:hover {
+.carclub-close-btn:hover {
   background: darkred;
 }
 
-.player-widget .player-card {
+.carclub-player-widget .carclub-player-card {
   background: linear-gradient(145deg, #222, #333);
   padding: 1.5rem;
   border-radius: 15px;
@@ -149,7 +149,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-.player-card:hover {
+.carclub-player-card:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
 }

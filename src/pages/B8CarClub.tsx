@@ -26,18 +26,18 @@ export default function B8CarClub() {
   }, []);
 
   return (
-    <div className="page">
+    <div className="carclub-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       {/* Hero Video Section */}
-      <section className="hero-video">
-        <div className="video-placeholder">
+      <section className="carclub-hero-video">
+        <div className="carclub-video-placeholder">
           <p>Hero Video Placeholder</p>
         </div>
       </section>
 
       {/* Intro Section */}
-      <section className="intro-section">
+      <section className="carclub-intro-section">
         <h2>Welcome to B8 Car Club</h2>
         <p>
           The B8 Car Club connects car enthusiasts through exclusive events, road trips, and showcases. 
@@ -46,46 +46,46 @@ export default function B8CarClub() {
       </section>
 
       {/* Existing Hero Section */}
-      <section className="hero">
+      <section className="carclub-hero">
         <h1>B8 Car Club</h1>
         <p>Join our exclusive car club for events, showcases, and community activities.</p>
       </section>
 
       {/* Existing Gallery Section */}
-      <section className="gallery">
-        <div className="gallery-item">
+      <section className="carclub-gallery">
+        <div className="carclub-gallery-item">
           <img src="/assets/car-club1.jpg" alt="Car Event 1" />
           <p>Event 1: Supercar Showcase 2023</p>
         </div>
-        <div className="gallery-item">
+        <div className="carclub-gallery-item">
           <img src="/assets/car-club2.jpg" alt="Car Event 2" />
           <p>Event 2: Mountain Rally Adventure</p>
         </div>
-        <div className="gallery-item">
+        <div className="carclub-gallery-item">
           <img src="/assets/car-club3.jpg" alt="Car Event 3" />
           <p>Event 3: Classic Car Exhibition</p>
         </div>
       </section>
 
       {/* Updated Event List */}
-      <section className="event-list">
+      <section className="carclub-event-list">
         <h3>Upcoming Events</h3>
-        <div className="event-cards">
+        <div className="carclub-event-cards">
           {upcomingEvents.map((event, index) => (
-            <div className="event-card" key={index}>
-              <div className="icon-container">{event.icon}</div>
+            <div className="carclub-event-card" key={index}>
+              <div className="carclub-icon-container">{event.icon}</div>
               <h4>{event.title}</h4>
-              <p className="event-date">{event.date}</p>
-              <p className="event-description">{event.description}</p>
+              <p className="carclub-event-date">{event.date}</p>
+              <p className="carclub-event-description">{event.description}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Companies We've Worked With */}
-      <section className="companies-worked-with">
+      <section className="carclub-companies-worked-with">
         <h3>Our Partners</h3>
-        <div className="company-logos">
+        <div className="carclub-company-logos">
           <img src="/assets/company1-logo.png" alt="Company 1" />
           <img src="/assets/company2-logo.png" alt="Company 2" />
           <img src="/assets/company3-logo.png" alt="Company 3" />
@@ -93,21 +93,21 @@ export default function B8CarClub() {
       </section>
 
       {/* Location-Based Event Information */}
-      <section className="event-locations">
+      <section className="carclub-event-locations">
         <h3>Where Our Events Happen</h3>
-        <div className="location-cards">
+        <div className="carclub-location-cards">
           {eventLocations.map((location, index) => (
-            <div className="location-card" key={index}>
-              <div className="icon-container">{location.icon}</div>
+            <div className="carclub-location-card" key={index}>
+              <div className="carclub-icon-container">{location.icon}</div>
               <h4>{location.location}</h4>
-              <p className="location-description">{location.description}</p>
+              <p className="carclub-location-description">{location.description}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Sign-Up Form for the Club */}
-      <section className="signup-form">
+      <section className="carclub-signup-form">
         <h3>Join the B8 Car Club</h3>
         <form>
           <input type="text" placeholder="Your Name" required />
