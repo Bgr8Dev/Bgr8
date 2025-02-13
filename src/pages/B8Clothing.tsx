@@ -14,32 +14,30 @@ export default function B8Clothing() {
   const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || '';
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLISHABLE_KEY);
 
-  const handleStripeCheckout = async (product) => {
+  const handleStripeCheckout = async (product: { name: string; description: string; image: string; price: number }) => {
     const stripe = await stripePromise;
+    if (!stripe) {
+      console.error('Stripe failed to initialize');
+      return;
+    }
+  
     const { error } = await stripe.redirectToCheckout({
       lineItems: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: product.name,
-              description: product.description,
-              images: [product.image],
-            },
-            unit_amount: product.price * 100, // Convert to cents
-          },
+          price: product.priceId, // Replace with actual price ID from Stripe
           quantity: 1,
         },
       ],
       mode: 'payment',
       successUrl: `${window.location.origin}/success`,
       cancelUrl: `${window.location.origin}/cancel`,
-    })
-
+    });
+  
     if (error) {
       console.error('Stripe Checkout Error:', error);
     }
   };
+  
 
     useEffect(() => {
       const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -121,10 +119,12 @@ export default function B8Clothing() {
                     });
                   }}
                   onApprove={(data, actions) => {
-                    return actions.order.capture().then((details) => {
-                      alert(`Transaction completed by ${details.payer.name.given_name}`);
+                    return actions.order?.capture().then((details) => {
+                      const name = details.payer?.name?.given_name ?? 'Customer';
+                      alert(`Transaction completed by ${name}`);
                     });
                   }}
+                  
                 />
               </div>
               {/* Google Pay Button */}
