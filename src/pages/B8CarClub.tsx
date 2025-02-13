@@ -30,8 +30,8 @@ export default function B8CarClub() {
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       {/* Hero Video Section */}
-      <section className="carclub-hero-video">
-        <div className="carclub-video-placeholder">
+      <section className="hero-video">
+        <div className="video-placeholder">
           <p>Hero Video Placeholder</p>
         </div>
       </section>

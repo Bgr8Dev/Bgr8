@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import GooglePayButton from '@google-pay/button-react';
 import { loadStripe } from '@stripe/stripe-js';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaCreditCard, FaPaypal, FaGooglePay, FaApplePay } from 'react-icons/fa';
 import '../styles/B8Clothing.css';
 
 export default function B8Clothing() {
@@ -54,7 +54,7 @@ export default function B8Clothing() {
   
   return (
     <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-    <div className="page">
+    <div className="clothing-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
       {/* Hero Video Section */}
       <section className="hero-video">
@@ -64,152 +64,195 @@ export default function B8Clothing() {
       </section>
 
       {/* Intro Section */}
-      <section className="intro-section">
+      <section className="clothing-intro-section">
         <h2>About B8 Clothing</h2>
         <p>
           B8 Clothing offers premium, stylish, and modern apparel designed for individuals who value quality and fashion-forward thinking.
         </p>
       </section>
 
-      {/* Existing Hero Section */}
-      <section className="hero">
+      {/* Hero Section */}
+      <section className="clothing-hero">
         <h1>B8 Clothing</h1>
         <p>Discover our exclusive range of stylish and modern B8 apparel.</p>
       </section>
 
-      {/* Existing Gallery Section */}
-      <section className="gallery">
+      {/* Gallery Section */}
+      <section className="clothing-gallery">
         <img src="/assets/clothing1.jpg" alt="Clothing Item 1" />
         <img src="/assets/clothing2.jpg" alt="Clothing Item 2" />
         <img src="/assets/clothing3.jpg" alt="Clothing Item 3" />
       </section>
 
-      {/* Placeholder Item to Purchase */}
-      <section className="shop-section">
-          <h3>Featured Product</h3>
-          <div className="product-card" onClick={() => setIsModalOpen(true)}>
-            <img src={product.image} alt={product.name} />
-            <p>{`${product.name} - $${product.price}`}</p>
+      {/* Featured Product */}
+      <section className="clothing-shop-section">
+        <h3>Featured Product</h3>
+        <div className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
+          <div className="clothing-icon-container">
+            <FaCreditCard size={40} />
           </div>
-        </section>
-
-
-      {isModalOpen && (
-          <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-            <div className="modal-content enhanced-modal" onClick={(e) => e.stopPropagation()}>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>×</button>
-              <h2 className="modal-title">B8 Exclusive T-Shirt</h2>
-              <img className="modal-image" src="/assets/clothing1.jpg" alt="B8 T-Shirt" />
-              <p className="modal-description">High-quality, comfortable, and stylish t-shirt featuring the exclusive B8 logo. Perfect for any occasion!</p>
-              <p className="modal-price">Price: <strong>$30</strong></p>
-              <div className="paypal-container">
-              <PayPalButtons
-                style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
-                createOrder={(_data, actions) => {
-                  return actions.order.create({
-                    intent: "CAPTURE",
-                    purchase_units: [
-                      {
-                        amount: { currency_code: 'USD', value: '30.00' },
-                      },
-                    ],
-                  });
-                }}
-                onApprove={async (_data, actions) => {
-                  if (actions.order) {
-                    try {
-                      const details = await actions.order.capture();
-                      const name = details.payer?.name?.given_name ?? 'Customer';
-                      alert(`Transaction completed by ${name}`);
-                    } catch (error) {
-                      console.error('Payment capture failed:', error);
-                      alert('Payment failed.');
-                    }
-                  } else {
-                    console.error('Order actions not available.');
-                    alert('Payment could not be processed.');
-                  }
-                }}
-              />
-
-              </div>
-              {/* Google Pay Button */}
-              <div className="googlepay-container">
-                <GooglePayButton
-                  environment="TEST"
-                  paymentRequest={{
-                    apiVersion: 2,
-                    apiVersionMinor: 0,
-                    allowedPaymentMethods: [
-                      {
-                        type: 'CARD',
-                        parameters: {
-                          allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                          allowedCardNetworks: ['MASTERCARD', 'VISA'],
-                        },
-                        tokenizationSpecification: {
-                          type: 'PAYMENT_GATEWAY',
-                          parameters: {
-                            gateway: 'example', // Replace with actual payment gateway
-                            gatewayMerchantId: 'exampleMerchantId',
-                          },
-                        },
-                      },
-                    ],
-                    merchantInfo: {
-                      merchantId: '12345678901234567890', // Replace with actual merchant ID
-                      merchantName: 'B8 Clothing',
-                    },
-                    transactionInfo: {
-                      totalPriceStatus: 'FINAL',
-                      totalPriceLabel: 'Total',
-                      totalPrice: '30.00',
-                      currencyCode: 'USD',
-                      countryCode: 'US',
-                    },
-                  }}
-                  onLoadPaymentData={(paymentRequest) => {
-                    console.log('Payment successful', paymentRequest);
-                    alert('Google Pay payment successful!');
-                  }}
-                />
-              </div>
-              <button className="stripe-button" onClick={handleStripeCheckout}>
-                Pay with Card (Stripe)
-              </button>
-            </div>
-          </div>
-        )}
-
-      {/* Payment Process Placeholder */}
-      <section className="payment-section">
-        <h3>Payment Options</h3>
-        <ul>
-          <li>💳 Credit/Debit Card (via Stripe)</li>
-          <li>💸 PayPal</li>
-          <li>📱 Google Pay</li>
-          <li>🍎 Apple Pay</li>
-        </ul>
-        <p>*Note: We do not accept cryptocurrency payments.</p>
+          <img src={product.image} alt={product.name} />
+          <p>{`${product.name} - $${product.price}`}</p>
+        </div>
       </section>
 
-      {/* Existing Contact Section */}
-      <section className="contact-section">
+      {isModalOpen && (
+        <div className="clothing-modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="clothing-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>{product.name}</h2>
+            <img src={product.image} alt={product.name} />
+            <p>{product.description}</p>
+            <p>Price: ${product.price}</p>
+
+            {/* Payment Options */}
+            <div className="clothing-payment-options">
+              {/* PayPal */}
+              <div className="clothing-payment-card">
+                <div className="clothing-icon-container">
+                  <FaPaypal size={40} />
+                </div>
+                <div className="clothing-paypal-container">
+                  <PayPalButtons
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: {
+                              value: product.price.toString(),
+                            },
+                          },
+                        ],
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      if (actions.order) {
+                        try {
+                          const details = await actions.order.capture();
+                          const name = details.payer.name?.given_name;
+                          alert(`Transaction completed by ${name}`);
+                        } catch (error) {
+                          console.error('Payment capture failed:', error);
+                          alert('Payment failed.');
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Google Pay */}
+              <div className="clothing-payment-card">
+                <div className="clothing-icon-container">
+                  <FaGooglePay size={40} />
+                </div>
+                <div className="clothing-googlepay-container">
+                  <GooglePayButton
+                    environment="TEST"
+                    paymentRequest={{
+                      apiVersion: 2,
+                      apiVersionMinor: 0,
+                      allowedPaymentMethods: [
+                        {
+                          type: 'CARD',
+                          parameters: {
+                            allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                            allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                          },
+                          tokenizationSpecification: {
+                            type: 'PAYMENT_GATEWAY',
+                            parameters: {
+                              gateway: 'example',
+                              gatewayMerchantId: 'exampleMerchantId',
+                            },
+                          },
+                        },
+                      ],
+                      merchantInfo: {
+                        merchantId: '12345678901234567890',
+                        merchantName: 'B8 Clothing',
+                      },
+                      transactionInfo: {
+                        totalPriceStatus: 'FINAL',
+                        totalPriceLabel: 'Total',
+                        totalPrice: '30.00',
+                        currencyCode: 'USD',
+                        countryCode: 'US',
+                      },
+                    }}
+                    onLoadPaymentData={(paymentRequest) => {
+                      console.log('Payment successful', paymentRequest);
+                      alert('Google Pay payment successful!');
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Stripe */}
+              <div className="clothing-payment-card">
+                <div className="clothing-icon-container">
+                  <FaCreditCard size={40} />
+                </div>
+                <button className="clothing-stripe-button" onClick={handleStripeCheckout}>
+                  Pay with Card (Stripe)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Options Section */}
+      <section className="clothing-payment-section">
+        <h3>Payment Options</h3>
+        <div className="clothing-payment-options">
+          <div className="clothing-payment-card">
+            <div className="clothing-icon-container">
+              <FaCreditCard size={40} />
+            </div>
+            <h4>Credit/Debit Card</h4>
+            <p>Secure payments via Stripe</p>
+          </div>
+          <div className="clothing-payment-card">
+            <div className="clothing-icon-container">
+              <FaPaypal size={40} />
+            </div>
+            <h4>PayPal</h4>
+            <p>Fast and secure PayPal checkout</p>
+          </div>
+          <div className="clothing-payment-card">
+            <div className="clothing-icon-container">
+              <FaGooglePay size={40} />
+            </div>
+            <h4>Google Pay</h4>
+            <p>Quick payments with Google Pay</p>
+          </div>
+          <div className="clothing-payment-card">
+            <div className="clothing-icon-container">
+              <FaApplePay size={40} />
+            </div>
+            <h4>Apple Pay</h4>
+            <p>Easy payments with Apple Pay</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="clothing-contact-section">
         <h3>Contact Us</h3>
-        <form className="contact-form">
+        <form className="clothing-contact-form">
           <input type="text" placeholder="Your Name" required />
           <input type="email" placeholder="Your Email" required />
           <textarea placeholder="Your Message" required></textarea>
           <button type="submit">Send Message</button>
         </form>
 
-        <div className="contact-info">
+        <div className="clothing-contact-info">
           <p>Email: contact@b8company.com</p>
           <p>Phone: +123 456 7890</p>
           <p>Address: 123 B8 Street, Innovation City</p>
         </div>
 
-        <div className="social-media">
+        <div className="clothing-social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
           <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
