@@ -1,5 +1,3 @@
-/* src/styles/B8FootballClub.css */
-
 .carclub-page {
   min-height: 100vh;
   background-color: black;
@@ -152,4 +150,165 @@
 .carclub-player-card:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+}
+
+.carclub-location-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.carclub-location-card {
+  background: linear-gradient(145deg, #222, #333);
+  padding: 1.5rem;
+  border-radius: 15px;
+  color: white;
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.carclub-location-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+}
+
+.carclub-location-card h4 {
+  font-size: 1.5rem;
+  margin: 1rem 0;
+  color: white;
+}
+
+.carclub-location-description {
+  color: #ccc;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.carclub-icon-container {
+  background: #444;
+  padding: 1rem;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: 1rem;
+  transition: background 0.3s;
+}
+
+.carclub-location-card:hover .carclub-icon-container {
+  background: #00bfff;
+}
+
+.carclub-event-list {
+  padding: 2rem;
+  margin: 2rem 0;
+  background-color: #111;
+  border-radius: 15px;
+}
+
+.carclub-event-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.carclub-event-card {
+  background: linear-gradient(145deg, #222, #333);
+  padding: 1.5rem;
+  border-radius: 15px;
+  color: white;
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.carclub-event-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+}
+
+.carclub-event-date {
+  color: #00bfff;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.carclub-event-description {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.carclub-signup-form {
+  background-color: #111;
+  padding: 2rem;
+  border-radius: 15px;
+  margin: 2rem 0;
+}
+
+.carclub-signup-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.carclub-signup-form input {
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #222;
+  color: white;
+  font-size: 1rem;
+}
+
+.carclub-signup-form input:focus {
+  outline: none;
+  border-color: #00bfff;
+  box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.2);
+}
+
+.carclub-signup-form button {
+  padding: 1rem;
+  background: linear-gradient(to right, #00bfff, #0077ff);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.carclub-signup-form button:hover {
+  opacity: 0.9;
+}
+
+.carclub-companies-worked-with {
+  background-color: #111;
+  padding: 2rem;
+  border-radius: 15px;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.carclub-company-logos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: center;
+}
+
+.carclub-company-logos img {
+  max-width: 150px;
+  height: auto;
+  filter: grayscale(100%) brightness(0.8);
+  transition: filter 0.3s, transform 0.3s;
+}
+
+.carclub-company-logos img:hover {
+  filter: grayscale(0%) brightness(1);
+  transform: scale(1.1);
 }
