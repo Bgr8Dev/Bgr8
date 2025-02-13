@@ -24,7 +24,15 @@ export default function B8Clothing() {
     const { error } = await stripe.redirectToCheckout({
       lineItems: [
         {
-          price: product.price, // Replace with actual price ID from Stripe
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: product.name,
+              description: product.description,
+              images: [product.image],
+            },
+            unit_amount: String(product.price * 100), // Fix: convert number to string
+          },
           quantity: 1,
         },
       ],
@@ -37,7 +45,6 @@ export default function B8Clothing() {
       console.error('Stripe Checkout Error:', error);
     }
   };
-  
 
     useEffect(() => {
       const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -104,28 +111,25 @@ export default function B8Clothing() {
               <p className="modal-description">High-quality, comfortable, and stylish t-shirt featuring the exclusive B8 logo. Perfect for any occasion!</p>
               <p className="modal-price">Price: <strong>$30</strong></p>
               <div className="paypal-container">
-                <PayPalButtons
-                  style={{
-                    layout: 'vertical',     // Options: 'vertical' or 'horizontal'
-                    color: 'gold',          // Options: 'gold', 'blue', 'silver', 'black', 'white'
-                    shape: 'pill',          // Options: 'rect' or 'pill'
-                    label: 'paypal',        // Options: 'paypal', 'checkout', 'buynow', 'pay', 'installment'
-                    height: 55,             // Adjust button height
-                    tagline: false          // Hide the "Powered by PayPal" tagline
-                  }}
-                  createOrder={(data, actions) => {
-                    return actions.order.create({
-                      purchase_units: [{ amount: { value: '30.00' } }],
-                    });
-                  }}
-                  onApprove={(data, actions) => {
-                    return actions.order?.capture().then((details) => {
-                      const name = details.payer?.name?.given_name ?? 'Customer';
-                      alert(`Transaction completed by ${name}`);
-                    });
-                  }}
-                  
-                />
+              <PayPalButtons
+                style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
+                createOrder={(actions) => {
+                  return actions.order.create({
+                    purchase_units: [
+                      {
+                        amount: { currency_code: 'USD', value: '30.00' },
+                      },
+                    ],
+                  });
+                }}
+                onApprove={(data, actions) => {
+                  if (!actions.order) return Promise.resolve();
+                  return actions.order.capture().then((details) => {
+                    const name = details.payer?.name?.given_name || 'Customer';
+                    alert(`Transaction completed by ${name}`);
+                  });
+                }}
+              />
               </div>
               {/* Google Pay Button */}
               <div className="googlepay-container">
@@ -168,7 +172,9 @@ export default function B8Clothing() {
                   }}
                 />
               </div>
-              <button className="stripe-button" onClick={handleStripeCheckout}>Pay with Card (Stripe)</button>
+              <button className="stripe-button" onClick={() => handleStripeCheckout(product)}>
+                Pay with Card (Stripe)
+              </button>
             </div>
           </div>
         )}
