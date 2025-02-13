@@ -112,31 +112,34 @@ export default function B8Clothing() {
                   <FaPaypal size={40} />
                 </div>
                 <div className="clothing-paypal-container">
-                  <PayPalButtons
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        purchase_units: [
-                          {
-                            amount: {
-                              value: product.price.toString(),
-                            },
-                          },
-                        ],
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      if (actions.order) {
-                        try {
-                          const details = await actions.order.capture();
-                          const name = details.payer.name?.given_name;
-                          alert(`Transaction completed by ${name}`);
-                        } catch (error) {
-                          console.error('Payment capture failed:', error);
-                          alert('Payment failed.');
-                        }
+                <PayPalButtons
+                  style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
+                  createOrder={(_data, actions) => {
+                    return actions.order.create({
+                      intent: "CAPTURE",
+                      purchase_units: [
+                        {
+                          amount: { currency_code: 'USD', value: '30.00' },
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={async (_data, actions) => {
+                    if (actions.order) {
+                      try {
+                        const details = await actions.order.capture();
+                        const name = details.payer?.name?.given_name ?? 'Customer';
+                        alert(`Transaction completed by ${name}`);
+                      } catch (error) {
+                        console.error('Payment capture failed:', error);
+                        alert('Payment failed.');
                       }
-                    }}
-                  />
+                    } else {
+                      console.error('Order actions not available.');
+                      alert('Payment could not be processed.');
+                    }
+                  }}
+                />
                 </div>
               </div>
 
