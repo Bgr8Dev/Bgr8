@@ -24,7 +24,7 @@ export default function B8Clothing() {
     const { error } = await stripe.redirectToCheckout({
       lineItems: [
         {
-          price: product.priceId, // Replace with actual price ID from Stripe
+          price: product.price, // Replace with actual price ID from Stripe
           quantity: 1,
         },
       ],
