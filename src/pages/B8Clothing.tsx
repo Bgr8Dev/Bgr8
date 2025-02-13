@@ -14,37 +14,29 @@ export default function B8Clothing() {
   const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || '';
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLISHABLE_KEY);
 
-  const handleStripeCheckout = async (product: { name: string; description: string; image: string; price: number }) => {
+  const handleStripeCheckout = async () => {
     const stripe = await stripePromise;
     if (!stripe) {
-      console.error('Stripe failed to initialize');
+      console.error('Stripe initialization failed');
       return;
     }
   
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: product.name,
-              description: product.description,
-              images: [product.image],
-            },
-            unit_amount: String(product.price * 100), // Fix: convert number to string
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      successUrl: `${window.location.origin}/success`,
-      cancelUrl: `${window.location.origin}/cancel`,
+    // Call your backend to create a checkout session
+    const response = await fetch('/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{ id: 'b8-tshirt', quantity: 1 }],
+      }),
     });
   
-    if (error) {
-      console.error('Stripe Checkout Error:', error);
-    }
+    const session = await response.json();
+  
+    // Redirect to Stripe Checkout
+    const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
+    if (error) console.error('Stripe Checkout Error:', error);
   };
+  
 
     useEffect(() => {
       const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -172,7 +164,7 @@ export default function B8Clothing() {
                   }}
                 />
               </div>
-              <button className="stripe-button" onClick={() => handleStripeCheckout(product)}>
+              <button className="stripe-button" onClick={handleStripeCheckout}>
                 Pay with Card (Stripe)
               </button>
             </div>
