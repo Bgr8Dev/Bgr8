@@ -106,6 +106,7 @@ export default function B8Clothing() {
               <PayPalButtons
                 style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
                 createOrder={(actions) => {
+                  // Correct usage of createOrder directly from actions
                   return actions.order.create({
                     purchase_units: [
                       {
@@ -114,12 +115,19 @@ export default function B8Clothing() {
                     ],
                   });
                 }}
-                onApprove={(data, actions) => {
-                  if (!actions.order) return Promise.resolve();
-                  return actions.order.capture().then((details) => {
-                    const name = details.payer?.name?.given_name || 'Customer';
-                    alert(`Transaction completed by ${name}`);
-                  });
+                onApprove={async (_data, actions) => {
+                  if (actions && actions.order && actions.order.capture) {
+                    try {
+                      const details = await actions.order.capture();
+                      const name = details.payer?.name?.given_name ?? 'Customer';
+                      alert(`Transaction completed by ${name}`);
+                    } catch (error) {
+                      console.error('Payment capture failed:', error);
+                      alert('Payment failed.');
+                    }
+                  } else {
+                    alert('Payment was approved but could not be captured.');
+                  }
                 }}
               />
               </div>
