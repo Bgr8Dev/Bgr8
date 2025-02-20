@@ -86,9 +86,15 @@ export default function B8Clothing() {
 
       {/* Gallery Section */}
       <section className="clothing-gallery">
-        <img src="/assets/clothing1.jpg" alt="Clothing Item 1" />
-        <img src="/assets/clothing2.jpg" alt="Clothing Item 2" />
-        <img src="/assets/clothing3.jpg" alt="Clothing Item 3" />
+        <div>
+          <img src="/src/assets/Volkswagen.jpg" alt="Clothing Item 1" />
+        </div>
+        <div>
+          <img src="/src/assets/clothing2.jpg" alt="Clothing Item 2" />
+        </div>
+        <div>
+          <img src="/src/assets/clothing3.jpg" alt="Clothing Item 3" />
+        </div>
       </section>
 
       {/* Featured Product */}

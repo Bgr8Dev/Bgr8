@@ -29,6 +29,7 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin: 2rem 0;
+  position: relative;
 }
 
 .clothing-gallery img {
@@ -36,10 +37,35 @@
   height: auto;
   border-radius: 10px;
   transition: transform 0.3s;
+  position: relative;
 }
 
 .clothing-gallery img:hover {
   transform: scale(1.05);
+}
+
+.clothing-gallery {
+  position: relative;
+}
+
+.clothing-gallery > div {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.clothing-gallery > div::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 50%;
+  width: 0;
+  height: 60px; /* Fixed height */
+  background: rgba(0, 0, 0, 1);
+  transition: width 0.3s ease;
+}
+
+.clothing-gallery > div:hover::after {
+  width: 100%;
 }
 
 .clothing-shop-section {

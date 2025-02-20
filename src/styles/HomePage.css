@@ -26,7 +26,7 @@
 
 .hero button {
   padding: 1rem 2rem;
-  background: linear-gradient(to right, purple, blue);
+  background: linear-gradient(to right, #ff0000, #cc0000);
   background-size: 200% 200%;
   border: none;
   border-radius: 1rem;
@@ -35,7 +35,6 @@
   cursor: pointer;
   transition: opacity 0.3s;
   transition: background-position 0.4s ease-in-out;
-
 }
 
 .hero button:hover {
@@ -69,7 +68,7 @@
 
 .service-card:hover {
   transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+  box-shadow: 0 8px 20px var(--hover-color, rgba(255, 0, 0, 0.3));
 }
 
 .icon-container {
@@ -78,11 +77,19 @@
   border-radius: 50%;
   display: inline-block;
   margin-bottom: 1rem;
-  transition: background 0.3s;
+  transition: all 0.3s;
+}
+
+.service-card .icon-container svg {
+  color: var(--icon-color);
+}
+
+.service-card:hover .icon-container svg {
+  color: var(--icon-hover-color);
 }
 
 .service-card:hover .icon-container {
-  background: #00bfff;
+  background: var(--hover-color);
 }
 
 .service-card h4 {
@@ -133,7 +140,7 @@
 
 .contact-form button {
   padding: 1rem;
-  background: linear-gradient(to right, purple, blue);
+  background: linear-gradient(to right, #ff0000, #cc0000);
   border: none;
   border-radius: 8px;
   color: white;
