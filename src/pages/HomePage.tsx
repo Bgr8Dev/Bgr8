@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaWhatsapp } from 'react-icons/fa';
 import { FaBullhorn, FaCar, FaTshirt, FaGraduationCap, FaUsers, FaGlobe, FaHeart, FaBriefcase } from 'react-icons/fa';
 import '../styles/HomePage.css';
 
@@ -80,24 +80,18 @@ export default function HomePage() {
           <button type="submit">Send Message</button>
         </form>
 
-        <div className="contact-info">
-          <p>Email: contact@b8company.com</p>
-          <p>Phone: +123 456 7890</p>
-          <p>Address: 123 B8 Street, Innovation City</p>
-        </div>
-
         <div className="social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
             <FaLinkedin />
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.instagram.com/b8carclub/" target="_blank" rel="noopener noreferrer">
             <FaInstagram />
           </a>
-          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.youtube.com/@B8Cars" target="_blank" rel="noopener noreferrer">
             <FaYoutube />
           </a>
           <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-            <FaTwitter />
+            <FaWhatsapp />
           </a>
         </div>
       </section>

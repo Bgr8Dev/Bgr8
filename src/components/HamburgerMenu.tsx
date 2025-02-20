@@ -19,7 +19,7 @@ export default function HamburgerMenu() {
         <nav className="mobile-nav">
           <Link to="/" onClick={toggleMenu}>Home</Link>
           <Link to="/b8-marketing" onClick={toggleMenu}>B8 Marketing</Link>
-          <Link to="/bgr8" onClick={toggleMenu}>BGr8</Link>
+          <Link to="/bgr8" onClick={toggleMenu}>Bgr8</Link>
           <Link to="/b8-car-club" onClick={toggleMenu}>B8 Car Club</Link>
           <Link to="/b8-clothing" onClick={toggleMenu}>B8 Clothing</Link>
           <Link to="/b8-football-club" onClick={toggleMenu}>B8 Football Club</Link>

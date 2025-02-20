@@ -15,7 +15,7 @@ export default function Navbar() {
       <nav className="nav">
         <Link to="/">Home</Link>
         <Link to="/b8-marketing">B8 Marketing</Link>
-        <Link to="/bgr8">BGr8</Link>
+        <Link to="/bgr8">Bgr8</Link>
         <Link to="/b8-car-club">B8 Car Club</Link>
         <Link to="/b8-clothing">B8 Clothing</Link>
         <Link to="/b8-football-club">B8 Football Club</Link>

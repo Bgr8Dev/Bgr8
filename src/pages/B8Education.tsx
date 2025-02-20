@@ -61,7 +61,7 @@ export default function B8Education() {
         <h3>Our Global Impact</h3>
         <iframe
           title="B8 Education Map"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345093753!2d144.95373631531866!3d-37.816279742021654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577c6e8f8b8a0a5!2sEducation%20Hub!5e0!3m2!1sen!2s!4v1647158468891"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2488.8901724724397!2d-0.19435492299797727!3d51.37012597178726!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4876075d1e973c37%3A0x9a6c0c5ef5e0a1d0!2s62%20Oakhill%20Rd%2C%20Sutton%20SM1%203AG%2C%20UK!5e0!3m2!1sen!2s!4v1709835851871!5m2!1sen!2s"
           width="100%"
           height="300"
           style={{ border: 0 }}
