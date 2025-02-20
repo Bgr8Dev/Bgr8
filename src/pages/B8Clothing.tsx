@@ -24,9 +24,16 @@ export default function B8Clothing() {
     // Call your backend to create a checkout session
     const response = await fetch('/create-checkout-session', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
-        items: [{ id: 'b8-tshirt', quantity: 1 }],
+        items: [
+          {
+            id: 'b8-tshirt',
+            quantity: 1
+          }
+        ]
       }),
     });
   
