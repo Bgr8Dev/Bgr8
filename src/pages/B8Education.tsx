@@ -133,12 +133,6 @@ export default function B8Education() {
           <button type="submit">Send Message</button>
         </form>
 
-        <div className="contact-info">
-          <p>Email: contact@b8company.com</p>
-          <p>Phone: +123 456 7890</p>
-          <p>Address: 123 B8 Street, Innovation City</p>
-        </div>
-
         <div className="social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>

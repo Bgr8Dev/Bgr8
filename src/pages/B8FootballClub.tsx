@@ -16,7 +16,7 @@ export default function B8FootballClub() {
   }, []);
 
   return (
-    <div className="page">
+    <div className="football-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       {/* Hero Video Section */}
@@ -27,71 +27,69 @@ export default function B8FootballClub() {
       </section>
 
       {/* Intro Section */}
-      <section className="intro-section">
+      <section className="football-intro-section">
         <h2>Welcome to B8 Football Club</h2>
         <p>
           B8 Football Club is more than just a team. We are a community of passionate athletes committed to excellence on and off the field.
         </p>
       </section>
 
-      {/* Existing Hero Section */}
-      <section className="hero">
+      {/* Hero Section */}
+      <section className="football-hero">
         <h1>B8 Football Club</h1>
         <p>Passion, performance, and community through football excellence.</p>
       </section>
 
-      {/* Existing Gallery Section */}
-      <section className="gallery">
-        <div className="gallery-item">
+      {/* Gallery Section */}
+      <section className="football-gallery">
+        <div className="football-gallery-item">
           <img src="/assets/football1.jpg" alt="Football Match 1" />
           <p>Match 1: Championship League 2023</p>
         </div>
-        <div className="gallery-item">
+        <div className="football-gallery-item">
           <img src="/assets/football2.jpg" alt="Football Match 2" />
           <p>Match 2: Youth Development Camp</p>
         </div>
-        <div className="gallery-item">
+        <div className="football-gallery-item">
           <img src="/assets/football3.jpg" alt="Football Match 3" />
           <p>Match 3: International Friendly</p>
         </div>
       </section>
 
-      {/* Buy the Kit Section */}
-      <section className="kit-shop">
+      {/* Kit Shop Section */}
+      <section className="football-kit-shop">
         <h3>Buy the Official B8 Kit</h3>
-        <div className="product-card" onClick={() => setIsModalOpen(true)}>
+        <div className="football-product-card" onClick={() => setIsModalOpen(true)}>
           <img src="/assets/football1.jpg" alt="B8 Jersey" />
           <p>B8 Official Jersey - $50</p>
         </div>
       </section>
 
-      {/* Modal for Kit Details */}
+      {/* Modal */}
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="football-modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="football-modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>B8 Official Jersey</h2>
             <img src="/assets/football1.jpg" alt="B8 Jersey" />
-            <p>
-              High-quality jersey made with breathable fabric, designed for comfort and performance.
-            </p>
+            <p>High-quality jersey made with breathable fabric, designed for comfort and performance.</p>
             <p>Price: $50</p>
             <button onClick={() => alert('Payment functionality will be integrated soon!')}>Buy Now</button>
-            <button className="close-btn" onClick={() => setIsModalOpen(false)}>Close</button>
+            <button className="football-close-btn" onClick={() => setIsModalOpen(false)}>Close</button>
           </div>
         </div>
       )}
 
-      {/* Player Information Widget */}
-      <section className="player-widget">
+      {/* Player Widget */}
+      <section className="football-player-widget">
         <h3>Player Spotlight</h3>
-        <div className="player-card">
+        <div className="football-player-card">
           <img src="/assets/player1.jpg" alt="Star Player" />
           <h4>John Doe - Forward</h4>
           <p>Goals: 15 | Assists: 10 | Appearances: 20</p>
         </div>
       </section>
 
-      {/* Existing Contact Section */}
+      {/* Contact Section */}
       <section className="contact-section">
         <h3>Contact Us</h3>
         <form className="contact-form">
@@ -107,7 +105,7 @@ export default function B8FootballClub() {
           <p>Address: 123 B8 Street, Innovation City</p>
         </div>
 
-        <div className="social-media">
+        <div className="football-social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
           <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>

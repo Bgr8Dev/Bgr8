@@ -41,6 +41,7 @@
   
   .gallery img:hover {
     transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 128, 0, 0.8); /* Green glow */
   }
   .hero-video, .intro-section, .donation-section, .map-section, .user-selection, .signup-form {
     background-color: #111;
@@ -67,14 +68,28 @@
     margin-bottom: 1rem;
   }
   
+  .donation-section input:focus {
+    outline: none;
+    border-color: #008000; /* Green border */
+    box-shadow: 0 0 0 2px rgba(0, 128, 0, 0.2); /* Green glow */
+  }
+  
   .donation-section button, .user-selection button {
     padding: 1rem;
-    background: linear-gradient(to right, purple, blue);
+    background: linear-gradient(to right, #008000, #006400); /* Green gradient */
     border: none;
     border-radius: 8px;
     color: white;
     cursor: pointer;
     margin: 0.5rem;
+    transition: all 0.3s;
+  }
+  
+  .donation-section button:hover,
+  .user-selection button:hover {
+    background: linear-gradient(to right, #006400, #008000); /* Reversed green gradient */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.4);
   }
   
   .signup-form form {
@@ -93,12 +108,38 @@
     color: white;
   }
   
+  .signup-form input:focus, 
+  .signup-form select:focus {
+    outline: none;
+    border-color: #008000; /* Green border */
+    box-shadow: 0 0 0 2px rgba(0, 128, 0, 0.2); /* Green glow */
+  }
+  
   .signup-form button {
     padding: 1rem;
-    background: linear-gradient(to right, blue, purple);
+    background: linear-gradient(to right, #008000, #006400); /* Green gradient */
     border: none;
     border-radius: 8px;
     color: white;
     cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .signup-form button:hover {
+    background: linear-gradient(to right, #006400, #008000); /* Reversed green gradient */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.4);
+  }
+  
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: none;
+    border-color: #008000; /* Green border */
+    box-shadow: 0 0 0 2px rgba(0, 128, 0, 0.2); /* Green glow */
+  }
+  
+  .social-media a:hover {
+    color: #008000; /* Green color */
+    transform: translateY(-3px);
   }
   

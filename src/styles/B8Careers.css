@@ -41,6 +41,7 @@
   
   .gallery img:hover {
     transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
   }
   .about-section, .industries-section, .education-section, .cv-submission-section, .cv-database-section {
     background-color: #111;
@@ -64,6 +65,13 @@
     color: white;
   }
   
+  .industries-section li:hover {
+    background-color: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+  }
+  
   .education-section form, .cv-submission-section form {
     display: flex;
     flex-direction: column;
@@ -80,11 +88,70 @@
     color: white;
   }
   
+  .education-section input:focus, 
+  .cv-submission-section input:focus {
+    outline: none;
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+  }
+  
   .cv-profile {
     background-color: #222;
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
     color: white;
+  }
+  
+  .cv-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+  }
+  
+  button {
+    background: linear-gradient(to right, #1a1a1a, #000000);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  button:hover {
+    background: linear-gradient(to right, #000000, #1a1a1a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+  
+  .social-media a:hover {
+    color: #1a1a1a;
+    transform: translateY(-3px);
+  }
+  
+  .cv-submission-section form button:hover {
+    background: linear-gradient(to right, #000000, #1a1a1a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+  
+  .careers-card {
+    transition: all 0.3s ease;
+  }
+  
+  .careers-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+  }
+  
+  .careers-icon-container {
+    background: #222;
+    transition: all 0.3s ease;
+  }
+  
+  .careers-card:hover .careers-icon-container {
+    background: #1a1a1a;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
   }
   

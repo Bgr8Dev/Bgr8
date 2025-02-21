@@ -1,5 +1,5 @@
 /* src/styles/Pages.css */
-.page {
+.football-page {
     min-height: 100vh;
     background-color: black;
     color: white;
@@ -7,42 +7,42 @@
     padding: 2rem;
   }
   
-  .hero {
+  .football-hero {
     text-align: center;
     padding: 4rem 1.5rem;
   }
   
-  .hero h1 {
+  .football-hero h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
     color: white;
   }
   
-  .hero p {
+  .football-hero p {
     font-size: 1.2rem;
     color: gray;
     max-width: 600px;
     margin: 0 auto 2rem;
   }
   
-  .gallery {
+  .football-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin: 2rem 0;
   }
   
-  .gallery img {
+  .football-gallery img {
     width: 100%;
     height: auto;
     border-radius: 10px;
     transition: transform 0.3s;
   }
   
-  .gallery img:hover {
+  .football-gallery img:hover {
     transform: scale(1.05);
   }
-  .hero-video, .intro-section, .kit-shop, .player-widget {
+  .football-hero-video, .football-intro-section, .football-kit-shop, .football-player-widget {
     background-color: #111;
     padding: 2rem;
     margin: 1rem 0;
@@ -58,7 +58,7 @@
     border-radius: 10px;
   }
   
-  .gallery-item {
+  .football-gallery-item {
     background: linear-gradient(145deg, #222, #333);
     padding: 1.5rem;
     border-radius: 15px;
@@ -68,12 +68,12 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
   
-  .gallery-item:hover {
+  .football-gallery-item:hover {
     transform: translateY(-10px) scale(1.05);
     box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
-  .product-card {
+  .football-product-card {
     background: linear-gradient(145deg, #222, #333);
     padding: 1.5rem;
     border-radius: 15px;
@@ -83,12 +83,12 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
   
-  .product-card:hover {
+  .football-product-card:hover {
     transform: translateY(-10px) scale(1.05);
     box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
-  .modal-overlay {
+  .football-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -101,7 +101,7 @@
     z-index: 1000;
   }
   
-  .modal-content {
+  .football-modal-content {
     background: linear-gradient(145deg, #222, #333);
     padding: 2rem;
     border-radius: 15px;
@@ -112,17 +112,17 @@
     transition: transform 0.3s, box-shadow 0.3s;
   }
   
-  .modal-content:hover {
+  .football-modal-content:hover {
     transform: translateY(-10px) scale(1.05);
     box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
-  .modal-content img {
+  .football-modal-content img {
     width: 100%;
     border-radius: 8px;
   }
   
-  .close-btn {
+  .football-close-btn {
     background: #800080; /* Purple background */
     color: white;
     padding: 0.5rem 1rem;
@@ -133,11 +133,11 @@
     transition: background 0.3s;
   }
   
-  .close-btn:hover {
+  .football-close-btn:hover {
     background: #660066; /* Darker purple on hover */
   }
   
-  .player-widget .player-card {
+  .football-player-widget .football-player-card {
     background: linear-gradient(145deg, #222, #333);
     padding: 1.5rem;
     border-radius: 15px;
@@ -147,12 +147,12 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
   
-  .player-card:hover {
+  .football-player-card:hover {
     transform: translateY(-10px) scale(1.05);
     box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
-  .icon-container {
+  .football-icon-container {
     background: #444;
     padding: 20px;
     border-radius: 50%;
@@ -162,11 +162,22 @@
     color: #FFF;
   }
   
-  .player-card:hover .icon-container {
+  .football-player-card:hover .football-icon-container {
     background: #800080; /* Purple background */
     box-shadow: 0 0 15px rgba(128, 0, 128, 0.6); /* Purple glow */
     color: #FFF;
     transform: scale(1.1);
+  }
+
+  .football-social-media a {
+    font-size: 2rem;
+    color: white;
+    margin: 0 1rem;
+    transition: color 0.3s ease;
+  }
+  
+  .football-social-media a:hover {
+    color: #800080;
   }
   
   /* Add styles for form elements if they exist */

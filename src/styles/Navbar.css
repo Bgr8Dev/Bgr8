@@ -31,11 +31,61 @@
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.3s;
     font-weight: 500;
   }
   
-  .nav a:hover {
+  /* Specific hover effects for each nav item */
+  .nav a[href="/b8-marketing"]:hover {
+    background-color: #FFFFFF;
+    color: black;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  }
+  
+  .nav a[href="/bgr8"]:hover {
+    background-color: #FFD700;
+    color: black;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  }
+  
+  .nav a[href="/b8-car-club"]:hover {
+    background-color: #FF0000;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+  }
+  
+  .nav a[href="/b8-clothing"]:hover {
+    background-color: #8B4513;
+    color: white;
+    box-shadow: 0 0 10px rgba(139, 69, 19, 0.4);
+  }
+  
+  .nav a[href="/b8-football-club"]:hover {
+    background-color: #800080;
+    color: white;
+    box-shadow: 0 0 10px rgba(128, 0, 128, 0.4);
+  }
+  
+  .nav a[href="/b8-charity"]:hover {
+    background-color: #0000FF;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.4);
+  }
+  
+  .nav a[href="/b8-education"]:hover {
+    background-color: #008000;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 128, 0, 0.4);
+  }
+  
+  .nav a[href="/b8-careers"]:hover {
+    background-color: #000000;
+    color: white;
+    box-shadow: 0 0 10px rgba(82, 81, 81, 0.4);
+  }
+  
+  /* Home link can keep original or match company primary color */
+  .nav a[href="/"]:hover {
     background-color: #444;
     color: lightgray;
   }
@@ -68,13 +118,19 @@
     color: white;
     text-decoration: none;
     padding: 0.5rem;
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.3s;
   }
   
-  .mobile-nav a:hover {
-    background-color: #444;
-    color: lightgray;
-  }
+  /* Update mobile nav with the same hover effects */
+  .mobile-nav a[href="/b8-marketing"]:hover { background-color: #FFFFFF; color: black; }
+  .mobile-nav a[href="/bgr8"]:hover { background-color: #FFD700; color: black; }
+  .mobile-nav a[href="/b8-car-club"]:hover { background-color: #FF0000; color: white; }
+  .mobile-nav a[href="/b8-clothing"]:hover { background-color: #8B4513; color: white; }
+  .mobile-nav a[href="/b8-football-club"]:hover { background-color: #800080; color: white; }
+  .mobile-nav a[href="/b8-charity"]:hover { background-color: #0000FF; color: white; }
+  .mobile-nav a[href="/b8-education"]:hover { background-color: #008000; color: white; }
+  .mobile-nav a[href="/b8-careers"]:hover { background-color: #000000; color: white; }
+  .mobile-nav a[href="/"]:hover { background-color: #444; color: lightgray; }
   
   /* Responsive Design */
   @media (max-width: 768px) {

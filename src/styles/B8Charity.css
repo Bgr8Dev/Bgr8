@@ -94,7 +94,8 @@
   }
   
   .charity-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 255, 0.8); /* Blue glow */
   }
   
   .charity-card img {
@@ -131,6 +132,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    border-color: #0000FF;
   }
   
   .modal-content {
@@ -138,5 +140,76 @@
     padding: 2rem;
     border-radius: 10px;
     color: white;
+  }
+  
+  .charity-gallery-item:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 255, 0.8); /* Blue glow */
+  }
+  
+  .charity-product-card:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 255, 0.8); /* Blue glow */
+  }
+  
+  .charity-modal-content:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 255, 0.8); /* Blue glow */
+  }
+  
+  .charity-close-btn {
+    background: #0000FF; /* Blue background */
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    margin-top: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+  }
+  
+  .charity-close-btn:hover {
+    background: #0000CC; /* Darker blue on hover */
+  }
+  
+  .charity-icon-container {
+    background: #444;
+    padding: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+    color: #FFF;
+  }
+  
+  .charity-card:hover .charity-icon-container {
+    background: #0000FF; /* Blue background */
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.6); /* Blue glow */
+    color: #FFF;
+    transform: scale(1.1);
+  }
+  
+  .charity-social-media a:hover {
+    color: #0000FF; /* Blue color */
+  }
+  
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #0000FF; /* Blue border */
+    box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.2); /* Blue glow */
+  }
+  
+  button {
+    background: linear-gradient(to right, #0000FF, #0000CC); /* Blue gradient */
+  }
+  
+  button:hover {
+    background: linear-gradient(to right, #0000CC, #0000FF); /* Reversed blue gradient */
+  }
+  
+  .charity-info-modal button:hover {
+    background: #0000FF;
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.6);
   }
   
