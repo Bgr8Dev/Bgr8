@@ -169,3 +169,124 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
 }
+
+.marketing-services {
+  padding: 4rem 2rem;
+  background-color: #111;
+  border-radius: 15px;
+  margin: 2rem 0;
+}
+
+.marketing-services h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.services-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.service-card {
+  background: linear-gradient(145deg, #222, #333);
+  padding: 2rem;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+}
+
+.service-icon {
+  background: #444;
+  padding: 1.5rem;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover .service-icon {
+  background: white;
+  color: black;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+.service-card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.service-card h4 {
+  font-size: 1.2rem;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+.service-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  text-align: left;
+}
+
+.service-list li {
+  padding: 0.5rem 0;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.service-list li::before {
+  content: "•";
+  color: white;
+  font-weight: bold;
+}
+
+.service-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  margin: 1rem 0;
+}
+
+.learn-more-btn {
+  background: linear-gradient(to right, white, #e0e0e0);
+  color: black;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.learn-more-btn:hover {
+  background: linear-gradient(to right, #e0e0e0, white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .services-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .service-card {
+    margin: 1rem;
+  }
+}

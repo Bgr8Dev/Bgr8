@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
 import { FaChartLine, FaBullhorn, FaCogs } from 'react-icons/fa';
-import '../styles/B8Marketting.css';
+import '../styles/B8Marketing.css';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -28,6 +28,37 @@ export default function B8Marketing() {
       price: 'Contact us for pricing',
       description: 'Tailored solutions for unique marketing needs.',
     },
+  ];
+
+  const marketingServices = [
+    {
+      category: 'Web Marketing',
+      icon: <FaGlobe size={40} />,
+      title: 'Digital Web Marketing',
+      services: [
+        'Search Engine Optimization (SEO)',
+        'Content Marketing Strategy',
+        'Email Marketing Campaigns',
+        'Google Ads Management',
+        'Website Analytics & Optimization',
+        'Landing Page Optimization'
+      ],
+      price: 'Starting from $1000/month'
+    },
+    {
+      category: 'Social Media',
+      icon: <FaHashtag size={40} />,
+      title: 'Social Media Marketing',
+      services: [
+        'Social Media Management',
+        'Influencer Partnerships',
+        'Content Creation & Scheduling',
+        'Community Engagement',
+        'Paid Social Advertising',
+        'Social Media Analytics'
+      ],
+      price: 'Starting from $800/month'
+    }
   ];
 
   useEffect(() => {
@@ -88,6 +119,42 @@ export default function B8Marketing() {
         </div>
       </section>
 
+      {/* Add this new section before the pricing section */}
+      <section className="marketing-services">
+        <h2>Our Marketing Solutions</h2>
+        <div className="services-container">
+          {marketingServices.map((service, index) => (
+            <div className="service-card" key={index}>
+              <div className="service-icon">{service.icon}</div>
+              <h3>{service.category}</h3>
+              <h4>{service.title}</h4>
+              <ul className="service-list">
+                {service.services.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+              <p className="service-price">{service.price}</p>
+              <button className="learn-more-btn">Learn More</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing List */}
+      <section className="pricing-list">
+        <h3>Our Pricing</h3>
+        <div className="pricing-cards">
+          {pricingPlans.map((plan, index) => (
+            <div className="pricing-card" key={index}>
+              <div className="icon-container">{plan.icon}</div>
+              <h4>{plan.title}</h4>
+              <p className="price">{plan.price}</p>
+              <p className="description">{plan.description}</p>
+            </div>
+          ))}
+        </div>
+    </section>
+
       {/* Links to Social Channels */}
       <section className="social-channels">
         <h3>Follow Us</h3>
@@ -111,21 +178,6 @@ export default function B8Marketing() {
           <button type="submit">Send Message</button>
         </form>
       </section>
-
-      {/* Pricing List */}
-      <section className="pricing-list">
-        <h3>Our Pricing</h3>
-        <div className="pricing-cards">
-          {pricingPlans.map((plan, index) => (
-            <div className="pricing-card" key={index}>
-              <div className="icon-container">{plan.icon}</div>
-              <h4>{plan.title}</h4>
-              <p className="price">{plan.price}</p>
-              <p className="description">{plan.description}</p>
-            </div>
-          ))}
-        </div>
-    </section>
 
       {/* Email Submission Form */}
       <section className="email-submission-form">
