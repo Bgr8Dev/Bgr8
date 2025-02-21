@@ -59,19 +59,33 @@
   }
   
   .gallery-item {
-    margin-bottom: 1rem;
+    background: linear-gradient(145deg, #222, #333);
+    padding: 1.5rem;
+    border-radius: 15px;
+    color: white;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  .gallery-item:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
   .product-card {
-    background-color: #222;
-    padding: 1rem;
-    border-radius: 8px;
+    background: linear-gradient(145deg, #222, #333);
+    padding: 1.5rem;
+    border-radius: 15px;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
   
   .product-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
   .modal-overlay {
@@ -88,12 +102,19 @@
   }
   
   .modal-content {
-    background-color: #111;
+    background: linear-gradient(145deg, #222, #333);
     padding: 2rem;
-    border-radius: 10px;
+    border-radius: 15px;
     text-align: center;
     color: white;
     max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .modal-content:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
   }
   
   .modal-content img {
@@ -102,24 +123,65 @@
   }
   
   .close-btn {
-    background: red;
+    background: #800080; /* Purple background */
     color: white;
     padding: 0.5rem 1rem;
     border: none;
     margin-top: 1rem;
     cursor: pointer;
     border-radius: 5px;
+    transition: background 0.3s;
+  }
+  
+  .close-btn:hover {
+    background: #660066; /* Darker purple on hover */
   }
   
   .player-widget .player-card {
-    background-color: #222;
-    padding: 1rem;
-    border-radius: 8px;
+    background: linear-gradient(145deg, #222, #333);
+    padding: 1.5rem;
+    border-radius: 15px;
     color: white;
-    transition: transform 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   }
   
   .player-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(128, 0, 128, 0.8); /* Purple glow */
+  }
+  
+  .icon-container {
+    background: #444;
+    padding: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+    color: #FFF;
+  }
+  
+  .player-card:hover .icon-container {
+    background: #800080; /* Purple background */
+    box-shadow: 0 0 15px rgba(128, 0, 128, 0.6); /* Purple glow */
+    color: #FFF;
+    transform: scale(1.1);
+  }
+  
+  /* Add styles for form elements if they exist */
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #800080; /* Purple border */
+    box-shadow: 0 0 0 2px rgba(128, 0, 128, 0.2); /* Purple glow */
+  }
+  
+  button {
+    background: linear-gradient(to right, #800080, #660066); /* Purple gradient */
+  }
+  
+  button:hover {
+    background: linear-gradient(to right, #660066, #800080); /* Reversed purple gradient */
   }
   
