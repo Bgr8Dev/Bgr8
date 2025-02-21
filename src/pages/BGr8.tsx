@@ -4,9 +4,11 @@ import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import { FaInstagram, FaYoutube } from 'react-icons/fa';
 import '../styles/BGr8.css';
+import BGr8Medical from './BGr8Medical';
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showMedical, setShowMedical] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -73,6 +75,20 @@ export default function BGr8() {
           Book Now via Calendly
         </a>
       </section>
+
+      {/* Medical Section */}
+      <section className="medical-section">
+        <h3>BGr8 Medical</h3>
+        <p>Join our medical community and make a difference in healthcare</p>
+        <button 
+          className="medical-button"
+          onClick={() => setShowMedical(true)}
+        >
+          Join BGr8 Medical
+        </button>
+      </section>
+
+      {showMedical && <BGr8Medical onClose={() => setShowMedical(false)} />}
 
       {/* Existing Contact Section */}
       <section className="contact-section">
