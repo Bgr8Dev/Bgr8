@@ -88,7 +88,7 @@
 
 .clothing-product-card:hover {
   transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.8);
 }
 
 .clothing-product-card img {
@@ -124,7 +124,7 @@
 
 .clothing-payment-card:hover {
   transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.8);
 }
 
 .clothing-icon-container {
@@ -137,7 +137,7 @@
 }
 
 .clothing-payment-card:hover .clothing-icon-container {
-  background: #00bfff;
+  background: #8B4513;
 }
 
 .clothing-modal-overlay {
@@ -176,7 +176,7 @@
 .clothing-paypal-container:hover, 
 .clothing-googlepay-container:hover {
   transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.8);
 }
 
 .clothing-stripe-button {
@@ -195,7 +195,7 @@
 
 .clothing-stripe-button:hover {
   transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(0, 191, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.8);
 }
 
 .clothing-contact-section {
@@ -231,13 +231,13 @@
 .clothing-contact-form input:focus,
 .clothing-contact-form textarea:focus {
   outline: none;
-  border-color: #00bfff;
-  box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.2);
+  border-color: #8B4513;
+  box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
 }
 
 .clothing-contact-form button {
   padding: 1rem;
-  background: linear-gradient(to right, #00bfff, #0077ff);
+  background: linear-gradient(to right, #8B4513, #654321);
   border: none;
   border-radius: 8px;
   color: white;
@@ -279,7 +279,7 @@
 }
 
 .clothing-social-media a:hover {
-  color: #00bfff;
+  color: #8B4513;
   transform: translateY(-3px);
 }
 
@@ -334,4 +334,62 @@
 .clothing-payment-card p {
   color: #ccc;
   font-size: 0.9rem;
+}
+
+.clothing-catalog-section {
+  background-color: #111;
+  padding: 2rem;
+  margin: 2rem 0;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.clothing-category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1rem;
+}
+
+.category-btn {
+  padding: 0.5rem 1rem;
+  background: #333;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+  background: #444;
+  transform: translateY(-2px);
+}
+
+.category-btn.active {
+  background: #8B4513;
+  box-shadow: 0 0 10px rgba(139, 69, 19, 0.5);
+}
+
+.clothing-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.clothing-products-grid .clothing-product-card {
+  margin: 0;
+}
+
+.clothing-products-grid .clothing-product-card h4 {
+  margin: 1rem 0 0.5rem;
+  color: white;
+}
+
+.clothing-products-grid .clothing-product-card p {
+  color: #8B4513;
+  font-weight: bold;
 }

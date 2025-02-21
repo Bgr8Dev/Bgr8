@@ -58,7 +58,33 @@ export default function B8Clothing() {
       image: '/assets/clothing1.jpg',
     };
   
-  
+  const categories = [
+    'T-Shirts',
+    'Hoodies',
+    'Sweatshirts',
+    'Jeans',
+    'Joggers',
+    'Shorts',
+    'Jackets',
+    'Caps',
+    'Accessories',
+    'Socks',
+    'Underwear',
+    'Dresses',
+    'Skirts',
+    'Polo Shirts',
+    'Tank Tops'
+  ];
+
+  const products = [
+    { id: 1, name: 'Classic B8 T-Shirt', price: 30, category: 'T-Shirts', image: '/assets/clothing1.jpg' },
+    { id: 2, name: 'B8 Hoodie Black', price: 60, category: 'Hoodies', image: '/assets/clothing2.jpg' },
+    { id: 3, name: 'B8 Slim Fit Jeans', price: 80, category: 'Jeans', image: '/assets/clothing3.jpg' },
+    // Add more products as needed
+  ];
+
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
   return (
     <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
     <div className="clothing-page">
@@ -106,6 +132,43 @@ export default function B8Clothing() {
           </div>
           <img src={product.image} alt={product.name} />
           <p>{`${product.name} - $${product.price}`}</p>
+        </div>
+      </section>
+
+            {/* Product Catalog Section */}
+            <section className="clothing-catalog-section">
+        <h3>Product Catalog</h3>
+        
+        {/* Category Filter */}
+        <div className="clothing-category-filter">
+          <button 
+            className={`category-btn ${selectedCategory === 'All' ? 'active' : ''}`}
+            onClick={() => setSelectedCategory('All')}
+          >
+            All
+          </button>
+          {categories.map((category) => (
+            <button
+              key={category}
+              className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {/* Products Grid */}
+        <div className="clothing-products-grid">
+          {products
+            .filter(product => selectedCategory === 'All' || product.category === selectedCategory)
+            .map(product => (
+              <div key={product.id} className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
+                <img src={product.image} alt={product.name} />
+                <h4>{product.name}</h4>
+                <p>${product.price}</p>
+              </div>
+            ))}
         </div>
       </section>
 
@@ -261,12 +324,6 @@ export default function B8Clothing() {
           <textarea placeholder="Your Message" required></textarea>
           <button type="submit">Send Message</button>
         </form>
-
-        <div className="clothing-contact-info">
-          <p>Email: contact@b8company.com</p>
-          <p>Phone: +123 456 7890</p>
-          <p>Address: 123 B8 Street, Innovation City</p>
-        </div>
 
         <div className="clothing-social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
