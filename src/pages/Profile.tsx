@@ -130,7 +130,7 @@ export default function Profile() {
                 `${userProfile.location.city}, ${userProfile.location.country}` : 
                 'Not set'}
               </p>
-              <p><strong>Member Since:</strong> {userProfile?.dateCreated?.toDate().toLocaleDateString()}</p>
+              <p><strong>Member Since:</strong> {userProfile?.dateCreated ? new Date(userProfile.dateCreated).toLocaleDateString() : 'Not set'}</p>
             </div>
 
             <button onClick={() => setIsEditing(true)}>Edit Profile</button>

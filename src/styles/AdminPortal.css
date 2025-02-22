@@ -1,0 +1,35 @@
+.admin-portal {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+}
+
+.admin-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.admin-section {
+  background-color: #111;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.admin-section h2 {
+  margin-bottom: 1rem;
+  color: #ffd700;
+}
+
+@media (max-width: 768px) {
+  .admin-portal {
+    padding: 1rem;
+  }
+  
+  .admin-dashboard {
+    grid-template-columns: 1fr;
+  }
+} 

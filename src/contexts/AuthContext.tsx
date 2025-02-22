@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { auth, db } from '../firebase';
+import { auth, db, logAnalyticsEvent } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { UserProfile } from '../utils/userProfile';
@@ -28,6 +28,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setCurrentUser(user);
       
       if (user) {
+        // Log sign in event
+        logAnalyticsEvent('user_login', {
+          userId: user.uid,
+          method: user.providerData[0]?.providerId
+        });
+        
         // Fetch user profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
@@ -35,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else {
         setUserProfile(null);
+        // Log sign out event
+        logAnalyticsEvent('user_logout');
       }
       
       setLoading(false);

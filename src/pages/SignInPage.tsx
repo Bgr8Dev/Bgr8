@@ -9,10 +9,10 @@ import HamburgerMenu from '../components/HamburgerMenu';
 import Footer from '../components/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../styles/AuthPages.css';
-
+import { useIsMobile } from '../hooks/useIsMobile';
 export default function SignInPage() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [formData, setFormData] = useState({
+    const isMobile = useIsMobile();
+    const [formData, setFormData] = useState({
     email: '',
     password: ''
   });

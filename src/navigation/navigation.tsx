@@ -16,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
+import AdminPortal from '../pages/AdminPortal';
 
 export default function Navigation() {
   const { loading } = useAuth();
@@ -39,6 +40,7 @@ export default function Navigation() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/admin-portal" element={<AdminPortal />} />
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
     </Routes>
   );

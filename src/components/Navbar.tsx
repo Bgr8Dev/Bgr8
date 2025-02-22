@@ -3,20 +3,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/Navbar.css';
 import logo from '../assets/B8-logo-transparent.png';
 
 export default function Navbar() {
-  const [user, setUser] = useState(auth.currentUser);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { currentUser, userProfile } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -47,30 +40,33 @@ export default function Navbar() {
       </nav>
 
       <div className="auth-section">
-        {user ? (
+        {currentUser ? (
           <div className="user-menu-container">
             <div 
               className="user-menu-trigger"
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
-              {user.photoURL ? (
+              {currentUser.photoURL ? (
                 <img 
-                  src={user.photoURL} 
+                  src={currentUser.photoURL} 
                   alt="Profile" 
                   className="user-avatar"
                 />
               ) : (
                 <div className="user-avatar-placeholder">
-                  {user.displayName?.charAt(0) || user.email?.charAt(0)}
+                  {currentUser.displayName?.charAt(0) || currentUser.email?.charAt(0)}
                 </div>
               )}
-              <span>Hello, {user.displayName || 'User'}</span>
+              <span>Hello, {currentUser.displayName || 'User'}</span>
             </div>
             
             {showUserMenu && (
               <div className="user-menu">
                 <Link to="/profile">Profile</Link>
                 <Link to="/settings">Settings</Link>
+                {userProfile?.admin && (
+                  <Link to="/admin-portal" className="admin-link">Admin Portal</Link>
+                )}
                 <button onClick={handleSignOut}>Sign Out</button>
               </div>
             )}

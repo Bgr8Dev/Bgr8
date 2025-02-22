@@ -8,9 +8,10 @@ import Footer from '../components/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../styles/AuthPages.css';
 import { createUserProfile, UserProfile } from '../utils/userProfile';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function RegisterPage() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const isMobile = useIsMobile()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',

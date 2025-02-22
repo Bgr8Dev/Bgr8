@@ -289,3 +289,14 @@
     }
   }
   
+  .admin-link {
+    color: #ffd700 !important; /* Gold color to make it stand out */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .admin-link:hover {
+    background-color: rgba(255, 215, 0, 0.1) !important;
+  }
+  
