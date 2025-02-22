@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaWhatsapp } from 'react-icons/fa';
 import { FaBullhorn, FaCar, FaTshirt, FaGraduationCap, FaUsers, FaGlobe, FaHeart, FaBriefcase } from 'react-icons/fa';
 import '../styles/HomePage.css';
+import ContactForm from '../components/ContactForm';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -72,14 +73,7 @@ export default function HomePage() {
       </section>
 
       <section className="contact-section">
-        <h3>Contact Us</h3>
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" required />
-          <input type="email" placeholder="Your Email" required />
-          <textarea placeholder="Your Message" required></textarea>
-          <button type="submit">Send Message</button>
-        </form>
-
+        <ContactForm source="home" />
         <div className="social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
             <FaLinkedin />

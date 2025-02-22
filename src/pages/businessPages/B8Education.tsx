@@ -4,6 +4,7 @@ import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import '../../styles/B8Education.css';
+import ContactForm from '../../components/ContactForm';
 
 export default function B8Education() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -19,10 +20,18 @@ export default function B8Education() {
     <div className="page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-      {/* Hero Video Section */}
+      {/* Updated Hero Video Section */}
       <section className="hero-video">
-        <div className="video-placeholder">
-          <p>Hero Video Placeholder</p>
+        <div className="video-container">
+          <iframe
+            width="100%"
+            height="100%"
+            src="https://www.youtube.com/embed/SwCf8B07_s8"
+            title="B8 Education Video"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
       </section>
 
@@ -125,14 +134,7 @@ export default function B8Education() {
 
       {/* Existing Contact Section */}
       <section className="contact-section">
-        <h3>Contact Us</h3>
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" required />
-          <input type="email" placeholder="Your Email" required />
-          <textarea placeholder="Your Message" required></textarea>
-          <button type="submit">Send Message</button>
-        </form>
-
+        <ContactForm source="education" />
         <div className="social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>

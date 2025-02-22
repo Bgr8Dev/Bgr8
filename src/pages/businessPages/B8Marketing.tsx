@@ -71,10 +71,18 @@ export default function B8Marketing() {
     <div className="page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-      {/* Header Video Placeholder */}
+      {/* Updated Header Video Section */}
       <section className="header-video">
-        <div className="video-placeholder">
-          <p>Header Video Placeholder</p>
+        <div className="video-container">
+          <iframe
+            width="100%"
+            height="100%"
+            src="https://www.youtube.com/embed/uPXf6RjA5RI"
+            title="B8 Marketing Video"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
       </section>
 

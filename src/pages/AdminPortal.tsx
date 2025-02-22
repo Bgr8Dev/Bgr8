@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus } from 'react-icons/fa';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -25,6 +25,7 @@ import { AdminPortalB8FootballClub } from './adminPages/AdminPortalB8FootballClu
 import { AdminPortalB8Charity } from './adminPages/AdminPortalB8Charity';
 import { AdminPortalB8Education } from './adminPages/AdminPortalB8Education';
 import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
+import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 
 // Register ChartJS components
 ChartJS.register(
@@ -89,7 +90,8 @@ export default function AdminPortal() {
     footballClub: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     charity: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     education: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
-    careers: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
+    careers: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    bgr8: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
   });
 
   const businessSections = [
@@ -99,7 +101,8 @@ export default function AdminPortal() {
     { id: 'footballClub', name: 'B8 Football Club', icon: FaFutbol },
     { id: 'charity', name: 'B8 Charity', icon: FaHandHoldingHeart },
     { id: 'education', name: 'B8 Education', icon: FaGraduationCap },
-    { id: 'careers', name: 'B8 Careers', icon: FaBriefcase }
+    { id: 'careers', name: 'B8 Careers', icon: FaBriefcase },
+    { id: 'bgr8', name: 'BGr8', icon: FaUserPlus }
   ];
 
   useEffect(() => {
@@ -313,6 +316,8 @@ export default function AdminPortal() {
         return <AdminPortalB8Education stats={businessStats.education} />;
       case 'careers':
         return <AdminPortalB8Careers stats={businessStats.careers} />;
+      case 'bgr8':
+        return <AdminPortalBgr8 stats={businessStats.bgr8} />;
       default:
         return null;
     }

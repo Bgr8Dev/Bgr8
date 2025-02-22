@@ -386,3 +386,122 @@
   gap: 1.5rem;
   margin: 2rem 0;
 }
+
+.carclub-social-media {
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: #1a1a1a;
+}
+
+.carclub-social-media h3 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.carclub-social-media > p {
+  font-size: 1.2rem;
+  color: #888;
+  margin-bottom: 3rem;
+}
+
+.social-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.social-media-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  border-radius: 15px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-media-card:hover {
+  transform: translateY(-10px);
+}
+
+.social-media-card h4 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.social-media-card p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.social-media-card span {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.5rem;
+}
+
+.social-media-card.instagram {
+  background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+}
+
+.social-media-card.facebook {
+  background: linear-gradient(45deg, #1877F2, #166FE5);
+}
+
+.social-media-card.twitter {
+  background: linear-gradient(45deg, #1DA1F2, #19608F);
+}
+
+.social-media-card.youtube {
+  background: linear-gradient(45deg, #FF0000, #CC0000);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .carclub-social-media {
+    padding: 3rem 1rem;
+  }
+
+  .carclub-social-media h3 {
+    font-size: 2rem;
+  }
+
+  .social-media-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .social-media-card {
+    padding: 1.5rem;
+  }
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-video {
+    margin-top: 60px; /* Adjust based on your mobile header height */
+  }
+}

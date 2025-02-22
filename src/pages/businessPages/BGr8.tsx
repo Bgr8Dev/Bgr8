@@ -5,6 +5,7 @@ import Footer from '../../components/Footer';
 import { FaInstagram, FaYoutube } from 'react-icons/fa';
 import '../../styles/BGr8.css';
 import BGr8Medical from './BGr8Medical';
+import ContactForm from '../../components/ContactForm';
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -92,14 +93,7 @@ export default function BGr8() {
 
       {/* Existing Contact Section */}
       <section className="contact-section">
-        <h3>Contact Us</h3>
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" required />
-          <input type="email" placeholder="Your Email" required />
-          <textarea placeholder="Your Message" required></textarea>
-          <button type="submit">Send Message</button>
-        </form>
-
+        <ContactForm source="bgr8" />
         <div className="contact-info">
           <p>Email: contact@b8company.com</p>
           <p>Phone: +123 456 7890</p>

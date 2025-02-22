@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaFlagCheckered, FaMapMarkerAlt, FaCar, FaGlobe } from 'react-icons/fa';
+import { FaFlagCheckered, FaMapMarkerAlt, FaCar, FaGlobe, FaInstagram, FaFacebook, FaTwitter, FaYoutube } from 'react-icons/fa';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
@@ -29,10 +29,18 @@ export default function B8CarClub() {
     <div className="carclub-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-      {/* Hero Video Section */}
+      {/* Updated Hero Video Section */}
       <section className="hero-video">
-        <div className="video-placeholder">
-          <p>Hero Video Placeholder</p>
+        <div className="video-container">
+          <iframe
+            width="100%"
+            height="100%"
+            src="https://www.youtube.com/embed/SQK4uEwRfRo"
+            title="B8 Car Club Video"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
       </section>
 
@@ -118,6 +126,62 @@ export default function B8CarClub() {
           <input type="text" placeholder="Instagram Handle" required />
           <button type="submit">Sign Up Now</button>
         </form>
+      </section>
+
+      {/* Social Media Section */}
+      <section className="carclub-social-media">
+        <h3>Follow Our Journey</h3>
+        <p>Stay connected with B8 Car Club across our social media platforms</p>
+        
+        <div className="social-media-grid">
+          <a 
+            href="https://instagram.com/b8carclub" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="social-media-card instagram"
+          >
+            <FaInstagram size={40} />
+            <h4>Instagram</h4>
+            <p>@b8carclub</p>
+            <span>Daily updates & exclusive content</span>
+          </a>
+
+          <a 
+            href="https://facebook.com/b8carclub" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="social-media-card facebook"
+          >
+            <FaFacebook size={40} />
+            <h4>Facebook</h4>
+            <p>B8 Car Club Official</p>
+            <span>Events & community updates</span>
+          </a>
+
+          <a 
+            href="https://twitter.com/b8carclub" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="social-media-card twitter"
+          >
+            <FaTwitter size={40} />
+            <h4>Twitter</h4>
+            <p>@b8carclub</p>
+            <span>Latest news & announcements</span>
+          </a>
+
+          <a 
+            href="https://www.youtube.com/@B8Cars" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="social-media-card youtube"
+          >
+            <FaYoutube size={40} />
+            <h4>YouTube</h4>
+            <p>B8 Car Club TV</p>
+            <span>Event highlights & features</span>
+          </a>
+        </div>
       </section>
 
       <Footer />
