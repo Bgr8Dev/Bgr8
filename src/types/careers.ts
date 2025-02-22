@@ -1,4 +1,5 @@
 export interface CvFormData {
+  filePath: string | undefined;
   id: string;
   name: string;
   email: string;
