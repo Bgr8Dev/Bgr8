@@ -96,7 +96,7 @@ export function AdminPortalB8Careers({ stats }: AdminPortalB8CareersProps) {
                     </a>
                   </p>
                 )}
-                <p><strong>Submitted:</strong> {cv.dateSubmitted.toDate().toLocaleDateString()}</p>
+                <p><strong>Submitted:</strong> {cv.dateSubmitted instanceof Date ? cv.dateSubmitted.toLocaleDateString() : new Date(cv.dateSubmitted).toLocaleDateString()}</p>
               </div>
 
               <div className="cv-admin-actions">
