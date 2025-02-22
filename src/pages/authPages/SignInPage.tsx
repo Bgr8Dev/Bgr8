@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth, db } from '../firebase';
+import { auth, db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { createUserProfile } from '../utils/userProfile';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import { createUserProfile } from '../../utils/userProfile';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
 import { FcGoogle } from 'react-icons/fc';
-import '../styles/AuthPages.css';
-import { useIsMobile } from '../hooks/useIsMobile';
+import '../../styles/AuthPages.css';
+import { useIsMobile } from '../../hooks/useIsMobile';
 export default function SignInPage() {
     const isMobile = useIsMobile();
     const [formData, setFormData] = useState({

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
 import { FaInstagram, FaYoutube } from 'react-icons/fa';
-import '../styles/BGr8.css';
+import '../../styles/BGr8.css';
 import BGr8Medical from './BGr8Medical';
 
 export default function BGr8() {

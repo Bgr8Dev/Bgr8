@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import GooglePayButton from '@google-pay/button-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaCreditCard, FaPaypal, FaGooglePay, FaApplePay } from 'react-icons/fa';
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
-import { ClothingItem, ClothingCategory } from '../types/clothing';
-import '../styles/B8Clothing.css';
+import { db } from '../../firebase';
+import { ClothingItem, ClothingCategory } from '../../types/clothing';
+import '../../styles/B8Clothing.css';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

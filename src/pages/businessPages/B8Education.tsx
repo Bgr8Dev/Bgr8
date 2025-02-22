@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
-import '../styles/B8Education.css';
+import '../../styles/B8Education.css';
 
 export default function B8Education() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

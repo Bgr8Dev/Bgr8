@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { FaFlagCheckered, FaMapMarkerAlt, FaCar, FaGlobe } from 'react-icons/fa';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
-import '../styles/B8CarClub.css';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
+import '../../styles/B8CarClub.css';
 
 export default function B8CarClub() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

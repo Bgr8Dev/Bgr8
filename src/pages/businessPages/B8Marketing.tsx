@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
 import { FaChartLine, FaBullhorn, FaCogs } from 'react-icons/fa';
-import '../styles/B8Marketing.css';
+import '../../styles/B8Marketing.css';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

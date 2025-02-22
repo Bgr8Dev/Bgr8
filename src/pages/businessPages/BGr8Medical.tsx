@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/BGr8Medical.css';
+import '../../styles/BGr8Medical.css';
 
 export default function BGr8Medical({ onClose }: { onClose: () => void }) {
   const handleSubmit = (e: React.FormEvent) => {

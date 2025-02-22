@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../firebase';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import { auth } from '../../firebase';
+import Navbar from '../../components/Navbar';
+import HamburgerMenu from '../../components/HamburgerMenu';
+import Footer from '../../components/Footer';
 import { FcGoogle } from 'react-icons/fc';
-import '../styles/AuthPages.css';
-import { createUserProfile, UserProfile } from '../utils/userProfile';
-import { useIsMobile } from '../hooks/useIsMobile';
+import '../../styles/AuthPages.css';
+import { createUserProfile, UserProfile } from '../../utils/userProfile';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 export default function RegisterPage() {
     const isMobile = useIsMobile()

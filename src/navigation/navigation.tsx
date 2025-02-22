@@ -1,21 +1,21 @@
 // src/Navigation.tsx
 import { Routes, Route } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
-import B8Marketing from '../pages/B8Marketing';
-import BGr8 from '../pages/BGr8';
-import B8CarClub from '../pages/B8CarClub';
-import B8Clothing from '../pages/B8Clothing';
-import B8FootballClub from '../pages/B8FootballClub';
-import B8Charity from '../pages/B8Charity';
-import B8Education from '../pages/B8Education';
-import B8Careers from '../pages/B8Careers';
+import B8Marketing from '../pages/businessPages/B8Marketing';
+import BGr8 from '../pages/businessPages/BGr8';
+import B8CarClub from '../pages/businessPages/B8CarClub';
+import B8Clothing from '../pages/businessPages/B8Clothing';
+import B8FootballClub from '../pages/businessPages/B8FootballClub';
+import B8Charity from '../pages/businessPages/B8Charity';
+import B8Education from '../pages/businessPages/B8Education';
+import B8Careers from '../pages/businessPages/B8Careers';
 import NotFound from '../pages/NotFound';
-import SignInPage from '../pages/SignInPage';
-import RegisterPage from '../pages/RegisterPage';
+import SignInPage from '../pages/authPages/SignInPage';
+import RegisterPage from '../pages/authPages/RegisterPage';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import Profile from '../pages/Profile';
-import Settings from '../pages/Settings';
+import Profile from '../pages/utilPages/Profile';
+import Settings from '../pages/utilPages/Settings';
 import AdminPortal from '../pages/AdminPortal';
 import ProtectedRoute from '../components/ProtectedRoute';
 export default function Navigation() {

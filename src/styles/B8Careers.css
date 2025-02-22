@@ -155,3 +155,239 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
   }
   
+  .success-message {
+    background-color: #4CAF50;
+    color: white;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .error-message {
+    background-color: #f44336;
+    color: white;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .file-input-label {
+    display: block;
+    margin-bottom: 1rem;
+    cursor: pointer;
+  }
+  
+  .file-input-label input[type="file"] {
+    margin-top: 0.5rem;
+  }
+  
+  button.submitting {
+    background-color: #666;
+    cursor: not-allowed;
+  }
+  
+  .cv-management-section {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .cv-details {
+    background-color: #222;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  
+  .cv-details p {
+    margin: 0.5rem 0;
+    color: #fff;
+  }
+  
+  .cv-details a {
+    color: #4CAF50;
+    text-decoration: none;
+  }
+  
+  .cv-details a:hover {
+    text-decoration: underline;
+  }
+  
+  .status-pending {
+    color: #FFA726;
+  }
+  
+  .status-reviewed {
+    color: #29B6F6;
+  }
+  
+  .status-contacted {
+    color: #4CAF50;
+  }
+  
+  .status-rejected {
+    color: #EF5350;
+  }
+  
+  .cv-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .view-cv-button,
+  .edit-cv-button,
+  .delete-cv-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .view-cv-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .edit-cv-button {
+    background-color: #2196F3;
+    color: white;
+  }
+  
+  .delete-cv-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .view-cv-button:hover,
+  .edit-cv-button:hover,
+  .delete-cv-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+  
+  .cv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .cv-card {
+    background-color: #222;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  
+  .cv-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cv-card-header {
+    background-color: #1a1a1a;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cv-card-header h4 {
+    margin: 0;
+    color: white;
+  }
+  
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.875rem;
+    font-weight: bold;
+  }
+  
+  .status-pending {
+    background-color: #FFA726;
+    color: #000;
+  }
+  
+  .status-reviewed {
+    background-color: #29B6F6;
+    color: #000;
+  }
+  
+  .status-contacted {
+    background-color: #4CAF50;
+    color: #000;
+  }
+  
+  .status-rejected {
+    background-color: #EF5350;
+    color: #fff;
+  }
+  
+  .cv-card-content {
+    padding: 1rem;
+  }
+  
+  .cv-card-content p {
+    margin: 0.5rem 0;
+    color: #fff;
+  }
+  
+  .cv-card-content a {
+    color: #4CAF50;
+    text-decoration: none;
+  }
+  
+  .cv-card-content a:hover {
+    text-decoration: underline;
+  }
+  
+  .cv-card-actions {
+    padding: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    background-color: #1a1a1a;
+  }
+  
+  .add-cv-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  
+  .add-cv-button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 768px) {
+    .cv-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .cv-card-actions {
+      flex-direction: column;
+    }
+    
+    .cv-card-actions button,
+    .cv-card-actions a {
+      width: 100%;
+    }
+  }
+  
