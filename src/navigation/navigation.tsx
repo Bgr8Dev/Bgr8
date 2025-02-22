@@ -14,6 +14,8 @@ import SignInPage from '../pages/SignInPage';
 import RegisterPage from '../pages/RegisterPage';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Profile from '../pages/Profile';
+import Settings from '../pages/Settings';
 
 export default function Navigation() {
   const { loading } = useAuth();
@@ -35,6 +37,8 @@ export default function Navigation() {
       <Route path="/b8-careers" element={<B8Careers />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
     </Routes>
   );
