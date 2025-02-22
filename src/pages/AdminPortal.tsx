@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import '../styles/AdminPortal.css';
 
 interface UserData extends Record<string, any> {
@@ -20,7 +20,7 @@ export default function AdminPortal() {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('users');
   const [searchTerm, setSearchTerm] = useState('');
   const [userStats, setUserStats] = useState({
@@ -96,6 +96,12 @@ export default function AdminPortal() {
   return (
     <div className="admin-portal">
       <div className="admin-sidebar">
+        <button 
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          <FaArrowLeft /> Back
+        </button>
         <button 
           className={`sidebar-button ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
