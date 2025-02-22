@@ -1,8 +1,8 @@
 // src/components/Navbar.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { auth } from '../firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/Navbar.css';
 import logo from '../assets/B8-logo-transparent.png';
