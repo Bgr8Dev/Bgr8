@@ -17,7 +17,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
 import AdminPortal from '../pages/AdminPortal';
-
+import ProtectedRoute from '../components/ProtectedRoute';
 export default function Navigation() {
   const { loading } = useAuth();
 
@@ -38,9 +38,30 @@ export default function Navigation() {
       <Route path="/b8-careers" element={<B8Careers />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/admin-portal" element={<AdminPortal />} />
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin-portal" 
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminPortal />
+          </ProtectedRoute>
+        } 
+      />
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
     </Routes>
   );

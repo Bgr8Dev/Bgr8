@@ -2,9 +2,33 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, updateDoc, doc, orderBy, where, Timestamp } from 'firebase/firestore';
 import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft } from 'react-icons/fa';
+import { Line, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
 import '../styles/AdminPortal.css';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface UserData extends Record<string, any> {
   uid: string;
@@ -14,6 +38,17 @@ interface UserData extends Record<string, any> {
   admin: boolean;
   dateCreated: any;
   lastLogin?: Date;
+}
+
+interface AnalyticsData {
+  userGrowth: {
+    labels: string[];
+    data: number[];
+  };
+  activeUsers: {
+    labels: string[];
+    data: number[];
+  };
 }
 
 export default function AdminPortal() {
@@ -28,6 +63,10 @@ export default function AdminPortal() {
     admins: 0,
     newThisMonth: 0
   });
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    userGrowth: { labels: [], data: [] },
+    activeUsers: { labels: [], data: [] }
+  });
 
   useEffect(() => {
     if (!userProfile?.admin) {
@@ -36,6 +75,7 @@ export default function AdminPortal() {
     }
 
     fetchUsers();
+    calculateAnalytics();
   }, [userProfile, navigate]);
 
   const fetchUsers = async () => {
@@ -68,6 +108,112 @@ export default function AdminPortal() {
     } catch (error) {
       console.error('Error fetching users:', error);
       setLoading(false);
+    }
+  };
+
+  const calculateAnalytics = async () => {
+    try {
+      // Get all users ordered by creation date
+      const usersRef = collection(db, 'users');
+      const usersSnapshot = await getDocs(query(usersRef, orderBy('dateCreated', 'asc')));
+      
+      // Calculate user growth over time
+      const userGrowthData: { [key: string]: number } = {};
+      const activeUsersData: { [key: string]: number } = {};
+      
+      // Get last 6 months
+      const months = Array.from({length: 6}, (_, i) => {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        return date.toLocaleString('default', { month: 'short', year: '2-digit' });
+      }).reverse();
+      
+      // Initialize data objects with 0s
+      months.forEach(month => {
+        userGrowthData[month] = 0;
+        activeUsersData[month] = 0;
+      });
+
+      // Calculate user growth
+      usersSnapshot.forEach(doc => {
+        const userData = doc.data();
+        const creationDate = userData.dateCreated?.toDate();
+        const month = creationDate.toLocaleString('default', { month: 'short', year: '2-digit' });
+        
+        if (userGrowthData[month] !== undefined) {
+          userGrowthData[month]++;
+        }
+
+        // Calculate active users (users who logged in during each month)
+        const lastLogin = userData.lastLogin?.toDate();
+        if (lastLogin) {
+          const loginMonth = lastLogin.toLocaleString('default', { month: 'short', year: '2-digit' });
+          if (activeUsersData[loginMonth] !== undefined) {
+            activeUsersData[loginMonth]++;
+          }
+        }
+      });
+
+      setAnalyticsData({
+        userGrowth: {
+          labels: months,
+          data: months.map(month => userGrowthData[month])
+        },
+        activeUsers: {
+          labels: months,
+          data: months.map(month => activeUsersData[month])
+        }
+      });
+    } catch (error) {
+      console.error('Error calculating analytics:', error);
+    }
+  };
+
+  const userGrowthOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'New Users per Month',
+        color: 'white'
+      }
+    },
+    scales: {
+      y: {
+        ticks: { color: 'white' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+      },
+      x: {
+        ticks: { color: 'white' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+      }
+    }
+  };
+
+  const activeUsersOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'Active Users per Month',
+        color: 'white'
+      }
+    },
+    scales: {
+      y: {
+        ticks: { color: 'white' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+      },
+      x: {
+        ticks: { color: 'white' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+      }
     }
   };
 
@@ -198,11 +344,39 @@ export default function AdminPortal() {
             <div className="analytics-cards">
               <div className="analytics-card">
                 <h3>User Growth</h3>
-                {/* Add chart component here */}
+                <Line
+                  data={{
+                    labels: analyticsData.userGrowth.labels,
+                    datasets: [
+                      {
+                        label: 'New Users',
+                        data: analyticsData.userGrowth.data,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.5)',
+                        tension: 0.4
+                      }
+                    ]
+                  }}
+                  options={userGrowthOptions}
+                />
               </div>
               <div className="analytics-card">
                 <h3>Active Users</h3>
-                {/* Add chart component here */}
+                <Bar
+                  data={{
+                    labels: analyticsData.activeUsers.labels,
+                    datasets: [
+                      {
+                        label: 'Active Users',
+                        data: analyticsData.activeUsers.data,
+                        backgroundColor: 'rgba(33, 150, 243, 0.5)',
+                        borderColor: '#2196F3',
+                        borderWidth: 1
+                      }
+                    ]
+                  }}
+                  options={activeUsersOptions}
+                />
               </div>
             </div>
           </div>
