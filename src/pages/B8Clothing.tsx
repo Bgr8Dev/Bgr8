@@ -6,6 +6,9 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import GooglePayButton from '@google-pay/button-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaCreditCard, FaPaypal, FaGooglePay, FaApplePay } from 'react-icons/fa';
+import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+import { db } from '../firebase';
+import { ClothingItem, ClothingCategory } from '../types/clothing';
 import '../styles/B8Clothing.css';
 
 export default function B8Clothing() {
@@ -13,6 +16,12 @@ export default function B8Clothing() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || '';
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLISHABLE_KEY);
+  const [items, setItems] = useState<ClothingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [selectedSize, setSelectedSize] = useState<string>('all');
 
   const handleStripeCheckout = async () => {
     const stripe = await stripePromise;
@@ -51,6 +60,29 @@ export default function B8Clothing() {
       return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    useEffect(() => {
+      fetchClothingItems();
+    }, []);
+
+    const fetchClothingItems = async () => {
+      try {
+        const itemsRef = collection(db, 'B8Clothing');
+        const q = query(itemsRef, orderBy('dateAdded', 'desc'));
+        const snapshot = await getDocs(q);
+        const clothingItems: ClothingItem[] = [];
+        
+        snapshot.forEach(doc => {
+          clothingItems.push({ id: doc.id, ...doc.data() } as ClothingItem);
+        });
+        
+        setItems(clothingItems);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching clothing items:', error);
+        setLoading(false);
+      }
+    };
+
     const product = {
       name: 'B8 Exclusive T-Shirt',
       description: 'High-quality, stylish t-shirt featuring the exclusive B8 logo.',
@@ -58,32 +90,35 @@ export default function B8Clothing() {
       image: '/assets/clothing1.jpg',
     };
   
-  const categories = [
-    'T-Shirts',
-    'Hoodies',
-    'Sweatshirts',
-    'Jeans',
-    'Joggers',
-    'Shorts',
-    'Jackets',
-    'Caps',
-    'Accessories',
-    'Socks',
-    'Underwear',
-    'Dresses',
-    'Skirts',
-    'Polo Shirts',
-    'Tank Tops'
-  ];
+  const categories: ClothingCategory[] = ['tops', 'bottoms', 'outerwear', 'accessories', 'footwear'];
 
-  const products = [
-    { id: 1, name: 'Classic B8 T-Shirt', price: 30, category: 'T-Shirts', image: '/assets/clothing1.jpg' },
-    { id: 2, name: 'B8 Hoodie Black', price: 60, category: 'Hoodies', image: '/assets/clothing2.jpg' },
-    { id: 3, name: 'B8 Slim Fit Jeans', price: 80, category: 'Jeans', image: '/assets/clothing3.jpg' },
-    // Add more products as needed
-  ];
+  const filteredItems = items.filter(item => {
+    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
+    const matchesSize = selectedSize === 'all' || item.sizes.includes(selectedSize);
+    return matchesCategory && matchesPrice && matchesSize && item.inStock;
+  });
 
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'newest':
+        return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+      default:
+        return 0;
+    }
+  });
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
@@ -135,15 +170,15 @@ export default function B8Clothing() {
         </div>
       </section>
 
-            {/* Product Catalog Section */}
-            <section className="clothing-catalog-section">
+      {/* Product Catalog Section */}
+      <section className="clothing-catalog-section">
         <h3>Product Catalog</h3>
         
         {/* Category Filter */}
         <div className="clothing-category-filter">
           <button 
-            className={`category-btn ${selectedCategory === 'All' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('All')}
+            className={`category-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+            onClick={() => setSelectedCategory('all')}
           >
             All
           </button>
@@ -153,22 +188,62 @@ export default function B8Clothing() {
               className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
               onClick={() => setSelectedCategory(category)}
             >
-              {category}
+              {category.charAt(0).toUpperCase() + category.slice(1)}
             </button>
           ))}
         </div>
 
+        {/* Sorting Filter */}
+        <div className="clothing-sort-filter">
+          <label>Sort By:</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="newest">Newest</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+        </div>
+
+        {/* Size Filter */}
+        <div className="clothing-size-filter">
+          <label>Size:</label>
+          <select
+            value={selectedSize}
+            onChange={(e) => setSelectedSize(e.target.value)}
+          >
+            <option value="all">All Sizes</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
+        </div>
+
+        {/* Price Range Filter */}
+        <div className="clothing-price-filter">
+          <label>Price Range: £{priceRange[0]} - £{priceRange[1]}</label>
+          <input
+            type="range"
+            min="0"
+            max="1000"
+            value={priceRange[1]}
+            onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+          />
+        </div>
+
         {/* Products Grid */}
         <div className="clothing-products-grid">
-          {products
-            .filter(product => selectedCategory === 'All' || product.category === selectedCategory)
-            .map(product => (
-              <div key={product.id} className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
-                <img src={product.image} alt={product.name} />
-                <h4>{product.name}</h4>
-                <p>${product.price}</p>
-              </div>
-            ))}
+          {sortedItems.map(item => (
+            <div key={item.id} className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
+              <img src={item.images[0]} alt={item.name} />
+              <h4>{item.name}</h4>
+              <p>${item.price.toFixed(2)}</p>
+            </div>
+          ))}
         </div>
       </section>
 

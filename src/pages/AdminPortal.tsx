@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy, where, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft } from 'react-icons/fa';
+import { collection, query, getDocs, updateDoc, doc, orderBy } from 'firebase/firestore';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase } from 'react-icons/fa';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -17,6 +17,14 @@ import {
   Legend
 } from 'chart.js';
 import '../styles/AdminPortal.css';
+
+import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
+import { AdminPortalB8CarClub } from './adminPages/AdminPortalB8CarClub';
+import { AdminPortalB8Clothing } from './adminPages/AdminPortalB8Clothing';
+import { AdminPortalB8FootballClub } from './adminPages/AdminPortalB8FootballClub';
+import { AdminPortalB8Charity } from './adminPages/AdminPortalB8Charity';
+import { AdminPortalB8Education } from './adminPages/AdminPortalB8Education';
+import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
 
 // Register ChartJS components
 ChartJS.register(
@@ -51,12 +59,19 @@ interface AnalyticsData {
   };
 }
 
+interface BusinessStats {
+  totalMembers: number;
+  activeMembers: number;
+  revenue: number;
+  engagement: number;
+}
+
 export default function AdminPortal() {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeSection, setActiveSection] = useState('users');
   const [searchTerm, setSearchTerm] = useState('');
   const [userStats, setUserStats] = useState({
     total: 0,
@@ -67,6 +82,25 @@ export default function AdminPortal() {
     userGrowth: { labels: [], data: [] },
     activeUsers: { labels: [], data: [] }
   });
+  const [businessStats, setBusinessStats] = useState<Record<string, BusinessStats>>({
+    marketing: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    carClub: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    clothing: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    footballClub: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    charity: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    education: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    careers: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
+  });
+
+  const businessSections = [
+    { id: 'marketing', name: 'B8 Marketing', icon: FaBullhorn },
+    { id: 'carClub', name: 'B8 Car Club', icon: FaCar },
+    { id: 'clothing', name: 'B8 Clothing', icon: FaTshirt },
+    { id: 'footballClub', name: 'B8 Football Club', icon: FaFutbol },
+    { id: 'charity', name: 'B8 Charity', icon: FaHandHoldingHeart },
+    { id: 'education', name: 'B8 Education', icon: FaGraduationCap },
+    { id: 'careers', name: 'B8 Careers', icon: FaBriefcase }
+  ];
 
   useEffect(() => {
     if (!userProfile?.admin) {
@@ -76,6 +110,7 @@ export default function AdminPortal() {
 
     fetchUsers();
     calculateAnalytics();
+    fetchBusinessStats();
   }, [userProfile, navigate]);
 
   const fetchUsers = async () => {
@@ -169,6 +204,33 @@ export default function AdminPortal() {
     }
   };
 
+  const fetchBusinessStats = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersRef);
+      
+      const stats = { ...businessStats };
+      
+      usersSnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const memberships = userData.b8Memberships || {};
+        
+        Object.keys(memberships).forEach((business) => {
+          if (memberships[business]) {
+            stats[business].totalMembers++;
+            if (userData.lastLogin?.toDate() > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+              stats[business].activeMembers++;
+            }
+          }
+        });
+      });
+      
+      setBusinessStats(stats);
+    } catch (error) {
+      console.error('Error fetching business stats:', error);
+    }
+  };
+
   const userGrowthOptions = {
     responsive: true,
     plugins: {
@@ -235,6 +297,27 @@ export default function AdminPortal() {
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const renderBusinessComponent = (section: { id: string; name: string }) => {
+    switch (section.id) {
+      case 'marketing':
+        return <AdminPortalB8Marketing stats={businessStats.marketing} />;
+      case 'carClub':
+        return <AdminPortalB8CarClub stats={businessStats.carClub} />;
+      case 'clothing':
+        return <AdminPortalB8Clothing />;
+      case 'footballClub':
+        return <AdminPortalB8FootballClub stats={businessStats.footballClub} />;
+      case 'charity':
+        return <AdminPortalB8Charity stats={businessStats.charity} />;
+      case 'education':
+        return <AdminPortalB8Education stats={businessStats.education} />;
+      case 'careers':
+        return <AdminPortalB8Careers stats={businessStats.careers} />;
+      default:
+        return null;
+    }
+  };
+
   if (!userProfile?.admin) {
     return null;
   }
@@ -248,30 +331,47 @@ export default function AdminPortal() {
         >
           <FaArrowLeft /> Back
         </button>
-        <button 
-          className={`sidebar-button ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          <FaUsers /> Users
-        </button>
-        <button 
-          className={`sidebar-button ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          <FaChartBar /> Analytics
-        </button>
-        <button 
-          className={`sidebar-button ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('settings')}
-        >
-          <FaCog /> Settings
-        </button>
+        
+        <div className="sidebar-section">
+          <h3>General</h3>
+          <button 
+            className={`sidebar-button ${activeSection === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveSection('users')}
+          >
+            <FaUsers /> Users
+          </button>
+          <button 
+            className={`sidebar-button ${activeSection === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActiveSection('analytics')}
+          >
+            <FaChartBar /> Analytics
+          </button>
+          <button 
+            className={`sidebar-button ${activeSection === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveSection('settings')}
+          >
+            <FaCog /> Settings
+          </button>
+        </div>
+
+        <div className="sidebar-section">
+          <h3>Businesses</h3>
+          {businessSections.map(section => (
+            <button
+              key={section.id}
+              className={`sidebar-button ${activeSection === section.id ? 'active' : ''}`}
+              onClick={() => setActiveSection(section.id)}
+            >
+              <section.icon /> {section.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="admin-content">
         <h1>Admin Portal</h1>
 
-        {activeTab === 'users' && (
+        {activeSection === 'users' && (
           <div className="admin-section">
             <div className="admin-header">
               <h2>User Management</h2>
@@ -338,7 +438,7 @@ export default function AdminPortal() {
           </div>
         )}
 
-        {activeTab === 'analytics' && (
+        {activeSection === 'analytics' && (
           <div className="admin-section">
             <h2>Analytics</h2>
             <div className="analytics-cards">
@@ -382,12 +482,20 @@ export default function AdminPortal() {
           </div>
         )}
 
-        {activeTab === 'settings' && (
+        {activeSection === 'settings' && (
           <div className="admin-section">
             <h2>Admin Settings</h2>
             {/* Add admin settings here */}
           </div>
         )}
+
+        {businessSections.map(section => (
+          activeSection === section.id && (
+            <div key={section.id}>
+              {renderBusinessComponent(section)}
+            </div>
+          )
+        ))}
       </div>
     </div>
   );

@@ -1,0 +1,120 @@
+.clothing-management {
+  padding: 1rem;
+}
+
+.clothing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.add-item-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #4CAF50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-item-button:hover {
+  background-color: #45a049;
+}
+
+.clothing-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.clothing-item-card {
+  background-color: #222;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.clothing-item-card:hover {
+  transform: translateY(-5px);
+}
+
+.clothing-item-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.clothing-item-card h4 {
+  padding: 1rem;
+  margin: 0;
+  color: white;
+}
+
+.clothing-item-card p {
+  padding: 0 1rem;
+  margin: 0.5rem 0;
+  color: #888;
+}
+
+.stock-status {
+  font-weight: bold;
+}
+
+.in-stock {
+  color: #4CAF50 !important;
+}
+
+.out-of-stock {
+  color: #f44336 !important;
+}
+
+.item-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.item-actions button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.item-actions button:first-child {
+  background-color: #2196F3;
+  color: white;
+}
+
+.item-actions button:first-child:hover {
+  background-color: #1976D2;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
+}
+
+@media (max-width: 768px) {
+  .clothing-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .clothing-item-card img {
+    height: 150px;
+  }
+
+  .item-actions {
+    flex-direction: column;
+  }
+} 
