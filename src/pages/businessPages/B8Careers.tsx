@@ -24,6 +24,7 @@ export default function B8Careers() {
     industry: '',
     professionalWeb: '',
     otherLinks: '',
+    filePath: '',
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const { userProfile } = useAuth();
@@ -65,6 +66,7 @@ export default function B8Careers() {
             industry: cvDoc.data().industry,
             professionalWeb: cvDoc.data().professionalWeb,
             otherLinks: cvDoc.data().otherLinks,
+            filePath: cvDoc.data().filePath,
           });
         }
       }
@@ -124,6 +126,7 @@ export default function B8Careers() {
         industry: '',
         professionalWeb: '',
         otherLinks: '',
+        filePath: '',
       });
       setCvFile(null);
       setSubmitSuccess(true);
@@ -223,10 +226,9 @@ export default function B8Careers() {
       industry: '',
       professionalWeb: '',
       otherLinks: '',
+      filePath: '',
     });
     setCvFile(null);
-    
-    // Reset success message after 5 seconds
     setTimeout(() => setSubmitSuccess(false), 5000);
   };
 
@@ -291,7 +293,7 @@ export default function B8Careers() {
                     </a>
                   </p>
                 )}
-                <p><strong>Submitted:</strong> {cv.dateSubmitted.toDate().toLocaleDateString()}</p>
+                <p><strong>Submitted:</strong> {new Date(cv.dateSubmitted).toLocaleDateString()}</p>
               </div>
 
               <div className="cv-card-actions">

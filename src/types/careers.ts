@@ -1,5 +1,4 @@
 export interface CvFormData {
-  filePath: string | undefined;
   id: string;
   name: string;
   email: string;
@@ -9,6 +8,10 @@ export interface CvFormData {
   professionalWeb: string;
   otherLinks: string;
   cvUrl: string;
+  filePath: string;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
   dateSubmitted: Date;
   status: 'pending' | 'reviewed' | 'contacted' | 'rejected';
-} 
+}
