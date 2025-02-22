@@ -33,7 +33,7 @@ export function AdminPortalBgr8({ stats }: AdminPortalBgr8Props) {
 
   const fetchMedicalRegistrations = async () => {
     try {
-      const registrationsQuery = query(collection(db, 'medicalRegistrations'));
+      const registrationsQuery = query(collection(db, 'Bgr8Medical'));
       const querySnapshot = await getDocs(registrationsQuery);
       const registrations: MedicalRegistration[] = [];
       

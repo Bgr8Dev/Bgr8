@@ -64,13 +64,6 @@
   text-decoration: underline;
 }
 
-.cv-admin-actions {
-  padding: 1rem;
-  background-color: #1a1a1a;
-  display: flex;
-  justify-content: center;
-}
-
 .loading {
   text-align: center;
   padding: 2rem;
