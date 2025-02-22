@@ -3,18 +3,6 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import '../../styles/BGr8Medical.css';
 
-interface MedicalRegistration {
-  fullName: string;
-  email: string;
-  phone: string;
-  profession: string;
-  licenseNumber?: string;
-  affiliation?: string;
-  reason: string;
-  status: 'pending' | 'approved' | 'rejected';
-  dateSubmitted: Date;
-}
-
 export default function BGr8Medical({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({
     fullName: '',
