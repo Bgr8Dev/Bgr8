@@ -5,7 +5,7 @@ interface BusinessSectionProps {
   businessName: string;
 }
 
-export function BusinessSection({ stats, businessName }: BusinessSectionProps) {
+export function BusinessSection({ stats}: BusinessSectionProps) {
   return (
     <div className="business-section">
       <div className="business-stats-grid">
