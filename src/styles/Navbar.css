@@ -140,5 +140,152 @@
     .hamburger-menu {
       display: block;
     }
+    .auth-buttons {
+      display: none; /* Hide in mobile view, will be shown in hamburger menu */
+    }
+    
+    .mobile-nav {
+      /* ... existing styles ... */
+    }
+    
+    /* Add auth buttons to mobile menu */
+    .mobile-nav .auth-buttons {
+      display: flex;
+      flex-direction: column;
+      margin: 1rem 0;
+      width: 100%;
+    }
+    
+    .mobile-nav .auth-button {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  
+  .auth-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-left: 2rem;
+  }
+  
+  .auth-button {
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+  
+  .auth-button.signin {
+    color: white;
+    border: 1px solid white;
+  }
+  
+  .auth-button.signin:hover {
+    background-color: white;
+    color: black;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  }
+  
+  .auth-button.register {
+    background-color: white;
+    color: black;
+  }
+  
+  .auth-button.register:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  }
+  
+  .auth-section {
+    display: flex;
+    align-items: center;
+    margin-left: 2rem;
+  }
+  
+  .user-menu-container {
+    position: relative;
+  }
+  
+  .user-menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .user-menu-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .user-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #444;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background-color: #222;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    min-width: 150px;
+    z-index: 1000;
+  }
+  
+  .user-menu a,
+  .user-menu button {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    color: white;
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .user-menu a:hover,
+  .user-menu button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .user-menu button {
+    color: #ff4444;
+  }
+  
+  @media (max-width: 768px) {
+    .auth-section {
+      margin-left: 1rem;
+    }
+    
+    .user-menu-trigger span {
+      display: none;
+    }
   }
   

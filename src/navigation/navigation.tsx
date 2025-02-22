@@ -10,8 +10,18 @@ import B8Charity from '../pages/B8Charity';
 import B8Education from '../pages/B8Education';
 import B8Careers from '../pages/B8Careers';
 import NotFound from '../pages/NotFound';
+import SignInPage from '../pages/SignInPage';
+import RegisterPage from '../pages/RegisterPage';
+import { useAuth } from '../contexts/AuthContext';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Navigation() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -23,6 +33,8 @@ export default function Navigation() {
       <Route path="/b8-charity" element={<B8Charity />} />
       <Route path="/b8-education" element={<B8Education />} />
       <Route path="/b8-careers" element={<B8Careers />} />
+      <Route path="/signin" element={<SignInPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
     </Routes>
   );

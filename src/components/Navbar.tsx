@@ -1,9 +1,31 @@
 // src/components/Navbar.tsx
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { auth } from '../firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import '../styles/Navbar.css';
 import logo from '../assets/B8-logo-transparent.png';
 
 export default function Navbar() {
+  const [user, setUser] = useState(auth.currentUser);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   return (
     <header className="header">
       <h1 className="logo">
@@ -23,6 +45,43 @@ export default function Navbar() {
         <Link to="/b8-education">B8 Education</Link>
         <Link to="/b8-careers">B8 Careers</Link>
       </nav>
+
+      <div className="auth-section">
+        {user ? (
+          <div className="user-menu-container">
+            <div 
+              className="user-menu-trigger"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
+              {user.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt="Profile" 
+                  className="user-avatar"
+                />
+              ) : (
+                <div className="user-avatar-placeholder">
+                  {user.displayName?.charAt(0) || user.email?.charAt(0)}
+                </div>
+              )}
+              <span>Hello, {user.displayName || 'User'}</span>
+            </div>
+            
+            {showUserMenu && (
+              <div className="user-menu">
+                <Link to="/profile">Profile</Link>
+                <Link to="/settings">Settings</Link>
+                <button onClick={handleSignOut}>Sign Out</button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="auth-buttons">
+            <Link to="/signin" className="auth-button signin">Sign In</Link>
+            <Link to="/register" className="auth-button register">Register</Link>
+          </div>
+        )}
+      </div>
     </header>
   );
 }
