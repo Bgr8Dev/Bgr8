@@ -132,7 +132,7 @@ export default function B8Marketing() {
         <h2>Our Marketing Solutions</h2>
         <div className="services-container">
           {marketingServices.map((service, index) => (
-            <div className="service-card" key={index}>
+            <div className="marketing-service-card" key={index}>
               <div className="service-icon">{service.icon}</div>
               <h3>{service.category}</h3>
               <h4>{service.title}</h4>

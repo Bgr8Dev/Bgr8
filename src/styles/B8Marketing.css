@@ -192,7 +192,7 @@
   margin: 0 auto;
 }
 
-.service-card {
+.marketing-service-card {
   background: linear-gradient(145deg, #222, #333);
   padding: 2rem;
   border-radius: 15px;
@@ -203,7 +203,7 @@
   text-align: center;
 }
 
-.service-card:hover {
+.marketing-service-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
 }
@@ -216,7 +216,7 @@
   transition: all 0.3s ease;
 }
 
-.service-card:hover .service-icon {
+.marketing-service-card:hover .service-icon {
   background: white;
   color: black;
   transform: scale(1.1);
@@ -286,7 +286,7 @@
     grid-template-columns: 1fr;
   }
   
-  .service-card {
+  .marketing-service-card {
     margin: 1rem;
   }
 }
