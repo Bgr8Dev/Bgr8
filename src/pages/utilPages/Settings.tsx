@@ -6,31 +6,59 @@ import { db } from '../../firebase';
 import { FaTimes } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 
+interface SettingsState {
+  marketingEmails: boolean;
+  notifications: boolean;
+  orderUpdates: boolean;
+  newProductAlerts: boolean;
+  theme: 'light' | 'dark' | 'system';
+  fontSize: 'small' | 'medium' | 'large';
+  colorScheme: 'default' | 'high-contrast' | 'colorful';
+  language: string;
+  currency: string;
+  timezone: string;
+  twoFactorEnabled: boolean;
+  showProfile: boolean;
+  activityStatus: boolean;
+  dataCollection: boolean;
+}
+
 export default function Settings() {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
-  const [settings, setSettings] = useState({
-    // Notifications
-    marketingEmails: userProfile?.preferences?.marketingEmails || false,
-    notifications: userProfile?.preferences?.notifications || false,
-    orderUpdates: userProfile?.preferences?.orderUpdates || true,
-    newProductAlerts: userProfile?.preferences?.newProductAlerts || false,
-    
-    // Appearance
-    theme: userProfile?.preferences?.theme || 'dark',
-    fontSize: userProfile?.preferences?.fontSize || 'medium',
-    colorScheme: userProfile?.preferences?.colorScheme || 'default',
-    
-    // Language & Region
-    language: userProfile?.preferences?.language || 'en',
-    currency: userProfile?.preferences?.currency || 'GBP',
-    timezone: userProfile?.preferences?.timezone || 'UTC',
-    
-    // Privacy & Security
-    twoFactorEnabled: userProfile?.security?.twoFactorEnabled || false,
-    showProfile: userProfile?.privacy?.showProfile || true,
-    activityStatus: userProfile?.privacy?.activityStatus || true,
-    dataCollection: userProfile?.privacy?.dataCollection || true
+  
+  const defaultSettings: SettingsState = {
+    marketingEmails: false,
+    notifications: false,
+    orderUpdates: true,
+    newProductAlerts: false,
+    theme: 'dark',
+    fontSize: 'medium',
+    colorScheme: 'default',
+    language: 'en',
+    currency: 'GBP',
+    timezone: 'UTC',
+    twoFactorEnabled: false,
+    showProfile: true,
+    activityStatus: true,
+    dataCollection: true
+  };
+
+  const [settings, setSettings] = useState<SettingsState>({
+    marketingEmails: userProfile?.preferences?.marketingEmails ?? defaultSettings.marketingEmails,
+    notifications: userProfile?.preferences?.notifications ?? defaultSettings.notifications,
+    orderUpdates: userProfile?.preferences?.orderUpdates ?? defaultSettings.orderUpdates,
+    newProductAlerts: userProfile?.preferences?.newProductAlerts ?? defaultSettings.newProductAlerts,
+    theme: userProfile?.preferences?.theme ?? defaultSettings.theme,
+    fontSize: userProfile?.preferences?.fontSize ?? defaultSettings.fontSize,
+    colorScheme: userProfile?.preferences?.colorScheme ?? defaultSettings.colorScheme,
+    language: userProfile?.preferences?.language ?? defaultSettings.language,
+    currency: userProfile?.preferences?.currency ?? defaultSettings.currency,
+    timezone: userProfile?.preferences?.timezone ?? defaultSettings.timezone,
+    twoFactorEnabled: userProfile?.security?.twoFactorEnabled ?? defaultSettings.twoFactorEnabled,
+    showProfile: userProfile?.privacy?.showProfile ?? defaultSettings.showProfile,
+    activityStatus: userProfile?.privacy?.activityStatus ?? defaultSettings.activityStatus,
+    dataCollection: userProfile?.privacy?.dataCollection ?? defaultSettings.dataCollection
   });
 
   const handleSave = async () => {
@@ -119,7 +147,7 @@ export default function Settings() {
             <label>Theme</label>
             <select
               value={settings.theme}
-              onChange={(e) => setSettings({...settings, theme: e.target.value as 'light' | 'dark'})}
+              onChange={(e) => setSettings({...settings, theme: e.target.value as 'light' | 'dark' | 'system'})}
             >
               <option value="light">Light</option>
               <option value="dark">Dark</option>
@@ -130,7 +158,7 @@ export default function Settings() {
             <label>Font Size</label>
             <select
               value={settings.fontSize}
-              onChange={(e) => setSettings({...settings, fontSize: e.target.value})}
+              onChange={(e) => setSettings({...settings, fontSize: e.target.value as 'small' | 'medium' | 'large'})}
             >
               <option value="small">Small</option>
               <option value="medium">Medium</option>
@@ -141,7 +169,7 @@ export default function Settings() {
             <label>Color Scheme</label>
             <select
               value={settings.colorScheme}
-              onChange={(e) => setSettings({...settings, colorScheme: e.target.value})}
+              onChange={(e) => setSettings({...settings, colorScheme: e.target.value as 'default' | 'high-contrast' | 'colorful'})}
             >
               <option value="default">Default</option>
               <option value="high-contrast">High Contrast</option>

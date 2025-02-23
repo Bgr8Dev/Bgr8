@@ -33,11 +33,17 @@ export interface UserProfile {
   };
 
   // Preferences
-  preferences?: {
+  preferences: {
     marketingEmails: boolean;
     notifications: boolean;
-    theme: 'light' | 'dark';
+    orderUpdates: boolean;
+    newProductAlerts: boolean;
+    theme: 'light' | 'dark' | 'system';
+    fontSize: 'small' | 'medium' | 'large';
+    colorScheme: 'default' | 'high-contrast' | 'colorful';
     language: string;
+    currency: string;
+    timezone: string;
   };
 
   // B8 Platform Specific
@@ -98,6 +104,13 @@ export interface UserProfile {
     lastPasswordChange?: Date;
     loginDevices?: string[];
   };
+
+  // Privacy Settings
+  privacy: {
+    showProfile: boolean;
+    activityStatus: boolean;
+    dataCollection: boolean;
+  };
 }
 
 export const createUserProfile = async (
@@ -121,8 +134,22 @@ export const createUserProfile = async (
     preferences: {
       marketingEmails: true,
       notifications: true,
+      orderUpdates: true,
+      newProductAlerts: false,
       theme: 'dark',
-      language: 'en'
+      fontSize: 'medium',
+      colorScheme: 'default',
+      language: 'en',
+      currency: 'GBP',
+      timezone: 'UTC'
+    },
+    security: {
+      twoFactorEnabled: false
+    },
+    privacy: {
+      showProfile: true,
+      activityStatus: true,
+      dataCollection: true
     },
     b8Memberships: {
       marketing: false,
@@ -132,9 +159,6 @@ export const createUserProfile = async (
       charity: false,
       education: false,
       careers: false
-    },
-    security: {
-      twoFactorEnabled: false
     },
     activityLog: {
       lastLogin: new Date(),

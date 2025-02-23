@@ -1,5 +1,27 @@
+export interface UserPreferences {
+  marketingEmails: boolean;
+  notifications: boolean;
+  orderUpdates: boolean;
+  newProductAlerts: boolean;
+  theme: 'light' | 'dark' | 'system';
+  fontSize: 'small' | 'medium' | 'large';
+  colorScheme: 'default' | 'high-contrast' | 'colorful';
+  language: string;
+  currency: string;
+  timezone: string;
+}
+
+export interface UserSecurity {
+  twoFactorEnabled: boolean;
+}
+
+export interface UserPrivacy {
+  showProfile: boolean;
+  activityStatus: boolean;
+  dataCollection: boolean;
+}
+
 export interface UserProfile {
-  // Basic Info
   uid: string;
   email: string;
   firstName: string;
@@ -10,34 +32,11 @@ export interface UserProfile {
   dateCreated: Date;
   lastUpdated: Date;
   admin: boolean;
-
-  // Additional Personal Info
-  dateOfBirth?: string;
-  gender?: string;
-  location?: {
-    address?: string;
-    city?: string;
-    country?: string;
-    postcode?: string;
-  };
-
-  // Social Media
-  socialMedia?: {
-    instagram?: string;
-    linkedin?: string;
-    twitter?: string;
-    youtube?: string;
-  };
-
-  // Preferences
-  preferences: {
-    marketingEmails: boolean;
-    notifications: boolean;
-    theme: 'light' | 'dark';
-    language: string;
-  };
-
-  // B8 Platform Specific
+  
+  preferences: UserPreferences;
+  security: UserSecurity;
+  privacy: UserPrivacy;
+  
   b8Memberships: {
     marketing: boolean;
     carClub: boolean;
@@ -47,38 +46,7 @@ export interface UserProfile {
     education: boolean;
     careers: boolean;
   };
-
-  // Education Info
-  education?: {
-    isStudent?: boolean;
-    school?: string;
-    householdIncome?: string;
-    qualifications?: string[];
-  };
-
-  // Career Info
-  career?: {
-    currentPosition?: string;
-    company?: string;
-    industry?: string;
-    experience?: string;
-    skills?: string[];
-    hasUploadedCV?: boolean;
-    lastCVUpdate?: Date;
-    cvDocId?: string;
-    professionalWebsite?: string;
-  };
-
-  // Car Club Info
-  carClub?: {
-    carMake?: string;
-    carModel?: string;
-    numberPlate?: string;
-    membershipType?: string;
-    joinDate?: Date;
-  };
-
-  // Activity Tracking
+  
   activityLog: {
     lastLogin: Date;
     loginCount: number;
@@ -90,10 +58,10 @@ export interface UserProfile {
       total: number;
     }[];
   };
-
-  // Security
-  security: {
-    twoFactorEnabled: boolean;
+  
+  location?: {
+    city: string;
+    country: string;
   };
 }
 
