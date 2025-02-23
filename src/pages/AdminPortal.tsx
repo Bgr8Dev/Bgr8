@@ -16,7 +16,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import '../styles/AdminPortal.css';
+import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
 import { AdminPortalB8CarClub } from './adminPages/AdminPortalB8CarClub';

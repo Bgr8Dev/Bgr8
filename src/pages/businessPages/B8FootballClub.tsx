@@ -3,7 +3,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
-import '../../styles/B8FootballClub.css';
+import '../../styles/businessStyles/B8FootballClub.css';
 
 export default function B8FootballClub() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -98,12 +98,6 @@ export default function B8FootballClub() {
           <textarea placeholder="Your Message" required></textarea>
           <button type="submit">Send Message</button>
         </form>
-
-        <div className="contact-info">
-          <p>Email: contact@b8company.com</p>
-          <p>Phone: +123 456 7890</p>
-          <p>Address: 123 B8 Street, Innovation City</p>
-        </div>
 
         <div className="football-social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>

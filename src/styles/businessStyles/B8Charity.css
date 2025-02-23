@@ -78,6 +78,11 @@
     border-radius: 8px;
     color: white;
     cursor: pointer;
+    transition: all 2s ease-in;
+  }
+
+  .donation-widget button:hover {
+    background: linear-gradient(to left, purple, blue);
   }
   
   .charity-logos {
@@ -198,14 +203,6 @@
     outline: none;
     border-color: #0000FF; /* Blue border */
     box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.2); /* Blue glow */
-  }
-  
-  button {
-    background: linear-gradient(to right, #0000FF, #0000CC); /* Blue gradient */
-  }
-  
-  button:hover {
-    background: linear-gradient(to right, #0000CC, #0000FF); /* Reversed blue gradient */
   }
   
   .charity-info-modal button:hover {

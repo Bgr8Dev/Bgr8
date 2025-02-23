@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
-import '../../styles/BGr8Medical.css';
+import '../../styles/businessStyles/BGr8Medical.css';
 
 export default function BGr8Medical({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({

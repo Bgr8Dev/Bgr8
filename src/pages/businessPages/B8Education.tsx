@@ -3,7 +3,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
-import '../../styles/B8Education.css';
+import '../../styles/businessStyles/B8Education.css';
 import ContactForm from '../../components/ContactForm';
 
 export default function B8Education() {

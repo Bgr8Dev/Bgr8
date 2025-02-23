@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ClothingItem, ClothingCategory } from '../../types/clothing';
-import '../../styles/AdminModal.css';
+import '../../styles/adminStyles/AdminModal.css';
 
 interface AddClothingModalProps {
   onClose: () => void;

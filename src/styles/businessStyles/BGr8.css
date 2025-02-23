@@ -64,14 +64,14 @@
     margin-bottom: 1rem;
   }
   
-  .social-media a {
+  .bgr8-social-media a {
     font-size: 2rem;
     color: white;
     margin: 0 1rem;
     transition: color 0.3s ease;
   }
   
-  .social-media a:hover {
+  .bgr8-social-media a:hover {
     color: #FFD700;
   }
   

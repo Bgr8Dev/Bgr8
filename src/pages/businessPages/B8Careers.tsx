@@ -7,7 +7,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { CvFormData } from '../../types/careers';
-import '../../styles/B8Careers.css';
+import '../../styles/businessStyles/B8Careers.css';
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

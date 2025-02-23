@@ -187,12 +187,5 @@
     border-color: #800080; /* Purple border */
     box-shadow: 0 0 0 2px rgba(128, 0, 128, 0.2); /* Purple glow */
   }
-  
-  button {
-    background: linear-gradient(to right, #800080, #660066); /* Purple gradient */
-  }
-  
-  button:hover {
-    background: linear-gradient(to right, #660066, #800080); /* Reversed purple gradient */
-  }
+
   

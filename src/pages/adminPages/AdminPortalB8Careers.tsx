@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { BusinessSection } from '../../components/admin/BusinessSection';
 import { BusinessStats } from '../../types/admin';
 import { CvFormData } from '../../types/careers';
-import '../../styles/AdminPortalB8Careers.css';
+import '../../styles/adminStyles/AdminPortalB8Careers.css';
 
 interface AdminPortalB8CareersProps {
   stats: BusinessStats;

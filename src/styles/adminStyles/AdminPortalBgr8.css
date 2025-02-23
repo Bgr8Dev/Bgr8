@@ -46,15 +46,6 @@
 .status-select.status-approved { background-color: #4CAF50; }
 .status-select.status-rejected { background-color: #f44336; }
 
-.registration-content {
-  padding: 1rem;
-}
-
-.registration-content p {
-  margin: 0.5rem 0;
-  color: #fff;
-}
-
 .loading {
   text-align: center;
   padding: 2rem;

@@ -109,23 +109,7 @@
     transition: all 0.3s ease;
   }
   
-  button {
-    background: linear-gradient(to right, #1a1a1a, #000000);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  button:hover {
-    background: linear-gradient(to right, #000000, #1a1a1a);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-  
-  .social-media a:hover {
+  .careers-social-media a:hover {
     color: #1a1a1a;
     transform: translateY(-3px);
   }

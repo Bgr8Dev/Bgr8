@@ -9,7 +9,7 @@ import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaCreditCard, FaPaypal, 
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ClothingItem, ClothingCategory } from '../../types/clothing';
-import '../../styles/B8Clothing.css';
+import '../../styles/businessStyles/B8Clothing.css';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

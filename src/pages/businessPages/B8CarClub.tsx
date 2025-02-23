@@ -3,7 +3,7 @@ import { FaFlagCheckered, FaMapMarkerAlt, FaCar, FaGlobe, FaInstagram, FaFaceboo
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import '../../styles/B8CarClub.css';
+import '../../styles/businessStyles/B8CarClub.css';
 
 export default function B8CarClub() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

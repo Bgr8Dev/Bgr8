@@ -3,7 +3,7 @@ import { collection, query, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { BusinessSection } from '../../components/admin/BusinessSection';
 import { BusinessStats } from '../../types/admin';
-import '../../styles/AdminPortalBgr8.css';
+import '../../styles/adminStyles/AdminPortalBgr8.css';
 
 interface AdminPortalBgr8Props {
   stats: BusinessStats;

@@ -39,55 +39,57 @@
   .nav a[href="/b8-marketing"]:hover {
     background-color: #FFFFFF;
     color: black;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    box-shadow: 10px 10px 10px rgba(255, 255, 255, 0.4);
   }
   
   .nav a[href="/bgr8"]:hover {
     background-color: #FFD700;
     color: black;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    box-shadow: 10px 10px 10px rgba(255, 215, 0, 0.4);
   }
   
   .nav a[href="/b8-car-club"]:hover {
     background-color: #FF0000;
     color: white;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+    box-shadow: 10px 10px 10px rgba(255, 0, 0, 0.4);
   }
   
   .nav a[href="/b8-clothing"]:hover {
     background-color: #8B4513;
     color: white;
-    box-shadow: 0 0 10px rgba(139, 69, 19, 0.4);
+    box-shadow: 10px 10px 10px rgba(139, 69, 19, 0.4);
   }
   
   .nav a[href="/b8-football-club"]:hover {
     background-color: #800080;
     color: white;
-    box-shadow: 0 0 10px rgba(128, 0, 128, 0.4);
+    box-shadow: 10px 10px 10px rgba(128, 0, 128, 0.4);
   }
   
   .nav a[href="/b8-charity"]:hover {
     background-color: #0000FF;
     color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 255, 0.4);
+    box-shadow: 10px 10px 10px rgba(0, 0, 255, 0.4);
   }
   
   .nav a[href="/b8-education"]:hover {
     background-color: #008000;
     color: white;
-    box-shadow: 0 0 10px rgba(0, 128, 0, 0.4);
+    box-shadow: 10px 10px 10px rgba(0, 128, 0, 0.4);
   }
   
   .nav a[href="/b8-careers"]:hover {
     background-color: #000000;
     color: white;
-    box-shadow: 0 0 10px rgba(82, 81, 81, 0.4);
+    box-shadow: 10px 10px 10px rgba(82, 81, 81, 0.4);
   }
   
   /* Home link can keep original or match company primary color */
   .nav a[href="/"]:hover {
     background-color: #444;
     color: lightgray;
+    box-shadow: 10px 10px 10px rgba(82, 81, 81, 0.4);
+
   }
   
   /* Hamburger Menu */
@@ -298,5 +300,121 @@
   
   .admin-link:hover {
     background-color: rgba(255, 215, 0, 0.1) !important;
+  }
+  
+  .mobile-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 1rem;
+    background-color: #000;
+    z-index: 1001;
+    height: 60px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .mobile-header-center {
+    text-align: center;
+  }
+  
+  .mobile-greeting {
+    color: white;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 1rem;
+  }
+  
+  .mobile-logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .mobile-logo img {
+    height: 40px;
+    width: auto;
+  }
+  
+  .menu-icon {
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+  
+  .mobile-menu {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  
+  .mobile-auth-section {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .mobile-user-menu {
+    color: white;
+  }
+  
+  .mobile-user-menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .mobile-user-submenu {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  .mobile-user-submenu a,
+  .mobile-user-submenu button {
+    display: block;
+    padding: 0.75rem;
+    color: white;
+    text-decoration: none;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 1rem;
+  }
+  
+  .mobile-auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .mobile-nav a {
+    padding: 1rem;
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .mobile-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
   }
   

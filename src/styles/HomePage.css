@@ -35,11 +35,13 @@
   cursor: pointer;
   transition: opacity 0.3s;
   transition: background-position 0.4s ease-in-out;
+  transition: background 2s ease;
 }
 
 .hero button:hover {
   opacity: 0.9;
   background-position: right center;
+  background: linear-gradient(to left, #ff0000, #9c0000);
 }
 
 .services {
@@ -145,16 +147,17 @@
   border-radius: 8px;
   color: white;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 3s ease-out;
 }
 
 .contact-form button:hover {
   opacity: 0.9;
+  background: linear-gradient(to right, #cc0000, #ff0000);
 }
 
 .contact-info {
   margin-top: 2rem;
-  color: gray;
+  color: rgb(0, 0, 0);
 }
 
 .contact-info p {
@@ -171,11 +174,11 @@
 .social-media a {
   color: white;
   font-size: 2rem;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease-out;
 }
 
 .social-media a:hover {
-  color: #888;
+  color: #c71f1f;
 }
 
 .intro-video {
