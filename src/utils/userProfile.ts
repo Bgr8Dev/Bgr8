@@ -143,14 +143,6 @@ export const createUserProfile = async (
       currency: 'GBP',
       timezone: 'UTC'
     },
-    security: {
-      twoFactorEnabled: false
-    },
-    privacy: {
-      showProfile: true,
-      activityStatus: true,
-      dataCollection: true
-    },
     b8Memberships: {
       marketing: false,
       carClub: false,
@@ -159,6 +151,14 @@ export const createUserProfile = async (
       charity: false,
       education: false,
       careers: false
+    },
+    security: {
+      twoFactorEnabled: false
+    },
+    privacy: {
+      showProfile: true,
+      activityStatus: true,
+      dataCollection: true
     },
     activityLog: {
       lastLogin: new Date(),
