@@ -1,4 +1,4 @@
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.admin-modal-content {
   background-color: #222;
   padding: 2rem;
   border-radius: 10px;
@@ -21,14 +21,14 @@
   overflow-y: auto;
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.close-button {
+.admin-modal-close-button {
   background: none;
   border: none;
   color: #666;
@@ -37,23 +37,23 @@
   padding: 0.5rem;
 }
 
-.close-button:hover {
+.admin-modal-close-button:hover {
   color: #fff;
 }
 
-.form-group {
+.admin-modal-form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.admin-modal-form-group label {
   display: block;
   margin-bottom: 0.5rem;
   color: #888;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+.admin-modal-form-group input,
+.admin-modal-form-group textarea,
+.admin-modal-form-group select {
   width: 100%;
   padding: 0.75rem;
   background-color: #333;
@@ -62,19 +62,19 @@
   color: white;
 }
 
-.form-group textarea {
+.admin-modal-form-group textarea {
   min-height: 100px;
   resize: vertical;
 }
 
-.form-actions {
+.admin-modal-form-actions {
   display: flex;
   gap: 1rem;
   margin-top: 2rem;
 }
 
-.submit-button,
-.cancel-button {
+.admin-modal-submit-button,
+.admin-modal-cancel-button {
   flex: 1;
   padding: 0.75rem;
   border: none;
@@ -84,26 +84,26 @@
   transition: background-color 0.3s ease;
 }
 
-.submit-button {
+.admin-modal-submit-button {
   background-color: #4CAF50;
   color: white;
 }
 
-.submit-button:hover {
+.admin-modal-submit-button:hover {
   background-color: #45a049;
 }
 
-.cancel-button {
+.admin-modal-cancel-button {
   background-color: #666;
   color: white;
 }
 
-.cancel-button:hover {
+.admin-modal-cancel-button:hover {
   background-color: #555;
 }
 
 @media (max-width: 768px) {
-  .modal-content {
+  .admin-modal-content {
     width: 95%;
     padding: 1rem;
   }

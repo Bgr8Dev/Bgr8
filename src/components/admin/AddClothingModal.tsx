@@ -25,15 +25,15 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="admin-modal-overlay">
+      <div className="admin-modal-content">
+        <div className="admin-modal-header">
           <h2>Add New Clothing Item</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <button className="admin-modal-close-button" onClick={onClose}>&times;</button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Name</label>
             <input
               type="text"
@@ -43,7 +43,7 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Description</label>
             <textarea
               value={newItem.description}
@@ -52,7 +52,7 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Price (£)</label>
             <input
               type="number"
@@ -64,7 +64,7 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Category</label>
             <select
               value={newItem.category}
@@ -79,7 +79,7 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             </select>
           </div>
 
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Sizes (comma-separated)</label>
             <input
               type="text"
@@ -89,7 +89,7 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Colors (comma-separated)</label>
             <input
               type="text"
@@ -99,7 +99,7 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="admin-modal-form-group">
             <label>Image URLs (comma-separated)</label>
             <input
               type="text"
@@ -109,9 +109,9 @@ export function AddClothingModal({ onClose, onSubmit }: AddClothingModalProps) {
             />
           </div>
 
-          <div className="form-actions">
-            <button type="submit" className="submit-button">Add Item</button>
-            <button type="button" className="cancel-button" onClick={onClose}>Cancel</button>
+          <div className="admin-modal-form-actions">
+            <button type="submit" className="admin-modal-submit-button">Add Item</button>
+            <button type="button" className="admin-modal-cancel-button" onClick={onClose}>Cancel</button>
           </div>
         </form>
       </div>
