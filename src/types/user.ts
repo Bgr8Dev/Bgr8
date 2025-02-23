@@ -77,6 +77,11 @@ export const createUserProfile = async (
     email,
     firstName,
     lastName,
+    privacy: {
+      showProfile: false,
+      activityStatus: false,
+      dataCollection: false
+    },
     displayName: `${firstName} ${lastName}`,
     dateCreated: new Date(),
     lastUpdated: new Date(),
@@ -85,7 +90,13 @@ export const createUserProfile = async (
       marketingEmails: true,
       notifications: true,
       theme: 'dark',
-      language: 'en'
+      language: 'en',
+      timezone: 'UTC',
+      currency: 'USD',
+      orderUpdates: true,
+      newProductAlerts: true,
+      fontSize: 'medium',
+      colorScheme: 'default'
     },
     b8Memberships: {
       marketing: false,
