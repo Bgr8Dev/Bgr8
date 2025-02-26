@@ -3,7 +3,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
-import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot, FaReact, FaNode, FaPython, FaJs, FaAndroid, FaApple, FaAngular, FaVuejs, FaStripe, FaRobot, FaDatabase, FaServer, FaFire, FaMap, FaMobile, FaBrain, FaMicrochip } from 'react-icons/fa';
+import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot, FaReact, FaNode, FaPython, FaJs, FaAndroid, FaApple, FaAngular, FaVuejs, FaStripe, FaRobot, FaServer, FaFire, FaMap, FaBrain, FaMicrochip } from 'react-icons/fa';
 import '../../styles/businessStyles/B8Marketing.css';
 
 // Import company logos
