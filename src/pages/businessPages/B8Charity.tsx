@@ -17,31 +17,31 @@ const charityPartners = [
     name: "Maternal Aid Association (Maa)",
     description: "Supporting maternal health and wellbeing across communities",
     icon: <FaHandHoldingHeart size={40} />,
-    link: "https://www.maa.org.uk/"
+    link: "https://maacharity.org/"
   },
   {
     name: "Doctors without Borders (MSF)",
     description: "International medical humanitarian organization",
     icon: <FaHospital size={40} />,
-    link: "https://www.msf.org/"
+    link: "https://www.msf.org/uk"
   },
   {
     name: "Kingston Muslim Youth (KMY)",
     description: "Empowering and supporting young Muslims in Kingston",
     icon: <FaUsers size={40} />,
-    link: "/"
+    link: "https://www.kingstonmuslimyouth.org.uk/"
   },
   {
     name: "Muslim Cultural & Welfare Association of Sutton (MCWAS)",
     description: "Promoting cultural understanding and community welfare",
     icon: <FaHandsHelping size={40} />,
-    link: "/"
+    link: "https://mcwas.org.uk/"
   },
   {
     name: "MATW Project",
     description: "Making positive change through humanitarian projects",
     icon: <FaHandHoldingHeart size={40} />,
-    link: "/"
+    link: "https://www.matwproject.org/"
   },
   {
     name: "Disasters Emergency Committee (DEC)",
@@ -53,17 +53,12 @@ const charityPartners = [
 
 export default function B8Charity() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [activeCharity, setActiveCharity] = useState<string | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const handleCharityClick = (charity: string) => {
-    setActiveCharity(charity);
-  };
 
   return (
     <div className="page">
