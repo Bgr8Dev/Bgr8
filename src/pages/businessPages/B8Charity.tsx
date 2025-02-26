@@ -2,9 +2,54 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaHandHoldingHeart, FaGlobe, FaHospital, FaUsers, FaHandsHelping } from 'react-icons/fa';
 import '../../styles/businessStyles/B8Charity.css';
 import ContactForm from '../../components/ContactForm';
+
+const charityPartners = [
+  {
+    name: "Islamic Relief UK",
+    description: "International humanitarian organization providing emergency relief and development programs",
+    icon: <FaGlobe size={40} />,
+    link: "https://www.islamic-relief.org.uk/"
+  },
+  {
+    name: "Maternal Aid Association (Maa)",
+    description: "Supporting maternal health and wellbeing across communities",
+    icon: <FaHandHoldingHeart size={40} />,
+    link: "https://www.maa.org.uk/"
+  },
+  {
+    name: "Doctors without Borders (MSF)",
+    description: "International medical humanitarian organization",
+    icon: <FaHospital size={40} />,
+    link: "https://www.msf.org/"
+  },
+  {
+    name: "Kingston Muslim Youth (KMY)",
+    description: "Empowering and supporting young Muslims in Kingston",
+    icon: <FaUsers size={40} />,
+    link: "/"
+  },
+  {
+    name: "Muslim Cultural & Welfare Association of Sutton (MCWAS)",
+    description: "Promoting cultural understanding and community welfare",
+    icon: <FaHandsHelping size={40} />,
+    link: "/"
+  },
+  {
+    name: "MATW Project",
+    description: "Making positive change through humanitarian projects",
+    icon: <FaHandHoldingHeart size={40} />,
+    link: "/"
+  },
+  {
+    name: "Disasters Emergency Committee (DEC)",
+    description: "Coordinating emergency aid response for major disasters",
+    icon: <FaGlobe size={40} />,
+    link: "https://www.dec.org.uk/"
+  }
+];
 
 export default function B8Charity() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -71,34 +116,26 @@ export default function B8Charity() {
         </form>
       </section>
 
-      {/* Charities We Work With */}
-      <section className="charity-partners">
-        <h3>Charities We Work With</h3>
-        <div className="charity-logos">
-          {['charity1', 'charity2', 'charity3'].map((charity, index) => (
-            <div
+      {/* Charity Partners Section */}
+      <section className="charity-partners-showcase">
+        <h2>Charities We've Worked With</h2>
+        <p>Proud to partner with these amazing organizations making a difference in the world</p>
+        
+        <div className="charity-partners-grid">
+          {charityPartners.map((partner, index) => (
+            <a 
+              href={partner.link} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="charity-partner-card" 
               key={index}
-              className="charity-card"
-              onClick={() => handleCharityClick(charity)}
             >
-              <img src={`/assets/${charity}-logo.png`} alt={`Charity ${index + 1}`} />
-              <div className="overlay">
-                {/* <p>{charity.toUpperCase()}</p> */}
-                <p>Click to Learn More</p>
-              </div>
-            </div>
+              <div className="partner-icon">{partner.icon}</div>
+              <h3>{partner.name}</h3>
+              <p>{partner.description}</p>
+            </a>
           ))}
         </div>
-
-        {activeCharity && (
-          <div className="charity-info-modal" onClick={() => setActiveCharity(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h4>{activeCharity ? activeCharity.toUpperCase() : ''}</h4>
-              <p>Learn about how this charity is making a difference in the community.</p>
-              <button onClick={() => setActiveCharity(null)}>Close</button>
-            </div>
-          </div>
-        )}
       </section>
 
       {/* Existing Contact Section */}

@@ -3,7 +3,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
-import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot } from 'react-icons/fa';
+import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot, FaReact, FaNode, FaPython, FaJs, FaAndroid, FaApple, FaAngular, FaVuejs, FaStripe, FaRobot, FaDatabase, FaServer, FaFire, FaMap, FaMobile, FaBrain, FaMicrochip } from 'react-icons/fa';
 import '../../styles/businessStyles/B8Marketing.css';
 
 // Import company logos
@@ -18,7 +18,11 @@ const categories = [
   "SEO & Analytics",
   "Plugins",
   "Digital Media",
-  "Developer Tools"
+  "Developer Tools",
+  "Programming Languages",
+  "Frameworks",
+  "Cloud Services",
+  "Tech Solutions"
 ];
 
 const marketingSoftware = [
@@ -120,6 +124,136 @@ const marketingSoftware = [
     name: "Developer Tools",
     description: "Suite of professional development tools and frameworks",
     category: "Developer Tools"
+  },
+
+  // Programming Languages
+  {
+    icon: <FaJs size={40} />,
+    name: "JavaScript",
+    description: "Core web programming language for interactive applications",
+    category: "Programming Languages"
+  },
+  {
+    icon: <FaCode size={40} />,
+    name: "TypeScript",
+    description: "Typed superset of JavaScript for scalable applications",
+    category: "Programming Languages"
+  },
+  {
+    icon: <FaPython size={40} />,
+    name: "Python",
+    description: "Versatile language for web, AI, and data science",
+    category: "Programming Languages"
+  },
+
+  // Frameworks
+  {
+    icon: <FaReact size={40} />,
+    name: "React",
+    description: "Popular JavaScript library for building user interfaces",
+    category: "Frameworks"
+  },
+  {
+    icon: <FaAngular size={40} />,
+    name: "Angular",
+    description: "Comprehensive framework for enterprise applications",
+    category: "Frameworks"
+  },
+  {
+    icon: <FaVuejs size={40} />,
+    name: "Vue.js",
+    description: "Progressive framework for building user interfaces",
+    category: "Frameworks"
+  },
+  {
+    icon: <FaNode size={40} />,
+    name: "Node.js",
+    description: "JavaScript runtime for server-side development",
+    category: "Frameworks"
+  },
+  {
+    icon: <FaReact size={40} />,
+    name: "Next.js",
+    description: "React framework for production-grade applications",
+    category: "Frameworks"
+  },
+  {
+    icon: <FaVuejs size={40} />,
+    name: "Nuxt.js",
+    description: "Vue.js framework for universal applications",
+    category: "Frameworks"
+  },
+
+  // Mobile Development
+  {
+    icon: <FaAndroid size={40} />,
+    name: "Android Development",
+    description: "Native Android app development",
+    category: "Tech Solutions"
+  },
+  {
+    icon: <FaApple size={40} />,
+    name: "iOS Development",
+    description: "Native iOS app development",
+    category: "Tech Solutions"
+  },
+  {
+    icon: <FaReact size={40} />,
+    name: "React Native",
+    description: "Cross-platform mobile app development",
+    category: "Frameworks"
+  },
+
+  // Cloud Services
+  {
+    icon: <FaFire size={40} />,
+    name: "Firebase",
+    description: "Google's platform for app development",
+    category: "Cloud Services"
+  },
+  {
+    icon: <FaServer size={40} />,
+    name: "Vercel",
+    description: "Platform for frontend frameworks and static sites",
+    category: "Cloud Services"
+  },
+  {
+    icon: <FaServer size={40} />,
+    name: "Render",
+    description: "Cloud platform for web services and databases",
+    category: "Cloud Services"
+  },
+
+  // Tech Solutions
+  {
+    icon: <FaBrain size={40} />,
+    name: "OpenAI & API",
+    description: "Advanced AI and machine learning solutions",
+    category: "Tech Solutions"
+  },
+  {
+    icon: <FaRobot size={40} />,
+    name: "Chatbot Development",
+    description: "Custom chatbot solutions for businesses",
+    category: "Tech Solutions"
+  },
+  {
+    icon: <FaMap size={40} />,
+    name: "Google Maps API",
+    description: "Location-based services and mapping solutions",
+    category: "Tech Solutions"
+  },
+  {
+    icon: <FaStripe size={40} />,
+    name: "Stripe Integration",
+    description: "Payment processing solutions",
+    category: "Tech Solutions"
+  },
+  {
+    icon: <FaMicrochip size={40} />,
+    name: "Machine Learning",
+    description: "Custom ML solutions for business needs",
+    category: "Tech Solutions"
   }
 ];
 
