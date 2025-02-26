@@ -3,7 +3,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
-import { FaChartLine, FaBullhorn, FaCogs } from 'react-icons/fa';
+import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot } from 'react-icons/fa';
 import '../../styles/businessStyles/B8Marketing.css';
 
 // Import company logos
@@ -11,8 +11,125 @@ import company1 from '../../assets/Marketing/Hyundai.png';
 import company2 from '../../assets/Marketing/Surrey.png';
 import company3 from '../../assets/Marketing/Volkwagen.png';
 
+// Define categories and software
+const categories = [
+  "All",
+  "CMS",
+  "SEO & Analytics",
+  "Plugins",
+  "Digital Media",
+  "Developer Tools"
+];
+
+const marketingSoftware = [
+  // CMS
+  {
+    icon: <FaCamera size={40} />,
+    name: "Adobe Experience Manager",
+    description: "Enterprise-level content management system for building websites, mobile apps and forms",
+    category: "CMS"
+  },
+  {
+    icon: <FaWordpress size={40} />,
+    name: "WordPress",
+    description: "World's most popular CMS platform for website creation and content management",
+    category: "CMS"
+  },
+  {
+    icon: <FaHubspot size={40} />,
+    name: "HubSpot",
+    description: "All-in-one inbound marketing, sales, and CRM platform",
+    category: "CMS"
+  },
+
+  // SEO and Analytics
+  {
+    icon: <FaGoogle size={40} />,
+    name: "Google Analytics (GA4)",
+    description: "Advanced analytics platform for measuring website and app performance",
+    category: "SEO & Analytics"
+  },
+  {
+    icon: <FaSearchengin size={40} />,
+    name: "Google Search Console",
+    description: "Tool for monitoring and optimizing website's presence in Google Search results",
+    category: "SEO & Analytics"
+  },
+  {
+    icon: <FaChartLine size={40} />,
+    name: "Microsoft Clarity",
+    description: "Behavioral analytics tool for understanding how users interact with your website",
+    category: "SEO & Analytics"
+  },
+
+  // Plugins
+  {
+    icon: <FaStream size={40} />,
+    name: "Storystream",
+    description: "Visual content marketing platform for creating and managing social media content",
+    category: "Plugins"
+  },
+  {
+    icon: <FaChartLine size={40} />,
+    name: "ContentSquare",
+    description: "Digital experience analytics platform for understanding user behavior",
+    category: "Plugins"
+  },
+  {
+    icon: <FaStream size={40} />,
+    name: "Hootsuite",
+    description: "Social media management and scheduling platform",
+    category: "Plugins"
+  },
+  {
+    icon: <FaCalendarAlt size={40} />,
+    name: "Calendly",
+    description: "Automated scheduling software for streamlining meeting coordination",
+    category: "Plugins"
+  },
+
+  // Digital Media
+  {
+    icon: <FaCamera size={40} />,
+    name: "Adobe Suite",
+    description: "Professional creative tools including Photoshop and Premiere Pro",
+    category: "Digital Media"
+  },
+  {
+    icon: <FaVideo size={40} />,
+    name: "DaVinci Resolve",
+    description: "Professional video editing, color correction, and post-production software",
+    category: "Digital Media"
+  },
+  {
+    icon: <FaVideo size={40} />,
+    name: "CapCut",
+    description: "User-friendly video editing software for quick content creation",
+    category: "Digital Media"
+  },
+  {
+    icon: <FaPalette size={40} />,
+    name: "Canva",
+    description: "Online design platform for creating visual content",
+    category: "Digital Media"
+  },
+
+  // Developer Tools
+  {
+    icon: <FaCode size={40} />,
+    name: "Developer Tools",
+    description: "Suite of professional development tools and frameworks",
+    category: "Developer Tools"
+  }
+];
+
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const filteredSoftware = marketingSoftware.filter(software => 
+    selectedCategory === "All" || software.category === selectedCategory
+  );
 
   const pricingPlans = [
     {
@@ -154,6 +271,35 @@ export default function B8Marketing() {
               </ul>
               <p className="service-price">{service.price}</p>
               <button className="learn-more-btn">Learn More</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Software Tools Section */}
+      <section className="software-tools">
+        <h2>Our Marketing Tech Stack</h2>
+        <p>We use industry-leading software to deliver exceptional results</p>
+        
+        <div className="category-filter">
+          {categories.map((category) => (
+            <button
+              key={category}
+              className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div className="software-grid">
+          {filteredSoftware.map((software, index) => (
+            <div className="software-card" key={index}>
+              <div className="software-icon">{software.icon}</div>
+              <h4>{software.name}</h4>
+              <p className="software-category">{software.category}</p>
+              <p className="software-description">{software.description}</p>
             </div>
           ))}
         </div>
