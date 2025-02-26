@@ -471,7 +471,12 @@ export default function B8Marketing() {
         <form className="contact-form">
           <input type="text" placeholder="Your Name" required />
           <input type="email" placeholder="Your Email" required />
-          <input type="text" placeholder="What Do You Want?" required />
+          <select className="service-picker" required>
+            <option value="">Select a Service</option>
+            <option value="social">Social Media Marketing</option>
+            <option value="web">Digital Web Marketing</option>
+            <option value="complete">Complete Digital Marketing</option>
+          </select>
           <input type="tel" placeholder="Phone Number" required />
           <textarea placeholder="Your Query" required></textarea>
           <button type="submit">Send Message</button>
