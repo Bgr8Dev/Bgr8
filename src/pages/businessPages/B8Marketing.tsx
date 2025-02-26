@@ -475,7 +475,7 @@ export default function B8Marketing() {
             <option value="">Select a Service</option>
             <option value="social">Social Media Marketing</option>
             <option value="web">Digital Web Marketing</option>
-            <option value="complete">Complete Digital Marketing</option>
+            <option value="complete">Complete Digital Marketing (Both)</option>
           </select>
           <input type="tel" placeholder="Phone Number" required />
           <textarea placeholder="Your Query" required></textarea>
