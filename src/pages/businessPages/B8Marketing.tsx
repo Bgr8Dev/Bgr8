@@ -6,6 +6,11 @@ import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } fro
 import { FaChartLine, FaBullhorn, FaCogs } from 'react-icons/fa';
 import '../../styles/businessStyles/B8Marketing.css';
 
+// Import company logos
+import company1 from '../../assets/Marketing/Hyundai.png';
+import company2 from '../../assets/Marketing/Surrey.png';
+import company3 from '../../assets/Marketing/Volkwagen.png';
+
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -121,9 +126,15 @@ export default function B8Marketing() {
       <section className="companies-worked-with">
         <h3>Companies We've Worked With</h3>
         <div className="company-logos">
-          <img src="/assets/company1-logo.png" alt="Company 1" />
-          <img src="/assets/company2-logo.png" alt="Company 2" />
-          <img src="/assets/company3-logo.png" alt="Company 3" />
+          <div className="logo-wrapper">
+            <img src={company1} alt="Company 1" />
+          </div>
+          <div className="logo-wrapper">
+            <img src={company2} alt="Company 2" />
+          </div>
+          <div className="logo-wrapper">
+            <img src={company3} alt="Company 3" />
+          </div>
         </div>
       </section>
 

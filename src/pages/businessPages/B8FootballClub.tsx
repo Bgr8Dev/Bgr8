@@ -34,6 +34,15 @@ export default function B8FootballClub() {
         </p>
       </section>
 
+            {/* Kit Shop Section */}
+            <section className="football-kit-shop">
+        <h3>Buy the Official B8 Kit</h3>
+        <div className="football-product-card" onClick={() => setIsModalOpen(true)}>
+          <img src="/assets/football1.jpg" alt="B8 Jersey" />
+          <p>B8 Official Jersey - $50</p>
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="football-hero">
         <h1>B8 Football Club</h1>
@@ -56,14 +65,7 @@ export default function B8FootballClub() {
         </div>
       </section>
 
-      {/* Kit Shop Section */}
-      <section className="football-kit-shop">
-        <h3>Buy the Official B8 Kit</h3>
-        <div className="football-product-card" onClick={() => setIsModalOpen(true)}>
-          <img src="/assets/football1.jpg" alt="B8 Jersey" />
-          <p>B8 Official Jersey - $50</p>
-        </div>
-      </section>
+
 
       {/* Modal */}
       {isModalOpen && (

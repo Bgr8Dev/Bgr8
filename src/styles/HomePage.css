@@ -1,5 +1,14 @@
 /* src/styles/HomePage.css */
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .homepage {
   min-height: 100vh;
   background-color: black;
@@ -66,11 +75,42 @@
   text-align: center;
   color: white;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .service-card:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 20px var(--hover-color, rgba(255, 0, 0, 0.3));
+}
+
+.service-card.restricted::before {
+  content: "COMING SOON";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  background: rgba(255, 0, 0, 0.9);
+  color: white;
+  padding: 1rem 5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  z-index: 1;
+  width: 200%;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.service-card.restricted {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.service-card.restricted .icon-container,
+.service-card.restricted h4,
+.service-card.restricted p {
+  filter: blur(2px);
 }
 
 .icon-container {
@@ -200,4 +240,8 @@
 
 .video-placeholder:hover {
   background-color: #333;
+}
+
+.service-card[href="/b8-football-club"]:hover .icon-container svg {
+  animation: spin 2s linear infinite;
 }
