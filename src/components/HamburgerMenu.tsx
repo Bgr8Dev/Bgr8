@@ -9,12 +9,11 @@ import logo from '../assets/B8-logo-transparent.png';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [, setShowUserMenu] = useState(true);
   const { currentUser, userProfile } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-    if (showUserMenu) setShowUserMenu(false);
   };
 
   const handleSignOut = async () => {
@@ -52,18 +51,16 @@ export default function HamburgerMenu() {
           <div className="mobile-auth-section">
             {currentUser ? (
               <div className="mobile-user-menu">
-                {showUserMenu && (
-                  <div className="mobile-user-submenu">
-                    <Link to="/profile" onClick={toggleMenu}>Profile</Link>
-                    <Link to="/settings" onClick={toggleMenu}>Settings</Link>
-                    {userProfile?.admin && (
-                      <Link to="/admin-portal" onClick={toggleMenu} className="admin-link">
-                        Admin Portal
-                      </Link>
-                    )}
-                    <button onClick={handleSignOut}>Sign Out</button>
-                  </div>
-                )}
+                <div className="mobile-user-submenu">
+                  <Link to="/profile" onClick={toggleMenu}>Profile</Link>
+                  <Link to="/settings" onClick={toggleMenu}>Settings</Link>
+                  {userProfile?.admin && (
+                    <Link to="/admin-portal" onClick={toggleMenu} className="admin-link">
+                      Admin Portal
+                    </Link>
+                  )}
+                  <button onClick={handleSignOut}>Sign Out</button>
+                </div>
               </div>
             ) : (
               <div className="mobile-auth-buttons">
