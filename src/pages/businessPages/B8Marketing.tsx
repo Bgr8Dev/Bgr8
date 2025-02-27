@@ -378,13 +378,19 @@ export default function B8Marketing() {
         <h3>Companies We've Worked With</h3>
         <div className="company-logos">
           <div className="logo-wrapper">
-            <img src={company1} alt="Company 1" />
+            <a href="https://www.hyundai.com/uk" target="_blank" rel="noopener noreferrer">
+              <img src={company1} alt="Hyundai" />
+            </a>
           </div>
           <div className="logo-wrapper">
-            <img src={company2} alt="Company 2" />
+            <a href="https://www.surrey.ac.uk/" target="_blank" rel="noopener noreferrer">
+              <img src={company2} alt="University of Surrey" />
+            </a>
           </div>
           <div className="logo-wrapper">
-            <img src={company3} alt="Company 3" />
+            <a href="https://www.volkswagen.co.uk/" target="_blank" rel="noopener noreferrer">
+              <img src={company3} alt="Volkswagen" />
+            </a>
           </div>
         </div>
       </section>
