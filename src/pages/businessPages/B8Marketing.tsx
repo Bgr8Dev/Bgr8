@@ -2,327 +2,91 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
-import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot, FaReact, FaNode, FaPython, FaJs, FaAndroid, FaApple, FaAngular, FaVuejs, FaStripe, FaRobot, FaServer, FaFire, FaMap, FaBrain, FaMicrochip } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import { renderIcon } from '../../utils/iconMapping';
 import '../../styles/businessStyles/B8Marketing.css';
-
-// Import company logos
-import company1 from '../../assets/Marketing/Hyundai.png';
-import company2 from '../../assets/Marketing/Surrey.png';
-import company3 from '../../assets/Marketing/Volkwagen.png';
-
-// Define categories and software
-const categories = [
-  "All",
-  "CMS",
-  "SEO & Analytics",
-  "Plugins",
-  "Digital Media",
-  "Developer Tools",
-  "Programming Languages",
-  "Frameworks",
-  "Cloud Services",
-  "Tech Solutions"
-];
-
-const marketingSoftware = [
-  // CMS
-  {
-    icon: <FaCamera size={40} />,
-    name: "Adobe Experience Manager",
-    description: "Enterprise-level content management system for building websites, mobile apps and forms",
-    category: "CMS"
-  },
-  {
-    icon: <FaWordpress size={40} />,
-    name: "WordPress",
-    description: "World's most popular CMS platform for website creation and content management",
-    category: "CMS"
-  },
-  {
-    icon: <FaHubspot size={40} />,
-    name: "HubSpot",
-    description: "All-in-one inbound marketing, sales, and CRM platform",
-    category: "CMS"
-  },
-
-  // SEO and Analytics
-  {
-    icon: <FaGoogle size={40} />,
-    name: "Google Analytics (GA4)",
-    description: "Advanced analytics platform for measuring website and app performance",
-    category: "SEO & Analytics"
-  },
-  {
-    icon: <FaSearchengin size={40} />,
-    name: "Google Search Console",
-    description: "Tool for monitoring and optimizing website's presence in Google Search results",
-    category: "SEO & Analytics"
-  },
-  {
-    icon: <FaChartLine size={40} />,
-    name: "Microsoft Clarity",
-    description: "Behavioral analytics tool for understanding how users interact with your website",
-    category: "SEO & Analytics"
-  },
-
-  // Plugins
-  {
-    icon: <FaStream size={40} />,
-    name: "Storystream",
-    description: "Visual content marketing platform for creating and managing social media content",
-    category: "Plugins"
-  },
-  {
-    icon: <FaChartLine size={40} />,
-    name: "ContentSquare",
-    description: "Digital experience analytics platform for understanding user behavior",
-    category: "Plugins"
-  },
-  {
-    icon: <FaStream size={40} />,
-    name: "Hootsuite",
-    description: "Social media management and scheduling platform",
-    category: "Plugins"
-  },
-  {
-    icon: <FaCalendarAlt size={40} />,
-    name: "Calendly",
-    description: "Automated scheduling software for streamlining meeting coordination",
-    category: "Plugins"
-  },
-
-  // Digital Media
-  {
-    icon: <FaCamera size={40} />,
-    name: "Adobe Suite",
-    description: "Professional creative tools including Photoshop and Premiere Pro",
-    category: "Digital Media"
-  },
-  {
-    icon: <FaVideo size={40} />,
-    name: "DaVinci Resolve",
-    description: "Professional video editing, color correction, and post-production software",
-    category: "Digital Media"
-  },
-  {
-    icon: <FaVideo size={40} />,
-    name: "CapCut",
-    description: "User-friendly video editing software for quick content creation",
-    category: "Digital Media"
-  },
-  {
-    icon: <FaPalette size={40} />,
-    name: "Canva",
-    description: "Online design platform for creating visual content",
-    category: "Digital Media"
-  },
-
-  // Developer Tools
-  {
-    icon: <FaCode size={40} />,
-    name: "Developer Tools",
-    description: "Suite of professional development tools and frameworks",
-    category: "Developer Tools"
-  },
-
-  // Programming Languages
-  {
-    icon: <FaJs size={40} />,
-    name: "JavaScript",
-    description: "Core web programming language for interactive applications",
-    category: "Programming Languages"
-  },
-  {
-    icon: <FaCode size={40} />,
-    name: "TypeScript",
-    description: "Typed superset of JavaScript for scalable applications",
-    category: "Programming Languages"
-  },
-  {
-    icon: <FaPython size={40} />,
-    name: "Python",
-    description: "Versatile language for web, AI, and data science",
-    category: "Programming Languages"
-  },
-
-  // Frameworks
-  {
-    icon: <FaReact size={40} />,
-    name: "React",
-    description: "Popular JavaScript library for building user interfaces",
-    category: "Frameworks"
-  },
-  {
-    icon: <FaAngular size={40} />,
-    name: "Angular",
-    description: "Comprehensive framework for enterprise applications",
-    category: "Frameworks"
-  },
-  {
-    icon: <FaVuejs size={40} />,
-    name: "Vue.js",
-    description: "Progressive framework for building user interfaces",
-    category: "Frameworks"
-  },
-  {
-    icon: <FaNode size={40} />,
-    name: "Node.js",
-    description: "JavaScript runtime for server-side development",
-    category: "Frameworks"
-  },
-  {
-    icon: <FaReact size={40} />,
-    name: "Next.js",
-    description: "React framework for production-grade applications",
-    category: "Frameworks"
-  },
-  {
-    icon: <FaVuejs size={40} />,
-    name: "Nuxt.js",
-    description: "Vue.js framework for universal applications",
-    category: "Frameworks"
-  },
-
-  // Mobile Development
-  {
-    icon: <FaAndroid size={40} />,
-    name: "Android Development",
-    description: "Native Android app development",
-    category: "Tech Solutions"
-  },
-  {
-    icon: <FaApple size={40} />,
-    name: "iOS Development",
-    description: "Native iOS app development",
-    category: "Tech Solutions"
-  },
-  {
-    icon: <FaReact size={40} />,
-    name: "React Native",
-    description: "Cross-platform mobile app development",
-    category: "Frameworks"
-  },
-
-  // Cloud Services
-  {
-    icon: <FaFire size={40} />,
-    name: "Firebase",
-    description: "Google's platform for app development",
-    category: "Cloud Services"
-  },
-  {
-    icon: <FaServer size={40} />,
-    name: "Vercel",
-    description: "Platform for frontend frameworks and static sites",
-    category: "Cloud Services"
-  },
-  {
-    icon: <FaServer size={40} />,
-    name: "Render",
-    description: "Cloud platform for web services and databases",
-    category: "Cloud Services"
-  },
-
-  // Tech Solutions
-  {
-    icon: <FaBrain size={40} />,
-    name: "OpenAI & API",
-    description: "Advanced AI and machine learning solutions",
-    category: "Tech Solutions"
-  },
-  {
-    icon: <FaRobot size={40} />,
-    name: "Chatbot Development",
-    description: "Custom chatbot solutions for businesses",
-    category: "Tech Solutions"
-  },
-  {
-    icon: <FaMap size={40} />,
-    name: "Google Maps API",
-    description: "Location-based services and mapping solutions",
-    category: "Tech Solutions"
-  },
-  {
-    icon: <FaStripe size={40} />,
-    name: "Stripe Integration",
-    description: "Payment processing solutions",
-    category: "Tech Solutions"
-  },
-  {
-    icon: <FaMicrochip size={40} />,
-    name: "Machine Learning",
-    description: "Custom ML solutions for business needs",
-    category: "Tech Solutions"
-  }
-];
+import {
+  getCategories,
+  getSoftware,
+  getServices,
+  getCompanies,
+  getPricingPlans
+} from '../../services/marketingService';
+import { 
+  MarketingCategory, 
+  MarketingSoftware, 
+  MarketingService, 
+  MarketingCompany, 
+  MarketingPricingPlan
+} from '../../types/marketing';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // State for storing data from Firestore
+  const [categories, setCategories] = useState<MarketingCategory[]>([]);
+  const [software, setSoftware] = useState<MarketingSoftware[]>([]);
+  const [services, setServices] = useState<MarketingService[]>([]);
+  const [companies, setCompanies] = useState<MarketingCompany[]>([]);
+  const [pricingPlans, setPricingPlans] = useState<MarketingPricingPlan[]>([]);
 
-  const filteredSoftware = marketingSoftware.filter(software => 
-    selectedCategory === "All" || software.category === selectedCategory
+  // Filter software based on selected category
+  const filteredSoftware = software.filter(item => 
+    (selectedCategory === "All" || item.category === selectedCategory) && item.isActive
   );
 
-  const pricingPlans = [
-    {
-      icon: <FaChartLine size={40} />,
-      title: 'Basic Marketing Package',
-      price: '$500/month',
-      description: 'Perfect for startups looking to establish their online presence.',
-    },
-    {
-      icon: <FaBullhorn size={40} />,
-      title: 'Advanced Marketing Strategy',
-      price: '$1500/month',
-      description: 'Ideal for growing businesses wanting aggressive growth strategies.',
-    },
-    {
-      icon: <FaCogs size={40} />,
-      title: 'Custom Campaigns',
-      price: 'Contact us for pricing',
-      description: 'Tailored solutions for unique marketing needs.',
-    },
-  ];
+  // Get active services
+  const activeServices = services.filter(service => service.isActive);
+  
+  // Get active companies
+  const activeCompanies = companies.filter(company => company.isActive);
+  
+  // Get active pricing plans
+  const activePricingPlans = pricingPlans.filter(plan => plan.isActive);
 
-  const marketingServices = [
-    {
-      category: 'Web Marketing',
-      icon: <FaGlobe size={40} />,
-      title: 'Digital Web Marketing',
-      services: [
-        'Search Engine Optimization (SEO)',
-        'Content Marketing Strategy',
-        'Email Marketing Campaigns',
-        'Google Ads Management',
-        'Website Analytics & Optimization',
-        'Landing Page Optimization'
-      ],
-      price: 'Starting from $1000/month'
-    },
-    {
-      category: 'Social Media',
-      icon: <FaHashtag size={40} />,
-      title: 'Social Media Marketing',
-      services: [
-        'Social Media Management',
-        'Influencer Partnerships',
-        'Content Creation & Scheduling',
-        'Community Engagement',
-        'Paid Social Advertising',
-        'Social Media Analytics'
-      ],
-      price: 'Starting from $800/month'
+  // Load all data from Firestore
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const [
+        categoriesData,
+        softwareData,
+        servicesData,
+        companiesData,
+        pricingPlansData
+      ] = await Promise.all([
+        getCategories(),
+        getSoftware(),
+        getServices(),
+        getCompanies(),
+        getPricingPlans()
+      ]);
+      
+      setCategories(categoriesData);
+      setSoftware(softwareData);
+      setServices(servicesData);
+      setCompanies(companiesData);
+      setPricingPlans(pricingPlansData);
+    } catch (error) {
+      console.error('Error loading marketing data:', error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
   useEffect(() => {
+    loadData();
+    
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Filter categories to only show active ones
+  const activeCategories = categories.filter(category => category.isActive);
 
   return (
     <ComingSoonOverlay businessId="marketing">
@@ -378,44 +142,48 @@ export default function B8Marketing() {
         {/* Companies We've Worked With */}
         <section className="companies-worked-with">
           <h3>Companies We've Worked With</h3>
-          <div className="company-logos">
-            <div className="logo-wrapper">
-              <a href="https://www.hyundai.com/uk" target="_blank" rel="noopener noreferrer">
-                <img src={company1} alt="Hyundai" />
-              </a>
+          {isLoading ? (
+            <div className="loading">Loading companies...</div>
+          ) : activeCompanies.length > 0 ? (
+            <div className="company-logos">
+              {activeCompanies.map(company => (
+                <div key={company.id} className="logo-wrapper">
+                  <a href={company.websiteUrl} target="_blank" rel="noopener noreferrer">
+                    <img src={company.imageUrl} alt={company.name} />
+                  </a>
+                </div>
+              ))}
             </div>
-            <div className="logo-wrapper">
-              <a href="https://www.surrey.ac.uk/" target="_blank" rel="noopener noreferrer">
-                <img src={company2} alt="University of Surrey" />
-              </a>
-            </div>
-            <div className="logo-wrapper">
-              <a href="https://www.volkswagen.co.uk/" target="_blank" rel="noopener noreferrer">
-                <img src={company3} alt="Volkswagen" />
-              </a>
-            </div>
-          </div>
+          ) : (
+            <p>No companies to display</p>
+          )}
         </section>
 
-        {/* Add this new section before the pricing section */}
+        {/* Marketing Services */}
         <section className="marketing-services">
           <h2>Our Marketing Solutions</h2>
-          <div className="services-container">
-            {marketingServices.map((service, index) => (
-              <div className="marketing-service-card" key={index}>
-                <div className="service-icon">{service.icon}</div>
-                <h3>{service.category}</h3>
-                <h4>{service.title}</h4>
-                <ul className="service-list">
-                  {service.services.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-                <p className="service-price">{service.price}</p>
-                <button className="learn-more-btn">Learn More</button>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="loading">Loading services...</div>
+          ) : activeServices.length > 0 ? (
+            <div className="services-container">
+              {activeServices.map((service) => (
+                <div className="marketing-service-card" key={service.id}>
+                  <div className="service-icon">{renderIcon(service.iconName)}</div>
+                  <h3>{service.category}</h3>
+                  <h4>{service.title}</h4>
+                  <ul className="service-list">
+                    {service.services.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                  <p className="service-price">{service.price}</p>
+                  <button className="learn-more-btn">Learn More</button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No services to display</p>
+          )}
         </section>
 
         {/* Software Tools Section */}
@@ -423,43 +191,59 @@ export default function B8Marketing() {
           <h2>Our Marketing Tech Stack</h2>
           <p>We use industry-leading software to deliver exceptional results</p>
           
-          <div className="category-filter">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          <div className="software-grid">
-            {filteredSoftware.map((software, index) => (
-              <div className="software-card" key={index}>
-                <div className="software-icon">{software.icon}</div>
-                <h4>{software.name}</h4>
-                <p className="software-category">{software.category}</p>
-                <p className="software-description">{software.description}</p>
+          {isLoading ? (
+            <div className="loading">Loading tech stack...</div>
+          ) : (
+            <>
+              <div className="category-filter">
+                {activeCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(category.name)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+
+              <div className="software-grid">
+                {filteredSoftware.length > 0 ? (
+                  filteredSoftware.map((software) => (
+                    <div className="software-card" key={software.id}>
+                      <div className="software-icon">{renderIcon(software.iconName)}</div>
+                      <h4>{software.name}</h4>
+                      <p className="software-category">{software.category}</p>
+                      <p className="software-description">{software.description}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>No software to display for this category</p>
+                )}
+              </div>
+            </>
+          )}
         </section>
 
         {/* Pricing List */}
         <section className="pricing-list">
           <h3>Our Pricing</h3>
-          <div className="pricing-cards">
-            {pricingPlans.map((plan, index) => (
-              <div className="pricing-card" key={index}>
-                <div className="icon-container">{plan.icon}</div>
-                <h4>{plan.title}</h4>
-                <p className="price">{plan.price}</p>
-                <p className="description">{plan.description}</p>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="loading">Loading pricing plans...</div>
+          ) : activePricingPlans.length > 0 ? (
+            <div className="pricing-cards">
+              {activePricingPlans.map((plan) => (
+                <div className="pricing-card" key={plan.id}>
+                  <div className="icon-container">{renderIcon(plan.iconName)}</div>
+                  <h4>{plan.title}</h4>
+                  <p className="price">{plan.price}</p>
+                  <p className="description">{plan.description}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No pricing plans to display</p>
+          )}
         </section>
 
         {/* Links to Social Channels */}
@@ -481,9 +265,11 @@ export default function B8Marketing() {
             <input type="email" placeholder="Your Email" required />
             <select className="service-picker" required>
               <option value="">Select a Service</option>
-              <option value="social">Social Media Marketing</option>
-              <option value="web">Digital Web Marketing</option>
-              <option value="complete">Complete Digital Marketing (Both)</option>
+              {activeServices.map(service => (
+                <option key={service.id} value={service.title.toLowerCase().replace(/\s+/g, '-')}>
+                  {service.title}
+                </option>
+              ))}
             </select>
             <input type="tel" placeholder="Phone Number" required />
             <textarea placeholder="Your Query" required></textarea>
