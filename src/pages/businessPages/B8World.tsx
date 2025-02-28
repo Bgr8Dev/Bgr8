@@ -284,6 +284,31 @@ export default function B8World() {
               </div>
             </div>
             
+            {/* Add donation summary section here */}
+            {donationAmount && (
+              <div className="donation-summary">
+                <h3>Your Donation</h3>
+                <div className="summary-box">
+                  <div className="summary-amount">
+                    <span className="currency">£</span>
+                    <span className="amount">{donationAmount}</span>
+                  </div>
+                  <p className="summary-text">Thank you for supporting our global initiatives! Your contribution will help make a difference with our charity partners.</p>
+                  <div className="impact-info">
+                    {Number(donationAmount) >= 100 ? (
+                      <p>This generous donation could help provide emergency relief kits for families in crisis.</p>
+                    ) : Number(donationAmount) >= 50 ? (
+                      <p>This donation could help provide medical supplies for vulnerable communities.</p>
+                    ) : Number(donationAmount) >= 25 ? (
+                      <p>This donation could help supply educational materials for children in need.</p>
+                    ) : (
+                      <p>Every contribution, no matter the size, helps us support our charitable partners.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="donor-info-section">
               <h3>Your Information</h3>
               
