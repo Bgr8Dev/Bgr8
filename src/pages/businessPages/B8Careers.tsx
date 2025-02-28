@@ -9,7 +9,6 @@ import Footer from '../../components/Footer';
 import { CvFormData } from '../../types/careers';
 import '../../styles/businessStyles/B8Careers.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import ContactForm from '../../components/ContactForm';
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

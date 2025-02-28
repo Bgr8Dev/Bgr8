@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import '../../styles/businessStyles/B8Education.css';
-import ContactForm from '../../components/ContactForm';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 
 export default function B8Education() {
