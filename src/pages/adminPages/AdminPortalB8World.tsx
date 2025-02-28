@@ -1,6 +1,3 @@
-import React from 'react';
-import { BusinessSection } from '../../components/admin/BusinessSection';
-import { BusinessStats } from '../../types/admin';
 
 interface AdminPortalB8WorldProps {
   stats: { totalMembers: number; activeMembers: number; revenue: number; engagement: number };

@@ -1,5 +1,4 @@
 // src/Navigation.tsx
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import B8Marketing from '../pages/businessPages/B8Marketing';
@@ -18,7 +17,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
 import AdminPortal from '../pages/AdminPortal';
-import ProtectedRoute from '../components/ProtectedRoute';
+import React, { ReactElement } from 'react';
 
 // Video Library
 // import VideoLibrary from '../pages/VideosLibrary';
@@ -50,7 +49,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 // import SocialFeed from '../pages/SocialFeed';
 
 // Check if the user has the required permission
-function hasPermission(user: any, permission: string) {
+function hasPermission(user: Record<string, any> | null, permission: string) {
   if (!user) return false;
 
   switch (permission) {
@@ -72,8 +71,8 @@ function hasPermission(user: any, permission: string) {
 }
 
 // Protected route component
-function ProtectedRoute({ element, permission }: { element: JSX.Element, permission?: string }) {
-  const { user } = useAuth();
+function ProtectedRoute({ children, permission }: { children: ReactElement, permission?: string }) {
+  const { currentUser: user } = useAuth();
 
   // If a permission is specified, check if the user has it
   if (permission && !hasPermission(user, permission)) {
@@ -82,10 +81,10 @@ function ProtectedRoute({ element, permission }: { element: JSX.Element, permiss
 
   // If the user is not logged in, redirect to login
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/signin" />;
   }
 
-  return element;
+  return children;
 }
 
 export default function Navigation() {
@@ -127,7 +126,7 @@ export default function Navigation() {
       <Route 
         path="/admin-portal" 
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute permission="admin">
             <AdminPortal />
           </ProtectedRoute>
         } 
