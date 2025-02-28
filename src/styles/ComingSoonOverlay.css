@@ -11,7 +11,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4); /* Darker semi-transparent overlay */
+  background-color: rgba(0, 0, 0, 0.8); /* Darker semi-transparent overlay */
   z-index: 90; /* Higher than content but lower than overlay elements */
   pointer-events: none; /* Allow clicks to pass through to the content */
 }

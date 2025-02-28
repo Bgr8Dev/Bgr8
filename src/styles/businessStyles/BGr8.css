@@ -1,5 +1,5 @@
 /* src/styles/Pages.css */
-.page {
+.bgr8-page {
     min-height: 100vh;
     background-color: black;
     color: white;
@@ -7,44 +7,44 @@
     padding: 2rem;
   }
   
-  .hero {
+  .bgr8-hero {
     text-align: center;
     padding: 4rem 1.5rem;
   }
   
-  .hero h1 {
+  .bgr8-hero h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
     color: white;
   }
   
-  .hero p {
+  .bgr8-hero p {
     font-size: 1.2rem;
     color: gray;
     max-width: 600px;
     margin: 0 auto 2rem;
   }
   
-  .gallery {
+  .bgr8-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin: 2rem 0;
   }
   
-  .gallery img {
+  .bgr8-gallery img {
     width: 100%;
     height: auto;
     border-radius: 10px;
     transition: transform 0.3s;
   }
   
-  .gallery img:hover {
+  .bgr8-gallery img:hover {
     transform: scale(1.05);
     box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
   }
 
-.hero-video, .intro-section, .social-links, .calendar-section {
+.bgr8-hero-video, .bgr8-intro-section, .bgr8-social-links, .bgr8-calendar-section {
     background-color: #111;
     padding: 2rem;
     margin: 1rem 0;
@@ -52,7 +52,7 @@
     border-radius: 10px;
   }
   
-  .video-placeholder {
+  .bgr8-video-placeholder {
     background-color: #222;
     padding: 4rem;
     border: 2px dashed gray;
@@ -60,7 +60,7 @@
     border-radius: 10px;
   }
   
-  .gallery-item {
+  .bgr8-gallery-item {
     margin-bottom: 1rem;
   }
   
@@ -75,7 +75,7 @@
     color: #FFD700;
   }
   
-  .calendar-link {
+  .bgr8-calendar-link {
     display: inline-block;
     padding: 1rem 2rem;
     background: linear-gradient(to right, #FFD700, #DAA520);
@@ -85,11 +85,11 @@
     transition: background 0.3s ease;
   }
   
-  .calendar-link:hover {
+  .bgr8-calendar-link:hover {
     background: linear-gradient(to right, #DAA520, #FFD700);
   }
   
-.medical-section {
+.bgr8-medical-section {
   background-color: #111;
   padding: 2rem;
   margin: 2rem 0;
@@ -97,7 +97,7 @@
   border-radius: 10px;
 }
 
-.medical-button {
+.bgr8-medical-button {
   padding: 1rem 2rem;
   background: linear-gradient(to right, #FFD700, #DAA520);
   color: black;
@@ -109,9 +109,18 @@
   margin-top: 1rem;
 }
 
-.medical-button:hover {
+.bgr8-medical-button:hover {
   background: linear-gradient(to right, #DAA520, #FFD700);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+/* Add styles for the contact section */
+.bgr8-contact-section {
+  background-color: #111;
+  padding: 2rem;
+  margin: 2rem 0;
+  text-align: center;
+  border-radius: 10px;
 }
   
