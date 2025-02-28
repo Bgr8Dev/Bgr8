@@ -54,10 +54,112 @@
     box-shadow: 10px 10px 10px rgba(255, 0, 0, 0.4);
   }
   
+  /* Glitch effect for question marks */
+  @keyframes glitch {
+    0% {
+      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                  -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                  -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+      transform: translate(0);
+    }
+    14% {
+      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                  -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                  -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    15% {
+      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                  0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                  -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    49% {
+      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                  0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                  -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    50% {
+      text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                  0.05em 0 0 rgba(0, 255, 0, 0.75),
+                  0 -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    99% {
+      text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                  0.05em 0 0 rgba(0, 255, 0, 0.75),
+                  0 -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    100% {
+      text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                  -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                  -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+      transform: translate(0.025em, 0.0125em);
+    }
+  }
+
+  @keyframes glitchHover {
+    0% {
+      clip-path: inset(80% 0 0 0);
+    }
+    20% {
+      clip-path: inset(20% 0 80% 0);
+    }
+    40% {
+      clip-path: inset(20% 0 20% 0);
+    }
+    60% {
+      clip-path: inset(40% 0 40% 0);
+    }
+    80% {
+      clip-path: inset(80% 0 80% 0);
+    }
+    100% {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .glitch-link {
+    position: relative;
+    animation: glitch 2.5s infinite linear;
+    color: #8B4513;
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    letter-spacing: 2px;
+    font-weight: bold;
+  }
+
+  .glitch-link:hover {
+    animation: glitch 0.3s infinite;
+    background-color: #111 !important;
+    color: #f0f !important;
+    box-shadow: 0 0 10px #f0f, 0 0 20px #f0f !important;
+  }
+
+  .glitch-link::before,
+  .glitch-link::after {
+    position: absolute;
+    overflow: hidden;
+    background: #111;
+    color: #8B4513;
+  }
+
+  .glitch-link::before {
+    left: 3px;
+    text-shadow: -1px 0 red;
+    animation: glitchHover 2s infinite linear alternate-reverse;
+  }
+
+  .glitch-link::after {
+    left: -3px;
+    text-shadow: -1px 0 blue;
+    animation: glitchHover 3s infinite linear alternate-reverse;
+  }
+
   .nav a[href="/b8-clothing"]:hover {
-    background-color: #8B4513;
-    color: white;
-    box-shadow: 10px 10px 10px rgba(139, 69, 19, 0.4);
+    background-color: transparent; /* Override default hover */
+  }
+  
+  .mobile-nav a[href="/b8-clothing"]:hover {
+    background-color: transparent; /* Override default hover for mobile */
   }
   
   .nav a[href="/b8-league"]:hover {
@@ -126,7 +228,7 @@
   .mobile-nav a[href="/b8-marketing"]:hover { background-color: #FFFFFF; color: black; }
   .mobile-nav a[href="/bgr8"]:hover { background-color: #FFD700; color: black; }
   .mobile-nav a[href="/b8-car-club"]:hover { background-color: #FF0000; color: white; }
-  .mobile-nav a[href="/b8-clothing"]:hover { background-color: #8B4513; color: white; }
+  .mobile-nav a[href="/b8-clothing"]:hover { background-color: transparent; }
   .mobile-nav a[href="/b8-league"]:hover { background-color: #800080; color: white; }
   .mobile-nav a[href="/b8-world"]:hover { background-color: #0000FF; color: white; }
   .mobile-nav a[href="/b8-education"]:hover { background-color: #008000; color: white; }

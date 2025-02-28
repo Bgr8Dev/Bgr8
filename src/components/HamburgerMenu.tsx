@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../contexts/AuthContext';
+import { useBusinessAccess } from '../contexts/BusinessAccessContext';
 import '../styles/Navbar.css';
 import logo from '../assets/B8-logo-transparent.png';
 
@@ -11,6 +12,7 @@ export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [, setShowUserMenu] = useState(true);
   const { currentUser, userProfile } = useAuth();
+  const { isBusinessAccessible } = useBusinessAccess();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -76,14 +78,14 @@ export default function HamburgerMenu() {
 
           <nav className="mobile-nav">
             <Link to="/" onClick={toggleMenu}>Home</Link>
-            <Link to="/b8-marketing" onClick={toggleMenu}>B8 Marketing</Link>
-            <Link to="/bgr8" onClick={toggleMenu}>Bgr8</Link>
-            <Link to="/b8-car-club" onClick={toggleMenu}>B8 Car Club</Link>
-            <Link to="/b8-clothing" onClick={toggleMenu}>B8 Clothing</Link>
-            <Link to="/b8-league" onClick={toggleMenu}>B8 League</Link>
-            <Link to="/b8-world" onClick={toggleMenu}>B8 World</Link>
-            <Link to="/b8-education" onClick={toggleMenu}>B8 Education</Link>
-            <Link to="/b8-careers" onClick={toggleMenu}>B8 Careers</Link>
+            {isBusinessAccessible('marketing') && <Link to="/b8-marketing" onClick={toggleMenu}>B8 Marketing</Link>}
+            {isBusinessAccessible('bgr8') && <Link to="/bgr8" onClick={toggleMenu}>Bgr8</Link>}
+            {isBusinessAccessible('carClub') && <Link to="/b8-car-club" onClick={toggleMenu}>B8 Car Club</Link>}
+            {isBusinessAccessible('clothing') && <Link to="/b8-clothing" onClick={toggleMenu} className="glitch-link">??????????</Link>}
+            {isBusinessAccessible('league') && <Link to="/b8-league" onClick={toggleMenu}>B8 League</Link>}
+            {isBusinessAccessible('world') && <Link to="/b8-world" onClick={toggleMenu}>B8 World</Link>}
+            {isBusinessAccessible('education') && <Link to="/b8-education" onClick={toggleMenu}>B8 Education</Link>}
+            {isBusinessAccessible('careers') && <Link to="/b8-careers" onClick={toggleMenu}>B8 Careers</Link>}
           </nav>
         </div>
       )}

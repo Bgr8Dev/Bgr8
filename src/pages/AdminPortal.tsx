@@ -26,6 +26,7 @@ import { AdminPortalB8World } from './adminPages/AdminPortalB8World';
 import { AdminPortalB8Education } from './adminPages/AdminPortalB8Education';
 import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
 import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
+import { AdminSettings } from './adminPages/AdminSettings';
 
 // Register ChartJS components
 ChartJS.register(
@@ -490,7 +491,7 @@ export default function AdminPortal() {
         {activeSection === 'settings' && (
           <div className="admin-section">
             <h2>Admin Settings</h2>
-            {/* Add admin settings here */}
+            <AdminSettings />
           </div>
         )}
 

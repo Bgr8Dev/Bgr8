@@ -178,6 +178,39 @@ export default function B8World() {
           <button onClick={handleDonationClick}>Donate Now</button>
         </section>
 
+        {/* Fundraiser Progress */}
+        <section className="fundraiser-section">
+          <h2>Current Fundraising Campaign</h2>
+          <p>Join our mission to make a difference around the world. Every contribution brings us closer to our goal.</p>
+          
+          <div className="fundraiser-stats">
+            <div className="stat-card">
+              <span className="stat-value">£0</span>
+              <span className="stat-label">Raised so far</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-value">£50,000</span>
+              <span className="stat-label">Campaign goal</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-value">0</span>
+              <span className="stat-label">Donors</span>
+            </div>
+          </div>
+          
+          <div className="fundraiser-progress-container">
+            <div className="fundraiser-progress-bar">
+              <div className="fundraiser-progress" style={{ width: '0%' }}></div>
+            </div>
+            <div className="fundraiser-percentage">0% Complete</div>
+          </div>
+          
+          <div className="fundraiser-description">
+            <p>Our current fundraising campaign aims to provide emergency relief, medical supplies, and educational resources to communities in need. While we're not actively collecting donations yet, we're preparing to launch this initiative soon.</p>
+            <p>Check back for updates on our campaign and how your contributions will make an impact.</p>
+          </div>
+        </section>
+
         {/* World Partners Section */}
         <section className="world-partners-showcase">
           <h2>Our Global Partners</h2>

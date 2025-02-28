@@ -32,6 +32,7 @@ export interface UserProfile {
   dateCreated: Date;
   lastUpdated: Date;
   admin: boolean;
+  developer: boolean;
   
   preferences: UserPreferences;
   security: UserSecurity;
@@ -86,6 +87,7 @@ export const createUserProfile = async (
     dateCreated: new Date(),
     lastUpdated: new Date(),
     admin: false,
+    developer: false,
     preferences: {
       marketingEmails: true,
       notifications: true,
