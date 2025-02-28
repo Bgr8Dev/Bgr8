@@ -33,7 +33,7 @@ export default function Navbar() {
         <Link to="/bgr8">Bgr8</Link>
         <Link to="/b8-car-club">B8 Car Club</Link>
         <Link to="/b8-clothing">B8 Clothing</Link>
-        <Link to="/b8-football-club">B8 Football Club</Link>
+        <Link to="/b8-league">B8 League</Link>
         <Link to="/b8-charity">B8 Charity</Link>
         <Link to="/b8-education">B8 Education</Link>
         <Link to="/b8-careers">B8 Careers</Link>

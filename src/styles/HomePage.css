@@ -242,6 +242,6 @@
   background-color: #333;
 }
 
-.service-card[href="/b8-football-club"]:hover .icon-container svg {
+.service-card[href="/b8-league"]:hover .icon-container svg {
   animation: spin 2s linear infinite;
 }

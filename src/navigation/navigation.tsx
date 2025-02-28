@@ -5,7 +5,7 @@ import B8Marketing from '../pages/businessPages/B8Marketing';
 import BGr8 from '../pages/businessPages/BGr8';
 import B8CarClub from '../pages/businessPages/B8CarClub';
 import B8Clothing from '../pages/businessPages/B8Clothing';
-import B8FootballClub from '../pages/businessPages/B8FootballClub';
+import B8League from '../pages/businessPages/B8League';
 import B8Charity from '../pages/businessPages/B8Charity';
 import B8Education from '../pages/businessPages/B8Education';
 import B8Careers from '../pages/businessPages/B8Careers';
@@ -32,7 +32,7 @@ export default function Navigation() {
       <Route path="/bgr8" element={<BGr8 />} />
       <Route path="/b8-car-club" element={<B8CarClub />} />
       <Route path="/b8-clothing" element={<B8Clothing />} />
-      <Route path="/b8-football-club" element={<B8FootballClub />} />
+      <Route path="/b8-league" element={<B8League />} />
       <Route path="/b8-charity" element={<B8Charity />} />
       <Route path="/b8-education" element={<B8Education />} />
       <Route path="/b8-careers" element={<B8Careers />} />

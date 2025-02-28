@@ -60,7 +60,7 @@
     box-shadow: 10px 10px 10px rgba(139, 69, 19, 0.4);
   }
   
-  .nav a[href="/b8-football-club"]:hover {
+  .nav a[href="/b8-league"]:hover {
     background-color: #800080;
     color: white;
     box-shadow: 10px 10px 10px rgba(128, 0, 128, 0.4);
@@ -128,7 +128,7 @@
   .mobile-nav a[href="/bgr8"]:hover { background-color: #FFD700; color: black; }
   .mobile-nav a[href="/b8-car-club"]:hover { background-color: #FF0000; color: white; }
   .mobile-nav a[href="/b8-clothing"]:hover { background-color: #8B4513; color: white; }
-  .mobile-nav a[href="/b8-football-club"]:hover { background-color: #800080; color: white; }
+  .mobile-nav a[href="/b8-league"]:hover { background-color: #800080; color: white; }
   .mobile-nav a[href="/b8-charity"]:hover { background-color: #0000FF; color: white; }
   .mobile-nav a[href="/b8-education"]:hover { background-color: #008000; color: white; }
   .mobile-nav a[href="/b8-careers"]:hover { background-color: #000000; color: white; }

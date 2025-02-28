@@ -41,7 +41,7 @@ export interface UserProfile {
     marketing: boolean;
     carClub: boolean;
     clothing: boolean;
-    footballClub: boolean;
+    league: boolean;
     charity: boolean;
     education: boolean;
     careers: boolean;
@@ -102,7 +102,7 @@ export const createUserProfile = async (
       marketing: false,
       carClub: false,
       clothing: false,
-      footballClub: false,
+      league: false,
       charity: false,
       education: false,
       careers: false
