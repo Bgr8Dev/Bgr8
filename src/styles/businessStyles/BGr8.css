@@ -64,15 +64,35 @@
     margin-bottom: 1rem;
   }
   
+  .bgr8-social-links {
+    background-color: #111;
+    padding: 2rem;
+    margin: 2rem 0;
+    text-align: center;
+    border-radius: 10px;
+  }
+  
+  .bgr8-social-media {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
   .bgr8-social-media a {
     font-size: 2rem;
     color: white;
     margin: 0 1rem;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .bgr8-social-media a:hover {
     color: #FFD700;
+    transform: translateY(-5px);
   }
   
   .bgr8-calendar-link {

@@ -131,7 +131,7 @@
     animation: glitch 0.3s infinite;
     background-color: #111 !important;
     color: #f0f !important;
-    box-shadow: 0 0 10px #f0f, 0 0 20px #f0f !important;
+    box-shadow: 0 0 10px rgba(139, 69, 19, 1), 0 0 20px rgba(139, 69, 19, 1) !important;
   }
 
   .glitch-link::before,
