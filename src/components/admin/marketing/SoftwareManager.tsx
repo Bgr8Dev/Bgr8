@@ -7,8 +7,8 @@ import {
   getCategories
 } from '../../../services/marketingService';
 import { MarketingSoftware, MarketingCategory } from '../../../types/marketing';
-import { getAvailableIcons, renderIcon, IconPicker } from '../../../utils/iconMapping';
-import { FaPlus, FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
+import { renderIcon, IconPicker } from '../../../utils/iconMapping';
+import { FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 
 export const SoftwareManager: React.FC = () => {
   const [software, setSoftware] = useState<MarketingSoftware[]>([]);

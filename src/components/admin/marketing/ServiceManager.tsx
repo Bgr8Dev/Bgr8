@@ -7,7 +7,7 @@ import {
 } from '../../../services/marketingService';
 import { MarketingService } from '../../../types/marketing';
 import { renderIcon, IconPicker } from '../../../utils/iconMapping';
-import { FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaPlus, FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaPlus, FaTimes } from 'react-icons/fa';
 
 export const ServiceManager: React.FC = () => {
   const [services, setServices] = useState<MarketingService[]>([]);

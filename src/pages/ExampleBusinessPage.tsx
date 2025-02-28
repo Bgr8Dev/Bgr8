@@ -1,4 +1,3 @@
-import React from 'react';
 import { ComingSoonOverlay } from '../components/ComingSoonOverlay';
 
 /**

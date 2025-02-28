@@ -86,14 +86,15 @@ export const CompanyManager: React.FC = () => {
         name: formData.name,
         websiteUrl: formData.websiteUrl,
         imageUrl,
-        isActive: formData.isActive
+        isActive: formData.isActive,
+        imagePath: imageUrl
       };
       
-      const companyId = await addCompany(companyData, imageUrl);
+      const companyId = await addCompany(companyData, selectedFile);
       setUploadProgress(100);
       
       if (companyId) {
-        setCompanies([...companies, { id: companyId, ...companyData, imagePath: imageUrl }]);
+        setCompanies([...companies, { id: companyId, ...companyData }]);
         // Reset form
         setFormData({
           name: '',
