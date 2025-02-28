@@ -6,7 +6,7 @@ import {
   deleteCompany
 } from '../../../services/marketingService';
 import { MarketingCompany } from '../../../types/marketing';
-import { FaPlus, FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaCheck, FaTimes, FaLink } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaLink } from 'react-icons/fa';
 import { storage } from '../../../firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -18,7 +18,8 @@ export const CompanyManager: React.FC = () => {
   const [formData, setFormData] = useState<Omit<MarketingCompany, 'id' | 'imageUrl'> & { imageUrl?: string }>({
     name: '',
     websiteUrl: '',
-    isActive: true
+    isActive: true,
+    imagePath: '' // Added missing required field
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -88,16 +89,17 @@ export const CompanyManager: React.FC = () => {
         isActive: formData.isActive
       };
       
-      const companyId = await addCompany(companyData);
+      const companyId = await addCompany(companyData, imageUrl);
       setUploadProgress(100);
       
       if (companyId) {
-        setCompanies([...companies, { id: companyId, ...companyData }]);
+        setCompanies([...companies, { id: companyId, ...companyData, imagePath: imageUrl }]);
         // Reset form
         setFormData({
           name: '',
           websiteUrl: '',
-          isActive: true
+          isActive: true,
+          imagePath: ''
         });
         setSelectedFile(null);
         
@@ -119,7 +121,7 @@ export const CompanyManager: React.FC = () => {
     setFormData({
       name: company.name,
       websiteUrl: company.websiteUrl,
-      imageUrl: company.imageUrl,
+      imagePath: company.imageUrl,
       isActive: company.isActive
     });
     setIsEditing(true);
@@ -151,10 +153,11 @@ export const CompanyManager: React.FC = () => {
         name: formData.name,
         websiteUrl: formData.websiteUrl,
         imageUrl: imageUrl as string,
+        imagePath: imageUrl as string,
         isActive: formData.isActive
       };
       
-      const success = await updateCompany(updatedCompany);
+      const success = await updateCompany(editingId, updatedCompany);
       setUploadProgress(100);
       
       if (success) {
@@ -163,12 +166,12 @@ export const CompanyManager: React.FC = () => {
         setFormData({
           name: '',
           websiteUrl: '',
+          imagePath: '',
           isActive: true
         });
         setSelectedFile(null);
         setEditingId(null);
         setIsEditing(false);
-        
         // Reset file input
         const fileInput = document.getElementById('company-logo') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
@@ -193,7 +196,8 @@ export const CompanyManager: React.FC = () => {
         isActive: !companyToUpdate.isActive
       };
 
-      const success = await updateCompany(updatedCompany);
+      const success = await updateCompany(id, updatedCompany);
+
       if (success) {
         setCompanies(companies.map(co => co.id === id ? updatedCompany : co));
       }
@@ -242,7 +246,8 @@ export const CompanyManager: React.FC = () => {
     setFormData({
       name: '',
       websiteUrl: '',
-      isActive: true
+      isActive: true,
+      imagePath: ''
     });
     setSelectedFile(null);
     

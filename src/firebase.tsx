@@ -21,6 +21,9 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Analytics helper function
-export const logAnalyticsEvent = (eventName: string, eventParams?: Record<string, any>) => {
+export const logAnalyticsEvent = (
+  eventName: string, 
+  eventParams?: Record<string, string | number | boolean | null>
+) => {
   logEvent(analytics, eventName, eventParams);
 }; 

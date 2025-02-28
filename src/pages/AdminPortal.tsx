@@ -2,63 +2,30 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus } from 'react-icons/fa';
-import { Line, Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
 import { AdminPortalB8CarClub } from './adminPages/AdminPortalB8CarClub';
 import { AdminPortalB8Clothing } from './adminPages/AdminPortalB8Clothing';
-import { AdminPortalB8League } from './adminPages/AdminPortalB8League';
 import { AdminPortalB8World } from './adminPages/AdminPortalB8World';
 import { AdminPortalB8Education } from './adminPages/AdminPortalB8Education';
 import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
 import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 import { AdminSettings } from './adminPages/AdminSettings';
+import AdminAnalytics from './adminPages/AdminAnalytics';
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-interface UserData extends Record<string, any> {
+interface UserData {
   uid: string;
   email: string;
   firstName: string;
   lastName: string;
   admin: boolean;
-  dateCreated: any;
+  dateCreated: Timestamp;
   lastLogin?: Date;
-}
-
-interface AnalyticsData {
-  userGrowth: {
-    labels: string[];
-    data: number[];
-  };
-  activeUsers: {
-    labels: string[];
-    data: number[];
-  };
+  b8Memberships?: Record<string, boolean>;
+  [key: string]: unknown; // For other potential properties
 }
 
 interface BusinessStats {
@@ -79,10 +46,6 @@ export default function AdminPortal() {
     total: 0,
     admins: 0,
     newThisMonth: 0
-  });
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
-    userGrowth: { labels: [], data: [] },
-    activeUsers: { labels: [], data: [] }
   });
   const [businessStats, setBusinessStats] = useState<Record<string, BusinessStats>>({
     marketing: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
@@ -113,7 +76,6 @@ export default function AdminPortal() {
     }
 
     fetchUsers();
-    calculateAnalytics();
     fetchBusinessStats();
   }, [userProfile, navigate]);
 
@@ -150,64 +112,6 @@ export default function AdminPortal() {
     }
   };
 
-  const calculateAnalytics = async () => {
-    try {
-      // Get all users ordered by creation date
-      const usersRef = collection(db, 'users');
-      const usersSnapshot = await getDocs(query(usersRef, orderBy('dateCreated', 'asc')));
-      
-      // Calculate user growth over time
-      const userGrowthData: { [key: string]: number } = {};
-      const activeUsersData: { [key: string]: number } = {};
-      
-      // Get last 6 months
-      const months = Array.from({length: 6}, (_, i) => {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        return date.toLocaleString('default', { month: 'short', year: '2-digit' });
-      }).reverse();
-      
-      // Initialize data objects with 0s
-      months.forEach(month => {
-        userGrowthData[month] = 0;
-        activeUsersData[month] = 0;
-      });
-
-      // Calculate user growth
-      usersSnapshot.forEach(doc => {
-        const userData = doc.data();
-        const creationDate = userData.dateCreated?.toDate();
-        const month = creationDate.toLocaleString('default', { month: 'short', year: '2-digit' });
-        
-        if (userGrowthData[month] !== undefined) {
-          userGrowthData[month]++;
-        }
-
-        // Calculate active users (users who logged in during each month)
-        const lastLogin = userData.lastLogin?.toDate();
-        if (lastLogin) {
-          const loginMonth = lastLogin.toLocaleString('default', { month: 'short', year: '2-digit' });
-          if (activeUsersData[loginMonth] !== undefined) {
-            activeUsersData[loginMonth]++;
-          }
-        }
-      });
-
-      setAnalyticsData({
-        userGrowth: {
-          labels: months,
-          data: months.map(month => userGrowthData[month])
-        },
-        activeUsers: {
-          labels: months,
-          data: months.map(month => activeUsersData[month])
-        }
-      });
-    } catch (error) {
-      console.error('Error calculating analytics:', error);
-    }
-  };
-
   const fetchBusinessStats = async () => {
     try {
       const usersRef = collection(db, 'users');
@@ -232,54 +136,6 @@ export default function AdminPortal() {
       setBusinessStats(stats);
     } catch (error) {
       console.error('Error fetching business stats:', error);
-    }
-  };
-
-  const userGrowthOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: 'New Users per Month',
-        color: 'white'
-      }
-    },
-    scales: {
-      y: {
-        ticks: { color: 'white' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' }
-      },
-      x: {
-        ticks: { color: 'white' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' }
-      }
-    }
-  };
-
-  const activeUsersOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: 'Active Users per Month',
-        color: 'white'
-      }
-    },
-    scales: {
-      y: {
-        ticks: { color: 'white' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' }
-      },
-      x: {
-        ticks: { color: 'white' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' }
-      }
     }
   };
 
@@ -310,7 +166,7 @@ export default function AdminPortal() {
       case 'clothing':
         return <AdminPortalB8Clothing />;
       case 'league':
-        return <AdminPortalB8League stats={businessStats.league} />;
+        return <div>B8 League component is under development</div>;
       case 'world':
         return <AdminPortalB8World stats={businessStats.world} />;
       case 'education':
@@ -446,45 +302,7 @@ export default function AdminPortal() {
 
         {activeSection === 'analytics' && (
           <div className="admin-section">
-            <h2>Analytics</h2>
-            <div className="analytics-cards">
-              <div className="analytics-card">
-                <h3>User Growth</h3>
-                <Line
-                  data={{
-                    labels: analyticsData.userGrowth.labels,
-                    datasets: [
-                      {
-                        label: 'New Users',
-                        data: analyticsData.userGrowth.data,
-                        borderColor: '#4CAF50',
-                        backgroundColor: 'rgba(76, 175, 80, 0.5)',
-                        tension: 0.4
-                      }
-                    ]
-                  }}
-                  options={userGrowthOptions}
-                />
-              </div>
-              <div className="analytics-card">
-                <h3>Active Users</h3>
-                <Bar
-                  data={{
-                    labels: analyticsData.activeUsers.labels,
-                    datasets: [
-                      {
-                        label: 'Active Users',
-                        data: analyticsData.activeUsers.data,
-                        backgroundColor: 'rgba(33, 150, 243, 0.5)',
-                        borderColor: '#2196F3',
-                        borderWidth: 1
-                      }
-                    ]
-                  }}
-                  options={activeUsersOptions}
-                />
-              </div>
-            </div>
+            <AdminAnalytics />
           </div>
         )}
 
