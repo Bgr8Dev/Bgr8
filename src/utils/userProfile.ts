@@ -55,6 +55,7 @@ export interface UserProfile {
     charity?: boolean;
     education?: boolean;
     careers?: boolean;
+    world?: boolean;
   };
 
   // Education Info
@@ -150,7 +151,8 @@ export const createUserProfile = async (
       league: false,
       charity: false,
       education: false,
-      careers: false
+      careers: false,
+      world: false
     },
     security: {
       twoFactorEnabled: false

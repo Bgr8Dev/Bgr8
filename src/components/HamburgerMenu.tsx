@@ -81,7 +81,7 @@ export default function HamburgerMenu() {
             <Link to="/b8-car-club" onClick={toggleMenu}>B8 Car Club</Link>
             <Link to="/b8-clothing" onClick={toggleMenu}>B8 Clothing</Link>
             <Link to="/b8-league" onClick={toggleMenu}>B8 League</Link>
-            <Link to="/b8-charity" onClick={toggleMenu}>B8 Charity</Link>
+            <Link to="/b8-world" onClick={toggleMenu}>B8 World</Link>
             <Link to="/b8-education" onClick={toggleMenu}>B8 Education</Link>
             <Link to="/b8-careers" onClick={toggleMenu}>B8 Careers</Link>
           </nav>

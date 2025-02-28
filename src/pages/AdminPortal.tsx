@@ -22,7 +22,7 @@ import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
 import { AdminPortalB8CarClub } from './adminPages/AdminPortalB8CarClub';
 import { AdminPortalB8Clothing } from './adminPages/AdminPortalB8Clothing';
 import { AdminPortalB8League } from './adminPages/AdminPortalB8League';
-import { AdminPortalB8Charity } from './adminPages/AdminPortalB8Charity';
+import { AdminPortalB8World } from './adminPages/AdminPortalB8World';
 import { AdminPortalB8Education } from './adminPages/AdminPortalB8Education';
 import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
 import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
@@ -88,7 +88,7 @@ export default function AdminPortal() {
     carClub: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     clothing: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     league: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
-    charity: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    world: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     education: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     careers: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     bgr8: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
@@ -99,7 +99,7 @@ export default function AdminPortal() {
     { id: 'carClub', name: 'B8 Car Club', icon: FaCar },
     { id: 'clothing', name: 'B8 Clothing', icon: FaTshirt },
     { id: 'league', name: 'B8 League', icon: FaFutbol },
-    { id: 'charity', name: 'B8 Charity', icon: FaHandHoldingHeart },
+    { id: 'world', name: 'B8 World', icon: FaHandHoldingHeart },
     { id: 'education', name: 'B8 Education', icon: FaGraduationCap },
     { id: 'careers', name: 'B8 Careers', icon: FaBriefcase },
     { id: 'bgr8', name: 'BGr8', icon: FaUserPlus }
@@ -310,8 +310,8 @@ export default function AdminPortal() {
         return <AdminPortalB8Clothing />;
       case 'league':
         return <AdminPortalB8League stats={businessStats.league} />;
-      case 'charity':
-        return <AdminPortalB8Charity stats={businessStats.charity} />;
+      case 'world':
+        return <AdminPortalB8World stats={businessStats.world} />;
       case 'education':
         return <AdminPortalB8Education stats={businessStats.education} />;
       case 'careers':

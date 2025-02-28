@@ -42,7 +42,7 @@ export interface UserProfile {
     carClub: boolean;
     clothing: boolean;
     league: boolean;
-    charity: boolean;
+    world: boolean;
     education: boolean;
     careers: boolean;
   };
@@ -103,7 +103,7 @@ export const createUserProfile = async (
       carClub: false,
       clothing: false,
       league: false,
-      charity: false,
+      world: false,
       education: false,
       careers: false
     },
@@ -121,7 +121,7 @@ export const createUserProfile = async (
       acc[key] = value;
     }
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, unknown>);
 
   return {
     ...baseProfile,

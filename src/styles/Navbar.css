@@ -66,10 +66,9 @@
     box-shadow: 10px 10px 10px rgba(128, 0, 128, 0.4);
   }
   
-  .nav a[href="/b8-charity"]:hover {
+  .nav a[href="/b8-world"]:hover {
     background-color: #0000FF;
     color: white;
-    box-shadow: 10px 10px 10px rgba(0, 0, 255, 0.4);
   }
   
   .nav a[href="/b8-education"]:hover {
@@ -129,7 +128,7 @@
   .mobile-nav a[href="/b8-car-club"]:hover { background-color: #FF0000; color: white; }
   .mobile-nav a[href="/b8-clothing"]:hover { background-color: #8B4513; color: white; }
   .mobile-nav a[href="/b8-league"]:hover { background-color: #800080; color: white; }
-  .mobile-nav a[href="/b8-charity"]:hover { background-color: #0000FF; color: white; }
+  .mobile-nav a[href="/b8-world"]:hover { background-color: #0000FF; color: white; }
   .mobile-nav a[href="/b8-education"]:hover { background-color: #008000; color: white; }
   .mobile-nav a[href="/b8-careers"]:hover { background-color: #000000; color: white; }
   .mobile-nav a[href="/"]:hover { background-color: #444; color: lightgray; }
