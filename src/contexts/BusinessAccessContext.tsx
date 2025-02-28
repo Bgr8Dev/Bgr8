@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-import { UserProfile } from '../types/user';
 
 interface BusinessAccessibility {
   marketing: boolean;
