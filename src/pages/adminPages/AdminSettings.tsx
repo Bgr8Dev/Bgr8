@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { doc, getDoc, setDoc, collection, query, getDocs, updateDoc } from 'firebase/firestore';
-import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaSave, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaSave, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup } from 'react-icons/fa';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/adminStyles/AdminSettings.css';
 
@@ -18,6 +18,19 @@ interface BusinessAccessibility {
 }
 
 interface BusinessComingSoon {
+  marketing: boolean;
+  carClub: boolean;
+  clothing: boolean;
+  league: boolean;
+  world: boolean;
+  education: boolean;
+  careers: boolean;
+  bgr8: boolean;
+  [key: string]: boolean;
+}
+
+// New interface for grayed out pages
+interface BusinessGrayedOut {
   marketing: boolean;
   carClub: boolean;
   clothing: boolean;
@@ -59,6 +72,17 @@ export function AdminSettings() {
     careers: true,
     bgr8: true
   });
+  // New state for grayed out pages
+  const [grayedOut, setGrayedOut] = useState<BusinessGrayedOut>({
+    marketing: false,
+    carClub: false,
+    clothing: false,
+    league: false,
+    world: false,
+    education: false,
+    careers: false,
+    bgr8: false
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -66,7 +90,7 @@ export function AdminSettings() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const { refreshBusinessAccess, refreshComingSoonStatus } = useBusinessAccess();
+  const { refreshBusinessAccess, refreshComingSoonStatus, refreshGrayedOutStatus } = useBusinessAccess();
 
   const businessNames: Record<string, string> = {
     marketing: 'B8 Marketing',
@@ -82,6 +106,7 @@ export function AdminSettings() {
   useEffect(() => {
     fetchSettings();
     fetchComingSoonSettings();
+    fetchGrayedOutSettings();
     fetchUsers();
   }, []);
 
@@ -119,6 +144,24 @@ export function AdminSettings() {
     } catch (error) {
       console.error('Error fetching coming soon settings:', error);
       setErrorMessage('Failed to load coming soon settings. Please try again.');
+    }
+  };
+
+  // New method for fetching grayed out settings
+  const fetchGrayedOutSettings = async () => {
+    try {
+      const grayedOutRef = doc(db, 'settings', 'grayedOut');
+      const grayedOutDoc = await getDoc(grayedOutRef);
+      
+      if (grayedOutDoc.exists()) {
+        setGrayedOut(grayedOutDoc.data() as BusinessGrayedOut);
+      } else {
+        // If no grayed out document exists, create one with default values
+        await setDoc(grayedOutRef, grayedOut);
+      }
+    } catch (error) {
+      console.error('Error fetching grayed out settings:', error);
+      setErrorMessage('Failed to load grayed out settings. Please try again.');
     }
   };
 
@@ -164,6 +207,14 @@ export function AdminSettings() {
     }));
   };
 
+  // New toggle method for grayed out pages
+  const toggleGrayedOut = (business: string) => {
+    setGrayedOut(prev => ({
+      ...prev,
+      [business]: !prev[business]
+    }));
+  };
+
   const toggleUserDeveloper = async (userId: string, isDeveloper: boolean) => {
     try {
       const userRef = doc(db, 'users', userId);
@@ -203,13 +254,18 @@ export function AdminSettings() {
       const comingSoonRef = doc(db, 'settings', 'comingSoon');
       await setDoc(comingSoonRef, comingSoon);
       
+      // Save grayed out settings
+      const grayedOutRef = doc(db, 'settings', 'grayedOut');
+      await setDoc(grayedOutRef, grayedOut);
+      
       // Refresh the contexts to update navigation and homepage
       await Promise.all([
         refreshBusinessAccess(),
-        refreshComingSoonStatus()
+        refreshComingSoonStatus(),
+        refreshGrayedOutStatus()
       ]);
       
-      setSuccessMessage('Settings saved successfully! Navigation and homepage have been updated.');
+      setSuccessMessage('Settings saved successfully! Navigation and business pages have been updated.');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -339,6 +395,58 @@ export function AdminSettings() {
           <strong>Note:</strong> The "Coming Soon" banner will only appear on the homepage and won't affect the actual 
           accessibility of the business pages. Users can still access the pages through the navigation menu if 
           accessibility is enabled.
+        </div>
+      </section>
+
+      {/* New section for grayed out pages */}
+      <section className="settings-section">
+        <h3>Coming Soon Page Overlay</h3>
+        <p className="settings-description">
+          Add a "Coming Soon" overlay strip across business pages. This creates a visual indication that 
+          the page content is still in development, even if users can access it.
+        </p>
+        
+        <div className="business-access-grid">
+          {Object.keys(businessNames).map(business => (
+            <div 
+              key={business} 
+              className={`business-access-card ${!grayedOut[business] ? 'active' : 'inactive'}`}
+            >
+              <div className="business-access-header">
+                <span>{businessNames[business]}</span>
+                <div 
+                  className="toggle-button" 
+                  onClick={() => toggleGrayedOut(business)}
+                >
+                  {!grayedOut[business] ? (
+                    <FaToggleOn className="toggle-icon on" />
+                  ) : (
+                    <FaToggleOff className="toggle-icon off" />
+                  )}
+                </div>
+              </div>
+              
+              <div className="business-access-status">
+                {!grayedOut[business] ? (
+                  <>
+                    <FaLayerGroup className="status-icon public" />
+                    <span className="status-text public">No Overlay</span>
+                  </>
+                ) : (
+                  <>
+                    <FaLayerGroup className="status-icon private" />
+                    <span className="status-text private">Has Overlay</span>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="settings-note">
+          <strong>Note:</strong> The "Coming Soon" overlay will appear on the business pages themselves, 
+          indicating to users that the content is under development. Unlike the accessibility setting, this 
+          doesn't prevent access to the page but provides a visual cue that it's not fully ready.
         </div>
         
         <div className="settings-actions">

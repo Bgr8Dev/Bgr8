@@ -1,0 +1,134 @@
+.coming-soon-overlay-container {
+  position: relative;
+  min-height: 100vh; /* Ensure container covers full viewport height */
+}
+
+/* Adding a semi-transparent background over the entire content */
+.coming-soon-overlay-container.has-overlay::after {
+  content: '';
+  position: fixed; /* Fixed position to cover the entire viewport */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4); /* Darker semi-transparent overlay */
+  z-index: 90; /* Higher than content but lower than overlay elements */
+  pointer-events: none; /* Allow clicks to pass through to the content */
+}
+
+.coming-soon-overlay {
+  position: fixed; /* Fixed to viewport */
+  top: 100px;
+  left: 0;
+  right: 0;
+  background-color: rgba(139, 34, 34, 0.85); /* Darker background for better visibility */
+  color: white;
+  text-align: center;
+  padding: 25px 0; /* Increased padding for larger banner */
+  font-size: 1.8rem; /* Larger font size */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  z-index: 10000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* More pronounced shadow */
+  transform: rotate(-2deg) translateY(30px);
+  width: 120%; /* Wider banner */
+  margin-left: -10%;
+}
+
+/* New message element styles */
+.coming-soon-message {
+  position: fixed;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  z-index: 100;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 8px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coming-soon-overlay::before,
+.coming-soon-overlay::after {
+  content: '⚡';
+  margin: 0 15px;
+  font-size: 2rem; /* Larger icons */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .coming-soon-overlay {
+    font-size: 1.4rem;
+    padding: 15px 0;
+    transform: rotate(-1deg) translateY(20px);
+  }
+  
+  .coming-soon-overlay::before,
+  .coming-soon-overlay::after {
+    font-size: 1.6rem;
+    margin: 0 10px;
+  }
+  
+  .coming-soon-message {
+    bottom: 30px;
+    padding: 15px;
+    font-size: 1rem;
+    max-width: 90%;
+  }
+}
+
+/* Animation for the overlay */
+@keyframes pulse {
+  0% {
+    opacity: 0.9;
+    transform: rotate(-2deg) translateY(30px) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(-2deg) translateY(30px) scale(1.03);
+  }
+  100% {
+    opacity: 0.9;
+    transform: rotate(-2deg) translateY(30px) scale(1);
+  }
+}
+
+.coming-soon-overlay {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@media (max-width: 768px) {
+  @keyframes pulse {
+    0% {
+      opacity: 0.9;
+      transform: rotate(-1deg) translateY(20px) scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: rotate(-1deg) translateY(20px) scale(1.03);
+    }
+    100% {
+      opacity: 0.9;
+      transform: rotate(-1deg) translateY(20px) scale(1);
+    }
+  }
+} 

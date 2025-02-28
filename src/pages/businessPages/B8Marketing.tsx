@@ -4,6 +4,7 @@ import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaGlobe, FaHashtag } from 'react-icons/fa';
 import { FaChartLine, FaBullhorn, FaCogs, FaWordpress, FaGoogle, FaCamera, FaCode, FaSearchengin, FaCalendarAlt, FaStream, FaVideo, FaPalette, FaHubspot, FaReact, FaNode, FaPython, FaJs, FaAndroid, FaApple, FaAngular, FaVuejs, FaStripe, FaRobot, FaServer, FaFire, FaMap, FaBrain, FaMicrochip } from 'react-icons/fa';
+import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import '../../styles/businessStyles/B8Marketing.css';
 
 // Import company logos
@@ -324,181 +325,183 @@ export default function B8Marketing() {
   }, []);
 
   return (
-    <div className="page">
-      {isMobile ? <HamburgerMenu /> : <Navbar />}
+    <ComingSoonOverlay businessId="marketing">
+      <div className="page">
+        {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-      {/* Updated Header Video Section */}
-      <section className="header-video">
-        <div className="video-container">
-          <iframe
-            width="100%"
-            height="100%"
-            src="https://www.youtube.com/embed/uPXf6RjA5RI"
-            title="B8 Marketing Video"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      </section>
-
-      {/* Intro About Section */}
-      <section className="intro-about">
-        <h2>About B8 Marketing</h2>
-        <p>
-          At B8 Marketing, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
-          Our team is dedicated to delivering impactful campaigns that resonate with audiences globally.
-        </p>
-      </section>
-
-      {/* Existing Hero Section */}
-      <section className="hero">
-        <h1>B8 Marketing</h1>
-        <p>Innovative marketing strategies to boost your brand's presence globally.</p>
-      </section>
-
-      {/* Gallery of Media with Descriptions */}
-      <section className="gallery">
-        <div className="gallery-item">
-          <img src="/assets/marketing1.jpg" alt="Marketing Campaign 1" />
-          <p>Campaign 1: Social Media Engagement Strategy</p>
-        </div>
-        <div className="gallery-item">
-          <img src="/assets/marketing2.jpg" alt="Marketing Campaign 2" />
-          <p>Campaign 2: Influencer Partnerships for Brand Growth</p>
-        </div>
-        <div className="gallery-item">
-          <img src="/assets/marketing3.jpg" alt="Marketing Campaign 3" />
-          <p>Campaign 3: Viral Video Production and Promotion</p>
-        </div>
-      </section>
-
-      {/* Companies We've Worked With */}
-      <section className="companies-worked-with">
-        <h3>Companies We've Worked With</h3>
-        <div className="company-logos">
-          <div className="logo-wrapper">
-            <a href="https://www.hyundai.com/uk" target="_blank" rel="noopener noreferrer">
-              <img src={company1} alt="Hyundai" />
-            </a>
+        {/* Updated Header Video Section */}
+        <section className="header-video">
+          <div className="video-container">
+            <iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/uPXf6RjA5RI"
+              title="B8 Marketing Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </div>
-          <div className="logo-wrapper">
-            <a href="https://www.surrey.ac.uk/" target="_blank" rel="noopener noreferrer">
-              <img src={company2} alt="University of Surrey" />
-            </a>
+        </section>
+
+        {/* Intro About Section */}
+        <section className="intro-about">
+          <h2>About B8 Marketing</h2>
+          <p>
+            At B8 Marketing, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
+            Our team is dedicated to delivering impactful campaigns that resonate with audiences globally.
+          </p>
+        </section>
+
+        {/* Existing Hero Section */}
+        <section className="hero">
+          <h1>B8 Marketing</h1>
+          <p>Innovative marketing strategies to boost your brand's presence globally.</p>
+        </section>
+
+        {/* Gallery of Media with Descriptions */}
+        <section className="gallery">
+          <div className="gallery-item">
+            <img src="/assets/marketing1.jpg" alt="Marketing Campaign 1" />
+            <p>Campaign 1: Social Media Engagement Strategy</p>
           </div>
-          <div className="logo-wrapper">
-            <a href="https://www.volkswagen.co.uk/" target="_blank" rel="noopener noreferrer">
-              <img src={company3} alt="Volkswagen" />
-            </a>
+          <div className="gallery-item">
+            <img src="/assets/marketing2.jpg" alt="Marketing Campaign 2" />
+            <p>Campaign 2: Influencer Partnerships for Brand Growth</p>
           </div>
-        </div>
-      </section>
+          <div className="gallery-item">
+            <img src="/assets/marketing3.jpg" alt="Marketing Campaign 3" />
+            <p>Campaign 3: Viral Video Production and Promotion</p>
+          </div>
+        </section>
 
-      {/* Add this new section before the pricing section */}
-      <section className="marketing-services">
-        <h2>Our Marketing Solutions</h2>
-        <div className="services-container">
-          {marketingServices.map((service, index) => (
-            <div className="marketing-service-card" key={index}>
-              <div className="service-icon">{service.icon}</div>
-              <h3>{service.category}</h3>
-              <h4>{service.title}</h4>
-              <ul className="service-list">
-                {service.services.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-              <p className="service-price">{service.price}</p>
-              <button className="learn-more-btn">Learn More</button>
+        {/* Companies We've Worked With */}
+        <section className="companies-worked-with">
+          <h3>Companies We've Worked With</h3>
+          <div className="company-logos">
+            <div className="logo-wrapper">
+              <a href="https://www.hyundai.com/uk" target="_blank" rel="noopener noreferrer">
+                <img src={company1} alt="Hyundai" />
+              </a>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Software Tools Section */}
-      <section className="software-tools">
-        <h2>Our Marketing Tech Stack</h2>
-        <p>We use industry-leading software to deliver exceptional results</p>
-        
-        <div className="category-filter">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
-        <div className="software-grid">
-          {filteredSoftware.map((software, index) => (
-            <div className="software-card" key={index}>
-              <div className="software-icon">{software.icon}</div>
-              <h4>{software.name}</h4>
-              <p className="software-category">{software.category}</p>
-              <p className="software-description">{software.description}</p>
+            <div className="logo-wrapper">
+              <a href="https://www.surrey.ac.uk/" target="_blank" rel="noopener noreferrer">
+                <img src={company2} alt="University of Surrey" />
+              </a>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing List */}
-      <section className="pricing-list">
-        <h3>Our Pricing</h3>
-        <div className="pricing-cards">
-          {pricingPlans.map((plan, index) => (
-            <div className="pricing-card" key={index}>
-              <div className="icon-container">{plan.icon}</div>
-              <h4>{plan.title}</h4>
-              <p className="price">{plan.price}</p>
-              <p className="description">{plan.description}</p>
+            <div className="logo-wrapper">
+              <a href="https://www.volkswagen.co.uk/" target="_blank" rel="noopener noreferrer">
+                <img src={company3} alt="Volkswagen" />
+              </a>
             </div>
-          ))}
-        </div>
-    </section>
+          </div>
+        </section>
 
-      {/* Links to Social Channels */}
-      <section className="social-channels">
-        <h3>Follow Us</h3>
-        <div className="social-media">
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-        </div>
-      </section>
+        {/* Add this new section before the pricing section */}
+        <section className="marketing-services">
+          <h2>Our Marketing Solutions</h2>
+          <div className="services-container">
+            {marketingServices.map((service, index) => (
+              <div className="marketing-service-card" key={index}>
+                <div className="service-icon">{service.icon}</div>
+                <h3>{service.category}</h3>
+                <h4>{service.title}</h4>
+                <ul className="service-list">
+                  {service.services.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+                <p className="service-price">{service.price}</p>
+                <button className="learn-more-btn">Learn More</button>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      {/* Detailed Contact Us Form */}
-      <section className="contact-section">
-        <h3>Contact Us</h3>
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" required />
-          <input type="email" placeholder="Your Email" required />
-          <select className="service-picker" required>
-            <option value="">Select a Service</option>
-            <option value="social">Social Media Marketing</option>
-            <option value="web">Digital Web Marketing</option>
-            <option value="complete">Complete Digital Marketing (Both)</option>
-          </select>
-          <input type="tel" placeholder="Phone Number" required />
-          <textarea placeholder="Your Query" required></textarea>
-          <button type="submit">Send Message</button>
-        </form>
-      </section>
+        {/* Software Tools Section */}
+        <section className="software-tools">
+          <h2>Our Marketing Tech Stack</h2>
+          <p>We use industry-leading software to deliver exceptional results</p>
+          
+          <div className="category-filter">
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
 
-      {/* Email Submission Form */}
-      <section className="email-submission-form">
-        <h3>Subscribe to Our Newsletter</h3>
-        <form>
-          <input type="email" placeholder="Enter your email" required />
-          <button type="submit">Subscribe</button>
-        </form>
-      </section>
+          <div className="software-grid">
+            {filteredSoftware.map((software, index) => (
+              <div className="software-card" key={index}>
+                <div className="software-icon">{software.icon}</div>
+                <h4>{software.name}</h4>
+                <p className="software-category">{software.category}</p>
+                <p className="software-description">{software.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <Footer />
-    </div>
+        {/* Pricing List */}
+        <section className="pricing-list">
+          <h3>Our Pricing</h3>
+          <div className="pricing-cards">
+            {pricingPlans.map((plan, index) => (
+              <div className="pricing-card" key={index}>
+                <div className="icon-container">{plan.icon}</div>
+                <h4>{plan.title}</h4>
+                <p className="price">{plan.price}</p>
+                <p className="description">{plan.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Links to Social Channels */}
+        <section className="social-channels">
+          <h3>Follow Us</h3>
+          <div className="social-media">
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
+          </div>
+        </section>
+
+        {/* Detailed Contact Us Form */}
+        <section className="contact-section">
+          <h3>Contact Us</h3>
+          <form className="contact-form">
+            <input type="text" placeholder="Your Name" required />
+            <input type="email" placeholder="Your Email" required />
+            <select className="service-picker" required>
+              <option value="">Select a Service</option>
+              <option value="social">Social Media Marketing</option>
+              <option value="web">Digital Web Marketing</option>
+              <option value="complete">Complete Digital Marketing (Both)</option>
+            </select>
+            <input type="tel" placeholder="Phone Number" required />
+            <textarea placeholder="Your Query" required></textarea>
+            <button type="submit">Send Message</button>
+          </form>
+        </section>
+
+        {/* Email Submission Form */}
+        <section className="email-submission-form">
+          <h3>Subscribe to Our Newsletter</h3>
+          <form>
+            <input type="email" placeholder="Enter your email" required />
+            <button type="submit">Subscribe</button>
+          </form>
+        </section>
+
+        <Footer />
+      </div>
+    </ComingSoonOverlay>
   );
 }
