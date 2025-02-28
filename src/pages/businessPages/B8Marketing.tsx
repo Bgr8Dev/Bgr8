@@ -20,6 +20,7 @@ import {
   MarketingCompany, 
   MarketingPricingPlan
 } from '../../types/marketing';
+import ContactForm from '../../components/ContactForm';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -258,23 +259,8 @@ export default function B8Marketing() {
         </section>
 
         {/* Detailed Contact Us Form */}
-        <section className="contact-section">
-          <h3>Contact Us</h3>
-          <form className="contact-form">
-            <input type="text" placeholder="Your Name" required />
-            <input type="email" placeholder="Your Email" required />
-            <select className="service-picker" required>
-              <option value="">Select a Service</option>
-              {activeServices.map(service => (
-                <option key={service.id} value={service.title.toLowerCase().replace(/\s+/g, '-')}>
-                  {service.title}
-                </option>
-              ))}
-            </select>
-            <input type="tel" placeholder="Phone Number" required />
-            <textarea placeholder="Your Query" required></textarea>
-            <button type="submit">Send Message</button>
-          </form>
+        <section>
+          <ContactForm source="marketing" />
         </section>
 
         {/* Email Submission Form */}

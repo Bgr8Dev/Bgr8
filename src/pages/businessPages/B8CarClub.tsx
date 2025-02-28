@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import ContactForm from '../../components/ContactForm';
 import '../../styles/businessStyles/B8CarClub.css';
 
 export default function B8CarClub() {

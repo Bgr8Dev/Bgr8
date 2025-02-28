@@ -36,13 +36,13 @@ export default function HomePage() {
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       {/* Intro Video Section */}
-      <section className="intro-video">
-        <div className="video-placeholder">
+      <section className="homepage-intro-video">
+        <div className="homepage-video-placeholder">
           <p>Intro Video Placeholder</p>
         </div>
       </section>
 
-      <section className="hero">
+      <section className="homepage-hero">
         <h2>Empowering Your Business</h2>
         <p>
           We provide cutting-edge marketing strategies and innovative software development solutions tailored to your business needs.
@@ -52,13 +52,13 @@ export default function HomePage() {
         </button>
       </section>
 
-      <section className="services">
+      <section className="homepage-services">
         <h3>Explore B8</h3>
-        <div className="service-list">
+        <div className="homepage-service-list">
           {services.map((service, index) => (
             <Link 
               to={service.link} 
-              className={`service-card ${isBusinessComingSoon(service.id) ? 'restricted' : ''}`}
+              className={`homepage-service-card ${isBusinessComingSoon(service.id) ? 'restricted' : ''}`}
               key={index}
               style={{ 
                 '--hover-color': service.hoverColor,
@@ -67,7 +67,7 @@ export default function HomePage() {
                 color: service.color 
               } as React.CSSProperties}
             >
-              <div className="icon-container" style={{ color: service.iconColor }}>{service.icon}</div>
+              <div className="homepage-icon-container" style={{ color: service.iconColor }}>{service.icon}</div>
               <h4>{service.title}</h4>
               <p>{service.description}</p>
             </Link>
@@ -75,9 +75,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="contact-section">
+      <section className="homepage-contact-section">
         <ContactForm source="home" />
-        <div className="social-media">
+        <div className="homepage-social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
             <FaLinkedin />
           </a>

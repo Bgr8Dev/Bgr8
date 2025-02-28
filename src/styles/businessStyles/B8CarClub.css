@@ -505,3 +505,11 @@
     margin-top: 60px; /* Adjust based on your mobile header height */
   }
 }
+
+/* Contact Section */
+.car-club-contact-section {
+  padding: 4rem 0;
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 90%;
+}

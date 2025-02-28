@@ -5,6 +5,7 @@ import Footer from '../../components/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaTableTennis } from 'react-icons/fa';
 import '../../styles/businessStyles/B8League.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import ContactForm from '../../components/ContactForm';
 
 type LeagueSport = 'football' | 'badminton' | 'esports';
 
@@ -237,14 +238,8 @@ export default function B8League() {
         )}
 
         {/* Contact Section */}
-        <section className="contact-section">
-          <h3>Contact B8 League</h3>
-          <form className="contact-form">
-            <input type="text" placeholder="Your Name" required />
-            <input type="email" placeholder="Your Email" required />
-            <textarea placeholder="Your Message" required></textarea>
-            <button type="submit">Send Message</button>
-          </form>
+        <section>
+          <ContactForm source="league" />
 
           <div className="league-social-media">
             <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>

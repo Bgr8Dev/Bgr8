@@ -134,17 +134,6 @@ export default function B8Education() {
           </section>
         )}
 
-        {/* Existing Contact Section */}
-        <section className="contact-section">
-          <ContactForm source="education" />
-          <div className="social-media">
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-          </div>
-        </section>
-
         <Footer />
       </div>
     </ComingSoonOverlay>

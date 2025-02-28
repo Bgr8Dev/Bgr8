@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { FaUser, FaEnvelope, FaPhone, FaCommentAlt, FaPaperPlane, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import '../styles/ContactForm.css';
 
 interface ContactFormProps {
@@ -17,6 +18,7 @@ export default function ContactForm({ source = 'general' }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,15 +50,25 @@ export default function ContactForm({ source = 'general' }: ContactFormProps) {
       setIsSubmitting(false);
     }
   };
+  
+  const handleFocus = (field: string) => {
+    setFocusedField(field);
+  };
+  
+  const handleBlur = () => {
+    setFocusedField(null);
+  };
 
   return (
-    <section className="contact-section">
-      <h3>Contact Us</h3>
-      <p>Have a question? We'd love to hear from you.</p>
+    <section className="contactForm-section">
+      <h3>Get In Touch</h3>
+      <p>We'd love to hear from you! Fill out the form below and we'll get back to you as soon as possible.</p>
 
-      <form onSubmit={handleSubmit} className="contact-form">
-        <div className="form-group">
-          <label htmlFor="name">Name</label>
+      <form onSubmit={handleSubmit} className="contactForm-form">
+        <div className={`contactForm-form-group ${focusedField === 'name' ? 'focused' : ''}`}>
+          <label htmlFor="name">
+            <FaUser className="form-icon" /> Full Name
+          </label>
           <input
             type="text"
             id="name"
@@ -64,11 +76,15 @@ export default function ContactForm({ source = 'general' }: ContactFormProps) {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
             placeholder="Your Name"
+            onFocus={() => handleFocus('name')}
+            onBlur={handleBlur}
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
+        <div className={`contactForm-form-group ${focusedField === 'email' ? 'focused' : ''}`}>
+          <label htmlFor="email">
+            <FaEnvelope className="form-icon" /> Email Address
+          </label>
           <input
             type="email"
             id="email"
@@ -76,29 +92,39 @@ export default function ContactForm({ source = 'general' }: ContactFormProps) {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
             placeholder="Your Email"
+            onFocus={() => handleFocus('email')}
+            onBlur={handleBlur}
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="phone">Phone (Optional)</label>
+        <div className={`contactForm-form-group ${focusedField === 'phone' ? 'focused' : ''}`}>
+          <label htmlFor="phone">
+            <FaPhone className="form-icon" /> Phone Number (Optional)
+          </label>
           <input
             type="tel"
             id="phone"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder="Your Phone Number"
+            onFocus={() => handleFocus('phone')}
+            onBlur={handleBlur}
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="message">Message</label>
+        <div className={`contactForm-form-group ${focusedField === 'message' ? 'focused' : ''}`}>
+          <label htmlFor="message">
+            <FaCommentAlt className="form-icon" /> Your Message
+          </label>
           <textarea
             id="message"
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             required
-            placeholder="Your Message"
+            placeholder="Tell us what's on your mind..."
             rows={4}
+            onFocus={() => handleFocus('message')}
+            onBlur={handleBlur}
           />
         </div>
 
@@ -107,17 +133,28 @@ export default function ContactForm({ source = 'general' }: ContactFormProps) {
           disabled={isSubmitting}
           className={isSubmitting ? 'submitting' : ''}
         >
-          {isSubmitting ? 'Sending...' : 'Send Message'}
+          {isSubmitting ? (
+            <>
+              <span className="loading-spinner"></span>
+              Sending...
+            </>
+          ) : (
+            <>
+              <FaPaperPlane className="send-icon" /> Send Message
+            </>
+          )}
         </button>
 
         {submitSuccess && (
-          <div className="success-message">
+          <div className="contactForm-success-message">
+            <FaCheckCircle className="status-icon" />
             Thank you for your message! We'll get back to you soon.
           </div>
         )}
 
         {submitError && (
-          <div className="error-message">
+          <div className="contactForm-error-message">
+            <FaExclamationTriangle className="status-icon" />
             {submitError}
           </div>
         )}

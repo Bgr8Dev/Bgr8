@@ -94,13 +94,8 @@ export default function BGr8() {
         {showMedical && <BGr8Medical onClose={() => setShowMedical(false)} />}
 
         {/* Existing Contact Section */}
-        <section className="contact-section">
+        <section>
           <ContactForm source="bgr8" />
-          <div className="contact-info">
-            <p>Email: contact@b8company.com</p>
-            <p>Phone: +123 456 7890</p>
-            <p>Address: 123 B8 Street, Innovation City</p>
-          </div>
         </section>
 
         <Footer />

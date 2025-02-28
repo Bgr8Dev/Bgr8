@@ -11,6 +11,7 @@ import { db } from '../../firebase';
 import { ClothingItem, ClothingCategory } from '../../types/clothing';
 import '../../styles/businessStyles/B8Clothing.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import ContactForm from '../../components/ContactForm';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -252,6 +253,7 @@ export default function B8Clothing() {
           {isModalOpen && (
             <div className="clothing-modal-overlay" onClick={() => setIsModalOpen(false)}>
               <div className="clothing-modal-content" onClick={(e) => e.stopPropagation()}>
+                <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>×</button>
                 <h2>{product.name}</h2>
                 <img src={product.image} alt={product.name} />
                 <p>{product.description}</p>
@@ -393,14 +395,8 @@ export default function B8Clothing() {
           </section>
 
           {/* Contact Section */}
-          <section className="clothing-contact-section">
-            <h3>Contact Us</h3>
-            <form className="clothing-contact-form">
-              <input type="text" placeholder="Your Name" required />
-              <input type="email" placeholder="Your Email" required />
-              <textarea placeholder="Your Message" required></textarea>
-              <button type="submit">Send Message</button>
-            </form>
+          <section>
+            <ContactForm source="clothing" />
 
             <div className="clothing-social-media">
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
