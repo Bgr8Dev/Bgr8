@@ -1,4 +1,3 @@
-import React from 'react';
 import { BusinessSection } from '../../components/admin/BusinessSection';
 import { BusinessStats } from '../../types/admin';
 
