@@ -17,7 +17,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
 import AdminPortal from '../pages/AdminPortal';
-import React, { ReactElement } from 'react';
+import React from 'react';
+import { UserProfile } from '../utils/userProfile';
 
 // Video Library
 // import VideoLibrary from '../pages/VideosLibrary';
@@ -49,42 +50,42 @@ import React, { ReactElement } from 'react';
 // import SocialFeed from '../pages/SocialFeed';
 
 // Check if the user has the required permission
-function hasPermission(user: Record<string, any> | null, permission: string) {
-  if (!user) return false;
+function hasPermission(userProfile: UserProfile | null, permission: string) {
+  if (!userProfile) return false;
 
   switch (permission) {
     case 'admin':
-      return user.isAdmin;
+      return userProfile.admin;
     case 'entertainment':
-      return user.entertainment;
+      return false; // Not currently implemented
     case 'metaverse':
-      return user.metaverse;
+      return false; // Not currently implemented
     case 'crypto':
-      return user.crypto;
+      return false; // Not currently implemented
     case 'world':
-      return user.world;
+      return userProfile.b8Memberships?.world === true;
     case 'league':
-      return user.league;
+      return userProfile.b8Memberships?.league === true;
     default:
       return false;
   }
 }
 
 // Protected route component
-function ProtectedRoute({ children, permission }: { children: ReactElement, permission?: string }) {
-  const { currentUser: user } = useAuth();
+function ProtectedRoute({ children, permission }: { children: React.ReactNode, permission?: string }) {
+  const { currentUser, userProfile } = useAuth();
 
   // If a permission is specified, check if the user has it
-  if (permission && !hasPermission(user, permission)) {
+  if (permission && !hasPermission(userProfile, permission)) {
     return <Navigate to="/403" />;
   }
 
   // If the user is not logged in, redirect to login
-  if (!user) {
+  if (!currentUser) {
     return <Navigate to="/signin" />;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 export default function Navigation() {
