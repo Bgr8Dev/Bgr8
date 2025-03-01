@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus, FaEnvelope } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
@@ -15,6 +15,7 @@ import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
 import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
+import { AdminEnquiries } from './adminPages/AdminEnquiries';
 
 interface UserData {
   uid: string;
@@ -203,6 +204,12 @@ export default function AdminPortal() {
             <FaUsers /> Users
           </button>
           <button 
+            className={`sidebar-button ${activeSection === 'enquiries' ? 'active' : ''}`}
+            onClick={() => setActiveSection('enquiries')}
+          >
+            <FaEnvelope /> Enquiries
+          </button>
+          <button 
             className={`sidebar-button ${activeSection === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveSection('analytics')}
           >
@@ -297,6 +304,12 @@ export default function AdminPortal() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {activeSection === 'enquiries' && (
+          <div className="admin-section">
+            <AdminEnquiries />
           </div>
         )}
 

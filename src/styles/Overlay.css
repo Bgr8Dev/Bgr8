@@ -9,6 +9,7 @@
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
+  width: auto;
 }
 
 .overlay-content {

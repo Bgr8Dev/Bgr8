@@ -120,8 +120,8 @@ export default function B8Marketing() {
 
         {/* Existing Hero Section */}
         <section className="hero">
-          <h1>B8 Marketing</h1>
-          <p>Innovative marketing strategies to boost your brand's presence globally.</p>
+          <h1><s>B8</s> Marketing</h1>
+          <p> <s>We dont have a slogan yet</s></p>
         </section>
 
         {/* Gallery of Media with Descriptions */}
@@ -261,15 +261,6 @@ export default function B8Marketing() {
         {/* Detailed Contact Us Form */}
         <section>
           <ContactForm source="marketing" />
-        </section>
-
-        {/* Email Submission Form */}
-        <section className="email-submission-form">
-          <h3>Subscribe to Our Newsletter</h3>
-          <form>
-            <input type="email" placeholder="Enter your email" required />
-            <button type="submit">Subscribe</button>
-          </form>
         </section>
 
         <Footer />

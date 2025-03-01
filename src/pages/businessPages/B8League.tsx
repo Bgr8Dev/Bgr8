@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaTableTennis } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaTableTennis, } from 'react-icons/fa';
 import '../../styles/businessStyles/B8League.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import ContactForm from '../../components/ContactForm';
@@ -44,7 +44,7 @@ export default function B8League() {
               className={`league-tab ${activeSport === 'badminton' ? 'active' : ''}`} 
               onClick={() => setActiveSport('badminton')}
             >
-              <FaTableTennis /> B8Badminton
+              <FaTableTennis /> B8dminton
             </button>
             <button 
               className={`league-tab ${activeSport === 'esports' ? 'active' : ''}`} 
@@ -69,8 +69,17 @@ export default function B8League() {
 
             {/* Video Section */}
             <section className="hero-video">
-              <div className="video-placeholder">
-                <p>B8FC Highlights Video</p>
+              <div className="video-container">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                  title="B8FC Highlights Video" 
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ pointerEvents: 'auto' }}
+                ></iframe>
               </div>
             </section>
 

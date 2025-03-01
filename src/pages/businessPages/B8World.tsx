@@ -143,7 +143,7 @@ export default function B8World() {
           <section className="hero-section">
             <div className="hero-content">
               <h1>B8 World</h1>
-              <p>Making a positive impact across the globe</p>
+              <p>Making the world a <s>Better</s> B8er place</p>
             </div>
           </section>
 

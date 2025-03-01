@@ -243,5 +243,5 @@
 }
 
 .homepage-service-card[href="/b8-league"]:hover .homepage-icon-container svg {
-  animation: spin 2s linear infinite;
+  animation: spin 0s linear infinite;
 }
