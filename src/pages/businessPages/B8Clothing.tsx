@@ -127,6 +127,12 @@ export default function B8Clothing() {
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <div className="clothing-page">
           {isMobile ? <HamburgerMenu /> : <Navbar />}
+
+          {/* Hero Section */}
+          <section className="clothing-hero">
+            <h1>B8 Clothing</h1>
+            <p>Discover our exclusive range of stylish and modern B8 apparel.</p>
+          </section>
           {/* Hero Video Section */}
           <section className="hero-video">
             <div className="video-placeholder">
@@ -140,12 +146,6 @@ export default function B8Clothing() {
             <p>
               B8 Clothing offers premium, stylish, and modern apparel designed for individuals who value quality and fashion-forward thinking.
             </p>
-          </section>
-
-          {/* Hero Section */}
-          <section className="clothing-hero">
-            <h1>B8 Clothing</h1>
-            <p>Discover our exclusive range of stylish and modern B8 apparel.</p>
           </section>
 
           {/* Gallery Section */}

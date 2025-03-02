@@ -94,6 +94,12 @@ export default function B8Marketing() {
       <div className="page">
         {isMobile ? <HamburgerMenu /> : <Navbar />}
 
+        {/* Existing Hero Section */}
+        <section className="hero">
+          <h1><s>B8</s> Marketing</h1>
+          <p> <s>We dont have a slogan yet</s></p>
+        </section>
+
         {/* Updated Header Video Section */}
         <section className="header-video">
           <div className="video-container">
@@ -116,12 +122,6 @@ export default function B8Marketing() {
             At B8 Marketing, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
             Our team is dedicated to delivering impactful campaigns that resonate with audiences globally.
           </p>
-        </section>
-
-        {/* Existing Hero Section */}
-        <section className="hero">
-          <h1><s>B8</s> Marketing</h1>
-          <p> <s>We dont have a slogan yet</s></p>
         </section>
 
         {/* Gallery of Media with Descriptions */}

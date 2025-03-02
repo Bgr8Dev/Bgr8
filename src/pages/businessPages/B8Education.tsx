@@ -20,6 +20,12 @@ export default function B8Education() {
       <div className="page">
         {isMobile ? <HamburgerMenu /> : <Navbar />}
 
+        {/* Existing Hero Section */}
+        <section className="education-hero">
+          <h1>B8 Education</h1>
+          <p>Empowering the future through innovative education programs and resources.</p>
+        </section>
+
         {/* Updated Hero Video Section */}
         <section className="hero-video">
           <div className="video-container">
@@ -43,11 +49,6 @@ export default function B8Education() {
           </p>
         </section>
 
-        {/* Existing Hero Section */}
-        <section className="hero">
-          <h1>B8 Education</h1>
-          <p>Empowering the future through innovative education programs and resources.</p>
-        </section>
 
         {/* Existing Gallery Section */}
         <section className="gallery">

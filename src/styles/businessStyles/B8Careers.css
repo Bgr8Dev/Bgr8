@@ -383,3 +383,70 @@
     width: 90%;
   }
   
+  .careers-page {
+    min-height: 100vh;
+    background-color: #121212;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Enhanced hero section */
+  .careers-hero {
+    text-align: center;
+    padding: 150px 20px;
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/assets/careers-hero.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .careers-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 1;
+  }
+  
+  .careers-hero h1 {
+    font-size: 4.5rem;
+    color: white;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 800;
+    letter-spacing: -1px;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: fadeInUp 0.8s forwards 0.2s;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .careers-hero p {
+    font-size: 1.6rem;
+    color: white;
+    max-width: 800px;
+    margin: 0 auto;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    opacity: 0;
+    animation: fadeInUp 0.8s forwards 0.4s;
+    position: relative;
+    z-index: 2;
+  }
+  
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

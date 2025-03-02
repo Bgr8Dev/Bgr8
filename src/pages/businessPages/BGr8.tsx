@@ -23,6 +23,13 @@ export default function BGr8() {
       <div className="bgr8-page">
         {isMobile ? <HamburgerMenu /> : <Navbar />}
 
+        {/* Existing Hero Section */}
+        <section className="bgr8-hero">
+          <h1>BGr8</h1>
+          <p>Empowering individuals to be great through community engagement and growth.</p>
+        </section>
+
+
         {/* Hero Video Section */}
         <section className="bgr8-hero-video">
           <div className="bgr8-video-placeholder">
@@ -37,12 +44,6 @@ export default function BGr8() {
             BGr8 is dedicated to inspiring and empowering individuals to achieve greatness through community programs, workshops, and engaging events. 
             We believe in creating opportunities for growth, learning, and collaboration.
           </p>
-        </section>
-
-        {/* Existing Hero Section */}
-        <section className="bgr8-hero">
-          <h1>BGr8</h1>
-          <p>Empowering individuals to be great through community engagement and growth.</p>
         </section>
 
         {/* Existing Gallery Section */}

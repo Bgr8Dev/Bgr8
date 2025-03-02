@@ -31,6 +31,13 @@ export default function B8CarClub() {
       <div className="carclub-page">
         {isMobile ? <HamburgerMenu /> : <Navbar />}
 
+        {/* Existing Hero Section */}
+        <section className="car-club-hero">
+          <h1>B8 Car Club</h1>
+          <p>Join our exclusive car club for events, showcases, and community activities.</p>
+        </section>
+
+
         {/* Updated Hero Video Section */}
         <section className="hero-video">
           <div className="video-container">
@@ -53,12 +60,6 @@ export default function B8CarClub() {
             The B8 Car Club connects car enthusiasts through exclusive events, road trips, and showcases. 
             Join us to experience a community that celebrates passion for cars and performance.
           </p>
-        </section>
-
-        {/* Existing Hero Section */}
-        <section className="carclub-hero">
-          <h1>B8 Car Club</h1>
-          <p>Join our exclusive car club for events, showcases, and community activities.</p>
         </section>
 
         {/* Existing Gallery Section */}
