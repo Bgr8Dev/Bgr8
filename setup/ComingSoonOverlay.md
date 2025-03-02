@@ -19,7 +19,7 @@ The ComingSoonOverlay has been successfully implemented on all business pages:
 - B8Clothing (`clothing`)
 - B8League (`league`)
 - B8World (`world`)
-- B8Education (`education`)
+- Bgr8r (`bgr8r`)
 - B8Careers (`careers`)
 - BGr8 (`bgr8`)
 
@@ -52,7 +52,7 @@ Replace `"businessName"` with the correct identifier for your business page:
 - "clothing" for B8 Clothing
 - "league" for B8 League
 - "world" for B8 World
-- "education" for B8 Education
+- "bgr8r" for Bgr8r
 - "careers" for B8 Careers
 - "bgr8" for BGr8
 

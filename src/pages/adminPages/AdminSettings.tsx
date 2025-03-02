@@ -11,7 +11,7 @@ interface BusinessAccessibility {
   clothing: boolean;
   league: boolean;
   world: boolean;
-  education: boolean;
+  bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
   [key: string]: boolean;
@@ -23,7 +23,7 @@ interface BusinessComingSoon {
   clothing: boolean;
   league: boolean;
   world: boolean;
-  education: boolean;
+  bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
   [key: string]: boolean;
@@ -36,7 +36,7 @@ interface BusinessGrayedOut {
   clothing: boolean;
   league: boolean;
   world: boolean;
-  education: boolean;
+  bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
   [key: string]: boolean;
@@ -58,7 +58,7 @@ export function AdminSettings() {
     clothing: true,
     league: true,
     world: true,
-    education: true,
+    bgr8r: true,
     careers: true,
     bgr8: true
   });
@@ -68,7 +68,7 @@ export function AdminSettings() {
     clothing: true,
     league: true,
     world: true,
-    education: true,
+    bgr8r: true,
     careers: true,
     bgr8: true
   });
@@ -79,7 +79,7 @@ export function AdminSettings() {
     clothing: false,
     league: false,
     world: false,
-    education: false,
+    bgr8r: false,
     careers: false,
     bgr8: false
   });
@@ -98,7 +98,7 @@ export function AdminSettings() {
     clothing: 'B8 Clothing',
     league: 'B8 League',
     world: 'B8 World',
-    education: 'B8 Education',
+    bgr8r: 'Bgr8r',
     careers: 'B8 Careers',
     bgr8: 'BGr8'
   };

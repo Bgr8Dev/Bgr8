@@ -37,7 +37,7 @@ export default function Navbar() {
         {isBusinessAccessible('clothing') && <Link to="/b8-clothing" className="glitch-link">??????????</Link>}
         {isBusinessAccessible('league') && <Link to="/b8-league">B8 League</Link>}
         {isBusinessAccessible('world') && <Link to="/b8-world">B8 World</Link>}
-        {isBusinessAccessible('education') && <Link to="/b8-education">B8 Education</Link>}
+        {isBusinessAccessible('bgr8r') && <Link to="/bgr8r">Bgr8r</Link>}
         {isBusinessAccessible('careers') && <Link to="/b8-careers">B8 Careers</Link>}
       </nav>
 

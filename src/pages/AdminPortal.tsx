@@ -10,7 +10,7 @@ import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
 import { AdminPortalB8CarClub } from './adminPages/AdminPortalB8CarClub';
 import { AdminPortalB8Clothing } from './adminPages/AdminPortalB8Clothing';
 import { AdminPortalB8World } from './adminPages/AdminPortalB8World';
-import { AdminPortalB8Education } from './adminPages/AdminPortalB8Education';
+import { AdminPortalBgr8r } from './adminPages/AdminPortalBgr8r';
 import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
 import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 import { AdminSettings } from './adminPages/AdminSettings';
@@ -54,7 +54,7 @@ export default function AdminPortal() {
     clothing: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     league: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     world: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
-    education: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    bgr8r: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     careers: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     bgr8: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
   });
@@ -65,7 +65,7 @@ export default function AdminPortal() {
     { id: 'clothing', name: 'B8 Clothing', icon: FaTshirt },
     { id: 'league', name: 'B8 League', icon: FaFutbol },
     { id: 'world', name: 'B8 World', icon: FaHandHoldingHeart },
-    { id: 'education', name: 'B8 Education', icon: FaGraduationCap },
+    { id: 'bgr8r', name: 'Bgr8r', icon: FaGraduationCap },
     { id: 'careers', name: 'B8 Careers', icon: FaBriefcase },
     { id: 'bgr8', name: 'BGr8', icon: FaUserPlus }
   ];
@@ -170,8 +170,8 @@ export default function AdminPortal() {
         return <div>B8 League component is under development</div>;
       case 'world':
         return <AdminPortalB8World stats={businessStats.world} />;
-      case 'education':
-        return <AdminPortalB8Education stats={businessStats.education} />;
+      case 'bgr8r':
+        return <AdminPortalBgr8r stats={businessStats.bgr8r} />;
       case 'careers':
         return <AdminPortalB8Careers stats={businessStats.careers} />;
       case 'bgr8':

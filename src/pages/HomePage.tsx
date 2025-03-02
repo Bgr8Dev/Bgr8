@@ -21,7 +21,7 @@ export default function HomePage() {
     { id: 'clothing', icon: <FaTshirt size={40} />, title: 'B8 Clothing', description: 'Stylish modern apparel.', link: '/b8-clothing', color: '#FFF', hoverColor: 'rgba(139, 69, 19, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'league', icon: <FaMedal size={40} />, title: 'B8 League', description: 'Passion for sports.', link: '/b8-league', color: '#FFF', hoverColor: 'rgba(128, 0, 128, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'world', icon: <FaHeart size={40} />, title: 'B8 World', description: 'Making the world a B8er place', link: '/b8-world', color: '#FFF', hoverColor: 'rgba(0, 0, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'education', icon: <FaGraduationCap size={40} />, title: 'Bgr8r', description: 'Empowering future generations.', link: '/b8-education', color: '#FFF', hoverColor: 'rgba(0, 128, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'bgr8r', icon: <FaGraduationCap size={40} />, title: 'Bgr8r', description: 'Empowering future generations.', link: '/bgr8r', color: '#FFF', hoverColor: 'rgba(0, 128, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'careers', icon: <FaBriefcase size={40} />, title: 'B8 Careers', description: 'Grow and innovate with us.', link: '/b8-careers', color: '#FFF', hoverColor: 'rgba(0, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#FFF' },
   ];
 

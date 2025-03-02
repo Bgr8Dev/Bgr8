@@ -84,7 +84,7 @@ export default function HamburgerMenu() {
             {isBusinessAccessible('clothing') && <Link to="/b8-clothing" onClick={toggleMenu} className="glitch-link">??????????</Link>}
             {isBusinessAccessible('league') && <Link to="/b8-league" onClick={toggleMenu}>B8 League</Link>}
             {isBusinessAccessible('world') && <Link to="/b8-world" onClick={toggleMenu}>B8 World</Link>}
-            {isBusinessAccessible('education') && <Link to="/b8-education" onClick={toggleMenu}>B8 Education</Link>}
+            {isBusinessAccessible('bgr8r') && <Link to="/bgr8r" onClick={toggleMenu}>Bgr8r</Link>}
             {isBusinessAccessible('careers') && <Link to="/b8-careers" onClick={toggleMenu}>B8 Careers</Link>}
           </nav>
         </div>

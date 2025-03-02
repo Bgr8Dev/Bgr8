@@ -21,7 +21,7 @@ interface BusinessComingSoon {
   clothing: boolean;
   league: boolean;
   world: boolean;
-  education: boolean;
+  bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
   [key: string]: boolean;
@@ -70,7 +70,7 @@ const defaultComingSoon: BusinessComingSoon = {
   clothing: true,
   league: true,
   world: true,
-  education: true,
+  bgr8r: true,
   careers: true,
   bgr8: true
 };
