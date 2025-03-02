@@ -6,6 +6,14 @@ import React from 'react';
 // Import react-tournament-brackets components
 import { SingleEliminationBracket, Match, SVGViewer, MatchData, ParticipantData, DoubleEliminationBracket } from 'react-tournament-brackets';
 
+// Extend the ParticipantData interface to include the teamInfo property
+interface ExtendedParticipantData extends ParticipantData {
+  teamInfo?: {
+    name: string;
+    players: number;
+  } | null;
+}
+
 interface TournamentListProps {
   sportType?: 'football' | 'badminton' | 'esports';
   limit?: number;
@@ -18,6 +26,9 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
   const [expandedTournamentId, setExpandedTournamentId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<MatchData | null>(null);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [showTestModal, setShowTestModal] = useState(false);
 
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -106,8 +117,8 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
       startTime: tournament.startDate,
       state: 'SCHEDULED',
       participants: [
-        { id: 'tbd-1', name: 'TBD' },
-        { id: 'tbd-2', name: 'TBD' }
+        { id: 'finalist-1', name: 'TBD', teamInfo: null } as ExtendedParticipantData,
+        { id: 'finalist-2', name: 'TBD', teamInfo: null } as ExtendedParticipantData
       ]
     });
     
@@ -146,8 +157,8 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
           startTime: tournament.startDate,
           state: 'SCHEDULED',
           participants: [
-            { id: `tbd-${matchId}-1`, name: 'TBD' },
-            { id: `tbd-${matchId}-2`, name: 'TBD' }
+            { id: `seed-${matchId}-1`, name: 'TBD', teamInfo: null } as ExtendedParticipantData,
+            { id: `seed-${matchId}-2`, name: 'TBD', teamInfo: null } as ExtendedParticipantData
           ]
         });
       }
@@ -162,10 +173,10 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
     // Sort first round matches to maintain bracket order
     firstRoundMatches.sort((a, b) => a.id - b.id);
     
-    // Assign teams to first round matches
-    const availableTeams = [...tournament.teams];
-    while (availableTeams.length < firstRoundMatches.length * 2) {
-      availableTeams.push({ name: 'TBD', players: 0 });
+    // Prepare teams array with proper padding if needed
+    const teamsArray = [...tournament.teams];
+    while (teamsArray.length < firstRoundMatches.length * 2) {
+      teamsArray.push({ name: 'TBD', players: 0 });
     }
     
     // Distribute teams according to standard tournament seeding
@@ -178,13 +189,28 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
       const team2Idx = firstRoundMatches.length * 2 - 1 - i;
       
       if (matchIndex !== -1) {
-        matches[matchIndex].participants[0].name = team1Idx < availableTeams.length ? 
-          availableTeams[team1Idx].name : 'TBD';
-        matches[matchIndex].participants[0].id = `team-${team1Idx}`;
+        // Team 1 assignment
+        if (team1Idx < teamsArray.length && teamsArray[team1Idx]) {
+          matches[matchIndex].participants[0] = { 
+            id: `team-${team1Idx}`, 
+            name: teamsArray[team1Idx].name,
+            // Store complete team info for later reference
+            teamInfo: teamsArray[team1Idx]
+          } as ExtendedParticipantData;
+        }
         
-        matches[matchIndex].participants[1].name = team2Idx < availableTeams.length ? 
-          availableTeams[team2Idx].name : 'TBD';
-        matches[matchIndex].participants[1].id = `team-${team2Idx}`;
+        // Team 2 assignment
+        if (team2Idx < teamsArray.length && teamsArray[team2Idx]) {
+          matches[matchIndex].participants[1] = { 
+            id: `team-${team2Idx}`, 
+            name: teamsArray[team2Idx].name,
+            // Store complete team info for later reference
+            teamInfo: teamsArray[team2Idx]
+          } as ExtendedParticipantData;
+        }
+        
+        // Log team assignment for debugging
+        console.log(`Match ${matches[matchIndex].id} (${matches[matchIndex].name}): ${matches[matchIndex].participants[0].name} vs ${matches[matchIndex].participants[1].name}`);
       }
     }
     
@@ -202,17 +228,27 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
     // Find first round matches with TBD participants
     const firstRoundMatches = matches.filter(m => {
       // First round matches are typically the highest ID matches
-      return m.participants.some(p => p.name === 'TBD') && 
-        !matches.some(child => child.nextMatchId === m.id);
+      return (m.participants.some(p => p.name === 'TBD' || !p.name) || 
+             m.participants.some(p => p.name && p.name.includes('TBD'))) && 
+             !matches.some(child => child.nextMatchId === m.id);
     });
+    
+    console.log('Propagating byes for', firstRoundMatches.length, 'first round matches');
     
     // For each first round match that has a bye (one real team vs TBD)
     firstRoundMatches.forEach(match => {
-      // If only one participant is a real team (the other is TBD), it's a bye
-      const byeIndex = match.participants.findIndex(p => p.name === 'TBD');
-      const advancingIndex = byeIndex === 0 ? 1 : 0;
+      // Find participant with TBD name
+      const byeIndex = match.participants.findIndex(p => 
+        p.name === 'TBD' || !p.name || (p.name && p.name.includes('TBD'))
+      );
       
+      // If only one participant is TBD (the other is a real team), it's a bye
       if (byeIndex !== -1 && match.nextMatchId) {
+        const advancingIndex = byeIndex === 0 ? 1 : 0;
+        const advancingTeam = match.participants[advancingIndex];
+        
+        console.log(`Match ${match.id} has a bye: ${advancingTeam.name} advances automatically`);
+        
         // Find the next match
         const nextMatchIndex = matches.findIndex(m => m.id === match.nextMatchId);
         if (nextMatchIndex !== -1) {
@@ -224,10 +260,14 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
           const nextMatchSlot = childIndex % 2;
           
           // Advance the team to the next round
-          matches[nextMatchIndex].participants[nextMatchSlot] = { 
-            ...match.participants[advancingIndex],
-            name: match.participants[advancingIndex].name + ' (Bye)'
-          };
+          matches[nextMatchIndex].participants[nextMatchSlot] = {
+            id: advancingTeam.id,
+            name: `${advancingTeam.name} (Bye)`,
+            teamInfo: advancingTeam.teamInfo, // Preserve original team info
+            resultText: 'Advanced (Bye)'
+          } as ExtendedParticipantData;
+          
+          console.log(`Team ${advancingTeam.name} advanced to match ${matches[nextMatchIndex].id} (${matches[nextMatchIndex].name})`);
         }
       }
     });
@@ -453,12 +493,109 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
     
     const handleMatchClick = (match: MatchData) => {
       console.log('Match clicked:', match);
-      // Could display match details, schedule, etc.
+      // Add more detailed logs to debug match object
+      console.log('Match ID:', match.id);
+      console.log('Match name:', match.name);
+      console.log('Match start time:', match.startTime);
+      
+      // Log detailed participant information to diagnose the issue
+      if (match.participants && match.participants.length > 0) {
+        console.log('Match has', match.participants.length, 'participants:');
+        match.participants.forEach((p, index) => {
+          console.log(`Participant ${index + 1}:`, JSON.stringify(p));
+        });
+      } else {
+        console.log('Match has no participants or empty array');
+      }
+      
+      // Process participants to ensure they have the correct information
+      const enhancedParticipants = match.participants && match.participants.length > 0 
+        ? match.participants.map(p => {
+            // If we have teamInfo, use it directly
+            if (p.teamInfo) {
+              return {
+                ...p,
+                name: p.teamInfo.name || p.name || 'Unknown Team'
+              };
+            }
+            // Otherwise, use the name as is
+            return {
+              ...p,
+              name: p.name || 'Unknown Team'
+            };
+          })
+        : [
+            { id: 'team-1', name: 'TBD' },
+            { id: 'team-2', name: 'TBD' }
+          ];
+      
+      // Ensure the match has all required properties before opening the modal
+      const enhancedMatch: MatchData = {
+        ...match,
+        // Ensure these fields exist with default values if they're missing
+        id: match.id || Math.floor(Math.random() * 1000), 
+        name: match.name || 'Match',
+        tournamentRoundText: match.tournamentRoundText || 'Round',
+        startTime: match.startTime || new Date().toISOString(),
+        state: match.state || 'SCHEDULED',
+        participants: enhancedParticipants
+      };
+      
+      // Open modal with enhanced match details
+      setSelectedMatch(enhancedMatch);
+      setShowMatchModal(true);
+      console.log('Modal state after click:', { showMatchModal: true, selectedMatch: enhancedMatch });
     };
     
     const handleParticipantClick = (participant: ParticipantData, match: MatchData) => {
       console.log('Team clicked:', participant, 'in match:', match);
-      // Could display team details, roster, etc.
+      
+      // Log detailed participant information
+      if (match.participants && match.participants.length > 0) {
+        console.log('Match has', match.participants.length, 'participants:');
+        match.participants.forEach((p, index) => {
+          console.log(`Participant ${index + 1}:`, JSON.stringify(p));
+        });
+      }
+      
+      // Process participants to ensure they have the correct information
+      const enhancedParticipants = match.participants && match.participants.length > 0 
+        ? match.participants.map(p => {
+            // If we have teamInfo, use it directly
+            if (p.teamInfo) {
+              return {
+                ...p,
+                name: p.teamInfo.name || p.name || 'Unknown Team'
+              };
+            }
+            // Otherwise, use the name as is
+            return {
+              ...p,
+              name: p.name || 'Unknown Team'
+            };
+          })
+        : [
+            { id: 'team-1', name: 'TBD' },
+            { id: 'team-2', name: 'TBD' }
+          ];
+      
+      // Enhance the match data similar to handleMatchClick
+      const enhancedMatch: MatchData = {
+        ...match,
+        id: match.id || Math.floor(Math.random() * 1000),
+        name: match.name || 'Match',
+        tournamentRoundText: match.tournamentRoundText || 'Round',
+        startTime: match.startTime || new Date().toISOString(),
+        state: match.state || 'SCHEDULED',
+        participants: enhancedParticipants,
+        // Add the highlighted participant ID
+        highlightedParticipantId: participant.id
+      };
+      
+      // Open modal with match details, highlighting the selected participant
+      setSelectedMatch(enhancedMatch);
+      setShowMatchModal(true);
+      console.log('Modal state after participant click:', { showMatchModal: true, selectedMatch: enhancedMatch });
     };
 
     // Calculate proper dimensions based on tournament size
@@ -499,6 +636,10 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
           matchComponentBackground: '#333',
           matchComponentBorder: '#444',
           matchComponentColorHighlight: '#9c27b0',
+          hoveredMatchBorderColor: '#ff00ff', // Very visible color when hovering
+          hoveredMatchBackground: '#444', // Darker background on hover
+          hoveredParticipantBorderColor: '#ff00ff', // Match the hover highlight
+          hoveredParticipantBackground: '#444', // Darker background for hovered team
         },
         disableCanvasMouseOver: false, // Enable mouseover effects
         horizontalOffset: 180, // Increase spacing between rounds
@@ -510,10 +651,32 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
       }
     };
     
+    // Add custom controls for testing
     return (
       <div className="tournament-bracket knockout-bracket">
         <h4>{isDoubleElimination ? 'Double Elimination' : 'Single Elimination'} Tournament Bracket</h4>
-        
+        <div className="bracket-test-controls">
+          <button 
+            className="test-modal-btn" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowTestModal(true);
+              console.log('Simple test modal triggered');
+            }}
+            style={{ marginRight: '10px' }}
+          >
+            Test Modal
+          </button>
+          <button 
+            className="test-modal-btn" 
+            onClick={(e) => {
+              e.stopPropagation();
+              openTestMatchModal();
+            }}
+          >
+            Test Match Modal
+          </button>
+        </div>
         <div className="scrollable-bracket-container">
           {isDoubleElimination ? (
             <DoubleEliminationBracket
@@ -650,6 +813,244 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
     );
   };
 
+  // Modify the openTestMatchModal function to create better test data
+  const openTestMatchModal = () => {
+    // Create more complete test match data
+    const testMatch: MatchData = {
+      id: 999,
+      name: "Semi-Finals 2",
+      nextMatchId: 500,
+      tournamentRoundText: "Semi-Finals",
+      startTime: new Date().toISOString(),
+      state: "SCHEDULED",
+      participants: [
+        { 
+          id: "team1", 
+          name: "Team Alpha", 
+          resultText: "Winner",
+          teamInfo: {
+            name: "Team Alpha",
+            players: 5
+          }
+        } as ExtendedParticipantData,
+        { 
+          id: "team2", 
+          name: "Team Beta",
+          teamInfo: {
+            name: "Team Beta",
+            players: 5
+          }
+        } as ExtendedParticipantData
+      ],
+      venue: "Main Arena"
+    };
+    
+    console.log('Opening test match modal with hardcoded data:', testMatch);
+    setSelectedMatch(testMatch);
+    setShowMatchModal(true);
+  };
+
+  // Function to render the match modal
+  const renderMatchModal = () => {
+    try {
+      console.log('Rendering match modal, selectedMatch:', selectedMatch);
+      
+      if (!selectedMatch) {
+        return (
+          <div className="match-modal-overlay" onClick={() => setShowMatchModal(false)}>
+            <div className="match-modal" onClick={(e) => e.stopPropagation()}>
+              <p>No match selected</p>
+              <button onClick={() => setShowMatchModal(false)}>Close</button>
+            </div>
+          </div>
+        );
+      }
+
+      // Format match date and time
+      const matchDateTime = selectedMatch.startTime 
+        ? formatMatchDateTime(selectedMatch.startTime)
+        : { date: 'TBD', time: 'TBD' };
+        
+      // Get match status display
+      const getMatchStatusDisplay = () => {
+        switch (selectedMatch.state) {
+          case 'SCHEDULED': return 'Scheduled';
+          case 'RUNNING': return 'In Progress';
+          case 'DONE': return 'Completed';
+          default: return selectedMatch.state || 'Unknown';
+        }
+      };
+      
+      return (
+        <div className="match-modal-overlay" onClick={() => setShowMatchModal(false)}>
+          <div className="match-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="match-modal-header">
+              <h2>{selectedMatch.name || 'Unnamed Match'}</h2>
+              <button 
+                className="close-button" 
+                onClick={() => setShowMatchModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div className="match-modal-content">
+              <div className="match-info">
+                <p><strong>ID:</strong> {selectedMatch.id || 'N/A'}</p>
+                <p><strong>Round:</strong> {selectedMatch.tournamentRoundText || 'N/A'}</p>
+                <p><strong>Date:</strong> {matchDateTime.date}</p>
+                <p><strong>Time:</strong> {matchDateTime.time}</p>
+                <p><strong>Status:</strong> {getMatchStatusDisplay()}</p>
+              </div>
+              
+              <div className="match-teams">
+                <h3>Teams</h3>
+                {selectedMatch.participants && selectedMatch.participants.length > 0 ? (
+                  <div className="teams-container">
+                    {selectedMatch.participants.map((participant, index) => (
+                      <div 
+                        key={participant.id || index} 
+                        className={`team-item ${selectedMatch.highlightedParticipantId === participant.id ? 'highlighted' : ''}`}
+                      >
+                        <p className="team-name">{participant.name || 'Unknown Team'}</p>
+                        {participant.resultText && (
+                          <p className="team-result">{participant.resultText}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No teams assigned</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="match-modal-footer">
+              <button onClick={() => setShowMatchModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    } catch (error) {
+      console.error('Error rendering match modal:', error);
+      return (
+        <div className="match-modal-overlay" onClick={() => setShowMatchModal(false)}>
+          <div className="match-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="match-modal-header">
+              <h2>Error</h2>
+              <button 
+                className="close-button" 
+                onClick={() => setShowMatchModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="match-modal-content">
+              <p>There was an error displaying the match details.</p>
+              <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
+            </div>
+            <div className="match-modal-footer">
+              <button onClick={() => setShowMatchModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  // Add a simple test modal function before the renderMatchModal function
+  const renderTestModal = () => {
+    return (
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999
+        }}
+        onClick={() => setShowTestModal(false)}
+      >
+        <div 
+          style={{
+            backgroundColor: '#202020',
+            padding: '30px',
+            borderRadius: '15px',
+            width: '90%',
+            maxWidth: '500px',
+            boxShadow: '0 15px 30px rgba(156, 39, 176, 0.5)',
+            position: 'relative'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 style={{ color: '#ff80ff', marginTop: 0 }}>Test Modal</h2>
+          <p style={{ color: '#e0e0e0' }}>This is a test modal to check if modal rendering is working.</p>
+          <button 
+            style={{
+              backgroundColor: '#9c27b0',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+            onClick={() => setShowTestModal(false)}
+          >
+            Close Modal
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Format date time string for display
+  const formatMatchDateTime = (dateTimeString: string) => {
+    console.log('Formatting date time string:', dateTimeString);
+    
+    // Check if the string is valid
+    if (!dateTimeString || dateTimeString === 'TBD' || dateTimeString === 'N/A') {
+      console.warn('Invalid date time string:', dateTimeString);
+      return { date: 'TBD', time: 'TBD' };
+    }
+    
+    try {
+      const date = new Date(dateTimeString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date object created from:', dateTimeString);
+        return { date: 'TBD', time: 'TBD' };
+      }
+      
+      // Format date
+      const dateOptions: Intl.DateTimeFormatOptions = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      };
+      
+      // Format time
+      const timeOptions: Intl.DateTimeFormatOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true
+      };
+      
+      return {
+        date: date.toLocaleDateString(undefined, dateOptions),
+        time: date.toLocaleTimeString(undefined, timeOptions)
+      };
+    } catch (error) {
+      console.error('Error formatting date time:', error);
+      return { date: 'Error', time: 'Error' };
+    }
+  };
+
   if (loading) {
     return (
       <div className="tournaments-loading">
@@ -762,6 +1163,10 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
           )}
         </div>
       ))}
+      
+      {/* Render both modals */}
+      {showMatchModal && renderMatchModal()}
+      {showTestModal && renderTestModal()}
     </div>
   );
 } 

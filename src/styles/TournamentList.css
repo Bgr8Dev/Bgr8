@@ -920,4 +920,187 @@
 
 .tournament-bracket svg g[data-testid="roundHeader"] text[data-losers-bracket="true"] {
   fill: #f44336 !important;
+}
+
+/* Test button styles */
+.bracket-test-controls {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.test-modal-btn {
+  background-color: #9c27b0;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  margin-right: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.test-modal-btn:hover {
+  background-color: #7b1fa2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Match hover styles */
+[data-testid="matchComponent"] {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+[data-testid="matchComponent"]:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+[data-testid="playerContainer"] {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+[data-testid="playerContainer"]:hover {
+  transform: scale(1.02);
+  background-color: rgba(156, 39, 176, 0.1);
+}
+
+/* Match Modal Styles */
+.match-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.match-modal {
+  background-color: #202020;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 15px 30px rgba(156, 39, 176, 0.5);
+  overflow: hidden;
+  animation: modal-appear 0.3s ease-out;
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.match-modal-header {
+  background-color: #9c27b0;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.match-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.match-modal-content {
+  padding: 20px;
+}
+
+.match-info {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.match-info p {
+  margin: 8px 0;
+  color: #e0e0e0;
+}
+
+.match-teams h3 {
+  color: #e0e0e0;
+  margin-bottom: 15px;
+}
+
+.teams-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.team-item {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #444;
+}
+
+.team-item.highlighted {
+  border: 1px solid #9c27b0;
+  box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+}
+
+.team-name {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #e0e0e0;
+}
+
+.team-result {
+  color: #ff80ff;
+  margin: 0;
+  font-weight: bold;
+  background-color: rgba(156, 39, 176, 0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.match-modal-footer {
+  padding: 15px 20px;
+  background-color: #1a1a1a;
+  text-align: right;
+}
+
+.match-modal-footer button {
+  background-color: #9c27b0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.match-modal-footer button:hover {
+  background-color: #7b1fa2;
 } 
