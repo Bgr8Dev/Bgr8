@@ -1,4 +1,3 @@
-import React from 'react';
 import { FaGraduationCap, FaChalkboardTeacher, FaBook, FaUserGraduate } from 'react-icons/fa';
 
 interface AdminPortalBgr8rProps {
