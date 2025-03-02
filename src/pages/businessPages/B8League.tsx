@@ -6,6 +6,10 @@ import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaT
 import '../../styles/businessStyles/B8League.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import ContactForm from '../../components/ContactForm';
+import TournamentCreator from '../../components/tournament/TournamentCreator';
+import TournamentList from '../../components/tournament/TournamentList';
+import '../../styles/TournamentCreator.css';
+import '../../styles/TournamentList.css';
 
 type LeagueSport = 'football' | 'badminton' | 'esports';
 
@@ -245,6 +249,24 @@ export default function B8League() {
             </div>
           </div>
         )}
+
+        {/* Tournaments List Section */}
+        <section className="tournaments-section">
+          <h2 className="section-title">Upcoming Tournaments</h2>
+          <p className="section-description">
+            Join these upcoming {activeSport} tournaments or create your own below.
+          </p>
+          <TournamentList sportType={activeSport} />
+        </section>
+
+        {/* Tournament Creator Section */}
+        <section className="tournament-creator-section">
+          <h2 className="section-title">Create a Tournament</h2>
+          <p className="section-description">
+            Organize your own tournament with B8 League. Fill out the form below to get started.
+          </p>
+          <TournamentCreator sportType={activeSport} />
+        </section>
 
         {/* Contact Section */}
         <section>
