@@ -743,3 +743,52 @@
     margin-bottom: 1rem;
   }
 }
+
+/* Career Opportunities Section */
+.career-opportunities-section {
+  padding: 2rem 0;
+  margin: 3rem 0;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  flex-direction: column;
+}
+
+.section-header h2 {
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  color: white;
+  position: relative;
+  display: inline-block;
+}
+
+.section-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #007bff, #00c6ff);
+  border-radius: 3px;
+}
+
+.section-header p {
+  font-size: 1.2rem;
+  color: #aaa;
+  max-width: 800px;
+  margin: 1rem auto 0;
+}
+
+@media (max-width: 768px) {
+  .section-header h2 {
+    font-size: 2.2rem;
+  }
+  
+  .section-header p {
+    font-size: 1rem;
+  }
+}

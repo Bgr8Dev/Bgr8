@@ -21,6 +21,7 @@ import {
 } from '../../types/marketing';
 import ContactForm from '../../components/ContactForm';
 import SocialChannels from '../../components/SocialChannels';
+import JoinOurTeam from '../../components/JoinOurTeam';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -245,6 +246,15 @@ export default function B8Marketing() {
           ) : (
             <p>No pricing plans to display</p>
           )}
+        </section>
+
+        {/* Career Opportunities Section */}
+        <section className="career-opportunities-section">
+          <div className="section-header">
+            <h2>Career Opportunities</h2>
+            <p>Join our team of marketing professionals and help shape the future of digital marketing</p>
+          </div>
+          <JoinOurTeam />
         </section>
 
         {/* Links to Social Channels */}
