@@ -4,6 +4,7 @@ import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import '../../styles/businessStyles/Bgr8r.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function Bgr8r() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -132,6 +133,9 @@ export default function Bgr8r() {
             </form>
           </section>
         )}
+
+        {/* Social Channels */}
+        <SocialChannels className="bgr8r-social-channels" />
 
         <Footer />
       </div>

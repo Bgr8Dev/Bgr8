@@ -5,13 +5,14 @@ import Footer from '../../components/Footer';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import GooglePayButton from '@google-pay/button-react';
 import { loadStripe } from '@stripe/stripe-js';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaCreditCard, FaPaypal, FaGooglePay, FaApplePay } from 'react-icons/fa';
+import { FaCreditCard, FaPaypal, FaGooglePay, FaApplePay } from 'react-icons/fa';
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ClothingItem, ClothingCategory } from '../../types/clothing';
 import '../../styles/businessStyles/B8Clothing.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import ContactForm from '../../components/ContactForm';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -397,13 +398,8 @@ export default function B8Clothing() {
           {/* Contact Section */}
           <section>
             <ContactForm source="clothing" />
-
-            <div className="clothing-social-media">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-            </div>
+            
+            <SocialChannels className="clothing-social-channels" />
           </section>
 
           <Footer />

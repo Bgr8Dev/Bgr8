@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import '../../styles/businessStyles/BGr8Medical.css';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function BGr8Medical({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({
@@ -157,6 +158,9 @@ export default function BGr8Medical({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </form>
+        
+        {/* Social Channels */}
+        <SocialChannels className="medical-social-channels" />
       </div>
     </div>
   );

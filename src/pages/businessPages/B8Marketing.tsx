@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import { renderIcon } from '../../utils/iconMapping';
 import '../../styles/businessStyles/B8Marketing.css';
@@ -21,6 +20,7 @@ import {
   MarketingPricingPlan
 } from '../../types/marketing';
 import ContactForm from '../../components/ContactForm';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -248,15 +248,7 @@ export default function B8Marketing() {
         </section>
 
         {/* Links to Social Channels */}
-        <section className="social-channels">
-          <h3>Follow Us</h3>
-          <div className="social-media">
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-          </div>
-        </section>
+        <SocialChannels />
 
         {/* Detailed Contact Us Form */}
         <section>

@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaInstagram, FaYoutube } from 'react-icons/fa';
 import '../../styles/businessStyles/BGr8.css';
 import BGr8Medical from './BGr8Medical';
 import ContactForm from '../../components/ContactForm';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -63,13 +63,7 @@ export default function BGr8() {
         </section>
 
         {/* Social Media Links */}
-        <section className="bgr8-social-links">
-          <h3>Follow Us</h3>
-          <div className="bgr8-social-media">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-          </div>
-        </section>
+        <SocialChannels className="bgr8-social-channels" />
 
         {/* Google Calendar / Calendly Link */}
         <section className="bgr8-calendar-section">

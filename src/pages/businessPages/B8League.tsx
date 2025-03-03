@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaTableTennis } from 'react-icons/fa';
+import { FaFutbol, FaGamepad, FaTableTennis } from 'react-icons/fa';
 import '../../styles/businessStyles/B8League.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import ContactForm from '../../components/ContactForm';
@@ -11,6 +11,7 @@ import TournamentList from '../../components/tournament/TournamentList';
 import '../../styles/tournamentStyles/TournamentCreator.css';
 import '../../styles/tournamentStyles/TournamentList.css';
 import { useB8SectionVisibility } from '../../contexts/B8SectionVisibilityContext';
+import SocialChannels from '../../components/SocialChannels';
 
 type LeagueSport = 'football' | 'badminton' | 'esports';
 
@@ -303,13 +304,8 @@ export default function B8League() {
           <section>
             <AdminNotice section="showContact" name="Contact" />
             <ContactForm source="league" />
-
-            <div className="league-social-media">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-            </div>
+            
+            <SocialChannels className="league-social-channels" />
           </section>
         )}
 

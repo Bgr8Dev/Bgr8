@@ -6,6 +6,7 @@ import '../../styles/businessStyles/B8World.css';
 import ContactForm from '../../components/ContactForm';
 import { FaHandHoldingHeart, FaHospital, FaUsers, FaMosque, FaGraduationCap, FaHandsHelping, FaGlobe, FaTimes, FaCreditCard, FaPoundSign } from 'react-icons/fa';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import SocialChannels from '../../components/SocialChannels';
 
 const worldPartners = [
   {
@@ -244,6 +245,9 @@ export default function B8World() {
             <p>Reach out to learn more about our global initiatives, charity partners, and how you can contribute to making the world a better place.</p>
             <ContactForm source="world" />
           </section>
+          
+          {/* Social Channels */}
+          <SocialChannels className="world-social-channels" />
         </main>
 
         <Footer />

@@ -9,6 +9,7 @@ import Footer from '../../components/Footer';
 import { CvFormData } from '../../types/careers';
 import '../../styles/businessStyles/B8Careers.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -416,7 +417,8 @@ export default function B8Careers() {
           </section>
         )}
 
-
+        {/* Social Channels */}
+        <SocialChannels className="careers-social-channels" />
 
         <Footer />
       </div>

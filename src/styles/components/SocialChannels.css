@@ -1,0 +1,130 @@
+.social-channels {
+  background-color: #111;
+  padding: 3rem 2rem;
+  margin: 2rem 0;
+  text-align: center;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.social-channels h3 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.social-media {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.social-media a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #222, #333);
+  color: white;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.social-media a:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+}
+
+.social-media a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.social-media a:hover::before {
+  opacity: 1;
+}
+
+/* Individual social icon colors on hover */
+.social-media a:nth-child(1):hover {
+  background: #0077B5; /* LinkedIn */
+  color: #ffffff;
+  box-shadow: 0 0 20px #0077B5, 0 0 40px #0077B5;
+  animation: rainbow-pulse 1.5s infinite;
+}
+
+.social-media a:nth-child(2):hover {
+  background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D, #F56040, #F77737, #FCAF45, #FFDC80); /* Instagram */
+  color: #ffffff;
+  box-shadow: 0 0 20px #E1306C, 0 0 40px #E1306C;
+  animation: rainbow-pulse 2s infinite;
+}
+
+.social-media a:nth-child(3):hover {
+  background: #FF0000; /* YouTube */
+  color: #ffffff;
+  box-shadow: 0 0 20px #FF0000, 0 0 40px #FF0000;
+  animation: rainbow-pulse 1.5s infinite;
+}
+
+.social-media a:nth-child(4):hover {
+  background: #1DA1F2; /* Twitter */
+  color: #ffffff;
+  box-shadow: 0 0 20px #1DA1F2, 0 0 40px #1DA1F2;
+  animation: rainbow-pulse 1.5s infinite;
+}
+
+/* Define the rainbow-pulse animation */
+@keyframes rainbow-pulse {
+  0% {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+  }
+  100% {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .social-media {
+    gap: 1rem;
+  }
+  
+  .social-media a {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-media {
+    flex-wrap: wrap;
+    max-width: 240px;
+    margin: 1.5rem auto 0;
+  }
+  
+  .social-media a {
+    margin-bottom: 1rem;
+  }
+} 

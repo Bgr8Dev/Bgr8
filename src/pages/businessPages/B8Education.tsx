@@ -4,6 +4,7 @@ import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import '../../styles/businessStyles/B8Education.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import SocialChannels from '../../components/SocialChannels';
 
 export default function B8Education() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -132,6 +133,9 @@ export default function B8Education() {
             </form>
           </section>
         )}
+
+        {/* Social Channels */}
+        <SocialChannels className="education-social-channels" />
 
         <Footer />
       </div>
