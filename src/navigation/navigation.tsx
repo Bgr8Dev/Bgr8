@@ -11,6 +11,7 @@ import B8Careers from '../pages/businessPages/B8Careers';
 import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
 import RegisterPage from '../pages/authPages/RegisterPage';
+import ForgotPasswordPage from '../pages/authPages/ForgotPasswordPage';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Profile from '../pages/utilPages/Profile';
@@ -108,6 +109,7 @@ export default function Navigation() {
       <Route path="/b8-careers" element={<B8Careers />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route 
         path="/profile" 
         element={

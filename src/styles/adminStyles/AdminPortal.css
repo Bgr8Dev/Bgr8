@@ -242,6 +242,84 @@ th {
   background-color: #444;
 }
 
+.section-toggles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.admin-control-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.admin-control-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.admin-control-toggle span {
+  font-weight: 500;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.toggle-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.toggle-icon {
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+}
+
+.toggle-icon.on {
+  color: #4CAF50;
+}
+
+.toggle-icon.off {
+  color: #F44336;
+}
+
+.admin-message {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.admin-message.success {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border-left: 4px solid #4CAF50;
+}
+
+.admin-message.error {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+  border-left: 4px solid #F44336;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @media (max-width: 768px) {
   .admin-portal {
     flex-direction: column;
@@ -288,4 +366,128 @@ th {
   .business-actions .action-button {
     width: 100%;
   }
+
+  .section-toggles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Add these new styles for expandable sections */
+
+.section-header-collapsible {
+  cursor: pointer;
+  padding-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.section-header-collapsible:hover h3 {
+  color: #66a7ff;
+}
+
+.section-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.expansion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4c94fc;
+  width: 24px;
+  height: 24px;
+}
+
+.section-content {
+  animation: expandSection 0.3s ease;
+  overflow: hidden;
+  padding-top: 15px;
+}
+
+@keyframes expandSection {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+    transform: translateY(0);
+  }
+}
+
+.admin-control-section {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.admin-control-header h3 {
+  color: #4c94fc;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.admin-control-description {
+  margin-bottom: 15px;
+  color: #b0b0b0;
+}
+
+.youtube-link-form {
+  margin-top: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ddd;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: white;
+}
+
+.form-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.admin-button {
+  background-color: #4c94fc;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.admin-button:hover {
+  background-color: #3a75c4;
+}
+
+.admin-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
 } 

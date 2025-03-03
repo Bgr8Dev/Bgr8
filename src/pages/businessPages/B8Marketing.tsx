@@ -95,7 +95,7 @@ export default function B8Marketing() {
         {isMobile ? <HamburgerMenu /> : <Navbar />}
 
         {/* Existing Hero Section */}
-        <section className="hero">
+        <section className="marketing-hero">
           <h1><s>B8</s> Marketing</h1>
           <p> <s>We dont have a slogan yet</s></p>
         </section>

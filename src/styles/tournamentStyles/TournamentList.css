@@ -1103,4 +1103,106 @@
 
 .match-modal-footer button:hover {
   background-color: #7b1fa2;
+}
+
+/* Admin notice styling */
+.admin-notice {
+  background-color: rgba(255, 152, 0, 0.2);
+  border-left: 4px solid #ff9800;
+  color: #ff9800;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.admin-notice p {
+  margin: 0;
+}
+
+/* Admin controls styling */
+.admin-control-section {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.admin-control-header h3 {
+  color: #4c94fc;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.admin-control-description {
+  margin-bottom: 15px;
+  color: #b0b0b0;
+}
+
+.admin-control-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #272727;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.admin-control-toggle span {
+  font-weight: 500;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.toggle-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-icon {
+  transition: color 0.3s ease;
+}
+
+.toggle-icon.on {
+  color: #4caf50;
+}
+
+.toggle-icon.off {
+  color: #f44336;
+}
+
+.admin-message {
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.admin-message.success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.admin-message.error {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.tournaments-empty.admin-hidden {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #666;
+  color: #999;
 } 

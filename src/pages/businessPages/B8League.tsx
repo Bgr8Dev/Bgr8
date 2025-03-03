@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaTableTennis, } from 'react-icons/fa';
+import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter, FaFutbol, FaGamepad, FaTableTennis } from 'react-icons/fa';
 import '../../styles/businessStyles/B8League.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import ContactForm from '../../components/ContactForm';
 import TournamentCreator from '../../components/tournament/TournamentCreator';
 import TournamentList from '../../components/tournament/TournamentList';
-import '../../styles/TournamentCreator.css';
-import '../../styles/TournamentList.css';
+import '../../styles/tournamentStyles/TournamentCreator.css';
+import '../../styles/tournamentStyles/TournamentList.css';
+import { useB8SectionVisibility } from '../../contexts/B8SectionVisibilityContext';
 
 type LeagueSport = 'football' | 'badminton' | 'esports';
 
@@ -17,6 +18,8 @@ export default function B8League() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeSport, setActiveSport] = useState<LeagueSport>('football');
+  
+  const { shouldShowSection, isAdminOrDeveloper, sectionVisibility, getYoutubeLink } = useB8SectionVisibility();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -24,44 +27,63 @@ export default function B8League() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Show admin notice for hidden sections
+  const AdminNotice = ({ section, name }: { section: keyof typeof sectionVisibility, name: string }) => {
+    if (isAdminOrDeveloper && !sectionVisibility[section]) {
+      return (
+        <div className="admin-notice">
+          <p><strong>Admin Notice:</strong> The {name} section is currently hidden from regular users.</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <ComingSoonOverlay businessId="league">
       <div className="league-page">
         {isMobile ? <HamburgerMenu /> : <Navbar />}
 
         {/* Hero Section */}
-        <section className="league-hero">
-          <h1>B8 League</h1>
-          <p>Excellence in sports - Football, Badminton, and Esports</p>
-        </section>
+        {shouldShowSection('showHero') && (
+          <section className="league-hero">
+            <AdminNotice section="showHero" name="Hero" />
+            <h1>B8 League</h1>
+            <p>Excellence in sports - Football, Badminton, and Esports</p>
+          </section>
+        )}
 
         {/* Sport Navigation */}
-        <section className="league-nav">
-          <div className="league-tabs">
-            <button 
-              className={`league-tab ${activeSport === 'football' ? 'active' : ''}`} 
-              onClick={() => setActiveSport('football')}
-            >
-              <FaFutbol /> B8FC
-            </button>
-            <button 
-              className={`league-tab ${activeSport === 'badminton' ? 'active' : ''}`} 
-              onClick={() => setActiveSport('badminton')}
-            >
-              <FaTableTennis /> B8dminton
-            </button>
-            <button 
-              className={`league-tab ${activeSport === 'esports' ? 'active' : ''}`} 
-              onClick={() => setActiveSport('esports')}
-            >
-              <FaGamepad /> B8Esports
-            </button>
-          </div>
-        </section>
+        {shouldShowSection('showSportNavigation') && (
+          <section className="league-nav">
+            <AdminNotice section="showSportNavigation" name="Sport Navigation" />
+            <div className="league-tabs">
+              <button 
+                className={`league-tab ${activeSport === 'football' ? 'active' : ''}`} 
+                onClick={() => setActiveSport('football')}
+              >
+                <FaFutbol /> B8FC
+              </button>
+              <button 
+                className={`league-tab ${activeSport === 'badminton' ? 'active' : ''}`} 
+                onClick={() => setActiveSport('badminton')}
+              >
+                <FaTableTennis /> B8dminton
+              </button>
+              <button 
+                className={`league-tab ${activeSport === 'esports' ? 'active' : ''}`} 
+                onClick={() => setActiveSport('esports')}
+              >
+                <FaGamepad /> B8Esports
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* Football Section */}
-        {activeSport === 'football' && (
+        {activeSport === 'football' && shouldShowSection('showFootball') && (
           <div className="sport-section">
+            <AdminNotice section="showFootball" name="Football Content" />
             {/* Intro Section */}
             <section className="league-intro-section">
               <h2>Welcome to B8FC</h2>
@@ -77,7 +99,7 @@ export default function B8League() {
                 <iframe
                   width="100%"
                   height="100%"
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                  src={getYoutubeLink()}
                   title="B8FC Highlights Video" 
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -125,8 +147,9 @@ export default function B8League() {
         )}
 
         {/* Badminton Section */}
-        {activeSport === 'badminton' && (
+        {activeSport === 'badminton' && shouldShowSection('showBadminton') && (
           <div className="sport-section">
+            <AdminNotice section="showBadminton" name="Badminton Content" />
             {/* Intro Section */}
             <section className="league-intro-section">
               <h2>Welcome to B8Badminton</h2>
@@ -181,8 +204,9 @@ export default function B8League() {
         )}
 
         {/* Esports Section */}
-        {activeSport === 'esports' && (
+        {activeSport === 'esports' && shouldShowSection('showEsports') && (
           <div className="sport-section">
+            <AdminNotice section="showEsports" name="Esports Content" />
             {/* Intro Section */}
             <section className="league-intro-section">
               <h2>Welcome to B8Esports</h2>
@@ -251,34 +275,43 @@ export default function B8League() {
         )}
 
         {/* Tournaments List Section */}
-        <section className="tournaments-section">
-          <h2 className="section-title">Upcoming Tournaments</h2>
-          <p className="section-description">
-            Join these upcoming {activeSport} tournaments or create your own below.
-          </p>
-          <TournamentList sportType={activeSport} />
-        </section>
+        {shouldShowSection('showTournaments') && (
+          <section className="tournaments-section">
+            <AdminNotice section="showTournaments" name="Tournaments" />
+            <h2 className="section-title">Upcoming Tournaments</h2>
+            <p className="section-description">
+              Join these upcoming {activeSport} tournaments or create your own below.
+            </p>
+            <TournamentList sportType={activeSport} />
+          </section>
+        )}
 
         {/* Tournament Creator Section */}
-        <section className="tournament-creator-section">
-          <h2 className="section-title">Create a Tournament</h2>
-          <p className="section-description">
-            Organize your own tournament with B8 League. Fill out the form below to get started.
-          </p>
-          <TournamentCreator sportType={activeSport} />
-        </section>
+        {shouldShowSection('showTournamentCreator') && (
+          <section className="tournament-creator-section">
+            <AdminNotice section="showTournamentCreator" name="Tournament Creator" />
+            <h2 className="section-title">Create a Tournament</h2>
+            <p className="section-description">
+              Organize your own tournament with B8 League. Fill out the form below to get started.
+            </p>
+            <TournamentCreator sportType={activeSport} />
+          </section>
+        )}
 
         {/* Contact Section */}
-        <section>
-          <ContactForm source="league" />
+        {shouldShowSection('showContact') && (
+          <section>
+            <AdminNotice section="showContact" name="Contact" />
+            <ContactForm source="league" />
 
-          <div className="league-social-media">
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
-          </div>
-        </section>
+            <div className="league-social-media">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
+            </div>
+          </section>
+        )}
 
         <Footer />
       </div>

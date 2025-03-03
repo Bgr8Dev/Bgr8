@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { doc, getDoc, setDoc, collection, query, getDocs, updateDoc } from 'firebase/firestore';
-import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaSave, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup } from 'react-icons/fa';
+import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaSave, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup, FaChevronDown, FaChevronRight, FaCheckCircle, FaExclamationCircle, FaSpinner } from 'react-icons/fa';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/adminStyles/AdminSettings.css';
+
+// Define section IDs for expanded/collapsed state management
+type SectionId = 'businessAccess' | 'comingSoon' | 'grayedOut' | 'developerAccess';
 
 interface BusinessAccessibility {
   marketing: boolean;
@@ -84,13 +87,21 @@ export function AdminSettings() {
     bgr8: false
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
   const { refreshBusinessAccess, refreshComingSoonStatus, refreshGrayedOutStatus } = useBusinessAccess();
+
+  // New state for tracking expanded/collapsed sections
+  const [expandedSections, setExpandedSections] = useState<Record<SectionId, boolean>>({
+    businessAccess: true, // Start with first section expanded
+    comingSoon: false,
+    grayedOut: false,
+    developerAccess: false
+  });
 
   const businessNames: Record<string, string> = {
     marketing: 'B8 Marketing',
@@ -240,38 +251,78 @@ export function AdminSettings() {
     }
   };
 
-  const saveSettings = async () => {
+  const saveBusinessAccessSettings = async () => {
     try {
-      setSaving(true);
-      setErrorMessage('');
+      setSaving('businessAccess');
       setSuccessMessage('');
+      setErrorMessage('');
       
-      // Save business access settings
-      const settingsRef = doc(db, 'settings', 'businessAccess');
-      await setDoc(settingsRef, businessAccess);
+      await updateDoc(doc(db, 'settings', 'businessAccess'), {
+        businessAccess: businessAccess
+      });
       
-      // Save coming soon settings
-      const comingSoonRef = doc(db, 'settings', 'comingSoon');
-      await setDoc(comingSoonRef, comingSoon);
+      if (refreshBusinessAccess) {
+        await refreshBusinessAccess();
+      }
       
-      // Save grayed out settings
-      const grayedOutRef = doc(db, 'settings', 'grayedOut');
-      await setDoc(grayedOutRef, grayedOut);
-      
-      // Refresh the contexts to update navigation and homepage
-      await Promise.all([
-        refreshBusinessAccess(),
-        refreshComingSoonStatus(),
-        refreshGrayedOutStatus()
-      ]);
-      
-      setSuccessMessage('Settings saved successfully! Navigation and business pages have been updated.');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      setSuccessMessage('Business access settings saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
-      console.error('Error saving settings:', error);
-      setErrorMessage('Failed to save settings. Please try again.');
+      console.error('Error saving business access settings:', error);
+      setErrorMessage('Error saving business access settings: ' + (error as Error).message);
+      setTimeout(() => setErrorMessage(''), 5000);
     } finally {
-      setSaving(false);
+      setSaving('');
+    }
+  };
+
+  const saveComingSoonSettings = async () => {
+    try {
+      setSaving('comingSoon');
+      setSuccessMessage('');
+      setErrorMessage('');
+      
+      await updateDoc(doc(db, 'settings', 'businessAccess'), {
+        comingSoon: comingSoon
+      });
+      
+      if (refreshComingSoonStatus) {
+        await refreshComingSoonStatus();
+      }
+      
+      setSuccessMessage('Coming soon settings saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (error) {
+      console.error('Error saving coming soon settings:', error);
+      setErrorMessage('Error saving coming soon settings: ' + (error as Error).message);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+    }
+  };
+
+  const saveGrayedOutSettings = async () => {
+    try {
+      setSaving('grayedOut');
+      setSuccessMessage('');
+      setErrorMessage('');
+      
+      await updateDoc(doc(db, 'settings', 'businessAccess'), {
+        grayedOut: grayedOut
+      });
+      
+      if (refreshGrayedOutStatus) {
+        await refreshGrayedOutStatus();
+      }
+      
+      setSuccessMessage('Grayed out settings saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (error) {
+      console.error('Error saving grayed out settings:', error);
+      setErrorMessage('Error saving grayed out settings: ' + (error as Error).message);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
     }
   };
 
@@ -285,6 +336,14 @@ export function AdminSettings() {
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Toggle section expansion
+  const toggleSectionExpansion = (sectionId: SectionId) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
   if (loading) {
     return <div className="admin-loading">Loading settings...</div>;
   }
@@ -292,248 +351,320 @@ export function AdminSettings() {
   return (
     <div className="admin-settings">
       <section className="settings-section">
-        <h3>Business Accessibility</h3>
-        <p className="settings-description">
-          Control which business sections are accessible to the public. Toggling a business off will 
-          prevent users from accessing it through the navigation menu.
-        </p>
+        <div 
+          className="section-header-collapsible" 
+          onClick={() => toggleSectionExpansion('businessAccess')}
+        >
+          <div className="section-header-content">
+            <div className="expansion-icon">
+              {expandedSections.businessAccess ? <FaChevronDown /> : <FaChevronRight />}
+            </div>
+            <h3>Business Accessibility</h3>
+          </div>
+        </div>
         
-        {getAccessCount() === 0 && (
-          <div className="settings-warning">
-            <FaExclamationTriangle /> Warning: All businesses are currently set to private. 
-            Users will not be able to access any business section.
+        {expandedSections.businessAccess && (
+          <div className="section-content">
+            <p className="settings-description">
+              Control which business sections are accessible to the public. Toggling a business off will 
+              prevent users from accessing it through the navigation menu.
+            </p>
+            
+            {getAccessCount() === 0 && (
+              <div className="settings-warning">
+                <FaExclamationTriangle /> Warning: All businesses are currently set to private. 
+                Users will not be able to access any business section.
+              </div>
+            )}
+            
+            <div className="business-access-grid">
+              {Object.keys(businessNames).map(business => (
+                <div 
+                  key={business} 
+                  className={`business-access-card ${businessAccess[business] ? 'active' : 'inactive'}`}
+                >
+                  <div className="business-access-header">
+                    <span>{businessNames[business]}</span>
+                    <div 
+                      className="toggle-button" 
+                      onClick={() => toggleAccess(business)}
+                    >
+                      {businessAccess[business] ? (
+                        <FaToggleOn className="toggle-icon on" />
+                      ) : (
+                        <FaToggleOff className="toggle-icon off" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="business-access-status">
+                    {businessAccess[business] ? (
+                      <>
+                        <FaGlobe className="status-icon public" />
+                        <span className="status-text public">Public</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaLock className="status-icon private" />
+                        <span className="status-text private">Private</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="section-actions">
+              <button 
+                className="save-button"
+                onClick={saveBusinessAccessSettings}
+                disabled={saving !== 'businessAccess'}
+              >
+                {saving === 'businessAccess' ? <FaSpinner className="spinner" /> : <FaSave />}
+                {saving === 'businessAccess' ? 'Saving...' : 'Save Business Access'}
+              </button>
+            </div>
           </div>
         )}
-        
-        <div className="business-access-grid">
-          {Object.keys(businessNames).map(business => (
-            <div 
-              key={business} 
-              className={`business-access-card ${businessAccess[business] ? 'active' : 'inactive'}`}
-            >
-              <div className="business-access-header">
-                <span>{businessNames[business]}</span>
-                <div 
-                  className="toggle-button" 
-                  onClick={() => toggleAccess(business)}
-                >
-                  {businessAccess[business] ? (
-                    <FaToggleOn className="toggle-icon on" />
-                  ) : (
-                    <FaToggleOff className="toggle-icon off" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="business-access-status">
-                {businessAccess[business] ? (
-                  <>
-                    <FaGlobe className="status-icon public" />
-                    <span className="status-text public">Public</span>
-                  </>
-                ) : (
-                  <>
-                    <FaLock className="status-icon private" />
-                    <span className="status-text private">Private</span>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="settings-note">
-          <strong>Note:</strong> Admins and developers will always have access to all business sections regardless of these settings.
-        </div>
       </section>
 
       <section className="settings-section">
-        <h3>Coming Soon Status</h3>
-        <p className="settings-description">
-          Control which businesses display a "Coming Soon" banner on the homepage. Use this to indicate which businesses 
-          are not yet officially launched to the public.
-        </p>
-        
-        <div className="business-access-grid">
-          {Object.keys(businessNames).map(business => (
-            <div 
-              key={business} 
-              className={`business-access-card ${!comingSoon[business] ? 'active' : 'inactive'}`}
-            >
-              <div className="business-access-header">
-                <span>{businessNames[business]}</span>
-                <div 
-                  className="toggle-button" 
-                  onClick={() => toggleComingSoon(business)}
-                >
-                  {!comingSoon[business] ? (
-                    <FaToggleOn className="toggle-icon on" />
-                  ) : (
-                    <FaToggleOff className="toggle-icon off" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="business-access-status">
-                {!comingSoon[business] ? (
-                  <>
-                    <FaEye className="status-icon public" />
-                    <span className="status-text public">Visible</span>
-                  </>
-                ) : (
-                  <>
-                    <FaEyeSlash className="status-icon private" />
-                    <span className="status-text private">Coming Soon</span>
-                  </>
-                )}
-              </div>
+        <div 
+          className="section-header-collapsible" 
+          onClick={() => toggleSectionExpansion('comingSoon')}
+        >
+          <div className="section-header-content">
+            <div className="expansion-icon">
+              {expandedSections.comingSoon ? <FaChevronDown /> : <FaChevronRight />}
             </div>
-          ))}
-        </div>
-        
-        <div className="settings-note">
-          <strong>Note:</strong> The "Coming Soon" banner will only appear on the homepage and won't affect the actual 
-          accessibility of the business pages. Users can still access the pages through the navigation menu if 
-          accessibility is enabled.
-        </div>
-      </section>
-
-      {/* New section for grayed out pages */}
-      <section className="settings-section">
-        <h3>Coming Soon Page Overlay</h3>
-        <p className="settings-description">
-          Add a "Coming Soon" overlay strip across business pages. This creates a visual indication that 
-          the page content is still in development, even if users can access it.
-        </p>
-        
-        <div className="business-access-grid">
-          {Object.keys(businessNames).map(business => (
-            <div 
-              key={business} 
-              className={`business-access-card ${!grayedOut[business] ? 'active' : 'inactive'}`}
-            >
-              <div className="business-access-header">
-                <span>{businessNames[business]}</span>
-                <div 
-                  className="toggle-button" 
-                  onClick={() => toggleGrayedOut(business)}
-                >
-                  {!grayedOut[business] ? (
-                    <FaToggleOn className="toggle-icon on" />
-                  ) : (
-                    <FaToggleOff className="toggle-icon off" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="business-access-status">
-                {!grayedOut[business] ? (
-                  <>
-                    <FaLayerGroup className="status-icon public" />
-                    <span className="status-text public">No Overlay</span>
-                  </>
-                ) : (
-                  <>
-                    <FaLayerGroup className="status-icon private" />
-                    <span className="status-text private">Has Overlay</span>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="settings-note">
-          <strong>Note:</strong> The "Coming Soon" overlay will appear on the business pages themselves, 
-          indicating to users that the content is under development. Unlike the accessibility setting, this 
-          doesn't prevent access to the page but provides a visual cue that it's not fully ready.
-        </div>
-        
-        <div className="settings-actions">
-          <button 
-            className="save-button"
-            onClick={saveSettings}
-            disabled={saving}
-          >
-            <FaSave /> {saving ? 'Saving...' : 'Save Settings'}
-          </button>
-        </div>
-      </section>
-
-      <section className="settings-section">
-        <h3>Developer Access Management</h3>
-        <p className="settings-description">
-          Grant developer status to users who need access to all business sections for development and testing purposes. 
-          Developers will be able to see all navigation links regardless of business accessibility settings.
-        </p>
-        
-        <div className="search-container">
-          <div className="search-input-wrapper">
-            <FaSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search users by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="developer-search-input"
-            />
+            <h3>Coming Soon Status</h3>
           </div>
         </div>
         
-        {loadingUsers ? (
-          <div className="admin-loading">Loading users...</div>
-        ) : (
-          <div className="developers-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map(user => (
-                    <tr key={user.uid}>
-                      <td>{`${user.firstName} ${user.lastName}`}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`developer-status ${user.developer ? 'active' : 'inactive'}`}>
-                          {user.developer ? (
-                            <>
-                              <FaCodeBranch /> Developer
-                            </>
-                          ) : (
-                            'Regular User'
-                          )}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className={`action-button ${user.developer ? 'remove' : 'add'}`}
-                          onClick={() => toggleUserDeveloper(user.uid, user.developer)}
-                        >
-                          <FaUserCog /> {user.developer ? 'Remove Developer Access' : 'Grant Developer Access'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="no-results">No users found matching your search</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        {expandedSections.comingSoon && (
+          <div className="section-content">
+            <p className="settings-description">
+              Control which businesses display a "Coming Soon" banner on the homepage. Use this to indicate which businesses 
+              are not yet officially launched to the public.
+            </p>
+            
+            <div className="business-access-grid">
+              {Object.keys(businessNames).map(business => (
+                <div 
+                  key={business} 
+                  className={`business-access-card ${!comingSoon[business] ? 'active' : 'inactive'}`}
+                >
+                  <div className="business-access-header">
+                    <span>{businessNames[business]}</span>
+                    <div 
+                      className="toggle-button" 
+                      onClick={() => toggleComingSoon(business)}
+                    >
+                      {!comingSoon[business] ? (
+                        <FaToggleOn className="toggle-icon on" />
+                      ) : (
+                        <FaToggleOff className="toggle-icon off" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="business-access-status">
+                    {!comingSoon[business] ? (
+                      <>
+                        <FaEye className="status-icon public" />
+                        <span className="status-text public">Visible</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaEyeSlash className="status-icon private" />
+                        <span className="status-text private">Coming Soon</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="section-actions">
+              <button 
+                className="save-button"
+                onClick={saveComingSoonSettings}
+                disabled={saving !== 'comingSoon'}
+              >
+                {saving === 'comingSoon' ? <FaSpinner className="spinner" /> : <FaSave />}
+                {saving === 'comingSoon' ? 'Saving...' : 'Save Coming Soon Settings'}
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section className="settings-section">
+        <div 
+          className="section-header-collapsible" 
+          onClick={() => toggleSectionExpansion('grayedOut')}
+        >
+          <div className="section-header-content">
+            <div className="expansion-icon">
+              {expandedSections.grayedOut ? <FaChevronDown /> : <FaChevronRight />}
+            </div>
+            <h3>Coming Soon Page Overlay</h3>
+          </div>
+        </div>
+        
+        {expandedSections.grayedOut && (
+          <div className="section-content">
+            <p className="settings-description">
+              Add a "Coming Soon" overlay strip across business pages. This creates a visual indication that 
+              the page content is still in development, even if users can access it.
+            </p>
+            
+            <div className="business-access-grid">
+              {Object.keys(businessNames).map(business => (
+                <div 
+                  key={business} 
+                  className={`business-access-card ${!grayedOut[business] ? 'active' : 'inactive'}`}
+                >
+                  <div className="business-access-header">
+                    <span>{businessNames[business]}</span>
+                    <div 
+                      className="toggle-button" 
+                      onClick={() => toggleGrayedOut(business)}
+                    >
+                      {!grayedOut[business] ? (
+                        <FaToggleOn className="toggle-icon on" />
+                      ) : (
+                        <FaToggleOff className="toggle-icon off" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="business-access-status">
+                    {!grayedOut[business] ? (
+                      <>
+                        <FaLayerGroup className="status-icon public" />
+                        <span className="status-text public">No Overlay</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaLayerGroup className="status-icon private" />
+                        <span className="status-text private">Has Overlay</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="section-actions">
+              <button 
+                className="save-button"
+                onClick={saveGrayedOutSettings}
+                disabled={saving !== 'grayedOut'}
+              >
+                {saving === 'grayedOut' ? <FaSpinner className="spinner" /> : <FaSave />}
+                {saving === 'grayedOut' ? 'Saving...' : 'Save Grayed Out Settings'}
+              </button>
+            </div>
           </div>
         )}
       </section>
       
-      {(successMessage || errorMessage) && (
-        <div className={`settings-message ${errorMessage ? 'error' : 'success'}`}>
-          {successMessage || errorMessage}
+      <section className="settings-section">
+        <div 
+          className="section-header-collapsible" 
+          onClick={() => toggleSectionExpansion('developerAccess')}
+        >
+          <div className="section-header-content">
+            <div className="expansion-icon">
+              {expandedSections.developerAccess ? <FaChevronDown /> : <FaChevronRight />}
+            </div>
+            <h3>Developer Access Management</h3>
+          </div>
+        </div>
+        
+        {expandedSections.developerAccess && (
+          <div className="section-content">
+            <p className="settings-description">
+              Grant developer status to users who need access to all business sections for development and testing purposes. 
+              Developers will be able to see all navigation links regardless of business accessibility settings.
+            </p>
+            
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search users by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="developer-search-input"
+                />
+              </div>
+            </div>
+            
+            {loadingUsers ? (
+              <div className="admin-loading">Loading users...</div>
+            ) : (
+              <div className="developers-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.length > 0 ? (
+                      filteredUsers.map(user => (
+                        <tr key={user.uid}>
+                          <td>{`${user.firstName} ${user.lastName}`}</td>
+                          <td>{user.email}</td>
+                          <td>
+                            <span className={`developer-status ${user.developer ? 'active' : 'inactive'}`}>
+                              {user.developer ? (
+                                <>
+                                  <FaCodeBranch /> Developer
+                                </>
+                              ) : (
+                                'Regular User'
+                              )}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              className={`action-button ${user.developer ? 'remove' : 'add'}`}
+                              onClick={() => toggleUserDeveloper(user.uid, user.developer)}
+                            >
+                              <FaUserCog /> {user.developer ? 'Remove Developer Access' : 'Grant Developer Access'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="no-results">No users found matching your search</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+      
+      {successMessage && (
+        <div className="settings-success-message">
+          <FaCheckCircle /> {successMessage}
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="settings-error-message">
+          <FaExclamationCircle /> {errorMessage}
         </div>
       )}
     </div>

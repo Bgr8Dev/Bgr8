@@ -10,6 +10,12 @@ import Footer from '../../components/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
+
+// Define FirebaseErrorWithCode type to handle Firebase errors
+interface FirebaseErrorWithCode extends Error {
+  code: string;
+}
+
 export default function SignInPage() {
     const isMobile = useIsMobile();
     const [formData, setFormData] = useState({
@@ -26,8 +32,9 @@ export default function SignInPage() {
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       navigate('/');
-    } catch (err: any) {
-      switch (err.code) {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseErrorWithCode;
+      switch (firebaseError.code) {
         case 'auth/user-not-found':
           setError('No account found with this email');
           break;
@@ -71,8 +78,9 @@ export default function SignInPage() {
       }
 
       navigate('/');
-    } catch (err: any) {
-      if (err.code === 'auth/popup-closed-by-user') {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseErrorWithCode;
+      if (firebaseError.code === 'auth/popup-closed-by-user') {
         setError('Sign in cancelled');
       } else {
         setError('Error signing in with Google');

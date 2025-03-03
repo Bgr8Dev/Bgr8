@@ -1,0 +1,441 @@
+/* B8 World Admin Portal Styles */
+.admin-portal-page {
+  padding: 2rem;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  color: #fff;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-portal-page h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: #9C27B0;
+  border-bottom: 2px solid #333;
+  padding-bottom: 1rem;
+}
+
+/* Stats Grid Layout */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Individual Stat Cards */
+.admin-stat-card {
+  background-color: #2c2c2c;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.admin-stat-card h3 {
+  font-size: 1.2rem;
+  color: #9C27B0;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.admin-stat-card .stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0.5rem 0;
+}
+
+.admin-stat-card svg {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  opacity: 0.7;
+}
+
+/* Stats Actions */
+.stats-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Administrative Actions Section */
+.admin-actions {
+  margin-top: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.admin-actions h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #9C27B0;
+}
+
+.admin-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.admin-action-button {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.admin-action-button:hover {
+  background-color: #3a536b;
+  transform: translateY(-2px);
+}
+
+.admin-action-button:active {
+  transform: translateY(0);
+}
+
+/* World Admin Section (Card-based layout) */
+.world-admin-section {
+  margin-bottom: 3rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #333;
+}
+
+.section-header h3 {
+  font-size: 1.8rem;
+  color: #9C27B0;
+  margin: 0;
+}
+
+.add-button {
+  background-color: #9C27B0;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #7B1FA2;
+  transform: translateY(-2px);
+}
+
+.world-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.world-admin-card {
+  background-color: #2c2c2c;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.world-admin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.world-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  padding: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.world-admin-header h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-badge.status-active {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.status-badge.status-pending {
+  background-color: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+}
+
+.status-badge.status-planning {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.status-badge.status-inactive {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.donation-amount {
+  background-color: rgba(142, 68, 173, 0.2);
+  color: #9b59b6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.world-admin-content {
+  padding: 1.5rem;
+}
+
+.content-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.content-row strong {
+  color: #9C27B0;
+  font-weight: 500;
+}
+
+.world-admin-content p.description,
+.world-admin-content p.message {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #444;
+  line-height: 1.6;
+  color: #ccc;
+  font-style: italic;
+}
+
+.world-admin-content a {
+  color: #3498db;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.world-admin-content a:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-top: 1px solid #444;
+  background-color: #262626;
+}
+
+/* Form Styles */
+.world-admin-edit-form {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #9C27B0;
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.edit-textarea {
+  width: 100%;
+  min-height: 80px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: white;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: #9C27B0;
+  box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.3);
+}
+
+/* Action Buttons */
+.action-button {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #3a536b;
+  transform: translateY(-2px);
+}
+
+.action-button.save {
+  background-color: #2ecc71;
+}
+
+.action-button.save:hover {
+  background-color: #27ae60;
+}
+
+.action-button.delete {
+  background-color: #e74c3c;
+}
+
+.action-button.delete:hover {
+  background-color: #c0392b;
+}
+
+.action-button.cancel {
+  background-color: #7f8c8d;
+}
+
+.action-button.cancel:hover {
+  background-color: #95a5a6;
+}
+
+.action-button:disabled {
+  background-color: #546778;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
+}
+
+/* Animation for spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Success and Error Messages */
+.settings-success-message,
+.settings-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 5px;
+  font-weight: 500;
+  animation: fadeInUp 0.3s ease;
+}
+
+.settings-success-message {
+  background-color: rgba(46, 204, 113, 0.2);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.settings-error-message {
+  background-color: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .admin-stats-grid,
+  .world-admin-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-action-buttons,
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .admin-portal-page {
+    padding: 1rem;
+  }
+  
+  .admin-stat-card .stat-value {
+    font-size: 2rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .section-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .add-button {
+    width: 100%;
+    justify-content: center;
+  }
+} 

@@ -207,4 +207,95 @@
     width: 95%;
     padding: 1.5rem;
   }
+}
+
+/* Add these styles for password change form */
+
+.password-field {
+  position: relative;
+}
+
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-password-visibility {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password-visibility:hover {
+  color: #fff;
+}
+
+.password-requirements {
+  background-color: #222;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border-left: 3px solid #555;
+}
+
+.password-requirements p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.password-requirements ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.password-requirements li {
+  margin: 0.4rem 0;
+  color: #aaa;
+  transition: color 0.3s ease;
+}
+
+.password-requirements li.valid {
+  color: #4CAF50;
+}
+
+.password-requirements li.valid::marker {
+  color: #4CAF50;
+}
+
+.form-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #F44336;
+}
+
+.form-success {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #4CAF50;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 } 

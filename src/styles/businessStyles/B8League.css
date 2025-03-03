@@ -766,4 +766,119 @@
     }
 }
 
+/* Admin controls styling */
+.admin-controls-panel {
+  background-color: #1e1e1e;
+  border: 2px solid #9c27b0;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  color: #fff;
+}
+
+.admin-controls-panel h3 {
+  color: #ff80ff;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.admin-controls-panel p {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+.admin-toggle-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.admin-toggle-buttons button {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-toggle-buttons button.active {
+  background-color: #9c27b0;
+  border-color: #ff80ff;
+}
+
+.admin-toggle-buttons button:hover {
+  background-color: #444;
+}
+
+.admin-toggle-buttons button.active:hover {
+  background-color: #7b1fa2;
+}
+
+.admin-section-toggle {
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px 10px;
+  background-color: rgba(30, 30, 30, 0.7);
+  position: relative;
+  z-index: 10;
+}
+
+.admin-section-toggle button {
+  background-color: #9c27b0;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-section-toggle button:hover {
+  background-color: #7b1fa2;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .admin-toggle-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .admin-toggle-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Admin Notice Styling */
+.admin-notice {
+  background-color: rgba(255, 193, 7, 0.15);
+  border-left: 4px solid #ffc107;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.9rem;
+}
+
+.admin-notice p {
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.admin-notice strong {
+  color: #ffc107;
+}
+
   

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaTrophy, FaFootballBall, FaTableTennis, FaGamepad, FaSpinner, FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa';
 import { Tournament, getTournamentsBySport, getAllTournaments, deleteTournament } from '../../services/tournamentService';
-import '../../styles/TournamentList.css';
+import '../../styles/tournamentStyles/TournamentList.css';
 import React from 'react';
 // Import react-tournament-brackets components
 import { SingleEliminationBracket, Match, SVGViewer, MatchData, ParticipantData, DoubleEliminationBracket } from 'react-tournament-brackets';
@@ -29,7 +29,7 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
   const [selectedMatch, setSelectedMatch] = useState<MatchData | null>(null);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [showTestModal, setShowTestModal] = useState(false);
-
+  
   useEffect(() => {
     const fetchTournaments = async () => {
       setLoading(true);
@@ -1051,122 +1051,128 @@ export default function TournamentList({ sportType, limit }: TournamentListProps
     }
   };
 
-  if (loading) {
-    return (
-      <div className="tournaments-loading">
-        <FaSpinner className="spinner" />
-        <p>Loading tournaments...</p>
-      </div>
-    );
-  }
+  // Simplified rendering - always render the tournament list
+  return renderTournamentList();
 
-  if (error) {
-    return (
-      <div className="tournaments-error">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  if (tournaments.length === 0) {
-    return (
-      <div className="tournaments-empty">
-        <p>No tournaments found. Be the first to create one!</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="tournaments-list">
-      {error && (
-        <div className="tournament-error-message">
-          {error}
+  // Helper function to render the tournament list
+  function renderTournamentList() {
+    if (loading) {
+      return (
+        <div className="tournaments-loading">
+          <FaSpinner className="spinner" />
+          <p>Loading tournaments...</p>
         </div>
-      )}
-      
-      {tournaments.map((tournament) => (
-        <div 
-          key={tournament.id} 
-          className={`tournament-card ${expandedTournamentId === tournament.id ? 'expanded' : ''}`}
-          onClick={() => toggleExpand(tournament.id)}
-        >
-          <div className="tournament-card-header">
-            {getSportIcon(tournament.sportType)}
-            <h3>{tournament.tournamentName}</h3>
-            <div className="tournament-actions">
-              {deleteConfirmation === tournament.id ? (
-                <div className="delete-confirmation" onClick={(e) => e.stopPropagation()}>
-                  <span>Delete tournament?</span>
-                  <button className="confirm-delete" onClick={confirmDelete}>Yes</button>
-                  <button className="cancel-delete" onClick={cancelDelete}>No</button>
-                </div>
-              ) : (
-                <button 
-                  className="delete-tournament-btn" 
-                  onClick={(e) => handleDeleteClick(e, tournament.id!)}
-                  aria-label="Delete tournament"
-                >
-                  <FaTrash />
-                </button>
-              )}
-              <div className="expand-icon">
-                {expandedTournamentId === tournament.id ? <FaChevronUp /> : <FaChevronDown />}
-              </div>
-            </div>
+      );
+    }
+  
+    if (error) {
+      return (
+        <div className="tournaments-error">
+          <p>{error}</p>
+        </div>
+      );
+    }
+  
+    if (tournaments.length === 0) {
+      return (
+        <div className="tournaments-empty">
+          <p>No tournaments found. Be the first to create one!</p>
+        </div>
+      );
+    }
+  
+    return (
+      <div className="tournaments-list">
+        {error && (
+          <div className="tournament-error-message">
+            {error}
           </div>
-          
-          <div className="tournament-card-details">
-            <div className="tournament-detail">
-              <FaCalendarAlt />
-              <span>{formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}</span>
-            </div>
-            
-            <div className="tournament-detail">
-              <FaMapMarkerAlt />
-              <span>{tournament.location}</span>
-            </div>
-            
-            <div className="tournament-detail">
-              <FaUsers />
-              <span>{tournament.teams.length} / {tournament.maxTeams} teams</span>
-            </div>
-            
-            <div className="tournament-detail">
-              <FaTrophy />
-              <span>{tournament.tournamentFormat.charAt(0).toUpperCase() + tournament.tournamentFormat.slice(1)} Format</span>
-            </div>
-          </div>
-          
-          {tournament.description && (
-            <div className="tournament-description" onClick={(e) => e.stopPropagation()}>
-              {tournament.description}
-            </div>
-          )}
-          
-          {tournament.teams.length > 0 && (
-            <div className="tournament-teams" onClick={(e) => e.stopPropagation()}>
-              <h4>Registered Teams:</h4>
-              <div className="teams-chips">
-                {tournament.teams.map((team, index) => (
-                  <div key={index} className="team-chip">
-                    {team.name} ({team.players})
+        )}
+        
+        {tournaments.map((tournament) => (
+          <div 
+            key={tournament.id} 
+            className={`tournament-card ${expandedTournamentId === tournament.id ? 'expanded' : ''}`}
+            onClick={() => toggleExpand(tournament.id)}
+          >
+            <div className="tournament-card-header">
+              {getSportIcon(tournament.sportType)}
+              <h3>{tournament.tournamentName}</h3>
+              <div className="tournament-actions">
+                {deleteConfirmation === tournament.id ? (
+                  <div className="delete-confirmation" onClick={(e) => e.stopPropagation()}>
+                    <span>Delete tournament?</span>
+                    <button className="confirm-delete" onClick={confirmDelete}>Yes</button>
+                    <button className="cancel-delete" onClick={cancelDelete}>No</button>
                   </div>
-                ))}
+                ) : (
+                  <button 
+                    className="delete-tournament-btn" 
+                    onClick={(e) => handleDeleteClick(e, tournament.id!)}
+                    aria-label="Delete tournament"
+                  >
+                    <FaTrash />
+                  </button>
+                )}
+                <div className="expand-icon">
+                  {expandedTournamentId === tournament.id ? <FaChevronUp /> : <FaChevronDown />}
+                </div>
               </div>
             </div>
-          )}
-          
-          {expandedTournamentId === tournament.id && (
-            <div className="tournament-bracket-section" onClick={(e) => e.stopPropagation()}>
-              {renderTournamentBracket(tournament)}
+            
+            <div className="tournament-card-details">
+              <div className="tournament-detail">
+                <FaCalendarAlt />
+                <span>{formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}</span>
+              </div>
+              
+              <div className="tournament-detail">
+                <FaMapMarkerAlt />
+                <span>{tournament.location}</span>
+              </div>
+              
+              <div className="tournament-detail">
+                <FaUsers />
+                <span>{tournament.teams.length} / {tournament.maxTeams} teams</span>
+              </div>
+              
+              <div className="tournament-detail">
+                <FaTrophy />
+                <span>{tournament.tournamentFormat.charAt(0).toUpperCase() + tournament.tournamentFormat.slice(1)} Format</span>
+              </div>
             </div>
-          )}
-        </div>
-      ))}
-      
-      {/* Render both modals */}
-      {showMatchModal && renderMatchModal()}
-      {showTestModal && renderTestModal()}
-    </div>
-  );
+            
+            {tournament.description && (
+              <div className="tournament-description" onClick={(e) => e.stopPropagation()}>
+                {tournament.description}
+              </div>
+            )}
+            
+            {tournament.teams.length > 0 && (
+              <div className="tournament-teams" onClick={(e) => e.stopPropagation()}>
+                <h4>Registered Teams:</h4>
+                <div className="teams-chips">
+                  {tournament.teams.map((team, index) => (
+                    <div key={index} className="team-chip">
+                      {team.name} ({team.players})
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {expandedTournamentId === tournament.id && (
+              <div className="tournament-bracket-section" onClick={(e) => e.stopPropagation()}>
+                {renderTournamentBracket(tournament)}
+              </div>
+            )}
+          </div>
+        ))}
+        
+        {/* Render both modals */}
+        {showMatchModal && renderMatchModal()}
+        {showTestModal && renderTestModal()}
+      </div>
+    );
+  }
 } 

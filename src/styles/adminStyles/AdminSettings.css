@@ -347,4 +347,157 @@
   .developers-table td, .developers-table th {
     padding: 10px;
   }
+}
+
+/* Add these new styles for collapsible sections */
+
+.section-header-collapsible {
+  cursor: pointer;
+  padding: 0 0 10px 0;
+  transition: all 0.3s ease;
+}
+
+.section-header-collapsible:hover h3 {
+  color: #66a7ff;
+}
+
+.section-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.expansion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4c94fc;
+  width: 24px;
+  height: 24px;
+}
+
+.section-content {
+  animation: expandSection 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes expandSection {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+    transform: translateY(0);
+  }
+}
+
+.settings-actions {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-button {
+  background-color: #4c94fc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #3a75c4;
+}
+
+.save-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+/* Update the section-actions styling */
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #444;
+}
+
+/* Style for save button - keeping consistent with existing button style */
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #34495e;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.save-button:disabled {
+  background-color: #546778;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* Update success and error message styles */
+.settings-success-message,
+.settings-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 5px;
+  font-weight: 500;
+  animation: fadeInUp 0.3s ease;
+}
+
+.settings-success-message {
+  background-color: rgba(46, 204, 113, 0.2);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.settings-error-message {
+  background-color: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 } 

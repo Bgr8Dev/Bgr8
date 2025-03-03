@@ -12,6 +12,7 @@ import { AdminPortalB8Clothing } from './adminPages/AdminPortalB8Clothing';
 import { AdminPortalB8World } from './adminPages/AdminPortalB8World';
 import { AdminPortalBgr8r } from './adminPages/AdminPortalBgr8r';
 import { AdminPortalB8Careers } from './adminPages/AdminPortalB8Careers';
+import { AdminPortalB8League } from './adminPages/AdminPortalB8League';
 import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
@@ -167,7 +168,7 @@ export default function AdminPortal() {
       case 'clothing':
         return <AdminPortalB8Clothing />;
       case 'league':
-        return <div>B8 League component is under development</div>;
+          return <AdminPortalB8League stats={businessStats.league} />;
       case 'world':
         return <AdminPortalB8World stats={businessStats.world} />;
       case 'bgr8r':

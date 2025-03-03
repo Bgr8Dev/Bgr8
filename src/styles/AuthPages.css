@@ -26,6 +26,14 @@
   color: white;
 }
 
+.auth-description {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+  color: #ccc;
+  font-size: 0.95rem;
+}
+
 .auth-form {
   width: 100%;
   display: flex;
@@ -90,6 +98,16 @@
   background-color: rgba(255, 0, 0, 0.1);
   border: 1px solid #ff0000;
   color: #ff0000;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.auth-success {
+  background-color: rgba(0, 255, 0, 0.1);
+  border: 1px solid #4CAF50;
+  color: #4CAF50;
   padding: 0.75rem;
   border-radius: 8px;
   margin-bottom: 1rem;
