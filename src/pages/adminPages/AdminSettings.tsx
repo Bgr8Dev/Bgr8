@@ -6,7 +6,7 @@ import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/adminStyles/AdminSettings.css';
 
 // Define section IDs for expanded/collapsed state management
-type SectionId = 'businessAccess' | 'comingSoon' | 'grayedOut' | 'developerAccess';
+type SectionId = 'businessAccess' | 'comingSoon' | 'grayedOut' | 'passwordProtected' | 'developerAccess';
 
 interface BusinessAccessibility {
   marketing: boolean;
@@ -46,6 +46,34 @@ interface BusinessGrayedOut {
   bgr8: boolean;
   podcast: boolean;
   [key: string]: boolean;
+}
+
+// New interface for password-protected pages
+interface BusinessPasswordProtected {
+  marketing: boolean;
+  carClub: boolean;
+  clothing: boolean;
+  league: boolean;
+  world: boolean;
+  bgr8r: boolean;
+  careers: boolean;
+  bgr8: boolean;
+  podcast: boolean;
+  [key: string]: boolean;
+}
+
+// Interface for page passwords
+interface BusinessPasswords {
+  marketing: string;
+  carClub: string;
+  clothing: string;
+  league: string;
+  world: string;
+  bgr8r: string;
+  careers: string;
+  bgr8: string;
+  podcast: string;
+  [key: string]: string;
 }
 
 interface UserData {
@@ -106,7 +134,34 @@ export function AdminSettings() {
     businessAccess: true, // Start with first section expanded
     comingSoon: false,
     grayedOut: false,
+    passwordProtected: false,
     developerAccess: false
+  });
+
+  // New state for password protection
+  const [passwordProtected, setPasswordProtected] = useState<BusinessPasswordProtected>({
+    marketing: false,
+    carClub: false,
+    clothing: false,
+    league: false,
+    world: false,
+    bgr8r: false,
+    careers: false,
+    bgr8: false,
+    podcast: false
+  });
+  
+  // New state for page passwords
+  const [businessPasswords, setBusinessPasswords] = useState<BusinessPasswords>({
+    marketing: '',
+    carClub: '',
+    clothing: '',
+    league: '',
+    world: '',
+    bgr8r: '',
+    careers: '',
+    bgr8: '',
+    podcast: ''
   });
 
   const businessNames: Record<string, string> = {
@@ -125,6 +180,7 @@ export function AdminSettings() {
     fetchSettings();
     fetchComingSoonSettings();
     fetchGrayedOutSettings();
+    fetchPasswordProtectionSettings();
     fetchUsers();
   }, []);
 
@@ -180,6 +236,28 @@ export function AdminSettings() {
     } catch (error) {
       console.error('Error fetching grayed out settings:', error);
       setErrorMessage('Failed to load grayed out settings. Please try again.');
+    }
+  };
+
+  // New method for fetching password protection settings
+  const fetchPasswordProtectionSettings = async () => {
+    try {
+      const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
+      const passwordProtectedDoc = await getDoc(passwordProtectedRef);
+      
+      if (passwordProtectedDoc.exists()) {
+        setPasswordProtected(passwordProtectedDoc.data().passwordProtected || {});
+        setBusinessPasswords(passwordProtectedDoc.data().businessPasswords || {});
+      } else {
+        // If no password protection document exists, create one with default values
+        await setDoc(passwordProtectedRef, { 
+          passwordProtected,
+          businessPasswords
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching password protection settings:', error);
+      setErrorMessage('Failed to load password protection settings. Please try again.');
     }
   };
 
@@ -327,6 +405,45 @@ export function AdminSettings() {
     } catch (error) {
       console.error('Error saving grayed out settings:', error);
       setErrorMessage('Error saving grayed out settings: ' + (error as Error).message);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+    }
+  };
+
+  // New toggle method for password protection
+  const togglePasswordProtection = (business: string) => {
+    setPasswordProtected(prev => ({
+      ...prev,
+      [business]: !prev[business]
+    }));
+  };
+
+  // New method to update password for a business
+  const updateBusinessPassword = (business: string, password: string) => {
+    setBusinessPasswords(prev => ({
+      ...prev,
+      [business]: password
+    }));
+  };
+
+  // New method to save password protection settings
+  const savePasswordProtectionSettings = async () => {
+    try {
+      setSaving('passwordProtected');
+      setSuccessMessage('');
+      setErrorMessage('');
+      
+      await setDoc(doc(db, 'settings', 'passwordProtected'), {
+        passwordProtected,
+        businessPasswords
+      });
+      
+      setSuccessMessage('Password protection settings saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (error) {
+      console.error('Error saving password protection settings:', error);
+      setErrorMessage('Error saving password protection settings: ' + (error as Error).message);
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setSaving('');
@@ -571,6 +688,88 @@ export function AdminSettings() {
               >
                 {saving === 'grayedOut' ? <FaSpinner className="spinner" /> : <FaSave />}
                 {saving === 'grayedOut' ? 'Saving...' : 'Save Grayed Out Settings'}
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+      
+      <section className="settings-section">
+        <div 
+          className="section-header-collapsible" 
+          onClick={() => toggleSectionExpansion('passwordProtected')}
+        >
+          <div className="section-header-content">
+            <div className="expansion-icon">
+              {expandedSections.passwordProtected ? <FaChevronDown /> : <FaChevronRight />}
+            </div>
+            <h3>Password Protected Pages</h3>
+          </div>
+        </div>
+        
+        {expandedSections.passwordProtected && (
+          <div className="section-content">
+            <p className="settings-description">
+              Control which businesses require password protection. Users will need to enter the correct password to access protected pages.
+            </p>
+            
+            <div className="business-access-grid">
+              {Object.keys(businessNames).map(business => (
+                <div 
+                  key={business} 
+                  className={`business-access-card ${passwordProtected[business] ? 'active' : 'inactive'}`}
+                >
+                  <div className="business-access-header">
+                    <span>{businessNames[business]}</span>
+                    <div 
+                      className="toggle-button" 
+                      onClick={() => togglePasswordProtection(business)}
+                    >
+                      {passwordProtected[business] ? (
+                        <FaToggleOn className="toggle-icon on" />
+                      ) : (
+                        <FaToggleOff className="toggle-icon off" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="business-access-status">
+                    {passwordProtected[business] ? (
+                      <>
+                        <FaLock className="status-icon private" />
+                        <span className="status-text private">Password Protected</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaGlobe className="status-icon public" />
+                        <span className="status-text public">No Password</span>
+                      </>
+                    )}
+                  </div>
+                  
+                  {passwordProtected[business] && (
+                    <div className="password-input-container">
+                      <input
+                        type="text"
+                        placeholder="Set page password"
+                        value={businessPasswords[business]}
+                        onChange={(e) => updateBusinessPassword(business, e.target.value)}
+                        className="password-input"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="section-actions">
+              <button 
+                className="save-button"
+                onClick={savePasswordProtectionSettings}
+                disabled={saving === 'passwordProtected'}
+              >
+                {saving === 'passwordProtected' ? <FaSpinner className="spinner" /> : <FaSave />}
+                {saving === 'passwordProtected' ? 'Saving...' : 'Save Password Protection'}
               </button>
             </div>
           </div>

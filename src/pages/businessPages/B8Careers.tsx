@@ -10,6 +10,7 @@ import { CvFormData } from '../../types/careers';
 import '../../styles/businessStyles/B8Careers.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import SocialChannels from '../../components/SocialChannels';
+import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -247,181 +248,183 @@ export default function B8Careers() {
   };
 
   return (
-    <ComingSoonOverlay businessId="careers">
-      <div className="page">
-        {isMobile ? <HamburgerMenu /> : <Navbar />}
+    <PasswordProtectedPage businessId="careers">
+      <ComingSoonOverlay businessId="careers">
+        <div className="page">
+          {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-        <section className="about-section">
-          <h2>About B8 Careers</h2>
-          <p>
-            B8 Careers is dedicated to connecting talented individuals with dynamic opportunities in various industries.
-            We believe in fostering growth, innovation, and collaboration.
-          </p>
-        </section>
+          <section className="about-section">
+            <h2>About B8 Careers</h2>
+            <p>
+              B8 Careers is dedicated to connecting talented individuals with dynamic opportunities in various industries.
+              We believe in fostering growth, innovation, and collaboration.
+            </p>
+          </section>
 
-        <section className="cv-management-section">
-          <h3>Your CV Submissions</h3>
-          <button 
-            onClick={() => setIsEditing(true)} 
-            className="add-cv-button"
-          >
-            Add New CV
-          </button>
+          <section className="cv-management-section">
+            <h3>Your CV Submissions</h3>
+            <button 
+              onClick={() => setIsEditing(true)} 
+              className="add-cv-button"
+            >
+              Add New CV
+            </button>
 
-          <div className="cv-grid">
-            {userCVs.map((cv) => (
-              <div key={cv.id} className="cv-card">
-                <div className="cv-card-header">
-                  <h4>{cv.industry}</h4>
-                  <span className={`status-badge status-${cv.status}`}>
-                    {cv.status}
-                  </span>
-                </div>
-                
-                <div className="cv-card-content">
-                  <p><strong>Name:</strong> {cv.name}</p>
-                  <p><strong>Email:</strong> {cv.email}</p>
-                  <p><strong>Phone:</strong> {cv.phone}</p>
-                  <p>
-                    <strong>LinkedIn:</strong>{' '}
-                    <a href={cv.linkedIn} target="_blank" rel="noopener noreferrer">
-                      View Profile
-                    </a>
-                  </p>
-                  {cv.professionalWeb && (
+            <div className="cv-grid">
+              {userCVs.map((cv) => (
+                <div key={cv.id} className="cv-card">
+                  <div className="cv-card-header">
+                    <h4>{cv.industry}</h4>
+                    <span className={`status-badge status-${cv.status}`}>
+                      {cv.status}
+                    </span>
+                  </div>
+                  
+                  <div className="cv-card-content">
+                    <p><strong>Name:</strong> {cv.name}</p>
+                    <p><strong>Email:</strong> {cv.email}</p>
+                    <p><strong>Phone:</strong> {cv.phone}</p>
                     <p>
-                      <strong>Website:</strong>{' '}
-                      <a href={cv.professionalWeb} target="_blank" rel="noopener noreferrer">
-                        View Website
+                      <strong>LinkedIn:</strong>{' '}
+                      <a href={cv.linkedIn} target="_blank" rel="noopener noreferrer">
+                        View Profile
                       </a>
                     </p>
-                  )}
-                  <p><strong>Submitted:</strong> {new Date(cv.dateSubmitted).toLocaleDateString()}</p>
-                </div>
+                    {cv.professionalWeb && (
+                      <p>
+                        <strong>Website:</strong>{' '}
+                        <a href={cv.professionalWeb} target="_blank" rel="noopener noreferrer">
+                          View Website
+                        </a>
+                      </p>
+                    )}
+                    <p><strong>Submitted:</strong> {new Date(cv.dateSubmitted).toLocaleDateString()}</p>
+                  </div>
 
-                <div className="cv-card-actions">
-                  <a 
-                    href={cv.cvUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="view-cv-button"
-                  >
-                    View CV
-                  </a>
-                  <button 
-                    onClick={() => {
-                      setExistingCV(cv);
-                      setIsEditing(true);
-                    }} 
-                    className="edit-cv-button"
-                  >
-                    Update
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteCV(cv)} 
-                    className="delete-cv-button"
-                  >
-                    Delete
-                  </button>
+                  <div className="cv-card-actions">
+                    <a 
+                      href={cv.cvUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="view-cv-button"
+                    >
+                      View CV
+                    </a>
+                    <button 
+                      onClick={() => {
+                        setExistingCV(cv);
+                        setIsEditing(true);
+                      }} 
+                      className="edit-cv-button"
+                    >
+                      Update
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteCV(cv)} 
+                      className="delete-cv-button"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
 
-        {isEditing && (
-          <section className="cv-submission-section">
-            <h3>{existingCV ? 'Update CV' : 'Submit New CV'}</h3>
-            {submitSuccess && (
-              <div className="success-message">
-                CV submitted successfully! We'll be in touch soon.
-              </div>
-            )}
-            {submitError && (
-              <div className="error-message">
-                {submitError}
-              </div>
-            )}
-            <form onSubmit={handleCvSubmit}>
-              <input
-                name="name"
-                type="text"
-                placeholder="Name"
-                value={cvForm.name}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                name="email"
-                type="email"
-                placeholder="Email"
-                value={cvForm.email}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                name="phone"
-                type="tel"
-                placeholder="Phone"
-                value={cvForm.phone}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                name="linkedIn"
-                type="url"
-                placeholder="LinkedIn Profile"
-                value={cvForm.linkedIn}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                name="industry"
-                type="text"
-                placeholder="Industry"
-                value={cvForm.industry}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                name="professionalWeb"
-                type="url"
-                placeholder="Professional Website"
-                value={cvForm.professionalWeb}
-                onChange={handleInputChange}
-              />
-              <input
-                name="otherLinks"
-                type="url"
-                placeholder="Other Links"
-                value={cvForm.otherLinks}
-                onChange={handleInputChange}
-              />
-              <label className="file-input-label">
-                Upload CV:
+          {isEditing && (
+            <section className="cv-submission-section">
+              <h3>{existingCV ? 'Update CV' : 'Submit New CV'}</h3>
+              {submitSuccess && (
+                <div className="success-message">
+                  CV submitted successfully! We'll be in touch soon.
+                </div>
+              )}
+              {submitError && (
+                <div className="error-message">
+                  {submitError}
+                </div>
+              )}
+              <form onSubmit={handleCvSubmit}>
                 <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx"
+                  name="name"
+                  type="text"
+                  placeholder="Name"
+                  value={cvForm.name}
+                  onChange={handleInputChange}
                   required
                 />
-              </label>
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className={isSubmitting ? 'submitting' : ''}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit CV'}
-              </button>
-            </form>
-          </section>
-        )}
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={cvForm.email}
+                  onChange={handleInputChange}
+                  required
+                />
+                <input
+                  name="phone"
+                  type="tel"
+                  placeholder="Phone"
+                  value={cvForm.phone}
+                  onChange={handleInputChange}
+                  required
+                />
+                <input
+                  name="linkedIn"
+                  type="url"
+                  placeholder="LinkedIn Profile"
+                  value={cvForm.linkedIn}
+                  onChange={handleInputChange}
+                  required
+                />
+                <input
+                  name="industry"
+                  type="text"
+                  placeholder="Industry"
+                  value={cvForm.industry}
+                  onChange={handleInputChange}
+                  required
+                />
+                <input
+                  name="professionalWeb"
+                  type="url"
+                  placeholder="Professional Website"
+                  value={cvForm.professionalWeb}
+                  onChange={handleInputChange}
+                />
+                <input
+                  name="otherLinks"
+                  type="url"
+                  placeholder="Other Links"
+                  value={cvForm.otherLinks}
+                  onChange={handleInputChange}
+                />
+                <label className="file-input-label">
+                  Upload CV:
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx"
+                    required
+                  />
+                </label>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className={isSubmitting ? 'submitting' : ''}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit CV'}
+                </button>
+              </form>
+            </section>
+          )}
 
-        {/* Social Channels */}
-        <SocialChannels className="careers-social-channels" />
+          {/* Social Channels */}
+          <SocialChannels className="careers-social-channels" />
 
-        <Footer />
-      </div>
-    </ComingSoonOverlay>
+          <Footer />
+        </div>
+      </ComingSoonOverlay>
+    </PasswordProtectedPage>
   );
 }

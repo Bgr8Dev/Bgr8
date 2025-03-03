@@ -9,6 +9,7 @@ import { PodcastEpisode } from '../../types/podcast';
 import '../../styles/businessStyles/B8Podcast.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import SocialChannels from '../../components/SocialChannels';
+import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
 
 export default function B8Podcast() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -175,223 +176,224 @@ export default function B8Podcast() {
   };
 
   return (
-    <div className="page">
-      <Navbar />
-      <HamburgerMenu />
+    <PasswordProtectedPage businessId="podcast">
       <ComingSoonOverlay businessId="podcast">
-        <div className={`podcast-page ${isMobile ? 'mobile' : ''}`}>
-          <div className="podcast-hero">
-            <h1>Car Talk - B8 Podcast</h1>
-            <p>Your Ultimate Destination for Automotive Insights, Stories, and Expertise</p>
-            {!subscribed && (
-              <div className="subscribe-form-container">
-                <form onSubmit={handleSubscribe} className="subscribe-form">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <button type="submit">Subscribe</button>
-                </form>
-                {submitSuccess && (
-                  <div className="success-message">
-                    Successfully subscribed to Car Talk - B8 Podcast!
+        <div className="page">
+          {isMobile ? <HamburgerMenu /> : <Navbar />}
+          <div className={`podcast-page ${isMobile ? 'mobile' : ''}`}>
+            <div className="podcast-hero">
+              <h1>Car Talk - B8 Podcast</h1>
+              <p>Your Ultimate Destination for Automotive Insights, Stories, and Expertise</p>
+              {!subscribed && (
+                <div className="subscribe-form-container">
+                  <form onSubmit={handleSubscribe} className="subscribe-form">
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                    <button type="submit">Subscribe</button>
+                  </form>
+                  {submitSuccess && (
+                    <div className="success-message">
+                      Successfully subscribed to Car Talk - B8 Podcast!
+                    </div>
+                  )}
+                  {submitError && (
+                    <div className="error-message">
+                      {submitError}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="about-section">
+              <h2>About Car Talk - B8 Podcast</h2>
+              <p>
+                Car Talk is B8's premier automotive podcast dedicated to all things cars. From classic vehicles to the latest electric innovations, 
+                our expert hosts and industry guests bring you engaging discussions, insider knowledge, and entertaining stories from the world of automobiles.
+                Whether you're a car enthusiast, industry professional, or casual driver, our podcast offers valuable insights and entertainment for everyone.
+              </p>
+            </div>
+
+            {isLoading ? (
+              <div className="loading-section">
+                <p>Loading podcast episodes...</p>
+              </div>
+            ) : error ? (
+              <div className="error-section">
+                <p>{error}</p>
+              </div>
+            ) : (
+              <>
+                {featuredEpisodes.length > 0 && (
+                  <div className="featured-episodes-section">
+                    <h2>Featured Episodes</h2>
+                    <div className="featured-episodes-grid">
+                      {featuredEpisodes.map((episode) => (
+                        <div key={episode.id} className="featured-episode-card">
+                          <div className="episode-image">
+                            <img src={episode.imageUrl || '/assets/podcast-default.jpg'} alt={episode.title} />
+                            <div className="episode-duration">{formatDuration(episode.duration)}</div>
+                          </div>
+                          <div className="episode-content">
+                            <h3>{episode.title}</h3>
+                            <p className="episode-guest">with {episode.guestName}, {episode.guestTitle}</p>
+                            <p className="episode-date">{formatDate(episode.publishDate)}</p>
+                            <p className="episode-description">{episode.description}</p>
+                            <div className="episode-tags">
+                              {episode.tags.map((tag, index) => (
+                                <span key={index} className="episode-tag">{tag}</span>
+                              ))}
+                            </div>
+                            
+                            {episode.youtubeUrl && extractYoutubeVideoId(episode.youtubeUrl) && (
+                              <div className="episode-video-preview">
+                                <h4>Episode Video</h4>
+                                <div className="episode-video-container">
+                                  <iframe
+                                    width="100%"
+                                    height="100%"
+                                    src={`https://www.youtube.com/embed/${extractYoutubeVideoId(episode.youtubeUrl)}`}
+                                    title={`${episode.title} - YouTube video`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  ></iframe>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="episode-actions">
+                              <a href={episode.audioUrl} className="listen-button">Listen Now</a>
+                              {episode.youtubeUrl && (
+                                <a href={episode.youtubeUrl} target="_blank" rel="noopener noreferrer" className="youtube-button" onClick={(e) => handleYoutubeClick(e, episode.youtubeUrl)}>
+                                  Watch on YouTube
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-                {submitError && (
-                  <div className="error-message">
-                    {submitError}
+
+                <div className="categories-section">
+                  <h2>Popular Categories</h2>
+                  <ul className="categories-list">
+                    {popularCategories.map((category, index) => (
+                      <li key={index} className="category-item">{category}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                {latestEpisodes.length > 0 && (
+                  <div className="latest-episodes-section">
+                    <h2>Latest Episodes</h2>
+                    <div className="latest-episodes-grid">
+                      {latestEpisodes.map((episode) => (
+                        <div key={episode.id} className="episode-card">
+                          <div className="episode-card-image">
+                            <img src={episode.imageUrl || '/assets/podcast-default.jpg'} alt={episode.title} />
+                            <div className="episode-card-duration">{formatDuration(episode.duration)}</div>
+                          </div>
+                          <div className="episode-card-content">
+                            <h4>{episode.title}</h4>
+                            <p className="episode-card-guest">{episode.guestName}</p>
+                            <p className="episode-card-date">{formatDate(episode.publishDate)}</p>
+                            <div className="episode-card-actions">
+                              <a href={episode.audioUrl} className="episode-card-listen">Listen</a>
+                              {episode.youtubeUrl && (
+                                <a 
+                                  href={episode.youtubeUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="episode-card-youtube"
+                                  onClick={(e) => handleYoutubeClick(e, episode.youtubeUrl)}
+                                >
+                                  YouTube
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="view-all-container">
+                      <button className="view-all-button">View All Episodes</button>
+                    </div>
                   </div>
                 )}
+
+                <div className="host-section">
+                  <h2>Meet Your Hosts</h2>
+                  <div className="hosts-grid">
+                    <div className="host-card">
+                      <img src="/assets/host1.jpg" alt="Host 1" className="host-image" />
+                      <h3>Alex Morgan</h3>
+                      <p className="host-title">Lead Host & Automotive Journalist</p>
+                      <p className="host-bio">
+                        With over 15 years of experience in the automotive industry, Alex brings expert knowledge and passion to every episode.
+                      </p>
+                    </div>
+                    <div className="host-card">
+                      <img src="/assets/host2.jpg" alt="Host 2" className="host-image" />
+                      <h3>Jamie Chen</h3>
+                      <p className="host-title">Co-Host & Racing Enthusiast</p>
+                      <p className="host-bio">
+                        Former race car driver turned podcast host, Jamie offers unique insights from both on and off the track.
+                      </p>
+                    </div>
+                    <div className="host-card">
+                      <img src="/assets/host3.jpg" alt="Host 3" className="host-image" />
+                      <h3>Sam Rodriguez</h3>
+                      <p className="host-title">Technical Expert & Engineer</p>
+                      <p className="host-bio">
+                        Automotive engineer with a specialty in electric vehicles, Sam breaks down complex topics into accessible discussions.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="become-guest-section">
+                  <h2>Become a Guest</h2>
+                  <p>
+                    Are you an automotive expert, industry insider, or have a unique car story to share? 
+                    We're always looking for interesting guests to feature on Car Talk.
+                  </p>
+                  <button className="become-guest-button">Apply to Be a Guest</button>
+                </div>
+
+                <SocialChannels className="podcast-social-channels" />
+              </>
+            )}
+            
+            {activeVideoId && (
+              <div className="video-modal-overlay" onClick={closeVideoModal}>
+                <div className="video-modal" onClick={(e) => e.stopPropagation()}>
+                  <button className="close-modal-button" onClick={closeVideoModal}>×</button>
+                  <div className="video-container">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
               </div>
             )}
           </div>
-
-          <div className="about-section">
-            <h2>About Car Talk - B8 Podcast</h2>
-            <p>
-              Car Talk is B8's premier automotive podcast dedicated to all things cars. From classic vehicles to the latest electric innovations, 
-              our expert hosts and industry guests bring you engaging discussions, insider knowledge, and entertaining stories from the world of automobiles.
-              Whether you're a car enthusiast, industry professional, or casual driver, our podcast offers valuable insights and entertainment for everyone.
-            </p>
-          </div>
-
-          {isLoading ? (
-            <div className="loading-section">
-              <p>Loading podcast episodes...</p>
-            </div>
-          ) : error ? (
-            <div className="error-section">
-              <p>{error}</p>
-            </div>
-          ) : (
-            <>
-              {featuredEpisodes.length > 0 && (
-                <div className="featured-episodes-section">
-                  <h2>Featured Episodes</h2>
-                  <div className="featured-episodes-grid">
-                    {featuredEpisodes.map((episode) => (
-                      <div key={episode.id} className="featured-episode-card">
-                        <div className="episode-image">
-                          <img src={episode.imageUrl || '/assets/podcast-default.jpg'} alt={episode.title} />
-                          <div className="episode-duration">{formatDuration(episode.duration)}</div>
-                        </div>
-                        <div className="episode-content">
-                          <h3>{episode.title}</h3>
-                          <p className="episode-guest">with {episode.guestName}, {episode.guestTitle}</p>
-                          <p className="episode-date">{formatDate(episode.publishDate)}</p>
-                          <p className="episode-description">{episode.description}</p>
-                          <div className="episode-tags">
-                            {episode.tags.map((tag, index) => (
-                              <span key={index} className="episode-tag">{tag}</span>
-                            ))}
-                          </div>
-                          
-                          {episode.youtubeUrl && extractYoutubeVideoId(episode.youtubeUrl) && (
-                            <div className="episode-video-preview">
-                              <h4>Episode Video</h4>
-                              <div className="episode-video-container">
-                                <iframe
-                                  width="100%"
-                                  height="100%"
-                                  src={`https://www.youtube.com/embed/${extractYoutubeVideoId(episode.youtubeUrl)}`}
-                                  title={`${episode.title} - YouTube video`}
-                                  frameBorder="0"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                ></iframe>
-                              </div>
-                            </div>
-                          )}
-                          
-                          <div className="episode-actions">
-                            <a href={episode.audioUrl} className="listen-button">Listen Now</a>
-                            {episode.youtubeUrl && (
-                              <a href={episode.youtubeUrl} target="_blank" rel="noopener noreferrer" className="youtube-button" onClick={(e) => handleYoutubeClick(e, episode.youtubeUrl)}>
-                                Watch on YouTube
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="categories-section">
-                <h2>Popular Categories</h2>
-                <ul className="categories-list">
-                  {popularCategories.map((category, index) => (
-                    <li key={index} className="category-item">{category}</li>
-                  ))}
-                </ul>
-              </div>
-
-              {latestEpisodes.length > 0 && (
-                <div className="latest-episodes-section">
-                  <h2>Latest Episodes</h2>
-                  <div className="latest-episodes-grid">
-                    {latestEpisodes.map((episode) => (
-                      <div key={episode.id} className="episode-card">
-                        <div className="episode-card-image">
-                          <img src={episode.imageUrl || '/assets/podcast-default.jpg'} alt={episode.title} />
-                          <div className="episode-card-duration">{formatDuration(episode.duration)}</div>
-                        </div>
-                        <div className="episode-card-content">
-                          <h4>{episode.title}</h4>
-                          <p className="episode-card-guest">{episode.guestName}</p>
-                          <p className="episode-card-date">{formatDate(episode.publishDate)}</p>
-                          <div className="episode-card-actions">
-                            <a href={episode.audioUrl} className="episode-card-listen">Listen</a>
-                            {episode.youtubeUrl && (
-                              <a 
-                                href={episode.youtubeUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="episode-card-youtube"
-                                onClick={(e) => handleYoutubeClick(e, episode.youtubeUrl)}
-                              >
-                                YouTube
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="view-all-container">
-                    <button className="view-all-button">View All Episodes</button>
-                  </div>
-                </div>
-              )}
-
-              <div className="host-section">
-                <h2>Meet Your Hosts</h2>
-                <div className="hosts-grid">
-                  <div className="host-card">
-                    <img src="/assets/host1.jpg" alt="Host 1" className="host-image" />
-                    <h3>Alex Morgan</h3>
-                    <p className="host-title">Lead Host & Automotive Journalist</p>
-                    <p className="host-bio">
-                      With over 15 years of experience in the automotive industry, Alex brings expert knowledge and passion to every episode.
-                    </p>
-                  </div>
-                  <div className="host-card">
-                    <img src="/assets/host2.jpg" alt="Host 2" className="host-image" />
-                    <h3>Jamie Chen</h3>
-                    <p className="host-title">Co-Host & Racing Enthusiast</p>
-                    <p className="host-bio">
-                      Former race car driver turned podcast host, Jamie offers unique insights from both on and off the track.
-                    </p>
-                  </div>
-                  <div className="host-card">
-                    <img src="/assets/host3.jpg" alt="Host 3" className="host-image" />
-                    <h3>Sam Rodriguez</h3>
-                    <p className="host-title">Technical Expert & Engineer</p>
-                    <p className="host-bio">
-                      Automotive engineer with a specialty in electric vehicles, Sam breaks down complex topics into accessible discussions.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="become-guest-section">
-                <h2>Become a Guest</h2>
-                <p>
-                  Are you an automotive expert, industry insider, or have a unique car story to share? 
-                  We're always looking for interesting guests to feature on Car Talk.
-                </p>
-                <button className="become-guest-button">Apply to Be a Guest</button>
-              </div>
-
-              <SocialChannels className="podcast-social-channels" />
-            </>
-          )}
-          
-          {activeVideoId && (
-            <div className="video-modal-overlay" onClick={closeVideoModal}>
-              <div className="video-modal" onClick={(e) => e.stopPropagation()}>
-                <button className="close-modal-button" onClick={closeVideoModal}>×</button>
-                <div className="video-container">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-          )}
+          <Footer />
         </div>
       </ComingSoonOverlay>
-      <Footer />
-    </div>
+    </PasswordProtectedPage>
   );
 } 

@@ -48,7 +48,7 @@ export default function HomePage() {
           We provide cutting-edge marketing strategies and innovative software development solutions tailored to your business needs.
         </p>
         <button>
-          <Link to="/b8-marketing" style={{ color: 'white', textDecoration: 'none' }}>Explore B8 Marketing</Link>
+          <Link to="/b8-marketing" className="homepage-cta-link">Explore B8 Marketing</Link>
         </button>
       </section>
 

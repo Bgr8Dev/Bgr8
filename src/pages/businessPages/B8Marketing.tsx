@@ -3,6 +3,7 @@ import Navbar from '../../components/Navbar';
 import HamburgerMenu from '../../components/HamburgerMenu';
 import Footer from '../../components/Footer';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
+import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
 import { renderIcon } from '../../utils/iconMapping';
 import '../../styles/businessStyles/B8Marketing.css';
 import {
@@ -91,182 +92,184 @@ export default function B8Marketing() {
   const activeCategories = categories.filter(category => category.isActive);
 
   return (
-    <ComingSoonOverlay businessId="marketing">
-      <div className="page">
-        {isMobile ? <HamburgerMenu /> : <Navbar />}
+    <PasswordProtectedPage businessId="marketing">
+      <ComingSoonOverlay businessId="marketing">
+        <div className="page">
+          {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-        {/* Existing Hero Section */}
-        <section className="marketing-hero">
-          <h1><s>B8</s> Marketing</h1>
-          <p> <s>We dont have a slogan yet</s></p>
-        </section>
+          {/* Existing Hero Section */}
+          <section className="marketing-hero">
+            <h1><s>B8</s> Marketing</h1>
+            <p> <s>We dont have a slogan yet</s></p>
+          </section>
 
-        {/* Updated Header Video Section */}
-        <section className="header-video">
-          <div className="video-container">
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/uPXf6RjA5RI"
-              title="B8 Marketing Video"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </section>
-
-        {/* Intro About Section */}
-        <section className="intro-about">
-          <h2>About B8 Marketing</h2>
-          <p>
-            At B8 Marketing, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
-            Our team is dedicated to delivering impactful campaigns that resonate with audiences globally.
-          </p>
-        </section>
-
-        {/* Gallery of Media with Descriptions */}
-        <section className="gallery">
-          <div className="gallery-item">
-            <img src="/assets/marketing1.jpg" alt="Marketing Campaign 1" />
-            <p>Campaign 1: Social Media Engagement Strategy</p>
-          </div>
-          <div className="gallery-item">
-            <img src="/assets/marketing2.jpg" alt="Marketing Campaign 2" />
-            <p>Campaign 2: Influencer Partnerships for Brand Growth</p>
-          </div>
-          <div className="gallery-item">
-            <img src="/assets/marketing3.jpg" alt="Marketing Campaign 3" />
-            <p>Campaign 3: Viral Video Production and Promotion</p>
-          </div>
-        </section>
-
-        {/* Companies We've Worked With */}
-        <section className="companies-worked-with">
-          <h3>Companies We've Worked With</h3>
-          {isLoading ? (
-            <div className="loading">Loading companies...</div>
-          ) : activeCompanies.length > 0 ? (
-            <div className="company-logos">
-              {activeCompanies.map(company => (
-                <div key={company.id} className="logo-wrapper">
-                  <a href={company.websiteUrl} target="_blank" rel="noopener noreferrer">
-                    <img src={company.imageUrl} alt={company.name} />
-                  </a>
-                </div>
-              ))}
+          {/* Updated Header Video Section */}
+          <section className="header-video">
+            <div className="video-container">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/uPXf6RjA5RI"
+                title="B8 Marketing Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
             </div>
-          ) : (
-            <p>No companies to display</p>
-          )}
-        </section>
+          </section>
 
-        {/* Marketing Services */}
-        <section className="marketing-services">
-          <h2>Our Marketing Solutions</h2>
-          {isLoading ? (
-            <div className="loading">Loading services...</div>
-          ) : activeServices.length > 0 ? (
-            <div className="services-container">
-              {activeServices.map((service) => (
-                <div className="marketing-service-card" key={service.id}>
-                  <div className="service-icon">{renderIcon(service.iconName)}</div>
-                  <h3>{service.category}</h3>
-                  <h4>{service.title}</h4>
-                  <ul className="service-list">
-                    {service.services.map((item, i) => (
-                      <li key={i}>{item}</li>
-                    ))}
-                  </ul>
-                  <p className="service-price">{service.price}</p>
-                  <button className="learn-more-btn">Learn More</button>
-                </div>
-              ))}
+          {/* Intro About Section */}
+          <section className="intro-about">
+            <h2>About B8 Marketing</h2>
+            <p>
+              At B8 Marketing, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
+              Our team is dedicated to delivering impactful campaigns that resonate with audiences globally.
+            </p>
+          </section>
+
+          {/* Gallery of Media with Descriptions */}
+          <section className="gallery">
+            <div className="gallery-item">
+              <img src="/assets/marketing1.jpg" alt="Marketing Campaign 1" />
+              <p>Campaign 1: Social Media Engagement Strategy</p>
             </div>
-          ) : (
-            <p>No services to display</p>
-          )}
-        </section>
+            <div className="gallery-item">
+              <img src="/assets/marketing2.jpg" alt="Marketing Campaign 2" />
+              <p>Campaign 2: Influencer Partnerships for Brand Growth</p>
+            </div>
+            <div className="gallery-item">
+              <img src="/assets/marketing3.jpg" alt="Marketing Campaign 3" />
+              <p>Campaign 3: Viral Video Production and Promotion</p>
+            </div>
+          </section>
 
-        {/* Software Tools Section */}
-        <section className="software-tools">
-          <h2>Our Marketing Tech Stack</h2>
-          <p>We use industry-leading software to deliver exceptional results</p>
-          
-          {isLoading ? (
-            <div className="loading">Loading tech stack...</div>
-          ) : (
-            <>
-              <div className="category-filter">
-                {activeCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory(category.name)}
-                  >
-                    {category.name}
-                  </button>
+          {/* Companies We've Worked With */}
+          <section className="companies-worked-with">
+            <h3>Companies We've Worked With</h3>
+            {isLoading ? (
+              <div className="loading">Loading companies...</div>
+            ) : activeCompanies.length > 0 ? (
+              <div className="company-logos">
+                {activeCompanies.map(company => (
+                  <div key={company.id} className="logo-wrapper">
+                    <a href={company.websiteUrl} target="_blank" rel="noopener noreferrer">
+                      <img src={company.imageUrl} alt={company.name} />
+                    </a>
+                  </div>
                 ))}
               </div>
+            ) : (
+              <p>No companies to display</p>
+            )}
+          </section>
 
-              <div className="software-grid">
-                {filteredSoftware.length > 0 ? (
-                  filteredSoftware.map((software) => (
-                    <div className="software-card" key={software.id}>
-                      <div className="software-icon">{renderIcon(software.iconName)}</div>
-                      <h4>{software.name}</h4>
-                      <p className="software-category">{software.category}</p>
-                      <p className="software-description">{software.description}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p>No software to display for this category</p>
-                )}
+          {/* Marketing Services */}
+          <section className="marketing-services">
+            <h2>Our Marketing Solutions</h2>
+            {isLoading ? (
+              <div className="loading">Loading services...</div>
+            ) : activeServices.length > 0 ? (
+              <div className="services-container">
+                {activeServices.map((service) => (
+                  <div className="marketing-service-card" key={service.id}>
+                    <div className="service-icon">{renderIcon(service.iconName)}</div>
+                    <h3>{service.category}</h3>
+                    <h4>{service.title}</h4>
+                    <ul className="service-list">
+                      {service.services.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                    <p className="service-price">{service.price}</p>
+                    <button className="learn-more-btn">Learn More</button>
+                  </div>
+                ))}
               </div>
-            </>
-          )}
-        </section>
+            ) : (
+              <p>No services to display</p>
+            )}
+          </section>
 
-        {/* Pricing List */}
-        <section className="pricing-list">
-          <h3>Our Pricing</h3>
-          {isLoading ? (
-            <div className="loading">Loading pricing plans...</div>
-          ) : activePricingPlans.length > 0 ? (
-            <div className="pricing-cards">
-              {activePricingPlans.map((plan) => (
-                <div className="pricing-card" key={plan.id}>
-                  <div className="icon-container">{renderIcon(plan.iconName)}</div>
-                  <h4>{plan.title}</h4>
-                  <p className="price">{plan.price}</p>
-                  <p className="description">{plan.description}</p>
+          {/* Software Tools Section */}
+          <section className="software-tools">
+            <h2>Our Marketing Tech Stack</h2>
+            <p>We use industry-leading software to deliver exceptional results</p>
+            
+            {isLoading ? (
+              <div className="loading">Loading tech stack...</div>
+            ) : (
+              <>
+                <div className="category-filter">
+                  {activeCategories.map((category) => (
+                    <button
+                      key={category.id}
+                      className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
+                      onClick={() => setSelectedCategory(category.name)}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
                 </div>
-              ))}
+
+                <div className="software-grid">
+                  {filteredSoftware.length > 0 ? (
+                    filteredSoftware.map((software) => (
+                      <div className="software-card" key={software.id}>
+                        <div className="software-icon">{renderIcon(software.iconName)}</div>
+                        <h4>{software.name}</h4>
+                        <p className="software-category">{software.category}</p>
+                        <p className="software-description">{software.description}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No software to display for this category</p>
+                  )}
+                </div>
+              </>
+            )}
+          </section>
+
+          {/* Pricing List */}
+          <section className="pricing-list">
+            <h3>Our Pricing</h3>
+            {isLoading ? (
+              <div className="loading">Loading pricing plans...</div>
+            ) : activePricingPlans.length > 0 ? (
+              <div className="pricing-cards">
+                {activePricingPlans.map((plan) => (
+                  <div className="pricing-card" key={plan.id}>
+                    <div className="icon-container">{renderIcon(plan.iconName)}</div>
+                    <h4>{plan.title}</h4>
+                    <p className="price">{plan.price}</p>
+                    <p className="description">{plan.description}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No pricing plans to display</p>
+            )}
+          </section>
+
+          {/* Career Opportunities Section */}
+          <section className="career-opportunities-section">
+            <div className="section-header">
+              <h2>Career Opportunities</h2>
+              <p>Join our team of marketing professionals and help shape the future of digital marketing</p>
             </div>
-          ) : (
-            <p>No pricing plans to display</p>
-          )}
-        </section>
+            <JoinOurTeam />
+          </section>
 
-        {/* Career Opportunities Section */}
-        <section className="career-opportunities-section">
-          <div className="section-header">
-            <h2>Career Opportunities</h2>
-            <p>Join our team of marketing professionals and help shape the future of digital marketing</p>
-          </div>
-          <JoinOurTeam />
-        </section>
+          {/* Links to Social Channels */}
+          <SocialChannels />
 
-        {/* Links to Social Channels */}
-        <SocialChannels />
+          {/* Detailed Contact Us Form */}
+          <section>
+            <ContactForm source="marketing" />
+          </section>
 
-        {/* Detailed Contact Us Form */}
-        <section>
-          <ContactForm source="marketing" />
-        </section>
-
-        <Footer />
-      </div>
-    </ComingSoonOverlay>
+          <Footer />
+        </div>
+      </ComingSoonOverlay>
+    </PasswordProtectedPage>
   );
 }

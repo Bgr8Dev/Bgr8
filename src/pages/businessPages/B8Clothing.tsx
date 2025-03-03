@@ -13,6 +13,7 @@ import '../../styles/businessStyles/B8Clothing.css';
 import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
 import ContactForm from '../../components/ContactForm';
 import SocialChannels from '../../components/SocialChannels';
+import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -124,287 +125,289 @@ export default function B8Clothing() {
   }
 
   return (
-    <ComingSoonOverlay businessId="clothing">
-      <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-        <div className="clothing-page">
-          {isMobile ? <HamburgerMenu /> : <Navbar />}
+    <PasswordProtectedPage businessId="clothing">
+      <ComingSoonOverlay businessId="clothing">
+        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
+          <div className="clothing-page">
+            {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-          {/* Hero Section */}
-          <section className="clothing-hero">
-            <h1>B8 Clothing</h1>
-            <p>Discover our exclusive range of stylish and modern B8 apparel.</p>
-          </section>
-          {/* Hero Video Section */}
-          <section className="hero-video">
-            <div className="video-placeholder">
-              <p>Hero Video Placeholder</p>
-            </div>
-          </section>
-
-          {/* Intro Section */}
-          <section className="clothing-intro-section">
-            <h2>About B8 Clothing</h2>
-            <p>
-              B8 Clothing offers premium, stylish, and modern apparel designed for individuals who value quality and fashion-forward thinking.
-            </p>
-          </section>
-
-          {/* Gallery Section */}
-          <section className="clothing-gallery">
-            <div>
-              <img src="/src/assets/Volkswagen.jpg" alt="Clothing Item 1" />
-            </div>
-            <div>
-              <img src="/src/assets/clothing2.jpg" alt="Clothing Item 2" />
-            </div>
-            <div>
-              <img src="/src/assets/clothing3.jpg" alt="Clothing Item 3" />
-            </div>
-          </section>
-
-          {/* Featured Product */}
-          <section className="clothing-shop-section">
-            <h3>Featured Product</h3>
-            <div className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
-              <div className="clothing-icon-container">
-                <FaCreditCard size={40} />
+            {/* Hero Section */}
+            <section className="clothing-hero">
+              <h1>B8 Clothing</h1>
+              <p>Discover our exclusive range of stylish and modern B8 apparel.</p>
+            </section>
+            {/* Hero Video Section */}
+            <section className="hero-video">
+              <div className="video-placeholder">
+                <p>Hero Video Placeholder</p>
               </div>
-              <img src={product.image} alt={product.name} />
-              <p>{`${product.name} - $${product.price}`}</p>
-            </div>
-          </section>
+            </section>
 
-          {/* Product Catalog Section */}
-          <section className="clothing-catalog-section">
-            <h3>Product Catalog</h3>
-            
-            {/* Category Filter */}
-            <div className="clothing-category-filter">
-              <button 
-                className={`category-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-              >
-                All
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </button>
-              ))}
-            </div>
+            {/* Intro Section */}
+            <section className="clothing-intro-section">
+              <h2>About B8 Clothing</h2>
+              <p>
+                B8 Clothing offers premium, stylish, and modern apparel designed for individuals who value quality and fashion-forward thinking.
+              </p>
+            </section>
 
-            {/* Sorting Filter */}
-            <div className="clothing-sort-filter">
-              <label>Sort By:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="newest">Newest</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-            </div>
-
-            {/* Size Filter */}
-            <div className="clothing-size-filter">
-              <label>Size:</label>
-              <select
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
-              >
-                <option value="all">All Sizes</option>
-                <option value="XS">XS</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
-              </select>
-            </div>
-
-            {/* Price Range Filter */}
-            <div className="clothing-price-filter">
-              <label>Price Range: £{priceRange[0]} - £{priceRange[1]}</label>
-              <input
-                type="range"
-                min="0"
-                max="1000"
-                value={priceRange[1]}
-                onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-              />
-            </div>
-
-            {/* Products Grid */}
-            <div className="clothing-products-grid">
-              {sortedItems.map(item => (
-                <div key={item.id} className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
-                  <img src={item.images[0]} alt={item.name} />
-                  <h4>{item.name}</h4>
-                  <p>${item.price.toFixed(2)}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {isModalOpen && (
-            <div className="clothing-modal-overlay" onClick={() => setIsModalOpen(false)}>
-              <div className="clothing-modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>×</button>
-                <h2>{product.name}</h2>
-                <img src={product.image} alt={product.name} />
-                <p>{product.description}</p>
-                <p>Price: ${product.price}</p>
-
-                {/* Payment Options */}
-                <div className="clothing-payment-options">
-                  {/* PayPal */}
-                  <div className="clothing-payment-card">
-                    <div className="clothing-icon-container">
-                      <FaPaypal size={40} />
-                    </div>
-                    <div className="clothing-paypal-container">
-                    <PayPalButtons
-                      style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
-                      createOrder={(_data, actions) => {
-                        return actions.order.create({
-                          intent: "CAPTURE",
-                          purchase_units: [
-                            {
-                              amount: { currency_code: 'USD', value: '30.00' },
-                            },
-                          ],
-                        });
-                      }}
-                      onApprove={async (_data, actions) => {
-                        if (actions.order) {
-                          try {
-                            const details = await actions.order.capture();
-                            const name = details.payer?.name?.given_name ?? 'Customer';
-                            alert(`Transaction completed by ${name}`);
-                          } catch (error) {
-                            console.error('Payment capture failed:', error);
-                            alert('Payment failed.');
-                          }
-                        } else {
-                          console.error('Order actions not available.');
-                          alert('Payment could not be processed.');
-                        }
-                      }}
-                    />
-                    </div>
-                  </div>
-
-                  {/* Google Pay */}
-                  <div className="clothing-payment-card">
-                    <div className="clothing-icon-container">
-                      <FaGooglePay size={40} />
-                    </div>
-                    <div className="clothing-googlepay-container">
-                      <GooglePayButton
-                        environment="TEST"
-                        paymentRequest={{
-                          apiVersion: 2,
-                          apiVersionMinor: 0,
-                          allowedPaymentMethods: [
-                            {
-                              type: 'CARD',
-                              parameters: {
-                                allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                                allowedCardNetworks: ['MASTERCARD', 'VISA'],
-                              },
-                              tokenizationSpecification: {
-                                type: 'PAYMENT_GATEWAY',
-                                parameters: {
-                                  gateway: 'example',
-                                  gatewayMerchantId: 'exampleMerchantId',
-                                },
-                              },
-                            },
-                          ],
-                          merchantInfo: {
-                            merchantId: '12345678901234567890',
-                            merchantName: 'B8 Clothing',
-                          },
-                          transactionInfo: {
-                            totalPriceStatus: 'FINAL',
-                            totalPriceLabel: 'Total',
-                            totalPrice: '30.00',
-                            currencyCode: 'USD',
-                            countryCode: 'US',
-                          },
-                        }}
-                        onLoadPaymentData={(paymentRequest) => {
-                          console.log('Payment successful', paymentRequest);
-                          alert('Google Pay payment successful!');
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Stripe */}
-                  <div className="clothing-payment-card">
-                    <div className="clothing-icon-container">
-                      <FaCreditCard size={40} />
-                    </div>
-                    <button className="clothing-stripe-button" onClick={handleStripeCheckout}>
-                      Pay with Card (Stripe)
-                    </button>
-                  </div>
-                </div>
+            {/* Gallery Section */}
+            <section className="clothing-gallery">
+              <div>
+                <img src="/src/assets/Volkswagen.jpg" alt="Clothing Item 1" />
               </div>
-            </div>
-          )}
+              <div>
+                <img src="/src/assets/clothing2.jpg" alt="Clothing Item 2" />
+              </div>
+              <div>
+                <img src="/src/assets/clothing3.jpg" alt="Clothing Item 3" />
+              </div>
+            </section>
 
-          {/* Payment Options Section */}
-          <section className="clothing-payment-section">
-            <h3>Payment Options</h3>
-            <div className="clothing-payment-options">
-              <div className="clothing-payment-card">
+            {/* Featured Product */}
+            <section className="clothing-shop-section">
+              <h3>Featured Product</h3>
+              <div className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
                 <div className="clothing-icon-container">
                   <FaCreditCard size={40} />
                 </div>
-                <h4>Credit/Debit Card</h4>
-                <p>Secure payments via Stripe</p>
+                <img src={product.image} alt={product.name} />
+                <p>{`${product.name} - $${product.price}`}</p>
               </div>
-              <div className="clothing-payment-card">
-                <div className="clothing-icon-container">
-                  <FaPaypal size={40} />
-                </div>
-                <h4>PayPal</h4>
-                <p>Fast and secure PayPal checkout</p>
-              </div>
-              <div className="clothing-payment-card">
-                <div className="clothing-icon-container">
-                  <FaGooglePay size={40} />
-                </div>
-                <h4>Google Pay</h4>
-                <p>Quick payments with Google Pay</p>
-              </div>
-              <div className="clothing-payment-card">
-                <div className="clothing-icon-container">
-                  <FaApplePay size={40} />
-                </div>
-                <h4>Apple Pay</h4>
-                <p>Easy payments with Apple Pay</p>
-              </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Contact Section */}
-          <section>
-            <ContactForm source="clothing" />
-            
-            <SocialChannels className="clothing-social-channels" />
-          </section>
+            {/* Product Catalog Section */}
+            <section className="clothing-catalog-section">
+              <h3>Product Catalog</h3>
+              
+              {/* Category Filter */}
+              <div className="clothing-category-filter">
+                <button 
+                  className={`category-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory('all')}
+                >
+                  All
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </button>
+                ))}
+              </div>
 
-          <Footer />
-        </div>
-      </PayPalScriptProvider>
-    </ComingSoonOverlay>
+              {/* Sorting Filter */}
+              <div className="clothing-sort-filter">
+                <label>Sort By:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="newest">Newest</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                </select>
+              </div>
+
+              {/* Size Filter */}
+              <div className="clothing-size-filter">
+                <label>Size:</label>
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                >
+                  <option value="all">All Sizes</option>
+                  <option value="XS">XS</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                </select>
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="clothing-price-filter">
+                <label>Price Range: £{priceRange[0]} - £{priceRange[1]}</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                />
+              </div>
+
+              {/* Products Grid */}
+              <div className="clothing-products-grid">
+                {sortedItems.map(item => (
+                  <div key={item.id} className="clothing-product-card" onClick={() => setIsModalOpen(true)}>
+                    <img src={item.images[0]} alt={item.name} />
+                    <h4>{item.name}</h4>
+                    <p>${item.price.toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {isModalOpen && (
+              <div className="clothing-modal-overlay" onClick={() => setIsModalOpen(false)}>
+                <div className="clothing-modal-content" onClick={(e) => e.stopPropagation()}>
+                  <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>×</button>
+                  <h2>{product.name}</h2>
+                  <img src={product.image} alt={product.name} />
+                  <p>{product.description}</p>
+                  <p>Price: ${product.price}</p>
+
+                  {/* Payment Options */}
+                  <div className="clothing-payment-options">
+                    {/* PayPal */}
+                    <div className="clothing-payment-card">
+                      <div className="clothing-icon-container">
+                        <FaPaypal size={40} />
+                      </div>
+                      <div className="clothing-paypal-container">
+                      <PayPalButtons
+                        style={{ layout: 'vertical', color: 'gold', shape: 'pill', height: 55, tagline: false }}
+                        createOrder={(_data, actions) => {
+                          return actions.order.create({
+                            intent: "CAPTURE",
+                            purchase_units: [
+                              {
+                                amount: { currency_code: 'USD', value: '30.00' },
+                              },
+                            ],
+                          });
+                        }}
+                        onApprove={async (_data, actions) => {
+                          if (actions.order) {
+                            try {
+                              const details = await actions.order.capture();
+                              const name = details.payer?.name?.given_name ?? 'Customer';
+                              alert(`Transaction completed by ${name}`);
+                            } catch (error) {
+                              console.error('Payment capture failed:', error);
+                              alert('Payment failed.');
+                            }
+                          } else {
+                            console.error('Order actions not available.');
+                            alert('Payment could not be processed.');
+                          }
+                        }}
+                      />
+                      </div>
+                    </div>
+
+                    {/* Google Pay */}
+                    <div className="clothing-payment-card">
+                      <div className="clothing-icon-container">
+                        <FaGooglePay size={40} />
+                      </div>
+                      <div className="clothing-googlepay-container">
+                        <GooglePayButton
+                          environment="TEST"
+                          paymentRequest={{
+                            apiVersion: 2,
+                            apiVersionMinor: 0,
+                            allowedPaymentMethods: [
+                              {
+                                type: 'CARD',
+                                parameters: {
+                                  allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                                  allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                                },
+                                tokenizationSpecification: {
+                                  type: 'PAYMENT_GATEWAY',
+                                  parameters: {
+                                    gateway: 'example',
+                                    gatewayMerchantId: 'exampleMerchantId',
+                                  },
+                                },
+                              },
+                            ],
+                            merchantInfo: {
+                              merchantId: '12345678901234567890',
+                              merchantName: 'B8 Clothing',
+                            },
+                            transactionInfo: {
+                              totalPriceStatus: 'FINAL',
+                              totalPriceLabel: 'Total',
+                              totalPrice: '30.00',
+                              currencyCode: 'USD',
+                              countryCode: 'US',
+                            },
+                          }}
+                          onLoadPaymentData={(paymentRequest) => {
+                            console.log('Payment successful', paymentRequest);
+                            alert('Google Pay payment successful!');
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stripe */}
+                    <div className="clothing-payment-card">
+                      <div className="clothing-icon-container">
+                        <FaCreditCard size={40} />
+                      </div>
+                      <button className="clothing-stripe-button" onClick={handleStripeCheckout}>
+                        Pay with Card (Stripe)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Options Section */}
+            <section className="clothing-payment-section">
+              <h3>Payment Options</h3>
+              <div className="clothing-payment-options">
+                <div className="clothing-payment-card">
+                  <div className="clothing-icon-container">
+                    <FaCreditCard size={40} />
+                  </div>
+                  <h4>Credit/Debit Card</h4>
+                  <p>Secure payments via Stripe</p>
+                </div>
+                <div className="clothing-payment-card">
+                  <div className="clothing-icon-container">
+                    <FaPaypal size={40} />
+                  </div>
+                  <h4>PayPal</h4>
+                  <p>Fast and secure PayPal checkout</p>
+                </div>
+                <div className="clothing-payment-card">
+                  <div className="clothing-icon-container">
+                    <FaGooglePay size={40} />
+                  </div>
+                  <h4>Google Pay</h4>
+                  <p>Quick payments with Google Pay</p>
+                </div>
+                <div className="clothing-payment-card">
+                  <div className="clothing-icon-container">
+                    <FaApplePay size={40} />
+                  </div>
+                  <h4>Apple Pay</h4>
+                  <p>Easy payments with Apple Pay</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Contact Section */}
+            <section>
+              <ContactForm source="clothing" />
+              
+              <SocialChannels className="clothing-social-channels" />
+            </section>
+
+            <Footer />
+          </div>
+        </PayPalScriptProvider>
+      </ComingSoonOverlay>
+    </PasswordProtectedPage>
   );
 }

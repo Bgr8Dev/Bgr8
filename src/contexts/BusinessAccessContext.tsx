@@ -43,17 +43,51 @@ interface BusinessGrayedOut {
   [key: string]: boolean;
 }
 
+// New interface for password protected pages
+interface BusinessPasswordProtected {
+  marketing: boolean;
+  carClub: boolean;
+  clothing: boolean;
+  league: boolean;
+  world: boolean;
+  education: boolean;
+  careers: boolean;
+  bgr8: boolean;
+  podcast: boolean;
+  [key: string]: boolean;
+}
+
+// New interface for business passwords
+interface BusinessPasswords {
+  marketing: string;
+  carClub: string;
+  clothing: string;
+  league: string;
+  world: string;
+  education: string;
+  careers: string;
+  bgr8: string;
+  podcast: string;
+  [key: string]: string;
+}
+
 interface BusinessAccessContextType {
   businessAccess: BusinessAccessibility;
   comingSoon: BusinessComingSoon;
-  grayedOut: BusinessGrayedOut; // New property
+  grayedOut: BusinessGrayedOut;
+  passwordProtected: BusinessPasswordProtected;
+  businessPasswords: BusinessPasswords;
   loading: boolean;
   refreshBusinessAccess: () => Promise<void>;
   refreshComingSoonStatus: () => Promise<void>;
-  refreshGrayedOutStatus: () => Promise<void>; // New method
+  refreshGrayedOutStatus: () => Promise<void>;
+  refreshPasswordProtectionStatus: () => Promise<void>;
   isBusinessAccessible: (businessId: string) => boolean;
   isBusinessComingSoon: (businessId: string) => boolean;
-  isBusinessGrayedOut: (businessId: string) => boolean; // New method
+  isBusinessGrayedOut: (businessId: string) => boolean;
+  isBusinessPasswordProtected: (businessId: string) => boolean;
+  getBusinessPassword: (businessId: string) => string;
+  validateBusinessPassword: (businessId: string, password: string) => boolean;
 }
 
 const defaultBusinessAccess: BusinessAccessibility = {
@@ -93,6 +127,32 @@ const defaultGrayedOut: BusinessGrayedOut = {
   podcast: false
 };
 
+// Default values for password protection
+const defaultPasswordProtected: BusinessPasswordProtected = {
+  marketing: false,
+  carClub: false,
+  clothing: false,
+  league: false,
+  world: false,
+  education: false,
+  careers: false,
+  bgr8: false,
+  podcast: false
+};
+
+// Default values for business passwords
+const defaultBusinessPasswords: BusinessPasswords = {
+  marketing: '',
+  carClub: '',
+  clothing: '',
+  league: '',
+  world: '',
+  education: '',
+  careers: '',
+  bgr8: '',
+  podcast: ''
+};
+
 const BusinessAccessContext = createContext<BusinessAccessContextType | undefined>(undefined);
 
 export function useBusinessAccess() {
@@ -110,7 +170,9 @@ interface BusinessAccessProviderProps {
 export function BusinessAccessProvider({ children }: BusinessAccessProviderProps) {
   const [businessAccess, setBusinessAccess] = useState<BusinessAccessibility>(defaultBusinessAccess);
   const [comingSoon, setComingSoon] = useState<BusinessComingSoon>(defaultComingSoon);
-  const [grayedOut, setGrayedOut] = useState<BusinessGrayedOut>(defaultGrayedOut); // New state
+  const [grayedOut, setGrayedOut] = useState<BusinessGrayedOut>(defaultGrayedOut);
+  const [passwordProtected, setPasswordProtected] = useState<BusinessPasswordProtected>(defaultPasswordProtected);
+  const [businessPasswords, setBusinessPasswords] = useState<BusinessPasswords>(defaultBusinessPasswords);
   const [loading, setLoading] = useState(true);
   const { userProfile } = useAuth();
 
@@ -143,7 +205,6 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
     }
   };
 
-  // New method to fetch the grayed out settings
   const fetchGrayedOutStatus = async () => {
     try {
       const grayedOutRef = doc(db, 'settings', 'grayedOut');
@@ -157,8 +218,28 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
     }
   };
 
+  const fetchPasswordProtectionStatus = async () => {
+    try {
+      const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
+      const passwordProtectedDoc = await getDoc(passwordProtectedRef);
+      
+      if (passwordProtectedDoc.exists()) {
+        const data = passwordProtectedDoc.data();
+        setPasswordProtected(data.passwordProtected || defaultPasswordProtected);
+        setBusinessPasswords(data.businessPasswords || defaultBusinessPasswords);
+      }
+    } catch (error) {
+      console.error('Error fetching password protection settings:', error);
+    }
+  };
+
   useEffect(() => {
-    Promise.all([fetchBusinessAccess(), fetchComingSoonStatus(), fetchGrayedOutStatus()]);
+    Promise.all([
+      fetchBusinessAccess(), 
+      fetchComingSoonStatus(), 
+      fetchGrayedOutStatus(),
+      fetchPasswordProtectionStatus()
+    ]);
   }, []);
 
   const refreshBusinessAccess = async () => {
@@ -169,49 +250,67 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
     await fetchComingSoonStatus();
   };
 
-  // New refresh method
   const refreshGrayedOutStatus = async () => {
     await fetchGrayedOutStatus();
   };
 
+  const refreshPasswordProtectionStatus = async () => {
+    await fetchPasswordProtectionStatus();
+  };
+
   const isBusinessAccessible = (businessId: string): boolean => {
-    // Check if user is admin
     if (userProfile?.admin) {
       return true;
     }
     
-    // Check if user is developer (safely handle potential missing property)
     if (userProfile && 'developer' in userProfile && (userProfile as Record<string, unknown>).developer) {
       return true;
     }
     
-    // Otherwise, check the business access settings
-    return businessAccess[businessId] ?? true; // Default to true if not found
+    return businessAccess[businessId] ?? true;
   };
 
   const isBusinessComingSoon = (businessId: string): boolean => {
-    // Check if the business is marked as "coming soon"
-    return comingSoon[businessId] ?? false; // Default to false if not found
+    return comingSoon[businessId] ?? false;
   };
 
-  // New method to check if a business is grayed out
   const isBusinessGrayedOut = (businessId: string): boolean => {
-    // Admin and developer users still see the grayed out indication, but
-    // it should be clear to them that normal users will see a "coming soon" overlay
-    return grayedOut[businessId] ?? false; // Default to false if not found
+    return grayedOut[businessId] ?? false;
+  };
+
+  const isBusinessPasswordProtected = (businessId: string): boolean => {
+    return passwordProtected[businessId] ?? false;
+  };
+
+  const getBusinessPassword = (businessId: string): string => {
+    return businessPasswords[businessId] ?? '';
+  };
+
+  const validateBusinessPassword = (businessId: string, password: string): boolean => {
+    if (!isBusinessPasswordProtected(businessId)) {
+      return true;
+    }
+    
+    return password === getBusinessPassword(businessId);
   };
 
   const value = {
     businessAccess,
     comingSoon,
     grayedOut,
+    passwordProtected,
+    businessPasswords,
     loading,
     refreshBusinessAccess,
     refreshComingSoonStatus,
     refreshGrayedOutStatus,
+    refreshPasswordProtectionStatus,
     isBusinessAccessible,
     isBusinessComingSoon,
-    isBusinessGrayedOut
+    isBusinessGrayedOut,
+    isBusinessPasswordProtected,
+    getBusinessPassword,
+    validateBusinessPassword
   };
 
   return (

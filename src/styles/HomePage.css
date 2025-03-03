@@ -9,6 +9,48 @@
   }
 }
 
+@keyframes pulse {
+  0% { opacity: 0.9; }
+  50% { opacity: 1; }
+  100% { opacity: 0.9; }
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5), 0 0 10px rgba(255, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 30px rgba(255, 0, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5), 0 0 10px rgba(255, 0, 0, 0.2);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px);
+  }
+  60% {
+    transform: translateY(-7px);
+  }
+}
+
 .homepage {
   min-height: 100vh;
   background-color: black;
@@ -35,22 +77,47 @@
 
 .homepage-hero button {
   padding: 1rem 2rem;
-  background: linear-gradient(to right, #ff0000, #cc0000);
-  background-size: 200% 200%;
+  background: linear-gradient(45deg, #ff0000, #cc0000, #ff3333, #990000);
+  background-size: 300% 300%;
   border: none;
   border-radius: 1rem;
   color: white;
   font-size: 1.25rem;
   cursor: pointer;
-  transition: opacity 0.3s;
-  transition: background-position 0.4s ease-in-out;
-  transition: background 2s ease;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 4px 10px rgba(204, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.homepage-hero button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+  z-index: -1;
 }
 
 .homepage-hero button:hover {
-  opacity: 0.9;
-  background-position: right center;
-  background: linear-gradient(to left, #ff0000, #9c0000);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 25px rgba(204, 0, 0, 0.4);
+  animation: gradient-shift 3s ease infinite, pulse-glow 2s infinite;
+}
+
+.homepage-hero button:hover::before {
+  left: 100%;
+  transition: 0.5s;
+}
+
+.homepage-hero button:active {
+  transform: translateY(2px) scale(0.95);
+  box-shadow: 0 5px 10px rgba(204, 0, 0, 0.3);
 }
 
 .homepage-services {
@@ -88,29 +155,42 @@
   content: "COMING SOON";
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-45deg);
-  background: rgba(255, 0, 0, 0.9);
+  left: 0;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.85);
   color: white;
-  padding: 1rem 5rem;
-  font-size: 1.5rem;
+  padding: 0.6rem 0;
+  font-size: 1.2rem;
   font-weight: bold;
   letter-spacing: 2px;
   z-index: 1;
-  width: 200%;
+  width: 100%;
   text-align: center;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite ease-in-out;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .homepage-service-card.restricted {
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0.95;
+  position: relative;
+  overflow: hidden;
+  filter: grayscale(20%);
+  transition: all 0.3s ease;
 }
 
 .homepage-service-card.restricted .homepage-icon-container,
 .homepage-service-card.restricted h4,
 .homepage-service-card.restricted p {
   filter: blur(2px);
+}
+
+.homepage-service-card.restricted:hover::before {
+  background: rgba(0, 0, 0, 1);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+  transition: all 0.3s ease;
 }
 
 .homepage-icon-container {
@@ -214,11 +294,39 @@
 .homepage-social-media a {
   color: white;
   font-size: 2rem;
-  transition: color 0.3s ease-out;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: inline-block;
+  position: relative;
+  padding: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .homepage-social-media a:hover {
-  color: #c71f1f;
+  color: #ff0000;
+  transform: translateY(-5px) scale(1.2);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 15px rgba(255, 0, 0, 0.3);
+  animation: bounce 1s ease;
+}
+
+.homepage-social-media a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.3);
+  transform: scale(0);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.homepage-social-media a:hover::before {
+  transform: scale(1.5);
 }
 
 .homepage-intro-video {
@@ -244,4 +352,38 @@
 
 .homepage-service-card[href="/b8-league"]:hover .homepage-icon-container svg {
   animation: spin 0s linear infinite;
+}
+
+.homepage-cta-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: inline-block;
+  position: relative;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.homepage-cta-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: white;
+  transform-origin: bottom right;
+  transition: transform 0.5s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+.homepage-cta-link:hover {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 1);
+  letter-spacing: 2px;
+}
+
+.homepage-cta-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
 }
