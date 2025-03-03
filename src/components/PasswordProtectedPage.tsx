@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBusinessAccess } from '../contexts/BusinessAccessContext';
 import '../styles/PasswordProtectedPage.css';
-import { FaLock, FaUnlock, FaExclamationTriangle } from 'react-icons/fa';
+import { FaLock, FaUnlock, FaExclamationTriangle, FaCar } from 'react-icons/fa';
 
 interface PasswordProtectedPageProps {
   businessId: string;
@@ -63,18 +63,24 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
     setShowPasswordHint(!showPasswordHint);
   };
   
+  // Determine if this is the Car Club page to apply special styling
+  const isCarClub = businessId === 'carClub';
+  
+  // Custom messages for Car Club
+  const carClubMessage = 'Welcome to the exclusive B8 Car Club area. Please enter your membership password to access premium content.';
+  
   return (
-    <div className="password-protected-container">
+    <div className={`password-protected-container ${isCarClub ? 'carclub-password-protected' : ''}`}>
       <div className="password-protected-overlay">
         <div className="password-protected-content">
           <div className="password-protected-icon">
-            <FaLock />
+            {isCarClub ? <FaCar /> : <FaLock />}
           </div>
           
-          <h2>Password Protected</h2>
+          <h2>{isCarClub ? 'B8 Car Club Access' : 'Password Protected'}</h2>
           
           <p className="password-protected-message">
-            {customMessage || 'This page is password protected. Please enter the password to continue.'}
+            {customMessage || (isCarClub ? carClubMessage : 'This page is password protected. Please enter the password to continue.')}
           </p>
           
           <form onSubmit={handlePasswordSubmit} className="password-form">
@@ -83,11 +89,11 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder={isCarClub ? "Enter membership password" : "Enter password"}
                 className="password-input"
               />
               <button type="submit" className="password-submit-button">
-                <FaUnlock /> Unlock
+                <FaUnlock /> {isCarClub ? 'Access' : 'Unlock'}
               </button>
             </div>
             

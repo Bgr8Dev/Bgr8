@@ -22,6 +22,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.1.5",
     "react-svg-pan-zoom": "^3.13.1",
+    "react-toastify": "^11.0.5",
     "react-tournament-brackets": "^1.0.40",
     "styled-components": "^4.4.1"
   },

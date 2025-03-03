@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '../../firebase';
 import { doc, getDoc, setDoc, collection, query, getDocs, updateDoc } from 'firebase/firestore';
-import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaSave, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup, FaChevronDown, FaChevronRight, FaCheckCircle, FaExclamationCircle, FaSpinner } from 'react-icons/fa';
+import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup, FaChevronDown, FaChevronRight, FaCheckCircle, FaExclamationCircle, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/adminStyles/AdminSettings.css';
 
@@ -164,6 +164,12 @@ export function AdminSettings() {
     podcast: ''
   });
 
+  // First, add a new state to track which business is currently saving
+  const [savingBusiness, setSavingBusiness] = useState<string | null>(null);
+
+  // Add a timeout ref at the component level
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const businessNames: Record<string, string> = {
     marketing: 'B8 Marketing',
     carClub: 'B8 Car Club',
@@ -246,8 +252,34 @@ export function AdminSettings() {
       const passwordProtectedDoc = await getDoc(passwordProtectedRef);
       
       if (passwordProtectedDoc.exists()) {
-        setPasswordProtected(passwordProtectedDoc.data().passwordProtected || {});
-        setBusinessPasswords(passwordProtectedDoc.data().businessPasswords || {});
+        const data = passwordProtectedDoc.data();
+        // Check if data has the expected structure
+        if (data.passwordProtected) {
+          setPasswordProtected(data.passwordProtected);
+        } else {
+          // If the structure is flat, use it directly
+          const protectedSettings: BusinessPasswordProtected = { ...passwordProtected };
+          Object.keys(passwordProtected).forEach(key => {
+            if (data[key] !== undefined) {
+              protectedSettings[key] = data[key];
+            }
+          });
+          setPasswordProtected(protectedSettings);
+        }
+        
+        // Same for business passwords
+        if (data.businessPasswords) {
+          setBusinessPasswords(data.businessPasswords);
+        } else {
+          // If the structure is flat, use it directly
+          const passwordSettings: BusinessPasswords = { ...businessPasswords };
+          Object.keys(businessPasswords).forEach(key => {
+            if (data[`password_${key}`] !== undefined) {
+              passwordSettings[key] = data[`password_${key}`];
+            }
+          });
+          setBusinessPasswords(passwordSettings);
+        }
       } else {
         // If no password protection document exists, create one with default values
         await setDoc(passwordProtectedRef, { 
@@ -289,26 +321,219 @@ export function AdminSettings() {
     }
   };
 
-  const toggleAccess = (business: string) => {
-    setBusinessAccess(prev => ({
+  const toggleAccess = async (business: string) => {
+    try {
+      // Update local state first for immediate UI feedback
+      const newValue = !businessAccess[business];
+      setBusinessAccess(prev => ({
+        ...prev,
+        [business]: newValue
+      }));
+      
+      // Show saving indicator
+      setSaving('businessAccess');
+      setSavingBusiness(business);
+      
+      // Update Firebase - Fix: Update the field directly without nesting
+      const businessAccessRef = doc(db, 'settings', 'businessAccess');
+      await updateDoc(businessAccessRef, {
+        [business]: newValue
+      });
+      
+      // Refresh context if available
+      if (refreshBusinessAccess) {
+        await refreshBusinessAccess();
+      }
+      
+      // Show success message briefly
+      setSuccessMessage(`${business} access ${newValue ? 'enabled' : 'disabled'} successfully!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating business access:', error);
+      
+      // Revert local state on error
+      setBusinessAccess(prev => ({
+        ...prev,
+        [business]: !prev[business]
+      }));
+      
+      // Show error message
+      setErrorMessage(`Failed to update ${business} access. Please try again.`);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+      setSavingBusiness(null);
+    }
+  };
+
+  const toggleComingSoon = async (business: string) => {
+    try {
+      // Update local state first for immediate UI feedback
+      const newValue = !comingSoon[business];
+      setComingSoon(prev => ({
+        ...prev,
+        [business]: newValue
+      }));
+      
+      // Show saving indicator
+      setSaving('comingSoon');
+      setSavingBusiness(business);
+      
+      // Update Firebase - Fix: Update the correct document and field directly
+      const comingSoonRef = doc(db, 'settings', 'comingSoon');
+      await updateDoc(comingSoonRef, {
+        [business]: newValue
+      });
+      
+      // Refresh context if available
+      if (refreshComingSoonStatus) {
+        await refreshComingSoonStatus();
+      }
+      
+      // Show success message briefly
+      setSuccessMessage(`${business} coming soon status ${newValue ? 'enabled' : 'disabled'} successfully!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating coming soon status:', error);
+      
+      // Revert local state on error
+      setComingSoon(prev => ({
+        ...prev,
+        [business]: !prev[business]
+      }));
+      
+      // Show error message
+      setErrorMessage(`Failed to update ${business} coming soon status. Please try again.`);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+      setSavingBusiness(null);
+    }
+  };
+
+  const toggleGrayedOut = async (business: string) => {
+    try {
+      // Update local state first for immediate UI feedback
+      const newValue = !grayedOut[business];
+      setGrayedOut(prev => ({
+        ...prev,
+        [business]: newValue
+      }));
+      
+      // Show saving indicator
+      setSaving('grayedOut');
+      setSavingBusiness(business);
+      
+      // Update Firebase - Fix: Update the correct document and field directly
+      const grayedOutRef = doc(db, 'settings', 'grayedOut');
+      await updateDoc(grayedOutRef, {
+        [business]: newValue
+      });
+      
+      // Refresh context if available
+      if (refreshGrayedOutStatus) {
+        await refreshGrayedOutStatus();
+      }
+      
+      // Show success message briefly
+      setSuccessMessage(`${business} grayed out status ${newValue ? 'enabled' : 'disabled'} successfully!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating grayed out status:', error);
+      
+      // Revert local state on error
+      setGrayedOut(prev => ({
+        ...prev,
+        [business]: !prev[business]
+      }));
+      
+      // Show error message
+      setErrorMessage(`Failed to update ${business} grayed out status. Please try again.`);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+      setSavingBusiness(null);
+    }
+  };
+
+  const togglePasswordProtection = async (business: string) => {
+    try {
+      // Update local state first for immediate UI feedback
+      const newValue = !passwordProtected[business];
+      setPasswordProtected(prev => ({
+        ...prev,
+        [business]: newValue
+      }));
+      
+      // Show saving indicator
+      setSaving('passwordProtected');
+      setSavingBusiness(business);
+      
+      // Update Firebase - Fix: Update the passwordProtected field directly
+      const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
+      await updateDoc(passwordProtectedRef, {
+        [`passwordProtected.${business}`]: newValue
+      });
+      
+      // Show success message briefly
+      setSuccessMessage(`${business} password protection ${newValue ? 'enabled' : 'disabled'} successfully!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating password protection:', error);
+      
+      // Revert local state on error
+      setPasswordProtected(prev => ({
+        ...prev,
+        [business]: !prev[business]
+      }));
+      
+      // Show error message
+      setErrorMessage(`Failed to update ${business} password protection. Please try again.`);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+      setSavingBusiness(null);
+    }
+  };
+
+  // Update the updateBusinessPassword function to use a separate function for saving
+  const updateBusinessPassword = (business: string, password: string) => {
+    // Just update local state immediately
+    setBusinessPasswords(prev => ({
       ...prev,
-      [business]: !prev[business]
+      [business]: password
     }));
   };
 
-  const toggleComingSoon = (business: string) => {
-    setComingSoon(prev => ({
-      ...prev,
-      [business]: !prev[business]
-    }));
-  };
-
-  // New toggle method for grayed out pages
-  const toggleGrayedOut = (business: string) => {
-    setGrayedOut(prev => ({
-      ...prev,
-      [business]: !prev[business]
-    }));
+  // Add a new function to save the password with debounce
+  const saveBusinessPassword = async (business: string, password: string) => {
+    try {
+      // Only save to Firebase if we have a non-empty password
+      if (password.trim() !== '') {
+        // Show saving indicator
+        setSaving('passwordProtected');
+        setSavingBusiness(business);
+        
+        // Update Firebase - Fix: Update the businessPasswords field directly
+        const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
+        await updateDoc(passwordProtectedRef, {
+          [`businessPasswords.${business}`]: password
+        });
+        
+        // Show success message briefly
+        setSuccessMessage(`${business} password updated successfully!`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error updating business password:', error);
+      
+      // Show error message
+      setErrorMessage(`Failed to update ${business} password. Please try again.`);
+      setTimeout(() => setErrorMessage(''), 5000);
+    } finally {
+      setSaving('');
+      setSavingBusiness(null);
+    }
   };
 
   const toggleUserDeveloper = async (userId: string, isDeveloper: boolean) => {
@@ -336,120 +561,6 @@ export function AdminSettings() {
     }
   };
 
-  const saveBusinessAccessSettings = async () => {
-    try {
-      setSaving('businessAccess');
-      setSuccessMessage('');
-      setErrorMessage('');
-      
-      await updateDoc(doc(db, 'settings', 'businessAccess'), {
-        businessAccess: businessAccess
-      });
-      
-      if (refreshBusinessAccess) {
-        await refreshBusinessAccess();
-      }
-      
-      setSuccessMessage('Business access settings saved successfully!');
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } catch (error) {
-      console.error('Error saving business access settings:', error);
-      setErrorMessage('Error saving business access settings: ' + (error as Error).message);
-      setTimeout(() => setErrorMessage(''), 5000);
-    } finally {
-      setSaving('');
-    }
-  };
-
-  const saveComingSoonSettings = async () => {
-    try {
-      setSaving('comingSoon');
-      setSuccessMessage('');
-      setErrorMessage('');
-      
-      await updateDoc(doc(db, 'settings', 'businessAccess'), {
-        comingSoon: comingSoon
-      });
-      
-      if (refreshComingSoonStatus) {
-        await refreshComingSoonStatus();
-      }
-      
-      setSuccessMessage('Coming soon settings saved successfully!');
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } catch (error) {
-      console.error('Error saving coming soon settings:', error);
-      setErrorMessage('Error saving coming soon settings: ' + (error as Error).message);
-      setTimeout(() => setErrorMessage(''), 5000);
-    } finally {
-      setSaving('');
-    }
-  };
-
-  const saveGrayedOutSettings = async () => {
-    try {
-      setSaving('grayedOut');
-      setSuccessMessage('');
-      setErrorMessage('');
-      
-      await updateDoc(doc(db, 'settings', 'businessAccess'), {
-        grayedOut: grayedOut
-      });
-      
-      if (refreshGrayedOutStatus) {
-        await refreshGrayedOutStatus();
-      }
-      
-      setSuccessMessage('Grayed out settings saved successfully!');
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } catch (error) {
-      console.error('Error saving grayed out settings:', error);
-      setErrorMessage('Error saving grayed out settings: ' + (error as Error).message);
-      setTimeout(() => setErrorMessage(''), 5000);
-    } finally {
-      setSaving('');
-    }
-  };
-
-  // New toggle method for password protection
-  const togglePasswordProtection = (business: string) => {
-    setPasswordProtected(prev => ({
-      ...prev,
-      [business]: !prev[business]
-    }));
-  };
-
-  // New method to update password for a business
-  const updateBusinessPassword = (business: string, password: string) => {
-    setBusinessPasswords(prev => ({
-      ...prev,
-      [business]: password
-    }));
-  };
-
-  // New method to save password protection settings
-  const savePasswordProtectionSettings = async () => {
-    try {
-      setSaving('passwordProtected');
-      setSuccessMessage('');
-      setErrorMessage('');
-      
-      await setDoc(doc(db, 'settings', 'passwordProtected'), {
-        passwordProtected,
-        businessPasswords
-      });
-      
-      setSuccessMessage('Password protection settings saved successfully!');
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } catch (error) {
-      console.error('Error saving password protection settings:', error);
-      setErrorMessage('Error saving password protection settings: ' + (error as Error).message);
-      setTimeout(() => setErrorMessage(''), 5000);
-    } finally {
-      setSaving('');
-    }
-  };
-
   const getAccessCount = () => {
     return Object.values(businessAccess).filter(Boolean).length;
   };
@@ -467,6 +578,15 @@ export function AdminSettings() {
       [sectionId]: !prev[sectionId]
     }));
   };
+
+  // Clean up the timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   if (loading) {
     return <div className="admin-loading">Loading settings...</div>;
@@ -513,7 +633,9 @@ export function AdminSettings() {
                       className="toggle-button" 
                       onClick={() => toggleAccess(business)}
                     >
-                      {businessAccess[business] ? (
+                      {savingBusiness === business && saving === 'businessAccess' ? (
+                        <FaSpinner className="spinner" />
+                      ) : businessAccess[business] ? (
                         <FaToggleOn className="toggle-icon on" />
                       ) : (
                         <FaToggleOff className="toggle-icon off" />
@@ -538,15 +660,9 @@ export function AdminSettings() {
               ))}
             </div>
             
-            <div className="section-actions">
-              <button 
-                className="save-button"
-                onClick={saveBusinessAccessSettings}
-                disabled={saving !== 'businessAccess'}
-              >
-                {saving === 'businessAccess' ? <FaSpinner className="spinner" /> : <FaSave />}
-                {saving === 'businessAccess' ? 'Saving...' : 'Save Business Access'}
-              </button>
+            {/* Settings are saved automatically when toggled */}
+            <div className="settings-note">
+              <FaInfoCircle /> Changes are saved automatically
             </div>
           </div>
         )}
@@ -584,7 +700,9 @@ export function AdminSettings() {
                       className="toggle-button" 
                       onClick={() => toggleComingSoon(business)}
                     >
-                      {!comingSoon[business] ? (
+                      {savingBusiness === business && saving === 'comingSoon' ? (
+                        <FaSpinner className="spinner" />
+                      ) : !comingSoon[business] ? (
                         <FaToggleOn className="toggle-icon on" />
                       ) : (
                         <FaToggleOff className="toggle-icon off" />
@@ -609,15 +727,9 @@ export function AdminSettings() {
               ))}
             </div>
             
-            <div className="section-actions">
-              <button 
-                className="save-button"
-                onClick={saveComingSoonSettings}
-                disabled={saving !== 'comingSoon'}
-              >
-                {saving === 'comingSoon' ? <FaSpinner className="spinner" /> : <FaSave />}
-                {saving === 'comingSoon' ? 'Saving...' : 'Save Coming Soon Settings'}
-              </button>
+            {/* Settings are saved automatically when toggled */}
+            <div className="settings-note">
+              <FaInfoCircle /> Changes are saved automatically
             </div>
           </div>
         )}
@@ -655,7 +767,9 @@ export function AdminSettings() {
                       className="toggle-button" 
                       onClick={() => toggleGrayedOut(business)}
                     >
-                      {!grayedOut[business] ? (
+                      {savingBusiness === business && saving === 'grayedOut' ? (
+                        <FaSpinner className="spinner" />
+                      ) : !grayedOut[business] ? (
                         <FaToggleOn className="toggle-icon on" />
                       ) : (
                         <FaToggleOff className="toggle-icon off" />
@@ -680,15 +794,9 @@ export function AdminSettings() {
               ))}
             </div>
             
-            <div className="section-actions">
-              <button 
-                className="save-button"
-                onClick={saveGrayedOutSettings}
-                disabled={saving !== 'grayedOut'}
-              >
-                {saving === 'grayedOut' ? <FaSpinner className="spinner" /> : <FaSave />}
-                {saving === 'grayedOut' ? 'Saving...' : 'Save Grayed Out Settings'}
-              </button>
+            {/* Settings are saved automatically when toggled */}
+            <div className="settings-note">
+              <FaInfoCircle /> Changes are saved automatically
             </div>
           </div>
         )}
@@ -725,7 +833,9 @@ export function AdminSettings() {
                       className="toggle-button" 
                       onClick={() => togglePasswordProtection(business)}
                     >
-                      {passwordProtected[business] ? (
+                      {savingBusiness === business && saving === 'passwordProtected' ? (
+                        <FaSpinner className="spinner" />
+                      ) : passwordProtected[business] ? (
                         <FaToggleOn className="toggle-icon on" />
                       ) : (
                         <FaToggleOff className="toggle-icon off" />
@@ -753,7 +863,19 @@ export function AdminSettings() {
                         type="text"
                         placeholder="Set page password"
                         value={businessPasswords[business]}
-                        onChange={(e) => updateBusinessPassword(business, e.target.value)}
+                        onChange={(e) => {
+                          const newPassword = e.target.value;
+                          updateBusinessPassword(business, newPassword);
+                          
+                          // Use a timeout for debouncing
+                          if (timeoutRef.current) {
+                            clearTimeout(timeoutRef.current);
+                          }
+                          
+                          timeoutRef.current = setTimeout(() => {
+                            saveBusinessPassword(business, newPassword);
+                          }, 1000);
+                        }}
                         className="password-input"
                       />
                     </div>
@@ -762,15 +884,9 @@ export function AdminSettings() {
               ))}
             </div>
             
-            <div className="section-actions">
-              <button 
-                className="save-button"
-                onClick={savePasswordProtectionSettings}
-                disabled={saving === 'passwordProtected'}
-              >
-                {saving === 'passwordProtected' ? <FaSpinner className="spinner" /> : <FaSave />}
-                {saving === 'passwordProtected' ? 'Saving...' : 'Save Password Protection'}
-              </button>
+            {/* Settings are saved automatically when toggled */}
+            <div className="settings-note">
+              <FaInfoCircle /> Changes are saved automatically
             </div>
           </div>
         )}

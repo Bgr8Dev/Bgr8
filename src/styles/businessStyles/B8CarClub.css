@@ -554,3 +554,250 @@
   max-width: 1200px;
   width: 90%;
 }
+
+/* Car Club Login Prompt Styling - Professional & Futuristic Design */
+.carclub-login-prompt {
+  background: linear-gradient(135deg, rgba(18, 18, 18, 0.95), rgba(30, 30, 30, 0.95));
+  border: 1px solid rgba(255, 8, 0, 0.3);
+  border-radius: 16px;
+  padding: 35px 40px;
+  max-width: 500px;
+  margin: 40px auto;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 8, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease-out;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Login row for perfect alignment */
+.carclub-login-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.carclub-login-row p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .carclub-login-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+.carclub-login-prompt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 8, 0, 0.7), transparent);
+  z-index: 1;
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 0.7; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.carclub-login-prompt::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(255, 8, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 8, 0, 0.05) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.carclub-login-prompt p {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px; /* Ensure consistent height */
+}
+
+.carclub-login-prompt p.title {
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 8, 0, 0.5);
+  position: relative;
+  display: inline-block;
+}
+
+.carclub-login-prompt p.title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255, 8, 0, 0.3), rgba(255, 8, 0, 0.8), rgba(255, 8, 0, 0.3));
+  transform: translateX(-50%);
+  border-radius: 3px;
+}
+
+.carclub-login-prompt p.subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 30px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.carclub-login-prompt a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 8, 0, 0.8), rgba(200, 0, 0, 0.8));
+  color: white;
+  text-decoration: none;
+  padding: 14px 10px;
+  border-radius: 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 5px 15px rgba(255, 8, 0, 0.2), 0 0 5px rgba(255, 8, 0, 0.1);
+  border: none;
+  overflow: hidden;
+  min-height: 24px; /* Match the height of paragraph text */
+  line-height: 1.2; /* Adjust line height for better vertical centering */
+}
+
+.carclub-login-prompt a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s ease;
+}
+
+.carclub-login-prompt a:hover {
+  background: linear-gradient(135deg, rgba(255, 8, 0, 1), rgba(200, 0, 0, 1));
+  box-shadow: 0 7px 20px rgba(255, 8, 0, 0.3), 0 0 10px rgba(255, 8, 0, 0.2);
+  transform: translateY(-3px);
+}
+
+.carclub-login-prompt a:hover::before {
+  left: 100%;
+}
+
+.carclub-login-prompt a:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 10px rgba(255, 8, 0, 0.2);
+}
+
+.carclub-login-prompt input {
+  width: 100%;
+  padding: 16px 20px;
+  margin-bottom: 25px;
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  color: white;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.carclub-login-prompt input:focus {
+  outline: none;
+  border-color: rgba(255, 8, 0, 0.4);
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 8, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.carclub-login-prompt input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .carclub-login-prompt {
+    padding: 30px 25px;
+    margin: 30px 15px;
+    border-radius: 12px;
+  }
+  
+  .carclub-login-prompt p.title {
+    font-size: 22px;
+  }
+  
+  .carclub-login-prompt p.subtitle {
+    font-size: 16px;
+  }
+}
+
+/* Create a container for side-by-side elements */
+.carclub-login-options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.carclub-login-options p {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.carclub-login-options a {
+  margin-top: 0;
+  min-width: 140px; /* Ensure buttons have consistent width */
+}
+
+/* For the "or" text */
+.carclub-login-options span {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 10px;
+  font-size: 16px;
+}
