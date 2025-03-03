@@ -38,7 +38,7 @@ export default function Navbar() {
         {isBusinessAccessible('league') && <Link to="/b8-league">B8 League</Link>}
         {isBusinessAccessible('world') && <Link to="/b8-world">B8 World</Link>}
         {isBusinessAccessible('bgr8r') && <Link to="/bgr8r">Bgr8r</Link>}
-        {isBusinessAccessible('careers') && <Link to="/b8-careers">B8 Careers</Link>}
+        {isBusinessAccessible('podcast') && <Link to="/b8-podcast">B8 Podcast</Link>}
       </nav>
 
       <div className="auth-section">

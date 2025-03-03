@@ -22,7 +22,7 @@ export default function HomePage() {
     { id: 'league', icon: <FaMedal size={40} />, title: 'B8 League', description: 'Passion for sports.', link: '/b8-league', color: '#FFF', hoverColor: 'rgba(128, 0, 128, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'world', icon: <FaHeart size={40} />, title: 'B8 World', description: 'Making the world a B8er place', link: '/b8-world', color: '#FFF', hoverColor: 'rgba(0, 0, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'bgr8r', icon: <FaGraduationCap size={40} />, title: 'Bgr8r', description: 'Empowering future generations.', link: '/bgr8r', color: '#FFF', hoverColor: 'rgba(0, 128, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'careers', icon: <FaBriefcase size={40} />, title: 'B8 Careers', description: 'Grow and innovate with us.', link: '/b8-careers', color: '#FFF', hoverColor: 'rgba(0, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#FFF' },
+    { id: 'podcast', icon: <FaBriefcase size={40} />, title: 'B8 Podcast', description: 'Listen, Learn, and Connect.', link: '/b8-podcast', color: '#FFF', hoverColor: 'rgba(0, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#FFF' },
   ];
 
   useEffect(() => {

@@ -17,6 +17,7 @@ interface BusinessAccessibility {
   bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
+  podcast: boolean;
   [key: string]: boolean;
 }
 
@@ -29,6 +30,7 @@ interface BusinessComingSoon {
   bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
+  podcast: boolean;
   [key: string]: boolean;
 }
 
@@ -42,6 +44,7 @@ interface BusinessGrayedOut {
   bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
+  podcast: boolean;
   [key: string]: boolean;
 }
 
@@ -63,7 +66,8 @@ export function AdminSettings() {
     world: true,
     bgr8r: true,
     careers: true,
-    bgr8: true
+    bgr8: true,
+    podcast: true
   });
   const [comingSoon, setComingSoon] = useState<BusinessComingSoon>({
     marketing: false,
@@ -73,7 +77,8 @@ export function AdminSettings() {
     world: true,
     bgr8r: true,
     careers: true,
-    bgr8: true
+    bgr8: true,
+    podcast: true
   });
   // New state for grayed out pages
   const [grayedOut, setGrayedOut] = useState<BusinessGrayedOut>({
@@ -84,7 +89,8 @@ export function AdminSettings() {
     world: false,
     bgr8r: false,
     careers: false,
-    bgr8: false
+    bgr8: false,
+    podcast: false
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState('');
@@ -111,7 +117,8 @@ export function AdminSettings() {
     world: 'B8 World',
     bgr8r: 'Bgr8r',
     careers: 'B8 Careers',
-    bgr8: 'BGr8'
+    bgr8: 'BGr8',
+    podcast: 'B8 Podcast'
   };
 
   useEffect(() => {

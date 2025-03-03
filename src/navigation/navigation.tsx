@@ -7,7 +7,6 @@ import B8CarClub from '../pages/businessPages/B8CarClub';
 import B8Clothing from '../pages/businessPages/B8Clothing';
 import B8League from '../pages/businessPages/B8League';
 import B8World from '../pages/businessPages/B8World';
-import B8Careers from '../pages/businessPages/B8Careers';
 import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
 import RegisterPage from '../pages/authPages/RegisterPage';
@@ -20,6 +19,7 @@ import AdminPortal from '../pages/AdminPortal';
 import React from 'react';
 import { UserProfile } from '../utils/userProfile';
 import Bgr8r from '../pages/businessPages/Bgr8r';
+import B8Podcast from '../pages/businessPages/B8Podcast';
 
 // Video Library
 // import VideoLibrary from '../pages/VideosLibrary';
@@ -106,7 +106,7 @@ export default function Navigation() {
       <Route path="/b8-league" element={<B8League />} />
       <Route path="/b8-world" element={<B8World />} />
       <Route path="/bgr8r" element={<Bgr8r />} />
-      <Route path="/b8-careers" element={<B8Careers />} />
+      <Route path="/b8-podcast" element={<B8Podcast />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

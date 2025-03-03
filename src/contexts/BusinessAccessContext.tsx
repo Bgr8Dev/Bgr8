@@ -12,6 +12,7 @@ interface BusinessAccessibility {
   education: boolean;
   careers: boolean;
   bgr8: boolean;
+  podcast: boolean;
   [key: string]: boolean;
 }
 
@@ -24,6 +25,7 @@ interface BusinessComingSoon {
   bgr8r: boolean;
   careers: boolean;
   bgr8: boolean;
+  podcast: boolean;
   [key: string]: boolean;
 }
 
@@ -37,6 +39,7 @@ interface BusinessGrayedOut {
   education: boolean;
   careers: boolean;
   bgr8: boolean;
+  podcast: boolean;
   [key: string]: boolean;
 }
 
@@ -61,7 +64,8 @@ const defaultBusinessAccess: BusinessAccessibility = {
   world: true,
   education: true,
   careers: true,
-  bgr8: true
+  bgr8: true,
+  podcast: true
 };
 
 const defaultComingSoon: BusinessComingSoon = {
@@ -72,7 +76,8 @@ const defaultComingSoon: BusinessComingSoon = {
   world: true,
   bgr8r: true,
   careers: true,
-  bgr8: true
+  bgr8: true,
+  podcast: true
 };
 
 // Default values for grayed out setting
@@ -84,7 +89,8 @@ const defaultGrayedOut: BusinessGrayedOut = {
   world: false,
   education: false,
   careers: false,
-  bgr8: false
+  bgr8: false,
+  podcast: false
 };
 
 const BusinessAccessContext = createContext<BusinessAccessContextType | undefined>(undefined);

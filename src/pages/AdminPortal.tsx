@@ -17,6 +17,7 @@ import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
+import { AdminPortalB8Podcast } from './adminPages/AdminPortalB8Podcast';
 
 interface UserData {
   uid: string;
@@ -57,7 +58,8 @@ export default function AdminPortal() {
     world: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     bgr8r: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
     careers: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
-    bgr8: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
+    bgr8: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
+    podcast: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
   });
 
   const businessSections = [
@@ -68,7 +70,8 @@ export default function AdminPortal() {
     { id: 'world', name: 'B8 World', icon: FaHandHoldingHeart },
     { id: 'bgr8r', name: 'Bgr8r', icon: FaGraduationCap },
     { id: 'careers', name: 'B8 Careers', icon: FaBriefcase },
-    { id: 'bgr8', name: 'BGr8', icon: FaUserPlus }
+    { id: 'bgr8', name: 'BGr8', icon: FaUserPlus },
+    { id: 'podcast', name: 'B8 Podcast', icon: FaBriefcase }
   ];
 
   useEffect(() => {
@@ -177,6 +180,8 @@ export default function AdminPortal() {
         return <AdminPortalB8Careers stats={businessStats.careers} />;
       case 'bgr8':
         return <AdminPortalBgr8 stats={businessStats.bgr8} />;
+      case 'podcast':
+        return <AdminPortalB8Podcast stats={businessStats.podcast} />;
       default:
         return null;
     }

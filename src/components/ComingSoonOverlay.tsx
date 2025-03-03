@@ -39,8 +39,8 @@ export const ComingSoonOverlay: React.FC<ComingSoonOverlayProps> = ({
         return 'B8 World initiatives are under development. Our global impact projects will be launching soon!';
       case 'bgr8r':
         return 'Bgr8r programs are being developed. Learn with us soon!';
-      case 'careers':
-        return 'B8 Careers portal is under construction. Exciting job opportunities will be posted soon!';
+      case 'podcast':
+        return 'B8 Podcast portal is under construction. Exciting episodes will be available soon!';
       case 'bgr8':
         return 'BGr8 features are coming soon! Join our community to be part of something great.';
       default:
