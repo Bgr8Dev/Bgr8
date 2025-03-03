@@ -1,95 +1,406 @@
 .admin-portal-podcast {
   padding: 1.5rem;
+  background-color: #121212;
+  color: #e0e0e0;
 }
 
 .admin-portal-podcast h2 {
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #fff;
   font-size: 2rem;
 }
 
 .podcast-submissions-section,
 .podcast-management-section {
-  background-color: white;
+  background-color: #1e1e1e;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   padding: 1.5rem;
   margin-bottom: 2rem;
+  border: 1px solid #333;
 }
 
 .podcast-submissions-section h3,
 .podcast-management-section h3 {
   margin-bottom: 1rem;
-  color: #333;
+  color: #fff;
   font-size: 1.5rem;
 }
 
-.submissions-table-container {
+.submissions-table-container,
+.episodes-table-container {
   overflow-x: auto;
 }
 
-.submissions-table {
+.submissions-table,
+.episodes-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
 }
 
 .submissions-table th,
-.submissions-table td {
+.submissions-table td,
+.episodes-table th,
+.episodes-table td {
   padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #333;
 }
 
-.submissions-table th {
-  background-color: #f8f9fa;
+.submissions-table th,
+.episodes-table th {
+  background-color: #252525;
   font-weight: 600;
-  color: #495057;
+  color: #ccc;
 }
 
-.submissions-table tr:hover {
-  background-color: #f8f9fa;
+.submissions-table tr:hover,
+.episodes-table tr:hover {
+  background-color: #252525;
 }
 
-.submissions-table a {
-  color: #007bff;
+.submissions-table a,
+.episodes-table a {
+  color: #dc3545;
   text-decoration: none;
 }
 
-.submissions-table a:hover {
+.submissions-table a:hover,
+.episodes-table a:hover {
   text-decoration: underline;
 }
 
 .status-select {
   padding: 0.375rem 0.75rem;
   border-radius: 4px;
-  border: 1px solid #ced4da;
-  background-color: white;
+  border: 1px solid #333;
+  background-color: #252525;
   font-size: 0.9rem;
   cursor: pointer;
+  color: #e0e0e0;
 }
 
 .status-select.status-pending {
   border-color: #ffc107;
-  color: #856404;
+  color: #ffc107;
 }
 
 .status-select.status-reviewed {
   border-color: #17a2b8;
-  color: #0c5460;
+  color: #17a2b8;
 }
 
 .status-select.status-contacted {
   border-color: #28a745;
-  color: #155724;
+  color: #28a745;
 }
 
 .status-select.status-rejected {
   border-color: #dc3545;
-  color: #721c24;
+  color: #dc3545;
 }
 
 .podcast-management-section p {
-  color: #6c757d;
+  color: #aaa;
   font-style: italic;
+}
+
+/* New styles for podcast episode management */
+.podcast-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.add-episode-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-episode-button:hover {
+  background-color: #c82333;
+}
+
+.add-episode-form-container {
+  background-color: #252525;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #333;
+}
+
+.add-episode-form-container h4 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.add-episode-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #ccc;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="url"],
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #333;
+  color: #e0e0e0;
+  font-size: 1rem;
+}
+
+.form-group input[type="file"] {
+  padding: 0.5rem 0;
+  color: #ccc;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-help-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.youtube-preview {
+  margin-top: 15px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #1a1a1a;
+}
+
+.youtube-preview p {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.youtube-preview iframe {
+  border-radius: 4px;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin-right: 0.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}
+
+.tags-input-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tags-input-container input {
+  flex: 1;
+}
+
+.add-tag-button {
+  padding: 0.75rem 1rem;
+  background-color: #333;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-tag-button:hover {
+  background-color: #444;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #333;
+  color: #e0e0e0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.remove-tag-button {
+  background: none;
+  border: none;
+  color: #ccc;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+}
+
+.remove-tag-button:hover {
+  color: #dc3545;
+}
+
+.file-info {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #aaa;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.submit-button,
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  flex: 1;
+}
+
+.submit-button:hover {
+  background-color: #c82333;
+}
+
+.cancel-button {
+  background-color: transparent;
+  color: #ccc;
+  border: 1px solid #444;
+}
+
+.cancel-button:hover {
+  background-color: #333;
+}
+
+.submit-button:disabled,
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.episode-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.listen-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.listen-button:hover {
+  background-color: #c62828;
+}
+
+.youtube-button {
+  background-color: #ff0000;
+  color: white;
+  margin-right: 5px;
+}
+
+.youtube-button:hover {
+  background-color: #cc0000;
+}
+
+.edit-button {
+  background-color: #333;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+.edit-button:hover {
+  background-color: #444;
+}
+
+.success-message {
+  background-color: rgba(40, 167, 69, 0.15);
+  color: #2ecc71;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.error-message {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #e74c3c;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid rgba(220, 53, 69, 0.3);
 } 

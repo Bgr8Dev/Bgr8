@@ -26,6 +26,7 @@ export interface PodcastEpisode {
   guestTitle: string;
   audioUrl: string;
   imageUrl: string;
+  youtubeUrl?: string;
   duration: number;
   publishDate: Timestamp;
   tags: string[];

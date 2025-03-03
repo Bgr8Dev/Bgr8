@@ -25,6 +25,7 @@ export default function B8Podcast() {
   const [email, setEmail] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -123,6 +124,41 @@ export default function B8Podcast() {
     }
   };
 
+  const extractYoutubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    try {
+      // Match YouTube URL patterns
+      const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?$/;
+      const match = url.match(regExp);
+      
+      if (match && match[1]) {
+        return match[1];
+      }
+    } catch (error) {
+      console.error('Error extracting YouTube video ID:', error);
+    }
+    
+    return null;
+  };
+
+  const handleYoutubeClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string | undefined) => {
+    e.preventDefault();
+    if (!url) return;
+    
+    const videoId = extractYoutubeVideoId(url);
+    if (videoId) {
+      setActiveVideoId(videoId);
+    } else {
+      // If we can't extract the ID, just open the URL in a new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const closeVideoModal = () => {
+    setActiveVideoId(null);
+  };
+
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -212,7 +248,32 @@ export default function B8Podcast() {
                               <span key={index} className="episode-tag">{tag}</span>
                             ))}
                           </div>
-                          <a href={episode.audioUrl} className="listen-button">Listen Now</a>
+                          
+                          {episode.youtubeUrl && extractYoutubeVideoId(episode.youtubeUrl) && (
+                            <div className="episode-video-preview">
+                              <h4>Episode Video</h4>
+                              <div className="episode-video-container">
+                                <iframe
+                                  width="100%"
+                                  height="100%"
+                                  src={`https://www.youtube.com/embed/${extractYoutubeVideoId(episode.youtubeUrl)}`}
+                                  title={`${episode.title} - YouTube video`}
+                                  frameBorder="0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                ></iframe>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="episode-actions">
+                            <a href={episode.audioUrl} className="listen-button">Listen Now</a>
+                            {episode.youtubeUrl && (
+                              <a href={episode.youtubeUrl} target="_blank" rel="noopener noreferrer" className="youtube-button" onClick={(e) => handleYoutubeClick(e, episode.youtubeUrl)}>
+                                Watch on YouTube
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -243,7 +304,20 @@ export default function B8Podcast() {
                           <h4>{episode.title}</h4>
                           <p className="episode-card-guest">{episode.guestName}</p>
                           <p className="episode-card-date">{formatDate(episode.publishDate)}</p>
-                          <a href={episode.audioUrl} className="episode-card-listen">Listen</a>
+                          <div className="episode-card-actions">
+                            <a href={episode.audioUrl} className="episode-card-listen">Listen</a>
+                            {episode.youtubeUrl && (
+                              <a 
+                                href={episode.youtubeUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="episode-card-youtube"
+                                onClick={(e) => handleYoutubeClick(e, episode.youtubeUrl)}
+                              >
+                                YouTube
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -295,6 +369,25 @@ export default function B8Podcast() {
 
               <SocialChannels className="podcast-social-channels" />
             </>
+          )}
+          
+          {activeVideoId && (
+            <div className="video-modal-overlay" onClick={closeVideoModal}>
+              <div className="video-modal" onClick={(e) => e.stopPropagation()}>
+                <button className="close-modal-button" onClick={closeVideoModal}>×</button>
+                <div className="video-container">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </ComingSoonOverlay>

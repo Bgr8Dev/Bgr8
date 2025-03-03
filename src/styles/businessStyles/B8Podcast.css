@@ -221,6 +221,36 @@
   color: #ccc;
 }
 
+.episode-video-preview {
+  margin: 1rem 0;
+  border-top: 1px solid #333;
+  padding-top: 1rem;
+}
+
+.episode-video-preview h4 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.episode-video-container {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  background-color: #000;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.episode-video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 .episode-tags {
   display: flex;
   flex-wrap: wrap;
@@ -249,6 +279,110 @@
 
 .listen-button:hover {
   background-color: #c82333;
+}
+
+.youtube-button {
+  display: inline-block;
+  background-color: #ff0000;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.youtube-button:hover {
+  background-color: #cc0000;
+}
+
+.episode-actions {
+  display: flex;
+  align-items: center;
+}
+
+.episode-card-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.episode-card-youtube {
+  display: inline-block;
+  background-color: #ff0000;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: background-color 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.episode-card-youtube:hover {
+  background-color: #cc0000;
+}
+
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.video-modal {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.close-modal-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-modal-button:hover {
+  background-color: rgba(255, 0, 0, 0.7);
+}
+
+.video-container {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 .latest-episodes-grid {
@@ -483,7 +617,7 @@
 
 @media (max-width: 768px) {
   .podcast-hero {
-    height: 500px;
+    height: 350px;
   }
   
   .podcast-hero h1 {
@@ -491,7 +625,7 @@
   }
   
   .podcast-hero p {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
   
   .featured-episode-card {
@@ -501,6 +635,31 @@
   .episode-image {
     width: 100%;
     height: 200px;
+    min-width: auto;
+  }
+  
+  .episode-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .youtube-button {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .episode-card-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .episode-card-youtube {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
   }
   
   .hosts-grid {
@@ -535,7 +694,7 @@
   .podcast-page.mobile .latest-episodes-section,
   .podcast-page.mobile .host-section,
   .podcast-page.mobile .become-guest-section {
-    padding: 1.5rem;
+    padding: 1rem;
   }
   
   .podcast-page.mobile .episode-content {
@@ -543,8 +702,10 @@
   }
   
   .podcast-page.mobile .host-image {
-    width: 120px;
-    height: 120px;
-    margin: 1.5rem auto 0.75rem;
+    height: 200px;
+  }
+  
+  .video-modal {
+    width: 95%;
   }
 } 
