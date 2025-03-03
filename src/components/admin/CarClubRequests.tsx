@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, orderBy, where, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { CarClubRequest } from '../../types/admin';
-import { FaSpinner, FaCheck, FaTimes, FaEdit, FaSave, FaCarAlt, FaInstagram, FaPhone, FaEnvelope, FaUser, FaCalendarAlt } from 'react-icons/fa';
+import { 
+  FaSpinner, FaCheck, FaTimes, FaEdit, FaSave, FaCarAlt, FaInstagram, 
+  FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaIdCard, FaChevronDown,
+  FaChevronUp, FaExclamationTriangle, FaFilter, FaNotesMedical
+} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 export const CarClubRequests: React.FC = () => {
@@ -192,6 +196,7 @@ export const CarClubRequests: React.FC = () => {
           <h3>Car Club Join Requests</h3>
         </div>
         <div className="car-club-requests-error">
+          <FaExclamationTriangle size={30} />
           <p>{error}</p>
           <button onClick={fetchRequests}>Try Again</button>
         </div>
@@ -208,25 +213,25 @@ export const CarClubRequests: React.FC = () => {
             className={viewMode === 'all' ? 'active' : ''} 
             onClick={() => setViewMode('all')}
           >
-            All Requests
+            <FaFilter /> All Requests
           </button>
           <button 
             className={viewMode === 'pending' ? 'active' : ''} 
             onClick={() => setViewMode('pending')}
           >
-            Pending
+            <FaExclamationTriangle /> Pending
           </button>
           <button 
             className={viewMode === 'approved' ? 'active' : ''} 
             onClick={() => setViewMode('approved')}
           >
-            Approved
+            <FaCheck /> Approved
           </button>
           <button 
             className={viewMode === 'rejected' ? 'active' : ''} 
             onClick={() => setViewMode('rejected')}
           >
-            Rejected
+            <FaTimes /> Rejected
           </button>
         </div>
       </div>
@@ -247,14 +252,18 @@ export const CarClubRequests: React.FC = () => {
                 onClick={() => toggleRequestExpansion(request.id)}
               >
                 <div className="request-basic-info">
-                  <h4>{request.name}</h4>
-                  <p className="car-info">{request.carMakeModel} • {request.numberPlate}</p>
+                  <h4><FaUser /> {request.name}</h4>
+                  <p className="car-info"><FaCarAlt /> {request.carMakeModel} <span>•</span> <FaIdCard /> {request.numberPlate}</p>
                 </div>
                 <div className="request-meta">
                   <span className={`status-badge ${request.status}`}>
+                    {request.status === 'pending' && <FaExclamationTriangle />}
+                    {request.status === 'approved' && <FaCheck />}
+                    {request.status === 'rejected' && <FaTimes />}
                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                   </span>
-                  <span className="request-date">{formatDate(request.requestDate)}</span>
+                  <span className="request-date"><FaCalendarAlt /> {formatDate(request.requestDate)}</span>
+                  {expandedRequests[request.id] ? <FaChevronUp /> : <FaChevronDown />}
                 </div>
               </div>
 
@@ -279,7 +288,7 @@ export const CarClubRequests: React.FC = () => {
                     </div>
                     <div className="info-item">
                       <label>Number Plate</label>
-                      <p>{request.numberPlate}</p>
+                      <p><FaIdCard /> {request.numberPlate}</p>
                     </div>
                     <div className="info-item">
                       <label>Instagram</label>
@@ -299,7 +308,7 @@ export const CarClubRequests: React.FC = () => {
 
                   <div className="request-notes">
                     <div className="notes-header">
-                      <h5>Admin Notes</h5>
+                      <h5><FaNotesMedical /> Admin Notes</h5>
                       {editingNotes !== request.id && (
                         <button 
                           className="edit-notes-btn"
