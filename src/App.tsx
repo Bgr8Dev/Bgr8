@@ -6,7 +6,10 @@ import { BusinessAccessProvider } from './contexts/BusinessAccessContext';
 import { TournamentVisibilityProvider } from './contexts/TournamentVisibilityContext';
 import { B8SectionVisibilityProvider } from './contexts/B8SectionVisibilityContext';
 import Navigation from './navigation/navigation';
+// @ts-expect-error Missing type definitions for this module
 import { initializeB8LeagueSettings } from './scripts/initializeB8LeagueSettings';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   // Initialize B8 League settings when the app starts
@@ -25,6 +28,7 @@ function App() {
           <B8SectionVisibilityProvider>
             <TournamentVisibilityProvider>
               <Navigation />
+              <ToastContainer position="bottom-right" autoClose={5000} />
             </TournamentVisibilityProvider>
           </B8SectionVisibilityProvider>
         </BusinessAccessProvider>
