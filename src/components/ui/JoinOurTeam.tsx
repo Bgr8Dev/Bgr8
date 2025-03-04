@@ -3,7 +3,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db, storage, auth } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import { FaBriefcase, FaUsers, FaRocket, FaFileAlt, FaChevronDown, FaCode, FaVideo, FaUserTie, FaHandshake } from 'react-icons/fa';
+import { FaBriefcase, FaUsers, FaRocket, FaFileAlt, FaChevronDown, FaCode, FaVideo, FaUserTie, FaHandshake, FaCheck } from 'react-icons/fa';
 import '../../styles/components/JoinOurTeam.css';
 
 interface JoinOurTeamProps {
@@ -45,7 +45,7 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
   const [submitError, setSubmitError] = useState('');
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   
   const [cvForm, setCvForm] = useState({
@@ -58,7 +58,7 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
     otherLinks: '',
     filePath: '',
     jobCategory: '',
-    jobRole: ''
+    jobRoles: [] as string[]
   });
 
   const resetForm = () => {
@@ -72,11 +72,11 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
       otherLinks: '',
       filePath: '',
       jobCategory: '',
-      jobRole: ''
+      jobRoles: []
     });
     setCvFile(null);
     setSelectedCategory(null);
-    setSelectedRole(null);
+    setSelectedRoles([]);
     setExpandedCategory(null);
     setTimeout(() => setSubmitSuccess(false), 5000);
   };
@@ -95,15 +95,32 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+    if (selectedCategory !== categoryId) {
+      setSelectedCategory(categoryId);
+      setSelectedRoles([]);
+      setCvForm(prev => ({
+        ...prev,
+        jobCategory: categoryId,
+        jobRoles: []
+      }));
+    }
   };
 
-  const selectRole = (category: string, role: string) => {
+  const toggleRole = (category: string, role: string) => {
     setSelectedCategory(category);
-    setSelectedRole(role);
+    
+    let updatedRoles: string[];
+    if (selectedRoles.includes(role)) {
+      updatedRoles = selectedRoles.filter(r => r !== role);
+    } else {
+      updatedRoles = [...selectedRoles, role];
+    }
+    
+    setSelectedRoles(updatedRoles);
     setCvForm(prev => ({
       ...prev,
       jobCategory: category,
-      jobRole: role
+      jobRoles: updatedRoles
     }));
   };
 
@@ -117,8 +134,8 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
         throw new Error('Please select a CV file');
       }
 
-      if (!selectedCategory || !selectedRole) {
-        throw new Error('Please select a job category and role');
+      if (!selectedCategory || selectedRoles.length === 0) {
+        throw new Error('Please select a job category and at least one role');
       }
 
       // Validate file size (10MB max)
@@ -178,7 +195,7 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
           'career.industry': cvForm.industry,
           'career.professionalWebsite': cvForm.professionalWeb,
           'career.jobCategory': cvForm.jobCategory,
-          'career.jobRole': cvForm.jobRole,
+          'career.jobRoles': cvForm.jobRoles,
           'socialMedia.linkedin': cvForm.linkedIn
         });
       }
@@ -246,7 +263,7 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
         
         <div className="job-categories-container">
           <h4>Select a Position</h4>
-          <p className="job-selection-instruction">Choose the category and role you're interested in:</p>
+          <p className="job-selection-instruction">Choose the category and roles you're interested in (you can select multiple roles):</p>
           
           <div className="job-categories">
             {jobCategories.map(category => (
@@ -265,9 +282,12 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
                     {category.roles.map(role => (
                       <div 
                         key={role} 
-                        className={`job-role ${selectedCategory === category.id && selectedRole === role ? 'selected' : ''}`}
-                        onClick={() => selectRole(category.id, role)}
+                        className={`job-role ${selectedCategory === category.id && selectedRoles.includes(role) ? 'selected' : ''}`}
+                        onClick={() => toggleRole(category.id, role)}
                       >
+                        {selectedCategory === category.id && selectedRoles.includes(role) && (
+                          <FaCheck className="role-check-icon" />
+                        )}
                         {role}
                       </div>
                     ))}
@@ -277,9 +297,25 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
             ))}
           </div>
           
-          {selectedCategory && selectedRole && (
+          {selectedCategory && selectedRoles.length > 0 && (
             <div className="selected-position">
-              Selected position: <strong>{jobCategories.find(c => c.id === selectedCategory)?.name} - {selectedRole}</strong>
+              Selected position(s): <strong>{jobCategories.find(c => c.id === selectedCategory)?.name}</strong>
+              <div className="selected-roles-list">
+                {selectedRoles.map((role) => (
+                  <span key={role} className="selected-role-tag">
+                    {role}
+                    <span 
+                      className="remove-role" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleRole(selectedCategory, role);
+                      }}
+                    >
+                      ×
+                    </span>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -390,7 +426,7 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
           
           <button 
             type="submit" 
-            disabled={isSubmitting || !selectedCategory || !selectedRole}
+            disabled={isSubmitting || !selectedCategory || selectedRoles.length === 0}
             className={isSubmitting ? 'submitting' : ''}
           >
             {isSubmitting ? 'Submitting...' : 'Submit Application'}
