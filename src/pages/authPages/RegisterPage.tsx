@@ -10,6 +10,11 @@ import '../../styles/AuthPages.css';
 import { createUserProfile, UserProfile } from '../../utils/userProfile';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
+// Define FirebaseErrorWithCode type to handle Firebase errors
+interface FirebaseErrorWithCode extends Error {
+  code: string;
+}
+
 export default function RegisterPage() {
     const isMobile = useIsMobile()
   const [formData, setFormData] = useState({
@@ -17,7 +22,9 @@ export default function RegisterPage() {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    ethnicity: '',
+    nationality: ''
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -55,14 +62,19 @@ export default function RegisterPage() {
         userCredential.user.uid,
         formData.email,
         formData.firstName,
-        formData.lastName
+        formData.lastName,
+        {
+          ethnicity: formData.ethnicity || 'N/A',
+          nationality: formData.nationality || 'N/A'
+        }
       );
 
       // Successful registration
       navigate('/'); // Redirect to home page
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Handle specific error cases
-      switch (err.code) {
+      const firebaseError = err as FirebaseErrorWithCode;
+      switch (firebaseError.code) {
         case 'auth/email-already-in-use':
           setError('An account already exists with this email');
           break;
@@ -89,7 +101,10 @@ export default function RegisterPage() {
       const nameParts = user.displayName?.split(' ') || ['', ''];
       
       // Create user profile in Firestore
-      const additionalData: Partial<UserProfile> = {};
+      const additionalData: Partial<UserProfile> = {
+        ethnicity: 'N/A',
+        nationality: 'N/A'
+      };
       
       if (user.photoURL) {
         additionalData.photoURL = user.photoURL;
@@ -108,8 +123,9 @@ export default function RegisterPage() {
       );
 
       navigate('/');
-    } catch (err: any) {
-      if (err.code === 'auth/popup-closed-by-user') {
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseErrorWithCode;
+      if (firebaseError.code === 'auth/popup-closed-by-user') {
         setError('Sign in cancelled');
       } else {
         setError('Error signing in with Google');
@@ -146,6 +162,18 @@ export default function RegisterPage() {
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
             required
+          />
+          <input
+            type="text"
+            placeholder="Ethnicity"
+            value={formData.ethnicity}
+            onChange={(e) => setFormData({...formData, ethnicity: e.target.value})}
+          />
+          <input
+            type="text"
+            placeholder="Nationality"
+            value={formData.nationality}
+            onChange={(e) => setFormData({...formData, nationality: e.target.value})}
           />
           <input
             type="password"

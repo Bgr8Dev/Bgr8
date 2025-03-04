@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/Overlay.css';
@@ -25,6 +25,8 @@ export default function Profile() {
     firstName: userProfile?.firstName || '',
     lastName: userProfile?.lastName || '',
     phoneNumber: userProfile?.phoneNumber || '',
+    ethnicity: userProfile?.ethnicity || '',
+    nationality: userProfile?.nationality || '',
     location: {
       city: userProfile?.location?.city || '',
       country: userProfile?.location?.country || ''
@@ -42,6 +44,8 @@ export default function Profile() {
         lastName: formData.lastName,
         displayName: `${formData.firstName} ${formData.lastName}`,
         phoneNumber: formData.phoneNumber,
+        ethnicity: formData.ethnicity,
+        nationality: formData.nationality,
         location: formData.location,
         lastUpdated: new Date()
       });
@@ -156,6 +160,24 @@ export default function Profile() {
                 type="tel"
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Ethnicity</label>
+              <input
+                type="text"
+                value={formData.ethnicity}
+                onChange={(e) => setFormData({...formData, ethnicity: e.target.value})}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Nationality</label>
+              <input
+                type="text"
+                value={formData.nationality}
+                onChange={(e) => setFormData({...formData, nationality: e.target.value})}
               />
             </div>
 
@@ -303,11 +325,18 @@ export default function Profile() {
 
             <div className="profile-details">
               <p><strong>Phone:</strong> {userProfile?.phoneNumber || 'Not set'}</p>
+              <p><strong>Ethnicity:</strong> {userProfile?.ethnicity || 'Not set'}</p>
+              <p><strong>Nationality:</strong> {userProfile?.nationality || 'Not set'}</p>
               <p><strong>Location:</strong> {userProfile?.location?.city ? 
                 `${userProfile.location.city}, ${userProfile.location.country}` : 
                 'Not set'}
               </p>
-              <p><strong>Member Since:</strong> {userProfile?.dateCreated ? new Date(userProfile.dateCreated).toLocaleDateString() : 'Not set'}</p>
+              <p><strong>Member Since:</strong> {userProfile?.dateCreated ? 
+                (userProfile.dateCreated instanceof Date 
+                  ? userProfile.dateCreated.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) 
+                  : new Date((userProfile.dateCreated as unknown as Timestamp).seconds * 1000).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })) 
+                : 'Not set'}
+              </p>
             </div>
 
             <div className="profile-actions">

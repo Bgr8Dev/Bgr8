@@ -14,6 +14,10 @@ export interface UserProfile {
   lastUpdated: Date;
   admin: boolean;
 
+  // Demographic Info
+  ethnicity?: string;
+  nationality?: string;
+
   // Additional Personal Info
   dateOfBirth?: string;
   gender?: string;
@@ -132,6 +136,8 @@ export const createUserProfile = async (
     dateCreated: new Date(),
     lastUpdated: new Date(),
     admin: false,
+    ethnicity: 'N/A',
+    nationality: 'N/A',
     preferences: {
       marketingEmails: true,
       notifications: true,
@@ -174,7 +180,7 @@ export const createUserProfile = async (
       acc[key] = value;
     }
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, unknown>);
 
   // Merge base profile with cleaned additional data
   const fullProfile = {

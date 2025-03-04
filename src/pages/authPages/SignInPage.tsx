@@ -65,7 +65,9 @@ export default function SignInPage() {
         const nameParts = user.displayName?.split(' ') || ['', ''];
         const additionalData = {
           photoURL: user.photoURL || undefined,
-          phoneNumber: user.phoneNumber || undefined
+          phoneNumber: user.phoneNumber || undefined,
+          ethnicity: 'N/A',
+          nationality: 'N/A'
         };
 
         await createUserProfile(
