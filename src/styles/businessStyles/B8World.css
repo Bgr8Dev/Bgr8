@@ -14,6 +14,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 /* Hero Section */
@@ -42,8 +43,9 @@
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 1200px;
   margin: 0 auto;
+  max-width: 1200px;
+  width: 90%;
 }
 
 .hero-section h1 {
@@ -61,8 +63,8 @@
 .hero-section p {
   font-size: 1.6rem;
   color: white;
-  max-width: 800px;
   margin: 0 auto;
+  max-width: 800px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   transform: translateY(20px);
   opacity: 0;
@@ -75,12 +77,14 @@
   text-align: center;
   width: 100%;
   box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .intro-section {
   padding: 60px 40px;
   text-align: center;
-  max-width: 900px;
+  max-width: 1200px;
   width: 90%;
   margin: 60px auto;
   background-color: #202020;
@@ -112,6 +116,8 @@
   font-size: 1.2rem;
   line-height: 1.8;
   color: #d0d0d0;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 /* Gallery styling */
@@ -126,7 +132,7 @@
   width: 100%;
   box-sizing: border-box;
   margin: 0 auto;
-  max-width: 1400px;
+  max-width: 1200px;
 }
 
 .gallery-item {
@@ -177,8 +183,9 @@
   border-radius: 15px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
   padding: 40px 20px;
-  max-width: 800px;
   margin: 60px auto;
+  max-width: 1200px;
+  width: 90%;
 }
 
 .donation-widget h3 {
@@ -191,6 +198,9 @@
   font-size: 1.1rem;
   margin-bottom: 30px;
   color: #d0d0d0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .donation-widget button {
@@ -220,6 +230,9 @@
   align-items: stretch;
   margin-top: 40px;
   width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .world-partner-card {
@@ -322,6 +335,7 @@
   gap: 30px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 90%;
 }
 
 /* Contact section */
@@ -333,6 +347,14 @@
   overflow: hidden;
   text-align: center;
   width: 100%;
+}
+
+.contact-section > div {
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .contact-section::before {
@@ -402,6 +424,7 @@
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   transform: scale(0.9);
   animation: zoomIn 0.3s forwards;
+  margin: 0 auto;
 }
 
 .modal-content img {
@@ -539,6 +562,7 @@
   transform: scale(0.9);
   animation: zoomIn 0.3s forwards;
   position: relative;
+  margin: 0 auto;
 }
 
 .modal-close-btn {
@@ -570,16 +594,22 @@
   margin-bottom: 10px;
   color: #4080ff;
   text-align: center;
+  width: 100%;
 }
 
 .donation-modal-content > p {
   text-align: center;
   margin-bottom: 30px;
   color: #d0d0d0;
+  width: 100%;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .donation-amount-section {
   margin-bottom: 30px;
+  width: 100%;
 }
 
 .donation-amount-section h3 {
@@ -588,6 +618,7 @@
   color: #e0e0e0;
   border-bottom: 1px solid #333;
   padding-bottom: 10px;
+  width: 100%;
 }
 
 .donation-amount-buttons {
@@ -596,6 +627,7 @@
   gap: 10px;
   margin-bottom: 20px;
   justify-content: center;
+  width: 100%;
 }
 
 .amount-button {
@@ -626,7 +658,8 @@
 
 .custom-amount-input {
   margin-top: 20px;
-  max-width: fit-content;
+  width: 100%;
+  max-width: 400px;
 }
 
 .custom-amount-input label {

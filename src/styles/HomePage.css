@@ -156,19 +156,20 @@
   position: absolute;
   top: 50%;
   left: 0;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(-3deg);
   background: rgba(0, 0, 0, 0.85);
   color: white;
-  padding: 0.6rem 0;
+  padding: 0.8rem 0;
   font-size: 1.2rem;
   font-weight: bold;
   letter-spacing: 2px;
   z-index: 1;
-  width: 100%;
+  width: 120%;
+  margin-left: -10%;
   text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(5% 0, 95% 0, 100% 100%, 0% 100%);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
   transition: all 0.3s ease;
-  animation: pulse 2s infinite ease-in-out;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
@@ -184,7 +185,7 @@
 .homepage-service-card.restricted .homepage-icon-container,
 .homepage-service-card.restricted h4,
 .homepage-service-card.restricted p {
-  filter: blur(2px);
+  filter: blur(5px);
 }
 
 .homepage-service-card.restricted:hover::before {

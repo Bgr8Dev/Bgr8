@@ -243,8 +243,6 @@ export default function B8World() {
 
             {/* Contact Form */}
             <section className="contact-section">
-              <h3>Get Involved</h3>
-              <p>Reach out to learn more about our global initiatives, charity partners, and how you can contribute to making the world a better place.</p>
               <ContactForm source="world" />
             </section>
             
