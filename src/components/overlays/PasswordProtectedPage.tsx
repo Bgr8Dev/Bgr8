@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/PasswordProtectedPage.css';
-import { FaLock, FaUnlock, FaExclamationTriangle, FaCar } from 'react-icons/fa';
+import { FaUnlock, FaExclamationTriangle } from 'react-icons/fa';
+import B8Logo from '../../assets/B8-logo-transparent.png';
 
 interface PasswordProtectedPageProps {
   businessId: string;
@@ -24,6 +25,7 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
   const [showPasswordHint, setShowPasswordHint] = useState(false);
+  const [logoClicked, setLogoClicked] = useState(false);
   
   // Check if the page is password protected
   const isProtected = isBusinessPasswordProtected(businessId);
@@ -35,6 +37,16 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
       setIsAuthenticated(true);
     }
   }, [businessId]);
+  
+  // Reset logo animation after it completes
+  useEffect(() => {
+    if (logoClicked) {
+      const timer = setTimeout(() => {
+        setLogoClicked(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [logoClicked]);
   
   // If the page is not password protected, render children directly
   if (!isProtected) {
@@ -69,52 +81,66 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
   // Custom messages for Car Club
   const carClubMessage = 'Welcome to the exclusive B8 Car Club area. Please enter your membership password to access premium content.';
   
+  const handleLogoClick = () => {
+    setLogoClicked(true);
+    // Focus on password input when logo is clicked
+    const inputElement = document.querySelector('.protected-password-input') as HTMLInputElement;
+    if (inputElement) {
+      inputElement.focus();
+    }
+  };
+  
   return (
-    <div className={`password-protected-container ${isCarClub ? 'carclub-password-protected' : ''}`}>
-      <div className="password-protected-overlay">
-        <div className="password-protected-content">
-          <div className="password-protected-icon">
-            {isCarClub ? <FaCar /> : <FaLock />}
+    <div className={`protected-password-container ${isCarClub ? 'carclub-password-protected' : ''}`}>
+      <div className="protected-password-overlay">
+        <div className="protected-password-content">
+          <div className="b8-logo-container">
+            <img 
+              src={B8Logo} 
+              alt="B8 Logo" 
+              className={`b8-logo ${logoClicked ? 'logo-pulse' : ''}`}
+              onClick={handleLogoClick}
+            />
+            
+            <form onSubmit={handlePasswordSubmit} className="protected-password-form">
+              <div className="protected-password-input-group">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={isCarClub ? "Enter membership password" : "Enter password"}
+                  className="protected-password-input"
+                />
+                <button type="submit" className="protected-password-submit-button">
+                  <FaUnlock /> {isCarClub ? 'Access' : 'Unlock'}
+                </button>
+              </div>
+            </form>
           </div>
           
           <h2>{isCarClub ? 'B8 Car Club Access' : 'Password Protected'}</h2>
           
-          <p className="password-protected-message">
+          <p className="protected-password-message">
             {customMessage || (isCarClub ? carClubMessage : 'This page is password protected. Please enter the password to continue.')}
           </p>
           
-          <form onSubmit={handlePasswordSubmit} className="password-form">
-            <div className="password-input-group">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={isCarClub ? "Enter membership password" : "Enter password"}
-                className="password-input"
-              />
-              <button type="submit" className="password-submit-button">
-                <FaUnlock /> {isCarClub ? 'Access' : 'Unlock'}
-              </button>
+          {error && (
+            <div className="protected-password-error">
+              <FaExclamationTriangle /> {error}
             </div>
-            
-            {error && (
-              <div className="password-error">
-                <FaExclamationTriangle /> {error}
-              </div>
-            )}
-          </form>
+          )}
           
           {process.env.NODE_ENV === 'development' && (
-            <div className="password-hint-container">
+            <div className="protected-password-hint-container">
               <button 
-                className="password-hint-toggle" 
+                className="protected-password-hint-toggle" 
                 onClick={togglePasswordHint}
               >
                 {showPasswordHint ? 'Hide Password Hint' : 'Show Password Hint (Dev Only)'}
               </button>
               
               {showPasswordHint && (
-                <div className="password-hint">
+                <div className="protected-password-hint">
                   <p>Development Mode: The correct password is: <strong>{getBusinessPassword(businessId)}</strong></p>
                 </div>
               )}
