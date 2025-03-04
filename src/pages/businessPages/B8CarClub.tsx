@@ -166,7 +166,7 @@ export default function B8CarClub() {
 
 
           {/* Updated Hero Video Section */}
-          <section className="hero-video">
+          <section className="carclub-hero-video">
             <div className="video-container">
               <iframe
                 width="100%"
