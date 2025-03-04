@@ -17,6 +17,7 @@ export interface UserProfile {
   // Demographic Info
   ethnicity?: string;
   nationality?: string;
+  secondNationality?: string;
 
   // Additional Personal Info
   dateOfBirth?: string;

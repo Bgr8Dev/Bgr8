@@ -67,7 +67,8 @@ export default function SignInPage() {
           photoURL: user.photoURL || undefined,
           phoneNumber: user.phoneNumber || undefined,
           ethnicity: 'N/A',
-          nationality: 'N/A'
+          nationality: 'N/A',
+          secondNationality: ''
         };
 
         await createUserProfile(

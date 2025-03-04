@@ -82,9 +82,9 @@ export default function HomePage() {
         <h3>
           <FaChartBar /> Our Community Demographics
         </h3>
-        <div className="homepage-globe-container">
+        {/* <div className="homepage-globe-container">
           <Globe3D width={600} height={600} />
-        </div>
+        </div> */}
         <p>
           Explore the diverse makeup of our B8 community. Understanding our user base helps us tailor our services to better meet your needs.
         </p>

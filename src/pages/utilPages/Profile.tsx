@@ -6,6 +6,53 @@ import { db } from '../../firebase';
 import { FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 
+// Comprehensive list of ethnicities
+const ethnicityOptions = [
+  'African',
+  'African American',
+  'Arab',
+  'Asian',
+  'Caucasian',
+  'East Asian',
+  'Hispanic/Latino',
+  'Indigenous',
+  'Middle Eastern',
+  'Mixed/Multiracial',
+  'Native American',
+  'Pacific Islander',
+  'South Asian',
+  'Southeast Asian',
+  'Other',
+  'Prefer not to say'
+];
+
+// Comprehensive list of nationalities
+const nationalityOptions = [
+  'Afghan', 'Albanian', 'Algerian', 'American', 'Andorran', 'Angolan', 'Argentine', 'Armenian', 'Australian',
+  'Austrian', 'Azerbaijani', 'Bahamian', 'Bahraini', 'Bangladeshi', 'Barbadian', 'Belarusian', 'Belgian',
+  'Belizean', 'Beninese', 'Bhutanese', 'Bolivian', 'Bosnian', 'Brazilian', 'British', 'Bruneian', 'Bulgarian',
+  'Burkinabe', 'Burmese', 'Burundian', 'Cambodian', 'Cameroonian', 'Canadian', 'Cape Verdean', 'Central African',
+  'Chadian', 'Chilean', 'Chinese', 'Colombian', 'Comoran', 'Congolese', 'Costa Rican', 'Croatian', 'Cuban', 'Cypriot',
+  'Czech', 'Danish', 'Djiboutian', 'Dominican', 'Dutch', 'Ecuadorian', 'Egyptian', 'Emirati', 'Equatorial Guinean',
+  'Eritrean', 'Estonian', 'Ethiopian', 'Fijian', 'Filipino', 'Finnish', 'French', 'Gabonese', 'Gambian', 'Georgian',
+  'German', 'Ghanaian', 'Greek', 'Grenadian', 'Guatemalan', 'Guinean', 'Guyanese', 'Haitian', 'Honduran', 'Hungarian',
+  'Icelandic', 'Indian', 'Indonesian', 'Iranian', 'Iraqi', 'Irish', 'Israeli', 'Italian', 'Ivorian', 'Jamaican',
+  'Japanese', 'Jordanian', 'Kazakhstani', 'Kenyan', 'Korean', 'Kuwaiti', 'Kyrgyz', 'Laotian', 'Latvian', 'Lebanese',
+  'Liberian', 'Libyan', 'Lithuanian', 'Luxembourgish', 'Macedonian', 'Malagasy', 'Malawian', 'Malaysian', 'Maldivian',
+  'Malian', 'Maltese', 'Mauritanian', 'Mauritian', 'Mexican', 'Moldovan', 'Monacan', 'Mongolian', 'Montenegrin',
+  'Moroccan', 'Mozambican', 'Namibian', 'Nepalese', 'New Zealand', 'Nicaraguan', 'Nigerian', 'Norwegian', 'Omani',
+  'Pakistani', 'Panamanian', 'Papua New Guinean', 'Paraguayan', 'Peruvian', 'Polish', 'Portuguese', 'Qatari',
+  'Romanian', 'Russian', 'Rwandan', 'Saint Lucian', 'Salvadoran', 'Samoan', 'Saudi', 'Senegalese', 'Serbian',
+  'Seychellois', 'Sierra Leonean', 'Singaporean', 'Slovak', 'Slovenian', 'Somali', 'South African', 'Spanish',
+  'Sri Lankan', 'Sudanese', 'Surinamese', 'Swedish', 'Swiss', 'Syrian', 'Taiwanese', 'Tajik', 'Tanzanian', 'Thai',
+  'Togolese', 'Trinidadian', 'Tunisian', 'Turkish', 'Turkmen', 'Ugandan', 'Ukrainian', 'Uruguayan', 'Uzbek',
+  'Venezuelan', 'Vietnamese', 'Yemeni', 'Zambian', 'Zimbabwean',
+  'Dual Nationality',
+  'Stateless',
+  'Other',
+  'Prefer not to say'
+];
+
 export default function Profile() {
   const { userProfile, changePassword } = useAuth();
   const navigate = useNavigate();
@@ -27,11 +74,27 @@ export default function Profile() {
     phoneNumber: userProfile?.phoneNumber || '',
     ethnicity: userProfile?.ethnicity || '',
     nationality: userProfile?.nationality || '',
+    secondNationality: userProfile?.secondNationality || '',
     location: {
       city: userProfile?.location?.city || '',
       country: userProfile?.location?.country || ''
     }
   });
+  const [showSecondNationality, setShowSecondNationality] = useState(
+    formData.nationality === 'Dual Nationality'
+  );
+
+  // Update second nationality visibility when nationality changes
+  const handleNationalityChange = (value: string) => {
+    const isDual = value === 'Dual Nationality';
+    setShowSecondNationality(isDual);
+    setFormData({
+      ...formData,
+      nationality: value,
+      // Clear second nationality if not dual
+      secondNationality: isDual ? formData.secondNationality : ''
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +109,7 @@ export default function Profile() {
         phoneNumber: formData.phoneNumber,
         ethnicity: formData.ethnicity,
         nationality: formData.nationality,
+        secondNationality: formData.secondNationality,
         location: formData.location,
         lastUpdated: new Date()
       });
@@ -165,21 +229,50 @@ export default function Profile() {
 
             <div className="form-group">
               <label>Ethnicity</label>
-              <input
-                type="text"
+              <select
                 value={formData.ethnicity}
                 onChange={(e) => setFormData({...formData, ethnicity: e.target.value})}
-              />
+                className="form-select"
+              >
+                <option value="">Select Ethnicity</option>
+                {ethnicityOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
               <label>Nationality</label>
-              <input
-                type="text"
+              <select
                 value={formData.nationality}
-                onChange={(e) => setFormData({...formData, nationality: e.target.value})}
-              />
+                onChange={(e) => handleNationalityChange(e.target.value)}
+                className="form-select"
+              >
+                <option value="">Select Nationality</option>
+                {nationalityOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             </div>
+
+            {showSecondNationality && (
+              <div className="form-group">
+                <label>Second Nationality</label>
+                <select
+                  value={formData.secondNationality}
+                  onChange={(e) => setFormData({...formData, secondNationality: e.target.value})}
+                  className="form-select"
+                >
+                  <option value="">Select Second Nationality</option>
+                  {nationalityOptions
+                    .filter(option => option !== 'Dual Nationality' && option !== formData.nationality)
+                    .map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))
+                  }
+                </select>
+              </div>
+            )}
 
             <div className="form-group">
               <label>City</label>
@@ -326,7 +419,13 @@ export default function Profile() {
             <div className="profile-details">
               <p><strong>Phone:</strong> {userProfile?.phoneNumber || 'Not set'}</p>
               <p><strong>Ethnicity:</strong> {userProfile?.ethnicity || 'Not set'}</p>
-              <p><strong>Nationality:</strong> {userProfile?.nationality || 'Not set'}</p>
+              <p>
+                <strong>Nationality:</strong> {
+                  userProfile?.nationality === 'Dual Nationality' 
+                    ? `Dual (${userProfile?.nationality}, ${userProfile?.secondNationality})` 
+                    : userProfile?.nationality || 'Not set'
+                }
+              </p>
               <p><strong>Location:</strong> {userProfile?.location?.city ? 
                 `${userProfile.location.city}, ${userProfile.location.country}` : 
                 'Not set'}

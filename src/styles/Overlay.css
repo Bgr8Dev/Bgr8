@@ -72,6 +72,32 @@
   width: auto;
 }
 
+.form-select {
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #222;
+  color: white;
+  width: auto;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.form-select option {
+  background-color: #222;
+  color: white;
+}
+
 .button-group {
   display: flex;
   gap: 1rem;
