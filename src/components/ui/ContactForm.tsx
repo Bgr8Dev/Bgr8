@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { FaUser, FaEnvelope, FaPhone, FaCommentAlt, FaPaperPlane, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
-import '../styles/ContactForm.css';
+import '../../styles/ContactForm.css';
 
 interface ContactFormProps {
   source?: string; // To track which page the enquiry came from

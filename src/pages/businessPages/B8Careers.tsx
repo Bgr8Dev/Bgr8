@@ -3,14 +3,14 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import { collection, query, where, getDocs,  serverTimestamp, doc, setDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db, storage, auth } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
 import { CvFormData } from '../../types/careers';
 import '../../styles/businessStyles/B8Careers.css';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import SocialChannels from '../../components/SocialChannels';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import SocialChannels from '../../components/ui/SocialChannels';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 
 export default function B8Careers() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

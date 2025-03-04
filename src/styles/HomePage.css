@@ -231,6 +231,59 @@
   color: gray;
 }
 
+.homepage-demographics-section {
+  background-color: #111;
+  padding: 4rem 1.5rem;
+  color: white;
+  text-align: center;
+  border-top: 1px solid #333;
+}
+
+.homepage-demographics-section h3 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.homepage-demographics-section h3 svg {
+  color: #ff0000;
+}
+
+.homepage-globe-container {
+  margin: 30px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 600px;
+  height: 600px;
+}
+
+@media (max-width: 768px) {
+  .homepage-globe-container {
+    max-width: 100%;
+    height: 400px;
+  }
+}
+
+.homepage-demographics-section p {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.homepage-demographics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .homepage-contact-section {
   background-color: #111;
   padding: 4rem 1.5rem;

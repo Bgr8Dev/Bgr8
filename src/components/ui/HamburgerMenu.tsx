@@ -1,12 +1,12 @@
 // src/components/HamburgerMenu.tsx
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { auth } from '../firebase';
+import { auth } from '../../firebase';
 import { signOut } from 'firebase/auth';
-import { useAuth } from '../contexts/AuthContext';
-import { useBusinessAccess } from '../contexts/BusinessAccessContext';
-import '../styles/Navbar.css';
-import logo from '../assets/B8-logo-transparent.png';
+import { useAuth } from '../../contexts/AuthContext';
+import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
+import '../../styles/Navbar.css';
+import logo from '../../assets/B8-logo-transparent.png';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);

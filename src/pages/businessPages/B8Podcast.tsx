@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy, limit, where, Timestamp, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
 import { PodcastEpisode } from '../../types/podcast';
 import '../../styles/businessStyles/B8Podcast.css';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import SocialChannels from '../../components/SocialChannels';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import SocialChannels from '../../components/ui/SocialChannels';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 
 export default function B8Podcast() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

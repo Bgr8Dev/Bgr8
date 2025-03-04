@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import GooglePayButton from '@google-pay/button-react';
 import { loadStripe } from '@stripe/stripe-js';
@@ -10,10 +10,10 @@ import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ClothingItem, ClothingCategory } from '../../types/clothing';
 import '../../styles/businessStyles/B8Clothing.css';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import ContactForm from '../../components/ContactForm';
-import SocialChannels from '../../components/SocialChannels';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import ContactForm from '../../components/ui/ContactForm';
+import SocialChannels from '../../components/ui/SocialChannels';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 
 export default function B8Clothing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

@@ -1,6 +1,6 @@
 import React from 'react';
-import '../styles/ComingSoonOverlay.css';
-import { useBusinessAccess } from '../contexts/BusinessAccessContext';
+import '../../styles/ComingSoonOverlay.css';
+import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 
 interface ComingSoonOverlayProps {
   businessId: string;

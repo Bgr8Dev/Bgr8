@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import '../../styles/businessStyles/BGr8Medical.css';
-import SocialChannels from '../../components/SocialChannels';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import SocialChannels from '../../components/ui/SocialChannels';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 
 export default function BGr8Medical({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({

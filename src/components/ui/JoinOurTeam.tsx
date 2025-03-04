@@ -1,10 +1,10 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { db, storage, auth } from '../firebase';
-import { useAuth } from '../contexts/AuthContext';
+import { db, storage, auth } from '../../firebase';
+import { useAuth } from '../../contexts/AuthContext';
 import { FaBriefcase, FaUsers, FaRocket, FaFileAlt, FaChevronDown, FaCode, FaVideo, FaUserTie, FaHandshake } from 'react-icons/fa';
-import '../styles/components/JoinOurTeam.css';
+import '../../styles/components/JoinOurTeam.css';
 
 interface JoinOurTeamProps {
   className?: string;

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 

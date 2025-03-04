@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { FaFlagCheckered, FaMapMarkerAlt, FaCar, FaGlobe } from 'react-icons/fa';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import '../../styles/businessStyles/B8CarClub.css';
-import SocialChannels from '../../components/SocialChannels';
+import SocialChannels from '../../components/ui/SocialChannels';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../firebase';
 import { doc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';

@@ -1,5 +1,5 @@
 import { FaLinkedin, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
-import '../styles/components/SocialChannels.css';
+import '../../styles/components/SocialChannels.css';
 
 interface SocialChannelsProps {
   className?: string;

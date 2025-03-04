@@ -1,14 +1,16 @@
 // src/HomePage.tsx
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import HamburgerMenu from '../components/HamburgerMenu';
-import Footer from '../components/Footer';
+import Navbar from '../components/ui/Navbar';
+import HamburgerMenu from '../components/ui/HamburgerMenu';
+import Footer from '../components/ui/Footer';
 import { FaLinkedin, FaInstagram, FaYoutube, FaWhatsapp, FaMedal } from 'react-icons/fa';
-import { FaBullhorn, FaCar, FaTshirt, FaGraduationCap, FaUsers, FaHeart, FaBriefcase } from 'react-icons/fa';
+import { FaBullhorn, FaCar, FaTshirt, FaGraduationCap, FaUsers, FaHeart, FaBriefcase, FaChartBar } from 'react-icons/fa';
 import '../styles/HomePage.css';
-import ContactForm from '../components/ContactForm';
+import ContactForm from '../components/ui/ContactForm';
+import UserDemographics from '../components/maps/UserDemographics';
 import { useBusinessAccess } from '../contexts/BusinessAccessContext';
+import Globe3D from '../components/maps/Globe3D';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -72,6 +74,22 @@ export default function HomePage() {
               <p>{service.description}</p>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Demographics Section */}
+      <section className="homepage-demographics-section">
+        <h3>
+          <FaChartBar /> Our Community Demographics
+        </h3>
+        <div className="homepage-globe-container">
+          <Globe3D width={600} height={600} />
+        </div>
+        <p>
+          Explore the diverse makeup of our B8 community. Understanding our user base helps us tailor our services to better meet your needs.
+        </p>
+        <div className="homepage-demographics-container">
+          <UserDemographics />
         </div>
       </section>
 

@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
 import { FaFutbol, FaGamepad, FaTableTennis } from 'react-icons/fa';
 import '../../styles/businessStyles/B8League.css';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import ContactForm from '../../components/ContactForm';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import ContactForm from '../../components/ui/ContactForm';
 import TournamentCreator from '../../components/tournament/TournamentCreator';
 import TournamentList from '../../components/tournament/TournamentList';
 import '../../styles/tournamentStyles/TournamentCreator.css';
 import '../../styles/tournamentStyles/TournamentList.css';
 import { useB8SectionVisibility } from '../../contexts/B8SectionVisibilityContext';
-import SocialChannels from '../../components/SocialChannels';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import SocialChannels from '../../components/ui/SocialChannels';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 
 type LeagueSport = 'football' | 'badminton' | 'esports';
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import BGr8Medical from './BGr8Medical';
-import ContactForm from '../../components/ContactForm';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import SocialChannels from '../../components/SocialChannels';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import ContactForm from '../../components/ui/ContactForm';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import SocialChannels from '../../components/ui/SocialChannels';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

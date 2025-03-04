@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useBusinessAccess } from '../contexts/BusinessAccessContext';
-import '../styles/PasswordProtectedPage.css';
+import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
+import '../../styles/PasswordProtectedPage.css';
 import { FaLock, FaUnlock, FaExclamationTriangle, FaCar } from 'react-icons/fa';
 
 interface PasswordProtectedPageProps {

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
-import HamburgerMenu from '../../components/HamburgerMenu';
-import Footer from '../../components/Footer';
-import { ComingSoonOverlay } from '../../components/ComingSoonOverlay';
-import { PasswordProtectedPage } from '../../components/PasswordProtectedPage';
+import Navbar from '../../components/ui/Navbar';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import Footer from '../../components/ui/Footer';
+import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
+import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import { renderIcon } from '../../utils/iconMapping';
 import '../../styles/businessStyles/B8Marketing.css';
 import {
@@ -20,9 +20,9 @@ import {
   MarketingCompany, 
   MarketingPricingPlan
 } from '../../types/marketing';
-import ContactForm from '../../components/ContactForm';
-import SocialChannels from '../../components/SocialChannels';
-import JoinOurTeam from '../../components/JoinOurTeam';
+import ContactForm from '../../components/ui/ContactForm';
+import SocialChannels from '../../components/ui/SocialChannels';
+import JoinOurTeam from '../../components/ui/JoinOurTeam';
 
 export default function B8Marketing() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

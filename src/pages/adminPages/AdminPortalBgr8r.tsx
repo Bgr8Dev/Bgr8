@@ -1,4 +1,6 @@
-import { FaGraduationCap, FaChalkboardTeacher, FaBook, FaUserGraduate } from 'react-icons/fa';
+import { FaGraduationCap, FaChalkboardTeacher, FaBook, FaUserGraduate, FaPlus, FaEdit, FaTrash, FaEye, FaDollarSign, FaUsers, FaUserCheck } from 'react-icons/fa';
+import '../../styles/admin/AdminPortalBgr8r.css';
+import { useState } from 'react';
 
 interface AdminPortalBgr8rProps {
   stats?: {
@@ -10,6 +12,8 @@ interface AdminPortalBgr8rProps {
 }
 
 export function AdminPortalBgr8r({ stats }: AdminPortalBgr8rProps) {
+  const [loading] = useState(false);
+  
   const educationPrograms = [
     {
       name: 'Basic Learning',
@@ -34,91 +38,117 @@ export function AdminPortalBgr8r({ stats }: AdminPortalBgr8rProps) {
     }
   ];
 
+  const handleAddProgram = () => {
+    // Implementation for adding a new program
+    console.log('Add new program');
+  };
+
+  if (loading) {
+    return (
+      <div className="bgr8r-admin-container">
+        <div className="bgr8r-loading">
+          <FaGraduationCap className="bgr8r-spinner" />
+          <p>Loading education programs...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="admin-business-portal">
-      <h2><FaGraduationCap /> Bgr8r Administration</h2>
-      
-      <div className="business-stats-cards">
-        <div className="stat-card">
-          <h3>Total Students</h3>
-          <p>{stats?.totalMembers || 240}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Active Courses</h3>
-          <p>{stats?.activeMembers || 16}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Revenue (Monthly)</h3>
-          <p>${stats?.revenue || 14500}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Student Engagement</h3>
-          <p>{stats?.engagement || 78}%</p>
+    <div className="bgr8r-admin-container">
+      <div className="bgr8r-admin-header">
+        <h2>Bgr8r Education</h2>
+        <div className="bgr8r-admin-actions">
+          <button className="primary" onClick={handleAddProgram}>
+            <FaPlus /> Add Program
+          </button>
         </div>
       </div>
-      
-      <div className="education-programs-section">
-        <h3><FaBook /> Current Education Programs</h3>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Program Name</th>
-              <th>Students</th>
-              <th>Teachers</th>
-              <th>Revenue</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {educationPrograms.map((program, index) => (
-              <tr key={index}>
-                <td>{program.name}</td>
-                <td>{program.students}</td>
-                <td>{program.teachers}</td>
-                <td>{program.revenue}</td>
-                <td>
-                  <span className={`status-badge ${program.status.toLowerCase()}`}>
-                    {program.status}
-                  </span>
-                </td>
-                <td>
-                  <button className="action-btn edit">Edit</button>
-                  <button className="action-btn view">View</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      {/* Stats Section */}
+      <div className="bgr8r-stats-grid">
+        <div className="bgr8r-stat-card">
+          <FaUserGraduate className="bgr8r-stat-icon" />
+          <p className="bgr8r-stat-value">{stats?.totalMembers || 240}</p>
+          <p className="bgr8r-stat-label">Total Students</p>
+        </div>
+        <div className="bgr8r-stat-card">
+          <FaChalkboardTeacher className="bgr8r-stat-icon" />
+          <p className="bgr8r-stat-value">{stats?.activeMembers || 16}</p>
+          <p className="bgr8r-stat-label">Teachers</p>
+        </div>
+        <div className="bgr8r-stat-card">
+          <FaDollarSign className="bgr8r-stat-icon" />
+          <p className="bgr8r-stat-value">${stats?.revenue || 14500}</p>
+          <p className="bgr8r-stat-label">Revenue</p>
+        </div>
+        <div className="bgr8r-stat-card">
+          <FaUsers className="bgr8r-stat-icon" />
+          <p className="bgr8r-stat-value">{stats?.engagement || 85}%</p>
+          <p className="bgr8r-stat-label">Engagement</p>
+        </div>
       </div>
-      
-      <div className="admin-actions-grid">
-        <div className="admin-action-card">
-          <FaChalkboardTeacher className="action-icon" />
-          <h4>Manage Teachers</h4>
-          <p>Add, remove, or update teacher profiles and assignments</p>
-          <button className="admin-action-btn">Manage</button>
+
+      {/* Programs Section */}
+      <div className="bgr8r-programs-section">
+        <div className="bgr8r-section-header">
+          <h3 className="bgr8r-section-title">
+            <FaBook /> Education Programs
+          </h3>
         </div>
-        
-        <div className="admin-action-card">
-          <FaUserGraduate className="action-icon" />
-          <h4>Student Enrollments</h4>
-          <p>View and manage student enrollments and course progress</p>
-          <button className="admin-action-btn">Manage</button>
-        </div>
-        
-        <div className="admin-action-card">
-          <FaBook className="action-icon" />
-          <h4>Course Materials</h4>
-          <p>Update course content, assignments, and resources</p>
-          <button className="admin-action-btn">Manage</button>
-        </div>
-        
-        <div className="admin-action-card">
-          <FaGraduationCap className="action-icon" />
-          <h4>New Programs</h4>
-          <p>Create and set up new education programs</p>
-          <button className="admin-action-btn">Create</button>
+
+        <div className="bgr8r-programs-grid">
+          {educationPrograms.map((program, index) => (
+            <div key={index} className="bgr8r-program-card">
+              <div className="bgr8r-program-header">
+                <h4 className="bgr8r-program-name">{program.name}</h4>
+              </div>
+              <div className="bgr8r-program-content">
+                <div className="bgr8r-program-stats">
+                  <div className="bgr8r-program-stat">
+                    <span className="bgr8r-program-stat-label">Students</span>
+                    <p className="bgr8r-program-stat-value">
+                      <FaUserGraduate /> {program.students}
+                    </p>
+                  </div>
+                  <div className="bgr8r-program-stat">
+                    <span className="bgr8r-program-stat-label">Teachers</span>
+                    <p className="bgr8r-program-stat-value">
+                      <FaChalkboardTeacher /> {program.teachers}
+                    </p>
+                  </div>
+                  <div className="bgr8r-program-stat">
+                    <span className="bgr8r-program-stat-label">Revenue</span>
+                    <p className="bgr8r-program-stat-value">
+                      <FaDollarSign /> {program.revenue}
+                    </p>
+                  </div>
+                  <div className="bgr8r-program-stat">
+                    <span className="bgr8r-program-stat-label">Status</span>
+                    <p className="bgr8r-program-stat-value">
+                      <FaUserCheck /> {program.status}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="bgr8r-program-footer">
+                <span className={`bgr8r-program-status ${program.status.toLowerCase()}`}>
+                  {program.status}
+                </span>
+                <div className="bgr8r-program-actions">
+                  <button title="View Details">
+                    <FaEye />
+                  </button>
+                  <button title="Edit Program">
+                    <FaEdit />
+                  </button>
+                  <button title="Delete Program">
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
