@@ -1,120 +1,273 @@
 .clothing-management {
-  padding: 1rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  min-height: 100vh;
 }
 
 .clothing-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.clothing-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.clothing-header h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #fff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.clothing-header h3:hover {
+  transform: translateY(-2px);
 }
 
 .add-item-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #4CAF50;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(45deg, #ffd700, #daa520);
   border: none;
-  border-radius: 5px;
-  color: white;
+  border-radius: 25px;
+  color: #000;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.add-item-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
 .add-item-button:hover {
-  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.add-item-button:hover::before {
+  left: 100%;
 }
 
 .clothing-items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2.5rem;
+  padding: 1rem;
 }
 
 .clothing-item-card {
-  background-color: #222;
-  border-radius: 10px;
+  background: rgba(34, 34, 34, 0.8);
+  border-radius: 15px;
   overflow: hidden;
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  /* -webkit-backdrop-filter: blur(10px); */
+  /* backdrop-filter: blur(10px); */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clothing-item-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 15px;
+  padding: 2px;
+  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .clothing-item-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+}
+
+.clothing-item-card:hover::before {
+  opacity: 1;
 }
 
 .clothing-item-card img {
   width: 100%;
-  height: 200px;
+  height: 300px;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.clothing-item-card:hover img {
+  transform: scale(1.05);
 }
 
 .clothing-item-card h4 {
-  padding: 1rem;
+  padding: 1.5rem 1.5rem 0.5rem;
   margin: 0;
   color: white;
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
 .clothing-item-card p {
-  padding: 0 1rem;
+  padding: 0 1.5rem;
   margin: 0.5rem 0;
-  color: #888;
+  color: #ffd700;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 .stock-status {
-  font-weight: bold;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
 }
 
-.in-stock {
-  color: #4CAF50 !important;
+.stock-status.in-stock {
+  color: #4CAF50;
+  text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
 }
 
-.out-of-stock {
-  color: #f44336 !important;
+.stock-status.out-of-stock {
+  color: #f44336;
+  text-shadow: 0 0 10px rgba(244, 67, 54, 0.3);
 }
 
 .item-actions {
   display: flex;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.clothing-item-card:hover .item-actions {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .item-actions button {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.item-actions button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.item-actions button:hover::before {
+  left: 100%;
 }
 
 .item-actions button:first-child {
-  background-color: #2196F3;
+  background: linear-gradient(45deg, #2196F3, #1976D2);
   color: white;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
 }
 
 .item-actions button:first-child:hover {
-  background-color: #1976D2;
+  background: linear-gradient(45deg, #1976D2, #1565C0);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
 }
 
 .delete-button {
-  background-color: #f44336;
+  background: linear-gradient(45deg, #f44336, #d32f2f);
   color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
 }
 
 .delete-button:hover {
-  background-color: #d32f2f;
+  background: linear-gradient(45deg, #d32f2f, #c62828);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 @media (max-width: 768px) {
   .clothing-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
   }
 
   .clothing-item-card img {
-    height: 150px;
+    height: 250px;
   }
 
   .item-actions {
+    opacity: 1;
+    transform: translateY(0);
     flex-direction: column;
+  }
+
+  .clothing-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .clothing-header h3 {
+    font-size: 2rem;
+  }
+
+  .add-item-button {
+    width: 100%;
+    max-width: 300px;
   }
 } 

@@ -10,6 +10,7 @@
   align-items: center;
   z-index: 1000;
   padding: 20px;
+  overflow: hidden;
 }
 
 .medical-content {
@@ -18,15 +19,40 @@
   border-radius: 15px;
   width: 100%;
   max-width: 600px;
+  max-height: 90vh;
   position: relative;
   color: white;
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #FFD700 #333;
+}
+
+/* Custom scrollbar for webkit browsers */
+.medical-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.medical-content::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 4px;
+}
+
+.medical-content::-webkit-scrollbar-thumb {
+  background: #FFD700;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.medical-content::-webkit-scrollbar-thumb:hover {
+  background: #DAA520;
 }
 
 .close-button {
-  position: absolute;
+  position: sticky;
   top: 15px;
   right: 15px;
+  float: right;
   background: none;
   border: none;
   color: #FFD700;
@@ -34,6 +60,7 @@
   cursor: pointer;
   padding: 5px;
   transition: transform 0.3s;
+  z-index: 2;
 }
 
 .close-button:hover {
@@ -57,6 +84,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding-bottom: 1rem; /* Add padding at the bottom for better scrolling experience */
 }
 
 .form-group {
@@ -108,12 +136,25 @@
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
 
+/* Add some spacing after social channels */
+.medical-social-channels {
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+}
+
 @media (max-width: 768px) {
   .medical-content {
+    max-height: 85vh; /* Slightly smaller on mobile for better usability */
     padding: 1.5rem;
   }
   
   .medical-content h2 {
     font-size: 1.5rem;
+    margin-top: 1.5rem; /* Add space for the sticky close button */
+  }
+  
+  .close-button {
+    top: 10px;
+    right: 10px;
   }
 } 

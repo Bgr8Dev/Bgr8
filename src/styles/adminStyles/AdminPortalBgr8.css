@@ -1,68 +1,288 @@
+.admin-section {
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  min-height: 100vh;
+}
+
+.admin-section h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #fff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.admin-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, #ffd700, transparent);
+  animation: shimmerWidth 3s infinite;
+}
+
 .medical-registrations-section {
-  margin-top: 2rem;
-  padding: 1rem;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: rgba(34, 34, 34, 0.6);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.medical-registrations-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.medical-registrations-section h3 {
+  font-size: 2rem;
+  color: #fff;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.medical-registrations-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  animation: shimmer 2s infinite;
 }
 
 .registrations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
 }
 
 .registration-card {
-  background-color: #222;
-  border-radius: 8px;
+  background: rgba(34, 34, 34, 0.8);
+  border-radius: 15px;
   overflow: hidden;
-  transition: transform 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeInUp 0.5s ease backwards;
+  animation-delay: calc(var(--animation-order) * 0.1s);
+}
+
+.registration-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 15px;
+  padding: 1px;
+  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .registration-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+}
+
+.registration-card:hover::before {
+  opacity: 1;
 }
 
 .registration-header {
-  background-color: #1a1a1a;
-  padding: 1rem;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(17, 17, 17, 0.95) 100%);
+  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .registration-header h4 {
   margin: 0;
   color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .status-select {
-  padding: 0.5rem;
-  border-radius: 4px;
+  padding: 0.5rem 2rem 0.5rem 1rem;
+  border-radius: 8px;
   border: none;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1em;
 }
 
-.status-select.status-pending { background-color: #FFA726; }
-.status-select.status-approved { background-color: #4CAF50; }
-.status-select.status-rejected { background-color: #f44336; }
+.status-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.status-select.status-pending {
+  background-color: #FFA726;
+  color: #000;
+}
+
+.status-select.status-approved {
+  background-color: #4CAF50;
+  color: #fff;
+}
+
+.status-select.status-rejected {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.registration-content {
+  padding: 1.5rem;
+}
+
+.registration-content p {
+  margin: 0.8rem 0;
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.registration-content p strong {
+  color: #ffd700;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
 
 .loading {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  padding: 3rem;
+  color: #ffd700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.loading-dots {
+  display: inline-block;
+  animation: loadingDots 1.4s infinite both;
+}
+
+@keyframes loadingDots {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+  100% { content: '.'; }
 }
 
 .error {
   text-align: center;
-  padding: 1rem;
+  padding: 1.5rem;
   color: #f44336;
-  background-color: rgba(244, 67, 54, 0.1);
-  border-radius: 4px;
-  margin: 1rem 0;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  border: 1px solid rgba(244, 67, 54, 0.2);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes shimmerWidth {
+  0% { width: 0; }
+  50% { width: 60%; }
+  100% { width: 0; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 @media (max-width: 768px) {
+  .admin-section {
+    padding: 1rem;
+  }
+
+  .admin-section h2 {
+    font-size: 2rem;
+  }
+
+  .medical-registrations-section {
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .medical-registrations-section h3 {
+    font-size: 1.5rem;
+  }
+
   .registrations-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .registration-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .status-select {
+    width: 100%;
   }
 } 
