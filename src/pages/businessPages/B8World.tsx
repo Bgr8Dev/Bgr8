@@ -1,65 +1,27 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/B8World.css';
 import ContactForm from '../../components/ui/ContactForm';
-import { FaHandHoldingHeart, FaHospital, FaUsers, FaMosque, FaGraduationCap, FaHandsHelping, FaGlobe, FaTimes, FaCreditCard, FaPoundSign } from 'react-icons/fa';
+import { FaTimes, FaCreditCard, FaPoundSign } from 'react-icons/fa';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
+import { db } from '../../firebase';
+import { collection, query, getDocs, where } from 'firebase/firestore';
+import { renderIcon } from '../../utils/iconMapping';
 
-const worldPartners = [
-  {
-    name: "Islamic Relief UK",
-    description: "A faith-inspired humanitarian aid and development agency working to transform and save the lives of some of the most vulnerable people in over 40 countries worldwide.",
-    logo: "/assets/charity1.jpg",
-    link: "https://www.islamic-relief.org.uk/",
-    icon: <FaHandHoldingHeart />
-  },
-  {
-    name: "Maternal Aid Association (Maa)",
-    description: "Dedicated to improving maternal healthcare and reducing maternal mortality in developing countries through education, resources, and direct medical support.",
-    logo: "/assets/charity2.jpg",
-    link: "https://maternalaidsociety.org/",
-    icon: <FaHospital />
-  },
-  {
-    name: "Doctors without Borders (MSF)",
-    description: "An international humanitarian medical non-governmental organization known for its projects in conflict zones and countries affected by endemic diseases.",
-    logo: "/assets/charity3.jpg",
-    link: "https://www.msf.org/",
-    icon: <FaHospital />
-  },
-  {
-    name: "Kingston Muslim Youth (KMY)",
-    description: "Empowering young Muslims in Kingston through educational programs, social activities, and community service projects that foster leadership and personal growth.",
-    logo: "/assets/charity1.jpg",
-    link: "https://kingstonmuslimyouth.org.uk/",
-    icon: <FaUsers />
-  },
-  {
-    name: "Muslim Cultural & Welfare Association of Sutton (MCWAS)",
-    description: "Promoting community cohesion and providing welfare services to Muslims in Sutton, while fostering interfaith dialogue and cultural awareness.",
-    logo: "/assets/charity2.jpg",
-    link: "https://mcwas.org.uk/",
-    icon: <FaMosque />
-  },
-  {
-    name: "MATW Project",
-    description: "Muslims Around The World Project delivers humanitarian aid and sustainable development initiatives to communities in need, focusing on education, clean water, and healthcare.",
-    logo: "/assets/charity3.jpg",
-    link: "https://matwproject.org/",
-    icon: <FaGraduationCap />
-  },
-  {
-    name: "Disasters Emergency Committee (DEC)",
-    description: "Uniting 15 leading UK aid charities to raise funds quickly and efficiently in times of crisis overseas, ensuring humanitarian aid reaches those who need it most.",
-    logo: "/assets/charity1.jpg",
-    link: "https://www.dec.org.uk/",
-    icon: <FaHandsHelping />
-  }
-];
+// Add interface for partner data
+interface Partner {
+  id: string;
+  organization: string;
+  description?: string;
+  logoUrl?: string;
+  websiteLink?: string;
+  icon?: string;
+  status: string;
+}
 
 export default function B8World() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -69,6 +31,8 @@ export default function B8World() {
   const [donationAmount, setDonationAmount] = useState<number | string>('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loadingPartners, setLoadingPartners] = useState(true);
 
   useEffect(() => {
     const handleWindowResize = () => {
@@ -81,6 +45,39 @@ export default function B8World() {
     return () => {
       window.removeEventListener('resize', handleWindowResize);
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const partnersQuery = query(
+          collection(db, 'B8WorldPartners'), 
+          where('status', '==', 'active')
+        );
+        const partnersSnapshot = await getDocs(partnersQuery);
+        
+        const partnersData: Partner[] = [];
+        partnersSnapshot.forEach((doc) => {
+          partnersData.push({
+            id: doc.id,
+            organization: doc.data().organization || '',
+            description: doc.data().description || '',
+            logoUrl: doc.data().logoUrl || '',
+            websiteLink: doc.data().websiteLink || '',
+            icon: doc.data().icon || 'FaHandHoldingHeart',
+            status: doc.data().status
+          });
+        });
+        
+        setPartners(partnersData);
+      } catch (error) {
+        console.error('Error fetching partners:', error);
+      } finally {
+        setLoadingPartners(false);
+      }
+    };
+    
+    fetchPartners();
   }, []);
 
   const openImageModal = (index: number) => {
@@ -109,10 +106,9 @@ export default function B8World() {
   };
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only numbers and decimal points
     const value = e.target.value;
-    if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-      setDonationAmount(value);
+    if (value === '' || /^\d+$/.test(value)) {
+      setDonationAmount(value === '' ? '' : parseInt(value));
     }
   };
 
@@ -217,27 +213,43 @@ export default function B8World() {
             </section>
 
             {/* World Partners Section */}
-            <section className="world-partners-showcase">
+            <section className="world-partners">
               <h2>Our Global Partners</h2>
-              <p>B8 World collaborates with established charitable organizations around the globe to maximize our impact and create sustainable change in communities that need it most.</p>
-
+              <p>We collaborate with organizations around the world to make a difference.</p>
+              
               <div className="world-partners-grid">
-                {worldPartners.map((partner, index) => (
-                  <a 
-                    key={index}
-                    href={partner.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="world-partner-card"
-                  >
-                    <img src={partner.logo} alt={partner.name} />
-                    <div className="partner-icon">
-                      {partner.icon || <FaGlobe />}
+                {loadingPartners ? (
+                  <div className="loading-partners">Loading partners...</div>
+                ) : partners.length > 0 ? (
+                  partners.map((partner) => (
+                    <div className="world-partner-card" key={partner.id}>
+                      <div className="partner-icon">
+                        {partner.icon && renderIcon(partner.icon)}
+                      </div>
+                      <h3>{partner.organization}</h3>
+                      {partner.description && <p>{partner.description}</p>}
+                      {partner.websiteLink && (
+                        <a 
+                          href={partner.websiteLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="partner-link"
+                        >
+                          Visit Website
+                        </a>
+                      )}
+                      {partner.logoUrl && (
+                        <img 
+                          src={partner.logoUrl} 
+                          alt={`${partner.organization} logo`} 
+                          className="partner-logo" 
+                        />
+                      )}
                     </div>
-                    <h3>{partner.name}</h3>
-                    <p>{partner.description}</p>
-                  </a>
-                ))}
+                  ))
+                ) : (
+                  <p className="no-partners">No partners available at the moment.</p>
+                )}
               </div>
             </section>
 

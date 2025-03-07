@@ -1,7 +1,7 @@
 import { BusinessSection } from '../../components/admin/BusinessSection';
 import { BusinessStats } from '../../types/admin';
 import { CarClubRequests } from '../../components/admin/CarClubRequests';
-import '../../styles/admin/CarClubRequests.css';
+import '../../styles/adminStyles/CarClubRequests.css';
 
 interface AdminPortalB8CarClubProps {
   stats: BusinessStats;

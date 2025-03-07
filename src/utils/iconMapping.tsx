@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import * as SiIcons from 'react-icons/si';
 
@@ -116,10 +116,10 @@ export const IconPicker: React.FC<{
   selectedIcon: string;
   onSelectIcon: (iconName: string) => void;
 }> = ({ selectedIcon, onSelectIcon }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const icons = getAvailableIcons();
-  const pickerRef = React.useRef<HTMLDivElement>(null);
 
   // Filter icons based on search term
   const filteredIcons = icons.filter(({ name }) => 
@@ -148,7 +148,7 @@ export const IconPicker: React.FC<{
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setIsPickerOpen(false);
+        setIsOpen(false);
       }
     };
     
@@ -161,18 +161,44 @@ export const IconPicker: React.FC<{
   const currentIcon = renderIcon(selectedIcon);
 
   return (
-    <div className="icon-picker-container" ref={pickerRef}>
+    <div ref={pickerRef} className="icon-picker-container" style={{ position: 'relative', zIndex: 100 }}>
       <div 
-        className="icon-picker-preview" 
-        onClick={() => setIsPickerOpen(!isPickerOpen)}
-        title="Click to select an icon"
+        className="selected-icon-display" 
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          padding: '8px 12px',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          background: 'rgba(255, 255, 255, 0.05)',
+          zIndex: 101,
+          position: 'relative'
+        }}
       >
-        <div className="current-icon">{currentIcon}</div>
+        {currentIcon}
         <span className="icon-name">{selectedIcon}</span>
       </div>
       
-      {isPickerOpen && (
-        <div className="icon-picker-dropdown">
+      {isOpen && (
+        <div 
+          className="icon-picker-dropdown"
+          style={{ 
+            position: 'absolute', 
+            top: '100%', 
+            left: 0, 
+            width: '300px',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            background: '#222',
+            border: '1px solid #444',
+            borderRadius: '4px',
+            padding: '10px',
+            zIndex: 102,
+            boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+          }}
+        >
           <div className="icon-search">
             <input
               type="text"
@@ -195,7 +221,7 @@ export const IconPicker: React.FC<{
                       className={`icon-item ${name === selectedIcon ? 'selected' : ''}`}
                       onClick={() => {
                         onSelectIcon(name);
-                        setIsPickerOpen(false);
+                        setIsOpen(false);
                       }}
                       title={name}
                     >
@@ -220,7 +246,7 @@ export const IconPicker: React.FC<{
                             className={`icon-item ${name === selectedIcon ? 'selected' : ''}`}
                             onClick={() => {
                               onSelectIcon(name);
-                              setIsPickerOpen(false);
+                              setIsOpen(false);
                             }}
                             title={name}
                           >
@@ -246,7 +272,7 @@ export const IconPicker: React.FC<{
                             className={`icon-item ${name === selectedIcon ? 'selected' : ''}`}
                             onClick={() => {
                               onSelectIcon(name);
-                              setIsPickerOpen(false);
+                              setIsOpen(false);
                             }}
                             title={name}
                           >

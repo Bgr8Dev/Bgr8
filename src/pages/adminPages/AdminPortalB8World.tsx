@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserCheck, FaDollarSign, FaChartLine, FaCog, FaDownload, FaEnvelope, FaEdit, FaSave, FaCheck, FaSpinner, FaPlus, FaTrash } from 'react-icons/fa';
+import { IconPicker } from '../../utils/iconMapping';
 import '../../styles/adminStyles/AdminPortalB8World.css';
 import { db } from '../../firebase';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, query, getDocs, addDoc, deleteDoc } from 'firebase/firestore';
 
 interface AdminPortalB8WorldProps {
   stats: { totalMembers: number; activeMembers: number; revenue: number; engagement: number };
@@ -35,6 +36,10 @@ interface Partner {
   startDate: string;
   contactPerson?: string;
   email?: string;
+  description?: string;
+  logoUrl?: string;
+  websiteLink?: string;
+  icon?: string;
 }
 
 export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldProps) {
@@ -42,72 +47,93 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
   const [stats, setStats] = useState(initialStats);
   
   // State for editable sections
-  const [editMode, setEditMode] = useState<{
-    stats: boolean;
-    initiative: string | null;
-    donation: string | null;
-    partner: string | null;
-  }>({
+  const [editMode, setEditMode] = useState({
     stats: false,
-    initiative: null,
-    donation: null,
-    partner: null
+    initiative: null as string | null,
+    donation: null as string | null,
+    partner: null as string | null,
+    partners: null as string | null
   });
   
   // State for saving status
-  const [saving, setSaving] = useState<string>('');
+  const [saving, setSaving] = useState('');
   
   // State for success/error messages
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   
   // Initialize editable data
-  const [initiatives, setInitiatives] = useState<Initiative[]>([
-    { id: '1', name: 'Clean Water Project', status: 'active', participants: 125, lastUpdated: 'Yesterday', description: 'Providing clean water to communities in need.' },
-    { id: '2', name: 'Education Fund', status: 'active', participants: 87, lastUpdated: '3 days ago', description: 'Supporting education initiatives in underserved areas.' },
-    { id: '3', name: 'Wildlife Conservation', status: 'planning', participants: 42, lastUpdated: '1 week ago', description: 'Protecting endangered species and their habitats.' }
-  ]);
+  const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   
-  const [donations, setDonations] = useState<Donation[]>([
-    { id: '1', donor: 'Anonymous', amount: 150, initiative: 'Clean Water Project', date: 'Today', message: 'Keep up the great work!' },
-    { id: '2', donor: 'John D.', amount: 75, initiative: 'Education Fund', date: 'Yesterday', message: 'Happy to support education.' },
-    { id: '3', donor: 'Sarah M.', amount: 200, initiative: 'Wildlife Conservation', date: '3 days ago', message: 'For the animals!' }
-  ]);
+  const [donations, setDonations] = useState<Donation[]>([]);
   
-  const [partners, setPartners] = useState<Partner[]>([
-    { id: '1', organization: 'Global Water Alliance', partnershipType: 'Program', status: 'active', startDate: 'Jan 2023', contactPerson: 'Michael Brown', email: 'mbrown@gwa.org' },
-    { id: '2', organization: 'Education First', partnershipType: 'Sponsorship', status: 'active', startDate: 'Mar 2023', contactPerson: 'Jessica Taylor', email: 'jtaylor@edfirst.com' },
-    { id: '3', organization: 'Wildlife Trust', partnershipType: 'Program', status: 'pending', startDate: 'N/A', contactPerson: 'Robert Wilson', email: 'rwilson@wildlife.org' }
-  ]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load data from Firestore
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const docRef = doc(db, 'settings', 'b8World');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.stats) setStats(data.stats);
-          if (data.initiatives) setInitiatives(data.initiatives);
-          if (data.donations) setDonations(data.donations);
-          if (data.partners) setPartners(data.partners);
-        }
-      } catch (error) {
-        console.error('Error fetching B8 World data:', error);
-        setErrorMessage('Error loading data. Please refresh the page.');
-      }
-    };
-    
     fetchData();
   }, []);
+  
+  const fetchData = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+    
+    try {
+      // Fetch settings document
+      const docRef = doc(db, 'settings', 'b8World');
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setStats({
+          totalMembers: data.totalMembers || initialStats.totalMembers,
+          activeMembers: data.activeMembers || initialStats.activeMembers,
+          revenue: data.revenue || initialStats.revenue,
+          engagement: data.engagement || initialStats.engagement
+        });
+        
+        // Set initiatives and donations from the settings document
+        if (data.initiatives) setInitiatives(data.initiatives);
+        if (data.donations) setDonations(data.donations);
+      }
+      
+      // Fetch partners from dedicated collection
+      const partnersQuery = query(collection(db, 'B8WorldPartners'));
+      const partnersSnapshot = await getDocs(partnersQuery);
+      
+      const partnersData: Partner[] = [];
+      partnersSnapshot.forEach((doc) => {
+        partnersData.push({
+          id: doc.id,
+          organization: doc.data().organization || '',
+          partnershipType: doc.data().partnershipType || '',
+          status: doc.data().status || 'pending',
+          startDate: doc.data().startDate || '',
+          contactPerson: doc.data().contactPerson || '',
+          email: doc.data().email || '',
+          description: doc.data().description || '',
+          logoUrl: doc.data().logoUrl || '',
+          websiteLink: doc.data().websiteLink || '',
+          icon: doc.data().icon || 'FaHandHoldingHeart'
+        });
+      });
+      
+      setPartners(partnersData);
+    } catch (error) {
+      console.error('Error fetching B8 World data:', error);
+      setErrorMessage('Error loading data. Please refresh the page.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Toggle edit mode for a section
   const toggleEditMode = (section: keyof typeof editMode, id: string | null = null) => {
     setEditMode({
       ...editMode,
-      [section]: id === editMode[section] ? null : id
+      [section]: section === 'stats' ? !editMode.stats : id
     });
   };
   
@@ -189,26 +215,58 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
   };
   
   const savePartner = async (partner: Partner) => {
+    setSaving(`partner-${partner.id}`);
+    setErrorMessage('');
+    
     try {
-      setSaving(`partner-${partner.id}`);
-      setSuccessMessage('');
-      setErrorMessage('');
+      // Reference to the partners collection
+      const partnersCollectionRef = collection(db, 'B8WorldPartners');
       
-      const updatedPartners = partners.map(p => 
-        p.id === partner.id ? partner : p
-      );
+      // Check if this is a new partner or an existing one
+      if (partner.id.startsWith('partner-')) {
+        // This is a new partner, add it to the collection
+        const newPartnerRef = await addDoc(partnersCollectionRef, {
+          organization: partner.organization,
+          partnershipType: partner.partnershipType,
+          status: partner.status,
+          startDate: partner.startDate,
+          contactPerson: partner.contactPerson || '',
+          email: partner.email || '',
+          description: partner.description || '',
+          logoUrl: partner.logoUrl || '',
+          websiteLink: partner.websiteLink || '',
+          icon: partner.icon || 'FaHandHoldingHeart',
+          createdAt: new Date()
+        });
+        
+        // Update the partner in state with the new ID from Firestore
+        setPartners(partners.map(p => 
+          p.id === partner.id ? { ...partner, id: newPartnerRef.id } : p
+        ));
+      } else {
+        // This is an existing partner, update it
+        const partnerRef = doc(db, 'B8WorldPartners', partner.id);
+        await updateDoc(partnerRef, {
+          organization: partner.organization,
+          partnershipType: partner.partnershipType,
+          status: partner.status,
+          startDate: partner.startDate,
+          contactPerson: partner.contactPerson || '',
+          email: partner.email || '',
+          description: partner.description || '',
+          logoUrl: partner.logoUrl || '',
+          websiteLink: partner.websiteLink || '',
+          icon: partner.icon || 'FaHandHoldingHeart',
+          updatedAt: new Date()
+        });
+      }
       
-      await updateDoc(doc(db, 'settings', 'b8World'), {
-        partners: updatedPartners
-      });
-      
-      setPartners(updatedPartners);
-      setSuccessMessage('Partner updated successfully!');
+      setSuccessMessage('Partner saved successfully!');
       setTimeout(() => setSuccessMessage(''), 5000);
-      setEditMode({...editMode, partner: null});
+      toggleEditMode('partner', null);
     } catch (error) {
       console.error('Error saving partner:', error);
-      setErrorMessage('Error saving partner: ' + (error as Error).message);
+      setErrorMessage('Failed to save partner. Please try again.');
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setSaving('');
@@ -246,17 +304,20 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
   
   const addPartner = () => {
     const newPartner: Partner = {
-      id: Date.now().toString(),
+      id: `partner-${Date.now()}`,
       organization: 'New Partner Organization',
-      partnershipType: 'Program',
+      partnershipType: 'Charity',
       status: 'pending',
-      startDate: 'TBD',
-      contactPerson: 'Contact Name',
-      email: 'contact@example.com'
+      startDate: new Date().toISOString().split('T')[0],
+      contactPerson: '',
+      email: '',
+      description: '',
+      logoUrl: '',
+      websiteLink: '',
+      icon: 'FaHandHoldingHeart'
     };
-    
     setPartners([...partners, newPartner]);
-    setEditMode({...editMode, partner: newPartner.id});
+    toggleEditMode('partner', newPartner.id);
   };
   
   // Remove items
@@ -303,20 +364,22 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
   };
   
   const removePartner = async (id: string) => {
+    setSaving(`remove-partner-${id}`);
+    setErrorMessage('');
+    
     try {
-      setSaving(`remove-partner-${id}`);
-      const updatedPartners = partners.filter(p => p.id !== id);
+      // Only delete from Firestore if it's a real document (not a temporary one)
+      if (!id.startsWith('partner-')) {
+        await deleteDoc(doc(db, 'B8WorldPartners', id));
+      }
       
-      await updateDoc(doc(db, 'settings', 'b8World'), {
-        partners: updatedPartners
-      });
-      
-      setPartners(updatedPartners);
-      setSuccessMessage('Partner removed successfully');
+      // Remove from state
+      setPartners(partners.filter(partner => partner.id !== id));
+      setSuccessMessage('Partner removed successfully!');
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
       console.error('Error removing partner:', error);
-      setErrorMessage('Error removing partner: ' + (error as Error).message);
+      setErrorMessage('Failed to remove partner. Please try again.');
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setSaving('');
@@ -358,17 +421,24 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
   };
   
   const updatePartner = (id: string, field: keyof Partner, value: string) => {
-    setPartners(partners.map(partner => {
-      if (partner.id === id) {
-        if (field === 'status') {
-          return { ...partner, [field]: value as 'active' | 'pending' | 'inactive' };
-        }
-        return { ...partner, [field]: value };
-      }
-      return partner;
-    }));
+    setPartners(partners.map(partner => 
+      partner.id === id ? { ...partner, [field]: value } : partner
+    ));
   };
   
+  // Add a specific style to the partner edit form
+  const partnerEditFormStyle = {
+    position: 'relative' as const,
+    zIndex: 20,
+  };
+
+  // Add a specific style to inputs
+  const inputStyle = {
+    position: 'relative' as const,
+    zIndex: 30,
+    pointerEvents: 'auto' as const,
+  };
+
   return (
     <div className="admin-portal-page">
       <h2>B8 World Admin Panel</h2>
@@ -489,7 +559,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
               
               {editMode.initiative === initiative.id ? (
                 <div className="world-admin-edit-form">
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Name:</label>
                     <input 
                       type="text" 
@@ -499,7 +569,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Status:</label>
                     <select 
                       value={initiative.status}
@@ -512,7 +582,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     </select>
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Participants:</label>
                     <input 
                       type="number" 
@@ -522,7 +592,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Last Updated:</label>
                     <input 
                       type="text" 
@@ -532,7 +602,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Description:</label>
                     <textarea 
                       value={initiative.description || ''}
@@ -617,7 +687,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
               
               {editMode.donation === donation.id ? (
                 <div className="world-admin-edit-form">
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Donor:</label>
                     <input 
                       type="text" 
@@ -627,7 +697,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Amount:</label>
                     <input 
                       type="number" 
@@ -637,7 +707,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Initiative:</label>
                     <input 
                       type="text" 
@@ -647,7 +717,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Date:</label>
                     <input 
                       type="text" 
@@ -657,7 +727,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                     />
                   </div>
                   
-                  <div className="form-group">
+                  <div className="admin-world-admin-world-form-group">
                     <label>Message:</label>
                     <textarea 
                       value={donation.message || ''}
@@ -734,88 +804,106 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
         
         <div className="world-admin-grid">
           {partners.map((partner) => (
-            <div className="world-admin-card" key={partner.id}>
-              <div className="world-admin-header">
-                <h4>{partner.organization}</h4>
-                <div className={`status-badge status-${partner.status}`}>
-                  {partner.status.charAt(0).toUpperCase() + partner.status.slice(1)}
-                </div>
-              </div>
-              
+            <div key={partner.id} className="world-admin-card">
               {editMode.partner === partner.id ? (
-                <div className="world-admin-edit-form">
-                  <div className="form-group">
-                    <label>Organization:</label>
+                <div className="world-admin-edit-form" style={partnerEditFormStyle}>
+                  <div className="admin-world-form-group">
+                    <label>Organization Name</label>
                     <input 
                       type="text" 
-                      value={partner.organization}
+                      value={partner.organization} 
                       onChange={(e) => updatePartner(partner.id, 'organization', e.target.value)}
                       className="edit-input"
+                      style={inputStyle}
                     />
                   </div>
-                  
-                  <div className="form-group">
-                    <label>Partnership Type:</label>
+                  <div className="admin-world-form-group">
+                    <label>Partnership Type</label>
                     <input 
                       type="text" 
-                      value={partner.partnershipType}
+                      value={partner.partnershipType} 
                       onChange={(e) => updatePartner(partner.id, 'partnershipType', e.target.value)}
                       className="edit-input"
+                      style={inputStyle}
                     />
                   </div>
-                  
-                  <div className="form-group">
-                    <label>Status:</label>
+                  <div className="admin-world-form-group">
+                    <label>Status</label>
                     <select 
-                      value={partner.status}
-                      onChange={(e) => updatePartner(partner.id, 'status', e.target.value)}
+                      value={partner.status} 
+                      onChange={(e) => updatePartner(partner.id, 'status', e.target.value as Partner['status'])}
                       className="edit-select"
+                      style={inputStyle}
                     >
                       <option value="active">Active</option>
                       <option value="pending">Pending</option>
                       <option value="inactive">Inactive</option>
                     </select>
                   </div>
-                  
-                  <div className="form-group">
-                    <label>Start Date:</label>
+                  <div className="admin-world-form-group" style={{ zIndex: 30, position: 'relative' }}>
+                    <label>Icon</label>
+                    <IconPicker 
+                      selectedIcon={partner.icon || 'FaHandHoldingHeart'} 
+                      onSelectIcon={(iconName) => updatePartner(partner.id, 'icon', iconName)} 
+                    />
+                  </div>
+                  <div className="admin-world-form-group">
+                    <label>Start Date</label>
                     <input 
-                      type="text" 
-                      value={partner.startDate}
+                      type="date" 
+                      value={partner.startDate} 
                       onChange={(e) => updatePartner(partner.id, 'startDate', e.target.value)}
-                      className="edit-input"
+                      style={inputStyle}
                     />
                   </div>
-                  
-                  <div className="form-group">
-                    <label>Contact Person:</label>
+                  <div className="admin-world-form-group">
+                    <label>Contact Person</label>
                     <input 
                       type="text" 
-                      value={partner.contactPerson || ''}
+                      value={partner.contactPerson || ''} 
                       onChange={(e) => updatePartner(partner.id, 'contactPerson', e.target.value)}
-                      className="edit-input"
+                      style={inputStyle}
                     />
                   </div>
-                  
-                  <div className="form-group">
-                    <label>Email:</label>
+                  <div className="admin-world-form-group">
+                    <label>Email</label>
                     <input 
                       type="email" 
-                      value={partner.email || ''}
+                      value={partner.email || ''} 
                       onChange={(e) => updatePartner(partner.id, 'email', e.target.value)}
-                      className="edit-input"
+                      style={inputStyle}
                     />
                   </div>
-                  
+                  <div className="admin-world-form-group">
+                    <label>Description</label>
+                    <textarea 
+                      className="edit-textarea"
+                      value={partner.description || ''} 
+                      onChange={(e) => updatePartner(partner.id, 'description', e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div className="admin-world-form-group">
+                    <label>Logo URL</label>
+                    <input 
+                      type="text" 
+                      value={partner.logoUrl || ''} 
+                      onChange={(e) => updatePartner(partner.id, 'logoUrl', e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div className="admin-world-form-group">
+                    <label>Website Link</label>
+                    <input 
+                      type="text" 
+                      value={partner.websiteLink || ''} 
+                      onChange={(e) => updatePartner(partner.id, 'websiteLink', e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
                   <div className="form-actions">
                     <button 
-                      className="action-button cancel"
-                      onClick={() => toggleEditMode('partner', null)}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      className="action-button save"
+                      className="action-button save" 
                       onClick={() => savePartner(partner)}
                       disabled={saving === `partner-${partner.id}`}
                     >
@@ -828,25 +916,17 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
                 <>
                   <div className="world-admin-content">
                     <div className="content-row">
+                      <strong>Organization:</strong>
+                      <span>{partner.organization}</span>
+                    </div>
+                    <div className="content-row">
                       <strong>Partnership Type:</strong>
                       <span>{partner.partnershipType}</span>
                     </div>
                     <div className="content-row">
-                      <strong>Start Date:</strong>
-                      <span>{partner.startDate}</span>
+                      <strong>Status:</strong>
+                      <span>{partner.status.charAt(0).toUpperCase() + partner.status.slice(1)}</span>
                     </div>
-                    {partner.contactPerson && (
-                      <div className="content-row">
-                        <strong>Contact:</strong>
-                        <span>{partner.contactPerson}</span>
-                      </div>
-                    )}
-                    {partner.email && (
-                      <div className="content-row">
-                        <strong>Email:</strong>
-                        <a href={`mailto:${partner.email}`}>{partner.email}</a>
-                      </div>
-                    )}
                   </div>
                   
                   <div className="card-actions">
@@ -871,21 +951,6 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
           ))}
         </div>
       </div>
-      
-      {/* Success/Error Messages */}
-      {successMessage && (
-        <div className="settings-success-message">
-          <FaCheck />
-          {successMessage}
-        </div>
-      )}
-      
-      {errorMessage && (
-        <div className="settings-error-message">
-          <FaTrash />
-          {errorMessage}
-        </div>
-      )}
     </div>
   );
-} 
+}

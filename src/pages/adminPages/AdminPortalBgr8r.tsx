@@ -1,5 +1,5 @@
 import { FaGraduationCap, FaChalkboardTeacher, FaBook, FaUserGraduate, FaPlus, FaEdit, FaTrash, FaEye, FaDollarSign, FaUsers, FaUserCheck } from 'react-icons/fa';
-import '../../styles/admin/AdminPortalBgr8r.css';
+import '../../styles/adminStyles/AdminPortalBgr8r.css';
 import { useState } from 'react';
 
 interface AdminPortalBgr8rProps {
