@@ -1,0 +1,38 @@
+# B8 Website Robots.txt
+# This file provides instructions to web crawlers about which parts of the site to crawl
+
+# Allow all crawlers to access the site
+User-agent: *
+Allow: /
+
+# Disallow access to admin pages
+Disallow: /admin/
+Disallow: /admin-portal/
+Disallow: /login/
+Disallow: /dashboard/
+
+# Disallow access to API endpoints
+Disallow: /api/
+
+# Sitemap location (uncomment and update when sitemap is available)
+# Sitemap: https://yourdomain.com/sitemap.xml
+
+# Crawl delay to prevent server overload (in seconds)
+Crawl-delay: 10
+
+# Specific instructions for major bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 5
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 5
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 5
+
+# Prevent access to development/staging environments if applicable
+# Disallow: /dev/
+# Disallow: /staging/ 
