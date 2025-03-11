@@ -1,0 +1,9 @@
+This file should be replaced with an actual PNG image file.
+
+Specifications:
+- Size: 192x192 pixels
+- Format: PNG with transparency
+- Content: B8 logo on black background with blue accent
+- Purpose: Used for PWA icons and app shortcuts
+
+This icon is referenced in the manifest.json file and is essential for Progressive Web App functionality. 
