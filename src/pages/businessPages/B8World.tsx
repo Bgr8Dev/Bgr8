@@ -8,7 +8,7 @@ import { FaTimes, FaCreditCard, FaPoundSign } from 'react-icons/fa';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 import { renderIcon } from '../../utils/iconMapping';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import '../../styles/businessStyles/BGr8Medical.css';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';

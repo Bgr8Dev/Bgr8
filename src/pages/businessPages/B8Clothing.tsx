@@ -7,7 +7,7 @@ import GooglePayButton from '@google-pay/button-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { FaCreditCard, FaPaypal, FaGooglePay, FaApplePay } from 'react-icons/fa';
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { ClothingItem, ClothingCategory } from '../../types/clothing';
 import '../../styles/businessStyles/B8Clothing.css';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';

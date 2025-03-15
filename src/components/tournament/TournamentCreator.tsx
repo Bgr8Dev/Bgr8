@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FaCalendarAlt, FaUsers, FaTrophy, FaMapMarkerAlt, FaInfoCircle, FaPlus, FaSpinner } from 'react-icons/fa';
 import '../../styles/tournamentStyles/TournamentCreator.css';
 import { createTournament } from '../../services/tournamentService';
-import { auth } from '../../firebase';
+import { auth } from '../../firebase/firebase';
 
 type SportType = 'football' | 'badminton' | 'esports';
 

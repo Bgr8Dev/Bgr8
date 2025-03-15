@@ -1,6 +1,6 @@
 import { collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import { logAnalyticsEvent } from "../firebase";
+import { db } from "../firebase/firebase";
+import { logAnalyticsEvent } from "../firebase/firebase";
 
 export interface Tournament {
   id?: string;

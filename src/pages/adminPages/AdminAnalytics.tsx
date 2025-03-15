@@ -26,13 +26,13 @@ import {
 import { 
   analytics,
   auth
-} from '../../firebase';
+} from '../../firebase/firebase';
 import { 
   logEvent,
   setAnalyticsCollectionEnabled
 } from 'firebase/analytics';
 import { collection, query, getDocs, where, Timestamp, orderBy, limit } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import '../../styles/adminStyles/AdminAnalytics.css';
 
 // Register Chart.js components

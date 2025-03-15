@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { FaGlobe, FaUsers, FaChartPie, FaExchangeAlt } from 'react-icons/fa';
 import '../../styles/UserDemographics.css';
 import Globe3D from '../maps/Globe3D';

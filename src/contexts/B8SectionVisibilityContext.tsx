@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase/firebase';
 import { useAuth } from './AuthContext';
 
 // Interface for B8 League section visibility settings

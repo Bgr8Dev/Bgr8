@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { collection, query, getDocs, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db, storage } from '../../firebase/firebase';
 import { CvFormData, PodcastEpisode } from '../../types/podcast';
 import '../../styles/adminStyles/AdminPortalB8Podcast.css';
 import { BusinessSection } from '../../components/admin/BusinessSection';

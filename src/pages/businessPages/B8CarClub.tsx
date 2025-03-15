@@ -8,7 +8,7 @@ import { PasswordProtectedPage } from '../../components/overlays/PasswordProtect
 import '../../styles/businessStyles/B8CarClub.css';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { useAuth } from '../../contexts/AuthContext';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { doc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 

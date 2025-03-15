@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, orderBy, where, Timestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { CarClubRequest } from '../../types/admin';
 import { 
   FaSpinner, FaCheck, FaTimes, FaEdit, FaSave, FaCarAlt, FaInstagram, 

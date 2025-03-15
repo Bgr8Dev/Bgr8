@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 

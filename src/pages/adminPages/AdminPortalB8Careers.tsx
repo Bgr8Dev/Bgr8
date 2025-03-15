@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { BusinessSection } from '../../components/admin/BusinessSection';
 import { BusinessStats } from '../../types/admin';
 import { CvFormData } from '../../types/careers';

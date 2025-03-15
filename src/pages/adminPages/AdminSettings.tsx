@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { doc, getDoc, setDoc, collection, query, getDocs, updateDoc } from 'firebase/firestore';
 import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup, FaChevronDown, FaChevronRight, FaCheckCircle, FaExclamationCircle, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';

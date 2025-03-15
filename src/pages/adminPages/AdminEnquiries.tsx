@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { collection, query, getDocs, orderBy, doc, updateDoc, deleteDoc, Timestamp, addDoc } from 'firebase/firestore';
 import { FaCheck, FaTrash, FaEnvelope, FaUndo, FaArrowLeft, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import '../../styles/adminStyles/AdminEnquiries.css';

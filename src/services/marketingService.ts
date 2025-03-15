@@ -12,7 +12,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db, storage } from '../firebase/firebase';
 import { 
   MarketingCategory, 
   MarketingSoftware, 

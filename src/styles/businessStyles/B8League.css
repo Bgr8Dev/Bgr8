@@ -881,4 +881,231 @@
   color: #ffc107;
 }
 
+/* B8FC Sign Up Section */
+.b8fc-signup-section {
+  padding: 60px 20px;
+  background: linear-gradient(to bottom, #121212, #181818);
+  border-radius: 15px;
+  margin: 40px auto;
+  max-width: 1200px;
+}
+
+.b8fc-signup-section h3 {
+  font-size: 2.5rem;
+  color: #4080ff;
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.b8fc-signup-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, #4080ff, #80a0ff);
+  border-radius: 2px;
+}
+
+/* Preset Teams */
+.preset-teams {
+  margin-bottom: 60px;
+}
+
+.preset-teams h4 {
+  font-size: 1.8rem;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.team-card {
+  background: linear-gradient(145deg, #1a1a1a, #222222);
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #333;
+  position: relative;
+  overflow: hidden;
+}
+
+.team-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #4080ff, #80a0ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.team-card:hover::before {
+  opacity: 1;
+}
+
+.team-card h5 {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.join-team-btn {
+  background: linear-gradient(to right, #4080ff, #80a0ff);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.join-team-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(64, 128, 255, 0.4);
+}
+
+/* Join Options */
+.join-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin: 60px 0;
+  padding: 0 20px;
+}
+
+.join-option {
+  background: linear-gradient(145deg, #1a1a1a, #222222);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  transition: transform 0.3s ease;
+  border: 1px solid #333;
+}
+
+.join-option:hover {
+  transform: translateY(-5px);
+}
+
+.join-option h4 {
+  font-size: 1.6rem;
+  color: #4080ff;
+  margin-bottom: 15px;
+}
+
+.join-option p {
+  color: #b0b0b0;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.create-team-btn,
+.join-player-btn {
+  background: linear-gradient(to right, #4080ff, #80a0ff);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  width: 100%;
+  max-width: 200px;
+}
+
+.create-team-btn:hover,
+.join-player-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(64, 128, 255, 0.4);
+}
+
+/* Match Scheduler */
+.match-scheduler {
+  background: linear-gradient(145deg, #1a1a1a, #222222);
+  border-radius: 15px;
+  padding: 40px;
+  text-align: center;
+  margin-top: 40px;
+  border: 1px solid #333;
+}
+
+.match-scheduler h4 {
+  font-size: 1.8rem;
+  color: #4080ff;
+  margin-bottom: 15px;
+}
+
+.match-scheduler p {
+  color: #b0b0b0;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.schedule-match-btn {
+  background: linear-gradient(to right, #4080ff, #80a0ff);
+  color: white;
+  border: none;
+  padding: 15px 35px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.schedule-match-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(64, 128, 255, 0.4);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .b8fc-signup-section h3 {
+    font-size: 2rem;
+  }
+
+  .teams-grid {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .join-options {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .team-card,
+  .join-option,
+  .match-scheduler {
+    padding: 20px;
+  }
+
+  .create-team-btn,
+  .join-player-btn,
+  .schedule-match-btn {
+    width: 100%;
+    max-width: none;
+  }
+}
+
   

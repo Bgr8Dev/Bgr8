@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserCheck, FaDollarSign, FaChartLine, FaCog, FaDownload, FaEnvelope, FaEdit, FaSave, FaCheck, FaSpinner, FaPlus, FaTrash } from 'react-icons/fa';
 import { IconPicker } from '../../utils/iconMapping';
 import '../../styles/adminStyles/AdminPortalB8World.css';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { doc, updateDoc, getDoc, collection, query, getDocs, addDoc, deleteDoc } from 'firebase/firestore';
 
 interface AdminPortalB8WorldProps {

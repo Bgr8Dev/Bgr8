@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../firebase/firebase';
 import { ClothingItem } from '../../types/clothing';
 import { AddClothingModal } from './AddClothingModal';
 import '../../styles/ClothingManagement.css';

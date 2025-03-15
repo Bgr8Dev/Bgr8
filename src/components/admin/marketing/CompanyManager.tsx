@@ -7,7 +7,7 @@ import {
 } from '../../../services/marketingService';
 import { MarketingCompany } from '../../../types/marketing';
 import { FaPencilAlt, FaTrash, FaEye, FaEyeSlash, FaLink } from 'react-icons/fa';
-import { storage } from '../../../firebase';
+import { storage } from '../../../firebase/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 export const CompanyManager: React.FC = () => {

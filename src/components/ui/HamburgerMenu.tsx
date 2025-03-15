@@ -1,7 +1,7 @@
 // src/components/HamburgerMenu.tsx
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { auth } from '../../firebase';
+import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';

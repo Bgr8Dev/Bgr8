@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../firebase';
+import { db } from '../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus, FaEnvelope } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';

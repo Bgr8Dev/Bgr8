@@ -13,6 +13,11 @@ import '../../styles/tournamentStyles/TournamentList.css';
 import { useB8SectionVisibility } from '../../contexts/B8SectionVisibilityContext';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
+import { useAuth } from '../../contexts/AuthContext';
+import { joinTeam, createTeam, getTeams, getPlayerTeam, scheduleMatch } from '../../firebase/b8fc';
+import { Team } from '../../types/b8fc';
+import { toast } from 'react-toastify';
+import { serverTimestamp } from 'firebase/firestore';
 
 type LeagueSport = 'football' | 'badminton' | 'esports';
 
@@ -20,6 +25,13 @@ export default function B8League() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeSport, setActiveSport] = useState<LeagueSport>('football');
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [userTeam, setUserTeam] = useState<Team | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const { currentUser: user } = useAuth();
   
   const { shouldShowSection, isAdminOrDeveloper, sectionVisibility, getYoutubeLink } = useB8SectionVisibility();
 
@@ -28,6 +40,170 @@ export default function B8League() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Fetch teams and user's team on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedTeams = await getTeams();
+        setTeams(fetchedTeams);
+        
+        if (user) {
+          const playerTeam = await getPlayerTeam(user.uid);
+          setUserTeam(playerTeam);
+        }
+      } catch (error) {
+        console.error('Error fetching teams:', error);
+        toast.error('Failed to load teams');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  const checkUserTeamStatus = async (userId: string) => {
+    // Get all teams
+    const allTeams = await getTeams();
+    
+    // Check if user is captain of any team
+    const isCaptain = allTeams.some(team => team.captain === userId);
+    
+    if (isCaptain) {
+      throw new Error('You are already a captain of another team');
+    }
+    
+    // Check if user is a member of any team
+    const isTeamMember = allTeams.some(team => 
+      team.members.some(member => member.uid === userId)
+    );
+    
+    if (isTeamMember) {
+      throw new Error('You are already a member of another team');
+    }
+    
+    return true;
+  };
+
+  // Handle joining a team
+  const handleJoinTeam = async (teamId: string) => {
+    if (!user) {
+      toast.error('Please sign in to join a team');
+      return;
+    }
+
+    try {
+      await joinTeam(teamId, user);
+      toast.success('Successfully joined team!');
+      
+      // Refresh user's team data
+      const playerTeam = await getPlayerTeam(user.uid);
+      setUserTeam(playerTeam);
+    } catch (error) {
+      console.error('Error joining team:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to join team');
+    }
+  };
+
+  // Update the handleCreateTeam function
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please sign in to create a team');
+      return;
+    }
+
+    if (!newTeamName.trim()) {
+      toast.error('Please enter a team name');
+      return;
+    }
+
+    try {
+      // Check if user can create a team
+      await checkUserTeamStatus(user.uid);
+
+      // Create initial member object
+      const initialMember = {
+        uid: user.uid,
+        name: user.displayName || 'Unknown Player',
+        role: 'captain' as const,
+        joinedAt: serverTimestamp()
+      };
+
+      // Create team with the initial member
+      const teamData = {
+        name: newTeamName.trim(),
+        isPreset: false,
+        createdAt: serverTimestamp(),
+        captain: user.uid, // Make sure this matches the Team interface
+        members: [initialMember]
+      };
+
+      await createTeam(teamData, user);
+      toast.success('Team created successfully!');
+      setNewTeamName('');
+      setShowCreateTeamModal(false); // Close the modal after success
+      
+      // Refresh teams and user's team data
+      const [fetchedTeams, playerTeam] = await Promise.all([
+        getTeams(),
+        getPlayerTeam(user.uid)
+      ]);
+      setTeams(fetchedTeams);
+      setUserTeam(playerTeam);
+    } catch (error) {
+      console.error('Error creating team:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create team');
+    }
+  };
+
+  // Handle scheduling a match
+  const handleScheduleMatch = async (matchData: any) => {
+    if (!user) {
+      toast.error('Please sign in to schedule a match');
+      return;
+    }
+
+    try {
+      await scheduleMatch(matchData);
+      toast.success('Match scheduled successfully!');
+      setShowScheduleModal(false);
+    } catch (error) {
+      console.error('Error scheduling match:', error);
+      toast.error('Failed to schedule match');
+    }
+  };
+
+  // Create Team Modal
+  const CreateTeamModal = () => (
+    <div className="league-modal-overlay">
+      <div className="league-modal-content">
+        <h3>Create New Team</h3>
+        <form onSubmit={handleCreateTeam}>
+          <div className="form-group">
+            <label htmlFor="teamName">Team Name</label>
+            <input
+              id="teamName"
+              type="text"
+              value={newTeamName}
+              onChange={(e) => setNewTeamName(e.target.value)}
+              placeholder="Enter team name"
+              required
+            />
+          </div>
+          <div className="button-group">
+            <button type="submit" disabled={loading || !newTeamName.trim() || !user}>
+              {!user ? 'Please sign in to create team' : 'Create Team'}
+            </button>
+            <button type="button" onClick={() => setShowCreateTeamModal(false)}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 
   // Show admin notice for hidden sections
   const AdminNotice = ({ section, name }: { section: keyof typeof sectionVisibility, name: string }) => {
@@ -92,8 +268,90 @@ export default function B8League() {
                 <h2>Welcome to B8FC</h2>
                 <p>
                   B8FC is our premier football club with teams competing at various levels. 
-                  We pride ourselves on developing talent and fostering a community of passionate football enthusiasts.
+                  Join our community of passionate football enthusiasts and be part of the action.
                 </p>
+              </section>
+
+              {/* B8FC Sign Up Section */}
+              <section className="b8fc-signup-section">
+                <h3>Join B8FC</h3>
+                <div className="preset-teams">
+                  <h4>Preset Teams</h4>
+                  <div className="teams-grid">
+                    {teams.filter(team => team.isPreset).map(team => (
+                      <div key={team.id} className="team-card">
+                        <h5>{team.name}</h5>
+                        <button 
+                          className="join-team-btn"
+                          onClick={() => handleJoinTeam(team.id)}
+                          disabled={loading || userTeam !== null}
+                        >
+                          {userTeam ? 'Already in a team' : 'Join Team'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="join-options">
+                  <div className="join-option">
+                    <h4>Join as Captain</h4>
+                    <p>Create and lead your own team</p>
+                    <button 
+                      className="create-team-btn"
+                      onClick={async () => {
+                        if (!user) {
+                          toast.error('Please sign in to create a team');
+                          return;
+                        }
+                        try {
+                          // Check if user can create a team before showing the modal
+                          await checkUserTeamStatus(user.uid);
+                          setShowCreateTeamModal(true);
+                        } catch (error) {
+                          toast.error(error instanceof Error ? error.message : 'Cannot create team');
+                        }
+                      }}
+                      disabled={loading || userTeam !== null}
+                    >
+                      {!user 
+                        ? 'Sign in to Create Team' 
+                        : userTeam 
+                          ? 'Already in a team' 
+                          : 'Create Team'
+                      }
+                    </button>
+                  </div>
+                  <div className="join-option">
+                    <h4>Join as Player</h4>
+                    <p>Join an existing team</p>
+                    <button 
+                      className="join-player-btn"
+                      onClick={() => {
+                        if (!user) {
+                          toast.error('Please sign in to join a team');
+                          return;
+                        }
+                        setShowCreateTeamModal(true);
+                      }}
+                      disabled={loading || userTeam !== null}
+                    >
+                      {!user ? 'Sign in to Join Team' : userTeam ? 'Already in a team' : 'Find Team'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="match-scheduler">
+                  <h4>Match Scheduler</h4>
+                  <p>View upcoming matches and schedule new games</p>
+                  <button 
+                    className="schedule-match-btn"
+                    onClick={() => setShowScheduleModal(true)}
+                    disabled={loading || !userTeam}
+                  >
+                    Schedule Match
+                  </button>
+                </div>
               </section>
 
               {/* Video Section */}
@@ -309,6 +567,18 @@ export default function B8League() {
               
               <SocialChannels className="league-social-channels" />
             </section>
+          )}
+
+          {/* Modals */}
+          {showCreateTeamModal && <CreateTeamModal />}
+          {showScheduleModal && (
+            <div className="league-modal-overlay" onClick={() => setShowScheduleModal(false)}>
+              <div className="league-modal-content" onClick={e => e.stopPropagation()}>
+                <h2>Schedule a Match</h2>
+                {/* Add match scheduling form here */}
+                <button onClick={() => setShowScheduleModal(false)}>Close</button>
+              </div>
+            </div>
           )}
 
           <Footer />
