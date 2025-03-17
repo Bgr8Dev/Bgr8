@@ -5,14 +5,40 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDLaPH3cVREnrmZxvjPRT86w9rZXuA5GEU",
-  authDomain: "b8network.firebaseapp.com",
-  projectId: "b8network",
-  storageBucket: "b8network.firebasestorage.app",
-  messagingSenderId: "297272606154",
-  appId: "1:297272606154:web:6042d3a4a70a5301a5e333",
-  measurementId: "G-T3M4QVLC02"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// Add error checking for environment variables
+const validateEnvVariables = () => {
+  const requiredEnvVars = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_STORAGE_BUCKET',
+    'VITE_FIREBASE_MESSAGING_SENDER_ID',
+    'VITE_FIREBASE_APP_ID',
+    'VITE_FIREBASE_MEASUREMENT_ID'
+  ];
+
+  const missingVars = requiredEnvVars.filter(
+    varName => !import.meta.env[varName]
+  );
+
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(', ')}`
+    );
+  }
+};
+
+// Validate environment variables before initializing Firebase
+validateEnvVariables();
 
 const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
