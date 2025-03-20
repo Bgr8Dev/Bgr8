@@ -11,20 +11,21 @@ import ContactForm from '../components/ui/ContactForm';
 import UserDemographics from '../components/maps/UserDemographics';
 import { useBusinessAccess } from '../contexts/BusinessAccessContext';
 import Globe3D from '../components/maps/Globe3D';
+import { Helmet } from 'react-helmet';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { isBusinessComingSoon } = useBusinessAccess();
   
   const services = [
-    { id: 'marketing', icon: <FaBullhorn size={40} />, title: 'B8 Marketing', description: 'Innovative marketing strategies.', link: '/b8-marketing', color: '#FFF', hoverColor: 'rgba(255, 255, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'bgr8', icon: <FaUsers size={40} />, title: 'Bgr8', description: 'Community growth programs.', link: '/bgr8', color: '#FFF', hoverColor: 'rgba(255, 215, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'carClub', icon: <FaCar size={40} />, title: 'B8 Car Club', description: 'Exclusive car events.', link: '/b8-car-club', color: '#FFF', hoverColor: 'rgba(255, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'clothing', icon: <FaTshirt size={40} />, title: 'B8 Clothing', description: 'Stylish modern apparel.', link: '/b8-clothing', color: '#FFF', hoverColor: 'rgba(139, 69, 19, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'league', icon: <FaMedal size={40} />, title: 'B8 League', description: 'Passion for sports.', link: '/b8-league', color: '#FFF', hoverColor: 'rgba(128, 0, 128, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'world', icon: <FaHeart size={40} />, title: 'B8 World', description: 'Making the world a B8er place', link: '/b8-world', color: '#FFF', hoverColor: 'rgba(0, 0, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'bgr8r', icon: <FaGraduationCap size={40} />, title: 'Bgr8r', description: 'Empowering future generations.', link: '/bgr8r', color: '#FFF', hoverColor: 'rgba(0, 128, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'podcast', icon: <FaBriefcase size={40} />, title: 'B8 Podcast', description: 'Listen, Learn, and Connect.', link: '/b8-podcast', color: '#FFF', hoverColor: 'rgba(0, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#FFF' },
+    { id: 'marketing', icon: <FaBullhorn size={40} />, title: 'B8 Marketing', description: 'Innovative digital marketing strategies for business growth and brand awareness.', link: '/b8-marketing', color: '#FFF', hoverColor: 'rgba(255, 255, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'bgr8', icon: <FaUsers size={40} />, title: 'Bgr8', description: 'Community-focused programs designed to foster growth and collaboration.', link: '/bgr8', color: '#FFF', hoverColor: 'rgba(255, 215, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'carClub', icon: <FaCar size={40} />, title: 'B8 Car Club', description: 'Exclusive automotive events and community for car enthusiasts.', link: '/b8-car-club', color: '#FFF', hoverColor: 'rgba(255, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'clothing', icon: <FaTshirt size={40} />, title: 'B8 Clothing', description: 'Modern, stylish apparel designed for comfort and self-expression.', link: '/b8-clothing', color: '#FFF', hoverColor: 'rgba(139, 69, 19, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'league', icon: <FaMedal size={40} />, title: 'B8 League', description: 'Sports tournaments and leagues bringing together competitors and fans.', link: '/b8-league', color: '#FFF', hoverColor: 'rgba(128, 0, 128, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'world', icon: <FaHeart size={40} />, title: 'B8 World', description: 'Making the world a B8er place through community initiatives and global outreach.', link: '/b8-world', color: '#FFF', hoverColor: 'rgba(0, 0, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'bgr8r', icon: <FaGraduationCap size={40} />, title: 'Bgr8r', description: 'Educational programs empowering future generations with knowledge and skills.', link: '/bgr8r', color: '#FFF', hoverColor: 'rgba(0, 128, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
+    { id: 'podcast', icon: <FaBriefcase size={40} />, title: 'B8 Podcast', description: 'Insightful discussions with industry leaders on business, sports, and personal growth.', link: '/b8-podcast', color: '#FFF', hoverColor: 'rgba(0, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#FFF' },
   ];
 
   useEffect(() => {
@@ -34,15 +35,22 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="homepage">
-      {isMobile ? <HamburgerMenu /> : <Navbar />}
+    <>
+      <Helmet>
+        <title>B8 Network | Integrated Business Solutions & Sports League</title>
+        <meta name="description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities." />
+        <link rel="canonical" href="https://b8network.co.uk/" />
+      </Helmet>
 
-      {/* Intro Video Section */}
-      <section className="homepage-intro-video">
-        <div className="homepage-video-placeholder">
-          <p>Intro Video Placeholder</p>
-        </div>
-      </section>
+      <div className="homepage">
+        {isMobile ? <HamburgerMenu /> : <Navbar />}
+
+        {/* Intro Video Section */}
+        <section className="homepage-intro-video" aria-label="Introduction Video">
+          <div className="homepage-video-placeholder">
+            <p>Intro Video Placeholder</p>
+          </div>
+        </section>
 
       <section className="homepage-hero">
         <h2>Empowering Your Business</h2>
@@ -111,7 +119,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }
