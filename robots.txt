@@ -1,4 +1,4 @@
-# B8 Website Robots.txt
+# B8 Network Website Robots.txt
 # This file provides instructions to web crawlers about which parts of the site to crawl
 
 # Allow all crawlers to access the site
@@ -8,31 +8,39 @@ Allow: /
 # Disallow access to admin pages
 Disallow: /admin/
 Disallow: /admin-portal/
-Disallow: /login/
+Disallow: /signin/
+Disallow: /register/
+Disallow: /forgot-password/
 Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /settings/
 
 # Disallow access to API endpoints
 Disallow: /api/
 
-# Sitemap location (uncomment and update when sitemap is available)
-# Sitemap: https://yourdomain.com/sitemap.xml
+# Sitemap location
+Sitemap: https://b8network.co.uk/sitemap.xml
 
 # Crawl delay to prevent server overload (in seconds)
-Crawl-delay: 10
+Crawl-delay: 3
 
 # Specific instructions for major bots
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 5
+Crawl-delay: 2
 
 User-agent: Bingbot
 Allow: /
-Crawl-delay: 5
+Crawl-delay: 2
 
 User-agent: Slurp
 Allow: /
-Crawl-delay: 5
+Crawl-delay: 2
 
-# Prevent access to development/staging environments if applicable
-# Disallow: /dev/
-# Disallow: /staging/ 
+# Allow Google to index JavaScript
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Prevent access to development/staging environments
+Disallow: /dev/
+Disallow: /staging/ 
