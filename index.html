@@ -1,54 +1,110 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- Security -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://*.firebase.com https://*.firebaseio.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebase.com https://*.firebaseio.com https://www.google-analytics.com; frame-src 'self' https://*.firebaseapp.com; object-src 'none'">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(self), interest-cohort=()" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- Performance optimization -->
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="preload" href="/src/main.tsx" as="script" type="module" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="modulepreload" href="/src/App.tsx" />
+    <link rel="dns-prefetch" href="https://firebaseapp.com" />
     
     <!-- Primary Meta Tags -->
     <title>B8 Network | Integrated Business Solutions & Sports League</title>
-    <meta name="title" content="B8 Network | Integrated Business Solutions & Sports League">
-    <meta name="description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities.">
-    <meta name="keywords" content="B8 Network, B8 League, B8 Marketing, B8 World, business solutions, sports management, professional network, B8 Car Club, B8 Clothing, BGr8">
+    <meta name="title" content="B8 Network | Integrated Business Solutions & Sports League" />
+    <meta name="description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities." />
+    <meta name="keywords" content="B8 Network, B8 League, B8 Marketing, B8 World, business solutions, sports management, professional network, B8 Car Club, B8 Clothing, BGr8" />
+    <meta name="author" content="B8 Network" />
+    <meta name="application-name" content="B8 Network" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="rating" content="general" />
+    <meta name="copyright" content="Copyright © 2023 B8 Network" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="language" content="English" />
     
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://b8network.co.uk/">
-    <meta property="og:title" content="B8 Network | Integrated Business Solutions & Sports League">
-    <meta property="og:description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities.">
-    <meta property="og:image" content="https://b8network.co.uk/og-image.jpg">
-    <meta property="og:locale" content="en_GB">
-    <meta property="og:site_name" content="B8 Network">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://b8network.co.uk/" />
+    <meta property="og:title" content="B8 Network | Integrated Business Solutions & Sports League" />
+    <meta property="og:description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities." />
+    <meta property="og:image" content="https://b8network.co.uk/og-image.jpg" />
+    <meta property="og:image:alt" content="B8 Network Logo and Branding" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:site_name" content="B8 Network" />
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://b8network.co.uk/">
-    <meta property="twitter:title" content="B8 Network | Integrated Business Solutions & Sports League">
-    <meta property="twitter:description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities.">
-    <meta property="twitter:image" content="https://b8network.co.uk/og-image.jpg">
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://b8network.co.uk/" />
+    <meta property="twitter:title" content="B8 Network | Integrated Business Solutions & Sports League" />
+    <meta property="twitter:description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities." />
+    <meta property="twitter:image" content="https://b8network.co.uk/og-image.jpg" />
+    <meta property="twitter:creator" content="@B8Network" />
+    <meta property="twitter:site" content="@B8Network" />
+    
+    <!-- LinkedIn -->
+    <meta property="linkedin:card" content="summary_large_image" />
+    <meta property="linkedin:title" content="B8 Network | Integrated Business Solutions & Sports League" />
+    <meta property="linkedin:description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors." />
+    <meta property="linkedin:image" content="https://b8network.co.uk/og-image.jpg" />
     
     <!-- Preconnect to important domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://firebaseapp.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://firebaseapp.com" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://b8network.co.uk/">
+    <link rel="canonical" href="https://b8network.co.uk/" />
     
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <!-- Alternative Languages -->
+    <link rel="alternate" href="https://b8network.co.uk/" hreflang="en-gb" />
+    <link rel="alternate" href="https://b8network.co.uk/" hreflang="x-default" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-TileImage" content="/mstile-144x144.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
     
     <!-- Manifest for PWA -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Performance optimization -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="/manifest.json" />
     
     <!-- SEO verification -->
-    <meta name="google-site-verification" content="your-verification-code">
-
+    <meta name="google-site-verification" content="your-verification-code" />
+    <meta name="norton-safeweb-site-verification" content="your-norton-verification-code" />
+    <meta name="facebook-domain-verification" content="your-facebook-verification-code" />
+    <meta name="yandex-verification" content="your-yandex-verification-code" />
+    <meta name="bing-verification" content="your-bing-verification-code" />
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    
     <!-- Structured Data - Organization -->
     <script type="application/ld+json">
       {
@@ -60,16 +116,258 @@
         "sameAs": [
           "https://www.linkedin.com/company/b8network",
           "https://www.instagram.com/b8network",
-          "https://www.youtube.com/b8network"
+          "https://www.youtube.com/b8network",
+          "https://twitter.com/b8network",
+          "https://facebook.com/b8network"
         ],
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+44-123-456-7890",
+            "contactType": "customer service",
+            "availableLanguage": ["English"]
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "123 Business Street",
+          "addressLocality": "London",
+          "addressRegion": "England",
+          "postalCode": "W1 1AA",
+          "addressCountry": "GB"
+        },
         "description": "B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors."
       }
     </script>
+    
+    <!-- Structured Data - Website -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://b8network.co.uk",
+        "name": "B8 Network",
+        "description": "B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://b8network.co.uk/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    
+    <!-- Structured Data - BreadcrumbList -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://b8network.co.uk"
+          }
+        ]
+      }
+    </script>
+    
+    <!-- Facebook Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', 'YOUR-PIXEL-ID');
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=YOUR-PIXEL-ID&ev=PageView&noscript=1"
+    /></noscript>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+    
+    <!-- Cookie Consent -->
+    <script>
+      window.cookieConsent = {
+        necessary: true,
+        preferences: false,
+        statistics: false,
+        marketing: false,
+        initialized: false
+      };
+    </script>
+    
+    <!-- Web Application Manifest Links -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="B8 Network" />
+    <meta name="application-name" content="B8 Network" />
+    
+    <!-- Accessibility -->
+    <meta name="color-scheme" content="light dark" />
+    
+    <!-- Critical CSS -->
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+        background-color: #ffffff;
+        color: #333333;
+      }
+      @media (prefers-color-scheme: dark) {
+        html, body {
+          background-color: #121212;
+          color: #ffffff;
+        }
+      }
+      #root {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .loading-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100%;
+        background-color: #ffffff;
+      }
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top-color: #000000;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @media (prefers-color-scheme: dark) {
+        .loading-screen {
+          background-color: #121212;
+        }
+        .loading-spinner {
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-top-color: #ffffff;
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;">Skip to main content</a>
+    
+    <noscript>
+      <div style="padding: 20px; text-align: center; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+        <p>You need to enable JavaScript to run this app. B8 Network requires JavaScript to provide its interactive features and functionality.</p>
+      </div>
+    </noscript>
+    
+    <div id="root">
+      <!-- Initial loading state -->
+      <div class="loading-screen" role="status" aria-label="Loading B8 Network">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Web Vitals & Analytics Improvement -->
+    <script type="module">
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').catch(error => {
+            console.log('Service worker registration failed:', error);
+          });
+        });
+      }
+      
+      // Report web vitals
+      const reportWebVitals = onPerfEntry => {
+        if (onPerfEntry && onPerfEntry instanceof Function) {
+          import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+            getCLS(onPerfEntry);
+            getFID(onPerfEntry);
+            getFCP(onPerfEntry);
+            getLCP(onPerfEntry);
+            getTTFB(onPerfEntry);
+          });
+        }
+      };
+      
+      // Store web vitals in dataLayer
+      reportWebVitals(metric => {
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'web-vitals',
+            event_category: 'Web Vitals',
+            event_action: metric.name,
+            event_value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+            event_label: metric.id,
+            non_interaction: true,
+          });
+        }
+      });
+    </script>
+    
+    <!-- Offline Support -->
+    <script>
+      window.addEventListener('online', () => {
+        document.body.classList.remove('offline');
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'connectivity',
+            connectivity_status: 'online'
+          });
+        }
+      });
+      
+      window.addEventListener('offline', () => {
+        document.body.classList.add('offline');
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'connectivity',
+            connectivity_status: 'offline'
+          });
+        }
+      });
+    </script>
+    
+    <!-- Load Polyfills Only When Needed -->
+    <script>
+      const modernBrowser = (
+        'fetch' in window &&
+        'IntersectionObserver' in window &&
+        'customElements' in window
+      );
+      
+      if (!modernBrowser) {
+        const scriptEl = document.createElement('script');
+        scriptEl.async = true;
+        scriptEl.src = '/polyfills.js';
+        document.head.appendChild(scriptEl);
+      }
+    </script>
   </body>
 </html>
