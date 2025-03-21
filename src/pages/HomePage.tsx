@@ -10,7 +10,7 @@ import '../styles/HomePage.css';
 import ContactForm from '../components/ui/ContactForm';
 import UserDemographics from '../components/maps/UserDemographics';
 import { useBusinessAccess } from '../contexts/BusinessAccessContext';
-import Globe3D from '../components/maps/Globe3D';
+// import Globe3D from '../components/maps/Globe3D';
 import { Helmet } from 'react-helmet';
 
 export default function HomePage() {
