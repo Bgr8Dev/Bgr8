@@ -17,11 +17,51 @@ pnpm-lock.yaml
 /dist-ssr
 *.local
 
-# Environment Variables
+# Environment & Secrets
 .env
-.env.local
 .env.*
 !.env.example
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+*.env
+.env*.local
+.secret*
+secrets.*
+*secret*
+*password*
+*credential*
+*key*
+*token*
+*auth*
+*config.json
+config.*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.csr
+*.der
+*.priv
+*.keystore
+*.jks
+*.p7b
+*.p7c
+*.spc
+*.sst
+*.stl
+google-services.json
+GoogleService-Info.plist
+firebase-adminsdk.json
+firebase-service-account.json
+stripe-webhook-secret.txt
+aws-credentials.json
+gcp-credentials.json
+azure-credentials.json
 
 # IDE - VSCode
 .vscode/*
@@ -43,7 +83,7 @@ pnpm-lock.yaml
 .classpath
 .settings/
 
-# Logs
+# Logs & Debug
 logs
 *.log
 npm-debug.log*
@@ -51,6 +91,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+debug.log
+debug/
+.debug/
 
 # Operating System
 .DS_Store
@@ -61,11 +104,6 @@ lerna-debug.log*
 ehthumbs.db
 Thumbs.db
 Desktop.ini
-
-# Debug
-.debug/
-debug.log
-debug/
 
 # Temporary files
 *.swp
@@ -101,6 +139,12 @@ next-env.d.ts
 *.sqlite
 *.sqlite3
 *.db
+dump.rdb
+*.rdb
+*.dmp
+*.bak
+*.backup
+*dump*
 
 # Cache directories
 .cache/
@@ -129,6 +173,10 @@ out/
 firebase-debug.log
 firebase-debug.*.log
 .firebaserc
+firebase-credentials.json
+serviceAccountKey.json
+*firebase*.json
+!firebase.json
 
 # PWA
 public/sw.js
@@ -156,6 +204,7 @@ cypress/screenshots/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.yarn-integrity
 
 # Vercel
 .vercel
@@ -175,5 +224,107 @@ cypress/screenshots/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
-.yarn-integrity
+# Private Keys & Certificates
+private/
+certs/
+certificates/
+*.crt
+*.cer
+*.pem
+*.key
+*.priv
+*.srl
+*.csr
+id_rsa
+id_dsa
+*.gpg
+*.pgp
+*.asc
+*.p12
+*.pfx
+known_hosts
+authorized_keys
+
+# API Keys & Tokens
+.npmrc
+.netrc
+.dockercfg
+.docker/config.json
+*.token
+*_token
+*api_key*
+*apikey*
+*client_secret*
+oauth.json
+token.json
+credentials.json
+.credentials/
+
+# Backup Files
+*~
+*.bak
+*.backup
+*.old
+*.orig
+*.previous
+*.save
+*.swp
+*.swo
+
+# Local Development
+*.dev
+*.development
+*.local
+local.*
+dev.*
+development.*
+
+# Logs & Reports
+*.log
+log/
+logs/
+*.report
+reports/
+coverage/
+.coverage
+coverage.*
+.nyc_output/
+
+# Personal Files
+TODO
+NOTES
+*.personal
+personal/
+private/
+confidential/
+
+# Payment & Financial
+*.invoice
+invoice/
+payment/
+financial/
+stripe-webhook-secret.txt
+paypal.json
+stripe.json
+banking/
+
+# Machine Learning & AI
+*.model
+*.weights
+model/
+weights/
+training/
+*.h5
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+
+# Analytics & Tracking
+analytics/
+tracking/
+*.analytics
+google-analytics.json
+analytics-key.json
+tracking-id.txt
