@@ -1,173 +1,246 @@
-# B8 Platform
+# B8 Network Platform <img src="public/logo.svg" align="right" width="100" height="100">
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.0-yellow.svg)](https://vitejs.dev/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-## Overview
+> 🌟 **B8 Network** is an integrated business solutions and sports league platform that connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors.
 
-B8 is a comprehensive web platform that integrates multiple business units including B8 League, B8 World, B8 Marketing, B8 Clothing, B8 Car Club, and more. Built with React, TypeScript, and Firebase, it offers a modern, responsive user experience with secure authentication, real-time data, and integrated payment processing.
+<details>
+<summary>📖 Table of Contents</summary>
 
-## 📋 Table of Contents
+- [Overview](#overview)
+- [Features](#-features)
+- [Tech Stack](#%EF%B8%8F-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Deployment](#-deployment)
+- [Environment Variables](#-environment-variables)
+- [Testing](#-testing)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Security](#-security)
+- [Contact](#-contact)
+- [Acknowledgments](#-acknowledgments)
+</details>
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Environment Setup](#environment-setup)
-- [Development](#development)
-- [Business Units](#business-units)
-- [Authentication](#authentication)
-- [Contributing](#contributing)
-- [License](#license)
+## 🎯 Overview
 
-## ✨ Features
+B8 Network is revolutionizing the way businesses and individuals connect across multiple sectors. Our platform integrates:
 
-- **Multi-business Integration**: Single platform for multiple B8 business units
-- **Tournament Management**: Create, join, and manage sports tournaments through B8 League
-- **User Authentication**: Secure Firebase authentication with user profiles and permissions
-- **Responsive Design**: Optimized for mobile and desktop experiences
-- **Payment Processing**: Integrated payment solutions including Stripe, PayPal, and Google Pay
-- **Real-time Updates**: Firebase-backed real-time database updates
-- **Permission-based Access**: Role-based content visibility and functionality
-- **Admin Portal**: Comprehensive admin tools for business management
+| Business Unit | Description | Status |
+|--------------|-------------|---------|
+| 🏆 B8 League | Professional sports management | Live |
+| 📈 B8 Marketing | Digital marketing solutions | Live |
+| 🚗 B8 Car Club | Automotive community | Beta |
+| 👕 B8 Clothing | Fashion & merchandise | Coming Soon |
+| 🎭 BGr8 | Entertainment & events | Live |
+
+## 🚀 Features
+
+<details>
+<summary>Click to expand feature list</summary>
+
+### Core Features
+- ✨ Professional networking and business solutions
+- 🏆 Sports league management
+- 📊 Marketing services (B8 Marketing)
+- 🚗 Automotive community (B8 Car Club)
+- 👕 Fashion and merchandise (B8 Clothing)
+- 🎉 Entertainment and events (BGr8)
+
+### Technical Features
+- 🔐 Secure authentication
+- 💳 Payment processing
+- 📱 PWA support
+- 🎨 Responsive design
+- 📊 Analytics integration
+- 🔄 Real-time updates
+</details>
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18, TypeScript
-- **Build Tool**: Vite
-- **Styling**: CSS with responsive design
-- **Authentication**: Firebase Authentication
-- **Database**: Firestore
-- **Storage**: Firebase Storage
-- **Analytics**: Firebase Analytics
-- **Payment Processing**: Stripe, PayPal, Google Pay
-- **Routing**: React Router Dom v7
-- **State Management**: React Context API
-- **Icons**: React Icons
-- **Notifications**: React Toastify
-- **Visualization**: Chart.js, Three.js, React Globe
-- **Tournament UI**: React Tournament Brackets
+Our platform is built with modern technologies:
 
-## 📁 Project Structure
-
-```
-b8/
-├── src/
-│   ├── assets/         # Static assets (images, icons, etc.)
-│   │   ├── animations/ # Loading and animation components
-│   │   ├── overlays/   # Modal and overlay components
-│   │   ├── tournament/ # Tournament-related components
-│   │   └── ui/         # General UI components
-│   ├── contexts/       # React context providers
-│   ├── firebase/       # Firebase configuration and services
-│   ├── hooks/          # Custom React hooks
-│   ├── navigation/     # Routing and navigation components
-│   ├── pages/          # Top-level page components
-│   │   ├── authPages/  # Authentication pages
-│   │   ├── businessPages/ # B8 business unit pages
-│   │   └── utilPages/  # Utility pages (profile, settings)
-│   ├── scripts/        # Utility scripts
-│   ├── services/       # API services
-│   ├── styles/         # CSS styles
-│   ├── types/          # TypeScript type definitions
-│   └── utils/          # Utility functions
-├── public/             # Public assets
-├── .env                # Environment variables
-├── package.json        # Dependencies and scripts
-└── vite.config.ts      # Vite configuration
+```mermaid
+graph TD
+    A[Frontend] --> B[React + TypeScript]
+    A --> C[Vite]
+    D[Backend Services] --> E[Firebase]
+    E --> F[Authentication]
+    E --> G[Firestore]
+    E --> H[Storage]
+    I[Analytics] --> J[Google Analytics]
+    K[Payments] --> L[Stripe]
 ```
 
-## 💻 Installation
+## 📋 Prerequisites
 
-1. Clone the repository:
+Before you begin, ensure you have:
 
-```bash
-git clone https://github.com/yourusername/b8.git
-cd b8
-```
+- [ ] Node.js (v16.x or higher)
+- [ ] npm (v8.x or higher)
+- [ ] Firebase account and project
+- [ ] Stripe account (for payments)
 
-2. Install dependencies:
+## 🔧 Installation
 
-```bash
-npm install --legacy-peer-deps
-```
+<details>
+<summary>Step-by-step installation guide</summary>
 
-3. Set up environment variables by creating a `.env` file based on the required Firebase configuration.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/b8-network.git
+   cd b8-network
+   ```
 
-## 🔐 Environment Setup
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-Create a `.env` file in the root directory with the following Firebase configuration:
+3. **Set up environment variables:**
+   Create a \`.env\` file in the root directory:
+   ```env
+   VITE_FIREBASE_API_KEY=your_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+   VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   ```
 
-```
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-```
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+</details>
 
-## 🚀 Development
+## 🚀 Deployment
 
-Start the development server:
+<details>
+<summary>Deployment instructions</summary>
 
-```bash
-npm run dev
-```
-
-Build for production:
-
+### Production Build
 ```bash
 npm run build
 ```
 
-Preview the production build:
-
+### Preview Production Build
 ```bash
 npm run preview
 ```
+</details>
 
-## 🏢 Business Units
+## 📝 Environment Variables
 
-The B8 platform integrates several business units:
+Required environment variables:
 
-- **B8 League**: Sports tournament management platform
-- **B8 World**: Global community and events platform
-- **B8 Marketing**: Digital marketing services
-- **B8 Clothing**: Fashion and apparel
-- **B8 Car Club**: Automotive community
-- **BGr8**: B8 group umbrella
-- **Bgr8r**: [Description]
-- **B8 Podcast**: Audio content platform
-- **BGr8 Medical**: Healthcare services
+<details>
+<summary>View all environment variables</summary>
 
-Each business unit has its own dedicated section within the application, accessible through the main navigation.
+| Variable | Description | Required |
+|----------|-------------|:---------:|
+| `VITE_FIREBASE_API_KEY` | Firebase API Key | ✅ |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth Domain | ✅ |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase Project ID | ✅ |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase Storage Bucket | ✅ |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging Sender ID | ✅ |
+| `VITE_FIREBASE_APP_ID` | Firebase App ID | ✅ |
+| `VITE_FIREBASE_MEASUREMENT_ID` | Firebase Measurement ID | ✅ |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key | ✅ |
+</details>
 
-## 🔒 Authentication
+## 🧪 Testing
 
-User authentication is powered by Firebase with various permission levels:
+```bash
+# Run unit tests
+npm run test
 
-- **Regular Users**: Basic access to public content
-- **Business Members**: Access to specific business unit content (e.g., League, World)
-- **Administrators**: Full access to admin portal and management tools
+# Run end-to-end tests
+npm run test:e2e
 
-User profiles store membership status and permissions for different B8 business units.
+# Run tests in CI environment
+npm run test:ci
+```
 
-## 👥 Contributing
+## 📦 Project Structure
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+<details>
+<summary>View project structure</summary>
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+```
+b8-network/
+├── 📁 src/                    # Source files
+│   ├── 📱 components/        # React components
+│   ├── 📄 pages/            # Page components
+│   ├── 🎣 hooks/            # Custom React hooks
+│   ├── 🌍 context/          # React context providers
+│   ├── 🔌 services/         # API and service integrations
+│   ├── 🛠️ utils/            # Utility functions
+│   ├── 📝 types/            # TypeScript type definitions
+│   └── 🎨 assets/           # Static assets
+├── 📂 public/               # Public static files
+├── 🧪 tests/                # Test files
+└── 📚 docs/                 # Documentation
+```
+</details>
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+
+<details>
+<summary>Quick contribution steps</summary>
+
+1. Fork the Project
+2. Create your Feature Branch (\`git checkout -b feature/AmazingFeature\`)
+3. Commit your Changes (\`git commit -m 'Add some AmazingFeature'\`)
+4. Push to the Branch (\`git push origin feature/AmazingFeature\`)
 5. Open a Pull Request
+</details>
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔒 Security
+
+For security concerns, please email [security@b8network.co.uk](mailto:security@b8network.co.uk)
+
+## 📧 Contact
+
+<details>
+<summary>Ways to reach us</summary>
+
+- 🌐 Website: [b8network.co.uk](https://b8network.co.uk)
+- 📧 Email: [contact@b8network.co.uk](mailto:contact@b8network.co.uk)
+- 🐦 Twitter: [@B8Network](https://twitter.com/B8Network)
+- 💼 LinkedIn: [B8 Network](https://www.linkedin.com/company/b8network)
+</details>
+
+## 🙏 Acknowledgments
+
+<details>
+<summary>Special thanks to</summary>
+
+- 👥 All our contributors and community members
+- 🌟 Open source projects we depend on
+- 🧪 Our beta testers and early adopters
+</details>
 
 ---
 
-<p align="center">Made with ❤️ by B8 Team</p>
+<div align="center">
+
+**Made with ❤️ by the B8 Network Team**
+
+[Report Bug](https://github.com/yourusername/b8-network/issues) · [Request Feature](https://github.com/yourusername/b8-network/issues)
+
+</div>
