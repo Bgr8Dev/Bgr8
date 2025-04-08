@@ -1,44 +1,135 @@
-# Security Policy
+# 🔒 Security Policy
 
-## Supported Versions
+[![Security Rating](https://img.shields.io/security-headers?url=https%3A%2F%2Fb8network.co.uk)](https://securityheaders.com/?q=b8network.co.uk)
+[![HTTPS](https://img.shields.io/badge/HTTPS-Enabled-success)](https://b8network.co.uk)
+[![CSP](https://img.shields.io/badge/CSP-Strict-success)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
-Use this section to tell people about which versions of your project are currently being supported with security updates.
+> 🛡️ At B8 Network, we take security seriously. This document outlines our security procedures and policies.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+<details>
+<summary>📖 Table of Contents</summary>
 
-## Reporting a Vulnerability
+- [Supported Versions](#supported-versions)
+- [Reporting a Vulnerability](#reporting-a-vulnerability)
+- [Security Measures](#security-measures)
+- [Bug Bounty Program](#bug-bounty-program)
+</details>
 
-We take the security of B8 Network seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+## 📋 Supported Versions
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+We maintain security updates for the following versions:
 
-Instead, please report them via email to security@b8network.co.uk
+| Version | Support Status | End of Support |
+|---------|---------------|----------------|
+| 1.0.x   | ✅ Active     | TBD           |
+| < 1.0   | ❌ End of Life| N/A           |
 
-You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
+## 🔍 Reporting a Vulnerability
 
-Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
+### ⚠️ Important: Do Not Create Public Issues
 
-* Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
-* Full paths of source file(s) related to the manifestation of the issue
-* The location of the affected source code (tag/branch/commit or direct URL)
-* Any special configuration required to reproduce the issue
-* Step-by-step instructions to reproduce the issue
-* Proof-of-concept or exploit code (if possible)
-* Impact of the issue, including how an attacker might exploit it
+> 🚫 **Please do not report security vulnerabilities through public GitHub issues.**
 
-This information will help us triage your report more quickly.
+### 📧 Preferred Method
 
-## Preferred Languages
+1. Email us at [security@b8network.co.uk](mailto:security@b8network.co.uk)
+2. Expect initial response within 48 hours
+3. We'll create a private security advisory if needed
 
-We prefer all communications to be in English.
+### 📝 Required Information
 
-## Policy
+<details>
+<summary>Information to include in your report</summary>
 
-B8 Network follows the principle of [Responsible Disclosure](https://en.wikipedia.org/wiki/Responsible_disclosure).
+#### Essential Details
+- [ ] Type of issue
+- [ ] Full paths of source file(s)
+- [ ] Location of affected source code
+- [ ] Any special configuration required
+- [ ] Step-by-step reproduction instructions
+- [ ] Proof-of-concept or exploit code
+- [ ] Impact of the issue
 
-## Bug Bounty Program
+#### Example Report Format
+```markdown
+## Issue Type
+[e.g., XSS, CSRF, SQL Injection]
 
-Currently, we do not have a bug bounty program. However, we are grateful for any security findings reported to us and will acknowledge your contribution if you wish.
+## Affected Files
+- /path/to/file1
+- /path/to/file2
+
+## Steps to Reproduce
+1. ...
+2. ...
+3. ...
+
+## Impact
+[Describe potential impact]
+```
+</details>
+
+## 🛡️ Security Measures
+
+We implement various security measures to protect our users:
+
+<details>
+<summary>View our security features</summary>
+
+### 🔒 Authentication
+- ✅ Multi-factor authentication
+- ✅ Secure password policies
+- ✅ Session management
+- ✅ Rate limiting
+
+### 🔐 Data Protection
+- ✅ End-to-end encryption
+- ✅ Secure data storage
+- ✅ Regular security audits
+- ✅ Automated vulnerability scanning
+
+### 🌐 Network Security
+- ✅ HTTPS everywhere
+- ✅ Content Security Policy
+- ✅ DDoS protection
+- ✅ Regular penetration testing
+</details>
+
+## 💰 Bug Bounty Program
+
+While we currently don't have a formal bug bounty program, we show appreciation for security researchers:
+
+<details>
+<summary>Recognition Program</summary>
+
+### 🏆 Rewards
+- Public acknowledgment (if desired)
+- Letter of appreciation
+- Potential for security advisory collaboration
+
+### 🎯 Scope
+- Web application vulnerabilities
+- API security issues
+- Authentication bypasses
+- Data exposure risks
+</details>
+
+## 🌐 Preferred Languages
+
+```mermaid
+pie title Communication Language Distribution
+    "English" : 90
+    "Other" : 10
+```
+
+We prefer all security communications in English to ensure clear understanding.
+
+---
+
+<div align="center">
+
+**Thank you for helping keep B8 Network secure! 🛡️**
+
+[![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F-red.svg)](https://b8network.co.uk)
+
+</div>

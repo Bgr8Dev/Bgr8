@@ -1,72 +1,165 @@
-# Contributing to B8 Network
+# 🤝 Contributing to B8 Network
 
-We love your input! We want to make contributing to B8 Network as easy and transparent as possible, whether it's:
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Contributors](https://img.shields.io/github/contributors/yourusername/b8-network.svg)](https://github.com/yourusername/b8-network/graphs/contributors)
+[![GitHub issues](https://img.shields.io/github/issues/yourusername/b8-network.svg)](https://github.com/yourusername/b8-network/issues)
+[![GitHub stars](https://img.shields.io/github/stars/yourusername/b8-network.svg)](https://github.com/yourusername/b8-network/stargazers)
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
-- Becoming a maintainer
+> 💡 We love your input! We want to make contributing to B8 Network as easy and transparent as possible.
 
-## We Develop with Github
-We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
+<details>
+<summary>📖 Table of Contents</summary>
 
-## We Use [Github Flow](https://guides.github.com/introduction/flow/index.html)
-Pull requests are the best way to propose changes to the codebase. We actively welcome your pull requests:
+- [Ways to Contribute](#ways-to-contribute)
+- [Development Process](#development-process)
+- [Bug Reports](#bug-reports)
+- [Coding Style](#coding-style)
+- [Code of Conduct](#code-of-conduct)
+- [License](#license)
+</details>
 
-1. Fork the repo and create your branch from `main`.
-2. If you've added code that should be tested, add tests.
-3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes.
-5. Make sure your code lints.
-6. Issue that pull request!
+## 🌟 Ways to Contribute
 
-## Any contributions you make will be under the MIT Software License
-In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
+| Type | Description |
+|------|-------------|
+| 🐛 [Report Bugs](#bug-reports) | Help us identify issues |
+| 💬 [Discuss Code](#development-process) | Share your insights |
+| 🔧 [Submit Fixes](#development-process) | Help resolve issues |
+| ✨ [Propose Features](#development-process) | Suggest improvements |
+| 👥 [Become a Maintainer](#development-process) | Join our core team |
 
-## Report bugs using Github's [issue tracker](https://github.com/yourusername/b8-network/issues)
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/yourusername/b8-network/issues/new); it's that easy!
+## 🔄 Development Process
 
-## Write bug reports with detail, background, and sample code
+We use [Github Flow](https://guides.github.com/introduction/flow/index.html). Here's how to propose changes:
 
-**Great Bug Reports** tend to have:
+```mermaid
+graph LR
+    A[Fork Repo] --> B[Create Branch]
+    B --> C[Make Changes]
+    C --> D[Add Tests]
+    D --> E[Update Docs]
+    E --> F[Submit PR]
+```
 
-- A quick summary and/or background
-- Steps to reproduce
-  - Be specific!
-  - Give sample code if you can.
-- What you expected would happen
-- What actually happens
-- Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
+<details>
+<summary>Step-by-step guide</summary>
 
-## Use a Consistent Coding Style
+1. Fork the repo and create your branch from `main`:
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
 
-* Use TypeScript for all new code
-* 2 spaces for indentation rather than tabs
-* You can try running `npm run lint` for style unification
+2. Make your changes and test them:
+   ```bash
+   npm run test
+   npm run lint
+   ```
 
-## Code of Conduct
+3. Update documentation if needed
+
+4. Create a pull request:
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+</details>
+
+## 🐛 Bug Reports
+
+> **Note:** Please use our [issue template](https://github.com/yourusername/b8-network/issues/new?template=bug_report.md) when reporting bugs.
+
+A great bug report should include:
+
+<details>
+<summary>Essential elements of a bug report</summary>
+
+- [ ] Quick summary
+- [ ] Steps to reproduce
+- [ ] Expected behavior
+- [ ] Actual behavior
+- [ ] Notes and context
+- [ ] Screenshots (if applicable)
+- [ ] Error logs
+</details>
+
+### Example Bug Report Format
+
+```markdown
+**Description:**
+Brief description of the issue
+
+**Steps to Reproduce:**
+1. Go to '...'
+2. Click on '....'
+3. See error
+
+**Expected Behavior:**
+What should happen
+
+**Actual Behavior:**
+What actually happens
+```
+
+## 💅 Coding Style
+
+We follow strict coding standards to maintain consistency:
+
+<details>
+<summary>View coding standards</summary>
+
+- ✅ Use TypeScript for all new code
+- ✅ 2 spaces for indentation
+- ✅ Meaningful variable and function names
+- ✅ Comment complex logic
+- ✅ Write tests for new features
+</details>
+
+### Code Quality Checks
+
+```bash
+# Run linter
+npm run lint
+
+# Run type checks
+npm run type-check
+
+# Run tests
+npm run test
+```
+
+## 📜 Code of Conduct
 
 ### Our Pledge
 
-In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+> We pledge to make participation in our project a harassment-free experience for everyone.
 
-### Our Standards
+<details>
+<summary>View our standards</summary>
 
-Examples of behavior that contributes to creating a positive environment include:
+#### Positive Behavior Examples:
+- ✅ Using welcoming language
+- ✅ Respecting different viewpoints
+- ✅ Accepting constructive criticism
+- ✅ Focusing on community benefits
+- ✅ Showing empathy
 
-* Using welcoming and inclusive language
-* Being respectful of differing viewpoints and experiences
-* Gracefully accepting constructive criticism
-* Focusing on what is best for the community
-* Showing empathy towards other community members
+#### Unacceptable Behavior:
+- ❌ Harassment of any kind
+- ❌ Discriminatory jokes and language
+- ❌ Personal or political attacks
+- ❌ Publishing others' private information
+- ❌ Other unprofessional conduct
+</details>
 
-### Our Responsibilities
+## ⚖️ License
 
-Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
+By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
 
-## License
-By contributing, you agree that your contributions will be licensed under its MIT License.
+---
 
-## References
-This document was adapted from the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebook/draft-js/blob/a9316a723f9e918afde44dea68b5f9f39b7d9b00/CONTRIBUTING.md). 
+<div align="center">
+
+**Thank you for contributing to B8 Network! 🎉**
+
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+</div> 
