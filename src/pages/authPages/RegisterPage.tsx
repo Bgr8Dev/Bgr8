@@ -9,6 +9,7 @@ import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { createUserProfile, UserProfile } from '../../utils/userProfile';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { validatePassword, validateUserInput, updateLastActivity, handleError } from '../../utils/security';
 
 // Define FirebaseErrorWithCode type to handle Firebase errors
 interface FirebaseErrorWithCode extends Error {
@@ -62,6 +63,11 @@ const nationalityOptions = [
   'Prefer not to say'
 ];
 
+interface PasswordRequirement {
+  label: string;
+  met: boolean;
+}
+
 export default function RegisterPage() {
   const isMobile = useIsMobile()
   const [formData, setFormData] = useState({
@@ -75,6 +81,13 @@ export default function RegisterPage() {
     secondNationality: ''
   });
   const [error, setError] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirement[]>([
+    { label: 'At least 12 characters long', met: false },
+    { label: 'Contains uppercase letter', met: false },
+    { label: 'Contains lowercase letter', met: false },
+    { label: 'Contains number', met: false },
+    { label: 'Contains special character (@$!%*?&)', met: false }
+  ]);
   const navigate = useNavigate();
   const [showSecondNationality, setShowSecondNationality] = useState(
     formData.nationality === 'Dual Nationality'
@@ -92,18 +105,46 @@ export default function RegisterPage() {
     });
   };
 
+  const updatePasswordRequirements = (password: string) => {
+    setPasswordRequirements([
+      { label: 'At least 12 characters long', met: password.length >= 12 },
+      { label: 'Contains uppercase letter', met: /[A-Z]/.test(password) },
+      { label: 'Contains lowercase letter', met: /[a-z]/.test(password) },
+      { label: 'Contains number', met: /\d/.test(password) },
+      { label: 'Contains special character (@$!%*?&)', met: /[@$!%*?&]/.test(password) }
+    ]);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setFormData({ ...formData, password: newPassword });
+    updatePasswordRequirements(newPassword);
+  };
+
+  const validateForm = (): boolean => {
+    if (!validateUserInput(formData.firstName) || !validateUserInput(formData.lastName)) {
+      setError('Invalid characters in name fields');
+      return false;
+    }
+
+    if (!validatePassword(formData.password)) {
+      setError('Password does not meet security requirements');
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validation checks
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!validateForm()) {
       return;
     }
 
@@ -133,25 +174,11 @@ export default function RegisterPage() {
         }
       );
 
-      // Successful registration
+      updateLastActivity(); // Set initial session timestamp
       navigate('/'); // Redirect to home page
     } catch (err: unknown) {
-      // Handle specific error cases
-      const firebaseError = err as FirebaseErrorWithCode;
-      switch (firebaseError.code) {
-        case 'auth/email-already-in-use':
-          setError('An account already exists with this email');
-          break;
-        case 'auth/invalid-email':
-          setError('Invalid email address');
-          break;
-        case 'auth/weak-password':
-          setError('Password is too weak');
-          break;
-        default:
-          setError('An error occurred during registration');
-      }
-      console.error('Registration error:', err);
+      const errorMessage = handleError(err as Error);
+      setError(errorMessage);
     }
   };
 
@@ -186,15 +213,11 @@ export default function RegisterPage() {
         additionalData
       );
 
+      updateLastActivity(); // Set initial session timestamp
       navigate('/');
     } catch (err: unknown) {
-      const firebaseError = err as FirebaseErrorWithCode;
-      if (firebaseError.code === 'auth/popup-closed-by-user') {
-        setError('Sign in cancelled');
-      } else {
-        setError('Error signing in with Google');
-        console.error('Google sign in error:', err);
-      }
+      const errorMessage = handleError(err as Error);
+      setError(errorMessage);
     }
   };
 
@@ -206,20 +229,24 @@ export default function RegisterPage() {
         <h2>Create Account</h2>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
-          <input
-            type="text"
-            placeholder="First Name"
-            value={formData.firstName}
-            onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={formData.lastName}
-            onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-            required
-          />
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={formData.firstName}
+              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+              required
+              maxLength={50}
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+              required
+              maxLength={50}
+            />
+          </div>
           <input
             type="email"
             placeholder="Email"
@@ -233,6 +260,7 @@ export default function RegisterPage() {
             onChange={(e) => setFormData({...formData, ethnicity: e.target.value})}
             className="auth-select"
             aria-label="Ethnicity"
+            required
           >
             <option value="">Select Ethnicity</option>
             {ethnicityOptions.map(option => (
@@ -245,6 +273,7 @@ export default function RegisterPage() {
             onChange={(e) => handleNationalityChange(e.target.value)}
             className="auth-select"
             aria-label="Nationality"
+            required
           >
             <option value="">Select Nationality</option>
             {nationalityOptions.map(option => (
@@ -269,13 +298,22 @@ export default function RegisterPage() {
             </select>
           )}
           
-          <input
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
-            required
-          />
+          <div className="password-section">
+            <input
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handlePasswordChange}
+              required
+            />
+            <div className="password-requirements">
+              {passwordRequirements.map((req, index) => (
+                <div key={index} className={`requirement ${req.met ? 'met' : ''}`}>
+                  {req.met ? '✓' : '○'} {req.label}
+                </div>
+              ))}
+            </div>
+          </div>
           <input
             type="password"
             placeholder="Confirm Password"

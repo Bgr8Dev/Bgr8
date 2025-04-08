@@ -10,6 +10,7 @@ import Footer from '../../components/ui/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { checkRateLimit, updateLastActivity, handleError } from '../../utils/security';
 
 // Define FirebaseErrorWithCode type to handle Firebase errors
 interface FirebaseErrorWithCode extends Error {
@@ -23,17 +24,27 @@ export default function SignInPage() {
     password: ''
   });
   const [error, setError] = useState('');
+  const [isBlocked, setIsBlocked] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Check rate limiting
+    if (!checkRateLimit(formData.email)) {
+      setIsBlocked(true);
+      setError('Too many login attempts. Please try again in 15 minutes.');
+      return;
+    }
     
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      updateLastActivity(); // Set initial session timestamp
       navigate('/');
     } catch (err: unknown) {
       const firebaseError = err as FirebaseErrorWithCode;
+      let errorMessage: string;
       switch (firebaseError.code) {
         case 'auth/user-not-found':
           setError('No account found with this email');
@@ -45,7 +56,8 @@ export default function SignInPage() {
           setError('Invalid email address');
           break;
         default:
-          setError('An error occurred during sign in');
+          errorMessage = handleError(firebaseError);
+          setError(errorMessage);
       }
       console.error('Sign in error:', err);
     }
@@ -55,40 +67,26 @@ export default function SignInPage() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
+      
       // Check if user profile exists
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       
       if (!userDoc.exists()) {
-        // Create new profile if it doesn't exist
-        const nameParts = user.displayName?.split(' ') || ['', ''];
-        const additionalData = {
-          photoURL: user.photoURL || undefined,
-          phoneNumber: user.phoneNumber || undefined,
-          ethnicity: 'N/A',
-          nationality: 'N/A',
-          secondNationality: ''
-        };
-
+        // Create user profile for new Google sign-in users
         await createUserProfile(
-          user.uid,
-          user.email || '',
-          nameParts[0],
-          nameParts.slice(1).join(' '),
-          additionalData
+          result.user.uid,
+          result.user.email || '',
+          result.user.displayName?.split(' ')[0] || '',
+          result.user.displayName?.split(' ').slice(1).join(' ') || '',
+          {}
         );
       }
-
+      
+      updateLastActivity(); // Set initial session timestamp
       navigate('/');
     } catch (err: unknown) {
-      const firebaseError = err as FirebaseErrorWithCode;
-      if (firebaseError.code === 'auth/popup-closed-by-user') {
-        setError('Sign in cancelled');
-      } else {
-        setError('Error signing in with Google');
-        console.error('Google sign in error:', err);
-      }
+      const errorMessage = handleError(err as Error);
+      setError(errorMessage);
     }
   };
 
@@ -99,6 +97,12 @@ export default function SignInPage() {
       <div className="auth-container">
         <h2>Sign In</h2>
         {error && <div className="auth-error">{error}</div>}
+        {isBlocked && (
+          <div className="auth-warning">
+            Account temporarily blocked due to too many login attempts.
+            Please try again later or reset your password.
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="auth-form">
           <input
             type="email"
@@ -106,6 +110,7 @@ export default function SignInPage() {
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
             required
+            disabled={isBlocked}
           />
           <input
             type="password"
@@ -113,8 +118,9 @@ export default function SignInPage() {
             value={formData.password}
             onChange={(e) => setFormData({...formData, password: e.target.value})}
             required
+            disabled={isBlocked}
           />
-          <button type="submit">Sign In</button>
+          <button type="submit" disabled={isBlocked}>Sign In</button>
         </form>
 
         <div className="auth-divider">
@@ -125,6 +131,7 @@ export default function SignInPage() {
           type="button" 
           onClick={handleGoogleSignIn} 
           className="google-sign-in"
+          disabled={isBlocked}
         >
           <FcGoogle size={20} />
           Sign in with Google

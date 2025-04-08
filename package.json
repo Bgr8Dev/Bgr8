@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "npm install --legacy-peer-deps && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "security:audit": "npm audit",
+    "security:fix": "npm audit fix",
+    "security:snyk": "snyk test",
+    "security:snyk-fix": "snyk wizard",
+    "security:lint": "eslint . -c .eslintrc.security.json",
+    "security:all": "npm run security:audit && npm run security:snyk && npm run security:lint"
   },
   "dependencies": {
     "@google-pay/button-react": "^3.1.0",
@@ -40,7 +46,9 @@
     "eslint": "^9.19.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
+    "eslint-plugin-security": "^2.1.1",
     "globals": "^15.14.0",
+    "snyk": "^1.1250.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",
     "vite": "^6.1.0"

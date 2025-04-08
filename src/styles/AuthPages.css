@@ -180,4 +180,50 @@
   background: white;
   border-radius: 50%;
   padding: 2px;
+}
+
+.password-section {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.password-requirements {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  font-size: 0.85rem;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.requirement.met {
+  color: #2ecc71;
+}
+
+.auth-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #ffeeba;
+  text-align: center;
+}
+
+.form-group {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.form-group input {
+  flex: 1;
 } 
