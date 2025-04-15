@@ -1,28 +1,56 @@
 import Stripe from 'stripe';
+import { config } from './config.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Initialize Stripe with the secret key
+const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
+  apiVersion: '2023-10-16'
+});
+
+// Debug logging
+console.log('Stripe initialized with API key:', config.STRIPE_SECRET_KEY.slice(0, 7) + '...');
 
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { priceId, successUrl, cancelUrl } = req.body;
+    const { amount, currency, successUrl, cancelUrl, metadata } = req.body;
+
+    console.log('Creating checkout session with:', {
+      amount,
+      currency,
+      successUrl,
+      cancelUrl,
+      metadata
+    });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: currency || 'gbp',
+            product_data: {
+              name: 'B8 World Donation',
+              description: 'Support our global initiatives',
+            },
+            unit_amount: amount,
+          },
           quantity: 1,
         },
       ],
       mode: 'payment',
       success_url: successUrl,
       cancel_url: cancelUrl,
+      metadata: metadata,
     });
+
+    console.log('Checkout session created:', session.id);
 
     res.json({ sessionId: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      error: error.message,
+      details: error
+    });
   }
 };
 

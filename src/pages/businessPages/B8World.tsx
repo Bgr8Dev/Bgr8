@@ -145,6 +145,11 @@ export default function B8World() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
       const { sessionId } = await response.json();
 
       // Redirect to Stripe Checkout
@@ -153,7 +158,10 @@ export default function B8World() {
         throw new Error('Stripe failed to initialize');
       }
 
-      const { error } = await stripe.redirectToCheckout({ sessionId });
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: sessionId
+      });
+
       if (error) {
         throw error;
       }
