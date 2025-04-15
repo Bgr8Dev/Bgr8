@@ -9,7 +9,7 @@ import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import { db } from '../../firebase/firebase';
-import { collection, query, getDocs, where } from 'firebase/firestore';
+import { collection, query, getDocs, where, doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 import { renderIcon } from '../../utils/iconMapping';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -37,6 +37,7 @@ export default function B8World() {
   const [donorEmail, setDonorEmail] = useState('');
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loadingPartners, setLoadingPartners] = useState(true);
+  const [totalRaised, setTotalRaised] = useState(0);
 
   useEffect(() => {
     const handleWindowResize = () => {
@@ -84,6 +85,21 @@ export default function B8World() {
     fetchPartners();
   }, []);
 
+  useEffect(() => {
+    const fetchTotalRaised = async () => {
+      try {
+        const fundraisedDoc = await getDoc(doc(db, "B8World", "Fundraised"));
+        if (fundraisedDoc.exists()) {
+          setTotalRaised(fundraisedDoc.data().totalRaised || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching total raised:", error);
+      }
+    };
+
+    fetchTotalRaised();
+  }, []);
+
   const openImageModal = (index: number) => {
     setSelectedImage(index);
     setIsImageModalOpen(true);
@@ -111,8 +127,28 @@ export default function B8World() {
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    // Only allow numbers and keep as string
     if (value === '' || /^\d+$/.test(value)) {
-      setDonationAmount(value === '' ? '' : parseInt(value));
+      setDonationAmount(value);
+    }
+  };
+
+  const saveDonationToFirebase = async (sessionId: string, amount: number) => {
+    try {
+      // Save invoice only - fundraised amount will be updated on successful payment
+      const invoiceData = {
+        sessionId,
+        amount,
+        donorName: donorName || 'Anonymous',
+        donorEmail: donorEmail || 'Not provided',
+        timestamp: Timestamp.now(),
+        status: 'pending' // Will be updated by Success page
+      };
+
+      await setDoc(doc(db, "B8World", "Donations", "Invoices", sessionId), invoiceData);
+    } catch (error) {
+      console.error("Error saving donation data:", error);
+      // Don't throw error here - we still want the payment to process
     }
   };
 
@@ -151,6 +187,9 @@ export default function B8World() {
       }
 
       const { sessionId } = await response.json();
+
+      // Save donation data to Firebase
+      await saveDonationToFirebase(sessionId, Number(donationAmount));
 
       // Redirect to Stripe Checkout
       const stripe = await stripePromise;
@@ -226,7 +265,7 @@ export default function B8World() {
               
               <div className="fundraiser-stats">
                 <div className="stat-card">
-                  <span className="stat-value">£0</span>
+                  <span className="stat-value">£{totalRaised.toLocaleString()}</span>
                   <span className="stat-label">Raised so far</span>
                 </div>
                 <div className="stat-card">
@@ -234,16 +273,19 @@ export default function B8World() {
                   <span className="stat-label">Campaign goal</span>
                 </div>
                 <div className="stat-card">
-                  <span className="stat-value">0</span>
-                  <span className="stat-label">Donors</span>
+                  <span className="stat-value">{Math.round((totalRaised / 50000) * 100)}%</span>
+                  <span className="stat-label">Progress</span>
                 </div>
               </div>
               
               <div className="fundraiser-progress-container">
                 <div className="fundraiser-progress-bar">
-                  <div className="fundraiser-progress" style={{ width: '0%' }}></div>
+                  <div 
+                    className="fundraiser-progress" 
+                    style={{ width: `${Math.min((totalRaised / 50000) * 100, 100)}%` }}
+                  ></div>
                 </div>
-                <div className="fundraiser-percentage">0% Complete</div>
+                <div className="fundraiser-percentage">{Math.round((totalRaised / 50000) * 100)}% Complete</div>
               </div>
               
               <div className="fundraiser-description">
