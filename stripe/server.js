@@ -10,10 +10,11 @@ const port = config.PORT;
 console.log('Environment variables loaded:');
 console.log('- STRIPE_SECRET_KEY:', config.STRIPE_SECRET_KEY ? 'Present' : 'Missing');
 console.log('- PORT:', config.PORT);
+console.log('- CLIENT_URL:', config.CLIENT_URL);
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: [config.CLIENT_URL, 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
