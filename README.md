@@ -5,6 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-yellow.svg)](https://vitejs.dev/)
+[![Stripe](https://img.shields.io/badge/Stripe-Latest-blue.svg)](https://stripe.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 > 🌟 **B8 Network** is an integrated business solutions and sports league platform that connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors.
@@ -55,11 +56,12 @@ B8 Network is revolutionizing the way businesses and individuals connect across 
 
 ### Technical Features
 - 🔐 Secure authentication
-- 💳 Payment processing
+- 💳 Secure payment processing with Stripe
 - 📱 PWA support
 - 🎨 Responsive design
 - 📊 Analytics integration
 - 🔄 Real-time updates
+- 💰 Donation system with Stripe Checkout
 </details>
 
 ## 🛠️ Tech Stack
@@ -76,6 +78,8 @@ graph TD
     E --> H[Storage]
     I[Analytics] --> J[Google Analytics]
     K[Payments] --> L[Stripe]
+    L --> M[Stripe Checkout]
+    L --> N[Stripe Webhooks]
 ```
 
 ## 📋 Prerequisites
@@ -85,7 +89,8 @@ Before you begin, ensure you have:
 - [ ] Node.js (v16.x or higher)
 - [ ] npm (v8.x or higher)
 - [ ] Firebase account and project
-- [ ] Stripe account (for payments)
+- [ ] Stripe account with API keys
+- [ ] Stripe CLI (for webhook testing)
 
 ## 🔧 Installation
 
@@ -104,7 +109,7 @@ Before you begin, ensure you have:
    ```
 
 3. **Set up environment variables:**
-   Create a \`.env\` file in the root directory:
+   Create a `.env` file in the root directory:
    ```env
    VITE_FIREBASE_API_KEY=your_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -114,11 +119,25 @@ Before you begin, ensure you have:
    VITE_FIREBASE_APP_ID=your_app_id
    VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
    VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   VITE_STRIPE_SERVER_URL=your_stripe_server_url
    ```
 
-4. **Start the development server:**
+4. **Set up Stripe server environment:**
+   Create a `.env` file in the stripe directory:
+   ```env
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   PORT=3001
+   CLIENT_URL=http://localhost:5173
+   ```
+
+5. **Start the development servers:**
    ```bash
+   # Start the main application
    npm run dev
+
+   # Start the Stripe server (in a separate terminal)
+   cd stripe && node server.js
    ```
 </details>
 
@@ -155,6 +174,9 @@ Required environment variables:
 | `VITE_FIREBASE_APP_ID` | Firebase App ID | ✅ |
 | `VITE_FIREBASE_MEASUREMENT_ID` | Firebase Measurement ID | ✅ |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key | ✅ |
+| `VITE_STRIPE_SERVER_URL` | Stripe Server URL | ✅ |
+| `STRIPE_SECRET_KEY` | Stripe Secret Key (server) | ✅ |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret (server) | ✅ |
 </details>
 
 ## 🧪 Testing
@@ -188,7 +210,11 @@ b8-network/
 │   └── 🎨 assets/           # Static assets
 ├── 📂 public/               # Public static files
 ├── 🧪 tests/                # Test files
-└── 📚 docs/                 # Documentation
+├── 📚 docs/                 # Documentation
+└── 💳 stripe/               # Stripe server implementation
+    ├── server.js           # Express server setup
+    ├── stripe.js           # Stripe integration logic
+    └── config.js           # Server configuration
 ```
 </details>
 
