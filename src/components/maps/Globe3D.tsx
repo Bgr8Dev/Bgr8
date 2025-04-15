@@ -18,17 +18,16 @@ interface CountryData {
   color: string;
 }
 
-// Define the GeoJSON feature type for countries
 interface CountryFeature {
   type: string;
   properties: {
     NAME: string;
     ISO_A3: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean;
   };
   geometry: {
     type: string;
-    coordinates: any[];
+    coordinates: number[][][];
   };
 }
 
@@ -45,13 +44,14 @@ const Globe3D: React.FC<Globe3DProps> = ({
   className = '',
   customPoints
 }) => {
-  // Use a more specific type for the ref
-  const globeEl = useRef<GlobeMethods>(null!);
+  const globeEl = useRef<GlobeMethods | null>(null);
   const [points, setPoints] = useState<GlobePoint[]>([]);
   const [countries, setCountries] = useState<CountryFeature[]>([]);
   const [countryData, setCountryData] = useState<Record<string, CountryData>>({});
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Sample data points representing different locations
   const samplePoints: GlobePoint[] = [
@@ -93,11 +93,25 @@ const Globe3D: React.FC<Globe3DProps> = ({
 
   // Fetch country GeoJSON data
   useEffect(() => {
-    fetch('https://unpkg.com/world-atlas/countries-110m.json')
-      .then(res => res.json())
-      .then(({ features }) => {
-        setCountries(features as CountryFeature[]);
-      });
+    const fetchCountries = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('https://unpkg.com/world-atlas/countries-110m.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch countries data');
+        }
+        const data = await response.json();
+        setCountries(data.features as CountryFeature[]);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load countries data. Please try again later.');
+        console.error('Error fetching countries:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCountries();
   }, []);
 
   // Process custom points to create country data
@@ -117,7 +131,6 @@ const Globe3D: React.FC<Globe3DProps> = ({
                 color: point.color
               };
             } else {
-              // If we have multiple points for the same country, add the counts
               countryStats[countryCode].userCount += point.count || 0;
             }
           }
@@ -128,54 +141,52 @@ const Globe3D: React.FC<Globe3DProps> = ({
     }
   }, [customPoints]);
 
+  // Handle window resize and initial setup
   useEffect(() => {
-    // Handle window resize
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     
-    // Set points with animation
-    const timer = setTimeout(() => {
-      setPoints(customPoints || samplePoints);
-    }, 1000);
+    // Set initial points
+    setPoints(customPoints || samplePoints);
 
-    // Set auto-rotation after the component has mounted
+    // Set auto-rotation
     if (globeEl.current) {
       const controls = globeEl.current.controls();
       if (controls) {
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.5;
+        controls.enableZoom = true;
+        controls.enablePan = true;
       }
     }
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      clearTimeout(timer);
     };
   }, [customPoints]);
 
-  // Update points when customPoints change
-  useEffect(() => {
-    if (customPoints) {
-      setPoints(customPoints);
-    }
-  }, [customPoints]);
-
-  // Get color for a country
   const getCountryColor = (countryCode: string) => {
     if (hoveredCountry === countryCode) {
-      return 'rgba(255, 255, 255, 0.8)'; // Highlighted color
+      return 'rgba(255, 255, 255, 0.8)';
     }
     
     const country = countryData[countryCode];
     if (country) {
-      // Apply opacity based on user count
       const opacity = Math.min(0.2 + (country.userCount / 20), 0.8);
       const baseColor = country.color.replace('#', '');
       return `rgba(${parseInt(baseColor.substr(0, 2), 16)}, ${parseInt(baseColor.substr(2, 2), 16)}, ${parseInt(baseColor.substr(4, 2), 16)}, ${opacity})`;
     }
     
-    return 'rgba(40, 40, 40, 0.3)'; // Default color for countries with no data
+    return 'rgba(40, 40, 40, 0.3)';
   };
+
+  if (isLoading) {
+    return <div className="globe-loading">Loading globe...</div>;
+  }
+
+  if (error) {
+    return <div className="globe-error">{error}</div>;
+  }
 
   return (
     <div className={`globe-3d-container ${className}`}>
@@ -186,30 +197,32 @@ const Globe3D: React.FC<Globe3DProps> = ({
         </div>
       )}
       <Globe
-        ref={globeEl}
+        ref={globeEl as React.RefObject<GlobeMethods>}
         width={isMobile ? width * 0.8 : width}
         height={isMobile ? height * 0.8 : height}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
+        bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
+        backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="#000011"
         atmosphereColor="rgba(25, 25, 100, 0.6)"
         atmosphereAltitude={0.15}
         
-        // Points configuration
         pointsData={points}
         pointColor="color"
         pointAltitude={0}
         pointRadius="size"
         pointsMerge={true}
         
-        // Countries configuration
         hexPolygonsData={countries}
         hexPolygonResolution={3}
         hexPolygonMargin={0.3}
-        hexPolygonColor={(d: CountryFeature) => getCountryColor(d.properties.ISO_A3)}
-        hexPolygonLabel={(d: CountryFeature) => {
-          const countryCode = d.properties.ISO_A3;
+        hexPolygonColor={(d: unknown) => {
+          const feature = d as CountryFeature;
+          return getCountryColor(feature.properties.ISO_A3);
+        }}
+        hexPolygonLabel={(d: unknown) => {
+          const feature = d as CountryFeature;
+          const countryCode = feature.properties.ISO_A3;
           const country = countryData[countryCode];
           if (country) {
             return `<div class="country-label">
@@ -217,11 +230,12 @@ const Globe3D: React.FC<Globe3DProps> = ({
               ${country.userCount} users
             </div>`;
           }
-          return `<div class="country-label">${d.properties.NAME}</div>`;
+          return `<div class="country-label">${feature.properties.NAME}</div>`;
         }}
-        onHexPolygonHover={(polygon: CountryFeature | null) => {
+        onHexPolygonHover={(polygon: unknown | null) => {
           if (polygon) {
-            setHoveredCountry(polygon.properties.ISO_A3);
+            const feature = polygon as CountryFeature;
+            setHoveredCountry(feature.properties.ISO_A3);
           } else {
             setHoveredCountry(null);
           }
