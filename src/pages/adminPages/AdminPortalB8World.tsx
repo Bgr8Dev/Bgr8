@@ -3,7 +3,7 @@ import { FaUsers, FaUserCheck, FaDollarSign, FaChartLine, FaCog, FaDownload, FaE
 import { IconPicker } from '../../utils/iconMapping';
 import '../../styles/adminStyles/AdminPortalB8World.css';
 import { db } from '../../firebase/firebase';
-import { doc, updateDoc, getDoc, collection, query, getDocs, addDoc, deleteDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, query, getDocs, addDoc, deleteDoc, orderBy, limit, Timestamp } from 'firebase/firestore';
 
 interface AdminPortalB8WorldProps {
   stats: { totalMembers: number; activeMembers: number; revenue: number; engagement: number };
@@ -42,11 +42,19 @@ interface Partner {
   icon?: string;
 }
 
+interface DonationInvoice {
+  id: string;
+  sessionId: string;
+  amount: number;
+  donorName: string;
+  donorEmail: string;
+  timestamp: Timestamp;
+  status: 'pending' | 'completed';
+}
+
 export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldProps) {
-  // State for stats
   const [stats, setStats] = useState(initialStats);
   
-  // State for editable sections
   const [editMode, setEditMode] = useState({
     stats: false,
     initiative: null as string | null,
@@ -55,14 +63,11 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
     partners: null as string | null
   });
   
-  // State for saving status
   const [saving, setSaving] = useState('');
   
-  // State for success/error messages
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   
-  // Initialize editable data
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -70,6 +75,9 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
   const [partners, setPartners] = useState<Partner[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [donationInvoices, setDonationInvoices] = useState<DonationInvoice[]>([]);
+  const [totalRaised, setTotalRaised] = useState(0);
 
   // Load data from Firestore
   useEffect(() => {
@@ -98,6 +106,35 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
         if (data.initiatives) setInitiatives(data.initiatives);
         if (data.donations) setDonations(data.donations);
       }
+
+      // Fetch donation invoices
+      const invoicesQuery = query(
+        collection(db, 'B8World', 'Donations', 'Invoices'),
+        orderBy('timestamp', 'desc'),
+        limit(10)
+      );
+      const invoicesSnapshot = await getDocs(invoicesQuery);
+      const invoicesData: DonationInvoice[] = [];
+      let total = 0;
+
+      invoicesSnapshot.forEach((doc) => {
+        const invoice = {
+          id: doc.id,
+          sessionId: doc.data().sessionId,
+          amount: doc.data().amount,
+          donorName: doc.data().donorName || 'Anonymous',
+          donorEmail: doc.data().donorEmail || 'Not provided',
+          timestamp: doc.data().timestamp,
+          status: doc.data().status
+        };
+        invoicesData.push(invoice);
+        if (invoice.status === 'completed') {
+          total += invoice.amount;
+        }
+      });
+
+      setDonationInvoices(invoicesData);
+      setTotalRaised(total);
       
       // Fetch partners from dedicated collection
       const partnersQuery = query(collection(db, 'B8WorldPartners'));
@@ -187,33 +224,6 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
     }
   };
   
-  const saveDonation = async (donation: Donation) => {
-    try {
-      setSaving(`donation-${donation.id}`);
-      setSuccessMessage('');
-      setErrorMessage('');
-      
-      const updatedDonations = donations.map(d => 
-        d.id === donation.id ? donation : d
-      );
-      
-      await updateDoc(doc(db, 'settings', 'b8World'), {
-        donations: updatedDonations
-      });
-      
-      setDonations(updatedDonations);
-      setSuccessMessage('Donation updated successfully!');
-      setTimeout(() => setSuccessMessage(''), 5000);
-      setEditMode({...editMode, donation: null});
-    } catch (error) {
-      console.error('Error saving donation:', error);
-      setErrorMessage('Error saving donation: ' + (error as Error).message);
-      setTimeout(() => setErrorMessage(''), 5000);
-    } finally {
-      setSaving('');
-    }
-  };
-  
   const savePartner = async (partner: Partner) => {
     setSaving(`partner-${partner.id}`);
     setErrorMessage('');
@@ -288,20 +298,6 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
     setEditMode({...editMode, initiative: newInitiative.id});
   };
   
-  const addDonation = () => {
-    const newDonation: Donation = {
-      id: Date.now().toString(),
-      donor: 'New Donor',
-      amount: 0,
-      initiative: initiatives[0]?.name || 'General Fund',
-      date: new Date().toLocaleDateString(),
-      message: 'Thank you for your support!'
-    };
-    
-    setDonations([...donations, newDonation]);
-    setEditMode({...editMode, donation: newDonation.id});
-  };
-  
   const addPartner = () => {
     const newPartner: Partner = {
       id: `partner-${Date.now()}`,
@@ -336,27 +332,6 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
     } catch (error) {
       console.error('Error removing initiative:', error);
       setErrorMessage('Error removing initiative: ' + (error as Error).message);
-      setTimeout(() => setErrorMessage(''), 5000);
-    } finally {
-      setSaving('');
-    }
-  };
-  
-  const removeDonation = async (id: string) => {
-    try {
-      setSaving(`remove-donation-${id}`);
-      const updatedDonations = donations.filter(d => d.id !== id);
-      
-      await updateDoc(doc(db, 'settings', 'b8World'), {
-        donations: updatedDonations
-      });
-      
-      setDonations(updatedDonations);
-      setSuccessMessage('Donation removed successfully');
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } catch (error) {
-      console.error('Error removing donation:', error);
-      setErrorMessage('Error removing donation: ' + (error as Error).message);
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setSaving('');
@@ -405,18 +380,6 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
         return { ...initiative, [field]: value };
       }
       return initiative;
-    }));
-  };
-  
-  const updateDonation = (id: string, field: keyof Donation, value: string | number) => {
-    setDonations(donations.map(donation => {
-      if (donation.id === id) {
-        if (field === 'amount') {
-          return { ...donation, [field]: Number(value) };
-        }
-        return { ...donation, [field]: value };
-      }
-      return donation;
     }));
   };
   
@@ -474,7 +437,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
           <FaUserCheck size={24} color="#9C27B0" />
         </div>
         <div className="admin-stat-card">
-          <h3>Donations Received</h3>
+          <h3>Fundraised</h3>
           {editMode.stats ? (
             <input 
               type="number" 
@@ -483,7 +446,7 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
               onChange={(e) => handleStatsChange('revenue', e.target.value)}
             />
           ) : (
-            <p className="stat-value">${stats.revenue}</p>
+            <p className="stat-value">£{totalRaised.toLocaleString()}</p>
           )}
           <FaDollarSign size={24} color="#9C27B0" />
         </div>
@@ -671,123 +634,44 @@ export function AdminPortalB8World({ stats: initialStats }: AdminPortalB8WorldPr
       {/* Donations Section */}
       <div className="world-admin-section">
         <div className="section-header">
-          <h3>Recent Donations</h3>
-          <button className="add-button" onClick={addDonation}>
-            <FaPlus /> Add Donation
-          </button>
+          <div className="section-header-content">
+            <h3>Recent Donations</h3>
+            <div className="total-raised">
+              Total Raised: £{totalRaised.toLocaleString()}
+            </div>
+          </div>
         </div>
         
         <div className="world-admin-grid">
-          {donations.map((donation) => (
-            <div className="world-admin-card" key={donation.id}>
+          {donationInvoices.map((invoice) => (
+            <div className="world-admin-card" key={invoice.id}>
               <div className="world-admin-header">
-                <h4>{donation.donor}</h4>
-                <div className="donation-amount">${donation.amount}</div>
+                <h4>{invoice.donorName}</h4>
+                <div className={`donation-amount ${invoice.status}`}>
+                  £{invoice.amount.toLocaleString()}
+                </div>
               </div>
               
-              {editMode.donation === donation.id ? (
-                <div className="world-admin-edit-form">
-                  <div className="admin-world-admin-world-form-group">
-                    <label>Donor:</label>
-                    <input 
-                      type="text" 
-                      value={donation.donor}
-                      onChange={(e) => updateDonation(donation.id, 'donor', e.target.value)}
-                      className="edit-input"
-                    />
-                  </div>
-                  
-                  <div className="admin-world-admin-world-form-group">
-                    <label>Amount:</label>
-                    <input 
-                      type="number" 
-                      value={donation.amount}
-                      onChange={(e) => updateDonation(donation.id, 'amount', e.target.value)}
-                      className="edit-input"
-                    />
-                  </div>
-                  
-                  <div className="admin-world-admin-world-form-group">
-                    <label>Initiative:</label>
-                    <input 
-                      type="text" 
-                      value={donation.initiative}
-                      onChange={(e) => updateDonation(donation.id, 'initiative', e.target.value)}
-                      className="edit-input"
-                    />
-                  </div>
-                  
-                  <div className="admin-world-admin-world-form-group">
-                    <label>Date:</label>
-                    <input 
-                      type="text" 
-                      value={donation.date}
-                      onChange={(e) => updateDonation(donation.id, 'date', e.target.value)}
-                      className="edit-input"
-                    />
-                  </div>
-                  
-                  <div className="admin-world-admin-world-form-group">
-                    <label>Message:</label>
-                    <textarea 
-                      value={donation.message || ''}
-                      onChange={(e) => updateDonation(donation.id, 'message', e.target.value)}
-                      className="edit-textarea"
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <div className="form-actions">
-                    <button 
-                      className="action-button cancel"
-                      onClick={() => toggleEditMode('donation', null)}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      className="action-button save"
-                      onClick={() => saveDonation(donation)}
-                      disabled={saving === `donation-${donation.id}`}
-                    >
-                      {saving === `donation-${donation.id}` ? <FaSpinner className="spinner" /> : <FaSave />}
-                      {saving === `donation-${donation.id}` ? 'Saving...' : 'Save'}
-                    </button>
-                  </div>
+              <div className="world-admin-content">
+                <div className="content-row">
+                  <strong>Status:</strong>
+                  <span className={`status-badge status-${invoice.status}`}>
+                    {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                  </span>
                 </div>
-              ) : (
-                <>
-                  <div className="world-admin-content">
-                    <div className="content-row">
-                      <strong>Initiative:</strong>
-                      <span>{donation.initiative}</span>
-                    </div>
-                    <div className="content-row">
-                      <strong>Date:</strong>
-                      <span>{donation.date}</span>
-                    </div>
-                    {donation.message && (
-                      <p className="message">"{donation.message}"</p>
-                    )}
-                  </div>
-                  
-                  <div className="card-actions">
-                    <button 
-                      className="action-button"
-                      onClick={() => toggleEditMode('donation', donation.id)}
-                    >
-                      <FaEdit /> Edit
-                    </button>
-                    <button 
-                      className="action-button delete"
-                      onClick={() => removeDonation(donation.id)}
-                      disabled={saving === `remove-donation-${donation.id}`}
-                    >
-                      {saving === `remove-donation-${donation.id}` ? <FaSpinner className="spinner" /> : <FaTrash />}
-                      {saving === `remove-donation-${donation.id}` ? 'Removing...' : 'Remove'}
-                    </button>
-                  </div>
-                </>
-              )}
+                <div className="content-row">
+                  <strong>Date:</strong>
+                  <span>{invoice.timestamp?.toDate().toLocaleDateString()}</span>
+                </div>
+                <div className="content-row">
+                  <strong>Email:</strong>
+                  <span>{invoice.donorEmail}</span>
+                </div>
+                <div className="content-row">
+                  <strong>Session ID:</strong>
+                  <span className="session-id">{invoice.sessionId}</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>
