@@ -8,51 +8,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
     <!-- Security Headers -->
+    <!-- Content Security Policy temporarily disabled for testing
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-        https://*.firebaseapp.com 
+        https://*.stripe.com 
         https://*.googleapis.com 
-        https://www.googletagmanager.com 
-        https://www.google-analytics.com 
-        https://apis.google.com 
-        https://js.stripe.com 
-        https://connect.facebook.net
-        https://unpkg.com;
+        https://*.gstatic.com 
+        https://*.google-analytics.com 
+        https://connect.facebook.net;
       style-src 'self' 'unsafe-inline' 
-        https://fonts.googleapis.com;
-      img-src 'self' data: blob: 
-        https://*.firebaseapp.com 
         https://*.googleapis.com 
-        https://*.gstatic.com
-        https://unpkg.com
-        https://*.google-analytics.com
-        https://*.googleusercontent.com
-        https://*.google.com
-        https://*.ggpht.com
-        https://*.ytimg.com
-        https://*.youtube.com
-        https://*.facebook.com
-        https://*.fbcdn.net
-        https://*.cloudfront.net
-        https://*.amazonaws.com
-        https://*.stripe.com;
+        https://*.gstatic.com;
+      img-src 'self' data: 
+        https://*.stripe.com 
+        https://*.googleapis.com 
+        https://*.gstatic.com 
+        https://*.google-analytics.com;
       font-src 'self' 
-        https://fonts.gstatic.com;
+        https://*.googleapis.com 
+        https://*.gstatic.com;
       frame-src 'self' 
-        https://*.firebaseapp.com 
-        https://*.google.com 
         https://*.stripe.com;
       connect-src 'self' 
         https://*.firebaseapp.com 
         https://*.googleapis.com 
         https://*.stripe.com 
+        https://r.stripe.com
+        https://*.stripe.com
         https://unpkg.com
         https://*.google-analytics.com
         https://region1.google-analytics.com
+        http://localhost:3001
         data:
         wss://*.firebaseio.com;
-    ">
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'self';
+      upgrade-insecure-requests;"
+    />
+    -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload" />
@@ -91,7 +87,7 @@
     <!-- Performance optimization -->
     <meta name="format-detection" content="telephone=no" />
     <link rel="preload" href="/src/main.tsx" as="script" type="module" crossorigin="anonymous" />
-    <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/main-font.woff2" as="font" crossorigin="anonymous" />
     <link rel="modulepreload" href="/src/App.tsx" />
     <link rel="dns-prefetch" href="https://firebaseapp.com" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />

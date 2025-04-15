@@ -11,6 +11,10 @@ import { PasswordProtectedPage } from '../../components/overlays/PasswordProtect
 import { db } from '../../firebase/firebase';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 import { renderIcon } from '../../utils/iconMapping';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLISHABLE_KEY || '');
 
 // Add interface for partner data
 interface Partner {
@@ -112,23 +116,51 @@ export default function B8World() {
     }
   };
 
-  const proceedToPayment = () => {
-    // Here we would typically redirect to Stripe or open a Stripe payment modal
-    // For now, we'll just log the donation details and close the modal
-    console.log('Processing donation:', {
-      amount: donationAmount,
-      name: donorName,
-      email: donorEmail
-    });
-    
-    // In a real implementation, we would redirect to Stripe:
-    // window.location.href = `https://your-stripe-checkout-url?amount=${donationAmount}`;
-    
-    // For demo purposes, show an alert
-    alert(`Thank you for your donation of £${donationAmount}! You would now be redirected to our secure payment processor.`);
-    
-    // Close the modal
-    closeDonationModal();
+  const proceedToPayment = async () => {
+    try {
+      if (!donationAmount) {
+        alert('Please select or enter a donation amount');
+        return;
+      }
+
+      // Convert donation amount to pence (Stripe uses smallest currency unit)
+      const amountInPence = Math.round(Number(donationAmount) * 100);
+
+      // Create a checkout session
+      const response = await fetch(`${import.meta.env.VITE_STRIPE_SERVER_URL}/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amountInPence,
+          currency: 'gbp',
+          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/cancel`,
+          metadata: {
+            donorName,
+            donorEmail,
+            businessId: 'world'
+          }
+        }),
+      });
+
+      const { sessionId } = await response.json();
+
+      // Redirect to Stripe Checkout
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe failed to initialize');
+      }
+
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('There was an error processing your donation. Please try again.');
+    }
   };
   
   return (
