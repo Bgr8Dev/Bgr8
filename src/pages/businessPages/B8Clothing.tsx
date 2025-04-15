@@ -28,33 +28,47 @@ export default function B8Clothing() {
   const [selectedSize, setSelectedSize] = useState<string>('all');
 
   const handleStripeCheckout = async () => {
-    const stripe = await stripePromise;
-    if (!stripe) {
-      console.error('Stripe initialization failed');
-      return;
+    try {
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe initialization failed');
+      }
+
+      // Call your backend to create a checkout session
+      const response = await fetch('/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              id: 'b8-tshirt',
+              quantity: 1
+            }
+          ],
+          successUrl: `${window.location.origin}/success`,
+          cancelUrl: `${window.location.origin}/cancel`
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create checkout session');
+      }
+
+      const { id: sessionId } = await response.json();
+
+      // Redirect to Stripe Checkout
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Stripe Checkout Error:', error);
+      // You might want to show an error message to the user here
+      alert('Failed to process payment. Please try again.');
     }
-  
-    // Call your backend to create a checkout session
-    const response = await fetch('/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        items: [
-          {
-            id: 'b8-tshirt',
-            quantity: 1
-          }
-        ]
-      }),
-    });
-  
-    const session = await response.json();
-  
-    // Redirect to Stripe Checkout
-    const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
-    if (error) console.error('Stripe Checkout Error:', error);
   };
   
 

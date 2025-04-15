@@ -20,6 +20,9 @@ import React from 'react';
 import { UserProfile } from '../utils/userProfile';
 import Bgr8r from '../pages/businessPages/Bgr8r';
 import B8Podcast from '../pages/businessPages/B8Podcast';
+import Success from '../pages/Success';
+import Cancel from '../pages/Cancel';
+
 
 // Video Library
 // import VideoLibrary from '../pages/VideosLibrary';
@@ -152,6 +155,8 @@ export default function Navigation() {
       <Route path="/admin/world" element={<ProtectedRoute element={<AdminPortalB8World />} permission="admin" />} />
       <Route path="/admin/league" element={<ProtectedRoute element={<AdminPortalLeague />} permission="admin" />} /> */}
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
+      <Route path="/success" element={<Success />} />
+      <Route path="/cancel" element={<Cancel />} />
     </Routes>
   );
 }
