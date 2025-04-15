@@ -1,0 +1,24 @@
+{
+  "name": "b8-stripe-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "ts-node-esm server.ts",
+    "dev": "nodemon --exec ts-node-esm server.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "stripe": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.1",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.7.2"
+  }
+} 
