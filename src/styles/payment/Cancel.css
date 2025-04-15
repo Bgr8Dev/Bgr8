@@ -1,0 +1,72 @@
+.cancel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  padding: 20px;
+}
+
+.cancel-content {
+  background: #2a2a2a;
+  padding: 40px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+}
+
+.cancel-icon {
+  font-size: 80px;
+  color: #f44336;
+  margin-bottom: 20px;
+}
+
+.cancel-content h1 {
+  color: #fff;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.cancel-content p {
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.try-again-btn {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-top: 20px;
+}
+
+.try-again-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(244, 67, 54, 0.3);
+}
+
+@media (max-width: 768px) {
+  .cancel-content {
+    padding: 30px 20px;
+  }
+
+  .cancel-icon {
+    font-size: 60px;
+  }
+
+  .cancel-content h1 {
+    font-size: 2rem;
+  }
+
+  .cancel-content p {
+    font-size: 1rem;
+  }
+} 

@@ -1,31 +1,33 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { createCheckoutSession, handleWebhook } from './stripe';
+import { createCheckoutSession, handleWebhook } from './stripe.js';
 
 dotenv.config();
 
 const app = express();
-const port = process.env.STRIPE_SERVER_PORT || 3001;
+const port = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
-// Stripe webhook endpoint needs raw body
+// Stripe webhook requires raw body
 app.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
 // Other routes use JSON body parser
 app.use(express.json());
 
-// Stripe routes
+// Routes
 app.post('/create-checkout-session', createCheckoutSession);
 
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.status(200).json({ status: 'ok' });
 });
 
-// Start server
 app.listen(port, () => {
-  console.log(`Stripe server running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 }); 

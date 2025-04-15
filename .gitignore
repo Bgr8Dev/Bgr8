@@ -301,7 +301,7 @@ confidential/
 # Payment & Financial
 *.invoice
 invoice/
-payment/
+# payment/
 financial/
 stripe-webhook-secret.txt
 paypal.json
