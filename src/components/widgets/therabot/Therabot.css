@@ -2,8 +2,8 @@
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, #4a90e2, #357abd);
   color: white;
@@ -15,11 +15,17 @@
   box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
   transition: all 0.3s ease;
   z-index: 1000;
+  padding: 0;
 }
 
-.therabot-toggle-button:hover {
-  transform: scale(1.1) rotate(10deg);
-  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+.therabot-toggle-button svg {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s ease;
+}
+
+.therabot-toggle-button:hover svg {
+  transform: scale(1.1);
 }
 
 .therabot-container {
@@ -318,8 +324,13 @@
   .therabot-toggle-button {
     bottom: 1rem;
     right: 1rem;
-    width: 45px;
-    height: 45px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .therabot-toggle-button svg {
+    width: 26px;
+    height: 26px;
   }
 }
 
