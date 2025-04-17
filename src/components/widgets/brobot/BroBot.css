@@ -1,4 +1,4 @@
-.therabot-toggle-button {
+.BroBot-toggle-button {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
@@ -18,17 +18,17 @@
   padding: 0;
 }
 
-.therabot-toggle-button svg {
+.BroBot-toggle-button svg {
   width: 28px;
   height: 28px;
   transition: transform 0.3s ease;
 }
 
-.therabot-toggle-button:hover svg {
+.BroBot-toggle-button:hover svg {
   transform: scale(1.1);
 }
 
-.therabot-container {
+.BroBot-container {
   position: fixed;
   bottom: 4rem;
   right: 1.5rem;
@@ -72,7 +72,7 @@
   }
 }
 
-.therabot-container.closing {
+.BroBot-container.closing {
   animation: therabotClose 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
@@ -102,7 +102,7 @@
   }
 }
 
-.therabot-header {
+.BroBot-header {
   padding: 0.8rem 1rem;
   background: linear-gradient(135deg, #4a90e2, #357abd);
   color: white;
@@ -125,7 +125,7 @@
   }
 }
 
-.therabot-header h3 {
+.BroBot-header h3 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
@@ -134,7 +134,7 @@
   gap: 0.5rem;
 }
 
-.therabot-close-button {
+.BroBot-close-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
@@ -144,11 +144,11 @@
   transition: background-color 0.3s ease;
 }
 
-.therabot-close-button:hover {
+.BroBot-close-button:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.therabot-messages {
+.BroBot-messages {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
@@ -162,20 +162,20 @@
   scrollbar-color: rgba(74, 144, 226, 0.3) transparent;
 }
 
-.therabot-messages::-webkit-scrollbar {
+.BroBot-messages::-webkit-scrollbar {
   width: 6px;
 }
 
-.therabot-messages::-webkit-scrollbar-track {
+.BroBot-messages::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.therabot-messages::-webkit-scrollbar-thumb {
+.BroBot-messages::-webkit-scrollbar-thumb {
   background-color: rgba(74, 144, 226, 0.3);
   border-radius: 3px;
 }
 
-.therabot-message {
+.BroBot-message {
   max-width: 85%;
   padding: 0.7rem 0.9rem;
   border-radius: 12px;
@@ -185,34 +185,34 @@
   transform: translateY(10px);
 }
 
-.therabot-message.user {
+.BroBot-message.user {
   align-self: flex-end;
   background: linear-gradient(135deg, #4a90e2, #357abd);
   color: white;
   border-bottom-right-radius: 5px;
 }
 
-.therabot-message.bot {
+.BroBot-message.bot {
   align-self: flex-start;
   background: #f5f7fa;
   color: #2c3e50;
   border-bottom-left-radius: 5px;
 }
 
-.therabot-message p {
+.BroBot-message p {
   margin: 0;
   line-height: 1.3;
   font-size: 0.9rem;
 }
 
-.therabot-message-time {
+.BroBot-message-time {
   font-size: 0.7rem;
   opacity: 0.7;
   margin-top: 0.3rem;
   display: block;
 }
 
-.therabot-input-form {
+.BroBot-input-form {
   padding: 0.8rem;
   background: white;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
@@ -223,7 +223,7 @@
   opacity: 0;
 }
 
-.therabot-input {
+.BroBot-input {
   flex: 1;
   padding: 0.7rem 1rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -234,18 +234,18 @@
   background: #f5f7fa;
 }
 
-.therabot-input:focus {
+.BroBot-input:focus {
   border-color: #4a90e2;
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
   background: white;
 }
 
-.therabot-input:disabled {
+.BroBot-input:disabled {
   background: #f0f0f0;
   cursor: not-allowed;
 }
 
-.therabot-send-button {
+.BroBot-send-button {
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -260,29 +260,29 @@
   box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2);
 }
 
-.therabot-send-button:hover:not(:disabled) {
+.BroBot-send-button:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
 }
 
-.therabot-send-button:disabled {
+.BroBot-send-button:disabled {
   background: #ccc;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-.therabot-message.bot.loading {
+.BroBot-message.bot.loading {
   animation: pulse 1.5s ease-in-out infinite;
   background: #f5f7fa;
 }
 
-.therabot-message.bot.loading p {
+.BroBot-message.bot.loading p {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.therabot-message.bot.loading p::after {
+.BroBot-message.bot.loading p::after {
   content: '';
   width: 8px;
   height: 8px;
@@ -291,7 +291,7 @@
   animation: loadingDots 1.4s infinite;
 }
 
-.therabot-message.bot.loading p::before {
+.BroBot-message.bot.loading p::before {
   content: '';
   width: 8px;
   height: 8px;
@@ -313,7 +313,7 @@
 }
 
 @media (max-width: 768px) {
-  .therabot-container {
+  .BroBot-container {
     width: 100%;
     height: 100vh;
     bottom: 0;
@@ -321,21 +321,21 @@
     border-radius: 0;
   }
 
-  .therabot-toggle-button {
+  .BroBot-toggle-button {
     bottom: 1rem;
     right: 1rem;
     width: 52px;
     height: 52px;
   }
 
-  .therabot-toggle-button svg {
+  .BroBot-toggle-button svg {
     width: 26px;
     height: 26px;
   }
 }
 
 @media (max-height: 600px) {
-  .therabot-container {
+  .BroBot-container {
     height: 90vh;
     bottom: 1rem;
   }

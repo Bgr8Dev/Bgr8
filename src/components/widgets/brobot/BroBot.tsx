@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaRobot, FaTimes, FaPaperPlane } from 'react-icons/fa';
-import './Therabot.css';
+import './BroBot.css';
 import { getAuth } from 'firebase/auth';
 
 const THERABOT_API_URL = import.meta.env.VITE_THERABOT_API_URL;
@@ -11,7 +11,7 @@ interface Message {
   timestamp: Date;
 }
 
-const Therabot: React.FC = () => {
+const BroBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -64,7 +64,7 @@ const Therabot: React.FC = () => {
 
       // Add welcome message
       const welcomeMessage: Message = {
-        text: "Hello! I'm Therabot, your AI companion. How can I help you today?",
+        text: "Hello! I'm BroBot, your AI companion. How can I help you today?",
         sender: 'bot',
         timestamp: new Date()
       };
@@ -103,13 +103,13 @@ const Therabot: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response from Therabot');
+        throw new Error('Failed to get response from BroBot');
       }
 
       const data = await response.json();
       return data.reply;
     } catch (error) {
-      console.error('Error communicating with Therabot:', error);
+      console.error('Error communicating with BroBot:', error);
       return "I'm sorry, I'm having trouble connecting right now. Please try again later.";
     } finally {
       setIsLoading(false);
@@ -153,7 +153,7 @@ const Therabot: React.FC = () => {
   return (
     <>
       <button
-        className="therabot-toggle-button"
+        className="BroBot-toggle-button"
         onClick={() => setIsOpen(true)}
         aria-label="Open chat"
         style={{ display: isOpen ? 'none' : 'flex' }}
@@ -164,12 +164,12 @@ const Therabot: React.FC = () => {
       {isOpen && (
         <div 
           ref={containerRef}
-          className={`therabot-container ${isClosing ? 'closing' : ''}`}
+          className={`BroBot-container ${isClosing ? 'closing' : ''}`}
         >
-          <div className="therabot-header">
-            <h3>Therabot Assistant</h3>
+          <div className="BroBot-header">
+            <h3>BroBot Assistant</h3>
             <button
-              className="therabot-close-button"
+              className="BroBot-close-button"
               onClick={handleClose}
               aria-label="Close chat"
             >
@@ -177,30 +177,30 @@ const Therabot: React.FC = () => {
             </button>
           </div>
 
-          <div className="therabot-messages">
+          <div className="BroBot-messages">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`therabot-message ${message.sender}`}
+                className={`BroBot-message ${message.sender}`}
               >
                 <p>{message.text}</p>
-                <span className="therabot-message-time">
+                <span className="BroBot-message-time">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             ))}
             {isLoading && (
-              <div className="therabot-message bot loading">
+              <div className="BroBot-message bot loading">
                 <p>Thinking...</p>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSendMessage} className="therabot-input-form">
+          <form onSubmit={handleSendMessage} className="BroBot-input-form">
             <input
               type="text"
-              className="therabot-input"
+              className="BroBot-input"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Type your message..."
@@ -209,7 +209,7 @@ const Therabot: React.FC = () => {
             />
             <button
               type="submit"
-              className="therabot-send-button"
+              className="BroBot-send-button"
               disabled={!inputMessage.trim() || isLoading || !sessionId}
               aria-label="Send message"
             >
@@ -222,4 +222,4 @@ const Therabot: React.FC = () => {
   );
 };
 
-export default Therabot;
+export default BroBot;
