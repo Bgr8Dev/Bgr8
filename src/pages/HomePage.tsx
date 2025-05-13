@@ -12,7 +12,6 @@ import UserDemographics from '../components/maps/UserDemographics';
 import { useBusinessAccess } from '../contexts/BusinessAccessContext';
 // import Globe3D from '../components/maps/Globe3D';
 import { Helmet } from 'react-helmet';
-import BroBot from '../components/widgets/brobot/BroBot';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -121,7 +120,6 @@ export default function HomePage() {
       </section>
 
         <Footer />
-        <BroBot />
       </div>
     </>
   );
