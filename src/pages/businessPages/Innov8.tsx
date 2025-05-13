@@ -21,7 +21,7 @@ import {
 import ContactForm from '../../components/ui/ContactForm';
 import SocialChannels from '../../components/ui/SocialChannels';
 import JoinOurTeam from '../../components/ui/JoinOurTeam';
-import { FaPlay } from 'react-icons/fa';
+import { FaPlay, FaTimes } from 'react-icons/fa';
 
 declare global {
   interface Window {
@@ -103,10 +103,7 @@ export default function Innov8() {
       tag.src = 'https://www.youtube.com/iframe_api';
       document.body.appendChild(tag);
     }
-    // YT API will call window.onYouTubeIframeAPIReady
-    window.onYouTubeIframeAPIReady = () => {
-      // nothing here, handled on play
-    };
+    window.onYouTubeIframeAPIReady = () => {};
   }, []);
 
   // Handle play button click
@@ -135,6 +132,12 @@ export default function Innov8() {
     }, 300);
   };
 
+  // Handle close button click
+  const handleCloseVideo = () => {
+    setIsVideoPlaying(false);
+    setYtPlayer(null);
+  };
+
   return (
     <PasswordProtectedPage businessId="marketing">
       <ComingSoonOverlay businessId="marketing">
@@ -149,6 +152,11 @@ export default function Innov8() {
 
           {/* Header Video Section */}
           <section className={`header-video-banner${isVideoPlaying ? ' expanded' : ''}`}> 
+            {isVideoPlaying && (
+              <button className="video-close-btn" onClick={handleCloseVideo} aria-label="Close video">
+                <FaTimes size={28} color="#fff" />
+              </button>
+            )}
             {!isVideoPlaying && (
               <button className="video-play-btn" onClick={handlePlay} aria-label="Play video">
                 <FaPlay size={38} color="#e86a1a" />

@@ -813,30 +813,69 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: height 0.6s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s;
+  transition: 
+    height 0.6s cubic-bezier(0.4,0,0.2,1),
+    width 0.6s cubic-bezier(0.4,0,0.2,1),
+    max-width 0.6s cubic-bezier(0.4,0,0.2,1),
+    left 0.6s cubic-bezier(0.4,0,0.2,1),
+    top 0.6s cubic-bezier(0.4,0,0.2,1),
+    border-radius 0.6s cubic-bezier(0.4,0,0.2,1),
+    box-shadow 0.4s;
   box-shadow: 0 2px 12px rgba(0,0,0,0.25);
   margin-bottom: 2.5rem;
   cursor: url('data:image/svg+xml;utf8,<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="black" fill-opacity="0.0"/><polygon points="12,8 24,16 12,24" fill="%23e86a1a"/></svg>') 8 16, pointer;
 }
 
 .header-video-banner.expanded {
-  height: 420px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.65);
+  margin-bottom: 0;
   cursor: url('data:image/svg+xml;utf8,<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="black" fill-opacity="0.0"/><polygon points="12,8 24,16 12,24" fill="%23e86a1a"/></svg>') 8 16, pointer;
+}
+
+.header-video-banner.expanded .video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  background: #000;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 900px) {
   .header-video-banner.expanded {
-    height: 240px;
+    width: 98vw;
+    max-width: 98vw;
+    height: 40vh;
+    top: 5vh;
+    border-radius: 18px;
+  }
+  .header-video-banner.expanded .video-container {
+    border-radius: 12px;
   }
 }
-
 @media (max-width: 600px) {
   .header-video-banner {
     height: 44px;
   }
   .header-video-banner.expanded {
-    height: 180px;
+    width: 100vw;
+    max-width: 100vw;
+    height: 30vh;
+    top: 0;
+    border-radius: 0;
+  }
+  .header-video-banner.expanded .video-container {
+    border-radius: 0;
   }
 }
 
