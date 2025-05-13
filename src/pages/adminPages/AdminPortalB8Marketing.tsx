@@ -11,7 +11,7 @@ interface AdminPortalB8MarketingProps {
 export function AdminPortalB8Marketing({ stats }: AdminPortalB8MarketingProps) {
   return (
     <div className="admin-section">
-      <h2>B8 Marketing Administration</h2>
+      <h2>Innov8 Administration</h2>
       
       {/* Business analytics section */}
       <div className="admin-panel-section">
@@ -30,7 +30,7 @@ export function AdminPortalB8Marketing({ stats }: AdminPortalB8MarketingProps) {
         </div>
         <p className="section-description">
           Manage all marketing content from this dashboard. Add, edit, and organize categories, 
-          software tools, services, client companies, and pricing plans that will be displayed on the B8 Marketing page.
+          software tools, services, client companies, and pricing plans that will be displayed on the Innov8 page.
         </p>
         <MarketingContentManager />
       </div>

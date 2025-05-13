@@ -17,7 +17,7 @@ A clear and concise description of what you want to happen.
 A clear and concise description of any alternative solutions or features you've considered.
 
 **Business Unit**
-Which B8 Network business unit would this feature be for? (e.g., B8 League, B8 Marketing, B8 Car Club, etc.)
+Which B8 Network business unit would this feature be for? (e.g., B8 League, Innov8, B8 Car Club, etc.)
 
 **Target Users**
 Who would benefit from this feature? (e.g., regular users, business members, administrators)

@@ -23,7 +23,7 @@
 
 - 🏢 Multi-business unit integration
   - B8 League (Sports management)
-  - B8 Marketing (Digital services)
+  - Innov8 (Digital services)
   - B8 Car Club (Automotive community)
   - B8 Clothing (Fashion retail)
   - BGr8 (Entertainment)

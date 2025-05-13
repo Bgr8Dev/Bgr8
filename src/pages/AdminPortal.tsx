@@ -63,7 +63,7 @@ export default function AdminPortal() {
   });
 
   const businessSections = [
-    { id: 'marketing', name: 'B8 Marketing', icon: FaBullhorn },
+    { id: 'marketing', name: 'Innov8', icon: FaBullhorn },
     { id: 'carClub', name: 'B8 Car Club', icon: FaCar },
     { id: 'clothing', name: 'B8 Clothing', icon: FaTshirt },
     { id: 'league', name: 'B8 League', icon: FaFutbol },

@@ -159,8 +159,8 @@ export const MarketingContentManager: React.FC = () => {
     <div className="marketing-content-manager">
       <div className="admin-header">
         <div>
-          <h2>B8 Marketing Content Manager</h2>
-          <p>Manage and customize content displayed on the B8 Marketing page</p>
+          <h2>Innov8 Content Manager</h2>
+          <p>Manage and customize content displayed on the Innov8 page</p>
         </div>
         
         {/* Initialize data button */}

@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
-import Navbar from '../../components/ui/Navbar';
-import HamburgerMenu from '../../components/ui/HamburgerMenu';
+import { useEffect, useState, useRef } from 'react';
 import Footer from '../../components/ui/Footer';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import { renderIcon } from '../../utils/iconMapping';
-import '../../styles/businessStyles/B8Marketing.css';
+import '../../styles/businessStyles/Innov8.css';
 import {
   getCategories,
   getSoftware,
@@ -23,11 +21,22 @@ import {
 import ContactForm from '../../components/ui/ContactForm';
 import SocialChannels from '../../components/ui/SocialChannels';
 import JoinOurTeam from '../../components/ui/JoinOurTeam';
+import { FaPlay } from 'react-icons/fa';
 
-export default function B8Marketing() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+declare global {
+  interface Window {
+    YT: unknown;
+    onYouTubeIframeAPIReady: (() => void) | undefined;
+  }
+}
+
+// --- INNOV8 PAGE ---
+export default function Innov8() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const [ytPlayer, setYtPlayer] = useState<unknown>(null);
   
   // State for storing data from Firestore
   const [categories, setCategories] = useState<MarketingCategory[]>([]);
@@ -74,7 +83,7 @@ export default function B8Marketing() {
       setCompanies(companiesData);
       setPricingPlans(pricingPlansData);
     } catch (error) {
-      console.error('Error loading marketing data:', error);
+      console.error('Error loading Innov8 data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -82,47 +91,79 @@ export default function B8Marketing() {
 
   useEffect(() => {
     loadData();
-    
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Filter categories to only show active ones
   const activeCategories = categories.filter(category => category.isActive);
 
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+    }
+    // YT API will call window.onYouTubeIframeAPIReady
+    window.onYouTubeIframeAPIReady = () => {
+      // nothing here, handled on play
+    };
+  }, []);
+
+  // Handle play button click
+  const handlePlay = () => {
+    setIsVideoPlaying(true);
+    setTimeout(() => {
+      if (window.YT && playerRef.current && !ytPlayer) {
+        const Player = (window.YT as unknown as { Player: unknown }).Player as unknown as (new (...args: any[]) => any);
+        const player = new Player(playerRef.current, {
+          height: '100%',
+          width: '100%',
+          videoId: 'uPXf6RjA5RI',
+          playerVars: { autoplay: 1, rel: 0, modestbranding: 1 },
+          events: {
+            onStateChange: (event: unknown) => {
+              const ytEvent = event as { data: number };
+              if (ytEvent.data === 0 || ytEvent.data === 2) {
+                setIsVideoPlaying(false);
+                setYtPlayer(null);
+              }
+            },
+          },
+        });
+        setYtPlayer(player);
+      }
+    }, 300);
+  };
+
   return (
     <PasswordProtectedPage businessId="marketing">
       <ComingSoonOverlay businessId="marketing">
         <div className="page">
-          {isMobile ? <HamburgerMenu /> : <Navbar />}
+          {/* {isMobile ? <HamburgerMenu /> : <Navbar />} */}
 
-          {/* Existing Hero Section */}
+          {/* Hero Section */}
           <section className="marketing-hero">
-            <h1><s>B8</s> Marketing</h1>
-            <p> <s>We dont have a slogan yet</s></p>
+            <h1>Innov8</h1>
+            <p>Innovative marketing for the next generation.</p>
           </section>
 
-          {/* Updated Header Video Section */}
-          <section className="header-video">
-            <div className="video-container">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/uPXf6RjA5RI"
-                title="B8 Marketing Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+          {/* Header Video Section */}
+          <section className={`header-video-banner${isVideoPlaying ? ' expanded' : ''}`}> 
+            {!isVideoPlaying && (
+              <button className="video-play-btn" onClick={handlePlay} aria-label="Play video">
+                <FaPlay size={38} color="#e86a1a" />
+              </button>
+            )}
+            <div className={`video-container${isVideoPlaying ? ' visible' : ''}`}> 
+              <div ref={playerRef} style={{ width: '100%', height: '100%' }} />
             </div>
           </section>
 
           {/* Intro About Section */}
           <section className="intro-about">
-            <h2>About B8 Marketing</h2>
+            <h2>About Innov8</h2>
             <p>
-              At B8 Marketing, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
+              At Innov8, we specialize in innovative marketing strategies designed to elevate brands to new heights. 
               Our team is dedicated to delivering impactful campaigns that resonate with audiences globally.
             </p>
           </section>
@@ -130,15 +171,15 @@ export default function B8Marketing() {
           {/* Gallery of Media with Descriptions */}
           <section className="gallery">
             <div className="gallery-item">
-              <img src="/assets/marketing1.jpg" alt="Marketing Campaign 1" />
+              <img src="../../assets/Marketing/Hyundai.png" alt="Marketing Campaign 1" />
               <p>Campaign 1: Social Media Engagement Strategy</p>
             </div>
             <div className="gallery-item">
-              <img src="/assets/marketing2.jpg" alt="Marketing Campaign 2" />
+              <img src="../../assets/Marketing/Surrey.png" alt="Marketing Campaign 2" />
               <p>Campaign 2: Influencer Partnerships for Brand Growth</p>
             </div>
             <div className="gallery-item">
-              <img src="/assets/marketing3.jpg" alt="Marketing Campaign 3" />
+              <img src="../../assets/Marketing/Volkwagen.png" alt="Marketing Campaign 3" />
               <p>Campaign 3: Viral Video Production and Promotion</p>
             </div>
           </section>

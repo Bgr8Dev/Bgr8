@@ -16,7 +16,7 @@ Please delete options that are not relevant.
 ## Business Unit Impact
 
 - [ ] B8 League
-- [ ] B8 Marketing
+- [ ] Innov8
 - [ ] B8 Car Club
 - [ ] B8 Clothing
 - [ ] BGr8

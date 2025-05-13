@@ -171,7 +171,7 @@ export function AdminSettings() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const businessNames: Record<string, string> = {
-    marketing: 'B8 Marketing',
+    marketing: 'Innov8',
     carClub: 'B8 Car Club',
     clothing: 'B8 Clothing',
     league: 'B8 League',

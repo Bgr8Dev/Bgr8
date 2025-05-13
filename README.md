@@ -36,7 +36,7 @@ B8 Network is revolutionizing the way businesses and individuals connect across 
 | Business Unit | Description | Status |
 |--------------|-------------|---------|
 | 🏆 B8 League | Professional sports management | Live |
-| 📈 B8 Marketing | Digital marketing solutions | Live |
+| 📈 Innov8 | Digital marketing solutions | Live |
 | 🚗 B8 Car Club | Automotive community | Beta |
 | 👕 B8 Clothing | Fashion & merchandise | Coming Soon |
 | 🎭 BGr8 | Entertainment & events | Live |
@@ -49,7 +49,7 @@ B8 Network is revolutionizing the way businesses and individuals connect across 
 ### Core Features
 - ✨ Professional networking and business solutions
 - 🏆 Sports league management
-- 📊 Marketing services (B8 Marketing)
+- 📊 Marketing services (Innov8)
 - 🚗 Automotive community (B8 Car Club)
 - 👕 Fashion and merchandise (B8 Clothing)
 - 🎉 Entertainment and events (BGr8)

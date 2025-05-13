@@ -1,7 +1,8 @@
 // src/Navigation.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
-import B8Marketing from '../pages/businessPages/B8Marketing';
+import LandingPage from '../pages/LandingPage';
+import Innov8 from '../pages/businessPages/Innov8';
 import BGr8 from '../pages/businessPages/BGr8';
 import B8CarClub from '../pages/businessPages/B8CarClub';
 import B8Clothing from '../pages/businessPages/B8Clothing';
@@ -101,8 +102,10 @@ export default function Navigation() {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/b8-marketing" element={<B8Marketing />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/b8network" element={<HomePage />} />
+      <Route path="/innov8" element={<Innov8 />} />
+      <Route path="/b8-marketing" element={<Innov8 />} />
       <Route path="/bgr8" element={<BGr8 />} />
       <Route path="/b8-car-club" element={<B8CarClub />} />
       <Route path="/b8-clothing" element={<B8Clothing />} />
