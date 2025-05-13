@@ -31,7 +31,7 @@ export default function Navbar() {
 
       <nav className="nav">
         <Link to="/">Home</Link>
-        {isBusinessAccessible('marketing') && <Link to="/b8-marketing">Innov8</Link>}
+        {/* {isBusinessAccessible('marketing') && <Link to="/b8-marketing">Innov8</Link>} */}
         {isBusinessAccessible('bgr8') && <Link to="/bgr8">Bgr8</Link>}
         {isBusinessAccessible('carClub') && <Link to="/b8-car-club">B8 Car Club</Link>}
         {isBusinessAccessible('clothing') && <Link to="/b8-clothing" className="glitch-link">??????????</Link>}

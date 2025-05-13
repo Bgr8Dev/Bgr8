@@ -78,7 +78,7 @@ export default function HamburgerMenu() {
 
           <nav className="mobile-nav">
             <Link to="/" onClick={toggleMenu}>Home</Link>
-            {isBusinessAccessible('marketing') && <Link to="/b8-marketing" onClick={toggleMenu}>Innov8</Link>}
+            {/* {isBusinessAccessible('marketing') && <Link to="/b8-marketing" onClick={toggleMenu}>Innov8</Link>} */}
             {isBusinessAccessible('bgr8') && <Link to="/bgr8" onClick={toggleMenu}>Bgr8</Link>}
             {isBusinessAccessible('carClub') && <Link to="/b8-car-club" onClick={toggleMenu}>B8 Car Club</Link>}
             {isBusinessAccessible('clothing') && <Link to="/b8-clothing" onClick={toggleMenu} className="glitch-link">??????????</Link>}

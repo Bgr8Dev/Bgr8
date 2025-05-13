@@ -75,6 +75,7 @@ export default function Profile() {
     ethnicity: userProfile?.ethnicity || '',
     nationality: userProfile?.nationality || '',
     secondNationality: userProfile?.secondNationality || '',
+    countryOfOrigin: userProfile?.countryOfOrigin || '',
     location: {
       city: userProfile?.location?.city || '',
       country: userProfile?.location?.country || ''
@@ -110,6 +111,7 @@ export default function Profile() {
         ethnicity: formData.ethnicity,
         nationality: formData.nationality,
         secondNationality: formData.secondNationality,
+        countryOfOrigin: formData.countryOfOrigin,
         location: formData.location,
         lastUpdated: new Date()
       });
@@ -275,6 +277,20 @@ export default function Profile() {
             )}
 
             <div className="form-group">
+              <label>Country of Origin</label>
+              <select
+                value={formData.countryOfOrigin}
+                onChange={(e) => setFormData({...formData, countryOfOrigin: e.target.value})}
+                className="form-select"
+              >
+                <option value="">Select Country of Origin</option>
+                {nationalityOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
               <label>City</label>
               <input
                 type="text"
@@ -426,6 +442,7 @@ export default function Profile() {
                     : userProfile?.nationality || 'Not set'
                 }
               </p>
+              <p><strong>Country of Origin:</strong> {userProfile?.countryOfOrigin || 'Not set'}</p>
               <p><strong>Location:</strong> {userProfile?.location?.city ? 
                 `${userProfile.location.city}, ${userProfile.location.country}` : 
                 'Not set'}

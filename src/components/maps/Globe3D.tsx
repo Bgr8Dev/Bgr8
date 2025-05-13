@@ -36,13 +36,15 @@ interface Globe3DProps {
   height?: number;
   className?: string;
   customPoints?: GlobePoint[];
+  showCountries?: boolean;
 }
 
 const Globe3D: React.FC<Globe3DProps> = ({ 
   width = 500, 
   height = 500,
   className = '',
-  customPoints
+  customPoints,
+  showCountries = true
 }) => {
   const globeEl = useRef<GlobeMethods | null>(null);
   const [points, setPoints] = useState<GlobePoint[]>([]);
@@ -213,7 +215,7 @@ const Globe3D: React.FC<Globe3DProps> = ({
         pointRadius="size"
         pointsMerge={true}
         
-        hexPolygonsData={countries}
+        hexPolygonsData={showCountries ? countries : []}
         hexPolygonResolution={3}
         hexPolygonMargin={0.3}
         hexPolygonColor={(d: unknown) => {

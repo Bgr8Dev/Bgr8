@@ -5,7 +5,7 @@ import { FaGlobe, FaUsers, FaChartPie, FaExchangeAlt } from 'react-icons/fa';
 import '../../styles/UserDemographics.css';
 import Globe3D from '../maps/Globe3D';
 
-type DemographicMode = 'ethnicity' | 'nationality';
+type DemographicMode = 'countryOfOrigin' | 'nationality';
 
 interface DemographicData {
   label: string;
@@ -26,7 +26,7 @@ interface GlobePoint {
 interface UserData {
   uid?: string;
   email?: string;
-  ethnicity?: string;
+  countryOfOrigin?: string;
   nationality?: string;
   displayName?: string;
   photoURL?: string;
@@ -61,10 +61,10 @@ const regionCoordinates: Record<string, { lat: number; lng: number }> = {
 };
 
 const UserDemographics: React.FC = () => {
-  const [mode, setMode] = useState<DemographicMode>('ethnicity');
+  const [mode, setMode] = useState<DemographicMode>('countryOfOrigin');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [ethnicityData, setEthnicityData] = useState<DemographicData[]>([]);
+  const [countryOfOriginData, setCountryOfOriginData] = useState<DemographicData[]>([]);
   const [nationalityData, setNationalityData] = useState<DemographicData[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [globePoints, setGlobePoints] = useState<GlobePoint[]>([]);
@@ -88,21 +88,21 @@ const UserDemographics: React.FC = () => {
 
   // Process user data to extract demographic information
   const processDemographicData = (users: UserData[]) => {
-    const ethnicityMap = new Map<string, number>();
+    const countryOfOriginMap = new Map<string, number>();
     const nationalityMap = new Map<string, number>();
     
     users.forEach(user => {
-      // Handle ethnicity data
-      const ethnicity = user.ethnicity || 'Not Specified';
-      ethnicityMap.set(ethnicity, (ethnicityMap.get(ethnicity) || 0) + 1);
+      // Handle country of origin data
+      const countryOfOrigin = user.countryOfOrigin || 'Not Specified';
+      countryOfOriginMap.set(countryOfOrigin, (countryOfOriginMap.get(countryOfOrigin) || 0) + 1);
       
       // Handle nationality data
       const nationality = user.nationality || 'Not Specified';
       nationalityMap.set(nationality, (nationalityMap.get(nationality) || 0) + 1);
     });
     
-    // Convert ethnicity map to array of objects with percentages
-    const ethnicityArray: DemographicData[] = Array.from(ethnicityMap.entries())
+    // Convert country of origin map to array of objects with percentages
+    const countryOfOriginArray: DemographicData[] = Array.from(countryOfOriginMap.entries())
       .map(([label, count]) => ({
         label,
         count,
@@ -121,12 +121,12 @@ const UserDemographics: React.FC = () => {
       }))
       .sort((a, b) => b.count - a.count);
     
-    setEthnicityData(ethnicityArray);
+    setCountryOfOriginData(countryOfOriginArray);
     setNationalityData(nationalityArray);
     setTotalUsers(users.length);
 
-    // Create globe points for both ethnicity and nationality
-    updateGlobePoints(mode === 'ethnicity' ? ethnicityArray : nationalityArray);
+    // Create globe points for both country of origin and nationality
+    updateGlobePoints(mode === 'countryOfOrigin' ? countryOfOriginArray : nationalityArray);
   };
 
   // Update globe points based on current demographic data
@@ -180,20 +180,20 @@ const UserDemographics: React.FC = () => {
 
   // Update globe points when mode changes
   useEffect(() => {
-    if (mode === 'ethnicity' && ethnicityData.length > 0) {
-      updateGlobePoints(ethnicityData);
+    if (mode === 'countryOfOrigin' && countryOfOriginData.length > 0) {
+      updateGlobePoints(countryOfOriginData);
     } else if (mode === 'nationality' && nationalityData.length > 0) {
       updateGlobePoints(nationalityData);
     }
-  }, [mode, ethnicityData, nationalityData]);
+  }, [mode, countryOfOriginData, nationalityData]);
 
-  // Toggle between ethnicity and nationality modes
+  // Toggle between country of origin and nationality modes
   const toggleMode = () => {
-    setMode(prevMode => prevMode === 'ethnicity' ? 'nationality' : 'ethnicity');
+    setMode(prevMode => prevMode === 'countryOfOrigin' ? 'nationality' : 'countryOfOrigin');
   };
 
   // Get current data based on mode
-  const currentData = mode === 'ethnicity' ? ethnicityData : nationalityData;
+  const currentData = mode === 'countryOfOrigin' ? countryOfOriginData : nationalityData;
 
   // Handle mouse events for pie chart segments
   const handleMouseOver = (e: React.MouseEvent<SVGPathElement>, item: DemographicData) => {
@@ -252,21 +252,21 @@ const UserDemographics: React.FC = () => {
     <div className="demographics-container">
       <div className="demographics-header">
         <h2>
-          {mode === 'ethnicity' ? (
-            <><FaUsers /> User Ethnicity</>
+          {mode === 'countryOfOrigin' ? (
+            <><FaUsers /> User Country of Origin</>
           ) : (
             <><FaGlobe /> User Nationality</>
           )}
         </h2>
 
         <button className="mode-toggle-btn" onClick={toggleMode}>
-          <FaExchangeAlt /> Switch to {mode === 'ethnicity' ? 'Nationality' : 'Ethnicity'}
+          <FaExchangeAlt /> Switch to {mode === 'countryOfOrigin' ? 'Nationality' : 'Country of Origin'}
         </button>
       </div>
 
       <div className="demographics-summary">
         <p>Total Users: <strong>{totalUsers}</strong></p>
-        <p>Unique {mode === 'ethnicity' ? 'Ethnicities' : 'Nationalities'}: <strong>{currentData.length}</strong></p>
+        <p>Unique {mode === 'countryOfOrigin' ? 'Countries of Origin' : 'Nationalities'}: <strong>{currentData.length}</strong></p>
       </div>
 
       <div className="visualization-container">

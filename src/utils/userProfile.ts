@@ -18,6 +18,7 @@ export interface UserProfile {
   ethnicity?: string;
   nationality?: string;
   secondNationality?: string;
+  countryOfOrigin?: string;
 
   // Additional Personal Info
   dateOfBirth?: string;
