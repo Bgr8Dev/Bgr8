@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
+import { getBestMatchesForUser, MatchResult, MentorMenteeProfile } from './matchUsers';
 
 type UserType = 'mentor' | 'mentee';
 
@@ -160,6 +161,8 @@ export default function MentorProgram() {
     type: '' as UserType | ''
   });
   const [matches, setMatches] = useState<{ mentee: User; mentor: User }[]>([]);
+  const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -182,6 +185,23 @@ export default function MentorProgram() {
 
     checkProfile();
   }, [currentUser]);
+
+  // Fetch best matches for the current user
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (!currentUser || !hasProfile) return;
+      setLoadingMatches(true);
+      try {
+        const results = await getBestMatchesForUser(currentUser.uid);
+        setBestMatches(results);
+      } catch (err) {
+        setBestMatches([]);
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
+    fetchMatches();
+  }, [currentUser, hasProfile]);
 
   // Simple matching algorithm
   const matchMentees = () => {
@@ -509,13 +529,21 @@ export default function MentorProgram() {
 
       <div style={{ marginTop: '2rem' }}>
         <h3>Matches</h3>
-        {matches.length === 0 ? (
+        {loadingMatches ? (
+          <p>Loading matches...</p>
+        ) : bestMatches.length === 0 ? (
           <p>No matches yet. Sign up as a mentor or mentee!</p>
         ) : (
           <ul>
-            {matches.map((match, idx) => (
-              <li key={idx}>
-                <strong>{match.mentee.name}</strong> (mentee) matched with <strong>{match.mentor.name}</strong> (mentor)
+            {bestMatches.map((match, idx) => (
+              <li key={idx} style={{ marginBottom: '1.2rem' }}>
+                <div style={{ fontWeight: 700, color: '#ff2a2a', fontSize: '1.08rem' }}>{match.user.name} <span style={{ color: '#fff', fontWeight: 400 }}>({match.user.type})</span></div>
+                <div style={{ color: '#fff', fontSize: '0.98rem', margin: '0.2rem 0 0.3rem 0' }}>Match Score: <span style={{ color: '#00ff00', fontWeight: 600 }}>{match.score}</span></div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#e0e0e0', fontSize: '0.97rem' }}>
+                  {match.reasons.map((reason, i) => (
+                    <li key={i}>{reason}</li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
