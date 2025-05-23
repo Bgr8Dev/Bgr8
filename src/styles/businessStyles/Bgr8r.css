@@ -243,4 +243,11 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.hero-video,
+.intro-section {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
 } 
