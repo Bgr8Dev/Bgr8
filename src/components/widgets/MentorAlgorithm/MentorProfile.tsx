@@ -31,8 +31,10 @@ export default function MentorProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [animateIn, setAnimateIn] = useState(false);
 
   useEffect(() => {
+    setAnimateIn(false);
     const fetchProfile = async () => {
       if (!currentUser) return;
       
@@ -46,6 +48,7 @@ export default function MentorProfile() {
         console.error('Error fetching profile:', err);
       } finally {
         setLoading(false);
+        setTimeout(() => setAnimateIn(true), 100); // trigger entrance animation
       }
     };
 
@@ -117,30 +120,30 @@ export default function MentorProfile() {
   }
 
   return (
-    <div className="mentor-profile">
-      <div className="mentor-profile-header">
-        <h3>{profile.type === 'mentor' ? 'Mentor Profile' : 'Mentee Profile'}</h3>
+    <div className={`mentor-profile mentor-profile-animate${animateIn ? ' in' : ''}`}>
+      <div className="mentor-profile-header mentor-profile-header-animate">
+        <h3 className="mentor-profile-title-animate">{profile.type === 'mentor' ? 'Mentor Profile' : 'Mentee Profile'}</h3>
         {!isEditing ? (
-          <button onClick={handleEdit} className="mentor-profile-edit-btn">
+          <button onClick={handleEdit} className="mentor-profile-edit-btn mentor-profile-btn-animate">
             <FaEdit /> Edit Profile
           </button>
         ) : (
           <div className="mentor-profile-actions">
-            <button onClick={handleSave} className="mentor-profile-save-btn">
+            <button onClick={handleSave} className="mentor-profile-save-btn mentor-profile-btn-animate">
               <FaSave /> Save
             </button>
-            <button onClick={handleCancel} className="mentor-profile-cancel-btn">
+            <button onClick={handleCancel} className="mentor-profile-cancel-btn mentor-profile-btn-animate">
               <FaTimes /> Cancel
             </button>
           </div>
         )}
       </div>
 
-      {error && <div className="mentor-profile-error">{error}</div>}
-      {success && <div className="mentor-profile-success">{success}</div>}
+      {error && <div className="mentor-profile-error mentor-profile-fadein">{error}</div>}
+      {success && <div className="mentor-profile-success mentor-profile-fadein">{success}</div>}
 
       <div className="mentor-profile-content">
-        <div className="mentor-profile-section">
+        <div className="mentor-profile-section mentor-profile-section-animate">
           <h4>Personal Information</h4>
           <div className="mentor-profile-field">
             <label>Name</label>
@@ -206,7 +209,7 @@ export default function MentorProfile() {
           </div>
         </div>
 
-        <div className="mentor-profile-section">
+        <div className="mentor-profile-section mentor-profile-section-animate">
           <h4>Education & Professional</h4>
           <div className="mentor-profile-field">
             <label>Degree</label>
@@ -300,13 +303,13 @@ export default function MentorProfile() {
           </div>
         </div>
 
-        <div className="mentor-profile-section">
+        <div className="mentor-profile-section mentor-profile-section-animate">
           <h4>Skills & Interests</h4>
           <div className="mentor-profile-field">
             <label>{profile.type === 'mentor' ? 'Skills Offered' : 'Skills Looking For'}</label>
             <div className="mentor-profile-skills mentor-profile-chips">
               {(profile.type === 'mentor' ? profile.skills : profile.lookingFor).map((skill, idx) => (
-                <span className="mentor-profile-chip" key={idx}>{skill}</span>
+                <span className="mentor-profile-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{skill}</span>
               ))}
             </div>
           </div>
@@ -314,13 +317,13 @@ export default function MentorProfile() {
             <label>Hobbies & Interests</label>
             <div className="mentor-profile-list mentor-profile-chips">
               {profile.hobbies.map((hobby, idx) => (
-                <span className="mentor-profile-chip" key={idx}>{hobby}</span>
+                <span className="mentor-profile-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{hobby}</span>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mentor-profile-section">
+        <div className="mentor-profile-section mentor-profile-section-animate">
           <h4>Additional Information</h4>
           <div className="mentor-profile-field">
             <label>Ethnicity</label>
