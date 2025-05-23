@@ -161,6 +161,8 @@ export default function MentorProgram() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   // Simple matching algorithm
   const matchMentees = () => {
@@ -274,18 +276,24 @@ export default function MentorProgram() {
   };
 
   const handleRoleSelect = (role: UserType) => {
-    setSelectedRole(role);
-    setForm({
-      name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', country: '',
-      currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], type: role
-    });
-    setError(null);
-    setSuccess(null);
+    setSwipeDirection(role === 'mentor' ? 'left' : 'right');
+    setTimeout(() => {
+      setSelectedRole(role);
+      setShowForm(true);
+      setSwipeDirection(null);
+      setForm({
+        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', country: '',
+        currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+        skills: [], lookingFor: [], type: role
+      });
+      setError(null);
+      setSuccess(null);
+    }, 600); // match CSS transition duration
   };
 
   const handleBack = () => {
     setSelectedRole(null);
+    setShowForm(false);
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', country: '',
       currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
@@ -299,8 +307,8 @@ export default function MentorProgram() {
     <section className="mentor-program-widget">
       <h2>Mentor Program</h2>
       <p>Sign up as a mentor or mentee and get matched based on your skills and interests!</p>
-      {!selectedRole ? (
-        <div className="mentor-role-cards">
+      {!selectedRole && !showForm ? (
+        <div className={`mentor-role-cards${swipeDirection ? ` swipe-${swipeDirection}` : ''}`}>
           <div className="mentor-role-card mentor" onClick={() => handleRoleSelect('mentor')}>
             <FaChalkboardTeacher size={48} style={{ color: '#ff2a2a', marginBottom: 16 }} />
             <h3>Become a Mentor</h3>
@@ -312,8 +320,9 @@ export default function MentorProgram() {
             <p>Find a mentor to help you grow. Tell us what skills you're looking for and get matched with the right mentor for you.</p>
           </div>
         </div>
-      ) : (
-        <>
+      ) : null}
+      {(selectedRole || showForm) && (
+        <div className="mentor-form-stage">
           <button className="mentor-back-btn" onClick={handleBack} type="button">&larr; Back</button>
           <form onSubmit={handleSubmit} className="mentor-form">
             <div className="mentor-form-row">
@@ -459,7 +468,7 @@ export default function MentorProgram() {
           </form>
           {error && <p style={{ color: '#ff2a2a', marginTop: '1rem' }}>{error}</p>}
           {success && <p style={{ color: '#2aff2a', marginTop: '1rem' }}>{success}</p>}
-        </>
+        </div>
       )}
       <div style={{ marginTop: '2rem' }}>
         <h3>Matches</h3>
