@@ -4,6 +4,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
 import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync } from 'react-icons/fa';
+import MentorModal from '../widgets/MentorAlgorithm/MentorModal';
 import '../../styles/adminStyles/MentorManagement.css';
 
 interface MentorMenteeProfileWithId extends MentorMenteeProfile {
@@ -17,6 +18,8 @@ export default function MentorManagement() {
   const [filter, setFilter] = useState<'all' | 'mentor' | 'mentee'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalUser, setModalUser] = useState<MentorMenteeProfileWithId | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -188,7 +191,7 @@ export default function MentorManagement() {
                 </td>
                 <td>
                   <div className="action-buttons">
-                    <button className="view-profile">View Profile</button>
+                    <button className="view-profile" onClick={() => { setModalUser(user); setModalOpen(true); }}>View Profile</button>
                     <button className="edit-profile">Edit</button>
                   </div>
                 </td>
@@ -197,6 +200,7 @@ export default function MentorManagement() {
           </tbody>
         </table>
       </div>
+      <MentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} />
     </div>
   );
 } 
