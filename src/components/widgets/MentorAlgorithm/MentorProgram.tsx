@@ -139,6 +139,10 @@ const religionOptions = [
   'Other (please specify)',
 ];
 
+// Age limits for mentee sign up
+const MENTEE_MIN_AGE = 15;
+const MENTEE_MAX_AGE = 19;
+
 export default function MentorProgram() {
   const { currentUser } = useAuth();
   const [mentors, setMentors] = useState<User[]>([]);
@@ -278,6 +282,15 @@ export default function MentorProgram() {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    // Age validation for mentees
+    if (selectedRole === 'mentee') {
+      const ageNum = parseInt(form.age, 10);
+      if (isNaN(ageNum) || ageNum < MENTEE_MIN_AGE || ageNum > MENTEE_MAX_AGE) {
+        setError(`Mentees must be between ${MENTEE_MIN_AGE} and ${MENTEE_MAX_AGE} years old.`);
+        setLoading(false);
+        return;
+      }
+    }
     const user: User = {
       name: form.name,
       email: form.email,
