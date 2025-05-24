@@ -6,6 +6,7 @@ import { FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
 import { getBestMatchesForUser, MatchResult, MentorMenteeProfile } from './matchUsers';
+import MentorModal from './MentorModal';
 
 type UserType = 'mentor' | 'mentee';
 
@@ -170,6 +171,8 @@ export default function MentorProgram() {
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalUser, setModalUser] = useState<any | null>(null);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -534,21 +537,62 @@ export default function MentorProgram() {
         ) : bestMatches.length === 0 ? (
           <p>No matches yet. Sign up as a mentor or mentee!</p>
         ) : (
-          <ul>
-            {bestMatches.map((match, idx) => (
-              <li key={idx} style={{ marginBottom: '1.2rem' }}>
-                <div style={{ fontWeight: 700, color: '#ff2a2a', fontSize: '1.08rem' }}>{match.user.name} <span style={{ color: '#fff', fontWeight: 400 }}>({match.user.type})</span></div>
-                <div style={{ color: '#fff', fontSize: '0.98rem', margin: '0.2rem 0 0.3rem 0' }}>Match Score: <span style={{ color: '#00ff00', fontWeight: 600 }}>{match.score}</span></div>
-                <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#e0e0e0', fontSize: '0.97rem' }}>
-                  {match.reasons.map((reason, i) => (
-                    <li key={i}>{reason}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
+          <div className="matches-grid">
+            {bestMatches.map((match, idx) => {
+              const user = match.user;
+              return (
+                <div className="match-card" key={idx} onClick={() => { setModalUser(user); setModalOpen(true); }} style={{ cursor: 'pointer' }}>
+                  <div className="match-card-header">
+                    <div className="match-card-title">
+                      <span className="match-card-name">{user.name}</span>
+                      <span className="match-card-type">({user.type})</span>
+                    </div>
+                    <div className="match-card-score">
+                      Match Score: <span className="match-card-score-value">{match.score}</span>
+                    </div>
+                  </div>
+                  <div className="match-card-info">
+                    <div className="match-card-row">
+                      <span className="match-card-label">Email:</span>
+                      <span className="match-card-value">{user.email}</span>
+                    </div>
+                    <div className="match-card-row">
+                      <span className="match-card-label">Profession:</span>
+                      <span className="match-card-value">{user.currentProfession}</span>
+                    </div>
+                    <div className="match-card-row">
+                      <span className="match-card-label">Education:</span>
+                      <span className="match-card-value">{user.degree} ({user.educationLevel})</span>
+                    </div>
+                    <div className="match-card-row">
+                      <span className="match-card-label">Skills:</span>
+                      <span className="match-card-value">
+                        {(user.skills && user.skills.length > 0)
+                          ? user.skills.slice(0, 3).join(', ') + (user.skills.length > 3 ? `, +${user.skills.length - 3} more` : '')
+                          : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="match-card-row">
+                      <span className="match-card-label">Looking For:</span>
+                      <span className="match-card-value">
+                        {(user.lookingFor && user.lookingFor.length > 0)
+                          ? user.lookingFor.slice(0, 3).join(', ') + (user.lookingFor.length > 3 ? `, +${user.lookingFor.length - 3} more` : '')
+                          : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="match-card-reasons">
+                    {match.reasons.map((reason, i) => (
+                      <div className="match-card-reason" key={i}>{reason}</div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
+      <MentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} />
     </section>
   );
 } 

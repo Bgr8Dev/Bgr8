@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus, FaEnvelope } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaBullhorn, FaCar, FaTshirt, FaFutbol, FaHandHoldingHeart, FaGraduationCap, FaBriefcase, FaUserPlus, FaEnvelope, FaChalkboardTeacher } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminPortalB8Marketing } from './adminPages/AdminPortalB8Marketing';
@@ -18,6 +18,7 @@ import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
 import { AdminPortalB8Podcast } from './adminPages/AdminPortalB8Podcast';
+import MentorManagement from '../components/admin/MentorManagement';
 
 interface UserData {
   uid: string;
@@ -222,6 +223,12 @@ export default function AdminPortal() {
             <FaChartBar /> Analytics
           </button>
           <button 
+            className={`sidebar-button ${activeSection === 'mentors' ? 'active' : ''}`}
+            onClick={() => setActiveSection('mentors')}
+          >
+            <FaChalkboardTeacher /> Mentors
+          </button>
+          <button 
             className={`sidebar-button ${activeSection === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveSection('settings')}
           >
@@ -323,6 +330,10 @@ export default function AdminPortal() {
           <div className="admin-section">
             <AdminAnalytics />
           </div>
+        )}
+
+        {activeSection === 'mentors' && (
+          <MentorManagement />
         )}
 
         {activeSection === 'settings' && (

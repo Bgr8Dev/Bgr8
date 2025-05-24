@@ -1,0 +1,367 @@
+.mentor-management {
+  padding: 2rem;
+  background: #181818;
+  border-radius: 16px;
+  color: #fff;
+}
+
+.mentor-management-header {
+  margin-bottom: 2rem;
+}
+
+.mentor-management-header h2 {
+  color: #ff2a2a;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.mentor-management-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mentor-management-search input {
+  padding: 0.8rem 1.2rem;
+  border: 1.5px solid #3a0a0a;
+  border-radius: 8px;
+  background: #181818;
+  color: #fff;
+  font-size: 1rem;
+  min-width: 300px;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.mentor-management-search input:focus {
+  outline: none;
+  border-color: #ff2a2a;
+  box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+}
+
+.mentor-management-filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mentor-management-filters button {
+  padding: 0.8rem 1.5rem;
+  border: 1.5px solid #3a0a0a;
+  border-radius: 8px;
+  background: #181818;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mentor-management-filters button:hover {
+  border-color: #ff2a2a;
+  background: rgba(255,42,42,0.1);
+}
+
+.mentor-management-filters button.active {
+  background: #ff2a2a;
+  border-color: #ff2a2a;
+  color: #fff;
+}
+
+.refresh-button {
+  background: #181818 !important;
+  border-color: #3a0a0a !important;
+}
+
+.refresh-button:hover {
+  background: rgba(255,42,42,0.1) !important;
+  border-color: #ff2a2a !important;
+}
+
+.refresh-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.refresh-button svg {
+  transition: transform 0.3s ease;
+}
+
+.refresh-button .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mentor-management-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: rgba(40,0,0,0.25);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid #3a0a0a;
+}
+
+.stat-card h3 {
+  color: #ff2a2a;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.mentor-management-table {
+  background: rgba(40,0,0,0.25);
+  border-radius: 12px;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.mentor-management-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mentor-management-table th {
+  text-align: left;
+  padding: 1rem;
+  color: #ff2a2a;
+  font-weight: 600;
+  border-bottom: 2px solid #3a0a0a;
+}
+
+.mentor-management-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #3a0a0a;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-age {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.user-type {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.user-type.mentor {
+  background: rgba(255,42,42,0.1);
+  color: #ff2a2a;
+}
+
+.user-type.mentee {
+  background: rgba(0,255,0,0.1);
+  color: #00ff00;
+}
+
+.profession-info,
+.education-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.current-profession,
+.degree {
+  font-weight: 600;
+}
+
+.past-professions,
+.education-level {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.skills-list,
+.looking-for-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  background: rgba(255,42,42,0.1);
+  color: #ff2a2a;
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.9rem;
+}
+
+.more-skills {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-buttons button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-profile {
+  background: #ff2a2a;
+  color: #fff;
+  border: none;
+}
+
+.view-profile:hover {
+  background: #a80000;
+}
+
+.edit-profile {
+  background: transparent;
+  color: #ff2a2a;
+  border: 1.5px solid #ff2a2a;
+}
+
+.edit-profile:hover {
+  background: rgba(255,42,42,0.1);
+}
+
+.mentor-management-loading,
+.mentor-management-error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.mentor-management-error {
+  color: #ff2a2a;
+}
+
+.generate-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.count-input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1.5px solid #3a0a0a;
+  border-radius: 8px;
+  background: #181818;
+  color: #fff;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.count-input:focus {
+  outline: none;
+  border-color: #ff2a2a;
+  box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+}
+
+.generate-button {
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.generate-button:hover:not(:disabled) {
+  background: linear-gradient(90deg, #a80000 0%, #ff2a2a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,42,42,0.2);
+}
+
+.generate-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.mentor-management-success {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.mentor-management-error {
+  background: rgba(255, 42, 42, 0.1);
+  border: 1px solid #ff2a2a;
+  color: #ff2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .mentor-management {
+    padding: 1rem;
+  }
+
+  .mentor-management-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mentor-management-search input {
+    min-width: 100%;
+  }
+
+  .mentor-management-filters {
+    justify-content: center;
+  }
+
+  .mentor-management-table {
+    padding: 1rem;
+  }
+
+  .mentor-management-table th,
+  .mentor-management-table td {
+    padding: 0.8rem;
+  }
+} 
