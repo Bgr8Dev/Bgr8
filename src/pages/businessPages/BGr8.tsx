@@ -9,6 +9,7 @@ import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import BroBot from '../../components/widgets/brobot/BroBot';
+import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgram';
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -48,6 +49,9 @@ export default function BGr8() {
               We believe in creating opportunities for growth, learning, and collaboration.
             </p>
           </section>
+
+          {/* Mentor Program Widget */}
+          <MentorProgram />
 
           {/* Existing Gallery Section */}
           <section className="bgr8-gallery">

@@ -8,7 +8,6 @@ import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import { loadStripe } from '@stripe/stripe-js';
 import { FaTimes, FaCreditCard, FaPoundSign } from 'react-icons/fa';
-import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgram';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLISHABLE_KEY || '');
@@ -137,9 +136,6 @@ export default function Bgr8r() {
               Bgr8r is dedicated to fostering learning and growth through innovative programs, resources, and support for students and educators alike.
             </p>
           </section>
-
-          {/* Mentor Program Widget */}
-          <MentorProgram />
 
           {/* Existing Gallery Section */}
           <section className="gallery">

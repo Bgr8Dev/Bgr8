@@ -102,7 +102,7 @@ export default function Navigation() {
 
   return (
     <Routes>
-      <Route path="/" element={<Bgr8r />} />
+      <Route path="/" element={<BGr8 />} />
       <Route path="/b8network" element={<HomePage />} />
       <Route path="/innov8" element={<Innov8 />} />
       <Route path="/b8-marketing" element={<Innov8 />} />
