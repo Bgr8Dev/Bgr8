@@ -99,8 +99,8 @@ Before you begin, ensure you have:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/b8-network.git
-   cd b8-network
+   git clone https://github.com/Hum2a/B8.git
+   cd B8
    ```
 
 2. **Install dependencies:**
@@ -109,21 +109,12 @@ Before you begin, ensure you have:
    ```
 
 3. **Set up environment variables:**
-   Create a `.env` file in the root directory:
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-   VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-   VITE_STRIPE_SERVER_URL=your_stripe_server_url
-   ```
+   You will need your own firebase account.
+   Get the correct `.env` file from Hum2a to place in the root directory.
 
 4. **Set up Stripe server environment:**
-   Create a `.env` file in the stripe directory:
+   Typically you will just place the stripe `.env` file provided by Hum2a into the stripe directory.
+   If that's too easy for you, create a `.env` file in the stripe directory:
    ```env
    STRIPE_SECRET_KEY=your_stripe_secret_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
