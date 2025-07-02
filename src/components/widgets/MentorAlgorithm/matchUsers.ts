@@ -115,9 +115,9 @@ function getAgeScore(
       || (currentUser.age < candidate.age && currentUser.type == MENTOR)) {
       return 0; // if the mentor is younger, return 0. Unlikely, but...
     }
-    let ageReason = currentUser.type == MENTOR ? ageReasonMentor : ageReasonMentee;
+    const ageReason = currentUser.type == MENTOR ? ageReasonMentor : ageReasonMentee;
     for (const ageString in ageReason) {
-      let age = Number(ageString);
+      const age = Number(ageString);
       if (age > ageDiff) {
         reasons.push(ageReason[age as keyof typeof ageReason]);
         break;
@@ -128,7 +128,7 @@ function getAgeScore(
     if (ageDiff < softAgeDiffLimit) {
       score = Math.max(
         Math.ceil(maxScore - ((ageDiff * maxScore) / softAgeDiffLimit)), 0);
-      let ageReason = { 5: 'Very close in age', 10: 'Moderately close in age' };
+      const ageReason = { 5: 'Very close in age', 10: 'Moderately close in age' };
       for (const age in ageReason) {
         if (Number(age) < ageDiff) {
           reasons.push(ageReason[Number(age) as keyof typeof ageReason]);
@@ -222,7 +222,7 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
     score += getProfessionalScore(currentUser, candidate, reasons);
 
     // Age
-    let olderMentorPreferred = true; // TODO: this should be decided on the website maybe under "YoE"
+    const olderMentorPreferred = true; // TODO: this should be decided on the website maybe under "YoE"
     score += getAgeScore(currentUser, candidate, olderMentorPreferred, reasons);
 
     // Religion [HIDDEN]

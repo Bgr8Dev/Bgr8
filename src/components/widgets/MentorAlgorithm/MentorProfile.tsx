@@ -5,6 +5,11 @@ import { db } from '../../../firebase/firebase';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import './MentorProgram.css';
 import industriesList from '../../../constants/industries';
+import subjects from '../../../constants/subjects';
+import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import ethnicityOptions from '../../../constants/ethnicityOptions';
+import religionOptions from '../../../constants/religionOptions';
+import ukEducationLevels from '../../../constants/ukEducationLevels';
 
 interface MentorProfile {
   name: string;
@@ -24,6 +29,7 @@ interface MentorProfile {
   lookingFor: string[];
   industries: string[];
   type: 'mentor' | 'mentee';
+  subjects: string[];
 }
 
 export default function MentorProfile() {
@@ -34,6 +40,8 @@ export default function MentorProfile() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [animateIn, setAnimateIn] = useState(false);
+  const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
+  const [hobbiesDropdownOpen, setHobbiesDropdownOpen] = useState(false);
 
   useEffect(() => {
     setAnimateIn(false);
@@ -85,7 +93,8 @@ export default function MentorProfile() {
         skills: profile.skills,
         lookingFor: profile.lookingFor,
         industries: profile.industries,
-        type: profile.type
+        type: profile.type,
+        subjects: profile.subjects
       };
 
       await updateDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
@@ -210,6 +219,137 @@ export default function MentorProfile() {
               <p className="mentor-profile-value">{profile.county}</p>
             )}
           </div>
+          <div className="mentor-profile-field">
+            <label>Subjects</label>
+            {isEditing ? (
+              <div
+                className="custom-multiselect-dropdown"
+                tabIndex={0}
+                style={{ position: 'relative', marginTop: 4 }}
+              >
+                <div
+                  className="custom-multiselect-control"
+                  style={{
+                    background: '#181818',
+                    color: '#fff',
+                    border: '1.5px solid #3a0a0a',
+                    borderRadius: 8,
+                    padding: '0.7rem 1rem',
+                    fontSize: '1rem',
+                    minHeight: 44,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    userSelect: 'none',
+                  }}
+                  onClick={() => setSubjectsDropdownOpen(v => !v)}
+                  aria-haspopup="listbox"
+                  aria-expanded={subjectsDropdownOpen}
+                >
+                  <span style={{ color: profile.subjects.length === 0 ? '#888' : '#fff' }}>
+                    {profile.subjects.length === 0 ? 'Select subjects...' : `${profile.subjects.length} selected`}
+                  </span>
+                  <span style={{ fontSize: 18, color: '#ff2a2a', marginLeft: 8 }}>
+                    ▼
+                  </span>
+                </div>
+                {subjectsDropdownOpen && (
+                  <div
+                    className="custom-multiselect-options"
+                    style={{
+                      position: 'absolute',
+                      top: '110%',
+                      left: 0,
+                      width: '100%',
+                      background: '#181818',
+                      border: '1.5px solid #3a0a0a',
+                      borderRadius: 8,
+                      zIndex: 20,
+                      maxHeight: 220,
+                      overflowY: 'auto',
+                      boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
+                    }}
+                  >
+                    {subjects.map(subj => (
+                      <label
+                        key={subj}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
+                          background: profile.subjects.includes(subj) ? 'rgba(0,119,181,0.13)' : 'transparent',
+                          color: profile.subjects.includes(subj) ? '#00eaff' : '#fff',
+                          fontWeight: profile.subjects.includes(subj) ? 700 : 400,
+                          borderRadius: 6,
+                          marginBottom: 0,
+                          transition: 'background 0.15s, color 0.15s',
+                          fontSize: '1.08rem',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={profile.subjects.includes(subj)}
+                          onChange={() => {
+                            setProfile(prev => prev ? {
+                              ...prev,
+                              subjects: prev.subjects.includes(subj)
+                                ? prev.subjects.filter((s: string) => s !== subj)
+                                : [...prev.subjects, subj],
+                            } : null);
+                          }}
+                          style={{
+                            accentColor: '#00eaff',
+                            marginRight: 0,
+                            width: 16,
+                            height: 16,
+                            flexShrink: 0,
+                            verticalAlign: 'middle'
+                          }}
+                        />
+                        <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{subj}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {profile.subjects.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {profile.subjects.map((subj) => (
+                      <span className="mentor-profile-chip mentor-profile-industry-chip" key={subj} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {subj}
+                        <button
+                          type="button"
+                          aria-label={`Remove ${subj}`}
+                          onClick={e => {
+                            e.preventDefault();
+                            setProfile(prev => prev ? { ...prev, subjects: prev.subjects.filter((s: string) => s !== subj) } : null);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#00eaff',
+                            fontWeight: 700,
+                            fontSize: 18,
+                            cursor: 'pointer',
+                            marginLeft: 2,
+                            lineHeight: 1
+                          }}
+                        >×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mentor-profile-list mentor-profile-chips mentor-profile-industries-chips">
+                {profile.subjects && profile.subjects.length > 0 ? (
+                  profile.subjects.map((subj, idx) => (
+                    <span className="mentor-profile-chip mentor-profile-industry-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{subj}</span>
+                  ))
+                ) : (
+                  <p className="mentor-profile-value">Not specified</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="mentor-profile-section mentor-profile-section-animate">
@@ -231,19 +371,36 @@ export default function MentorProfile() {
           <div className="mentor-profile-field">
             <label>Education Level</label>
             {isEditing ? (
-              <input
-                type="text"
+              <select
                 name="educationLevel"
                 value={profile.educationLevel}
                 onChange={handleChange}
                 required
-              />
+                style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
+              >
+                <option value="">Select Education Level</option>
+                {ukEducationLevels
+                  .filter(level => {
+                    // For mentees, only show up to Bachelor's degree
+                    if (profile.type === 'mentee') {
+                      const menteeLevels = [
+                        'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
+                      ];
+                      return menteeLevels.includes(level);
+                    }
+                    // For mentors, show all levels
+                    return true;
+                  })
+                  .map(level => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+              </select>
             ) : (
               <p className="mentor-profile-value">{profile.educationLevel}</p>
             )}
           </div>
           <div className="mentor-profile-field">
-            <label>Current Profession</label>
+            <label className="mentor-profile-label">{profile.type === 'mentee' ? 'Desired Profession' : 'Current Profession'}</label>
             {isEditing ? (
               <input
                 type="text"
@@ -251,6 +408,8 @@ export default function MentorProfile() {
                 value={profile.currentProfession}
                 onChange={handleChange}
                 required
+                className="mentor-profile-input"
+                style={{ width: '100%', padding: '0.8rem', border: '1.5px solid #3a0a0a', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
               />
             ) : (
               <p className="mentor-profile-value">{profile.currentProfession}</p>
@@ -331,7 +490,7 @@ export default function MentorProfile() {
                 </select>
                 {profile.industries && profile.industries.length > 0 && (
                   <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {profile.industries.map((industry, idx) => (
+                    {profile.industries.map((industry) => (
                       <span className="mentor-profile-chip mentor-profile-industry-chip" key={industry} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         {industry}
                         <button
@@ -379,11 +538,151 @@ export default function MentorProfile() {
           </div>
           <div className="mentor-profile-field">
             <label>Hobbies & Interests</label>
-            <div className="mentor-profile-list mentor-profile-chips mentor-profile-hobbies-chips">
-              {profile.hobbies.map((hobby, idx) => (
-                <span className="mentor-profile-chip mentor-profile-hobby-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{hobby}</span>
-              ))}
-            </div>
+            {isEditing ? (
+              <div
+                className="custom-multiselect-dropdown"
+                tabIndex={0}
+                style={{ position: 'relative', marginTop: 4 }}
+              >
+                <div
+                  className="custom-multiselect-control"
+                  style={{
+                    background: '#181818',
+                    color: '#fff',
+                    border: '1.5px solid #3a0a0a',
+                    borderRadius: 8,
+                    padding: '0.7rem 1rem',
+                    fontSize: '1rem',
+                    minHeight: 44,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    userSelect: 'none',
+                  }}
+                  onClick={() => setHobbiesDropdownOpen(v => !v)}
+                  aria-haspopup="listbox"
+                  aria-expanded={hobbiesDropdownOpen}
+                >
+                  <span style={{ color: profile.hobbies.length === 0 ? '#888' : '#fff' }}>
+                    {profile.hobbies.length === 0 ? 'Select hobbies...' : `${profile.hobbies.length} selected`}
+                  </span>
+                  <span style={{ fontSize: 18, color: '#ffb300', marginLeft: 8 }}>
+                    ▼
+                  </span>
+                </div>
+                {hobbiesDropdownOpen && (
+                  <div
+                    className="custom-multiselect-options"
+                    style={{
+                      position: 'absolute',
+                      top: '110%',
+                      left: 0,
+                      width: '100%',
+                      background: '#181818',
+                      border: '1.5px solid #3a0a0a',
+                      borderRadius: 8,
+                      zIndex: 20,
+                      maxHeight: 320,
+                      overflowY: 'auto',
+                      boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
+                      padding: '0.5rem 0',
+                    }}
+                  >
+                    {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
+                      <div key={category} style={{ marginBottom: 8 }}>
+                        <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
+                        {hobbies.map(hobby => (
+                          <label
+                            key={hobby}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
+                              background: profile.hobbies.includes(hobby) ? 'rgba(255,179,0,0.13)' : 'transparent',
+                              color: profile.hobbies.includes(hobby) ? '#ffb300' : '#fff',
+                              fontWeight: profile.hobbies.includes(hobby) ? 700 : 400,
+                              borderRadius: 6,
+                              marginBottom: 0,
+                              transition: 'background 0.15s, color 0.15s',
+                              fontSize: '1.08rem',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={profile.hobbies.includes(hobby)}
+                              onChange={() => {
+                                setProfile(prev => prev ? {
+                                  ...prev,
+                                  hobbies: prev.hobbies.includes(hobby)
+                                    ? prev.hobbies.filter((h: string) => h !== hobby)
+                                    : [...prev.hobbies, hobby],
+                                } : null);
+                              }}
+                              style={{
+                                accentColor: '#ffb300',
+                                marginRight: 0,
+                                width: 16,
+                                height: 16,
+                                flexShrink: 0,
+                                verticalAlign: 'middle'
+                              }}
+                            />
+                            <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{hobby}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {profile.hobbies.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {profile.hobbies.map((hobby) => (
+                      <span className="mentor-profile-chip mentor-profile-hobby-chip" key={hobby} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {hobby}
+                        <button
+                          type="button"
+                          aria-label={`Remove ${hobby}`}
+                          onClick={e => {
+                            e.preventDefault();
+                            setProfile(prev => prev ? { ...prev, hobbies: prev.hobbies.filter((h: string) => h !== hobby) } : null);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ffb300',
+                            fontWeight: 700,
+                            fontSize: 18,
+                            cursor: 'pointer',
+                            marginLeft: 2,
+                            lineHeight: 1
+                          }}
+                        >×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mentor-profile-list mentor-profile-chips mentor-profile-hobbies-chips">
+                {profile.hobbies && profile.hobbies.length > 0 ? (
+                  Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
+                    <React.Fragment key={category}>
+                      {profile.hobbies.some(hobby => hobbies.includes(hobby)) && (
+                        <div style={{ marginBottom: 4 }}>
+                          <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            {hobbies.filter(hobby => profile.hobbies.includes(hobby)).map((hobby, idx) => (
+                              <span className="mentor-profile-chip mentor-profile-hobby-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={hobby}>{hobby}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <p className="mentor-profile-value">Not specified</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -392,12 +691,17 @@ export default function MentorProfile() {
           <div className="mentor-profile-field">
             <label>Ethnicity</label>
             {isEditing ? (
-              <input
-                type="text"
+              <select
                 name="ethnicity"
                 value={profile.ethnicity}
                 onChange={handleChange}
-              />
+                style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
+              >
+                <option value="">Select Ethnicity</option>
+                {ethnicityOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             ) : (
               <p className="mentor-profile-value">{profile.ethnicity || 'Not specified'}</p>
             )}
@@ -405,12 +709,17 @@ export default function MentorProfile() {
           <div className="mentor-profile-field">
             <label>Religion</label>
             {isEditing ? (
-              <input
-                type="text"
+              <select
                 name="religion"
                 value={profile.religion}
                 onChange={handleChange}
-              />
+                style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
+              >
+                <option value="">Select Religion</option>
+                {religionOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             ) : (
               <p className="mentor-profile-value">{profile.religion || 'Not specified'}</p>
             )}

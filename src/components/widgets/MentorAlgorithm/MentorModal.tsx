@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { MentorMenteeProfile } from './matchUsers';
+import ethnicityOptions from '../../../constants/ethnicityOptions';
+import religionOptions from '../../../constants/religionOptions';
+import ukEducationLevels from '../../../constants/ukEducationLevels';
 
 interface MentorModalProps {
   open: boolean;
   onClose: () => void;
-  user: any | null;
+  user: MentorMenteeProfile | null;
   editMode?: boolean;
-  onSave?: (updatedUser: any) => void;
+  onSave?: (updatedUser: MentorMenteeProfile) => void;
 }
 
 const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode = false, onSave }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [editUser, setEditUser] = useState<any | null>(user);
+  const [editUser, setEditUser] = useState<MentorMenteeProfile | null>(user);
 
   useEffect(() => {
     if (!open) return;
@@ -33,24 +37,30 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setEditUser((prev: any) => ({ ...prev, [name]: value }));
+    setEditUser((prev: MentorMenteeProfile | null) => prev ? { ...prev, [name]: value } : null);
   };
 
   const handleArrayChange = (field: string, idx: number, value: string) => {
-    setEditUser((prev: any) => {
-      const arr = [...(prev[field] || [])];
+    setEditUser((prev: MentorMenteeProfile | null) => {
+      if (!prev) return null;
+      const arr = [...(prev[field as keyof MentorMenteeProfile] as string[] || [])];
       arr[idx] = value;
       return { ...prev, [field]: arr };
     });
   };
 
   const addArrayField = (field: string) => {
-    setEditUser((prev: any) => ({ ...prev, [field]: [...(prev[field] || []), ''] }));
+    setEditUser((prev: MentorMenteeProfile | null) => {
+      if (!prev) return null;
+      const currentArray = prev[field as keyof MentorMenteeProfile] as string[] || [];
+      return { ...prev, [field]: [...currentArray, ''] };
+    });
   };
 
   const removeArrayField = (field: string, idx: number) => {
-    setEditUser((prev: any) => {
-      const arr = [...(prev[field] || [])];
+    setEditUser((prev: MentorMenteeProfile | null) => {
+      if (!prev) return null;
+      const arr = [...(prev[field as keyof MentorMenteeProfile] as string[] || [])];
       arr.splice(idx, 1);
       return { ...prev, [field]: arr.length ? arr : [''] };
     });
@@ -67,9 +77,9 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
           <h3>Contact</h3>
           {editMode ? (
             <>
-              <div><b>Email:</b> <input name="email" value={editUser.email} onChange={handleInputChange} /></div>
-              <div><b>Phone:</b> <input name="phone" value={editUser.phone} onChange={handleInputChange} /></div>
-              <div><b>County:</b> <input name="county" value={editUser.county} onChange={handleInputChange} /></div>
+              <div><b>Email:</b> <input name="email" value={editUser?.email || ''} onChange={handleInputChange} /></div>
+              <div><b>Phone:</b> <input name="phone" value={editUser?.phone || ''} onChange={handleInputChange} /></div>
+              <div><b>County:</b> <input name="county" value={editUser?.county || ''} onChange={handleInputChange} /></div>
             </>
           ) : (
             <>
@@ -113,11 +123,30 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
           <h3>Education & Professional</h3>
           {editMode ? (
             <>
-              <div><b>Degree:</b> <input name="degree" value={editUser.degree} onChange={handleInputChange} /></div>
-              <div><b>Education Level:</b> <input name="educationLevel" value={editUser.educationLevel} onChange={handleInputChange} /></div>
-              <div><b>Current Profession:</b> <input name="currentProfession" value={editUser.currentProfession} onChange={handleInputChange} /></div>
+              <div><b>Degree:</b> <input name="degree" value={editUser?.degree || ''} onChange={handleInputChange} /></div>
+              <div><b>Education Level:</b> 
+                <select name="educationLevel" value={editUser?.educationLevel || ''} onChange={handleInputChange} style={{ marginLeft: 8, padding: '0.5rem', borderRadius: 4, border: '1px solid #ccc', background: '#fff' }}>
+                  <option value="">Select Education Level</option>
+                  {ukEducationLevels
+                    .filter(level => {
+                      // For mentees, only show up to Bachelor's degree
+                      if (user.type === 'mentee') {
+                        const menteeLevels = [
+                          'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
+                        ];
+                        return menteeLevels.includes(level);
+                      }
+                      // For mentors, show all levels
+                      return true;
+                    })
+                    .map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                </select>
+              </div>
+              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <input name="currentProfession" value={editUser?.currentProfession || ''} onChange={handleInputChange} /></div>
               <div><b>Past Professions:</b>
-                {editUser.pastProfessions && editUser.pastProfessions.map((prof: string, idx: number) => (
+                {editUser?.pastProfessions && editUser.pastProfessions.map((prof: string, idx: number) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input value={prof} onChange={e => handleArrayChange('pastProfessions', idx, e.target.value)} />
                     <button type="button" onClick={() => removeArrayField('pastProfessions', idx)} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>&times;</button>
@@ -125,13 +154,13 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                 ))}
                 <button type="button" onClick={() => addArrayField('pastProfessions')} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>+ Add</button>
               </div>
-              <div><b>LinkedIn:</b> <input name="linkedin" value={editUser.linkedin} onChange={handleInputChange} /></div>
+              <div><b>LinkedIn:</b> <input name="linkedin" value={editUser?.linkedin || ''} onChange={handleInputChange} /></div>
             </>
           ) : (
             <>
               <div><b>Degree:</b> <span className="field-value">{user.degree}</span></div>
               <div><b>Education Level:</b> <span className="field-value">{user.educationLevel}</span></div>
-              <div><b>Current Profession:</b> <span className="field-value">{user.currentProfession}</span></div>
+              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <span className="field-value">{user.currentProfession}</span></div>
               <div><b>Past Professions:</b> <span className="field-value">{user.pastProfessions && user.pastProfessions.length > 0 ? user.pastProfessions.join(', ') : 'N/A'}</span></div>
               <div><b>LinkedIn:</b> <span className="field-value">{user.linkedin ? (
                 <a
@@ -153,7 +182,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
           {editMode ? (
             <>
               <div><b>Skills:</b>
-                {editUser.skills && editUser.skills.map((skill: string, idx: number) => (
+                {editUser?.skills && editUser.skills.map((skill: string, idx: number) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input value={skill} onChange={e => handleArrayChange('skills', idx, e.target.value)} />
                     <button type="button" onClick={() => removeArrayField('skills', idx)} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>&times;</button>
@@ -162,7 +191,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                 <button type="button" onClick={() => addArrayField('skills')} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>+ Add</button>
               </div>
               <div><b>Looking For:</b>
-                {editUser.lookingFor && editUser.lookingFor.map((skill: string, idx: number) => (
+                {editUser?.lookingFor && editUser.lookingFor.map((skill: string, idx: number) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input value={skill} onChange={e => handleArrayChange('lookingFor', idx, e.target.value)} />
                     <button type="button" onClick={() => removeArrayField('lookingFor', idx)} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>&times;</button>
@@ -171,7 +200,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                 <button type="button" onClick={() => addArrayField('lookingFor')} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>+ Add</button>
               </div>
               <div><b>Hobbies:</b>
-                {editUser.hobbies && editUser.hobbies.map((hobby: string, idx: number) => (
+                {editUser?.hobbies && editUser.hobbies.map((hobby: string, idx: number) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input value={hobby} onChange={e => handleArrayChange('hobbies', idx, e.target.value)} />
                     <button type="button" onClick={() => removeArrayField('hobbies', idx)} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>&times;</button>
@@ -192,8 +221,22 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
           <h3>Additional Information</h3>
           {editMode ? (
             <>
-              <div><b>Ethnicity:</b> <input name="ethnicity" value={editUser.ethnicity} onChange={handleInputChange} /></div>
-              <div><b>Religion:</b> <input name="religion" value={editUser.religion} onChange={handleInputChange} /></div>
+              <div><b>Ethnicity:</b> 
+                <select name="ethnicity" value={editUser?.ethnicity || ''} onChange={handleInputChange} style={{ marginLeft: 8, padding: '0.5rem', borderRadius: 4, border: '1px solid #ccc', background: '#fff' }}>
+                  <option value="">Select Ethnicity</option>
+                  {ethnicityOptions.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+              <div><b>Religion:</b> 
+                <select name="religion" value={editUser?.religion || ''} onChange={handleInputChange} style={{ marginLeft: 8, padding: '0.5rem', borderRadius: 4, border: '1px solid #ccc', background: '#fff' }}>
+                  <option value="">Select Religion</option>
+                  {religionOptions.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
             </>
           ) : (
             <>
@@ -204,7 +247,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
         </div>
         {editMode && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 16 }}>
-            <button className="mentor-profile-save-btn" onClick={() => onSave && onSave(editUser)} style={{ minWidth: 90 }}>Save</button>
+            <button className="mentor-profile-save-btn" onClick={() => onSave && editUser && onSave(editUser)} style={{ minWidth: 90 }}>Save</button>
             <button className="mentor-profile-cancel-btn" onClick={onClose} style={{ minWidth: 90 }}>Cancel</button>
           </div>
         )}

@@ -4,6 +4,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
 import ukCounties from '../../constants/ukCounties';
+import industriesList from '../../constants/industries';
 import '../../styles/adminStyles/MentorManagement.css';
 
 // Sample data for randomization
@@ -383,6 +384,14 @@ export default function GenerateRandomProfile() {
     const age = Math.floor(Math.random() * 43) + 18; // 18-60 years old
     const skills = getRandomSkills();
     const lookingFor = getRandomSkills();
+    const industries = getRandomElements(industriesList, Math.floor(Math.random() * 3) + 1);
+
+    // Filter education levels based on type
+    const availableEducationLevels = type === 'mentee' 
+      ? ukEducationLevels.filter(level => [
+          'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
+        ].includes(level))
+      : ukEducationLevels;
 
     return {
       name: `${firstName} ${lastName}`,
@@ -390,7 +399,7 @@ export default function GenerateRandomProfile() {
       phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       age: age.toString(),
       degree: `${getRandomElement(['BSc', 'BA', 'MSc', 'MA'])} ${getRandomElement(['Computer Science', 'Business', 'Engineering', 'Arts', 'Science'])}`,
-      educationLevel: getRandomElement(ukEducationLevels),
+      educationLevel: getRandomElement(availableEducationLevels),
       county: getRandomElement(ukCounties),
       currentProfession: getRandomElement(professions),
       pastProfessions: getRandomElements(professions, Math.floor(Math.random() * 3) + 1),
@@ -400,6 +409,7 @@ export default function GenerateRandomProfile() {
       religion: getRandomElement(religionOptions),
       skills: type === 'mentor' ? skills : [],
       lookingFor: type === 'mentee' ? lookingFor : [],
+      industries: industries,
       type
     };
   };

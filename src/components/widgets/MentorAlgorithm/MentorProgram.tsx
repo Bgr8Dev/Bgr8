@@ -13,6 +13,8 @@ import ukCounties from '../../../constants/ukCounties';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
+import subjects from '../../../constants/subjects';
+import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 
 type UserType = 'mentor' | 'mentee';
 
@@ -30,6 +32,7 @@ export default function MentorProgram() {
     age: '',
     degree: '',
     educationLevel: '',
+    subjects: [] as string[],
     county: '',
     currentProfession: '',
     pastProfessions: [''],
@@ -56,6 +59,8 @@ export default function MentorProgram() {
   const [modalUser, setModalUser] = useState<MentorMenteeProfile | null>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
   const [industriesDropdownOpen, setIndustriesDropdownOpen] = useState(false);
+  const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
+  const [hobbiesDropdownOpen, setHobbiesDropdownOpen] = useState(false);
   const industriesDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,7 +84,9 @@ export default function MentorProgram() {
       try {
         const docSnap = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
         if (docSnap.exists()) setCurrentUserProfile(docSnap.data() as MentorMenteeProfile);
-      } catch {}
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
     };
     fetchProfile();
   }, [currentUser]);
@@ -92,7 +99,8 @@ export default function MentorProgram() {
       try {
         const results = await getBestMatchesForUser(currentUser.uid);
         setBestMatches(results);
-      } catch (err) {
+      } catch (error) {
+        console.error('Error fetching matches:', error);
         setBestMatches([]);
       } finally {
         setLoadingMatches(false);
@@ -135,7 +143,7 @@ export default function MentorProgram() {
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (e.target.multiple) {
+    if (e.target instanceof HTMLSelectElement && e.target.multiple) {
       const options = Array.from(e.target.selectedOptions, o => o.value);
       setForm(prev => ({ ...prev, [name]: options }));
     } else {
@@ -173,24 +181,6 @@ export default function MentorProgram() {
     });
   };
 
-  // Handle dynamic hobbies/interests
-  const handleHobbyChange = (idx: number, value: string) => {
-    setForm(prev => {
-      const updated = [...prev.hobbies];
-      updated[idx] = value;
-      return { ...prev, hobbies: updated };
-    });
-  };
-  const addHobbyField = () => {
-    setForm(prev => ({ ...prev, hobbies: [...prev.hobbies, ''] }));
-  };
-  const removeHobbyField = (idx: number) => {
-    setForm(prev => {
-      const updated = prev.hobbies.filter((_, i) => i !== idx);
-      return { ...prev, hobbies: updated.length ? updated : [''] };
-    });
-  };
-
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +203,7 @@ export default function MentorProgram() {
       age: form.age,
       degree: form.degree,
       educationLevel: form.educationLevel,
+      subjects: form.subjects,
       county: form.county,
       currentProfession: form.currentProfession,
       pastProfessions: form.pastProfessions.filter(p => p.trim() !== ''),
@@ -244,7 +235,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: ''
+        skills: [], lookingFor: [], industries: [], type: '', subjects: []
       });
       setTimeout(matchMentees, 0); // Update matches after state change
     } catch (err) {
@@ -264,7 +255,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: role
+        skills: [], lookingFor: [], industries: [], type: role, subjects: []
       });
       setError(null);
       setSuccess(null);
@@ -277,7 +268,7 @@ export default function MentorProgram() {
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], industries: [], type: ''
+      skills: [], lookingFor: [], industries: [], type: '', subjects: []
     });
     setError(null);
     setSuccess(null);
@@ -438,10 +429,148 @@ export default function MentorProgram() {
                       <input name="degree" value={form.degree} onChange={handleChange} placeholder="Degree (e.g. BSc Computer Science)" required />
                       <select name="educationLevel" value={form.educationLevel} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
                         <option value="" disabled>Select Education Level</option>
-                        {ukEducationLevels.map(level => (
-                          <option key={level} value={level}>{level}</option>
-                        ))}
+                        {ukEducationLevels
+                          .filter(level => {
+                            // For mentees, only show up to Bachelor's degree
+                            if (selectedRole === 'mentee') {
+                              const menteeLevels = [
+                                'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
+                              ];
+                              return menteeLevels.includes(level);
+                            }
+                            // For mentors, show all levels
+                            return true;
+                          })
+                          .map(level => (
+                            <option key={level} value={level}>{level}</option>
+                          ))}
                       </select>
+                      <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
+                        Subjects
+                        <div
+                          className="custom-multiselect-dropdown"
+                          tabIndex={0}
+                          style={{ position: 'relative', marginTop: 4 }}
+                        >
+                          <div
+                            className="custom-multiselect-control"
+                            style={{
+                              background: '#181818',
+                              color: '#fff',
+                              border: '1.5px solid #3a0a0a',
+                              borderRadius: 8,
+                              padding: '0.7rem 1rem',
+                              fontSize: '1rem',
+                              minHeight: 44,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => setSubjectsDropdownOpen(v => !v)}
+                            aria-haspopup="listbox"
+                            aria-expanded={subjectsDropdownOpen}
+                          >
+                            <span style={{ color: form.subjects.length === 0 ? '#888' : '#fff' }}>
+                              {form.subjects.length === 0 ? 'Select subjects...' : `${form.subjects.length} selected`}
+                            </span>
+                            <span style={{ fontSize: 18, color: '#ff2a2a', marginLeft: 8 }}>
+                              ▼
+                            </span>
+                          </div>
+                          {subjectsDropdownOpen && (
+                            <div
+                              className="custom-multiselect-options"
+                              style={{
+                                position: 'absolute',
+                                top: '110%',
+                                left: 0,
+                                width: '100%',
+                                background: '#181818',
+                                border: '1.5px solid #3a0a0a',
+                                borderRadius: 8,
+                                zIndex: 20,
+                                maxHeight: 220,
+                                overflowY: 'auto',
+                                boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
+                              }}
+                            >
+                              {subjects.map(subj => (
+                                <label
+                                  key={subj}
+                                  style={{
+                                    display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
+                                    background: form.subjects.includes(subj) ? 'rgba(0,119,181,0.13)' : 'transparent',
+                                    color: form.subjects.includes(subj) ? '#00eaff' : '#fff',
+                                    fontWeight: form.subjects.includes(subj) ? 700 : 400,
+                                    borderRadius: 6,
+                                    marginBottom: 0,
+                                    transition: 'background 0.15s, color 0.15s',
+                                    fontSize: '1.08rem',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={form.subjects.includes(subj)}
+                                    onChange={() => {
+                                      setForm(prev => ({
+                                        ...prev,
+                                        subjects: prev.subjects.includes(subj)
+                                          ? prev.subjects.filter((s: string) => s !== subj)
+                                          : [...prev.subjects, subj],
+                                      }));
+                                    }}
+                                    style={{
+                                      accentColor: '#00eaff',
+                                      marginRight: 0,
+                                      width: 16,
+                                      height: 16,
+                                      flexShrink: 0,
+                                      verticalAlign: 'middle'
+                                    }}
+                                  />
+                                  <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{subj}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                          {form.subjects.length > 0 && (
+                            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                              {form.subjects.map((subj) => (
+                                <span className="mentor-profile-chip mentor-profile-industry-chip" key={subj} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  {subj}
+                                  <button
+                                    type="button"
+                                    aria-label={`Remove ${subj}`}
+                                    onClick={e => {
+                                      e.preventDefault();
+                                      setForm(prev => ({ ...prev, subjects: prev.subjects.filter((s: string) => s !== subj) }));
+                                    }}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: '#00eaff',
+                                      fontWeight: 700,
+                                      fontSize: 18,
+                                      cursor: 'pointer',
+                                      marginLeft: 2,
+                                      lineHeight: 1
+                                    }}
+                                  >×</button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="mentor-form-row">
+                  <div className="mentor-form-half">
+                    <div className="mentor-form-section">
+                      <div className="mentor-form-section-title">Industries</div>
                       <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
                         {selectedRole === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}
                         <div
@@ -493,7 +622,6 @@ export default function MentorProgram() {
                                 overflowY: 'auto',
                                 boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
                               }}
-                              role="listbox"
                             >
                               {industriesList.map(ind => (
                                 <label
@@ -516,7 +644,7 @@ export default function MentorProgram() {
                                   <input
                                     type="checkbox"
                                     checked={form.industries.includes(ind)}
-                                    onChange={e => {
+                                    onChange={() => {
                                       setForm(prev => ({
                                         ...prev,
                                         industries: prev.industries.includes(ind)
@@ -540,7 +668,7 @@ export default function MentorProgram() {
                           )}
                           {form.industries.length > 0 && (
                             <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                              {form.industries.map((industry, idx) => (
+                              {form.industries.map((industry) => (
                                 <span className="mentor-profile-chip mentor-profile-industry-chip" key={industry} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                   {industry}
                                   <button
@@ -574,7 +702,18 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Professional Information</div>
-                      <input name="currentProfession" value={form.currentProfession} onChange={handleChange} placeholder="Current Profession" required />
+                      <div className="mentor-profile-field">
+                        <label className="mentor-profile-label">{selectedRole === 'mentee' ? 'Desired Profession' : 'Current Profession'}</label>
+                        <input
+                          name="currentProfession"
+                          value={form.currentProfession}
+                          onChange={handleChange}
+                          required
+                          placeholder={selectedRole === 'mentee' ? 'Desired Profession (e.g. Software Engineer)' : 'Current Profession (e.g. Software Engineer)'}
+                          className="mentor-profile-input"
+                          style={{ width: '100%', padding: '0.8rem', border: '1.5px solid #3a0a0a', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
+                        />
+                      </div>
                       <div className="mentor-past-professions-list">
                         {form.pastProfessions.map((prof, idx) => (
                           <div key={idx} className="mentor-past-profession-field">
@@ -609,47 +748,155 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Identity & Interests</div>
-                      <div className="mentor-hobbies-list">
-                        {form.hobbies.map((hobby, idx) => (
-                          <div key={idx} className="mentor-hobby-field">
-                            <input
-                              name={`hobby${idx}`}
-                              value={hobby}
-                              onChange={e => handleHobbyChange(idx, e.target.value)}
-                              placeholder={idx === 0 ? 'Hobbies / Interests (optional)' : 'Additional Hobby / Interest'}
-                              style={{ marginBottom: 4 }}
-                            />
-                            {form.hobbies.length > 1 && (
-                              <button type="button" className="mentor-remove-btn" onClick={() => removeHobbyField(idx)} title="Remove hobby">&times;</button>
-                            )}
+                      <select 
+                        name="ethnicity" 
+                        value={form.ethnicity} 
+                        onChange={handleChange} 
+                        required
+                        style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
+                      >
+                        <option value="" disabled>Select Ethnicity</option>
+                        {ethnicityOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      <select 
+                        name="religion" 
+                        value={form.religion} 
+                        onChange={handleChange} 
+                        required
+                        style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
+                      >
+                        <option value="" disabled>Select Religion</option>
+                        {religionOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
+                        Hobbies & Interests
+                        <div
+                          className="custom-multiselect-dropdown"
+                          tabIndex={0}
+                          style={{ position: 'relative', marginTop: 4 }}
+                        >
+                          <div
+                            className="custom-multiselect-control"
+                            style={{
+                              background: '#181818',
+                              color: '#fff',
+                              border: '1.5px solid #3a0a0a',
+                              borderRadius: 8,
+                              padding: '0.7rem 1rem',
+                              fontSize: '1rem',
+                              minHeight: 44,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => setHobbiesDropdownOpen(v => !v)}
+                            aria-haspopup="listbox"
+                            aria-expanded={hobbiesDropdownOpen}
+                          >
+                            <span style={{ color: form.hobbies.length === 0 ? '#888' : '#fff' }}>
+                              {form.hobbies.length === 0 ? 'Select hobbies...' : `${form.hobbies.length} selected`}
+                            </span>
+                            <span style={{ fontSize: 18, color: '#ffb300', marginLeft: 8 }}>
+                              ▼
+                            </span>
                           </div>
-                        ))}
-                        <button type="button" className="mentor-add-btn" onClick={addHobbyField} style={{ marginTop: 4, marginBottom: 8 }}>
-                          + Add Hobby / Interest
-                        </button>
-                      </div>
-                      <select
-                        name="ethnicity"
-                        value={form.ethnicity}
-                        onChange={handleChange}
-                        style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
-                      >
-                        <option value="" disabled>Select Ethnicity (optional)</option>
-                        {ethnicityOptions.map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                      <select
-                        name="religion"
-                        value={form.religion}
-                        onChange={handleChange}
-                        style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
-                      >
-                        <option value="" disabled>Select Religion (optional)</option>
-                        {religionOptions.map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
+                          {hobbiesDropdownOpen && (
+                            <div
+                              className="custom-multiselect-options"
+                              style={{
+                                position: 'absolute',
+                                top: '110%',
+                                left: 0,
+                                width: '100%',
+                                background: '#181818',
+                                border: '1.5px solid #3a0a0a',
+                                borderRadius: 8,
+                                zIndex: 20,
+                                maxHeight: 320,
+                                overflowY: 'auto',
+                                boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
+                                padding: '0.5rem 0',
+                              }}
+                            >
+                              {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
+                                <div key={category} style={{ marginBottom: 8 }}>
+                                  <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
+                                  {hobbies.map(hobby => (
+                                    <label
+                                      key={hobby}
+                                      style={{
+                                        display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
+                                        background: form.hobbies.includes(hobby) ? 'rgba(255,179,0,0.13)' : 'transparent',
+                                        color: form.hobbies.includes(hobby) ? '#ffb300' : '#fff',
+                                        fontWeight: form.hobbies.includes(hobby) ? 700 : 400,
+                                        borderRadius: 6,
+                                        marginBottom: 0,
+                                        transition: 'background 0.15s, color 0.15s',
+                                        fontSize: '1.08rem',
+                                      }}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={form.hobbies.includes(hobby)}
+                                        onChange={() => {
+                                          setForm(prev => ({
+                                            ...prev,
+                                            hobbies: prev.hobbies.includes(hobby)
+                                              ? prev.hobbies.filter((h: string) => h !== hobby)
+                                              : [...prev.hobbies, hobby],
+                                          }));
+                                        }}
+                                        style={{
+                                          accentColor: '#ffb300',
+                                          marginRight: 0,
+                                          width: 16,
+                                          height: 16,
+                                          flexShrink: 0,
+                                          verticalAlign: 'middle'
+                                        }}
+                                      />
+                                      <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{hobby}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {form.hobbies.length > 0 && (
+                            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                              {form.hobbies.map((hobby) => (
+                                <span className="mentor-profile-chip mentor-profile-hobby-chip" key={hobby} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  {hobby}
+                                  <button
+                                    type="button"
+                                    aria-label={`Remove ${hobby}`}
+                                    onClick={e => {
+                                      e.preventDefault();
+                                      setForm(prev => ({ ...prev, hobbies: prev.hobbies.filter((h: string) => h !== hobby) }));
+                                    }}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: '#ffb300',
+                                      fontWeight: 700,
+                                      fontSize: 18,
+                                      cursor: 'pointer',
+                                      marginLeft: 2,
+                                      lineHeight: 1
+                                    }}
+                                  >×</button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </label>
                     </div>
                   </div>
                 </div>

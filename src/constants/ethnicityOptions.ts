@@ -1,34 +1,48 @@
 const ethnicityOptions = [
   'Prefer not to say',
-  'White - British',
-  'White - Irish',
+  // White backgrounds
+  'White - British', 'White - English', 'White - Welsh', 'White - Scottish', 'White - Northern Irish',
+  'White - Irish', 'White - Gypsy or Irish Traveller', 'White - Roma',
+  'White - Eastern European', 'White - Western European', 'White - Southern European', 'White - Northern European',
+  'White - American', 'White - Canadian', 'White - Australian', 'White - New Zealander', 'White - South African',
   'White - Other',
-  'Mixed - White and Black Caribbean',
-  'Mixed - White and Black African',
-  'Mixed - White and Asian',
-  'Mixed - Other',
-  'Asian or Asian British - Indian',
-  'Asian or Asian British - Pakistani',
-  'Asian or Asian British - Bangladeshi',
-  'Asian or Asian British - Chinese',
-  'Asian or Asian British - Other',
-  'Black or Black British - African',
-  'Black or Black British - Caribbean',
-  'Black or Black British - Other',
-  'Arab',
-  'Gypsy or Irish Traveller',
-  'Roma',
-  'Other Ethnic Group',
-  'Hispanic or Latino',
-  'Native American or Alaska Native',
-  'Native Hawaiian or Other Pacific Islander',
-  'Jewish',
-  'South East Asian',
-  'East Asian',
-  'Central Asian',
-  'North African',
-  'Sub-Saharan African',
-  'Other (please specify)',
-];
 
+  // Mixed/Multiple ethnic backgrounds
+  'Mixed - White and Black Caribbean', 'Mixed - White and Black African', 'Mixed - White and Asian',
+  'Mixed - White and Indian', 'Mixed - White and Pakistani', 'Mixed - White and Bangladeshi',
+  'Mixed - White and Chinese', 'Mixed - White and Arab', 'Mixed - Black and Asian',
+  'Mixed - Asian and Chinese', 'Mixed - Other',
+
+  // Asian backgrounds
+  'Asian or Asian British - Indian', 'Asian or Asian British - Pakistani', 'Asian or Asian British - Bangladeshi',
+  'Asian or Asian British - Chinese', 'Asian or Asian British - Filipino', 'Asian or Asian British - Vietnamese',
+  'Asian or Asian British - Thai', 'Asian or Asian British - Malaysian', 'Asian or Asian British - Indonesian',
+  'Asian or Asian British - Japanese', 'Asian or Asian British - Korean', 'Asian or Asian British - Nepali',
+  'Asian or Asian British - Sri Lankan', 'Asian or Asian British - Burmese', 'Asian or Asian British - Mongolian',
+  'Asian or Asian British - Other',
+
+  // Black backgrounds
+  'Black or Black British - African', 'Black or Black British - Nigerian', 'Black or Black British - Ghanaian',
+  'Black or Black British - Somali', 'Black or Black British - Sudanese', 'Black or Black British - Caribbean',
+  'Black or Black British - Jamaican', 'Black or Black British - Barbadian', 'Black or Black British - Trinidadian',
+  'Black or Black British - Ethiopian', 'Black or Black British - Eritrean', 'Black or Black British - Congolese',
+  'Black or Black British - Angolan', 'Black or Black British - Other',
+
+  // Middle Eastern and North African backgrounds
+  'Arab - Middle Eastern', 'Arab - North African', 'Arab - Gulf States',
+  'Kurdish', 'Turkish', 'Iranian', 'Iraqi', 'Lebanese', 'Syrian', 'Yemeni', 'Egyptian',
+  'Moroccan', 'Algerian', 'Tunisian', 'Libyan',
+
+  // Latin American backgrounds
+  'Latin American - Mexican', 'Latin American - Brazilian', 'Latin American - Colombian',
+  'Latin American - Argentine', 'Latin American - Chilean', 'Latin American - Peruvian',
+  'Latin American - Other',
+
+  // Indigenous peoples
+  'Indigenous Australian', 'Torres Strait Islander', 'Maori', 'Native American/First Nations',
+  'Inuit', 'Sami', 'Indigenous African', 'Indigenous Asian', 'Indigenous South American',
+
+  // Other categories
+  'Jewish', 'Romani', 'Traveller', 'Other Ethnic Group'
+];
 export default ethnicityOptions; 
