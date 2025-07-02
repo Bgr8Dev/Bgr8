@@ -52,6 +52,7 @@ export default function MentorProgram() {
   const [hasProfile, setHasProfile] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalUser, setModalUser] = useState<MentorMenteeProfile | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -66,6 +67,17 @@ export default function MentorProgram() {
     };
 
     checkProfile();
+  }, [currentUser]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!currentUser) return;
+      try {
+        const docSnap = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+        if (docSnap.exists()) setCurrentUserProfile(docSnap.data() as MentorMenteeProfile);
+      } catch {}
+    };
+    fetchProfile();
   }, [currentUser]);
 
   // Fetch best matches for the current user
@@ -241,6 +253,62 @@ export default function MentorProgram() {
     setError(null);
     setSuccess(null);
   };
+
+  // Tooltip logic for match reasons
+  function getReasonTooltip(reason: string, match: MatchResult, user: MentorMenteeProfile, currentUserProfile: MentorMenteeProfile | null): string {
+    // Skill match
+    if (/skill\(s\) matched/.test(reason)) {
+      // Find the actual skills matched
+      if (!currentUserProfile) return 'Skills matched.';
+      const isMentor = currentUserProfile.type === 'mentor';
+      const skills = isMentor
+        ? currentUserProfile.skills.filter(skill => user.lookingFor.includes(skill))
+        : user.skills.filter(skill => currentUserProfile.lookingFor.includes(skill));
+      return skills.length > 0 ? `Matched skills: ${skills.join(', ')}` : 'Skills matched.';
+    }
+    // Professional history
+    if (reason === 'Similar professional history' || reason === 'Potentially similar professional history') {
+      if (!currentUserProfile) return 'Professional history matched.';
+      const userPast = currentUserProfile.pastProfessions || [];
+      const candidatePast = user.pastProfessions || [];
+      const userCurrent = currentUserProfile.currentProfession || '';
+      const candidateCurrent = user.currentProfession || '';
+      const overlaps = [];
+      if (userPast.includes(candidateCurrent)) overlaps.push(`Their current: ${candidateCurrent}`);
+      if (candidatePast.includes(userCurrent)) overlaps.push(`Your current: ${userCurrent}`);
+      const sharedPast = userPast.filter(p => candidatePast.includes(p));
+      if (sharedPast.length > 0) overlaps.push(`Shared past: ${sharedPast.join(', ')}`);
+      if (overlaps.length > 0) return `Overlap: ${overlaps.join('; ')}`;
+      return 'Some overlap in professional history.';
+    }
+    // Hobbies/interests
+    if (/hobby\/interests matched/.test(reason)) {
+      if (!currentUserProfile) return 'Hobbies/interests matched.';
+      const hobbies = currentUserProfile.hobbies.filter(h => user.hobbies.includes(h));
+      return hobbies.length > 0 ? `Matched hobbies/interests: ${hobbies.join(', ')}` : 'Hobbies/interests matched.';
+    }
+    // County
+    if (reason === 'Same county') {
+      return `Both are in ${user.county}.`;
+    }
+    // Education
+    if (reason === 'Higher mentor education level') {
+      return `${user.name} has a higher education level: ${user.educationLevel}.`;
+    }
+    // Age/experience
+    if (reason === 'More experienced mentor' || reason === 'Notably more experienced mentor' || reason === 'Significantly more experienced mentor') {
+      if (!currentUserProfile) return 'Mentor is older.';
+      const ageDiff = Math.abs(Number(currentUserProfile.age) - Number(user.age));
+      return `${user.name} is older by ${ageDiff} years.`;
+    }
+    if (reason === 'Very close in age' || reason === 'Moderately close in age') {
+      if (!currentUserProfile) return 'Close in age.';
+      const ageDiff = Math.abs(Number(currentUserProfile.age) - Number(user.age));
+      return `You are close in age (difference: ${ageDiff} years).`;
+    }
+    // Fallback
+    return reason;
+  }
 
   return (
     <section className="mentor-program-widget">
@@ -477,7 +545,10 @@ export default function MentorProgram() {
                   </div>
                   <div className="match-card-reasons">
                     {match.reasons.map((reason, i) => (
-                      <div className="match-card-reason" key={i}>{reason}</div>
+                      <div className="match-card-reason" key={i} tabIndex={0}>
+                        {reason}
+                        <span className="match-card-tooltip">{getReasonTooltip(reason, match, user, currentUserProfile)}</span>
+                      </div>
                     ))}
                   </div>
                 </div>

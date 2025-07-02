@@ -828,14 +828,23 @@
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow 0.22s, transform 0.18s, border 0.22s, background 0.22s;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
 }
-.match-card:hover {
+.match-card:hover, .match-card:focus {
   box-shadow: 0 8px 32px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
-  transform: translateY(-4px) scale(1.02);
-  border-color: #ff2a2a;
+  border: 2.5px solid #ff2a2a;
+  background: linear-gradient(135deg, #2d0000 80%, #181818 100%);
+  transform: scale(1.025) translateY(-4px);
+  outline: none;
+}
+.match-card:active {
+  background: #181818;
+  border: 2.5px solid #a80000;
+  box-shadow: 0 1px 4px rgba(255,42,42,0.10);
+  transform: scale(0.98) translateY(2px);
 }
 .match-card-header {
   display: flex;
@@ -918,6 +927,55 @@
   margin-bottom: 0.2rem;
   max-width: 100%;
   box-sizing: border-box;
+  transition: background 0.22s, color 0.22s, box-shadow 0.22s, transform 0.18s;
+  cursor: pointer;
+  position: relative;
+}
+.match-card-reason:hover, .match-card-reason:focus {
+  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
+  transform: scale(1.04) translateY(-2px);
+  border-left: 4px solid #fff;
+  outline: none;
+}
+.match-card-reason:active {
+  background: #a80000;
+  color: #fff;
+  transform: scale(0.98) translateY(1px);
+  box-shadow: 0 1px 4px rgba(255,42,42,0.10);
+  border-left: 4px solid #ff2a2a;
+}
+.match-card-tooltip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 110%;
+  transform: translateX(-50%);
+  background: rgba(24, 24, 24, 0.98);
+  color: #fff;
+  padding: 0.7em 1.1em;
+  border-radius: 8px;
+  font-size: 0.98rem;
+  font-weight: 500;
+  box-shadow: 0 4px 18px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
+  white-space: pre-line;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.18s;
+  margin-bottom: 0.4em;
+  min-width: 180px;
+  max-width: 320px;
+  text-align: left;
+}
+.match-card-reason:hover .match-card-tooltip,
+.match-card-reason:focus .match-card-tooltip,
+.match-card-reason:active .match-card-tooltip {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(-4px) scale(1.03);
 }
 @media (max-width: 600px) {
   .match-card {
@@ -999,39 +1057,99 @@
   opacity: 0.85;
 }
 .mentor-modal-section {
-  margin-bottom: 1.2rem;
-  background: rgba(40,0,0,0.18);
-  border-radius: 10px;
-  padding: 1rem 1.2rem 0.7rem 1.2rem;
-  box-shadow: 0 1px 6px rgba(255,42,42,0.04);
+  background: rgba(40,0,0,0.22);
+  border-radius: 12px;
+  box-shadow: 0 1px 8px rgba(255,42,42,0.07);
+  border: 1.5px solid #2d0000;
+  padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.18s, border 0.18s, background 0.18s, transform 0.18s;
+  text-align: left;
+}
+.mentor-modal-section:hover, .mentor-modal-section:focus-within {
+  background: rgba(40,0,0,0.32);
+  border: 1.5px solid #ff2a2a;
+  box-shadow: 0 4px 18px rgba(255,42,42,0.13);
+  transform: translateY(-2px) scale(1.01);
 }
 .mentor-modal-section h3 {
   color: #ff2a2a;
-  font-size: 1.08rem;
+  font-size: 1.18rem;
   font-weight: 700;
-  margin-bottom: 0.7rem;
+  margin-bottom: 1.1rem;
   letter-spacing: 0.5px;
+  text-align: center;
+  text-shadow: 0 2px 8px #1a000022;
 }
-.mentor-modal-section div {
-  margin-bottom: 0.4rem;
-  font-size: 1.01rem;
+.mentor-modal-section b {
+  color: #ff4d4d;
+  font-weight: 700;
+  min-width: 120px;
+  display: inline-block;
+  margin-right: 0.5rem;
+  letter-spacing: 0.2px;
+  transition: color 0.18s;
+  opacity: 0.92;
 }
-.mentor-modal-section a {
-  color: #4faaff;
-  text-decoration: underline;
-  transition: color 0.2s;
+.mentor-modal-section div, .mentor-modal-section a {
+  color: #fff;
+  font-size: 1.05rem;
+  margin-bottom: 0.45rem;
+  display: block;
+  align-items: unset;
+  gap: unset;
+  text-align: left;
+  padding-left: 0;
 }
-.mentor-modal-section a:hover {
-  color: #ff2a2a;
+.mentor-modal-section .field-value {
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  transition: color 0.18s;
+  opacity: 1;
 }
-@media (max-width: 900px) {
-  .mentor-modal {
-    max-width: 98vw;
-    padding: 1.2rem 0.5rem 1rem 0.5rem;
-    min-width: 0;
+@media (max-width: 600px) {
+  .mentor-modal-section {
+    padding: 1rem 0.5rem 0.7rem 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .mentor-modal-section h3 {
+    font-size: 1.05rem;
+  }
+  .mentor-modal-section div, .mentor-modal-section a {
+    font-size: 0.98rem;
+  }
+  .mentor-modal-section b {
+    min-width: 90px;
   }
 }
 
+/* Mentor Modal Contact Copyable Fields */
+.mentor-modal-section div.copyable-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,42,42,0.08);
+  border-radius: 7px;
+  padding: 0.45rem 0.8rem;
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, border 0.18s, color 0.18s;
+  border: 1.5px solid transparent;
+  position: relative;
+}
+.mentor-modal-section div.copyable-field:hover, .mentor-modal-section div.copyable-field:focus {
+  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
+  color: #fff;
+  border: 1.5px solid #ff2a2a;
+  box-shadow: 0 2px 10px rgba(255,42,42,0.13);
+  outline: none;
+}
+.mentor-modal-section div.copyable-field:active {
+  background: #a80000;
+  color: #fff;
+  border: 1.5px solid #ff2a2a;
+}
 .copy-btn {
   background: none;
   border: none;
@@ -1040,14 +1158,19 @@
   margin-left: 0.5rem;
   cursor: pointer;
   vertical-align: middle;
-  transition: color 0.2s, transform 0.2s;
+  transition: color 0.2s, transform 0.2s, background 0.18s;
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
 }
-.copy-btn:hover {
+.copy-btn:hover, .copy-btn:focus {
   color: #fff;
   background: #ff2a2a22;
   transform: scale(1.15);
+}
+.copy-btn:active {
+  color: #fff;
+  background: #a80000;
+  transform: scale(0.97);
 }
 .copied-feedback {
   color: #00ff00;
@@ -1060,4 +1183,50 @@
 @keyframes fadeInCopied {
   from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* LinkedIn Button in Mentor Modal */
+.mentor-modal-linkedin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  background: linear-gradient(90deg, #181818 0%, #0077b5 40%, #005983 80%, #0077b5 100%);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  padding: 0.22em 0.7em;
+  font-size: 0.98rem;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0,119,181,0.08);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.13s, background-position 0.7s cubic-bezier(0.77,0,0.175,1);
+  cursor: pointer;
+  outline: none;
+  vertical-align: middle;
+  background-size: 300% 100%;
+  background-position: 0% 0%;
+}
+.mentor-modal-linkedin-btn:hover, .mentor-modal-linkedin-btn:focus {
+  background-position: 100% 0%;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,119,181,0.13);
+  transform: scale(1.03) translateY(-1px);
+  text-decoration: none;
+}
+.mentor-modal-linkedin-btn:active {
+  background: #005983;
+  color: #fff;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 1px 2px rgba(0,119,181,0.08);
+}
+.mentor-modal-linkedin-btn .linkedin-icon {
+  font-size: 1em;
+  margin-right: 0.18em;
+  vertical-align: middle;
+}
+@media (max-width: 600px) {
+  .mentor-modal-linkedin-btn {
+    font-size: 0.93rem;
+    padding: 0.18em 0.5em;
+  }
 } 
