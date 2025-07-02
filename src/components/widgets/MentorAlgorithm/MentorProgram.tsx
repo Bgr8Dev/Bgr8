@@ -64,6 +64,123 @@ const ukEducationLevels = [
   'Other',
 ];
 
+const ukCounties = [
+  // England
+  'Bedfordshire',
+  'Berkshire',
+  'Bristol',
+  'Buckinghamshire',
+  'Cambridgeshire',
+  'Cheshire',
+  'City of London',
+  'Cornwall',
+  'Cumbria',
+  'Derbyshire',
+  'Devon',
+  'Dorset',
+  'Durham',
+  'East Riding of Yorkshire',
+  'East Sussex',
+  'Essex',
+  'Gloucestershire',
+  'Greater London',
+  'Greater Manchester',
+  'Hampshire',
+  'Herefordshire',
+  'Hertfordshire',
+  'Isle of Wight',
+  'Kent',
+  'Lancashire',
+  'Leicestershire',
+  'Lincolnshire',
+  'Merseyside',
+  'Norfolk',
+  'North Yorkshire',
+  'Northamptonshire',
+  'Northumberland',
+  'Nottinghamshire',
+  'Oxfordshire',
+  'Rutland',
+  'Shropshire',
+  'Somerset',
+  'South Yorkshire',
+  'Staffordshire',
+  'Suffolk',
+  'Surrey',
+  'Tyne and Wear',
+  'Warwickshire',
+  'West Midlands',
+  'West Sussex',
+  'West Yorkshire',
+  'Wiltshire',
+  'Worcestershire',
+  // Wales
+  'Anglesey',
+  'Blaenau Gwent',
+  'Bridgend',
+  'Caerphilly',
+  'Cardiff',
+  'Carmarthenshire',
+  'Ceredigion',
+  'Conwy',
+  'Denbighshire',
+  'Flintshire',
+  'Gwynedd',
+  'Merthyr Tydfil',
+  'Monmouthshire',
+  'Neath Port Talbot',
+  'Newport',
+  'Pembrokeshire',
+  'Powys',
+  'Rhondda Cynon Taf',
+  'Swansea',
+  'Torfaen',
+  'Vale of Glamorgan',
+  'Wrexham',
+  // Scotland
+  'Aberdeenshire',
+  'Angus',
+  'Argyll and Bute',
+  'City of Aberdeen',
+  'City of Dundee',
+  'City of Edinburgh',
+  'City of Glasgow',
+  'Clackmannanshire',
+  'Dumfries and Galloway',
+  'East Ayrshire',
+  'East Dunbartonshire',
+  'East Lothian',
+  'East Renfrewshire',
+  'Falkirk',
+  'Fife',
+  'Highland',
+  'Inverclyde',
+  'Midlothian',
+  'Moray',
+  'Na h-Eileanan Siar (Western Isles)',
+  'North Ayrshire',
+  'North Lanarkshire',
+  'Orkney Islands',
+  'Perth and Kinross',
+  'Renfrewshire',
+  'Scottish Borders',
+  'Shetland Islands',
+  'South Ayrshire',
+  'South Lanarkshire',
+  'Stirling',
+  'West Dunbartonshire',
+  'West Lothian',
+  // Northern Ireland
+  'Antrim',
+  'Armagh',
+  'Down',
+  'Fermanagh',
+  'Londonderry',
+  'Tyrone',
+  // Other options
+  'Other (please specify)',
+];
+
 interface User {
   name: string;
   email: string;
@@ -71,7 +188,7 @@ interface User {
   age: string;
   degree: string;
   educationLevel: string;
-  country: string;
+  county: string;
   currentProfession: string;
   pastProfessions: string[];
   linkedin: string;
@@ -154,7 +271,7 @@ export default function MentorProgram() {
     age: '',
     degree: '',
     educationLevel: '',
-    country: '',
+    county: '',
     currentProfession: '',
     pastProfessions: [''],
     linkedin: '',
@@ -298,7 +415,7 @@ export default function MentorProgram() {
       age: form.age,
       degree: form.degree,
       educationLevel: form.educationLevel,
-      country: form.country,
+      county: form.county,
       currentProfession: form.currentProfession,
       pastProfessions: form.pastProfessions.filter(p => p.trim() !== ''),
       linkedin: form.linkedin,
@@ -326,7 +443,7 @@ export default function MentorProgram() {
         setMentees(prev => [...prev, user]);
       }
       setForm({
-        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', country: '',
+        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], type: ''
       });
@@ -346,7 +463,7 @@ export default function MentorProgram() {
       setShowForm(true);
       setSwipeDirection(null);
       setForm({
-        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', country: '',
+        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], type: role
       });
@@ -359,7 +476,7 @@ export default function MentorProgram() {
     setSelectedRole(null);
     setShowForm(false);
     setForm({
-      name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', country: '',
+      name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
       skills: [], lookingFor: [], type: ''
     });
@@ -403,7 +520,12 @@ export default function MentorProgram() {
                       <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required type="email" />
                       <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required type="tel" />
                       <input name="age" value={form.age} onChange={handleChange} placeholder="Age" required type="number" min="10" max="100" />
-                      <input name="country" value={form.country} onChange={handleChange} placeholder="Country" required />
+                      <select name="county" value={form.county} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
+                        <option value="" disabled>Select County</option>
+                        {ukCounties.map(county => (
+                          <option key={county} value={county}>{county}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   <div className="mentor-form-half">
