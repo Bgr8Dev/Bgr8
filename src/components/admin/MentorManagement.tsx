@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
 import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync } from 'react-icons/fa';
@@ -20,6 +20,10 @@ export default function MentorManagement() {
   const [refreshing, setRefreshing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalUser, setModalUser] = useState<MentorMenteeProfileWithId | null>(null);
+  const [deleteStatus, setDeleteStatus] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editUser, setEditUser] = useState<MentorMenteeProfileWithId | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const fetchUsers = async () => {
     try {
@@ -45,6 +49,66 @@ export default function MentorManagement() {
   const handleRefresh = () => {
     setRefreshing(true);
     fetchUsers();
+  };
+
+  const handleDeleteUser = async (user: MentorMenteeProfileWithId) => {
+    const confirmed = window.confirm(`Are you sure you want to delete ${user.name} (${user.type})? This cannot be undone.`);
+    if (!confirmed) return;
+    setDeleteStatus(null);
+    try {
+      await deleteDoc(doc(db, 'mentorProgram', user.id));
+      setUsers(prev => prev.filter(u => u.id !== user.id));
+      setDeleteStatus(`Deleted ${user.name} successfully.`);
+    } catch {
+      setDeleteStatus('Failed to delete user.');
+    }
+  };
+
+  const handleEditUser = (user: MentorMenteeProfileWithId) => {
+    setEditUser(user);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (updatedUser: MentorMenteeProfileWithId) => {
+    setDeleteStatus(null);
+    try {
+      // Update Firestore
+      await setDoc(doc(db, 'mentorProgram', updatedUser.id), updatedUser);
+      // Update local state
+      setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+      setEditModalOpen(false);
+      setEditUser(null);
+      setDeleteStatus(`Updated ${updatedUser.name} successfully.`);
+    } catch {
+      setDeleteStatus('Failed to update user.');
+    }
+  };
+
+  const handleSelectRow = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredUsers.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredUsers.map(u => u.id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected user(s)? This cannot be undone.`);
+    if (!confirmed) return;
+    setDeleteStatus(null);
+    try {
+      await Promise.all(selectedIds.map(id => deleteDoc(doc(db, 'mentorProgram', id))));
+      setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
+      setSelectedIds([]);
+      setDeleteStatus(`Deleted ${selectedIds.length} user(s) successfully.`);
+    } catch {
+      setDeleteStatus('Failed to delete selected users.');
+    }
   };
 
   const filteredUsers = users.filter(user => {
@@ -124,10 +188,26 @@ export default function MentorManagement() {
 
       <GenerateRandomProfile />
 
+      {deleteStatus && (
+        <div className={deleteStatus.startsWith('Deleted') ? 'mentor-management-success' : 'mentor-management-error'} style={{ marginBottom: '1rem' }}>
+          {deleteStatus}
+        </div>
+      )}
+
+      {selectedIds.length > 0 && (
+        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span style={{ color: '#ff2a2a', fontWeight: 600 }}>{selectedIds.length} selected</span>
+          <button className="delete-profile" onClick={handleBulkDelete} style={{ background: '#2d0000', color: '#ff2a2a', border: '1.5px solid #ff2a2a', fontWeight: 600 }}>
+            Delete Selected
+          </button>
+        </div>
+      )}
+
       <div className="mentor-management-table">
         <table>
           <thead>
             <tr>
+              <th><input type="checkbox" checked={selectedIds.length === filteredUsers.length && filteredUsers.length > 0} onChange={handleSelectAll} /></th>
               <th>Name</th>
               <th>Type</th>
               <th>Email</th>
@@ -142,6 +222,7 @@ export default function MentorManagement() {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.id}>
+                <td><input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => handleSelectRow(user.id)} /></td>
                 <td>
                   <div className="user-info">
                     <span className="user-name">{user.name}</span>
@@ -194,7 +275,8 @@ export default function MentorManagement() {
                 <td>
                   <div className="action-buttons">
                     <button className="view-profile" onClick={() => { setModalUser(user); setModalOpen(true); }}>View Profile</button>
-                    <button className="edit-profile">Edit</button>
+                    <button className="edit-profile" onClick={() => handleEditUser(user)}>Edit</button>
+                    <button className="delete-profile" onClick={() => handleDeleteUser(user)} style={{ background: '#2d0000', color: '#ff2a2a', border: '1.5px solid #ff2a2a' }}>Delete</button>
                   </div>
                 </td>
               </tr>
@@ -203,6 +285,7 @@ export default function MentorManagement() {
         </table>
       </div>
       <MentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} />
+      <MentorModal open={editModalOpen} onClose={() => { setEditModalOpen(false); setEditUser(null); }} user={editUser} editMode={true} onSave={handleSaveEdit} />
     </div>
   );
 } 
