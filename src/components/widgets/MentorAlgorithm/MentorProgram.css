@@ -1300,4 +1300,19 @@
     font-size: 0.93rem;
     padding: 0.18em 0.5em;
   }
+}
+
+.mentor-profile-industry-chip {
+  background: #181818;
+  color: #fff;
+  border: 1.5px solid;
+  border-image: linear-gradient(90deg, #00bcd4 60%, #0077b5 100%) 1;
+  box-shadow: 0 1px 4px rgba(0,119,181,0.10);
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+}
+.mentor-profile-industry-chip:hover, .mentor-profile-industry-chip:focus {
+  background: #222c33;
+  color: #00eaff;
+  border-image: linear-gradient(90deg, #00eaff 60%, #0077b5 100%) 1;
+  box-shadow: 0 0 12px 2px #00bcd4aa;
 } 

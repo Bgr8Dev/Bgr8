@@ -20,6 +20,7 @@ export interface MentorMenteeProfile {
   religion: string;
   skills: string[];
   lookingFor: string[];
+  industries: string[];
   type: 'mentor' | 'mentee';
   [key: string]: string | string[];
 }

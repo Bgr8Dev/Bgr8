@@ -4,6 +4,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import './MentorProgram.css';
+import industriesList from '../../../constants/industries';
 
 interface MentorProfile {
   name: string;
@@ -21,6 +22,7 @@ interface MentorProfile {
   religion: string;
   skills: string[];
   lookingFor: string[];
+  industries: string[];
   type: 'mentor' | 'mentee';
 }
 
@@ -82,6 +84,7 @@ export default function MentorProfile() {
         religion: profile.religion,
         skills: profile.skills,
         lookingFor: profile.lookingFor,
+        industries: profile.industries,
         type: profile.type
       };
 
@@ -306,6 +309,60 @@ export default function MentorProfile() {
                   'Not provided'
                 )}
               </p>
+            )}
+          </div>
+          <div className="mentor-profile-field">
+            <label>{profile.type === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}</label>
+            {isEditing ? (
+              <>
+                <select
+                  name="industries"
+                  multiple
+                  value={profile.industries || []}
+                  onChange={e => {
+                    const options = Array.from(e.target.selectedOptions, o => o.value);
+                    setProfile(prev => prev ? { ...prev, industries: options } : null);
+                  }}
+                  style={{ minHeight: 90, background: '#181818', color: '#fff', border: '1.5px solid #3a0a0a', borderRadius: 8, padding: '0.7rem 1rem', fontSize: '1rem' }}
+                >
+                  {industriesList.map(ind => (
+                    <option key={ind} value={ind}>{ind}</option>
+                  ))}
+                </select>
+                {profile.industries && profile.industries.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {profile.industries.map((industry, idx) => (
+                      <span className="mentor-profile-chip mentor-profile-industry-chip" key={industry} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {industry}
+                        <button
+                          type="button"
+                          aria-label={`Remove ${industry}`}
+                          onClick={e => {
+                            e.preventDefault();
+                            setProfile(prev => prev ? { ...prev, industries: prev.industries.filter((i: string) => i !== industry) } : null);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#00eaff',
+                            fontWeight: 700,
+                            fontSize: 18,
+                            cursor: 'pointer',
+                            marginLeft: 2,
+                            lineHeight: 1
+                          }}
+                        >×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mentor-profile-list mentor-profile-chips mentor-profile-industries-chips">
+                {(profile.industries || []).map((industry, idx) => (
+                  <span className="mentor-profile-chip mentor-profile-industry-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{industry}</span>
+                ))}
+              </div>
             )}
           </div>
         </div>

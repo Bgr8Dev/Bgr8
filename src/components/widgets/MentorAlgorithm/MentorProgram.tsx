@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './MentorProgram.css';
 import { db } from '../../../firebase/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
@@ -12,6 +12,7 @@ import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
+import industriesList from '../../../constants/industries';
 
 type UserType = 'mentor' | 'mentee';
 
@@ -20,8 +21,8 @@ const MENTEE_MAX_AGE = 19;
 
 export default function MentorProgram() {
   const { currentUser } = useAuth();
-  const [mentors, setMentors] = useState<User[]>([]);
-  const [mentees, setMentees] = useState<User[]>([]);
+  const [mentors, setMentors] = useState<MentorMenteeProfile[]>([]);
+  const [mentees, setMentees] = useState<MentorMenteeProfile[]>([]);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -38,9 +39,10 @@ export default function MentorProgram() {
     religion: '',
     skills: [] as string[],
     lookingFor: [] as string[],
+    industries: [] as string[],
     type: '' as UserType | ''
   });
-  const [, setMatches] = useState<{ mentee: User; mentor: User }[]>([]);
+  const [, setMatches] = useState<{ mentee: MentorMenteeProfile; mentor: MentorMenteeProfile }[]>([]);
   const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,6 +55,8 @@ export default function MentorProgram() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalUser, setModalUser] = useState<MentorMenteeProfile | null>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
+  const [industriesDropdownOpen, setIndustriesDropdownOpen] = useState(false);
+  const industriesDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -97,9 +101,28 @@ export default function MentorProgram() {
     fetchMatches();
   }, [currentUser, hasProfile]);
 
+  // Close industries dropdown on outside click or Escape
+  useEffect(() => {
+    if (!industriesDropdownOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (industriesDropdownRef.current && !industriesDropdownRef.current.contains(e.target as Node)) {
+        setIndustriesDropdownOpen(false);
+      }
+    }
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === 'Escape') setIndustriesDropdownOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [industriesDropdownOpen]);
+
   // Simple matching algorithm
   const matchMentees = () => {
-    const newMatches: { mentee: User; mentor: User }[] = [];
+    const newMatches: { mentee: MentorMenteeProfile; mentor: MentorMenteeProfile }[] = [];
     mentees.forEach(mentee => {
       const mentor = mentors.find(m =>
         m.skills.some(skill => mentee.lookingFor.includes(skill))
@@ -112,7 +135,12 @@ export default function MentorProgram() {
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    if (e.target.multiple) {
+      const options = Array.from(e.target.selectedOptions, o => o.value);
+      setForm(prev => ({ ...prev, [name]: options }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   // Handle skill toggle
@@ -178,7 +206,7 @@ export default function MentorProgram() {
         return;
       }
     }
-    const user: User = {
+    const user: MentorMenteeProfile = {
       name: form.name,
       email: form.email,
       phone: form.phone,
@@ -194,6 +222,7 @@ export default function MentorProgram() {
       religion: form.religion,
       skills: form.skills,
       lookingFor: form.lookingFor,
+      industries: form.industries,
       type: selectedRole!,
     };
     try {
@@ -215,7 +244,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], type: ''
+        skills: [], lookingFor: [], industries: [], type: ''
       });
       setTimeout(matchMentees, 0); // Update matches after state change
     } catch (err) {
@@ -235,7 +264,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], type: role
+        skills: [], lookingFor: [], industries: [], type: role
       });
       setError(null);
       setSuccess(null);
@@ -248,7 +277,7 @@ export default function MentorProgram() {
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], type: ''
+      skills: [], lookingFor: [], industries: [], type: ''
     });
     setError(null);
     setSuccess(null);
@@ -413,6 +442,131 @@ export default function MentorProgram() {
                           <option key={level} value={level}>{level}</option>
                         ))}
                       </select>
+                      <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
+                        {selectedRole === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}
+                        <div
+                          ref={industriesDropdownRef}
+                          className="custom-multiselect-dropdown"
+                          tabIndex={0}
+                          style={{ position: 'relative', marginTop: 4 }}
+                        >
+                          <div
+                            className="custom-multiselect-control"
+                            style={{
+                              background: '#181818',
+                              color: '#fff',
+                              border: '1.5px solid #3a0a0a',
+                              borderRadius: 8,
+                              padding: '0.7rem 1rem',
+                              fontSize: '1rem',
+                              minHeight: 44,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => setIndustriesDropdownOpen(v => !v)}
+                            aria-haspopup="listbox"
+                            aria-expanded={industriesDropdownOpen}
+                          >
+                            <span style={{ color: form.industries.length === 0 ? '#888' : '#fff' }}>
+                              {form.industries.length === 0 ? 'Select industries...' : `${form.industries.length} selected`}
+                            </span>
+                            <span style={{ fontSize: 18, color: '#ff2a2a', marginLeft: 8 }}>
+                              ▼
+                            </span>
+                          </div>
+                          {industriesDropdownOpen && (
+                            <div
+                              className="custom-multiselect-options"
+                              style={{
+                                position: 'absolute',
+                                top: '110%',
+                                left: 0,
+                                width: '100%',
+                                background: '#181818',
+                                border: '1.5px solid #3a0a0a',
+                                borderRadius: 8,
+                                zIndex: 20,
+                                maxHeight: 220,
+                                overflowY: 'auto',
+                                boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
+                              }}
+                              role="listbox"
+                            >
+                              {industriesList.map(ind => (
+                                <label
+                                  key={ind}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 16,
+                                    padding: '0.5rem 1rem',
+                                    cursor: 'pointer',
+                                    background: form.industries.includes(ind) ? 'rgba(0,119,181,0.13)' : 'transparent',
+                                    color: form.industries.includes(ind) ? '#00eaff' : '#fff',
+                                    fontWeight: form.industries.includes(ind) ? 700 : 400,
+                                    borderRadius: 6,
+                                    marginBottom: 0,
+                                    transition: 'background 0.15s, color 0.15s',
+                                    fontSize: '1.08rem',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={form.industries.includes(ind)}
+                                    onChange={e => {
+                                      setForm(prev => ({
+                                        ...prev,
+                                        industries: prev.industries.includes(ind)
+                                          ? prev.industries.filter((i: string) => i !== ind)
+                                          : [...prev.industries, ind],
+                                      }));
+                                    }}
+                                    style={{
+                                      accentColor: '#00eaff',
+                                      marginRight: 0,
+                                      width: 16,
+                                      height: 16,
+                                      flexShrink: 0,
+                                      verticalAlign: 'middle'
+                                    }}
+                                  />
+                                  <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{ind}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                          {form.industries.length > 0 && (
+                            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                              {form.industries.map((industry, idx) => (
+                                <span className="mentor-profile-chip mentor-profile-industry-chip" key={industry} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  {industry}
+                                  <button
+                                    type="button"
+                                    aria-label={`Remove ${industry}`}
+                                    onClick={e => {
+                                      e.preventDefault();
+                                      setForm(prev => ({ ...prev, industries: prev.industries.filter((i: string) => i !== industry) }));
+                                    }}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: '#00eaff',
+                                      fontWeight: 700,
+                                      fontSize: 18,
+                                      cursor: 'pointer',
+                                      marginLeft: 2,
+                                      lineHeight: 1
+                                    }}
+                                  >×</button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </label>
                     </div>
                   </div>
                 </div>
