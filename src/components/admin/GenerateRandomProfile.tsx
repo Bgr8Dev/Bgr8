@@ -3,20 +3,206 @@ import { db } from '../../firebase/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
+import ukCounties from '../../constants/ukCounties';
 import '../../styles/adminStyles/MentorManagement.css';
 
 // Sample data for randomization
-const firstNames = ['James', 'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'William', 'Sophia', 'Benjamin', 'Isabella', 'Lucas', 'Mia', 'Henry', 'Charlotte', 'Alexander', 'Amelia'];
-const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas'];
-const countries = ['United Kingdom', 'United States', 'Canada', 'Australia', 'Germany', 'France', 'Spain', 'Italy', 'Japan', 'South Korea', 'India', 'Brazil', 'Mexico', 'South Africa', 'Singapore'];
+const firstNames = [
+  // English/American
+  'James', 'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'William', 'Sophia', 'Benjamin', 'Isabella',
+  'Lucas', 'Mia', 'Henry', 'Charlotte', 'Alexander', 'Amelia', 'Theodore', 'Eleanor',
+  
+  // Chinese
+  'Wei', 'Ming', 'Li', 'Hui', 'Xiao', 'Jing', 'Zhang', 'Chen', 'Yong', 'Ling',
+  'Feng', 'Jun', 'Hong', 'Mei', 'Yang', 'Ying', 'Cheng', 'Zhen',
+  
+  // Indian
+  'Aarav', 'Diya', 'Arjun', 'Zara', 'Vihaan', 'Aanya', 'Reyansh', 'Anaya', 'Vivaan',
+  'Anika', 'Krishna', 'Riya', 'Ishaan', 'Myra', 'Advik', 'Shanaya',
+  
+  // Arabic
+  'Mohammed', 'Fatima', 'Ahmed', 'Aisha', 'Omar', 'Layla', 'Ali', 'Noor', 'Hassan',
+  'Zainab', 'Ibrahim', 'Mariam', 'Yusuf', 'Sara', 'Khalil', 'Amira',
+  
+  // Japanese
+  'Hiroto', 'Yui', 'Haruto', 'Aoi', 'Yuto', 'Hina', 'Sota', 'Yuna', 'Yuki',
+  'Akari', 'Kento', 'Sakura', 'Riku', 'Mio', 'Takumi', 'Nanami',
+  
+  // African
+  'Kwame', 'Amara', 'Oluwaseun', 'Chioma', 'Tendai', 'Aisha', 'Kofi', 'Abena',
+  'Babajide', 'Folami', 'Olayinka', 'Zalika', 'Chidi', 'Makena', 'Kwesi', 'Zuri',
+  
+  // Hispanic/Latino
+  'Santiago', 'Sofia', 'Mateo', 'Valentina', 'Sebastian', 'Isabella', 'Diego',
+  'Camila', 'Gabriel', 'Victoria', 'Alejandro', 'Lucia', 'Daniel', 'Elena',
+  
+  // Russian
+  'Dmitri', 'Anastasia', 'Ivan', 'Natasha', 'Vladimir', 'Ekaterina', 'Mikhail',
+  'Olga', 'Boris', 'Tatiana', 'Nikolai', 'Svetlana', 'Andrei', 'Marina',
+  
+  // Korean
+  'Min-jun', 'Seo-yeon', 'Ji-hun', 'Ji-woo', 'Hyun-woo', 'Soo-jin', 'Joon-ho',
+  'Min-seo', 'Tae-hyung', 'Hae-won', 'Seung-min', 'Yoo-jin', 'Do-yoon', 'Eun-ji',
+  
+  // Greek
+  'Andreas', 'Helena', 'Stavros', 'Sofia', 'Dimitris', 'Maria', 'Georgios',
+  'Eleni', 'Nikolaos', 'Christina', 'Alexandros', 'Katerina', 'Petros', 'Athena'
+];
+const lastNames = [
+  // English/American/Australian
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Wilson', 'Taylor', 'Davies', 'Evans', 'Thomas',
+  'Roberts', 'Walker', 'Wright', 'Thompson', 'White', 'Hughes', 'Edwards', 'Green', 'Lewis', 'Wood',
+  
+  // Chinese
+  'Wang', 'Li', 'Zhang', 'Liu', 'Chen', 'Yang', 'Huang', 'Zhao', 'Wu', 'Zhou',
+  'Xu', 'Sun', 'Ma', 'Zhu', 'Hu', 'Guo', 'Lin', 'He', 'Gao', 'Luo',
+  
+  // Indian
+  'Patel', 'Kumar', 'Singh', 'Shah', 'Sharma', 'Verma', 'Gupta', 'Malhotra', 'Kapoor', 'Mehra',
+  'Chopra', 'Agarwal', 'Reddy', 'Nair', 'Menon', 'Pillai', 'Rao', 'Mukherjee', 'Banerjee', 'Das',
+  
+  // Arabic/Middle Eastern
+  'Al-Sayed', 'Abdullah', 'Mohammed', 'Ahmed', 'Hassan', 'Ali', 'Ibrahim', 'Mahmoud', 'Rahman', 'Malik',
+  'Saleh', 'Khalil', 'Nasser', 'Aziz', 'Qureshi', 'Hussain', 'Khan', 'Mirza', 'Sheikh', 'Raza',
+  
+  // Japanese
+  'Sato', 'Suzuki', 'Takahashi', 'Tanaka', 'Watanabe', 'Ito', 'Yamamoto', 'Nakamura', 'Kobayashi', 'Kato',
+  'Yoshida', 'Yamada', 'Sasaki', 'Yamaguchi', 'Matsumoto', 'Inoue', 'Kimura', 'Hayashi', 'Shimizu', 'Mori',
+  
+  // Korean
+  'Kim', 'Lee', 'Park', 'Choi', 'Jung', 'Kang', 'Cho', 'Yoon', 'Jang', 'Lim',
+  'Han', 'Yang', 'Shin', 'Chang', 'Song', 'Hong', 'Yoo', 'Chung', 'Kwon', 'Ryu',
+  
+  // Hispanic/Latino
+  'Garcia', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Perez', 'Sanchez', 'Ramirez', 'Torres',
+  'Flores', 'Rivera', 'Morales', 'Ortiz', 'Cruz', 'Reyes', 'Moreno', 'Diaz', 'Castro', 'Ruiz',
+  
+  // Russian/Eastern European
+  'Ivanov', 'Petrov', 'Smirnov', 'Kuznetsov', 'Popov', 'Sokolov', 'Lebedev', 'Kozlov', 'Novikov', 'Morozov',
+  'Volkov', 'Kowalski', 'Nowicki', 'Wojcik', 'Kowalczyk', 'Kaminski', 'Lewandowski', 'Zielinski', 'Szymanski', 'Wozniak',
+  
+  // African
+  'Okafor', 'Adebayo', 'Okonkwo', 'Mensah', 'Mwangi', 'Afolabi', 'Okoro', 'Diallo', 'Ndlovu', 'Mutua',
+  'Osei', 'Adeyemi', 'Kamau', 'Banda', 'Nyathi', 'Moyo', 'Dube', 'Kone', 'Toure', 'Keita',
+  
+  // Greek
+  'Papadopoulos', 'Pappas', 'Kouris', 'Demetriou', 'Georgiou', 'Angelopoulos', 'Constantinides', 'Stavros', 'Kyriakides', 'Antoniou',
+  
+  // Vietnamese
+  'Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Phan', 'Vu', 'Dang', 'Bui', 'Do',
+  
+  // Thai
+  'Srisai', 'Saetang', 'Sae-Tang', 'Saechao', 'Ruangkanchanasetr', 'Wongsawat', 'Sitthichai', 'Chaisurivirat', 'Rojjanasukchai'
+];
 const professions = [
-  'Software Engineer', 'Data Scientist', 'Product Manager', 'UX Designer', 'Marketing Manager',
-  'Business Analyst', 'Project Manager', 'Financial Analyst', 'HR Manager', 'Sales Representative',
-  'Content Writer', 'Graphic Designer', 'Research Scientist', 'Teacher', 'Consultant'
+  // Technology
+  'Software Engineer', 'Data Scientist', 'Product Manager', 'UX Designer', 'DevOps Engineer',
+  'Cloud Architect', 'Mobile App Developer', 'Systems Administrator', 'Database Administrator',
+  'Information Security Analyst', 'Network Engineer', 'AI/ML Engineer', 'QA Engineer',
+  'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'Game Developer',
+  'Blockchain Developer', 'AR/VR Developer', 'IoT Engineer',
+
+  // Business & Finance
+  'Business Analyst', 'Project Manager', 'Financial Analyst', 'Investment Banker',
+  'Management Consultant', 'Risk Analyst', 'Portfolio Manager', 'Accountant', 'Actuary',
+  'Business Development Manager', 'Strategy Consultant', 'Operations Manager',
+  'Supply Chain Manager', 'Chief Financial Officer', 'Venture Capitalist',
+
+  // Marketing & Creative
+  'Marketing Manager', 'Digital Marketing Specialist', 'Content Strategist',
+  'Brand Manager', 'Social Media Manager', 'SEO Specialist', 'Copywriter',
+  'Content Writer', 'Graphic Designer', 'UI Designer', 'Art Director',
+  'Creative Director', 'Video Producer', 'Motion Designer', 'Animator',
+
+  // Healthcare
+  'Doctor', 'Nurse', 'Pharmacist', 'Dentist', 'Physiotherapist',
+  'Occupational Therapist', 'Clinical Psychologist', 'Veterinarian',
+  'Medical Researcher', 'Healthcare Administrator', 'Nutritionist',
+  'Radiologist', 'Surgeon', 'Pediatrician', 'Mental Health Counselor',
+
+  // Education
+  'Teacher', 'Professor', 'Educational Consultant', 'School Principal',
+  'Special Education Teacher', 'Corporate Trainer', 'Instructional Designer',
+  'Education Technology Specialist', 'Academic Advisor', 'Research Scientist',
+
+  // Legal & Professional
+  'Lawyer', 'Legal Consultant', 'Paralegal', 'Corporate Counsel',
+  'Patent Attorney', 'HR Manager', 'Recruitment Specialist',
+  'Compliance Officer', 'Policy Analyst', 'Public Relations Manager',
+
+  // Engineering & Science
+  'Mechanical Engineer', 'Civil Engineer', 'Electrical Engineer',
+  'Chemical Engineer', 'Aerospace Engineer', 'Environmental Scientist',
+  'Biomedical Engineer', 'Materials Scientist', 'Nuclear Engineer',
+  'Quantum Physicist', 'Marine Biologist', 'Geologist',
+
+  // Arts & Entertainment
+  'Actor', 'Musician', 'Film Director', 'Fashion Designer',
+  'Interior Designer', 'Photographer', 'Game Designer',
+  'Music Producer', 'Dance Choreographer', 'Theater Director',
+
+  // Trades & Services
+  'Electrician', 'Plumber', 'Carpenter', 'Chef', 'Real Estate Agent',
+  'Personal Trainer', 'Wedding Planner', 'Travel Consultant',
+  'Landscape Architect', 'Auto Mechanic', 'Construction Manager'
 ];
 const hobbies = [
-  'Reading', 'Traveling', 'Photography', 'Cooking', 'Gaming', 'Hiking', 'Painting', 'Music',
-  'Sports', 'Dancing', 'Writing', 'Yoga', 'Gardening', 'Chess', 'Swimming'
+  // Creative & Artistic
+  'Reading', 'Writing', 'Poetry', 'Painting', 'Drawing', 'Sketching', 'Digital Art',
+  'Photography', 'Filmmaking', 'Music Production', 'Playing Guitar', 'Playing Piano',
+  'Singing', 'Dancing', 'Ballet', 'Theater', 'Pottery', 'Sculpture', 'Knitting',
+  'Crocheting', 'Sewing', 'Fashion Design', 'Jewelry Making', 'Woodworking',
+
+  // Outdoor & Adventure
+  'Hiking', 'Rock Climbing', 'Mountaineering', 'Camping', 'Backpacking',
+  'Bird Watching', 'Nature Photography', 'Gardening', 'Landscaping',
+  'Foraging', 'Bushcraft', 'Survival Skills', 'Geocaching',
+
+  // Sports & Fitness
+  'Running', 'Swimming', 'Cycling', 'Weight Training', 'CrossFit', 'Yoga',
+  'Pilates', 'Martial Arts', 'Boxing', 'Football', 'Basketball', 'Tennis',
+  'Golf', 'Skateboarding', 'Surfing', 'Snowboarding', 'Skiing', 'Rock Climbing',
+  'Horse Riding', 'Archery',
+
+  // Games & Entertainment
+  'Video Gaming', 'Board Games', 'Chess', 'Poker', 'Magic: The Gathering',
+  'Dungeons & Dragons', 'Warhammer', 'Cosplay', 'Anime', 'Comic Books',
+  'Movie Collecting', 'TV Series', 'Virtual Reality Gaming',
+
+  // Food & Drink
+  'Cooking', 'Baking', 'Wine Tasting', 'Beer Brewing', 'Coffee Roasting',
+  'Mixology', 'Food Photography', 'Restaurant Exploring', 'Cheese Making',
+  'Fermentation', 'Vegetarian Cooking', 'International Cuisine',
+
+  // Technology & Digital
+  'Programming', 'Web Development', '3D Printing', 'Drone Flying',
+  'Robotics', 'Electronics', 'App Development', 'Digital Design',
+  'Blogging', 'Podcasting', 'YouTube Content Creation',
+
+  // Learning & Knowledge
+  'Language Learning', 'History Research', 'Philosophy', 'Science',
+  'Astronomy', 'Bird Watching', 'Genealogy', 'Psychology',
+  'Political Science', 'Economics', 'Mathematics',
+
+  // Collection & Curation
+  'Stamp Collecting', 'Coin Collecting', 'Antique Collecting',
+  'Record Collecting', 'Book Collecting', 'Art Collecting',
+  'Watch Collecting', 'Car Collecting', 'Model Building',
+
+  // Social & Community
+  'Volunteering', 'Mentoring', 'Teaching', 'Public Speaking',
+  'Event Planning', 'Community Organizing', 'Charity Work',
+  'Environmental Activism', 'Social Justice',
+
+  // Travel & Culture
+  'Traveling', 'Cultural Exchange', 'Language Exchange',
+  'Food Tourism', 'Photography Tourism', 'Historical Tourism',
+  'Backpacking', 'Van Life', 'Digital Nomading',
+
+  // Wellness & Spirituality
+  'Meditation', 'Mindfulness', 'Yoga', 'Tai Chi', 'Qigong',
+  'Reiki', 'Aromatherapy', 'Crystal Healing', 'Sound Healing',
+  'Traditional Medicine', 'Herbalism', 'Astrology'
 ];
 
 const skillsByCategory = {
@@ -66,22 +252,108 @@ const ukEducationLevels = [
 ];
 
 const ethnicityOptions = [
-  'Prefer not to say', 'White - British', 'White - Irish', 'White - Other',
-  'Mixed - White and Black Caribbean', 'Mixed - White and Black African',
-  'Mixed - White and Asian', 'Mixed - Other', 'Asian or Asian British - Indian',
-  'Asian or Asian British - Pakistani', 'Asian or Asian British - Bangladeshi',
-  'Asian or Asian British - Chinese', 'Asian or Asian British - Other',
-  'Black or Black British - African', 'Black or Black British - Caribbean',
-  'Black or Black British - Other', 'Arab', 'Gypsy or Irish Traveller',
-  'Roma', 'Other Ethnic Group'
+  'Prefer not to say',
+  // White backgrounds
+  'White - British', 'White - English', 'White - Welsh', 'White - Scottish', 'White - Northern Irish',
+  'White - Irish', 'White - Gypsy or Irish Traveller', 'White - Roma',
+  'White - Eastern European', 'White - Western European', 'White - Southern European', 'White - Northern European',
+  'White - American', 'White - Canadian', 'White - Australian', 'White - New Zealander', 'White - South African',
+  'White - Other',
+
+  // Mixed/Multiple ethnic backgrounds
+  'Mixed - White and Black Caribbean', 'Mixed - White and Black African', 'Mixed - White and Asian',
+  'Mixed - White and Indian', 'Mixed - White and Pakistani', 'Mixed - White and Bangladeshi',
+  'Mixed - White and Chinese', 'Mixed - White and Arab', 'Mixed - Black and Asian',
+  'Mixed - Asian and Chinese', 'Mixed - Other',
+
+  // Asian backgrounds
+  'Asian or Asian British - Indian', 'Asian or Asian British - Pakistani', 'Asian or Asian British - Bangladeshi',
+  'Asian or Asian British - Chinese', 'Asian or Asian British - Filipino', 'Asian or Asian British - Vietnamese',
+  'Asian or Asian British - Thai', 'Asian or Asian British - Malaysian', 'Asian or Asian British - Indonesian',
+  'Asian or Asian British - Japanese', 'Asian or Asian British - Korean', 'Asian or Asian British - Nepali',
+  'Asian or Asian British - Sri Lankan', 'Asian or Asian British - Burmese', 'Asian or Asian British - Mongolian',
+  'Asian or Asian British - Other',
+
+  // Black backgrounds
+  'Black or Black British - African', 'Black or Black British - Nigerian', 'Black or Black British - Ghanaian',
+  'Black or Black British - Somali', 'Black or Black British - Sudanese', 'Black or Black British - Caribbean',
+  'Black or Black British - Jamaican', 'Black or Black British - Barbadian', 'Black or Black British - Trinidadian',
+  'Black or Black British - Ethiopian', 'Black or Black British - Eritrean', 'Black or Black British - Congolese',
+  'Black or Black British - Angolan', 'Black or Black British - Other',
+
+  // Middle Eastern and North African backgrounds
+  'Arab - Middle Eastern', 'Arab - North African', 'Arab - Gulf States',
+  'Kurdish', 'Turkish', 'Iranian', 'Iraqi', 'Lebanese', 'Syrian', 'Yemeni', 'Egyptian',
+  'Moroccan', 'Algerian', 'Tunisian', 'Libyan',
+
+  // Latin American backgrounds
+  'Latin American - Mexican', 'Latin American - Brazilian', 'Latin American - Colombian',
+  'Latin American - Argentine', 'Latin American - Chilean', 'Latin American - Peruvian',
+  'Latin American - Other',
+
+  // Indigenous peoples
+  'Indigenous Australian', 'Torres Strait Islander', 'Maori', 'Native American/First Nations',
+  'Inuit', 'Sami', 'Indigenous African', 'Indigenous Asian', 'Indigenous South American',
+
+  // Other categories
+  'Jewish', 'Romani', 'Traveller', 'Other Ethnic Group'
 ];
 
 const religionOptions = [
-  'Prefer not to say', 'Christianity', 'Islam', 'Hinduism', 'Buddhism',
-  'Sikhism', 'Judaism', 'Jainism', 'Shinto', 'Taoism', 'Confucianism',
-  'Baháʼí', 'Zoroastrianism', 'Traditional African Religions',
-  'Indigenous Religions', 'Agnostic', 'Atheist',
-  'Spiritual but not religious', 'Other'
+  'Prefer not to say',
+  // Abrahamic Religions
+  'Christianity - Catholic', 'Christianity - Protestant', 'Christianity - Orthodox', 'Christianity - Coptic',
+  'Christianity - Anglican', 'Christianity - Methodist', 'Christianity - Baptist', 'Christianity - Lutheran',
+  'Christianity - Presbyterian', 'Christianity - Pentecostal', 'Christianity - Evangelical', 'Christianity - Other',
+  'Islam - Sunni', 'Islam - Shia', 'Islam - Sufi', 'Islam - Ahmadiyya', 'Islam - Other',
+  'Judaism - Orthodox', 'Judaism - Conservative', 'Judaism - Reform', 'Judaism - Reconstructionist',
+  'Judaism - Hasidic', 'Judaism - Other',
+  'Baháʼí Faith', 'Druze', 'Samaritanism', 'Mandaeism',
+
+  // Indian Religions
+  'Hinduism - Vaishnavism', 'Hinduism - Shaivism', 'Hinduism - Shaktism', 'Hinduism - Smartism',
+  'Hinduism - ISKCON', 'Hinduism - Other',
+  'Buddhism - Theravada', 'Buddhism - Mahayana', 'Buddhism - Vajrayana', 'Buddhism - Zen',
+  'Buddhism - Pure Land', 'Buddhism - Other',
+  'Sikhism', 'Jainism - Svetambara', 'Jainism - Digambara',
+
+  // East Asian Religions
+  'Taoism', 'Confucianism', 'Shinto', 'Chinese Folk Religion',
+  'Korean Shamanism', 'Caodaism', 'Chondogyo', 'Tenrikyo',
+  'Seicho-no-Ie', 'Falun Gong',
+
+  // Iranian/Persian Religions
+  'Zoroastrianism', 'Yazdânism', 'Manichaeism', 'Mandaeism',
+
+  // African Traditional Religions
+  'Yoruba Religion', 'Vodun', 'Santería', 'Candomblé',
+  'Umbanda', 'Odinani', 'Serer Religion', 'Zulu Traditional',
+  'Akan Religion', 'Dogon Religion',
+
+  // Indigenous Religions
+  'Native American Religions', 'First Nations Spirituality',
+  'Australian Aboriginal Religion', 'Māori Religion',
+  'Sami Shamanism', 'Siberian Shamanism',
+  'Aztec Religion', 'Inca Religion', 'Maya Religion',
+
+  // Modern Religious Movements
+  'Scientology', 'Raëlism', 'Wicca', 'Neo-Paganism',
+  'New Age', 'Theosophy', 'Anthroposophy', 'Rastafari',
+  'Unitarian Universalism', 'Unity Church',
+
+  // Ancient Religions Still Practiced
+  'Hellenism', 'Roman Polytheism', 'Kemetism',
+  'Germanic Heathenry', 'Celtic Polytheism', 'Baltic Polytheism',
+  'Slavic Native Faith',
+
+  // Non-Religious Categories
+  'Atheist', 'Agnostic', 'Humanist', 'Secular',
+  'Spiritual but not religious', 'Religious but not affiliated',
+  'Questioning/Seeking', 'Prefer not to practice',
+
+  // Other Categories
+  'Multiple Religious Beliefs', 'Syncretic Beliefs',
+  'Personal Religion/Philosophy', 'Other'
 ];
 
 export default function GenerateRandomProfile() {
@@ -119,7 +391,7 @@ export default function GenerateRandomProfile() {
       age: age.toString(),
       degree: `${getRandomElement(['BSc', 'BA', 'MSc', 'MA'])} ${getRandomElement(['Computer Science', 'Business', 'Engineering', 'Arts', 'Science'])}`,
       educationLevel: getRandomElement(ukEducationLevels),
-      country: getRandomElement(countries),
+      county: getRandomElement(ukCounties),
       currentProfession: getRandomElement(professions),
       pastProfessions: getRandomElements(professions, Math.floor(Math.random() * 3) + 1),
       linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
