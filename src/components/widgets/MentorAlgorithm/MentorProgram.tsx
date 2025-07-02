@@ -310,6 +310,55 @@ export default function MentorProgram() {
     return reason;
   }
 
+  // SuccessModal component
+  function SuccessModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+    useEffect(() => {
+      if (!open) return;
+      const timer = setTimeout(onClose, 3000);
+      return () => clearTimeout(timer);
+    }, [open, onClose]);
+    if (!open) return null;
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+        background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fadeInModalBg 0.3s'
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #181818 80%, #2d0000 100%)',
+          borderRadius: 18, boxShadow: '0 8px 48px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22)',
+          padding: '2.5rem 2.2rem 2rem 2.2rem', minWidth: 320, maxWidth: 400, color: '#fff', textAlign: 'center',
+          position: 'relative',
+          border: '2px solid #00ff00',
+          animation: 'fadeInModal 0.3s cubic-bezier(0.77,0,0.175,1)'
+        }}>
+          <div style={{ marginBottom: 24 }}>
+            <svg width="64" height="64" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
+              <circle cx="32" cy="32" r="30" fill="#181818" stroke="#00ff00" strokeWidth="4" />
+              <polyline points="20,34 30,44 46,24" fill="none" stroke="#00ff00" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
+                <animate attributeName="stroke-dasharray" from="0,60" to="60,0" dur="0.7s" fill="freeze" />
+              </polyline>
+            </svg>
+          </div>
+          <h2 style={{ color: '#00ff00', fontWeight: 800, fontSize: '2rem', marginBottom: 8 }}>Success!</h2>
+          <div style={{ color: '#fff', fontSize: '1.15rem', marginBottom: 18 }}>You have successfully registered.</div>
+          <button onClick={onClose} style={{
+            background: 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
+            color: '#fff', border: 'none', borderRadius: 8, padding: '0.8rem 2.2rem', fontWeight: 700, fontSize: '1.1rem', cursor: 'pointer',
+            marginTop: 8, boxShadow: '0 2px 12px rgba(255,42,42,0.15)', transition: 'background 0.2s, transform 0.2s'
+          }}>OK</button>
+        </div>
+      </div>
+    );
+  }
+
+  // SuccessModal close handler: also reset form view
+  const handleSuccessModalClose = () => {
+    setSuccess(null);
+    setSelectedRole(null);
+    setShowForm(false);
+  };
+
   return (
     <section className="mentor-program-widget">
       <h2>Mentor Program</h2>
@@ -355,7 +404,7 @@ export default function MentorProgram() {
                     </div>
                   </div>
                   <div className="mentor-form-half">
-                    <div className="mentor-form-section">
+                    <div className="mentor-form-section"> 
                       <div className="mentor-form-section-title">Education</div>
                       <input name="degree" value={form.degree} onChange={handleChange} placeholder="Degree (e.g. BSc Computer Science)" required />
                       <select name="educationLevel" value={form.educationLevel} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
@@ -486,7 +535,7 @@ export default function MentorProgram() {
                 </button>
               </form>
               {error && <p style={{ color: '#ff2a2a', marginTop: '1rem' }}>{error}</p>}
-              {success && <p style={{ color: '#00ff00', marginTop: '1rem' }}>{success}</p>}
+              <SuccessModal open={!!success} onClose={handleSuccessModalClose} />
             </div>
           )}
         </>
