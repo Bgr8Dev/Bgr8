@@ -133,6 +133,7 @@ export default function MentorManagement() {
               <th>Email</th>
               <th>Profession</th>
               <th>Education</th>
+              <th>County</th>
               <th>Skills</th>
               <th>Looking For</th>
               <th>Actions</th>
@@ -169,6 +170,7 @@ export default function MentorManagement() {
                     <span className="education-level">{user.educationLevel}</span>
                   </div>
                 </td>
+                <td>{user.county}</td>
                 <td>
                   <div className="skills-list">
                     {user.skills.slice(0, 3).map((skill, idx) => (

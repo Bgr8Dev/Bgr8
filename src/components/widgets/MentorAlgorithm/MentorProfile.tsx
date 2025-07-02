@@ -12,7 +12,7 @@ interface MentorProfile {
   age: string;
   degree: string;
   educationLevel: string;
-  country: string;
+  county: string;
   currentProfession: string;
   pastProfessions: string[];
   linkedin: string;
@@ -73,7 +73,7 @@ export default function MentorProfile() {
         age: profile.age,
         degree: profile.degree,
         educationLevel: profile.educationLevel,
-        country: profile.country,
+        county: profile.county,
         currentProfession: profile.currentProfession,
         pastProfessions: profile.pastProfessions,
         linkedin: profile.linkedin,
@@ -194,17 +194,17 @@ export default function MentorProfile() {
             )}
           </div>
           <div className="mentor-profile-field">
-            <label>Country</label>
+            <label>County</label>
             {isEditing ? (
               <input
                 type="text"
-                name="country"
-                value={profile.country}
+                name="county"
+                value={profile.county}
                 onChange={handleChange}
                 required
               />
             ) : (
-              <p className="mentor-profile-value">{profile.country}</p>
+              <p className="mentor-profile-value">{profile.county}</p>
             )}
           </div>
         </div>

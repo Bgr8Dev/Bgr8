@@ -11,7 +11,7 @@ export interface MentorMenteeProfile {
   age: string;
   degree: string;
   educationLevel: string;
-  country: string;
+  county: string;
   currentProfession: string;
   pastProfessions: string[];
   linkedin: string;
@@ -48,8 +48,7 @@ const SCORE_WEIGHTINGS: { [feature: string]: number } = {
   'educationLevel': 3,
   'currentProfession': 3,
   'hobbies': 2,
-  'country': 2,
-  'county': 2, // for the future when county likely replaces country in scoring
+  'county': 2,
   'age': 3,
   'religion': 1
 };
@@ -214,14 +213,9 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
     // Education level
     score += getEducationScore(currentUser, candidate, reasons);
 
-    // County or Country (defensive programming for when county is added)
-    if ('county' in currentUser) {
-      score += getSimpleScore(
-        'county', currentUser, candidate, reasons, 'Same county');
-    } else {
-      score += getSimpleScore(
-        'country', currentUser, candidate, reasons, 'Same country');
-    }
+    // County (location)
+    score += getSimpleScore(
+      'county', currentUser, candidate, reasons, 'Same county');
 
     // Profession / Professional History
     score += getProfessionalScore(currentUser, candidate, reasons);

@@ -53,7 +53,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user }) => {
             >📋</button>
             {copiedField === 'phone' && <span className="copied-feedback">Copied!</span>}
           </div>
-          <div><b>Country:</b> {user.country}</div>
+          <div><b>County:</b> {user.county}</div>
         </div>
         <div className="mentor-modal-section">
           <h3>Education & Professional</h3>

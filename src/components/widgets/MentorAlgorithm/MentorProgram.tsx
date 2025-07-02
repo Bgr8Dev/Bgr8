@@ -293,7 +293,7 @@ export default function MentorProgram() {
   const [showForm, setShowForm] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalUser, setModalUser] = useState<any | null>(null);
+  const [modalUser, setModalUser] = useState<MentorMenteeProfile | null>(null);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -654,6 +654,7 @@ export default function MentorProgram() {
                     </div>
                   </div>
                 </div>
+
                 <button type="submit" disabled={loading || (selectedRole === 'mentor' ? form.skills.length === 0 : form.lookingFor.length === 0)}>
                   {loading ? 'Saving...' : 'Sign Up'}
                 </button>
