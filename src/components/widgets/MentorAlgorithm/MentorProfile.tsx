@@ -292,8 +292,15 @@ export default function MentorProfile() {
             ) : (
               <p className="mentor-profile-value">
                 {profile.linkedin ? (
-                  <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: '#4faaff', textDecoration: 'underline' }}>
-                    View Profile
+                  <a
+                    href={profile.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mentor-profile-linkedin-btn"
+                    title="View LinkedIn Profile"
+                  >
+                    <svg className="linkedin-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6, verticalAlign: 'middle' }}><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm15.5 11.268h-3v-5.604c0-1.337-.025-3.063-1.868-3.063-1.868 0-2.154 1.459-2.154 2.967v5.7h-3v-10h2.881v1.367h.041c.401-.761 1.379-1.563 2.838-1.563 3.034 0 3.595 1.997 3.595 4.594v5.602z"/></svg>
+                    LinkedIn
                   </a>
                 ) : (
                   'Not provided'
@@ -309,15 +316,15 @@ export default function MentorProfile() {
             <label>{profile.type === 'mentor' ? 'Skills Offered' : 'Skills Looking For'}</label>
             <div className="mentor-profile-skills mentor-profile-chips">
               {(profile.type === 'mentor' ? profile.skills : profile.lookingFor).map((skill, idx) => (
-                <span className="mentor-profile-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{skill}</span>
+                <span className="mentor-profile-chip mentor-profile-skill-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{skill}</span>
               ))}
             </div>
           </div>
           <div className="mentor-profile-field">
             <label>Hobbies & Interests</label>
-            <div className="mentor-profile-list mentor-profile-chips">
+            <div className="mentor-profile-list mentor-profile-chips mentor-profile-hobbies-chips">
               {profile.hobbies.map((hobby, idx) => (
-                <span className="mentor-profile-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{hobby}</span>
+                <span className="mentor-profile-chip mentor-profile-hobby-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{hobby}</span>
               ))}
             </div>
           </div>

@@ -1229,4 +1229,75 @@
     font-size: 0.93rem;
     padding: 0.18em 0.5em;
   }
+}
+
+.mentor-profile-skill-chip {
+  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
+  color: #fff;
+  border: 1.5px solid #ff2a2a;
+  transition: background 0.18s, color 0.18s, border 0.18s, filter 0.18s;
+}
+.mentor-profile-skill-chip:hover, .mentor-profile-skill-chip:focus {
+  background: #fff;
+  color: #ff2a2a;
+  border: 1.5px solid #fff;
+  filter: invert(1) hue-rotate(180deg) brightness(1.1);
+}
+
+.mentor-profile-hobby-chip {
+  background: linear-gradient(90deg, #ffb300 60%, #ff6f00 100%);
+  color: #181818;
+  border: 1.5px solid #ffb300;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+}
+.mentor-profile-hobby-chip:hover, .mentor-profile-hobby-chip:focus {
+  background: #fffbe6;
+  color: #ff6f00;
+  border: 1.5px solid #ff6f00;
+  box-shadow: 0 0 8px 2px #ffb30055;
+}
+
+.mentor-profile-linkedin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  background: linear-gradient(90deg, #181818 0%, #0077b5 40%, #005983 80%, #0077b5 100%);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  padding: 0.22em 0.9em;
+  font-size: 1.01rem;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0,119,181,0.08);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.13s, background-position 0.7s cubic-bezier(0.77,0,0.175,1);
+  cursor: pointer;
+  outline: none;
+  vertical-align: middle;
+  background-size: 300% 100%;
+  background-position: 0% 0%;
+}
+.mentor-profile-linkedin-btn:hover, .mentor-profile-linkedin-btn:focus {
+  background-position: 100% 0%;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,119,181,0.13);
+  transform: scale(1.03) translateY(-1px);
+  text-decoration: none;
+}
+.mentor-profile-linkedin-btn:active {
+  background: #005983;
+  color: #fff;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 1px 2px rgba(0,119,181,0.08);
+}
+.mentor-profile-linkedin-btn .linkedin-icon {
+  font-size: 1em;
+  margin-right: 0.18em;
+  vertical-align: middle;
+}
+@media (max-width: 600px) {
+  .mentor-profile-linkedin-btn {
+    font-size: 0.93rem;
+    padding: 0.18em 0.5em;
+  }
 } 
