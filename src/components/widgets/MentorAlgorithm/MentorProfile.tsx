@@ -10,31 +10,11 @@ import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
-
-interface MentorProfile {
-  name: string;
-  email: string;
-  phone: string;
-  age: string;
-  degree: string;
-  educationLevel: string;
-  county: string;
-  currentProfession: string;
-  pastProfessions: string[];
-  linkedin: string;
-  hobbies: string[];
-  ethnicity: string;
-  religion: string;
-  skills: string[];
-  lookingFor: string[];
-  industries: string[];
-  type: 'mentor' | 'mentee';
-  subjects: string[];
-}
+import { MentorMenteeProfile } from './matchUsers';
 
 export default function MentorProfile() {
   const { currentUser } = useAuth();
-  const [profile, setProfile] = useState<MentorProfile | null>(null);
+  const [profile, setProfile] = useState<MentorMenteeProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +31,7 @@ export default function MentorProfile() {
       try {
         const mentorDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
         if (mentorDoc.exists()) {
-          setProfile(mentorDoc.data() as MentorProfile);
+          setProfile(mentorDoc.data() as MentorMenteeProfile);
         }
       } catch (err) {
         setError('Failed to load profile');
