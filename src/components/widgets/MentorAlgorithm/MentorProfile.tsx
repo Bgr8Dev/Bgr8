@@ -200,7 +200,9 @@ export default function MentorProfile() {
             )}
           </div>
           <div className="mentor-profile-field">
-            <label>Subjects</label>
+            <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8 }}>
+              Subjects
+            </div>
             {isEditing ? (
               <div
                 className="custom-multiselect-dropdown"
@@ -223,7 +225,10 @@ export default function MentorProfile() {
                     justifyContent: 'space-between',
                     userSelect: 'none',
                   }}
-                  onClick={() => setSubjectsDropdownOpen(v => !v)}
+                  onClick={(e) => {
+                    setSubjectsDropdownOpen(v => !v);
+                    e.stopPropagation();
+                  }}
                   aria-haspopup="listbox"
                   aria-expanded={subjectsDropdownOpen}
                 >

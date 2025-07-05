@@ -1,42 +1,37 @@
 const skillsByCategory: { [category: string]: string[] } = {
-  'Academic': [
-    'Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science',
-    'Statistics', 'Calculus', 'Algebra', 'Geometry', 'Data Science',
+  'STEM': [
+    'Biology', 'Chemistry', 'Computer Science', 'Economics',
+    'Engineering', 'Mathematics', 'Physics', 'Psychology',
+    'Statistics / Data Science'
   ],
   'Technology & Programming': [
-    'Web Development', 'Mobile Development', 'Python', 'JavaScript',
-    'Java', 'C++', 'React', 'Node.js', 'Database Design', 'Cloud Computing',
-    'Machine Learning', 'Artificial Intelligence', 'Cybersecurity',
-    'DevOps', 'UI/UX Design', 'Software Architecture',
+    'Artificial Intelligence', 'C/C++', 'Cybersecurity', 'Java/C#',
+    'JavaScript/TypeScript', 'Mobile Development', 'Node.js',
+    'Python', 'Web Development'
   ],
   'Business & Professional': [
-    'Project Management', 'Business Strategy', 'Marketing', 'Digital Marketing',
-    'Social Media Marketing', 'Public Relations', 'Sales', 'Entrepreneurship',
-    'Finance', 'Accounting', 'Investment', 'Business Analysis',
-    'Human Resources', 'Leadership', 'Team Management', 'Public Speaking',
-    'Negotiation', 'Business Writing', 'Consulting',
+    'Accounting', 'Business Analysis', 'Business Strategy',
+    'Business Writing', 'Consulting', 'Digital Marketing',
+    'Entrepreneurship', 'Finance', 'Human Resources',
+    'Leadership', 'Marketing', 'Negotiation', 'Project Management',
+    'Public Relations', 'Public Speaking', 'Sales',
+    'Social Media Marketing', 'Team Management'
   ],
   'Creative Arts': [
-    'Graphic Design', 'Web Design', '3D Modeling', 'Animation',
-    'Video Editing', 'Photography', 'Drawing', 'Painting',
-    'Music Production', 'Music Theory', 'Songwriting', 'Creative Writing',
-    'Content Creation', 'Film Making',
+    '3D Modeling', 'Animation', 'Content Creation', 'Creative Writing',
+    'Drawing', 'Film Making', 'Graphic Design', 'Music Production',
+    'Music Theory', 'Painting', 'Photography', 'Songwriting',
+    'Video Editing', 'Web Design'
   ],
   'Languages': [
-    'English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese',
-    'Korean', 'Arabic', 'Russian', 'Portuguese', 'Italian',
+    'Arabic', 'Chinese', 'English', 'French', 'German', 'Italian',
+    'Japanese', 'Korean', 'Portuguese', 'Russian', 'Spanish'
   ],
   'Soft Skills': [
-    'Communication', 'Time Management', 'Problem Solving', 'Critical Thinking',
-    'Emotional Intelligence', 'Conflict Resolution', 'Teamwork',
-    'Adaptability', 'Work Ethics', 'Stress Management',
-  ],
-  'Specialized Fields': [
-    'Data Analytics', 'Digital Marketing', 'Product Management',
-    'Supply Chain Management', 'Quality Assurance', 'Research Methods',
-    'Technical Writing', 'SEO', 'Blockchain', 'IoT',
-    'Renewable Energy', 'Environmental Science', 'Healthcare Management',
-  ],
+    'Adaptability', 'Communication', 'Conflict Resolution',
+    'Critical Thinking', 'Emotional Intelligence', 'Problem Solving',
+    'Stress Management', 'Time Management', 'Work Ethics'
+  ]
 };
 
-export default skillsByCategory; 
+export default skillsByCategory;

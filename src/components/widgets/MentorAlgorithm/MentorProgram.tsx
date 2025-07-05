@@ -5,13 +5,13 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
-import { getBestMatchesForUser, MatchResult, MentorMenteeProfile } from './matchUsers';
+import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
 import MentorModal from './MentorModal';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
-import ethnicityOptions from '../../../constants/ethnicityOptions';
-import religionOptions from '../../../constants/religionOptions';
+import {ethnicityOptions, DEFAULT_ETHNICITY} from '../../../constants/ethnicityOptions';
+import {religionOptions, DEFAULT_RELIGION} from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
 import subjects from '../../../constants/subjects';
 import hobbiesByCategory from '../../../constants/hobbiesByCategory';
@@ -37,7 +37,7 @@ export default function MentorProgram() {
     currentProfession: '',
     pastProfessions: [''],
     linkedin: '',
-    hobbies: [''],
+    hobbies: [] as string[],
     ethnicity: '',
     religion: '',
     skills: [] as string[],
@@ -426,7 +426,7 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section"> 
                       <div className="mentor-form-section-title">Education</div>
-                      <input name="degree" value={form.degree} onChange={handleChange} placeholder="Degree (e.g. BSc Computer Science)" required />
+                      <input name="degree" value={form.degree} onChange={handleChange} placeholder="Degree (e.g. BSc Computer Science)" />
                       <select name="educationLevel" value={form.educationLevel} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
                         <option value="" disabled>Select Education Level</option>
                         {ukEducationLevels
@@ -571,7 +571,7 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Industries</div>
-                      <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
+                      <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
                         {selectedRole === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}
                         <div
                           ref={industriesDropdownRef}
@@ -694,7 +694,7 @@ export default function MentorProgram() {
                             </div>
                           )}
                         </div>
-                      </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -722,7 +722,6 @@ export default function MentorProgram() {
                               value={prof}
                               onChange={e => handlePastProfessionChange(idx, e.target.value)}
                               placeholder={idx === 0 ? 'Past Professions' : 'Additional Past Profession'}
-                              required={idx === 0}
                               style={{ marginBottom: 4 }}
                             />
                             {form.pastProfessions.length > 1 && (
@@ -764,7 +763,6 @@ export default function MentorProgram() {
                         name="religion" 
                         value={form.religion} 
                         onChange={handleChange} 
-                        required
                         style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
                       >
                         <option value="" disabled>Select Religion</option>
@@ -772,8 +770,9 @@ export default function MentorProgram() {
                           <option key={option} value={option}>{option}</option>
                         ))}
                       </select>
-                      <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
+                      <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, marginTop: 8 }}>
                         Hobbies & Interests
+                      </div>
                         <div
                           className="custom-multiselect-dropdown"
                           tabIndex={0}
@@ -800,12 +799,15 @@ export default function MentorProgram() {
                             aria-expanded={hobbiesDropdownOpen}
                           >
                             <span style={{ color: form.hobbies.length === 0 ? '#888' : '#fff' }}>
-                              {form.hobbies.length === 0 ? 'Select hobbies...' : `${form.hobbies.length} selected`}
+                              {form.hobbies.filter(h => h && h.trim() !== '').length === 0
+                                ? 'Select hobbies...'
+                                : `${form.hobbies.filter(h => h && h.trim() !== '').length} selected`}
                             </span>
                             <span style={{ fontSize: 18, color: '#ffb300', marginLeft: 8 }}>
                               ▼
                             </span>
                           </div>
+
                           {hobbiesDropdownOpen && (
                             <div
                               className="custom-multiselect-options"
@@ -826,7 +828,9 @@ export default function MentorProgram() {
                             >
                               {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
                                 <div key={category} style={{ marginBottom: 8 }}>
-                                  <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
+                                  <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>
+                                    {category.replace(/([A-Z])/g, ' $1').trim()}
+                                  </div>
                                   {hobbies.map(hobby => (
                                     <label
                                       key={hobby}
@@ -845,12 +849,18 @@ export default function MentorProgram() {
                                         type="checkbox"
                                         checked={form.hobbies.includes(hobby)}
                                         onChange={() => {
-                                          setForm(prev => ({
-                                            ...prev,
-                                            hobbies: prev.hobbies.includes(hobby)
-                                              ? prev.hobbies.filter((h: string) => h !== hobby)
-                                              : [...prev.hobbies, hobby],
-                                          }));
+                                          if (!hobby || hobby.trim() === '') return;
+                                          setForm(prev => {
+                                            const isSelected = prev.hobbies.includes(hobby);
+                                            const updated = isSelected
+                                              ? prev.hobbies.filter(h => h !== hobby)
+                                              : [...prev.hobbies, hobby];
+
+                                            return {
+                                              ...prev,
+                                              hobbies: updated.filter(h => h && h.trim() !== '') // Sanitize
+                                            };
+                                          });
                                         }}
                                         style={{
                                           accentColor: '#ffb300',
@@ -868,35 +878,40 @@ export default function MentorProgram() {
                               ))}
                             </div>
                           )}
-                          {form.hobbies.length > 0 && (
+
+                          {form.hobbies.filter(h => h && h.trim() !== '').length > 0 && (
                             <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                              {form.hobbies.map((hobby) => (
-                                <span className="mentor-profile-chip mentor-profile-hobby-chip" key={hobby} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                  {hobby}
-                                  <button
-                                    type="button"
-                                    aria-label={`Remove ${hobby}`}
-                                    onClick={e => {
-                                      e.preventDefault();
-                                      setForm(prev => ({ ...prev, hobbies: prev.hobbies.filter((h: string) => h !== hobby) }));
-                                    }}
-                                    style={{
-                                      background: 'none',
-                                      border: 'none',
-                                      color: '#ffb300',
-                                      fontWeight: 700,
-                                      fontSize: 18,
-                                      cursor: 'pointer',
-                                      marginLeft: 2,
-                                      lineHeight: 1
-                                    }}
-                                  >×</button>
-                                </span>
-                              ))}
+                              {form.hobbies
+                                .filter(h => h && h.trim() !== '')
+                                .map((hobby) => (
+                                  <span className="mentor-profile-chip mentor-profile-hobby-chip" key={hobby} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                    {hobby}
+                                    <button
+                                      type="button"
+                                      aria-label={`Remove ${hobby}`}
+                                      onClick={e => {
+                                        e.preventDefault();
+                                        setForm(prev => ({
+                                          ...prev,
+                                          hobbies: prev.hobbies.filter(h => h !== hobby).filter(h => h && h.trim() !== '')
+                                        }));
+                                      }}
+                                      style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#ffb300',
+                                        fontWeight: 700,
+                                        fontSize: 18,
+                                        cursor: 'pointer',
+                                        marginLeft: 2,
+                                        lineHeight: 1
+                                      }}
+                                    >×</button>
+                                  </span>
+                                ))}
                             </div>
                           )}
                         </div>
-                      </label>
                     </div>
                   </div>
                 </div>
@@ -969,7 +984,7 @@ export default function MentorProgram() {
                       <span className="match-card-value">{user.email}</span>
                     </div>
                     <div className="match-card-row">
-                      <span className="match-card-label">Profession:</span>
+                      <span className="match-card-label">{(user.type == MENTOR) ? "Profession:" : "Desired Profession:"}</span>
                       <span className="match-card-value">{user.currentProfession}</span>
                     </div>
                     <div className="match-card-row">

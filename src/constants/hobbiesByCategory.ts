@@ -1,67 +1,73 @@
 const hobbiesByCategory = {
-  Sports: [
-    'Football', 'Cricket', 'Rugby', 'Tennis', 'Cycling', 'Running', 'Swimming', 'Hiking', 'Basketball', 'Baseball', 'Volleyball', 'Table Tennis', 'Badminton', 'Golf', 'Rock Climbing', 'Skateboarding', 'Surfing', 'Skiing', 'Snowboarding', 'Ice Skating', 'Roller Skating', 'Pilates', 'Tai Chi', 'Karate', 'Judo', 'Taekwondo',
-  ],
-  Music: [
-    'Singing', 'Opera Singing', 'Choir', 'Guitar', 'Piano', 'Violin', 'Drums', 'Saxophone',
-  ],
-  Dance: [
-    'Dancing', 'Ballet', 'Jazz Dance', 'Hip Hop Dance', 'Ballroom Dancing',
-  ],
   Art: [
-    'Drawing', 'Painting', 'Photography', 'Street Photography', 'Wildlife Photography', 'Portrait Photography', 'Digital Art', 'Animation', 'Calligraphy', 'Sculpture', 'Pottery',
-  ],
-  Writing: [
-    'Writing', 'Poetry', 'Creative Writing', 'Journalism',
-  ],
-  Crafts: [
-    'DIY Crafts', 'Woodworking', 'Metalworking', 'Jewelry Making', 'Knitting', 'Crocheting', 'Sewing', 'Quilting', 'Interior Design', 'Model Building',
-  ],
-  FoodAndDrink: [
-    'Cooking', 'Baking', 'International Cuisine', 'BBQ & Grilling', 'Wine Tasting', 'Beer Brewing', 'Cake Decorating', 'Bread Making',
-  ],
-  Gardening: [
-    'Gardening', 'Urban Gardening', 'Flower Arranging',
-  ],
-  Travel: [
-    'Travel', 'Backpacking', 'Road Trips', 'Wilderness Camping', 'RV Camping', 'Beach Camping',
-  ],
-  Volunteering: [
-    'Volunteering', 'Animal Rescue', 'Environmental Conservation', 'Teaching',
-  ],
-  Games: [
-    'Chess', 'Checkers', 'Board Games', 'Bridge', 'Mahjong', 'Dungeons & Dragons', 'Video Games', 'PC Gaming', 'Console Gaming', 'Mobile Gaming',
+    'Animation', 'Calligraphy', 'Digital Art', 'Drawing', 'Painting', 'Photography',
+    'Pottery', 'Sculpture', 'Street Art', 'Other Art'
   ],
   Collecting: [
-    'Collecting', 'Stamp Collecting', 'Coin Collecting', 'Comic Book Collecting', 'Record Collecting',
+    'Coin Collecting', 'Comic Book Collecting', 'Record Collecting', 'Stamp Collecting', 'Instrument Collecting', 'Collecting'
   ],
-  Nature: [
-    'Bird Watching', 'Nature Photography',
+  Crafts: [
+    'DIY Crafts', 'Interior Design', 'Jewelry Making', 'Knitting', 'Metalworking', 'Model Building',
+    'Quilting', 'Sewing', 'Woodworking', 'Crocheting', 'Other Craft'
   ],
-  BloggingVlogging: [
-    'Blogging', 'Podcasting', 'Vlogging', 'Web Design',
+  Dance: [
+    'Ballroom Dancing', 'Ballet', 'Salsa Dance', 'Hip Hop / Street Dance', 'Jazz Dance', 'Other Dancing'
   ],
-  OutdoorActivities: [
-    'Fishing', 'Deep Sea Fishing', 'Fly Fishing', 'Ice Fishing', 'Camping',
+  FoodAndDrink: [
+    'Baking', 'BBQ & Grilling', 'Bread Making', 'Cake Decorating', 'Cooking', 'Other Food and Drink Prep'
   ],
-  Mindfulness: [
-    'Yoga', 'Meditation', 'Mindfulness',
+  Games: [
+    'Board Games', 'Video Games', 'Chess', 'Dungeons & Dragons', 'Other Games'
   ],
-  Tech: [
-    'Drone Flying', 'Remote Control Cars',
-  ],
-  Science: [
-    'Astronomy', 'Genealogy',
-  ],
-  Performance: [
-    'Stand-up Comedy', 'Acting', 'Musical Theater', 'Magic Tricks', 'Juggling',
+  Gardening: [
+    'Home Gardening', 'Other Gardening'
   ],
   Language: [
-    'Language Learning',
+    'Language Learning', 'Linguistics'
+  ],
+  MediaAndContent: [
+    'Blogging', 'Podcasting', 'Vlogging', 'Web Design', 'Streaming', 'Content Creation', 'Other Media and Content'
+  ],
+  Mindfulness: [
+    'Meditation', 'Mindfulness', 'Yoga', 'Other Mindfulness'
+  ],
+  Music: [
+    'Bass', 'Choir', 'Drums', 'Guitar', 'Piano', 'Saxophone', 'Singing', 'Violin', 'Composition / Production', 'Other Instrument(s)'
+  ],
+  Nature: [
+    'Bird Watching', 'Nature Recording', 'Wildlife Conservation', 'Other Nature Activities'
+  ],
+  OutdoorRecreation: [
+    'Camping', 'Fishing', 'Hunting', 'Kayaking', 'Mountain Biking', 'Rock Climbing',
+    'Sailing', 'Scuba Diving', 'Wildlife Watching', 'Other Outdoor Recreation'
+  ],
+  PerformingArts: [
+    'Acting', 'Stunts', 'Stage Skills', 'Magic', 'Musical Theater', 'Stand-up Comedy', 'Other Performing Arts'
+  ],
+  Science: [
+    'Researching Science', 'Practicing Science', 'Other Scientific Activities'
+  ],
+  Sports: [
+    'Badminton', 'Baseball', 'Basketball', 'Biking', 'Cricket', 'Cycling', 'Football', 'Golf', 'Hiking',
+    'Ice Skating', 'Boxing', 'Martial Arts', 'Rock Climbing', 'Roller Skating', 'Rugby',
+    'Running', 'Skateboarding', 'Skiing', 'Snowboarding', 'Surfing', 'Swimming', 'Table Tennis',
+    'Tennis', 'Volleyball', 'Other Sport(s)'
+  ],
+  Technology: [
+    'Creating Technology', 'Exploring new Technology', 'Programming', 'Robotics', 'Other Technology Interests'
+  ],
+  TravelAndAdventure: [
+    'Travelling the World', 'Travelling the Country'
+  ],
+  Volunteering: [
+    'Animal Rescue', 'Environmental Conservation', 'Teaching', 'Other Volunteering'
+  ],
+  Writing: [
+    'Creative Writing', 'Journalism', 'Poetry', 'Other Writing'
   ],
   Other: [
-    'Fashion', 'Film & TV', 'Other',
-  ],
+    'Fashion', 'Film & TV', 'Other'
+  ]
 };
 
-export default hobbiesByCategory; 
+export default hobbiesByCategory;
