@@ -1,5 +1,3 @@
-import { AES, enc } from 'crypto-js';
-
 // Password validation
 export const validatePassword = (password: string): boolean => {
   const requirements = {
@@ -76,16 +74,6 @@ export const validateFile = (file: File): boolean => {
   const maxSize = 5 * 1024 * 1024; // 5MB
   const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
   return file.size <= maxSize && allowedTypes.includes(file.type);
-};
-
-// Sensitive data encryption
-export const encryptSensitiveData = (data: string, encryptionKey: string): string => {
-  return AES.encrypt(data, encryptionKey).toString();
-};
-
-export const decryptSensitiveData = (encryptedData: string, encryptionKey: string): string => {
-  const bytes = AES.decrypt(encryptedData, encryptionKey);
-  return bytes.toString(enc.Utf8);
 };
 
 // Error handling
