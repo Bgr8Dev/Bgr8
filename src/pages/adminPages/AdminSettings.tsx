@@ -1,78 +1,39 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { doc, getDoc, setDoc, updateDoc, collection, query, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
-import { doc, getDoc, setDoc, collection, query, getDocs, updateDoc } from 'firebase/firestore';
-import { FaGlobe, FaLock, FaToggleOn, FaToggleOff, FaExclamationTriangle, FaCodeBranch, FaUserCog, FaSearch, FaEye, FaEyeSlash, FaLayerGroup, FaChevronDown, FaChevronRight, FaCheckCircle, FaExclamationCircle, FaSpinner, FaInfoCircle } from 'react-icons/fa';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
+import { FaEye, FaEyeSlash, FaLock, FaUserCog, FaCheck, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import '../../styles/adminStyles/AdminSettings.css';
 
-// Define section IDs for expanded/collapsed state management
 type SectionId = 'businessAccess' | 'comingSoon' | 'grayedOut' | 'passwordProtected' | 'developerAccess';
 
 interface BusinessAccessibility {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  bgr8r: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
+  bgr8r: boolean;
   [key: string]: boolean;
 }
 
 interface BusinessComingSoon {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  bgr8r: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
+  bgr8r: boolean;
   [key: string]: boolean;
 }
 
-// New interface for grayed out pages
 interface BusinessGrayedOut {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  bgr8r: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
+  bgr8r: boolean;
   [key: string]: boolean;
 }
 
-// New interface for password-protected pages
 interface BusinessPasswordProtected {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  bgr8r: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
+  bgr8r: boolean;
   [key: string]: boolean;
 }
 
-// Interface for page passwords
 interface BusinessPasswords {
-  marketing: string;
-  carClub: string;
-  clothing: string;
-  league: string;
-  world: string;
-  bgr8r: string;
-  careers: string;
   bgr8: string;
-  podcast: string;
+  bgr8r: string;
   [key: string]: string;
 }
 
@@ -86,100 +47,50 @@ interface UserData {
 }
 
 export function AdminSettings() {
-  const [businessAccess, setBusinessAccess] = useState<BusinessAccessibility>({
-    marketing: true,
-    carClub: true,
-    clothing: true,
-    league: true,
-    world: true,
-    bgr8r: true,
-    careers: true,
-    bgr8: true,
-    podcast: true
-  });
-  const [comingSoon, setComingSoon] = useState<BusinessComingSoon>({
-    marketing: false,
-    carClub: true,
-    clothing: true,
-    league: true,
-    world: true,
-    bgr8r: true,
-    careers: true,
-    bgr8: true,
-    podcast: true
-  });
-  // New state for grayed out pages
-  const [grayedOut, setGrayedOut] = useState<BusinessGrayedOut>({
-    marketing: false,
-    carClub: false,
-    clothing: false,
-    league: false,
-    world: false,
-    bgr8r: false,
-    careers: false,
-    bgr8: false,
-    podcast: false
-  });
+  const { refreshBusinessAccess, refreshComingSoonStatus, refreshGrayedOutStatus, refreshPasswordProtectionStatus } = useBusinessAccess();
+  
+  const [expandedSections, setExpandedSections] = useState<Set<SectionId>>(new Set(['businessAccess'] as SectionId[]));
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const { refreshBusinessAccess, refreshComingSoonStatus, refreshGrayedOutStatus } = useBusinessAccess();
-
-  // New state for tracking expanded/collapsed sections
-  const [expandedSections, setExpandedSections] = useState<Record<SectionId, boolean>>({
-    businessAccess: true, // Start with first section expanded
-    comingSoon: false,
-    grayedOut: false,
-    passwordProtected: false,
-    developerAccess: false
-  });
-
-  // New state for password protection
-  const [passwordProtected, setPasswordProtected] = useState<BusinessPasswordProtected>({
-    marketing: false,
-    carClub: false,
-    clothing: false,
-    league: false,
-    world: false,
-    bgr8r: false,
-    careers: false,
-    bgr8: false,
-    podcast: false
+  const [saving, setSaving] = useState<string>('');
+  const [savingBusiness, setSavingBusiness] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  
+  const [businessAccess, setBusinessAccess] = useState<BusinessAccessibility>({
+    bgr8: true,
+    bgr8r: true
   });
   
-  // New state for page passwords
-  const [businessPasswords, setBusinessPasswords] = useState<BusinessPasswords>({
-    marketing: '',
-    carClub: '',
-    clothing: '',
-    league: '',
-    world: '',
-    bgr8r: '',
-    careers: '',
-    bgr8: '',
-    podcast: ''
+  const [comingSoon, setComingSoon] = useState<BusinessComingSoon>({
+    bgr8: true,
+    bgr8r: true
   });
+  
+  const [grayedOut, setGrayedOut] = useState<BusinessGrayedOut>({
+    bgr8: false,
+    bgr8r: false
+  });
+  
+  const [passwordProtected, setPasswordProtected] = useState<BusinessPasswordProtected>({
+    bgr8: false,
+    bgr8r: false
+  });
+  
+  const [businessPasswords, setBusinessPasswords] = useState<BusinessPasswords>({
+    bgr8: '',
+    bgr8r: ''
+  });
+  
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [editingPassword, setEditingPassword] = useState<string | null>(null);
+  const [tempPassword, setTempPassword] = useState<string>('');
 
-  // First, add a new state to track which business is currently saving
-  const [savingBusiness, setSavingBusiness] = useState<string | null>(null);
 
-  // Add a timeout ref at the component level
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const businessNames: Record<string, string> = {
-    marketing: 'Innov8',
-    carClub: 'B8 Car Club',
-    clothing: 'B8 Clothing',
-    league: 'B8 League',
-    world: 'B8 World',
     bgr8r: 'Bgr8r',
-    careers: 'B8 Careers',
-    bgr8: 'BGr8',
-    podcast: 'B8 Podcast'
+    bgr8: 'BGr8'
   };
 
   useEffect(() => {
@@ -368,41 +279,32 @@ export function AdminSettings() {
 
   const toggleComingSoon = async (business: string) => {
     try {
-      // Update local state first for immediate UI feedback
       const newValue = !comingSoon[business];
       setComingSoon(prev => ({
         ...prev,
         [business]: newValue
       }));
       
-      // Show saving indicator
       setSaving('comingSoon');
       setSavingBusiness(business);
       
-      // Update Firebase - Fix: Update the correct document and field directly
       const comingSoonRef = doc(db, 'settings', 'comingSoon');
       await updateDoc(comingSoonRef, {
         [business]: newValue
       });
       
-      // Refresh context if available
       if (refreshComingSoonStatus) {
         await refreshComingSoonStatus();
       }
       
-      // Show success message briefly
-      setSuccessMessage(`${business} coming soon status ${newValue ? 'enabled' : 'disabled'} successfully!`);
+      setSuccessMessage(`${business} coming soon ${newValue ? 'enabled' : 'disabled'} successfully!`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error updating coming soon status:', error);
-      
-      // Revert local state on error
       setComingSoon(prev => ({
         ...prev,
         [business]: !prev[business]
       }));
-      
-      // Show error message
       setErrorMessage(`Failed to update ${business} coming soon status. Please try again.`);
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
@@ -413,41 +315,32 @@ export function AdminSettings() {
 
   const toggleGrayedOut = async (business: string) => {
     try {
-      // Update local state first for immediate UI feedback
       const newValue = !grayedOut[business];
       setGrayedOut(prev => ({
         ...prev,
         [business]: newValue
       }));
       
-      // Show saving indicator
       setSaving('grayedOut');
       setSavingBusiness(business);
       
-      // Update Firebase - Fix: Update the correct document and field directly
       const grayedOutRef = doc(db, 'settings', 'grayedOut');
       await updateDoc(grayedOutRef, {
         [business]: newValue
       });
       
-      // Refresh context if available
       if (refreshGrayedOutStatus) {
         await refreshGrayedOutStatus();
       }
       
-      // Show success message briefly
-      setSuccessMessage(`${business} grayed out status ${newValue ? 'enabled' : 'disabled'} successfully!`);
+      setSuccessMessage(`${business} grayed out ${newValue ? 'enabled' : 'disabled'} successfully!`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error updating grayed out status:', error);
-      
-      // Revert local state on error
       setGrayedOut(prev => ({
         ...prev,
         [business]: !prev[business]
       }));
-      
-      // Show error message
       setErrorMessage(`Failed to update ${business} grayed out status. Please try again.`);
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
@@ -458,37 +351,33 @@ export function AdminSettings() {
 
   const togglePasswordProtection = async (business: string) => {
     try {
-      // Update local state first for immediate UI feedback
       const newValue = !passwordProtected[business];
       setPasswordProtected(prev => ({
         ...prev,
         [business]: newValue
       }));
       
-      // Show saving indicator
       setSaving('passwordProtected');
       setSavingBusiness(business);
       
-      // Update Firebase - Fix: Update the passwordProtected field directly
       const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
       await updateDoc(passwordProtectedRef, {
-        [`passwordProtected.${business}`]: newValue
+        [business]: newValue
       });
       
-      // Show success message briefly
+      if (refreshPasswordProtectionStatus) {
+        await refreshPasswordProtectionStatus();
+      }
+      
       setSuccessMessage(`${business} password protection ${newValue ? 'enabled' : 'disabled'} successfully!`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Error updating password protection:', error);
-      
-      // Revert local state on error
+      console.error('Error updating password protection status:', error);
       setPasswordProtected(prev => ({
         ...prev,
         [business]: !prev[business]
       }));
-      
-      // Show error message
-      setErrorMessage(`Failed to update ${business} password protection. Please try again.`);
+      setErrorMessage(`Failed to update ${business} password protection status. Please try again.`);
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setSaving('');
@@ -496,38 +385,28 @@ export function AdminSettings() {
     }
   };
 
-  // Update the updateBusinessPassword function to use a separate function for saving
-  const updateBusinessPassword = (business: string, password: string) => {
-    // Just update local state immediately
-    setBusinessPasswords(prev => ({
-      ...prev,
-      [business]: password
-    }));
-  };
 
-  // Add a new function to save the password with debounce
+
   const saveBusinessPassword = async (business: string, password: string) => {
     try {
-      // Only save to Firebase if we have a non-empty password
-      if (password.trim() !== '') {
-        // Show saving indicator
-        setSaving('passwordProtected');
-        setSavingBusiness(business);
-        
-        // Update Firebase - Fix: Update the businessPasswords field directly
-        const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
-        await updateDoc(passwordProtectedRef, {
-          [`businessPasswords.${business}`]: password
-        });
-        
-        // Show success message briefly
-        setSuccessMessage(`${business} password updated successfully!`);
-        setTimeout(() => setSuccessMessage(''), 3000);
+      setSaving('passwordProtected');
+      setSavingBusiness(business);
+      
+      const passwordProtectedRef = doc(db, 'settings', 'passwordProtected');
+      await updateDoc(passwordProtectedRef, {
+        [`businessPasswords.${business}`]: password
+      });
+      
+      if (refreshPasswordProtectionStatus) {
+        await refreshPasswordProtectionStatus();
       }
+      
+      setSuccessMessage(`${business} password updated successfully!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+      setEditingPassword(null);
+      setTempPassword('');
     } catch (error) {
       console.error('Error updating business password:', error);
-      
-      // Show error message
       setErrorMessage(`Failed to update ${business} password. Please try again.`);
       setTimeout(() => setErrorMessage(''), 5000);
     } finally {
@@ -544,20 +423,18 @@ export function AdminSettings() {
       });
       
       // Update local state
-      setUsers(prev => 
-        prev.map(user => 
-          user.uid === userId 
-            ? { ...user, developer: !isDeveloper } 
-            : user
-        )
-      );
+      setUsers(prev => prev.map(user => 
+        user.uid === userId 
+          ? { ...user, developer: !isDeveloper }
+          : user
+      ));
       
-      setSuccessMessage(`User ${!isDeveloper ? 'granted' : 'removed from'} developer access`);
+      setSuccessMessage(`Developer access ${!isDeveloper ? 'granted' : 'revoked'} successfully!`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Error updating user developer status:', error);
+      console.error('Error updating developer status:', error);
       setErrorMessage('Failed to update developer status. Please try again.');
-      setTimeout(() => setErrorMessage(''), 3000);
+      setTimeout(() => setErrorMessage(''), 5000);
     }
   };
 
@@ -565,430 +442,310 @@ export function AdminSettings() {
     return Object.values(businessAccess).filter(Boolean).length;
   };
 
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Toggle section expansion
   const toggleSectionExpansion = (sectionId: SectionId) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }));
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
   };
 
-  // Clean up the timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
   if (loading) {
-    return <div className="admin-loading">Loading settings...</div>;
+    return <div className="admin-settings-loading">Loading settings...</div>;
   }
 
   return (
     <div className="admin-settings">
-      <section className="settings-section">
-        <div 
-          className="section-header-collapsible" 
-          onClick={() => toggleSectionExpansion('businessAccess')}
-        >
-          <div className="section-header-content">
-            <div className="expansion-icon">
-              {expandedSections.businessAccess ? <FaChevronDown /> : <FaChevronRight />}
-            </div>
-            <h3>Business Accessibility</h3>
-          </div>
-        </div>
-        
-        {expandedSections.businessAccess && (
-          <div className="section-content">
-            <p className="settings-description">
-              Control which business sections are accessible to the public. Toggling a business off will 
-              prevent users from accessing it through the navigation menu.
-            </p>
-            
-            {getAccessCount() === 0 && (
-              <div className="settings-warning">
-                <FaExclamationTriangle /> Warning: All businesses are currently set to private. 
-                Users will not be able to access any business section.
-              </div>
-            )}
-            
-            <div className="business-access-grid">
-              {Object.keys(businessNames).map(business => (
-                <div 
-                  key={business} 
-                  className={`business-access-card ${businessAccess[business] ? 'active' : 'inactive'}`}
-                >
-                  <div className="business-access-header">
-                    <span>{businessNames[business]}</span>
-                    <div 
-                      className="toggle-button" 
-                      onClick={() => toggleAccess(business)}
-                    >
-                      {savingBusiness === business && saving === 'businessAccess' ? (
-                        <FaSpinner className="spinner" />
-                      ) : businessAccess[business] ? (
-                        <FaToggleOn className="toggle-icon on" />
-                      ) : (
-                        <FaToggleOff className="toggle-icon off" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="business-access-status">
-                    {businessAccess[business] ? (
-                      <>
-                        <FaGlobe className="status-icon public" />
-                        <span className="status-text public">Public</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaLock className="status-icon private" />
-                        <span className="status-text private">Private</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Settings are saved automatically when toggled */}
-            <div className="settings-note">
-              <FaInfoCircle /> Changes are saved automatically
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="settings-section">
-        <div 
-          className="section-header-collapsible" 
-          onClick={() => toggleSectionExpansion('comingSoon')}
-        >
-          <div className="section-header-content">
-            <div className="expansion-icon">
-              {expandedSections.comingSoon ? <FaChevronDown /> : <FaChevronRight />}
-            </div>
-            <h3>Coming Soon Status</h3>
-          </div>
-        </div>
-        
-        {expandedSections.comingSoon && (
-          <div className="section-content">
-            <p className="settings-description">
-              Control which businesses display a "Coming Soon" banner on the homepage. Use this to indicate which businesses 
-              are not yet officially launched to the public.
-            </p>
-            
-            <div className="business-access-grid">
-              {Object.keys(businessNames).map(business => (
-                <div 
-                  key={business} 
-                  className={`business-access-card ${!comingSoon[business] ? 'active' : 'inactive'}`}
-                >
-                  <div className="business-access-header">
-                    <span>{businessNames[business]}</span>
-                    <div 
-                      className="toggle-button" 
-                      onClick={() => toggleComingSoon(business)}
-                    >
-                      {savingBusiness === business && saving === 'comingSoon' ? (
-                        <FaSpinner className="spinner" />
-                      ) : !comingSoon[business] ? (
-                        <FaToggleOn className="toggle-icon on" />
-                      ) : (
-                        <FaToggleOff className="toggle-icon off" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="business-access-status">
-                    {!comingSoon[business] ? (
-                      <>
-                        <FaEye className="status-icon public" />
-                        <span className="status-text public">Visible</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaEyeSlash className="status-icon private" />
-                        <span className="status-text private">Coming Soon</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Settings are saved automatically when toggled */}
-            <div className="settings-note">
-              <FaInfoCircle /> Changes are saved automatically
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="settings-section">
-        <div 
-          className="section-header-collapsible" 
-          onClick={() => toggleSectionExpansion('grayedOut')}
-        >
-          <div className="section-header-content">
-            <div className="expansion-icon">
-              {expandedSections.grayedOut ? <FaChevronDown /> : <FaChevronRight />}
-            </div>
-            <h3>Coming Soon Page Overlay</h3>
-          </div>
-        </div>
-        
-        {expandedSections.grayedOut && (
-          <div className="section-content">
-            <p className="settings-description">
-              Add a "Coming Soon" overlay strip across business pages. This creates a visual indication that 
-              the page content is still in development, even if users can access it.
-            </p>
-            
-            <div className="business-access-grid">
-              {Object.keys(businessNames).map(business => (
-                <div 
-                  key={business} 
-                  className={`business-access-card ${!grayedOut[business] ? 'active' : 'inactive'}`}
-                >
-                  <div className="business-access-header">
-                    <span>{businessNames[business]}</span>
-                    <div 
-                      className="toggle-button" 
-                      onClick={() => toggleGrayedOut(business)}
-                    >
-                      {savingBusiness === business && saving === 'grayedOut' ? (
-                        <FaSpinner className="spinner" />
-                      ) : !grayedOut[business] ? (
-                        <FaToggleOn className="toggle-icon on" />
-                      ) : (
-                        <FaToggleOff className="toggle-icon off" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="business-access-status">
-                    {!grayedOut[business] ? (
-                      <>
-                        <FaLayerGroup className="status-icon public" />
-                        <span className="status-text public">No Overlay</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaLayerGroup className="status-icon private" />
-                        <span className="status-text private">Has Overlay</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Settings are saved automatically when toggled */}
-            <div className="settings-note">
-              <FaInfoCircle /> Changes are saved automatically
-            </div>
-          </div>
-        )}
-      </section>
-      
-      <section className="settings-section">
-        <div 
-          className="section-header-collapsible" 
-          onClick={() => toggleSectionExpansion('passwordProtected')}
-        >
-          <div className="section-header-content">
-            <div className="expansion-icon">
-              {expandedSections.passwordProtected ? <FaChevronDown /> : <FaChevronRight />}
-            </div>
-            <h3>Password Protected Pages</h3>
-          </div>
-        </div>
-        
-        {expandedSections.passwordProtected && (
-          <div className="section-content">
-            <p className="settings-description">
-              Control which businesses require password protection. Users will need to enter the correct password to access protected pages.
-            </p>
-            
-            <div className="business-access-grid">
-              {Object.keys(businessNames).map(business => (
-                <div 
-                  key={business} 
-                  className={`business-access-card ${passwordProtected[business] ? 'active' : 'inactive'}`}
-                >
-                  <div className="business-access-header">
-                    <span>{businessNames[business]}</span>
-                    <div 
-                      className="toggle-button" 
-                      onClick={() => togglePasswordProtection(business)}
-                    >
-                      {savingBusiness === business && saving === 'passwordProtected' ? (
-                        <FaSpinner className="spinner" />
-                      ) : passwordProtected[business] ? (
-                        <FaToggleOn className="toggle-icon on" />
-                      ) : (
-                        <FaToggleOff className="toggle-icon off" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="business-access-status">
-                    {passwordProtected[business] ? (
-                      <>
-                        <FaLock className="status-icon private" />
-                        <span className="status-text private">Password Protected</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaGlobe className="status-icon public" />
-                        <span className="status-text public">No Password</span>
-                      </>
-                    )}
-                  </div>
-                  
-                  {passwordProtected[business] && (
-                    <div className="password-input-container">
-                      <input
-                        type="text"
-                        placeholder="Set page password"
-                        value={businessPasswords[business]}
-                        onChange={(e) => {
-                          const newPassword = e.target.value;
-                          updateBusinessPassword(business, newPassword);
-                          
-                          // Use a timeout for debouncing
-                          if (timeoutRef.current) {
-                            clearTimeout(timeoutRef.current);
-                          }
-                          
-                          timeoutRef.current = setTimeout(() => {
-                            saveBusinessPassword(business, newPassword);
-                          }, 1000);
-                        }}
-                        className="password-input"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            {/* Settings are saved automatically when toggled */}
-            <div className="settings-note">
-              <FaInfoCircle /> Changes are saved automatically
-            </div>
-          </div>
-        )}
-      </section>
-      
-      <section className="settings-section">
-        <div 
-          className="section-header-collapsible" 
-          onClick={() => toggleSectionExpansion('developerAccess')}
-        >
-          <div className="section-header-content">
-            <div className="expansion-icon">
-              {expandedSections.developerAccess ? <FaChevronDown /> : <FaChevronRight />}
-            </div>
-            <h3>Developer Access Management</h3>
-          </div>
-        </div>
-        
-        {expandedSections.developerAccess && (
-          <div className="section-content">
-            <p className="settings-description">
-              Grant developer status to users who need access to all business sections for development and testing purposes. 
-              Developers will be able to see all navigation links regardless of business accessibility settings.
-            </p>
-            
-            <div className="search-container">
-              <div className="search-input-wrapper">
-                <FaSearch className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search users by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="developer-search-input"
-                />
-              </div>
-            </div>
-            
-            {loadingUsers ? (
-              <div className="admin-loading">Loading users...</div>
-            ) : (
-              <div className="developers-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.length > 0 ? (
-                      filteredUsers.map(user => (
-                        <tr key={user.uid}>
-                          <td>{`${user.firstName} ${user.lastName}`}</td>
-                          <td>{user.email}</td>
-                          <td>
-                            <span className={`developer-status ${user.developer ? 'active' : 'inactive'}`}>
-                              {user.developer ? (
-                                <>
-                                  <FaCodeBranch /> Developer
-                                </>
-                              ) : (
-                                'Regular User'
-                              )}
-                            </span>
-                          </td>
-                          <td>
-                            <button
-                              className={`action-button ${user.developer ? 'remove' : 'add'}`}
-                              onClick={() => toggleUserDeveloper(user.uid, user.developer)}
-                            >
-                              <FaUserCog /> {user.developer ? 'Remove Developer Access' : 'Grant Developer Access'}
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={4} className="no-results">No users found matching your search</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-      
-      {successMessage && (
-        <div className="settings-success-message">
-          <FaCheckCircle /> {successMessage}
-        </div>
-      )}
+      <h2>Admin Settings</h2>
       
       {errorMessage && (
-        <div className="settings-error-message">
-          <FaExclamationCircle /> {errorMessage}
+        <div className="error-message">
+          {errorMessage}
         </div>
       )}
+      
+      {successMessage && (
+        <div className="success-message">
+          {successMessage}
+        </div>
+      )}
+
+      <div className="settings-sections">
+        {/* Business Access Section */}
+        <div className="settings-section">
+          <div 
+            className="section-header"
+            onClick={() => toggleSectionExpansion('businessAccess')}
+          >
+            <div className="section-title">
+              <FaEye /> Business Access Control
+            </div>
+            <div className="section-stats">
+              {getAccessCount()} of {Object.keys(businessAccess).length} enabled
+            </div>
+            {expandedSections.has('businessAccess') ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
+          
+          {expandedSections.has('businessAccess') && (
+            <div className="section-content">
+              <p>Control which businesses are accessible to users.</p>
+              <div className="business-toggles">
+                {(['bgr8', 'bgr8r'] as const).map((business) => {
+                  const isEnabled = businessAccess[business];
+                  return (
+                    <div key={business} className="business-toggle">
+                      <div className="business-info">
+                        <span className="business-name">{businessNames[business] || business}</span>
+                        <span className={`status-badge ${isEnabled ? 'enabled' : 'disabled'}`}>
+                          {isEnabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </div>
+                      <button
+                        className={`toggle-button ${isEnabled ? 'enabled' : 'disabled'} ${saving === 'businessAccess' && savingBusiness === business ? 'saving' : ''}`}
+                        onClick={() => toggleAccess(business)}
+                        disabled={saving === 'businessAccess'}
+                      >
+                        {saving === 'businessAccess' && savingBusiness === business ? 'Saving...' : (isEnabled ? 'Disable' : 'Enable')}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Coming Soon Section */}
+        <div className="settings-section">
+          <div 
+            className="section-header"
+            onClick={() => toggleSectionExpansion('comingSoon')}
+          >
+            <div className="section-title">
+              <FaEyeSlash /> Coming Soon Overlay
+            </div>
+            <div className="section-stats">
+              {Object.values(comingSoon).filter(Boolean).length} of {Object.keys(comingSoon).length} enabled
+            </div>
+            {expandedSections.has('comingSoon') ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
+          
+          {expandedSections.has('comingSoon') && (
+            <div className="section-content">
+              <p>Show "Coming Soon" overlay for businesses under development.</p>
+              <div className="business-toggles">
+                {(['bgr8', 'bgr8r'] as const).map((business) => {
+                  const isEnabled = comingSoon[business];
+                  return (
+                    <div key={business} className="business-toggle">
+                      <div className="business-info">
+                        <span className="business-name">{businessNames[business] || business}</span>
+                        <span className={`status-badge ${isEnabled ? 'enabled' : 'disabled'}`}>
+                          {isEnabled ? 'Coming Soon' : 'Live'}
+                        </span>
+                      </div>
+                      <button
+                        className={`toggle-button ${isEnabled ? 'enabled' : 'disabled'} ${saving === 'comingSoon' && savingBusiness === business ? 'saving' : ''}`}
+                        onClick={() => toggleComingSoon(business)}
+                        disabled={saving === 'comingSoon'}
+                      >
+                        {saving === 'comingSoon' && savingBusiness === business ? 'Saving...' : (isEnabled ? 'Make Live' : 'Set Coming Soon')}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Grayed Out Section */}
+        <div className="settings-section">
+          <div 
+            className="section-header"
+            onClick={() => toggleSectionExpansion('grayedOut')}
+          >
+            <div className="section-title">
+              <FaEyeSlash /> Grayed Out Pages
+            </div>
+            <div className="section-stats">
+              {Object.values(grayedOut).filter(Boolean).length} of {Object.keys(grayedOut).length} enabled
+            </div>
+            {expandedSections.has('grayedOut') ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
+          
+          {expandedSections.has('grayedOut') && (
+            <div className="section-content">
+              <p>Gray out pages to indicate they are not fully functional.</p>
+              <div className="business-toggles">
+                {(['bgr8', 'bgr8r'] as const).map((business) => {
+                  const isEnabled = grayedOut[business];
+                  return (
+                    <div key={business} className="business-toggle">
+                      <div className="business-info">
+                        <span className="business-name">{businessNames[business] || business}</span>
+                        <span className={`status-badge ${isEnabled ? 'enabled' : 'disabled'}`}>
+                          {isEnabled ? 'Grayed Out' : 'Normal'}
+                        </span>
+                      </div>
+                      <button
+                        className={`toggle-button ${isEnabled ? 'enabled' : 'disabled'} ${saving === 'grayedOut' && savingBusiness === business ? 'saving' : ''}`}
+                        onClick={() => toggleGrayedOut(business)}
+                        disabled={saving === 'grayedOut'}
+                      >
+                        {saving === 'grayedOut' && savingBusiness === business ? 'Saving...' : (isEnabled ? 'Remove Gray' : 'Gray Out')}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Password Protection Section */}
+        <div className="settings-section">
+          <div 
+            className="section-header"
+            onClick={() => toggleSectionExpansion('passwordProtected')}
+          >
+            <div className="section-title">
+              <FaLock /> Password Protection
+            </div>
+            <div className="section-stats">
+              {Object.values(passwordProtected).filter(Boolean).length} of {Object.keys(passwordProtected).length} protected
+            </div>
+            {expandedSections.has('passwordProtected') ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
+          
+          {expandedSections.has('passwordProtected') && (
+            <div className="section-content">
+              <p>Protect pages with passwords for exclusive access.</p>
+              <div className="business-toggles">
+                {(['bgr8', 'bgr8r'] as const).map((business) => {
+                  const isEnabled = passwordProtected[business];
+                  return (
+                    <div key={business} className="business-toggle">
+                      <div className="business-info">
+                        <span className="business-name">{businessNames[business] || business}</span>
+                        <span className={`status-badge ${isEnabled ? 'enabled' : 'disabled'}`}>
+                          {isEnabled ? 'Protected' : 'Public'}
+                        </span>
+                      </div>
+                      <div className="business-actions">
+                        <button
+                          className={`toggle-button ${isEnabled ? 'enabled' : 'disabled'} ${saving === 'passwordProtected' && savingBusiness === business ? 'saving' : ''}`}
+                          onClick={() => togglePasswordProtection(business)}
+                          disabled={saving === 'passwordProtected'}
+                        >
+                          {saving === 'passwordProtected' && savingBusiness === business ? 'Saving...' : (isEnabled ? 'Remove Protection' : 'Add Protection')}
+                        </button>
+                        
+                        {isEnabled && (
+                          <div className="password-section">
+                            {editingPassword === business ? (
+                              <div className="password-edit">
+                                <input
+                                  type="password"
+                                  value={tempPassword}
+                                  onChange={(e) => setTempPassword(e.target.value)}
+                                  placeholder="Enter new password"
+                                  className="password-input"
+                                />
+                                <button
+                                  onClick={() => saveBusinessPassword(business, tempPassword)}
+                                  disabled={!tempPassword.trim()}
+                                  className="save-password-btn"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingPassword(null);
+                                    setTempPassword('');
+                                  }}
+                                  className="cancel-password-btn"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingPassword(business);
+                                  setTempPassword(businessPasswords[business] || '');
+                                }}
+                                className="edit-password-btn"
+                              >
+                                {businessPasswords[business] ? 'Change Password' : 'Set Password'}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Developer Access Section */}
+        <div className="settings-section">
+          <div 
+            className="section-header"
+            onClick={() => toggleSectionExpansion('developerAccess')}
+          >
+            <div className="section-title">
+              <FaUserCog /> Developer Access
+            </div>
+            <div className="section-stats">
+              {users.filter(user => user.developer).length} developers
+            </div>
+            {expandedSections.has('developerAccess') ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
+          
+          {expandedSections.has('developerAccess') && (
+            <div className="section-content">
+              <p>Grant developer access to users for testing and development purposes.</p>
+              {loadingUsers ? (
+                <div className="loading-users">Loading users...</div>
+              ) : (
+                <div className="users-list">
+                  {users.map(user => (
+                    <div key={user.uid} className="user-item">
+                      <div className="user-info">
+                        <span className="user-name">{user.firstName} {user.lastName}</span>
+                        <span className="user-email">{user.email}</span>
+                        <span className={`user-role ${user.admin ? 'admin' : 'user'}`}>
+                          {user.admin ? 'Admin' : 'User'}
+                        </span>
+                      </div>
+                      <div className="user-actions">
+                        <span className={`developer-badge ${user.developer ? 'developer' : 'user'}`}>
+                          {user.developer ? <FaCheck /> : <FaTimes />}
+                          {user.developer ? 'Developer' : 'User'}
+                        </span>
+                        <button
+                          className={`toggle-developer-btn ${user.developer ? 'remove' : 'add'}`}
+                          onClick={() => toggleUserDeveloper(user.uid, user.developer)}
+                        >
+                          {user.developer ? 'Remove Developer' : 'Make Developer'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 } 

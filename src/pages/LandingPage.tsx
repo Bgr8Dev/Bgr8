@@ -6,14 +6,14 @@ const LandingPage: React.FC = () => {
   return (
     <div className="landing-split-container">
       <Link to="/b8network" className="landing-card">
-        <div className="landing-logo">{/* B8Network Logo Placeholder */}</div>
-        <h2 className="landing-title">B8Network</h2>
-        <p className="landing-description">The B8 Network connects businesses, people, and ideas for a brighter future. Discover our ecosystem.</p>
+        <div className="landing-logo">{/* Bgr8Network Logo Placeholder */}</div>
+        <h2 className="landing-title">Bgr8Network</h2>
+        <p className="landing-description">The Bgr8 Network connects communities and individuals for growth and collaboration. Discover our ecosystem.</p>
       </Link>
-      <Link to="/innov8" className="landing-card">
-        <div className="landing-logo">{/* Innov8 Logo Placeholder */}</div>
-        <h2 className="landing-title">Innov8</h2>
-        <p className="landing-description">Innov8 is your hub for innovation, creativity, and entrepreneurship. Join us to shape tomorrow.</p>
+      <Link to="/bgr8" className="landing-card">
+        <div className="landing-logo">{/* Bgr8 Logo Placeholder */}</div>
+        <h2 className="landing-title">Bgr8</h2>
+        <p className="landing-description">Bgr8 is your hub for community growth, mentorship, and personal development. Join us to shape tomorrow.</p>
       </Link>
     </div>
   );

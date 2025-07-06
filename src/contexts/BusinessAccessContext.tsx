@@ -4,70 +4,32 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 
 interface BusinessAccessibility {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  education: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
   [key: string]: boolean;
 }
 
 interface BusinessComingSoon {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  bgr8r: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
   [key: string]: boolean;
 }
 
 // New interface for grayed out pages
 interface BusinessGrayedOut {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  education: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
   [key: string]: boolean;
 }
 
 // New interface for password protected pages
 interface BusinessPasswordProtected {
-  marketing: boolean;
-  carClub: boolean;
-  clothing: boolean;
-  league: boolean;
-  world: boolean;
-  education: boolean;
-  careers: boolean;
   bgr8: boolean;
-  podcast: boolean;
+  bgr8r: boolean;
   [key: string]: boolean;
 }
 
 // New interface for business passwords
 interface BusinessPasswords {
-  marketing: string;
-  carClub: string;
-  clothing: string;
-  league: string;
-  world: string;
-  education: string;
-  careers: string;
   bgr8: string;
-  podcast: string;
+  bgr8r: string;
   [key: string]: string;
 }
 
@@ -91,66 +53,28 @@ interface BusinessAccessContextType {
 }
 
 const defaultBusinessAccess: BusinessAccessibility = {
-  marketing: true,
-  carClub: true,
-  clothing: true,
-  league: true,
-  world: true,
-  education: true,
-  careers: true,
-  bgr8: true,
-  podcast: true
+  bgr8: true
 };
 
 const defaultComingSoon: BusinessComingSoon = {
-  marketing: false,
-  carClub: true,
-  clothing: true,
-  league: true,
-  world: true,
-  bgr8r: true,
-  careers: true,
-  bgr8: true,
-  podcast: true
+  bgr8: true
 };
 
 // Default values for grayed out setting
 const defaultGrayedOut: BusinessGrayedOut = {
-  marketing: false,
-  carClub: false,
-  clothing: false,
-  league: false,
-  world: false,
-  education: false,
-  careers: false,
-  bgr8: false,
-  podcast: false
+  bgr8: false
 };
 
 // Default values for password protection
 const defaultPasswordProtected: BusinessPasswordProtected = {
-  marketing: false,
-  carClub: false,
-  clothing: false,
-  league: false,
-  world: false,
-  education: false,
-  careers: false,
   bgr8: false,
-  podcast: false
+  bgr8r: false
 };
 
 // Default values for business passwords
 const defaultBusinessPasswords: BusinessPasswords = {
-  marketing: '',
-  carClub: '',
-  clothing: '',
-  league: '',
-  world: '',
-  education: '',
-  careers: '',
   bgr8: '',
-  podcast: ''
+  bgr8r: ''
 };
 
 const BusinessAccessContext = createContext<BusinessAccessContextType | undefined>(undefined);
@@ -201,7 +125,7 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
         setComingSoon(comingSoonDoc.data() as BusinessComingSoon);
       }
     } catch (error) {
-      console.error('Error fetching coming soon settings:', error);
+      console.error('Error fetching coming soon status:', error);
     }
   };
 
@@ -214,7 +138,7 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
         setGrayedOut(grayedOutDoc.data() as BusinessGrayedOut);
       }
     } catch (error) {
-      console.error('Error fetching grayed out settings:', error);
+      console.error('Error fetching grayed out status:', error);
     }
   };
 
@@ -224,23 +148,19 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
       const passwordProtectedDoc = await getDoc(passwordProtectedRef);
       
       if (passwordProtectedDoc.exists()) {
-        const data = passwordProtectedDoc.data();
-        setPasswordProtected(data.passwordProtected || defaultPasswordProtected);
-        setBusinessPasswords(data.businessPasswords || defaultBusinessPasswords);
+        setPasswordProtected(passwordProtectedDoc.data() as BusinessPasswordProtected);
+      }
+      
+      const passwordsRef = doc(db, 'settings', 'businessPasswords');
+      const passwordsDoc = await getDoc(passwordsRef);
+      
+      if (passwordsDoc.exists()) {
+        setBusinessPasswords(passwordsDoc.data() as BusinessPasswords);
       }
     } catch (error) {
-      console.error('Error fetching password protection settings:', error);
+      console.error('Error fetching password protection status:', error);
     }
   };
-
-  useEffect(() => {
-    Promise.all([
-      fetchBusinessAccess(), 
-      fetchComingSoonStatus(), 
-      fetchGrayedOutStatus(),
-      fetchPasswordProtectionStatus()
-    ]);
-  }, []);
 
   const refreshBusinessAccess = async () => {
     await fetchBusinessAccess();
@@ -259,42 +179,41 @@ export function BusinessAccessProvider({ children }: BusinessAccessProviderProps
   };
 
   const isBusinessAccessible = (businessId: string): boolean => {
-    if (userProfile?.admin) {
-      return true;
+    if (!userProfile?.admin && businessAccess[businessId] === false) {
+      return false;
     }
-    
-    if (userProfile && 'developer' in userProfile && (userProfile as Record<string, unknown>).developer) {
-      return true;
-    }
-    
-    return businessAccess[businessId] ?? true;
+    return true;
   };
 
   const isBusinessComingSoon = (businessId: string): boolean => {
-    return comingSoon[businessId] ?? false;
+    return comingSoon[businessId] || false;
   };
 
   const isBusinessGrayedOut = (businessId: string): boolean => {
-    return grayedOut[businessId] ?? false;
+    return grayedOut[businessId] || false;
   };
 
   const isBusinessPasswordProtected = (businessId: string): boolean => {
-    return passwordProtected[businessId] ?? false;
+    return passwordProtected[businessId] || false;
   };
 
   const getBusinessPassword = (businessId: string): string => {
-    return businessPasswords[businessId] ?? '';
+    return businessPasswords[businessId] || '';
   };
 
   const validateBusinessPassword = (businessId: string, password: string): boolean => {
-    if (!isBusinessPasswordProtected(businessId)) {
-      return true;
-    }
-    
-    return password === getBusinessPassword(businessId);
+    const correctPassword = getBusinessPassword(businessId);
+    return password === correctPassword;
   };
 
-  const value = {
+  useEffect(() => {
+    fetchBusinessAccess();
+    fetchComingSoonStatus();
+    fetchGrayedOutStatus();
+    fetchPasswordProtectionStatus();
+  }, []);
+
+  const value: BusinessAccessContextType = {
     businessAccess,
     comingSoon,
     grayedOut,

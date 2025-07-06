@@ -1,143 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FaCheckCircle } from 'react-icons/fa';
-import '../styles/payment/Success.css';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
-import { doc, getDoc, updateDoc, setDoc, arrayUnion, Timestamp } from 'firebase/firestore';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import '../styles/payment/Success.css';
 
 export default function Success() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [processed, setProcessed] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const updateDonationStatus = async () => {
+    const sessionId = searchParams.get('session_id');
+    
+    if (!sessionId) {
+      setStatus('error');
+      setMessage('No session ID found');
+      return;
+    }
+
+    const processPayment = async () => {
       try {
-        // Get session ID from URL
-        const params = new URLSearchParams(location.search);
-        const sessionId = params.get('session_id');
-
-        if (!sessionId) {
-          setError('No session ID found');
-          return;
-        }
-
-        // Get the invoice document
-        const invoiceRef = doc(db, "B8World", "Donations", "Invoices", sessionId);
-        const invoiceDoc = await getDoc(invoiceRef);
-
-        if (!invoiceDoc.exists()) {
-          setError('Invoice not found');
-          return;
-        }
-
-        // Check if this donation has already been processed
-        if (invoiceDoc.data().status === 'completed') {
-          setIsProcessing(false);
-          setProcessed(true);
-          return;
-        }
-
-        // Update invoice status
+        // Update the invoice status
+        const invoiceRef = doc(db, "Bgr8Donations", "Invoices", sessionId);
         await updateDoc(invoiceRef, {
           status: 'completed',
-          completedAt: Timestamp.now()
+          completedAt: new Date()
         });
 
-        // Get or create Fundraised document
-        const fundraisedRef = doc(db, "B8World", "Fundraised");
+        // Update the total fundraised amount
+        const fundraisedRef = doc(db, "Bgr8Donations", "Fundraised");
         const fundraisedDoc = await getDoc(fundraisedRef);
-
-        const amount = invoiceDoc.data().amount;
-        const currentTotal = fundraisedDoc.exists() ? (fundraisedDoc.data().totalRaised || 0) : 0;
-        const newTotal = currentTotal + amount;
-
-        // Update or create Fundraised document
+        
         if (fundraisedDoc.exists()) {
           await updateDoc(fundraisedRef, {
-            totalRaised: newTotal,
-            log: arrayUnion({
-              amount,
-              timestamp: Timestamp.now(),
-              donorName: invoiceDoc.data().donorName || 'Anonymous',
-              previousTotal: currentTotal,
-              newTotal,
-              sessionId
-            })
+            total: increment(parseFloat(searchParams.get('amount') || '0'))
           });
         } else {
-          await setDoc(fundraisedRef, {
-            totalRaised: amount,
-            log: [{
-              amount,
-              timestamp: Timestamp.now(),
-              donorName: invoiceDoc.data().donorName || 'Anonymous',
-              previousTotal: 0,
-              newTotal: amount,
-              sessionId
-            }]
+          // Create the fundraised document if it doesn't exist
+          await updateDoc(fundraisedRef, {
+            total: parseFloat(searchParams.get('amount') || '0')
           });
         }
 
-        setProcessed(true);
-        setIsProcessing(false);
+        setStatus('success');
+        setMessage('Payment processed successfully! Thank you for your donation.');
       } catch (error) {
-        console.error('Error updating donation status:', error);
-        setError('Failed to process donation. Please contact support.');
+        console.error('Error processing payment:', error);
+        setStatus('error');
+        setMessage('There was an error processing your payment. Please contact support.');
       }
     };
 
-    // Only process if we haven't already processed this donation
-    if (!processed && isProcessing) {
-      updateDonationStatus();
-    }
-  }, [location, processed, isProcessing]);
-
-  if (error) {
-    return (
-      <div className="success-container">
-        <div className="success-content error">
-          <FaCheckCircle className="success-icon error" />
-          <h1>Oops! Something went wrong</h1>
-          <p>{error}</p>
-          <button 
-            className="continue-shopping-btn"
-            onClick={() => navigate('/')}
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isProcessing) {
-    return (
-      <div className="success-container">
-        <div className="success-content">
-          <div className="loading-spinner"></div>
-          <h1>Processing your donation...</h1>
-          <p>Please wait while we confirm your payment.</p>
-        </div>
-      </div>
-    );
-  }
+    processPayment();
+  }, [searchParams]);
 
   return (
-    <div className="success-container">
-      <div className="success-content">
-        <FaCheckCircle className="success-icon" />
-        <h1>Thank You for Your Donation!</h1>
-        <p>Your generous contribution has been received and will help make a difference.</p>
-        <p>You will receive an email confirmation shortly.</p>
-        <button 
-          className="continue-shopping-btn"
-          onClick={() => navigate('/')}
-        >
-          Return Home
-        </button>
+    <div className="success-page">
+      <div className="success-container">
+        {status === 'loading' && (
+          <div className="loading-state">
+            <div className="spinner"></div>
+            <h2>Processing your payment...</h2>
+            <p>Please wait while we confirm your transaction.</p>
+          </div>
+        )}
+
+        {status === 'success' && (
+          <div className="success-state">
+            <FaCheckCircle className="success-icon" />
+            <h2>Payment Successful!</h2>
+            <p>{message}</p>
+            <div className="success-details">
+              <p><strong>Session ID:</strong> {searchParams.get('session_id')}</p>
+              <p><strong>Amount:</strong> £{searchParams.get('amount')}</p>
+            </div>
+            <a href="/" className="back-home-btn">Return to Home</a>
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="error-state">
+            <FaTimesCircle className="error-icon" />
+            <h2>Payment Error</h2>
+            <p>{message}</p>
+            <a href="/" className="back-home-btn">Return to Home</a>
+          </div>
+        )}
       </div>
     </div>
   );

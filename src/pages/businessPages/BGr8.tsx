@@ -3,7 +3,6 @@ import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
-import BGr8Medical from './BGr8Medical';
 import ContactForm from '../../components/ui/ContactForm';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
@@ -13,7 +12,6 @@ import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgra
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showMedical, setShowMedical] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -80,20 +78,6 @@ export default function BGr8() {
               Book Now via Calendly
             </a>
           </section>
-
-          {/* Medical Section */}
-          <section className="bgr8-medical-section">
-            <h3>BGr8 Medical</h3>
-            <p>Join our medical community and make a difference in healthcare</p>
-            <button 
-              className="bgr8-medical-button"
-              onClick={() => setShowMedical(true)}
-            >
-              Join BGr8 Medical
-            </button>
-          </section>
-
-          {showMedical && <BGr8Medical onClose={() => setShowMedical(false)} />}
 
           {/* Existing Contact Section */}
           <section className="bgr8-contact-section">

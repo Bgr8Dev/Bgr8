@@ -14,7 +14,13 @@
   gap: 1rem;
 }
 
-.sidebar-button {
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-nav-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -25,13 +31,16 @@
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.3s ease;
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
 }
 
-.sidebar-button:hover {
+.admin-nav-item:hover {
   background-color: #333;
 }
 
-.sidebar-button.active {
+.admin-nav-item.active {
   background-color: #444;
 }
 
@@ -65,21 +74,50 @@
 }
 
 .stat-card {
-  background-color: #222;
+  background: linear-gradient(135deg, #222 60%, #4c94fc22 100%);
+  box-shadow: 0 2px 12px 0 rgba(76,148,252,0.08);
   padding: 1.5rem;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
+  transition: box-shadow 0.3s;
+  border: 1.5px solid #333;
+}
+
+.stat-card:nth-child(1) {
+  background: linear-gradient(135deg, #222 60%, #ffd70022 100%);
+  border-color: #ffd70055;
+}
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #222 60%, #4c94fc22 100%);
+  border-color: #4c94fc55;
+}
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #222 60%, #ff572222 100%);
+  border-color: #ff572255;
 }
 
 .stat-card h3 {
   margin-bottom: 0.5rem;
-  color: #666;
+  color: #ffd700;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.stat-card:nth-child(2) h3 {
+  color: #4c94fc;
+}
+.stat-card:nth-child(3) h3 {
+  color: #ff5722;
 }
 
 .stat-card p {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.3rem;
+  font-weight: 700;
   color: #fff;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  letter-spacing: 1px;
 }
 
 .users-table {
@@ -100,8 +138,13 @@ th, td {
 }
 
 th {
-  background-color: #333;
-  font-weight: 500;
+  background: linear-gradient(90deg, #333 80%, #4c94fc22 100%);
+  font-size: 1.08rem;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-weight: 700;
+  color: #ffd700;
+  border-bottom: 2.5px solid #4c94fc;
+  letter-spacing: 0.5px;
 }
 
 .action-button {
@@ -490,4 +533,118 @@ th {
 .admin-button:disabled {
   background-color: #666;
   cursor: not-allowed;
+}
+
+/* Table row hover */
+.users-table tbody tr:hover {
+  background: linear-gradient(90deg, #232323 80%, #4c94fc11 100%);
+  box-shadow: 0 2px 8px 0 rgba(76,148,252,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+/* Role badges */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 1rem;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.35em 1em 0.35em 0.8em;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+}
+.admin-badge.admin {
+  background: linear-gradient(90deg, #4c94fc 60%, #ffd700 100%);
+  color: #fff;
+  border: 1.5px solid #ffd700;
+}
+.admin-badge.user {
+  background: #444;
+  color: #ffd700;
+  border: 1.5px solid #4c94fc;
+}
+
+/* Action buttons */
+.toggle-admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1.2em;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+}
+.toggle-admin-btn.add {
+  background: linear-gradient(90deg, #4caf50 60%, #4c94fc 100%);
+  color: #fff;
+}
+.toggle-admin-btn.remove {
+  background: linear-gradient(90deg, #ff5722 60%, #ffd700 100%);
+  color: #fff;
+}
+.toggle-admin-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* User name/email font tweaks */
+.users-table td {
+  font-size: 1.05rem;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #f5f5f5;
+  font-weight: 500;
+}
+
+.users-table td:first-child {
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+/* Search bar tweaks */
+.search-bar input[type="text"] {
+  background: #181818;
+  border: 1.5px solid #4c94fc;
+  color: #ffd700;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  padding: 0.7em 1.2em;
+  margin-bottom: 1.2em;
+  outline: none;
+  transition: border 0.2s;
+}
+.search-bar input[type="text"]:focus {
+  border: 2px solid #ffd700;
+}
+
+/* Heading tweaks */
+.admin-section h2 {
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 8px #000a;
+}
+
+/* Responsive badge and button tweaks */
+@media (max-width: 600px) {
+  .admin-badge {
+    font-size: 0.95rem;
+    padding: 0.25em 0.7em 0.25em 0.6em;
+  }
+  .toggle-admin-btn {
+    font-size: 0.95rem;
+    padding: 0.4em 0.7em;
+  }
 } 

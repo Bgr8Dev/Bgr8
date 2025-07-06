@@ -4,13 +4,10 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/ui/Navbar';
 import HamburgerMenu from '../components/ui/HamburgerMenu';
 import Footer from '../components/ui/Footer';
-import { FaLinkedin, FaInstagram, FaYoutube, FaWhatsapp, FaMedal } from 'react-icons/fa';
-import { FaBullhorn, FaCar, FaTshirt, FaGraduationCap, FaUsers, FaHeart, FaBriefcase, FaChartBar } from 'react-icons/fa';
-import '../styles/HomePage.css';
+import { FaLinkedin, FaInstagram, FaYoutube, FaWhatsapp } from 'react-icons/fa';
+import { FaUsers, FaGraduationCap } from 'react-icons/fa';
 import ContactForm from '../components/ui/ContactForm';
-import UserDemographics from '../components/maps/UserDemographics';
 import { useBusinessAccess } from '../contexts/BusinessAccessContext';
-// import Globe3D from '../components/maps/Globe3D';
 import { Helmet } from 'react-helmet';
 
 export default function HomePage() {
@@ -18,14 +15,8 @@ export default function HomePage() {
   const { isBusinessComingSoon } = useBusinessAccess();
   
   const services = [
-    { id: 'marketing', icon: <FaBullhorn size={40} />, title: 'B8 Marketing', description: 'Innovative digital marketing strategies for business growth and brand awareness.', link: '/b8-marketing', color: '#FFF', hoverColor: 'rgba(255, 255, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'bgr8', icon: <FaUsers size={40} />, title: 'Bgr8', description: 'Community-focused programs designed to foster growth and collaboration.', link: '/bgr8', color: '#FFF', hoverColor: 'rgba(255, 215, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'carClub', icon: <FaCar size={40} />, title: 'B8 Car Club', description: 'Exclusive automotive events and community for car enthusiasts.', link: '/b8-car-club', color: '#FFF', hoverColor: 'rgba(255, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'clothing', icon: <FaTshirt size={40} />, title: 'B8 Clothing', description: 'Modern, stylish apparel designed for comfort and self-expression.', link: '/b8-clothing', color: '#FFF', hoverColor: 'rgba(139, 69, 19, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'league', icon: <FaMedal size={40} />, title: 'B8 League', description: 'Sports tournaments and leagues bringing together competitors and fans.', link: '/b8-league', color: '#FFF', hoverColor: 'rgba(128, 0, 128, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'world', icon: <FaHeart size={40} />, title: 'B8 World', description: 'Making the world a B8er place through community initiatives and global outreach.', link: '/b8-world', color: '#FFF', hoverColor: 'rgba(0, 0, 255, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
     { id: 'bgr8r', icon: <FaGraduationCap size={40} />, title: 'Bgr8r', description: 'Educational programs empowering future generations with knowledge and skills.', link: '/bgr8r', color: '#FFF', hoverColor: 'rgba(0, 128, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#000' },
-    { id: 'podcast', icon: <FaBriefcase size={40} />, title: 'B8 Podcast', description: 'Insightful discussions with industry leaders on business, sports, and personal growth.', link: '/b8-podcast', color: '#FFF', hoverColor: 'rgba(0, 0, 0, 0.5)', iconColor: '#FFF', iconHoverColor: '#FFF' },
   ];
 
   useEffect(() => {
@@ -37,9 +28,9 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title>B8 Network | Integrated Business Solutions & Sports League</title>
-        <meta name="description" content="B8 Network connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors. Discover our integrated platform for professional growth and opportunities." />
-        <link rel="canonical" href="https://b8network.co.uk/" />
+        <title>Bgr8 Network | Community Growth & Education</title>
+        <meta name="description" content="Bgr8 Network connects communities and individuals through innovative programs, education, and mentorship. Discover our platform for personal and professional growth." />
+        <link rel="canonical" href="https://bgr8network.co.uk/" />
       </Helmet>
 
       <div className="homepage">
@@ -53,17 +44,17 @@ export default function HomePage() {
         </section>
 
       <section className="homepage-hero">
-        <h2>Empowering Your Business</h2>
+        <h2>Empowering Communities</h2>
         <p>
-          We provide cutting-edge marketing strategies and innovative software development solutions tailored to your business needs.
+          We provide innovative community programs and educational solutions designed to foster growth, collaboration, and personal development.
         </p>
         <button>
-          <Link to="/b8-marketing" className="homepage-cta-link">Explore B8 Marketing</Link>
+          <Link to="/bgr8" className="homepage-cta-link">Explore Bgr8</Link>
         </button>
       </section>
 
       <section className="homepage-services">
-        <h3>Explore B8</h3>
+        <h3>Explore Bgr8</h3>
         <div className="homepage-service-list">
           {services.map((service, index) => (
             <Link 
@@ -85,32 +76,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Demographics Section */}
-      <section className="homepage-demographics-section">
-        <h3>
-          <FaChartBar /> Our Community Demographics
-        </h3>
-        {/* <div className="homepage-globe-container">
-          <Globe3D width={600} height={600} />
-        </div> */}
-        <p>
-          Explore the diverse makeup of our B8 community. Understanding our user base helps us tailor our services to better meet your needs.
-        </p>
-        <div className="homepage-demographics-container">
-          <UserDemographics />
-        </div>
-      </section>
-
       <section className="homepage-contact-section">
         <ContactForm source="home" />
         <div className="homepage-social-media">
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
             <FaLinkedin />
           </a>
-          <a href="https://www.instagram.com/b8carclub/" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.instagram.com/bgr8network/" target="_blank" rel="noopener noreferrer">
             <FaInstagram />
           </a>
-          <a href="https://www.youtube.com/@B8Cars" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.youtube.com/@Bgr8Network" target="_blank" rel="noopener noreferrer">
             <FaYoutube />
           </a>
           <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">

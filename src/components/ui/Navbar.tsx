@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../contexts/AuthContext';
-import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
+// import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/Navbar.css';
 import logo from '../../assets/B8-logo-transparent.png';
 
 export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { currentUser, userProfile } = useAuth();
-  const { isBusinessAccessible } = useBusinessAccess();
+  // const { isBusinessAccessible } = useBusinessAccess();
 
   const handleSignOut = async () => {
     try {
@@ -29,17 +29,9 @@ export default function Navbar() {
         </Link>
       </h1>
 
-      <nav className="nav">
-        <Link to="/">Home</Link>
-        {/* {isBusinessAccessible('marketing') && <Link to="/b8-marketing">Innov8</Link>} */}
+      {/* <nav className="nav">
         {isBusinessAccessible('bgr8') && <Link to="/bgr8">Bgr8</Link>}
-        {isBusinessAccessible('carClub') && <Link to="/b8-car-club">B8 Car Club</Link>}
-        {isBusinessAccessible('clothing') && <Link to="/b8-clothing" className="glitch-link">??????????</Link>}
-        {isBusinessAccessible('league') && <Link to="/b8-league">B8 League</Link>}
-        {isBusinessAccessible('world') && <Link to="/b8-world">B8 World</Link>}
-        {isBusinessAccessible('bgr8r') && <Link to="/bgr8r">Bgr8r</Link>}
-        {isBusinessAccessible('podcast') && <Link to="/b8-podcast">B8 Podcast</Link>}
-      </nav>
+      </nav> */}
 
       <div className="auth-section">
         {currentUser ? (
