@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaUserPlus, FaEnvelope, FaChalkboardTeacher } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
-import { AdminPortalBgr8r } from './adminPages/AdminPortalBgr8r';
-import { AdminPortalBgr8 } from './adminPages/AdminPortalBgr8';
 import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
@@ -25,13 +23,6 @@ interface UserData {
   [key: string]: unknown; // For other potential properties
 }
 
-interface BusinessStats {
-  totalMembers: number;
-  activeMembers: number;
-  revenue: number;
-  engagement: number;
-}
-
 export default function AdminPortal() {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
@@ -44,15 +35,6 @@ export default function AdminPortal() {
     admins: 0,
     newThisMonth: 0
   });
-  const [businessStats, setBusinessStats] = useState<Record<string, BusinessStats>>({
-    bgr8r: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 },
-    bgr8: { totalMembers: 0, activeMembers: 0, revenue: 0, engagement: 0 }
-  });
-
-  const businessSections = [
-    { id: 'bgr8r', name: 'Bgr8r', icon: FaChalkboardTeacher },
-    { id: 'bgr8', name: 'BGr8', icon: FaUserPlus }
-  ];
 
   useEffect(() => {
     if (!userProfile?.admin) {
@@ -61,7 +43,6 @@ export default function AdminPortal() {
     }
 
     fetchUsers();
-    fetchBusinessStats();
   }, [userProfile, navigate]);
 
   const fetchUsers = async () => {
@@ -97,33 +78,6 @@ export default function AdminPortal() {
     }
   };
 
-  const fetchBusinessStats = async () => {
-    try {
-      const usersRef = collection(db, 'users');
-      const usersSnapshot = await getDocs(usersRef);
-      
-      const stats = { ...businessStats };
-      
-      usersSnapshot.forEach((doc) => {
-        const userData = doc.data();
-        const memberships = userData.b8Memberships || {};
-        
-        Object.keys(memberships).forEach((business) => {
-          if (memberships[business]) {
-            stats[business].totalMembers++;
-            if (userData.lastLogin?.toDate() > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
-              stats[business].activeMembers++;
-            }
-          }
-        });
-      });
-      
-      setBusinessStats(stats);
-    } catch (error) {
-      console.error('Error fetching business stats:', error);
-    }
-  };
-
   const toggleUserAdmin = async (uid: string, currentAdminStatus: boolean) => {
     try {
       const userRef = doc(db, 'users', uid);
@@ -141,17 +95,6 @@ export default function AdminPortal() {
     user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const renderBusinessComponent = (section: { id: string; name: string }) => {
-    switch (section.id) {
-      case 'bgr8r':
-        return <AdminPortalBgr8r stats={businessStats.bgr8r} />;
-      case 'bgr8':
-        return <AdminPortalBgr8 stats={businessStats.bgr8} />;
-      default:
-        return null;
-    }
-  };
 
   if (!userProfile?.admin) {
     return null;
@@ -195,16 +138,6 @@ export default function AdminPortal() {
           >
             <FaChalkboardTeacher /> Mentors
           </button>
-
-          {businessSections.map((section) => (
-            <button
-              key={section.id}
-              className={`admin-nav-item ${activeSection === section.id ? 'active' : ''}`}
-              onClick={() => setActiveSection(section.id)}
-            >
-              <section.icon /> {section.name}
-            </button>
-          ))}
           
           <button 
             className={`admin-nav-item ${activeSection === 'settings' ? 'active' : ''}`}
@@ -287,14 +220,6 @@ export default function AdminPortal() {
         {activeSection === 'enquiries' && <AdminEnquiries />}
         {activeSection === 'mentors' && <MentorManagement />}
         {activeSection === 'settings' && <AdminSettings />}
-        
-        {businessSections.map((section) => (
-          activeSection === section.id && (
-            <div key={section.id}>
-              {renderBusinessComponent(section)}
-            </div>
-          )
-        ))}
       </div>
     </div>
   );
