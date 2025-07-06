@@ -1,4 +1,4 @@
-# B8 Network Platform <img src="public/logo.svg" align="right" width="100" height="100">
+# B8 Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
@@ -8,7 +8,7 @@
 [![Stripe](https://img.shields.io/badge/Stripe-Latest-blue.svg)](https://stripe.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-> 🌟 **B8 Network** is an integrated business solutions and sports league platform that connects businesses and individuals across marketing, sports leagues, fashion, automotive, and entertainment sectors.
+> **B8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
 
 <details>
 <summary>📖 Table of Contents</summary>
@@ -31,15 +31,11 @@
 
 ## 🎯 Overview
 
-B8 Network is revolutionizing the way businesses and individuals connect across multiple sectors. Our platform integrates:
+B8 Platform is dedicated to empowering individuals through the BGr8 community and a robust mentoring program. The platform now focuses exclusively on:
 
-| Business Unit | Description | Status |
-|--------------|-------------|---------|
-| 🏆 B8 League | Professional sports management | Live |
-| 📈 Innov8 | Digital marketing solutions | Live |
-| 🚗 B8 Car Club | Automotive community | Beta |
-| 👕 B8 Clothing | Fashion & merchandise | Coming Soon |
-| 🎭 BGr8 | Entertainment & events | Live |
+| Unit | Description | Status |
+|------|-------------|--------|
+| 🌟 BGr8 | Community, events, and mentoring | Live |
 
 ## 🚀 Features
 
@@ -47,21 +43,20 @@ B8 Network is revolutionizing the way businesses and individuals connect across 
 <summary>Click to expand feature list</summary>
 
 ### Core Features
-- ✨ Professional networking and business solutions
-- 🏆 Sports league management
-- 📊 Marketing services (Innov8)
-- 🚗 Automotive community (B8 Car Club)
-- 👕 Fashion and merchandise (B8 Clothing)
-- 🎉 Entertainment and events (BGr8)
+- 🌟 BGr8 community hub
+- 🤝 Mentor matching and management (MentorAlgorithm)
+- 🔒 Secure authentication
+- 💳 Secure payment processing with Stripe
+- 📱 Responsive design
+- 📊 Analytics integration
+- 💬 Enquiries and admin management
 
 ### Technical Features
-- 🔐 Secure authentication
-- 💳 Secure payment processing with Stripe
-- 📱 PWA support
-- 🎨 Responsive design
-- 📊 Analytics integration
-- 🔄 Real-time updates
-- 💰 Donation system with Stripe Checkout
+- 🔑 Firebase authentication
+- 🔥 Firestore database
+- 💸 Stripe payments
+- ⚡ Real-time updates
+- 🧑‍💻 Modern React + TypeScript stack
 </details>
 
 ## 🛠️ Tech Stack
@@ -92,7 +87,7 @@ Before you begin, ensure you have:
 - [ ] Stripe account with API keys
 - [ ] Stripe CLI (for webhook testing)
 
-## 🔧 Installation
+## 🛠️ Installation
 
 <details>
 <summary>Step-by-step installation guide</summary>
@@ -113,8 +108,7 @@ Before you begin, ensure you have:
    Get the correct `.env` file from Hum2a to place in the root directory.
 
 4. **Set up Stripe server environment:**
-   Typically you will just place the stripe `.env` file provided by Hum2a into the stripe directory.
-   If that's too easy for you, create a `.env` file in the stripe directory:
+   Place the stripe `.env` file provided by Hum2a into the stripe directory, or create it as follows:
    ```env
    STRIPE_SECRET_KEY=your_stripe_secret_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
@@ -189,75 +183,38 @@ npm run test:ci
 <summary>View project structure</summary>
 
 ```
-b8-network/
-├── 📁 src/                    # Source files
-│   ├── 📱 components/        # React components
-│   ├── 📄 pages/            # Page components
-│   ├── 🎣 hooks/            # Custom React hooks
-│   ├── 🌍 context/          # React context providers
-│   ├── 🔌 services/         # API and service integrations
-│   ├── 🛠️ utils/            # Utility functions
-│   ├── 📝 types/            # TypeScript type definitions
-│   └── 🎨 assets/           # Static assets
-├── 📂 public/               # Public static files
-├── 🧪 tests/                # Test files
-├── 📚 docs/                 # Documentation
-└── 💳 stripe/               # Stripe server implementation
-    ├── server.js           # Express server setup
-    ├── stripe.js           # Stripe integration logic
-    └── config.js           # Server configuration
+B8/
+├── src/
+│   ├── components/         # React components
+│   ├── pages/              # Page components
+│   ├── hooks/              # Custom React hooks
+│   ├── contexts/           # React context providers
+│   ├── services/           # API and service integrations
+│   ├── utils/              # Utility functions
+│   ├── types/              # TypeScript type definitions
+│   └── MentorAlgorithm/    # Mentor matching logic
+├── stripe/                 # Stripe server
+├── public/                 # Static assets
+├── ...
 ```
 </details>
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-<details>
-<summary>Quick contribution steps</summary>
+## 📝 License
 
-1. Fork the Project
-2. Create your Feature Branch (\`git checkout -b feature/AmazingFeature\`)
-3. Commit your Changes (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push to the Branch (\`git push origin feature/AmazingFeature\`)
-5. Open a Pull Request
-</details>
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).
 
 ## 🔒 Security
 
-For security concerns, please email [security@b8network.co.uk](mailto:security@b8network.co.uk)
+See [SECURITY.md](SECURITY.md) for security policy and reporting.
 
-## 📧 Contact
+## 📬 Contact
 
-<details>
-<summary>Ways to reach us</summary>
-
-- 🌐 Website: [b8network.co.uk](https://b8network.co.uk)
-- 📧 Email: [contact@b8network.co.uk](mailto:contact@b8network.co.uk)
-- 🐦 Twitter: [@B8Network](https://twitter.com/B8Network)
-- 💼 LinkedIn: [B8 Network](https://www.linkedin.com/company/b8network)
-</details>
+For questions, contact Humza (Hum2a) or open an issue.
 
 ## 🙏 Acknowledgments
 
-<details>
-<summary>Special thanks to</summary>
-
-- 👥 All our contributors and community members
-- 🌟 Open source projects we depend on
-- 🧪 Our beta testers and early adopters
-</details>
-
----
-
-<div align="center">
-
-**Made with ❤️ by the B8 Network Team**
-
-[Report Bug](https://github.com/yourusername/b8-network/issues) · [Request Feature](https://github.com/yourusername/b8-network/issues)
-
-</div>
+Thanks to all contributors and the BGr8 community!

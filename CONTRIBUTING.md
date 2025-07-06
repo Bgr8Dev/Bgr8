@@ -1,11 +1,8 @@
-# 🤝 Contributing to B8 Network
+# �� Contributing to B8 Platform
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Contributors](https://img.shields.io/github/contributors/yourusername/b8-network.svg)](https://github.com/yourusername/b8-network/graphs/contributors)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/b8-network.svg)](https://github.com/yourusername/b8-network/issues)
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/b8-network.svg)](https://github.com/yourusername/b8-network/stargazers)
 
-> 💡 We love your input! We want to make contributing to B8 Network as easy and transparent as possible.
+> 💡 We love your input! We want to make contributing to B8 Platform as easy and transparent as possible.
 
 <details>
 <summary>📖 Table of Contents</summary>
@@ -22,7 +19,7 @@
 
 | Type | Description |
 |------|-------------|
-| 🐛 [Report Bugs](#bug-reports) | Help us identify issues |
+| 🐞 [Report Bugs](#bug-reports) | Help us identify issues |
 | 💬 [Discuss Code](#development-process) | Share your insights |
 | 🔧 [Submit Fixes](#development-process) | Help resolve issues |
 | ✨ [Propose Features](#development-process) | Suggest improvements |
@@ -63,9 +60,9 @@ graph LR
    ```
 </details>
 
-## 🐛 Bug Reports
+## 🐞 Bug Reports
 
-> **Note:** Please use our [issue template](https://github.com/yourusername/b8-network/issues/new?template=bug_report.md) when reporting bugs.
+> **Note:** Please use our [issue template](https://github.com/Hum2a/B8/issues/new?template=bug_report.md) when reporting bugs.
 
 A great bug report should include:
 
@@ -99,7 +96,7 @@ What should happen
 What actually happens
 ```
 
-## 💅 Coding Style
+## ✍️ Coding Style
 
 We follow strict coding standards to maintain consistency:
 
@@ -158,8 +155,6 @@ By contributing, you agree that your contributions will be licensed under the [M
 
 <div align="center">
 
-**Thank you for contributing to B8 Network! 🎉**
-
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+**Thank you for contributing to B8 Platform! 🎉**
 
 </div> 
