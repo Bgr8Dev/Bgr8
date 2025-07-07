@@ -39,7 +39,7 @@ export default function HomePage() {
         {/* Intro Video Section */}
         <section className="homepage-intro-video" aria-label="Introduction Video">
           <div className="homepage-video-placeholder">
-            <p>HURRY THE FUCK UP BAQUEER</p>
+            <p>Intro Video Placeholder</p>
           </div>
         </section>
 
