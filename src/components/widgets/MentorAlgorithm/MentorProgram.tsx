@@ -13,7 +13,6 @@ import ukCounties from '../../../constants/ukCounties';
 import {ethnicityOptions, DEFAULT_ETHNICITY} from '../../../constants/ethnicityOptions';
 import {religionOptions, DEFAULT_RELIGION} from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
-import subjects from '../../../constants/subjects';
 import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 
 type UserType = 'mentor' | 'mentee';
@@ -34,7 +33,7 @@ export default function MentorProgram() {
     educationLevel: '',
     subjects: [] as string[],
     county: '',
-    currentProfession: '',
+    profession: '',
     pastProfessions: [''],
     linkedin: '',
     hobbies: [] as string[],
@@ -205,7 +204,7 @@ export default function MentorProgram() {
       educationLevel: form.educationLevel,
       subjects: form.subjects,
       county: form.county,
-      currentProfession: form.currentProfession,
+      profession: form.profession,
       pastProfessions: form.pastProfessions.filter(p => p.trim() !== ''),
       linkedin: form.linkedin,
       hobbies: form.hobbies.filter(h => h.trim() !== ''),
@@ -234,7 +233,7 @@ export default function MentorProgram() {
       }
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
-        currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+        profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], industries: [], type: '', subjects: []
       });
       setTimeout(matchMentees, 0); // Update matches after state change
@@ -254,7 +253,7 @@ export default function MentorProgram() {
       setSwipeDirection(null);
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
-        currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+        profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], industries: [], type: role, subjects: []
       });
       setError(null);
@@ -267,7 +266,7 @@ export default function MentorProgram() {
     setShowForm(false);
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
-      currentProfession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+      profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
       skills: [], lookingFor: [], industries: [], type: '', subjects: []
     });
     setError(null);
@@ -291,8 +290,8 @@ export default function MentorProgram() {
       if (!currentUserProfile) return 'Professional history matched.';
       const userPast = currentUserProfile.pastProfessions || [];
       const candidatePast = user.pastProfessions || [];
-      const userCurrent = currentUserProfile.currentProfession || '';
-      const candidateCurrent = user.currentProfession || '';
+      const userCurrent = currentUserProfile.profession || '';
+      const candidateCurrent = user.profession || '';
       const overlaps = [];
       if (userPast.includes(candidateCurrent)) overlaps.push(`Their current: ${candidateCurrent}`);
       if (candidatePast.includes(userCurrent)) overlaps.push(`Your current: ${userCurrent}`);
@@ -313,7 +312,10 @@ export default function MentorProgram() {
     }
     // Education
     if (reason === 'Higher mentor education level') {
-      return `${user.name} has a higher education level: ${user.educationLevel}.`;
+      if (currentUserProfile?.type == MENTOR)
+        return `You have a higher education level: ${currentUserProfile.educationLevel} > ${user.educationLevel}.`;
+      else
+        return `${user?.name} has a higher education level: ${user.educationLevel} > ${currentUserProfile?.educationLevel}.`;
     }
     // Age/experience
     if (reason === 'More experienced mentor' || reason === 'Notably more experienced mentor' || reason === 'Significantly more experienced mentor') {
@@ -445,125 +447,6 @@ export default function MentorProgram() {
                             <option key={level} value={level}>{level}</option>
                           ))}
                       </select>
-                      <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
-                        Subjects
-                        <div
-                          className="custom-multiselect-dropdown"
-                          tabIndex={0}
-                          style={{ position: 'relative', marginTop: 4 }}
-                        >
-                          <div
-                            className="custom-multiselect-control"
-                            style={{
-                              background: '#181818',
-                              color: '#fff',
-                              border: '1.5px solid #3a0a0a',
-                              borderRadius: 8,
-                              padding: '0.7rem 1rem',
-                              fontSize: '1rem',
-                              minHeight: 44,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              userSelect: 'none',
-                            }}
-                            onClick={() => setSubjectsDropdownOpen(v => !v)}
-                            aria-haspopup="listbox"
-                            aria-expanded={subjectsDropdownOpen}
-                          >
-                            <span style={{ color: form.subjects.length === 0 ? '#888' : '#fff' }}>
-                              {form.subjects.length === 0 ? 'Select subjects...' : `${form.subjects.length} selected`}
-                            </span>
-                            <span style={{ fontSize: 18, color: '#ff2a2a', marginLeft: 8 }}>
-                              ▼
-                            </span>
-                          </div>
-                          {subjectsDropdownOpen && (
-                            <div
-                              className="custom-multiselect-options"
-                              style={{
-                                position: 'absolute',
-                                top: '110%',
-                                left: 0,
-                                width: '100%',
-                                background: '#181818',
-                                border: '1.5px solid #3a0a0a',
-                                borderRadius: 8,
-                                zIndex: 20,
-                                maxHeight: 220,
-                                overflowY: 'auto',
-                                boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
-                              }}
-                            >
-                              {subjects.map(subj => (
-                                <label
-                                  key={subj}
-                                  style={{
-                                    display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
-                                    background: form.subjects.includes(subj) ? 'rgba(0,119,181,0.13)' : 'transparent',
-                                    color: form.subjects.includes(subj) ? '#00eaff' : '#fff',
-                                    fontWeight: form.subjects.includes(subj) ? 700 : 400,
-                                    borderRadius: 6,
-                                    marginBottom: 0,
-                                    transition: 'background 0.15s, color 0.15s',
-                                    fontSize: '1.08rem',
-                                  }}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={form.subjects.includes(subj)}
-                                    onChange={() => {
-                                      setForm(prev => ({
-                                        ...prev,
-                                        subjects: prev.subjects.includes(subj)
-                                          ? prev.subjects.filter((s: string) => s !== subj)
-                                          : [...prev.subjects, subj],
-                                      }));
-                                    }}
-                                    style={{
-                                      accentColor: '#00eaff',
-                                      marginRight: 0,
-                                      width: 16,
-                                      height: 16,
-                                      flexShrink: 0,
-                                      verticalAlign: 'middle'
-                                    }}
-                                  />
-                                  <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{subj}</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                          {form.subjects.length > 0 && (
-                            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                              {form.subjects.map((subj) => (
-                                <span className="mentor-profile-chip mentor-profile-industry-chip" key={subj} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                  {subj}
-                                  <button
-                                    type="button"
-                                    aria-label={`Remove ${subj}`}
-                                    onClick={e => {
-                                      e.preventDefault();
-                                      setForm(prev => ({ ...prev, subjects: prev.subjects.filter((s: string) => s !== subj) }));
-                                    }}
-                                    style={{
-                                      background: 'none',
-                                      border: 'none',
-                                      color: '#00eaff',
-                                      fontWeight: 700,
-                                      fontSize: 18,
-                                      cursor: 'pointer',
-                                      marginLeft: 2,
-                                      lineHeight: 1
-                                    }}
-                                  >×</button>
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </label>
                     </div>
                   </div>
                 </div>
@@ -705,8 +588,8 @@ export default function MentorProgram() {
                       <div className="mentor-profile-field">
                         <label className="mentor-profile-label">{selectedRole === 'mentee' ? 'Desired Profession' : 'Current Profession'}</label>
                         <input
-                          name="currentProfession"
-                          value={form.currentProfession}
+                          name="profession"
+                          value={form.profession}
                           onChange={handleChange}
                           required
                           placeholder={selectedRole === 'mentee' ? 'Desired Profession (e.g. Software Engineer)' : 'Current Profession (e.g. Software Engineer)'}
@@ -985,7 +868,7 @@ export default function MentorProgram() {
                     </div>
                     <div className="match-card-row">
                       <span className="match-card-label">{(user.type == MENTOR) ? "Profession:" : "Desired Profession:"}</span>
-                      <span className="match-card-value">{user.currentProfession}</span>
+                      <span className="match-card-value">{user.profession}</span>
                     </div>
                     <div className="match-card-row">
                       <span className="match-card-label">Education:</span>

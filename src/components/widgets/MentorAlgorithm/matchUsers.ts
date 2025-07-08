@@ -12,7 +12,7 @@ export interface MentorMenteeProfile {
   degree: string;
   educationLevel: string;
   county: string;
-  currentProfession: string;
+  profession: string;
   pastProfessions: string[];
   linkedin: string;
   hobbies: string[];
@@ -22,7 +22,6 @@ export interface MentorMenteeProfile {
   lookingFor: string[];
   industries: string[];
   type: 'mentor' | 'mentee';
-  subjects: string[];
   [key: string]: string | string[];
 }
 
@@ -48,7 +47,7 @@ const educationLevelEncoding: { [level: string]: number } = {
 const SCORE_WEIGHTINGS: { [feature: string]: number } = {
   'skills': 9,
   'educationLevel': 3,
-  'currentProfession': 3,
+  'profession': 3,
   'hobbies': 2,
   'county': 2,
   'age': 3,
@@ -146,12 +145,12 @@ function getProfessionalScore(
   candidate: MentorMenteeProfile,
   reasons: string[]) {
   let score = 0;
-  const professionWeight = SCORE_WEIGHTINGS['currentProfession'];
+  const professionWeight = SCORE_WEIGHTINGS['profession'];
 
   const userPast = currentUser.pastProfessions || [];
   const candidatePast = candidate.pastProfessions || [];
-  const userCurrent = currentUser.currentProfession || '';
-  const candidateCurrent = candidate.currentProfession || '';
+  const userCurrent = currentUser.profession || '';
+  const candidateCurrent = candidate.profession || '';
 
   const fullMatch =
     userPast.includes(candidateCurrent) ||

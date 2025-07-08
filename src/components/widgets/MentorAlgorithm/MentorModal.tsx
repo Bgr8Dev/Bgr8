@@ -144,7 +144,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                     ))}
                 </select>
               </div>
-              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <input name="currentProfession" value={editUser?.currentProfession || ''} onChange={handleInputChange} /></div>
+              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <input name="profession" value={editUser?.profession || ''} onChange={handleInputChange} /></div>
               <div><b>Past Professions:</b>
                 {editUser?.pastProfessions && editUser.pastProfessions.map((prof: string, idx: number) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -160,7 +160,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
             <>
               <div><b>Degree:</b> <span className="field-value">{user.degree}</span></div>
               <div><b>Education Level:</b> <span className="field-value">{user.educationLevel}</span></div>
-              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <span className="field-value">{user.currentProfession}</span></div>
+              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <span className="field-value">{user.profession}</span></div>
               <div><b>Past Professions:</b> <span className="field-value">{user.pastProfessions && user.pastProfessions.length > 0 ? user.pastProfessions.join(', ') : 'N/A'}</span></div>
               <div><b>LinkedIn:</b> <span className="field-value">{user.linkedin ? (
                 <a

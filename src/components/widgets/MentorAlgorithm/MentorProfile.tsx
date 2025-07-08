@@ -5,7 +5,6 @@ import { db } from '../../../firebase/firebase';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import './MentorProgram.css';
 import industriesList from '../../../constants/industries';
-import subjects from '../../../constants/subjects';
 import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
@@ -20,7 +19,6 @@ export default function MentorProfile() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [animateIn, setAnimateIn] = useState(false);
-  const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
   const [hobbiesDropdownOpen, setHobbiesDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -64,7 +62,7 @@ export default function MentorProfile() {
         degree: profile.degree,
         educationLevel: profile.educationLevel,
         county: profile.county,
-        currentProfession: profile.currentProfession,
+        profession: profile.profession,
         pastProfessions: profile.pastProfessions,
         linkedin: profile.linkedin,
         hobbies: profile.hobbies,
@@ -74,7 +72,6 @@ export default function MentorProfile() {
         lookingFor: profile.lookingFor,
         industries: profile.industries,
         type: profile.type,
-        subjects: profile.subjects
       };
 
       await updateDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
@@ -199,142 +196,6 @@ export default function MentorProfile() {
               <p className="mentor-profile-value">{profile.county}</p>
             )}
           </div>
-          <div className="mentor-profile-field">
-            <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8 }}>
-              Subjects
-            </div>
-            {isEditing ? (
-              <div
-                className="custom-multiselect-dropdown"
-                tabIndex={0}
-                style={{ position: 'relative', marginTop: 4 }}
-              >
-                <div
-                  className="custom-multiselect-control"
-                  style={{
-                    background: '#181818',
-                    color: '#fff',
-                    border: '1.5px solid #3a0a0a',
-                    borderRadius: 8,
-                    padding: '0.7rem 1rem',
-                    fontSize: '1rem',
-                    minHeight: 44,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    userSelect: 'none',
-                  }}
-                  onClick={(e) => {
-                    setSubjectsDropdownOpen(v => !v);
-                    e.stopPropagation();
-                  }}
-                  aria-haspopup="listbox"
-                  aria-expanded={subjectsDropdownOpen}
-                >
-                  <span style={{ color: profile.subjects.length === 0 ? '#888' : '#fff' }}>
-                    {profile.subjects.length === 0 ? 'Select subjects...' : `${profile.subjects.length} selected`}
-                  </span>
-                  <span style={{ fontSize: 18, color: '#ff2a2a', marginLeft: 8 }}>
-                    ▼
-                  </span>
-                </div>
-                {subjectsDropdownOpen && (
-                  <div
-                    className="custom-multiselect-options"
-                    style={{
-                      position: 'absolute',
-                      top: '110%',
-                      left: 0,
-                      width: '100%',
-                      background: '#181818',
-                      border: '1.5px solid #3a0a0a',
-                      borderRadius: 8,
-                      zIndex: 20,
-                      maxHeight: 220,
-                      overflowY: 'auto',
-                      boxShadow: '0 4px 18px rgba(255,42,42,0.13)',
-                    }}
-                  >
-                    {subjects.map(subj => (
-                      <label
-                        key={subj}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
-                          background: profile.subjects.includes(subj) ? 'rgba(0,119,181,0.13)' : 'transparent',
-                          color: profile.subjects.includes(subj) ? '#00eaff' : '#fff',
-                          fontWeight: profile.subjects.includes(subj) ? 700 : 400,
-                          borderRadius: 6,
-                          marginBottom: 0,
-                          transition: 'background 0.15s, color 0.15s',
-                          fontSize: '1.08rem',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={profile.subjects.includes(subj)}
-                          onChange={() => {
-                            setProfile(prev => prev ? {
-                              ...prev,
-                              subjects: prev.subjects.includes(subj)
-                                ? prev.subjects.filter((s: string) => s !== subj)
-                                : [...prev.subjects, subj],
-                            } : null);
-                          }}
-                          style={{
-                            accentColor: '#00eaff',
-                            marginRight: 0,
-                            width: 16,
-                            height: 16,
-                            flexShrink: 0,
-                            verticalAlign: 'middle'
-                          }}
-                        />
-                        <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{subj}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-                {profile.subjects.length > 0 && (
-                  <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {profile.subjects.map((subj) => (
-                      <span className="mentor-profile-chip mentor-profile-industry-chip" key={subj} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                        {subj}
-                        <button
-                          type="button"
-                          aria-label={`Remove ${subj}`}
-                          onClick={e => {
-                            e.preventDefault();
-                            setProfile(prev => prev ? { ...prev, subjects: prev.subjects.filter((s: string) => s !== subj) } : null);
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#00eaff',
-                            fontWeight: 700,
-                            fontSize: 18,
-                            cursor: 'pointer',
-                            marginLeft: 2,
-                            lineHeight: 1
-                          }}
-                        >×</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="mentor-profile-list mentor-profile-chips mentor-profile-industries-chips">
-                {profile.subjects && profile.subjects.length > 0 ? (
-                  profile.subjects.map((subj, idx) => (
-                    <span className="mentor-profile-chip mentor-profile-industry-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s` }} key={idx}>{subj}</span>
-                  ))
-                ) : (
-                  <p className="mentor-profile-value">Not specified</p>
-                )}
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="mentor-profile-section mentor-profile-section-animate">
@@ -389,15 +250,15 @@ export default function MentorProfile() {
             {isEditing ? (
               <input
                 type="text"
-                name="currentProfession"
-                value={profile.currentProfession}
+                name="profession"
+                value={profile.profession}
                 onChange={handleChange}
                 required
                 className="mentor-profile-input"
                 style={{ width: '100%', padding: '0.8rem', border: '1.5px solid #3a0a0a', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
               />
             ) : (
-              <p className="mentor-profile-value">{profile.currentProfession}</p>
+              <p className="mentor-profile-value">{profile.profession}</p>
             )}
           </div>
           <div className="mentor-profile-field">

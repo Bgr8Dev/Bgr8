@@ -116,7 +116,7 @@ export default function MentorManagement() {
     const matchesSearch = searchTerm === '' || 
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.currentProfession.toLowerCase().includes(searchTerm.toLowerCase());
+      user.profession.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -237,7 +237,7 @@ export default function MentorManagement() {
                 <td>{user.email}</td>
                 <td>
                   <div className="profession-info">
-                    <span className="current-profession">{user.currentProfession}</span>
+                    <span className="profession">{user.profession}</span>
                     {user.pastProfessions.length > 0 && (
                       <span className="past-professions">
                         {user.pastProfessions.length} past roles

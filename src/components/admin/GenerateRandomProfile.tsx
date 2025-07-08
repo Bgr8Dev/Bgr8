@@ -401,7 +401,7 @@ export default function GenerateRandomProfile() {
       degree: `${getRandomElement(['BSc', 'BA', 'MSc', 'MA'])} ${getRandomElement(['Computer Science', 'Business', 'Engineering', 'Arts', 'Science'])}`,
       educationLevel: getRandomElement(availableEducationLevels),
       county: getRandomElement(ukCounties),
-      currentProfession: getRandomElement(professions),
+      profession: getRandomElement(professions),
       pastProfessions: getRandomElements(professions, Math.floor(Math.random() * 3) + 1),
       linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
       hobbies: getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2),
