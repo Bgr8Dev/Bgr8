@@ -43,7 +43,6 @@ export default function MentorProgram() {
     skills: [] as string[],
     lookingFor: [] as string[],
     industries: [] as string[],
-    cal: '',
     type: '' as UserType | ''
   });
   const [, setMatches] = useState<{ mentee: MentorMenteeProfile; mentor: MentorMenteeProfile }[]>([]);
@@ -214,22 +213,6 @@ export default function MentorProgram() {
       }
     }
 
-    // Calendar validation for mentors
-    if (selectedRole === 'mentor') {
-      if (!form.cal || !form.cal.trim()) {
-        setError('Calendar link is required for mentors. Please provide your Cal.com URL.');
-        setLoading(false);
-        return;
-      }
-      
-      // Validate Cal.com URL format
-      const calUrlPattern = /^https?:\/\/cal\.com\/[A-Za-z0-9\-_/]+$/;
-      if (!calUrlPattern.test(form.cal.trim())) {
-        setError('Please enter a valid Cal.com URL (e.g., https://cal.com/your-username)');
-        setLoading(false);
-        return;
-      }
-    }
     const user: MentorMenteeProfile = {
       uid: currentUser.uid,
       name: form.name,
@@ -249,7 +232,6 @@ export default function MentorProgram() {
       skills: form.skills,
       lookingFor: form.lookingFor,
       industries: form.industries,
-      cal: form.cal,
       type: selectedRole!,
     };
     try {
@@ -271,7 +253,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], cal: '', type: '', subjects: []
+        skills: [], lookingFor: [], industries: [], type: '', subjects: []
       });
       setTimeout(matchMentees, 0); // Update matches after state change
     } catch (err) {
@@ -291,7 +273,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], cal: '', type: role, subjects: []
+        skills: [], lookingFor: [], industries: [], type: role, subjects: []
       });
       setError(null);
       setSuccess(null);
@@ -304,7 +286,7 @@ export default function MentorProgram() {
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], industries: [], cal: '', type: '', subjects: []
+      skills: [], lookingFor: [], industries: [], type: '', subjects: []
     });
     setError(null);
     setSuccess(null);
@@ -673,58 +655,6 @@ export default function MentorProgram() {
                         pattern="https?://(www\.)?linkedin\.com/in/[A-Za-z0-9\-_/]+/?"
                         title="Please enter a valid LinkedIn profile URL (e.g. https://www.linkedin.com/in/your-profile)"
                       />
-                      {selectedRole === 'mentor' && (
-                        <div style={{ marginTop: '1rem' }}>
-                          <div style={{ 
-                            background: 'linear-gradient(135deg, rgba(255,42,42,0.1) 0%, rgba(255,42,42,0.05) 100%)', 
-                            border: '2px solid #ff2a2a', 
-                            borderRadius: 12, 
-                            padding: '1rem', 
-                            marginBottom: '1rem' 
-                          }}>
-                            <div style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '0.5rem', 
-                              marginBottom: '0.5rem',
-                              color: '#ff2a2a',
-                              fontWeight: 700,
-                              fontSize: '1.1rem'
-                            }}>
-                              📅 Calendar Link Required
-                            </div>
-                            <div style={{ 
-                              color: '#ccc', 
-                              fontSize: '0.9rem', 
-                              marginBottom: '1rem',
-                              lineHeight: 1.4
-                            }}>
-                              Mentors must provide a Cal.com link so mentees can easily schedule sessions with you. 
-                              Create your free calendar at <a href="https://cal.com" target="_blank" rel="noopener noreferrer" style={{ color: '#ff2a2a', textDecoration: 'underline' }}>cal.com</a>
-                            </div>
-                            <input
-                              name="cal"
-                              value={form.cal}
-                              onChange={handleChange}
-                              placeholder="https://cal.com/your-username"
-                              type="url"
-                              required
-                              pattern="https?://cal\.com/[A-Za-z0-9\-_/]+/?"
-                              title="Please enter a valid Cal.com URL (e.g. https://cal.com/your-username)"
-                              style={{ 
-                                width: '100%', 
-                                padding: '0.8rem', 
-                                border: '2px solid #ff2a2a', 
-                                borderRadius: 8, 
-                                background: '#181818', 
-                                color: '#fff', 
-                                fontSize: '1rem',
-                                boxShadow: '0 0 0 1px rgba(255,42,42,0.3)'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className="mentor-form-half">
@@ -928,7 +858,7 @@ export default function MentorProgram() {
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading || (selectedRole === 'mentor' ? (form.skills.length === 0 || !form.cal.trim()) : form.lookingFor.length === 0)}>
+                <button type="submit" disabled={loading || (selectedRole === 'mentor' ? (form.skills.length === 0) : form.lookingFor.length === 0)}>
                   {loading ? 'Saving...' : 'Sign Up'}
                 </button>
               </form>

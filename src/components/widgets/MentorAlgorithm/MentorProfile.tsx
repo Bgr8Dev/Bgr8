@@ -75,8 +75,6 @@ export default function MentorProfile() {
         skills: profile.skills,
         lookingFor: profile.lookingFor,
         industries: profile.industries,
-        cal: profile.cal,
-        type: profile.type,
       };
 
       await updateDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
@@ -368,53 +366,6 @@ export default function MentorProfile() {
                 </p>
               )}
             </div>
-            {profile.type === 'mentor' && (
-              <div className="mentor-profile-field">
-                <label>Calendar Link</label>
-                {isEditing ? (
-                  <input
-                    type="url"
-                    name="cal"
-                    value={profile.cal}
-                    onChange={handleChange}
-                    required
-                    pattern="https?://cal\.com/[A-Za-z0-9\-_/]+/?"
-                    title="Please enter a valid Cal.com URL"
-                    placeholder="https://cal.com/your-username"
-                  />
-                ) : (
-                  <p className="mentor-profile-value">
-                    {profile.cal ? (
-                      <a
-                        href={profile.cal}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mentor-profile-calendar-btn"
-                        title="Schedule a session"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          background: 'linear-gradient(135deg, #ff2a2a 0%, #a80000 100%)',
-                          color: '#fff',
-                          padding: '0.6rem 1.2rem',
-                          borderRadius: '8px',
-                          textDecoration: 'none',
-                          fontWeight: 600,
-                          fontSize: '0.9rem',
-                          transition: 'all 0.2s ease',
-                          boxShadow: '0 2px 8px rgba(255,42,42,0.3)'
-                        }}
-                      >
-                        📅 Schedule Session
-                      </a>
-                    ) : (
-                      'Not provided'
-                    )}
-                  </p>
-                )}
-              </div>
-            )}
             <div className="mentor-profile-field">
               <label>{profile.type === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}</label>
               {isEditing ? (
@@ -508,7 +459,6 @@ export default function MentorProfile() {
                     }}
                     onClick={() => setHobbiesDropdownOpen(v => !v)}
                     aria-haspopup="listbox"
-                    aria-expanded={hobbiesDropdownOpen ? "true" : "false"}
                   >
                     <span style={{ color: profile.hobbies.length === 0 ? '#888' : '#fff' }}>
                       {profile.hobbies.length === 0 ? 'Select hobbies...' : `${profile.hobbies.length} selected`}
