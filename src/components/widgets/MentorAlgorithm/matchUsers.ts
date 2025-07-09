@@ -5,6 +5,7 @@ export const MENTOR = 'mentor';
 export const MENTEE = 'mentee';
 
 export interface MentorMenteeProfile {
+  uid: string;
   name: string;
   email: string;
   phone: string;
@@ -21,6 +22,7 @@ export interface MentorMenteeProfile {
   skills: string[];
   lookingFor: string[];
   industries: string[];
+  cal: string;
   type: 'mentor' | 'mentee';
   [key: string]: string | string[];
 }
@@ -198,7 +200,8 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
   const allUsers: MentorMenteeProfile[] = [];
   allDocs.forEach(docSnap => {
     if (docSnap.id !== uid) {
-      allUsers.push(docSnap.data() as MentorMenteeProfile);
+      const data = docSnap.data() as MentorMenteeProfile;
+      allUsers.push({ ...data, uid: docSnap.id });
     }
   });
 

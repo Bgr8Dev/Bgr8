@@ -7,11 +7,12 @@ import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
 import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
 import MentorModal from './MentorModal';
+import BookingModal from './BookingModal';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
-import {ethnicityOptions, DEFAULT_ETHNICITY} from '../../../constants/ethnicityOptions';
-import {religionOptions, DEFAULT_RELIGION} from '../../../constants/religionOptions';
+import {ethnicityOptions} from '../../../constants/ethnicityOptions';
+import {religionOptions} from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
 import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 
@@ -42,6 +43,7 @@ export default function MentorProgram() {
     skills: [] as string[],
     lookingFor: [] as string[],
     industries: [] as string[],
+    cal: '',
     type: '' as UserType | ''
   });
   const [, setMatches] = useState<{ mentee: MentorMenteeProfile; mentor: MentorMenteeProfile }[]>([]);
@@ -58,8 +60,9 @@ export default function MentorProgram() {
   const [modalUser, setModalUser] = useState<MentorMenteeProfile | null>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
   const [industriesDropdownOpen, setIndustriesDropdownOpen] = useState(false);
-  const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
   const [hobbiesDropdownOpen, setHobbiesDropdownOpen] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingMentor, setBookingMentor] = useState<MentorMenteeProfile | null>(null);
   const industriesDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,6 +110,21 @@ export default function MentorProgram() {
     };
     fetchMatches();
   }, [currentUser, hasProfile]);
+
+  // Add manual refresh function
+  const refreshMatches = async () => {
+    if (!currentUser || !hasProfile) return;
+    setLoadingMatches(true);
+    try {
+      const results = await getBestMatchesForUser(currentUser.uid);
+      setBestMatches(results);
+    } catch (error) {
+      console.error('Error refreshing matches:', error);
+      setBestMatches([]);
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
 
   // Close industries dropdown on outside click or Escape
   useEffect(() => {
@@ -195,7 +213,25 @@ export default function MentorProgram() {
         return;
       }
     }
+
+    // Calendar validation for mentors
+    if (selectedRole === 'mentor') {
+      if (!form.cal || !form.cal.trim()) {
+        setError('Calendar link is required for mentors. Please provide your Cal.com URL.');
+        setLoading(false);
+        return;
+      }
+      
+      // Validate Cal.com URL format
+      const calUrlPattern = /^https?:\/\/cal\.com\/[A-Za-z0-9\-_/]+$/;
+      if (!calUrlPattern.test(form.cal.trim())) {
+        setError('Please enter a valid Cal.com URL (e.g., https://cal.com/your-username)');
+        setLoading(false);
+        return;
+      }
+    }
     const user: MentorMenteeProfile = {
+      uid: currentUser.uid,
       name: form.name,
       email: form.email,
       phone: form.phone,
@@ -213,6 +249,7 @@ export default function MentorProgram() {
       skills: form.skills,
       lookingFor: form.lookingFor,
       industries: form.industries,
+      cal: form.cal,
       type: selectedRole!,
     };
     try {
@@ -234,7 +271,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: '', subjects: []
+        skills: [], lookingFor: [], industries: [], cal: '', type: '', subjects: []
       });
       setTimeout(matchMentees, 0); // Update matches after state change
     } catch (err) {
@@ -254,7 +291,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: role, subjects: []
+        skills: [], lookingFor: [], industries: [], cal: '', type: role, subjects: []
       });
       setError(null);
       setSuccess(null);
@@ -267,7 +304,7 @@ export default function MentorProgram() {
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], industries: [], type: '', subjects: []
+      skills: [], lookingFor: [], industries: [], cal: '', type: '', subjects: []
     });
     setError(null);
     setSuccess(null);
@@ -381,6 +418,17 @@ export default function MentorProgram() {
     setShowForm(false);
   };
 
+  const degreePlaceholders: Record<string, string> = {
+    "GCSEs": "e.g. 9 GCSEs, including Maths and English",
+    "A-Levels": "e.g. A-Levels in Maths, Physics, Chemistry",
+    "BTEC": "e.g. BTEC Level 3 in Business",
+    "Foundation Degree": "e.g. Foundation Degree in Art & Design",
+    "Bachelor's Degree": "e.g. BSc Computer Science",
+    "Master's Degree": "e.g. MSc Artificial Intelligence",
+    "PhD": "e.g. PhD in Molecular Biology",
+    "Other": "e.g. Diploma in Marketing",
+  };
+
   return (
     <section className="mentor-program-widget">
       <h2>Mentor Program</h2>
@@ -428,7 +476,8 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section"> 
                       <div className="mentor-form-section-title">Education</div>
-                      <input name="degree" value={form.degree} onChange={handleChange} placeholder="Degree (e.g. BSc Computer Science)" />
+                      <input name="degree" value={form.degree} onChange={handleChange} 
+                        placeholder={degreePlaceholders[form.educationLevel] || "Degree (e.g. BSc Computer Science)"} />
                       <select name="educationLevel" value={form.educationLevel} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
                         <option value="" disabled>Select Education Level</option>
                         {ukEducationLevels
@@ -480,7 +529,6 @@ export default function MentorProgram() {
                             }}
                             onClick={() => setIndustriesDropdownOpen(v => !v)}
                             aria-haspopup="listbox"
-                            aria-expanded={industriesDropdownOpen}
                           >
                             <span style={{ color: form.industries.length === 0 ? '#888' : '#fff' }}>
                               {form.industries.length === 0 ? 'Select industries...' : `${form.industries.length} selected`}
@@ -625,6 +673,58 @@ export default function MentorProgram() {
                         pattern="https?://(www\.)?linkedin\.com/in/[A-Za-z0-9\-_/]+/?"
                         title="Please enter a valid LinkedIn profile URL (e.g. https://www.linkedin.com/in/your-profile)"
                       />
+                      {selectedRole === 'mentor' && (
+                        <div style={{ marginTop: '1rem' }}>
+                          <div style={{ 
+                            background: 'linear-gradient(135deg, rgba(255,42,42,0.1) 0%, rgba(255,42,42,0.05) 100%)', 
+                            border: '2px solid #ff2a2a', 
+                            borderRadius: 12, 
+                            padding: '1rem', 
+                            marginBottom: '1rem' 
+                          }}>
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.5rem', 
+                              marginBottom: '0.5rem',
+                              color: '#ff2a2a',
+                              fontWeight: 700,
+                              fontSize: '1.1rem'
+                            }}>
+                              📅 Calendar Link Required
+                            </div>
+                            <div style={{ 
+                              color: '#ccc', 
+                              fontSize: '0.9rem', 
+                              marginBottom: '1rem',
+                              lineHeight: 1.4
+                            }}>
+                              Mentors must provide a Cal.com link so mentees can easily schedule sessions with you. 
+                              Create your free calendar at <a href="https://cal.com" target="_blank" rel="noopener noreferrer" style={{ color: '#ff2a2a', textDecoration: 'underline' }}>cal.com</a>
+                            </div>
+                            <input
+                              name="cal"
+                              value={form.cal}
+                              onChange={handleChange}
+                              placeholder="https://cal.com/your-username"
+                              type="url"
+                              required
+                              pattern="https?://cal\.com/[A-Za-z0-9\-_/]+/?"
+                              title="Please enter a valid Cal.com URL (e.g. https://cal.com/your-username)"
+                              style={{ 
+                                width: '100%', 
+                                padding: '0.8rem', 
+                                border: '2px solid #ff2a2a', 
+                                borderRadius: 8, 
+                                background: '#181818', 
+                                color: '#fff', 
+                                fontSize: '1rem',
+                                boxShadow: '0 0 0 1px rgba(255,42,42,0.3)'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="mentor-form-half">
@@ -679,7 +779,6 @@ export default function MentorProgram() {
                             }}
                             onClick={() => setHobbiesDropdownOpen(v => !v)}
                             aria-haspopup="listbox"
-                            aria-expanded={hobbiesDropdownOpen}
                           >
                             <span style={{ color: form.hobbies.length === 0 ? '#888' : '#fff' }}>
                               {form.hobbies.filter(h => h && h.trim() !== '').length === 0
@@ -829,7 +928,7 @@ export default function MentorProgram() {
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading || (selectedRole === 'mentor' ? form.skills.length === 0 : form.lookingFor.length === 0)}>
+                <button type="submit" disabled={loading || (selectedRole === 'mentor' ? (form.skills.length === 0 || !form.cal.trim()) : form.lookingFor.length === 0)}>
                   {loading ? 'Saving...' : 'Sign Up'}
                 </button>
               </form>
@@ -842,6 +941,26 @@ export default function MentorProgram() {
 
       <div style={{ marginTop: '2rem' }}>
         <h3>Matches</h3>
+        <button
+          onClick={refreshMatches}
+          disabled={loadingMatches}
+          style={{
+            marginBottom: '1rem',
+            padding: '0.7rem 1.5rem',
+            background: 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            fontWeight: 700,
+            fontSize: '1rem',
+            cursor: loadingMatches ? 'not-allowed' : 'pointer',
+            boxShadow: '0 2px 12px rgba(255,42,42,0.15)',
+            transition: 'background 0.2s, transform 0.2s',
+            opacity: loadingMatches ? 0.7 : 1
+          }}
+        >
+          {loadingMatches ? 'Refreshing...' : 'Refresh Matches'}
+        </button>
         {loadingMatches ? (
           <p>Loading matches...</p>
         ) : bestMatches.length === 0 ? (
@@ -899,6 +1018,42 @@ export default function MentorProgram() {
                       </div>
                     ))}
                   </div>
+                  {user.type === 'mentor' && currentUserProfile?.type === 'mentee' && (
+                    <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBookingMentor(user);
+                          setBookingModalOpen(true);
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          background: 'linear-gradient(135deg, #ff2a2a 0%, #a80000 100%)',
+                          color: '#fff',
+                          padding: '0.7rem 1.4rem',
+                          borderRadius: '8px',
+                          border: 'none',
+                          fontWeight: 600,
+                          fontSize: '0.95rem',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 8px rgba(255,42,42,0.3)',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(255,42,42,0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(255,42,42,0.3)';
+                        }}
+                      >
+                        📅 Book Session
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -906,6 +1061,14 @@ export default function MentorProgram() {
         )}
       </div>
       <MentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} />
+      <BookingModal 
+        open={bookingModalOpen} 
+        onClose={() => {
+          setBookingModalOpen(false);
+          setBookingMentor(null);
+        }} 
+        mentor={bookingMentor!} 
+      />
     </section>
   );
 } 

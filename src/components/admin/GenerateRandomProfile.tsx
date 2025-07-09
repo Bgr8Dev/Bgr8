@@ -410,6 +410,7 @@ export default function GenerateRandomProfile() {
       skills: type === 'mentor' ? skills : [],
       lookingFor: type === 'mentee' ? lookingFor : [],
       industries: industries,
+      cal: type === 'mentor' ? `https://cal.com/${firstName.toLowerCase()}-${lastName.toLowerCase()}` : '',
       type
     };
   };
