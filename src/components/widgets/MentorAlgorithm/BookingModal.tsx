@@ -26,6 +26,8 @@ interface Booking {
   menteeId: string;
   mentorName: string;
   menteeName: string;
+  mentorEmail: string;
+  menteeEmail: string;
   day: string;
   startTime: string;
   endTime: string;
@@ -120,6 +122,12 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   const handleBooking = async () => {
     if (!currentUser || !selectedSlot || !sessionDate) return;
 
+    if (!mentor.email || !currentUser.email) {
+      setError('Mentor or mentee email is missing. Cannot create booking.');
+      setBooking(false);
+      return;
+    }
+
     setBooking(true);
     setError(null);
     setSuccess(null);
@@ -129,7 +137,9 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
         mentorId: mentor.uid,
         menteeId: currentUser.uid,
         mentorName: mentor.name,
-        menteeName: currentUser.email || 'Unknown',
+        menteeName: currentUser.displayName || currentUser.email || 'Unknown',
+        mentorEmail: mentor.email,
+        menteeEmail: currentUser.email || '',
         day: selectedSlot.day,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
