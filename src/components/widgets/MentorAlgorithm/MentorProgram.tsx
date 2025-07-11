@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './MentorProgram.css';
 import { db } from '../../../firebase/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaHandshake, FaQuestionCircle } from 'react-icons/fa';
+import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
 import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
@@ -15,6 +15,7 @@ import {ethnicityOptions} from '../../../constants/ethnicityOptions';
 import {religionOptions} from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
 import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import MatchStrengthRing from './MatchStrengthRing';
 
 type UserType = 'mentor' | 'mentee';
 
@@ -213,6 +214,11 @@ export default function MentorProgram() {
       }
     }
 
+    if (!currentUser) {
+      setError('No user logged in');
+      setLoading(false);
+      return;
+    }
     const user: MentorMenteeProfile = {
       uid: currentUser.uid,
       name: form.name,
@@ -235,7 +241,6 @@ export default function MentorProgram() {
       type: selectedRole!,
     };
     try {
-      if (!currentUser) throw new Error('No user logged in');
       
       // Save mentor/mentee profile with user.uid as document ID
       await setDoc(doc(db, 'mentorProgram', currentUser.uid), user);
@@ -447,22 +452,6 @@ export default function MentorProgram() {
     if (r.includes('age')) return reasonIconMap.age;
     if (r.includes('top')) return reasonIconMap.top;
     return reasonIconMap.default;
-  }
-
-  // Helper: get initials from name
-  function getInitials(name: string) {
-    if (!name) return '';
-    const parts = name.trim().split(' ');
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  // Helper: get color from string (name/email)
-  function getAvatarColor(str: string) {
-    // Simple hash to HSL
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 70%, 45%)`;
   }
 
   return (
@@ -961,13 +950,7 @@ export default function MentorProgram() {
                 <div className={`match-card ${topClass}`} key={idx} onClick={() => { setModalUser(user); setModalOpen(true); }} style={{ cursor: 'pointer', position: 'relative' }}>
                   {/* Avatar/Profile Picture */}
                   <div className="match-card-avatar-wrapper">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.name + ' avatar'} className="match-card-avatar" />
-                    ) : (
-                      <div className="match-card-avatar" style={{ background: getAvatarColor(user.name || user.email) }}>
-                        {getInitials(user.name)}
-                      </div>
-                    )}
+                    <MatchStrengthRing score={match.score} color={getScoreColor(match.score)} size={60} label="Match Strength" />
                   </div>
                   {(idx < 3) && (
                     <div className="top-match-watermark">Top Match</div>
@@ -977,8 +960,8 @@ export default function MentorProgram() {
                       <span className="match-card-name">{user.name}</span>
                       <span className="match-card-type">({user.type})</span>
                     </div>
-                    <div className="match-card-score">
-                      Match Score: <span className="match-card-score-value" style={{ color: getScoreColor(match.score) }}>{match.score}</span>
+                    <div className="match-card-score" style={{ color: '#fff', fontWeight: 500 }}>
+                      Match Score
                     </div>
                   </div>
                   <div className="match-card-info">
