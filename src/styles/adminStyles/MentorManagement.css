@@ -134,11 +134,45 @@
   border-radius: 12px;
   padding: 1.5rem;
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 60vh;
+  position: relative;
+}
+
+.mentor-management-table::-webkit-scrollbar {
+  height: 12px;
+  background: #181818;
+}
+.mentor-management-table::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 6px;
 }
 
 .mentor-management-table table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1100px;
+  table-layout: auto;
+}
+
+.mentor-management-table thead th {
+  position: sticky;
+  top: 0;
+  background: #181818;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.mentor-management-table::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  background: linear-gradient(to left, #181818 80%, transparent 100%);
+  opacity: 0.7;
+  z-index: 3;
+  display: block;
 }
 
 .mentor-management-table th {
@@ -409,6 +443,10 @@
 
   .mentor-management-table {
     padding: 1rem;
+    max-height: 50vh;
+  }
+  .mentor-management-table table {
+    min-width: 800px;
   }
 
   .mentor-management-table th,
