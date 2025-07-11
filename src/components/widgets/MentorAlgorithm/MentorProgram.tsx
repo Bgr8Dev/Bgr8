@@ -351,6 +351,18 @@ export default function MentorProgram() {
     return reason;
   }
 
+  // Color grading for match score
+  function getScoreColor(score: number) {
+    // Clamp score between 0 and 100
+    const s = Math.max(0, Math.min(100, score));
+    // Interpolate hue from 0 (gray) to 120 (green)
+    // We'll use HSL: gray is hsl(0,0%,53%), green is hsl(120,100%,45%)
+    const hue = 120 * (s / 100);
+    const sat = s < 10 ? 0 : 100; // very low scores are gray
+    const light = 45 + (8 * (1 - s / 100)); // slightly lighter for low scores
+    return `hsl(${hue}, ${sat}%, ${light}%)`;
+  }
+
   // SuccessModal component
   function SuccessModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     useEffect(() => {
@@ -899,15 +911,22 @@ export default function MentorProgram() {
           <div className="matches-grid">
             {bestMatches.map((match, idx) => {
               const user = match.user;
+              let topClass = '';
+              if (idx === 0) topClass = 'top-match-gold';
+              else if (idx === 1) topClass = 'top-match-silver';
+              else if (idx === 2) topClass = 'top-match-bronze';
               return (
-                <div className="match-card" key={idx} onClick={() => { setModalUser(user); setModalOpen(true); }} style={{ cursor: 'pointer' }}>
+                <div className={`match-card ${topClass}`} key={idx} onClick={() => { setModalUser(user); setModalOpen(true); }} style={{ cursor: 'pointer', position: 'relative' }}>
+                  {(idx < 3) && (
+                    <div className="top-match-watermark">Top Match</div>
+                  )}
                   <div className="match-card-header">
                     <div className="match-card-title">
                       <span className="match-card-name">{user.name}</span>
                       <span className="match-card-type">({user.type})</span>
                     </div>
                     <div className="match-card-score">
-                      Match Score: <span className="match-card-score-value">{match.score}</span>
+                      Match Score: <span className="match-card-score-value" style={{ color: getScoreColor(match.score) }}>{match.score}</span>
                     </div>
                   </div>
                   <div className="match-card-info">
