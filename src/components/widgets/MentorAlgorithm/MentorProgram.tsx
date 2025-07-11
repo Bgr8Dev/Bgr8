@@ -946,8 +946,20 @@ export default function MentorProgram() {
               if (idx === 0) topClass = 'top-match-gold';
               else if (idx === 1) topClass = 'top-match-silver';
               else if (idx === 2) topClass = 'top-match-bronze';
+              // Animation: fade/slide in, staggered
+              const cardAnimClass = 'match-card-animate';
+              const animDelay = `${idx * 80}ms`;
               return (
-                <div className={`match-card ${topClass}`} key={idx} onClick={() => { setModalUser(user); setModalOpen(true); }} style={{ cursor: 'pointer', position: 'relative' }}>
+                <div
+                  className={`match-card ${topClass} ${cardAnimClass}`}
+                  key={idx}
+                  onClick={() => { setModalUser(user); setModalOpen(true); }}
+                  style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                    animationDelay: animDelay,
+                  }}
+                >
                   {/* Avatar/Profile Picture */}
                   <div className="match-card-avatar-wrapper">
                     <MatchStrengthRing score={match.score} color={getScoreColor(match.score)} size={60} label="Match Strength" />
@@ -959,9 +971,6 @@ export default function MentorProgram() {
                     <div className="match-card-title">
                       <span className="match-card-name">{user.name}</span>
                       <span className="match-card-type">({user.type})</span>
-                    </div>
-                    <div className="match-card-score" style={{ color: '#fff', fontWeight: 500 }}>
-                      Match Score
                     </div>
                   </div>
                   <div className="match-card-info">
