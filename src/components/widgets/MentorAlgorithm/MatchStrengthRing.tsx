@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface MatchStrengthRingProps {
   score: number; // 0-100
@@ -22,11 +22,21 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
   label = 'Match Strength',
 }) => {
   const [hovered, setHovered] = useState(false);
+  const [animatedOffset, setAnimatedOffset] = useState(0);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const pct = clamp(score, 0, 100) / 100;
   const offset = circumference * (1 - pct);
   const tooltip = `${label}: ${score}/100`;
+
+  // Animate the arc on mount
+  useEffect(() => {
+    setAnimatedOffset(circumference); // Start empty
+    const timeout = setTimeout(() => {
+      setAnimatedOffset(offset); // Animate to score
+    }, 30); // Small delay to trigger transition
+    return () => clearTimeout(timeout);
+  }, [circumference, offset]);
 
   return (
     <div
@@ -65,10 +75,10 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
           stroke={color}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
+          strokeDashoffset={animatedOffset}
           strokeLinecap="round"
           style={{
-            transition: 'stroke-dashoffset 0.7s cubic-bezier(0.77,0,0.175,1)',
+            transition: 'stroke-dashoffset 0.9s cubic-bezier(0.77,0,0.175,1)',
             filter: 'drop-shadow(0 0 6px ' + color + '55)',
           }}
         />
