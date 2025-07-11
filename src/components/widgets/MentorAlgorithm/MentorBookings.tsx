@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { db } from '../../../firebase/firebase';
 import { collection, query, where, getDocs, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { FaVideo, FaCheck, FaTimes, FaSearch, FaFileExport } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaSearch, FaFileExport } from 'react-icons/fa';
 import './MentorProgram.css';
 
 interface Booking {
@@ -137,76 +137,7 @@ export default function MentorBookings() {
     fetchBookings();
   }, [currentUser]);
 
-  const generateGoogleMeetLink = async (booking: Booking) => {
-    try {
-      const sessionDate = booking.sessionDate instanceof Timestamp 
-        ? booking.sessionDate.toDate() 
-        : booking.sessionDate ? new Date(booking.sessionDate) : new Date();
 
-      const mentorEmail = booking.mentorEmail;
-      const menteeEmail = booking.menteeEmail;
-
-      if (!mentorEmail || !menteeEmail) {
-        setModalMessage('Cannot create Google Meet: Mentor or mentee email is missing for this booking.');
-        setModalType('error');
-        setModalOpen(true);
-        return;
-      }
-
-      const bookingData = {
-        id: booking.id,
-        mentorName: booking.mentorName,
-        menteeName: booking.menteeName,
-        mentorEmail,
-        menteeEmail,
-        sessionDate: sessionDate.toISOString(),
-        startTime: booking.startTime,
-        endTime: booking.endTime
-      };
-
-      const response = await fetch('http://localhost:3001/api/create-meeting', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ booking: bookingData }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        if (result.method === 'google-meet-api') {
-          // Real Google Meet link - open it directly
-          window.open(result.meetLink, '_blank');
-          
-          // Update the booking in Firestore with the meet link
-          await updateDoc(doc(db, 'bookings', booking.id), {
-            meetLink: result.meetLink,
-            eventId: result.eventId
-          });
-          
-          setModalMessage(result.message || 'Google Meet meeting created successfully! Share the Meet link with participants.');
-          setModalType('success');
-          setModalOpen(true);
-        } else {
-          // Server returned calendar fallback
-          setModalMessage(result.message || 'API not configured. Using calendar fallback.');
-          setModalType('warning');
-          setModalOpen(true);
-          window.open(result.meetLink, '_blank');
-        }
-      } else {
-        throw new Error(result.error || 'Failed to create meeting');
-      }
-    } catch (error) {
-      console.error('Error creating meeting:', error);
-      
-      // Show error and suggest using calendar method instead
-      setModalMessage('Failed to create automatic meeting. Please use "Create Calendar Event" instead or check if the server is running.');
-      setModalType('error');
-      setModalOpen(true);
-    }
-  };
 
   const createCalendarEvent = (booking: Booking) => {
     // Create a Google Calendar event with Meet integration (fallback method)
@@ -453,12 +384,6 @@ This meeting will include Google Meet integration.`;
           {filtered.map(booking => {
             const role = getBookingRole(booking);
             const otherPartyName = getOtherPartyName(booking);
-            const mentorEmail = booking.mentorEmail;
-            const menteeEmail = booking.menteeEmail;
-            const canAutoCreate = mentorEmail && menteeEmail;
-            const autoCreateTooltip = (!mentorEmail || !menteeEmail)
-              ? 'Mentor and mentee emails missing for this booking'
-              : 'Create automatic Google Meet meeting via API';
             return (
               <tr key={booking.id} className="mentor-animate-row" style={{ background: booking.status === 'cancelled' ? 'rgba(255,68,68,0.07)' : undefined, transition: 'background 0.2s', cursor: 'pointer' }}
                 onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,179,0,0.08)'; (e.currentTarget as HTMLElement).style.transform = 'scale(1.012)'; }}
@@ -479,24 +404,13 @@ This meeting will include Google Meet integration.`;
                   {booking.status !== 'cancelled' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {booking.status === 'confirmed' && (
-                        <>
-                          <button
-                            onClick={() => generateGoogleMeetLink(booking)}
-                            disabled={!canAutoCreate}
-                            style={{ background: 'linear-gradient(135deg, #4285f4 0%, #34a853 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: canAutoCreate ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(66, 133, 244, 0.3)', opacity: canAutoCreate ? 1 : 0.5 }}
-                            title={autoCreateTooltip}
-                          >
-                            <FaVideo style={{ fontSize: '14px' }} />
-                            Auto Create Meet
-                          </button>
-                          <button
-                            onClick={() => createCalendarEvent(booking)}
-                            style={{ background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)' }}
-                            title="Create calendar event with Google Meet integration"
-                          >
-                            📅 Create Calendar Event
-                          </button>
-                        </>
+                        <button
+                          onClick={() => createCalendarEvent(booking)}
+                          style={{ background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)' }}
+                          title="Set up Google Meet via calendar event"
+                        >
+                          📅 Set up Google Meet
+                        </button>
                       )}
                       {booking.status === 'pending' && (
                         <>
@@ -532,22 +446,6 @@ This meeting will include Google Meet integration.`;
                       >
                         Delete
                       </button>
-                      <button
-                            onClick={() => generateGoogleMeetLink(booking)}
-                            disabled={!canAutoCreate}
-                            style={{ background: 'linear-gradient(135deg, #4285f4 0%, #34a853 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: canAutoCreate ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(66, 133, 244, 0.3)', opacity: canAutoCreate ? 1 : 0.5 }}
-                            title={autoCreateTooltip}
-                          >
-                            <FaVideo style={{ fontSize: '14px' }} />
-                            Auto Create Meet
-                          </button>
-                          <button
-                            onClick={() => createCalendarEvent(booking)}
-                            style={{ background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)' }}
-                            title="Create calendar event with Google Meet integration"
-                          >
-                            📅 Create Calendar Event
-                          </button>
                     </div>
                   )}
                 </td>
