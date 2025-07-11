@@ -357,12 +357,153 @@ const religionOptions = [
   'Personal Religion/Philosophy', 'Other'
 ];
 
+// Mentor and Mentee Archetype definitions
+const mentorArchetypes = [
+  {
+    key: 'random',
+    label: 'Random Mentor',
+  },
+  {
+    key: 'tech_mentor',
+    label: 'Tech Mentor',
+    type: 'mentor',
+    professions: [
+      'Software Engineer', 'Data Scientist', 'DevOps Engineer', 'Cloud Architect', 'AI/ML Engineer', 'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'QA Engineer', 'Mobile App Developer',
+    ],
+    skills: [
+      'Programming', 'Cloud Computing', 'Machine Learning', 'Web Development', 'Python', 'JavaScript', 'DevOps', 'Database Design', 'Cybersecurity', 'AI/ML Engineer',
+    ],
+    educationLevels: ["Bachelor's Degree", "Master's Degree", 'Doctorate/PhD'],
+    degrees: ['BSc Computer Science', 'MSc Computer Science', 'BSc Engineering', 'MSc Engineering'],
+    hobbies: ['Programming', 'Gaming', 'Reading', 'Web Development', '3D Printing', 'Electronics'],
+    industries: ['Technology', 'Software', 'Engineering'],
+    ageRange: [28, 55],
+  },
+  {
+    key: 'business_mentor',
+    label: 'Business Mentor',
+    type: 'mentor',
+    professions: ['Business Analyst', 'Project Manager', 'Accountant', 'Financial Analyst', 'Management Consultant', 'Venture Capitalist'],
+    skills: ['Project Management', 'Business Strategy', 'Finance', 'Leadership', 'Team Management', 'Negotiation'],
+    educationLevels: ["Bachelor's Degree", "Master's Degree"],
+    degrees: ['BSc Business', 'MBA', 'BSc Finance'],
+    hobbies: ['Networking', 'Reading', 'Traveling', 'Public Speaking'],
+    industries: ['Business', 'Finance', 'Consulting'],
+    ageRange: [30, 60],
+  },
+  {
+    key: 'healthcare_mentor',
+    label: 'Healthcare Mentor',
+    type: 'mentor',
+    professions: ['Doctor', 'Nurse', 'Pharmacist', 'Dentist', 'Clinical Psychologist'],
+    skills: ['Healthcare Management', 'Communication', 'Leadership', 'Research Methods'],
+    educationLevels: ["Master's Degree", 'Doctorate/PhD'],
+    degrees: ['MBBS', 'BSc Nursing', 'MSc Healthcare'],
+    hobbies: ['Volunteering', 'Reading', 'Sports', 'Cooking'],
+    industries: ['Healthcare', 'Medicine'],
+    ageRange: [32, 65],
+  },
+  {
+    key: 'creative_mentor',
+    label: 'Creative Mentor',
+    type: 'mentor',
+    professions: ['Art Director', 'Creative Director', 'Graphic Designer', 'Animator', 'Music Producer'],
+    skills: ['Graphic Design', 'Video Editing', 'Music Production', 'Content Creation', 'Drawing', 'Painting'],
+    educationLevels: ["Bachelor's Degree", "Master's Degree"],
+    degrees: ['BA Arts', 'BA Design', 'MA Animation'],
+    hobbies: ['Drawing', 'Music', 'Photography', 'Digital Art', 'Film Making'],
+    industries: ['Creative', 'Media', 'Design'],
+    ageRange: [28, 55],
+  },
+  {
+    key: 'entrepreneur_mentor',
+    label: 'Entrepreneur Mentor',
+    type: 'mentor',
+    professions: ['Entrepreneur', 'Business Owner', 'Startup Founder', 'Venture Capitalist'],
+    skills: ['Entrepreneurship', 'Business Strategy', 'Leadership', 'Finance', 'Public Speaking'],
+    educationLevels: ["Bachelor's Degree", "Master's Degree"],
+    degrees: ['BSc Business', 'MBA'],
+    hobbies: ['Networking', 'Traveling', 'Reading', 'Mentoring'],
+    industries: ['Business', 'Startups', 'Finance'],
+    ageRange: [30, 65],
+  },
+];
+
+const menteeArchetypes = [
+  {
+    key: 'random',
+    label: 'Random Mentee',
+  },
+  {
+    key: 'creative_mentee',
+    label: 'Creative Mentee',
+    type: 'mentee',
+    professions: ['Student', 'Content Creator', 'Graphic Designer', 'UI Designer', 'Animator'],
+    skills: ['Graphic Design', 'Video Editing', 'Social Media', 'Content Creation', 'Drawing', 'Painting'],
+    educationLevels: ['A-Levels', "Bachelor's Degree", 'BTEC'],
+    degrees: ['BA Arts', 'BA Design', 'BA Animation'],
+    hobbies: ['Drawing', 'Music', 'Social Media', 'Photography', 'Digital Art'],
+    industries: ['Creative', 'Media', 'Design'],
+    ageRange: [16, 25],
+  },
+  {
+    key: 'stem_student',
+    label: 'STEM Student',
+    type: 'mentee',
+    professions: ['Student'],
+    skills: ['Mathematics', 'Physics', 'Programming', 'Data Science', 'Chemistry'],
+    educationLevels: ['A-Levels', 'BTEC', "Bachelor's Degree"],
+    degrees: ['BSc Physics', 'BSc Mathematics', 'BSc Computer Science'],
+    hobbies: ['Science', 'Gaming', 'Reading', 'Programming'],
+    industries: ['Science', 'Technology'],
+    ageRange: [15, 25],
+  },
+  {
+    key: 'business_mentee',
+    label: 'Business Mentee',
+    type: 'mentee',
+    professions: ['Student', 'Intern', 'Junior Analyst', 'Junior Accountant'],
+    skills: ['Business Analysis', 'Finance', 'Excel', 'Teamwork', 'Communication'],
+    educationLevels: ['A-Levels', "Bachelor's Degree", 'BTEC'],
+    degrees: ['BSc Business', 'BSc Finance'],
+    hobbies: ['Networking', 'Reading', 'Traveling', 'Public Speaking'],
+    industries: ['Business', 'Finance', 'Consulting'],
+    ageRange: [17, 27],
+  },
+  {
+    key: 'healthcare_mentee',
+    label: 'Healthcare Mentee',
+    type: 'mentee',
+    professions: ['Student', 'Nursing Student', 'Medical Student', 'Pharmacy Student'],
+    skills: ['Biology', 'Chemistry', 'Communication', 'Teamwork'],
+    educationLevels: ['A-Levels', 'BTEC', "Bachelor's Degree"],
+    degrees: ['BSc Biology', 'BSc Nursing', 'BSc Medicine'],
+    hobbies: ['Volunteering', 'Reading', 'Sports', 'Cooking'],
+    industries: ['Healthcare', 'Medicine'],
+    ageRange: [17, 27],
+  },
+  {
+    key: 'aspiring_entrepreneur',
+    label: 'Aspiring Entrepreneur',
+    type: 'mentee',
+    professions: ['Student', 'Intern', 'Startup Enthusiast'],
+    skills: ['Entrepreneurship', 'Business Strategy', 'Networking', 'Public Speaking'],
+    educationLevels: ['A-Levels', "Bachelor's Degree", 'BTEC'],
+    degrees: ['BSc Business', 'BSc Marketing'],
+    hobbies: ['Networking', 'Traveling', 'Reading', 'Mentoring'],
+    industries: ['Business', 'Startups', 'Marketing'],
+    ageRange: [17, 27],
+  },
+];
+
 export default function GenerateRandomProfile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [count, setCount] = useState(1);
   const [type, setType] = useState<'mentor' | 'mentee'>('mentor');
+  const [useArchetype, setUseArchetype] = useState(false);
+  const [archetype, setArchetype] = useState('random');
 
   const getRandomElement = <T,>(array: T[]): T => {
     return array[Math.floor(Math.random() * array.length)];
@@ -379,38 +520,74 @@ export default function GenerateRandomProfile() {
   };
 
   const generateRandomProfile = (): MentorMenteeProfile => {
+    let archetypeList = type === 'mentor' ? mentorArchetypes : menteeArchetypes;
+    const selectedArchetype = archetypeList.find(a => a.key === archetype);
+    if (!useArchetype || !selectedArchetype || archetype === 'random') {
+      const firstName = getRandomElement(firstNames);
+      const lastName = getRandomElement(lastNames);
+      const age = Math.floor(Math.random() * 43) + 18; // 18-60 years old
+      const skills = getRandomSkills();
+      const lookingFor = getRandomSkills();
+      const industries = getRandomElements(industriesList, Math.floor(Math.random() * 3) + 1);
+
+      // Filter education levels based on type
+      const availableEducationLevels = type === 'mentee' 
+        ? ukEducationLevels.filter(level => [
+            'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
+          ].includes(level))
+        : ukEducationLevels;
+
+      return {
+        name: `${firstName} ${lastName}`,
+        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+        phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+        age: age.toString(),
+        degree: `${getRandomElement(['BSc', 'BA', 'MSc', 'MA'])} ${getRandomElement(['Computer Science', 'Business', 'Engineering', 'Arts', 'Science'])}`,
+        educationLevel: getRandomElement(availableEducationLevels),
+        county: getRandomElement(ukCounties),
+        profession: getRandomElement(professions),
+        pastProfessions: getRandomElements(professions, Math.floor(Math.random() * 3) + 1),
+        linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
+        hobbies: getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2),
+        ethnicity: getRandomElement(ethnicityOptions),
+        religion: getRandomElement(religionOptions),
+        skills: type === 'mentor' ? skills : [],
+        lookingFor: type === 'mentee' ? lookingFor : [],
+        industries,
+        type,
+        isGenerated: true,
+      };
+    }
+    // Archetype-based generation
     const firstName = getRandomElement(firstNames);
     const lastName = getRandomElement(lastNames);
-    const age = Math.floor(Math.random() * 43) + 18; // 18-60 years old
-    const skills = getRandomSkills();
-    const lookingFor = getRandomSkills();
-    const industries = getRandomElements(industriesList, Math.floor(Math.random() * 3) + 1);
-
-    // Filter education levels based on type
-    const availableEducationLevels = type === 'mentee' 
-      ? ukEducationLevels.filter(level => [
-          'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
-        ].includes(level))
-      : ukEducationLevels;
-
+    const age = Math.floor(Math.random() * (selectedArchetype.ageRange[1] - selectedArchetype.ageRange[0] + 1)) + selectedArchetype.ageRange[0];
+    const skills = getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2);
+    const lookingFor = selectedArchetype.type === 'mentee' ? getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2) : [];
+    const industries = getRandomElements(selectedArchetype.industries!, 1);
+    const degree = getRandomElement(selectedArchetype.degrees!);
+    const educationLevel = getRandomElement(selectedArchetype.educationLevels!);
+    const profession = getRandomElement(selectedArchetype.professions!);
+    const hobbiesList = getRandomElements(selectedArchetype.hobbies!, Math.floor(Math.random() * 3) + 1);
     return {
       name: `${firstName} ${lastName}`,
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
       phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       age: age.toString(),
-      degree: `${getRandomElement(['BSc', 'BA', 'MSc', 'MA'])} ${getRandomElement(['Computer Science', 'Business', 'Engineering', 'Arts', 'Science'])}`,
-      educationLevel: getRandomElement(availableEducationLevels),
+      degree,
+      educationLevel,
       county: getRandomElement(ukCounties),
-      profession: getRandomElement(professions),
-      pastProfessions: getRandomElements(professions, Math.floor(Math.random() * 3) + 1),
+      profession,
+      pastProfessions: [],
       linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
-      hobbies: getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2),
+      hobbies: hobbiesList,
       ethnicity: getRandomElement(ethnicityOptions),
       religion: getRandomElement(religionOptions),
-      skills: type === 'mentor' ? skills : [],
-      lookingFor: type === 'mentee' ? lookingFor : [],
-      industries: industries,
-      type
+      skills: selectedArchetype.type === 'mentor' ? skills : [],
+      lookingFor,
+      industries,
+      type: selectedArchetype.type as 'mentor' | 'mentee',
+      isGenerated: "true",
     };
   };
 
@@ -453,6 +630,15 @@ export default function GenerateRandomProfile() {
             >
               <FaUserGraduate /> Mentees
             </button>
+            <label style={{ marginLeft: 16, fontWeight: 600, fontSize: 15 }}>
+              <input type="checkbox" checked={useArchetype} onChange={e => setUseArchetype(e.target.checked)} style={{ marginRight: 6 }} />
+              Use Archetype/Persona
+            </label>
+            {useArchetype && (
+              <select value={archetype} onChange={e => setArchetype(e.target.value)} style={{ marginLeft: 16, padding: '0.6rem 1.2rem', borderRadius: 8, fontWeight: 600, fontSize: 15 }}>
+                {(type === 'mentor' ? mentorArchetypes : menteeArchetypes).map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
+              </select>
+            )}
           </div>
         </div>
       </div>

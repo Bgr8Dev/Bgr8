@@ -338,6 +338,57 @@
   text-align: center;
 }
 
+.stat-animated-number-container {
+  position: relative;
+  height: 56px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-animated-number {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+  will-change: opacity;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.stat-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.stat-visible {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
+.stat-split {
+  opacity: 0;
+}
+
+.stat-real {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  line-height: 1.1;
+}
+
+.stat-generated {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #00c8ff;
+  display: block;
+  line-height: 1.1;
+}
+
 @media (max-width: 768px) {
   .mentor-management {
     padding: 1rem;
