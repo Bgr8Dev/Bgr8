@@ -820,7 +820,7 @@
 .match-card {
   background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
   border-radius: 16px;
-  padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+  padding: 2.5rem 1.2rem 1.2rem 1.2rem;
   box-shadow: 0 2px 12px rgba(255,42,42,0.10);
   border: 1.5px solid #3a0a0a;
   color: #fff;
@@ -909,48 +909,53 @@
 .match-card-reasons {
   margin-top: 0.5rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
 }
-.match-card-reason {
-  background: rgba(255,42,42,0.13);
-  border-left: 4px solid #ff2a2a;
-  border-radius: 8px;
+.match-card-reason-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 1.1em 0.45em 0.9em;
+  border-radius: 999px;
+  font-size: 1.01rem;
+  font-weight: 600;
+  border: 2px solid transparent;
+  background: #222;
   color: #fff;
-  padding: 0.5rem 1rem;
-  font-size: 0.97rem;
-  font-weight: 500;
-  box-shadow: 0 1px 4px rgba(255,42,42,0.07);
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 0.2rem;
-  margin-bottom: 0.2rem;
-  max-width: 100%;
-  box-sizing: border-box;
-  transition: background 0.22s, color 0.22s, box-shadow 0.22s, transform 0.18s;
   cursor: pointer;
   position: relative;
-}
-.match-card-reason:hover, .match-card-reason:focus {
-  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
-  transform: scale(1.04) translateY(-2px);
-  border-left: 4px solid #fff;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s, transform 0.13s;
   outline: none;
+  min-width: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-.match-card-reason:active {
-  background: #a80000;
+.match-card-reason-badge:hover, .match-card-reason-badge:focus {
+  background: #181818;
   color: #fff;
-  transform: scale(0.98) translateY(1px);
-  box-shadow: 0 1px 4px rgba(255,42,42,0.10);
-  border-left: 4px solid #ff2a2a;
+  border-color: #fff;
+  box-shadow: 0 2px 8px rgba(255,42,42,0.13);
+  z-index: 2;
+  transform: scale(1.06) translateY(-2px);
 }
-.match-card-tooltip {
+.match-card-reason-icon {
+  font-size: 1.15em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.match-card-reason-label {
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: inherit;
+}
+.match-card-reason-badge .match-card-tooltip {
   display: none;
   position: absolute;
   left: 50%;
-  bottom: 110%;
+  bottom: 120%;
   transform: translateX(-50%);
   background: rgba(24, 24, 24, 0.98);
   color: #fff;
@@ -969,14 +974,15 @@
   max-width: 320px;
   text-align: left;
 }
-.match-card-reason:hover .match-card-tooltip,
-.match-card-reason:focus .match-card-tooltip,
-.match-card-reason:active .match-card-tooltip {
+.match-card-reason-badge:hover .match-card-tooltip,
+.match-card-reason-badge:focus .match-card-tooltip,
+.match-card-reason-badge:active .match-card-tooltip {
   display: block;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(-4px) scale(1.03);
 }
+
 @media (max-width: 600px) {
   .match-card {
     padding: 1rem 0.5rem 0.8rem 0.5rem;
@@ -990,6 +996,19 @@
   .match-card-reason {
     font-size: 0.93rem;
     padding: 0.4rem 0.7rem;
+  }
+  .match-card-avatar-wrapper {
+    bottom: 10px;
+    right: 10px;
+    left: auto;
+    top: auto;
+    width: 28px;
+    height: 28px;
+  }
+  .match-card-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
   }
 }
 
@@ -2306,4 +2325,52 @@
 .top-match-bronze .top-match-watermark {
   color: #cd7f32cc;
   text-shadow: 0 2px 12px #cd7f32, 0 0 8px #fff;
+}
+
+.match-card-avatar-wrapper {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 12;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.match-card-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #222;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  border: 2px solid #181818;
+  letter-spacing: 1px;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  object-fit: cover;
+  text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+  .match-card-avatar-wrapper {
+    right: 10px;
+    bottom: 10px;
+    left: auto;
+    top: auto;
+    width: 28px;
+    height: 28px;
+  }
+  .match-card-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
 }

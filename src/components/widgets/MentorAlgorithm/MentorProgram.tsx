@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './MentorProgram.css';
 import { db } from '../../../firebase/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
+import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaHandshake, FaQuestionCircle } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
 import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
@@ -422,6 +422,48 @@ export default function MentorProgram() {
     "PhD": "e.g. PhD in Molecular Biology",
     "Other": "e.g. Diploma in Marketing",
   };
+
+  // Map reason keywords to icon and color
+  const reasonIconMap: { [key: string]: { icon: React.ReactNode; color: string } } = {
+    skill: { icon: <FaBrain />, color: '#00e676' },
+    professional: { icon: <FaUserTie />, color: '#ffb300' },
+    hobby: { icon: <FaRegSmile />, color: '#ff6f00' },
+    county: { icon: <FaMapMarkerAlt />, color: '#42a5f5' },
+    education: { icon: <FaGraduationCap />, color: '#ab47bc' },
+    experience: { icon: <FaChartLine />, color: '#00bcd4' },
+    age: { icon: <FaUserFriends />, color: '#ff2a2a' },
+    top: { icon: <FaStar />, color: '#ffd700' },
+    default: { icon: <FaQuestionCircle />, color: '#888' },
+  };
+  // Helper to get icon/color for a reason
+  function getReasonBadgeProps(reason: string) {
+    const r = reason.toLowerCase();
+    if (r.includes('skill')) return reasonIconMap.skill;
+    if (r.includes('professional')) return reasonIconMap.professional;
+    if (r.includes('hobby')) return reasonIconMap.hobby;
+    if (r.includes('county')) return reasonIconMap.county;
+    if (r.includes('education')) return reasonIconMap.education;
+    if (r.includes('experience')) return reasonIconMap.experience;
+    if (r.includes('age')) return reasonIconMap.age;
+    if (r.includes('top')) return reasonIconMap.top;
+    return reasonIconMap.default;
+  }
+
+  // Helper: get initials from name
+  function getInitials(name: string) {
+    if (!name) return '';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  // Helper: get color from string (name/email)
+  function getAvatarColor(str: string) {
+    // Simple hash to HSL
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 45%)`;
+  }
 
   return (
     <section className="mentor-program-widget">
@@ -917,6 +959,16 @@ export default function MentorProgram() {
               else if (idx === 2) topClass = 'top-match-bronze';
               return (
                 <div className={`match-card ${topClass}`} key={idx} onClick={() => { setModalUser(user); setModalOpen(true); }} style={{ cursor: 'pointer', position: 'relative' }}>
+                  {/* Avatar/Profile Picture */}
+                  <div className="match-card-avatar-wrapper">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name + ' avatar'} className="match-card-avatar" />
+                    ) : (
+                      <div className="match-card-avatar" style={{ background: getAvatarColor(user.name || user.email) }}>
+                        {getInitials(user.name)}
+                      </div>
+                    )}
+                  </div>
                   {(idx < 3) && (
                     <div className="top-match-watermark">Top Match</div>
                   )}
@@ -960,12 +1012,21 @@ export default function MentorProgram() {
                     </div>
                   </div>
                   <div className="match-card-reasons">
-                    {match.reasons.map((reason, i) => (
-                      <div className="match-card-reason" key={i} tabIndex={0}>
-                        {reason}
-                        <span className="match-card-tooltip">{getReasonTooltip(reason, match, user, currentUserProfile)}</span>
-                      </div>
-                    ))}
+                    {match.reasons.map((reason, i) => {
+                      const { icon, color } = getReasonBadgeProps(reason);
+                      return (
+                        <div
+                          className="match-card-reason-badge"
+                          key={i}
+                          tabIndex={0}
+                          style={{ background: color + '22', borderColor: color, color }}
+                        >
+                          <span className="match-card-reason-icon" style={{ color }}>{icon}</span>
+                          <span className="match-card-reason-label">{reason}</span>
+                          <span className="match-card-tooltip">{getReasonTooltip(reason, match, user, currentUserProfile)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                   {user.type === 'mentor' && currentUserProfile?.type === 'mentee' && (
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
