@@ -1,8 +1,8 @@
-# �� Contributing to B8 Platform
+# 🤝 Contributing to bgr8 Platform
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-> 💡 We love your input! We want to make contributing to B8 Platform as easy and transparent as possible.
+> 💡 We love your input! We want to make contributing to bgr8 Platform as easy and transparent as possible.
 
 <details>
 <summary>📖 Table of Contents</summary>
@@ -62,7 +62,7 @@ graph LR
 
 ## 🐞 Bug Reports
 
-> **Note:** Please use our [issue template](https://github.com/Hum2a/B8/issues/new?template=bug_report.md) when reporting bugs.
+> **Note:** Please use our [issue template](https://github.com/Hum2a/bgr8/issues/new?template=bug_report.md) when reporting bugs.
 
 A great bug report should include:
 
@@ -155,6 +155,6 @@ By contributing, you agree that your contributions will be licensed under the [M
 
 <div align="center">
 
-**Thank you for contributing to B8 Platform! 🎉**
+**Thank you for contributing to bgr8 Platform! 🎉**
 
 </div> 

@@ -6,7 +6,7 @@ import { signOut } from 'firebase/auth';
 import { useAuth } from '../../contexts/AuthContext';
 // import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/Navbar.css';
-import logo from '../../assets/B8-logo-transparent.png';
+import logo from '../../assets/bgr8-logo-transparent.png';
 
 export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -25,7 +25,7 @@ export default function Navbar() {
     <header className="header">
       <h1 className="logo">
         <Link to="/">
-          <img src={logo} alt="B8 Logo" />
+          <img src={logo} alt="Bgr8 Logo" />
         </Link>
       </h1>
 

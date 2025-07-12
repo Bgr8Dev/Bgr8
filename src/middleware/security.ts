@@ -74,8 +74,8 @@ export const validateRequest = (req: Request, res: Response, next: NextFunction)
 // CORS middleware
 export const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const allowedOrigins = [
-    'https://b8network.co.uk',
-    'https://www.b8network.co.uk'
+    'https://bgr8.uk',
+    'https://www.bgr8.uk'
   ];
 
   const origin = req.headers.origin;

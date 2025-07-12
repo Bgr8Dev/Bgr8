@@ -10,7 +10,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-section footer-logo-section">
-          <h3 className="footer-logo">B8</h3>
+          <h3 className="footer-logo">Bgr8</h3>
           <p className="footer-tagline">Automotive Excellence</p>
           <div className="footer-social">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
@@ -41,9 +41,9 @@ export default function Footer() {
         <div className="footer-section footer-businesses">
           <h4>Our Businesses</h4>
           <nav>
-            <Link to="/b8-car-club">B8 Car Club</Link>
-            <Link to="/b8-league">B8 League</Link>
-            <Link to="/b8-shop">B8 Shop</Link>
+            <Link to="/bgr8-car-club">bgr8 Car Club</Link>
+            <Link to="/bgr8-league">bgr8 League</Link>
+            <Link to="/bgr8-shop">bgr8 Shop</Link>
           </nav>
         </div>
         
@@ -52,14 +52,14 @@ export default function Footer() {
           <address>
             <p>123 Automotive Street</p>
             <p>London, UK</p>
-            <p>Email: info@b8.com</p>
+            <p>Email: info@bgr8.com</p>
             <p>Phone: +44 123 456 7890</p>
           </address>
         </div>
       </div>
       
       <div className="footer-bottom">
-        <p className="copyright">&copy; {currentYear} B8. All rights reserved.</p>
+        <p className="copyright">&copy; {currentYear} bgr8. All rights reserved.</p>
         <div className="footer-legal">
           <Link to="/privacy-policy">Privacy Policy</Link>
           <Link to="/terms-of-service">Terms of Service</Link>

@@ -6,7 +6,7 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://b8network.co.uk/</loc>
+    <loc>https://bgr8network.co.uk/</loc>
     <lastmod>2023-06-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,63 +14,27 @@
 
   <!-- Business Units -->
   <url>
-    <loc>https://b8network.co.uk/b8-marketing</loc>
+    <loc>https://bgr8.uk/bgr8-marketing</loc>
     <lastmod>2023-06-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://b8network.co.uk/bgr8</loc>
+    <loc>https://bgr8.uk/bgr8</loc>
     <lastmod>2023-06-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://b8network.co.uk/b8-car-club</loc>
-    <lastmod>2023-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://b8network.co.uk/b8-clothing</loc>
-    <lastmod>2023-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://b8network.co.uk/b8-league</loc>
-    <lastmod>2023-06-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://b8network.co.uk/b8-world</loc>
-    <lastmod>2023-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://b8network.co.uk/bgr8r</loc>
-    <lastmod>2023-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://b8network.co.uk/b8-podcast</loc>
-    <lastmod>2023-06-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
 
   <!-- Authentication Pages (for SEO visibility only) -->
   <url>
-    <loc>https://b8network.co.uk/signin</loc>
+    <loc>https://bgr8.uk/signin</loc>
     <lastmod>2023-06-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://b8network.co.uk/register</loc>
+    <loc>https://bgr8.uk/register</loc>
     <lastmod>2023-06-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

@@ -38,7 +38,7 @@ export function AdminEnquiries() {
   useEffect(() => {
     if (currentEnquiry) {
       setResponseSubject(`RE: Enquiry from ${currentEnquiry.source}`);
-      setResponseMessage(`Dear ${currentEnquiry.name},\n\nThank you for your enquiry regarding "${currentEnquiry.message}".\n\n\n\nBest regards,\nB8 Team`);
+      setResponseMessage(`Dear ${currentEnquiry.name},\n\nThank you for your enquiry regarding "${currentEnquiry.message}".\n\n\n\nBest regards,\nbgr8 Team`);
     }
   }, [currentEnquiry]);
 

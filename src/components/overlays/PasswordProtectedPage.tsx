@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/PasswordProtectedPage.css';
 import { FaUnlock, FaExclamationTriangle } from 'react-icons/fa';
-import B8Logo from '../../assets/B8-logo-transparent.png';
+import bgr8Logo from '../../assets/bgr8-logo-transparent.png';
 
 interface PasswordProtectedPageProps {
   businessId: string;
@@ -79,7 +79,7 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
   const isCarClub = businessId === 'carClub';
   
   // Custom messages for Car Club
-  const carClubMessage = 'Welcome to the exclusive B8 Car Club area. Please enter your membership password to access premium content.';
+  const carClubMessage = 'Welcome to the exclusive bgr8 Car Club area. Please enter your membership password to access premium content.';
   
   const handleLogoClick = () => {
     setLogoClicked(true);
@@ -94,11 +94,11 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
     <div className={`protected-password-container ${isCarClub ? 'carclub-password-protected' : ''}`}>
       <div className="protected-password-overlay">
         <div className="protected-password-content">
-          <div className="b8-logo-container">
+          <div className="bgr8-logo-container">
             <img 
-              src={B8Logo} 
-              alt="B8 Logo" 
-              className={`b8-logo ${logoClicked ? 'logo-pulse' : ''}`}
+              src={bgr8Logo} 
+              alt="bgr8 Logo" 
+              className={`bgr8-logo ${logoClicked ? 'logo-pulse' : ''}`}
               onClick={handleLogoClick}
             />
             
@@ -118,7 +118,7 @@ export const PasswordProtectedPage: React.FC<PasswordProtectedPageProps> = ({
             </form>
           </div>
           
-          <h2>{isCarClub ? 'B8 Car Club Access' : 'Password Protected'}</h2>
+          <h2>{isCarClub ? 'bgr8 Car Club Access' : 'Password Protected'}</h2>
           
           <p className="protected-password-message">
             {customMessage || (isCarClub ? carClubMessage : 'This page is password protected. Please enter the password to continue.')}

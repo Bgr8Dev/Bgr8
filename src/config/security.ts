@@ -17,8 +17,8 @@ export const API_SECURITY = {
   },
   MAX_PAYLOAD_SIZE: 10 * 1024, // 10KB
   ALLOWED_ORIGINS: [
-    'https://b8network.co.uk',
-    'https://www.b8network.co.uk'
+    'https://bgr8.uk',
+    'https://www.bgr8.uk'
   ],
   ALLOWED_METHODS: ['GET', 'POST', 'PUT', 'DELETE']
 };

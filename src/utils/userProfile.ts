@@ -52,8 +52,8 @@ export interface UserProfile {
     timezone: string;
   };
 
-  // B8 Platform Specific
-  b8Memberships?: {
+  // bgr8 Platform Specific
+  bgr8Memberships?: {
     marketing?: boolean;
     carClub?: boolean;
     clothing?: boolean;
@@ -152,7 +152,7 @@ export const createUserProfile = async (
       currency: 'GBP',
       timezone: 'UTC'
     },
-    b8Memberships: {
+    bgr8Memberships: {
       marketing: false,
       carClub: false,
       clothing: false,

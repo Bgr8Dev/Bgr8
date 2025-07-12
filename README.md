@@ -1,4 +1,4 @@
-# B8 Platform
+# bgr8 Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
@@ -8,10 +8,10 @@
 [![Stripe](https://img.shields.io/badge/Stripe-Latest-blue.svg)](https://stripe.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)  
 
-[![Linting](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
-[![CodeQL](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)
+[![Linting](https://github.com/Hum2a/bgr8/actions/workflows/lint.yml/badge.svg)](https://github.com/Hum2a/bgr8/actions/workflows/lint.yml/badge.svg)
+[![CodeQL](https://github.com/Hum2a/bgr8/actions/workflows/code_quality.yml/badge.svg)](https://github.com/Hum2a/bgr8/actions/workflows/code_quality.yml/badge.svg)
 
-> **B8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
+> **bgr8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
 
 <details>
 <summary>📖 Table of Contents</summary>
@@ -34,7 +34,7 @@
 
 ## 🎯 Overview
 
-B8 Platform is dedicated to empowering individuals through the BGr8 community and a robust mentoring program. The platform now focuses exclusively on:
+bgr8 Platform is dedicated to empowering individuals through the BGr8 community and a robust mentoring program. The platform now focuses exclusively on:
 
 | Unit | Description | Status |
 |------|-------------|--------|
@@ -97,8 +97,8 @@ Before you begin, ensure you have:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Hum2a/B8.git
-   cd B8
+   git clone https://github.com/Hum2a/bgr8.git
+   cd bgr8
    ```
 
 2. **Install dependencies:**
@@ -225,7 +225,7 @@ npm run test:ci
 <summary>View project structure</summary>
 
 ```
-B8/
+bgr8/
 ├── src/
 │   ├── components/         # React components
 │   ├── pages/              # Page components

@@ -6,7 +6,7 @@ import { signOut } from 'firebase/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/HamburgerMenu.css';
-import logo from '../../assets/B8-logo-transparent.png';
+import logo from '../../assets/bgr8-logo-transparent.png';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function HamburgerMenu() {
     <div className="hamburger-menu">
       <div className="hamburger-header">
         <Link to="/" className="hamburger-logo">
-          <img src={logo} alt="B8 Logo" />
+          <img src={logo} alt="Bgr8 Logo" />
         </Link>
         <button 
           className={`hamburger-button ${isOpen ? 'open' : ''}`}

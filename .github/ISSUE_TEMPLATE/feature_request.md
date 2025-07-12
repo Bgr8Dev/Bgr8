@@ -7,23 +7,37 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## 🎯 Feature Request
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+### 📝 Description
+<!-- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+### 💡 Proposed Solution
+<!-- A clear and concise description of what you want to happen. -->
 
-**Business Unit**
-Which B8 Network business unit would this feature be for? (e.g., B8 League, Innov8, B8 Car Club, etc.)
+### 🔄 Alternative Solutions
+<!-- A clear and concise description of any alternative solutions or features you've considered. -->
 
-**Target Users**
-Who would benefit from this feature? (e.g., regular users, business members, administrators)
+### 🏢 Business Unit
+Which bgr8 Network business unit would this feature be for? (e.g., bgr8 League, Innov8, bgr8 Car Club, etc.)
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+### 📱 Mobile Considerations
+<!-- Does this feature need to work on mobile devices? Any specific mobile requirements? -->
 
-**Implementation Considerations**
-Any technical considerations or potential challenges you foresee in implementing this feature. 
+### 🔒 Security Considerations
+<!-- Are there any security implications for this feature? -->
+
+### 📊 Impact Assessment
+<!-- What is the expected impact of this feature? (High/Medium/Low) -->
+
+### 🎨 UI/UX Considerations
+<!-- Any specific UI/UX requirements or mockups? -->
+
+### 📚 Documentation
+<!-- Will this feature require documentation updates? -->
+
+### 🧪 Testing Requirements
+<!-- What kind of testing will be needed for this feature? -->
+
+### 📋 Additional Context
+<!-- Add any other context, screenshots, or mockups about the feature request here. --> 

@@ -1,47 +1,75 @@
-## Description
+## 📋 Pull Request Checklist
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
-
-Fixes # (issue)
-
-## Type of change
-
-Please delete options that are not relevant.
-
+### 🎯 Type of Change
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+- [ ] Documentation update
+- [ ] Performance improvement
+- [ ] Refactoring (no functional changes)
 
-## Business Unit Impact
-
-- [ ] B8 League
-- [ ] Innov8
-- [ ] B8 Car Club
-- [ ] B8 Clothing
+### 🏢 Business Unit
 - [ ] BGr8
-- [ ] Multiple/All Units
+- [ ] bgr8 League
+- [ ] bgr8 Car Club
+- [ ] bgr8 Clothing
+- [ ] General Platform
+- [ ] Admin/Backend
 
-## How Has This Been Tested?
+### 🧪 Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+- [ ] Mobile responsiveness tested
+- [ ] Cross-browser compatibility verified
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration.
+### 📱 Mobile Optimization
+- [ ] Responsive design implemented
+- [ ] Touch interactions optimized
+- [ ] Performance on mobile devices tested
+- [ ] Accessibility features maintained
 
-- [ ] Test A
-- [ ] Test B
+### 🔒 Security
+- [ ] No security vulnerabilities introduced
+- [ ] Input validation implemented
+- [ ] Authentication/authorization maintained
+- [ ] Data protection measures in place
 
-## Checklist:
+### 📚 Documentation
+- [ ] Code comments added/updated
+- [ ] README updated if necessary
+- [ ] API documentation updated if applicable
+- [ ] User-facing documentation updated
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
+### 🚀 Deployment
+- [ ] Environment variables updated if needed
+- [ ] Database migrations handled
+- [ ] Build process tested
+- [ ] Deployment checklist completed
+
+## 📝 Description
+
+<!-- Provide a detailed description of the changes -->
+
+## 🔗 Related Issues
+
+<!-- Link to any related issues -->
+
+## 🎯 Testing Instructions
+
+<!-- Provide step-by-step instructions for testing -->
+
+## 📸 Screenshots (if applicable)
+
+<!-- Add screenshots for UI changes -->
+
+## ✅ Checklist
+
+- [ ] My code follows the project's style guidelines
+- [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
-- [ ] I have checked my code and corrected any misspellings
-- [ ] I have updated the CHANGELOG.md file
-
-## Screenshots (if appropriate):
-
-## Additional Notes: 
+- [ ] Any dependent changes have been merged and published in downstream modules 

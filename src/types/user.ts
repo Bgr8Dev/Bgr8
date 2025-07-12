@@ -38,7 +38,7 @@ export interface UserProfile {
   security: UserSecurity;
   privacy: UserPrivacy;
   
-  b8Memberships: {
+  bgr8Memberships: {
     marketing: boolean;
     carClub: boolean;
     clothing: boolean;
@@ -100,7 +100,7 @@ export const createUserProfile = async (
       fontSize: 'medium',
       colorScheme: 'default'
     },
-    b8Memberships: {
+    bgr8Memberships: {
       marketing: false,
       carClub: false,
       clothing: false,

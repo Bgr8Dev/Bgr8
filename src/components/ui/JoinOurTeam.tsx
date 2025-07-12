@@ -167,7 +167,7 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
       });
       const cvUrl = await getDownloadURL(uploadResult.ref);
 
-      // Create CV document in B8Marketing collection
+      // Create CV document in bgr8Marketing collection
       const cvData = {
         ...cvForm,
         cvUrl,
@@ -180,8 +180,8 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
         source: 'marketing'
       };
 
-      // Store CV data in B8Marketing collection using name as document ID
-      const cvDocRef = doc(collection(db, 'B8Marketing', 'careers', 'applications'), cvForm.name);
+      // Store CV data in bgr8Marketing collection using name as document ID
+      const cvDocRef = doc(collection(db, 'bgr8Marketing', 'careers', 'applications'), cvForm.name);
       await setDoc(cvDocRef, cvData);
 
       // Update user profile if logged in

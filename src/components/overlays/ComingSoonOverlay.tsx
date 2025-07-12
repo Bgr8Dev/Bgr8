@@ -29,18 +29,18 @@ export const ComingSoonOverlay: React.FC<ComingSoonOverlayProps> = ({
     switch(businessId) {
       case 'marketing':
         return 'Our marketing solutions are coming soon! Stay tuned for innovative strategies to boost your brand.';
-      case 'carClub':
-        return 'B8 Car Club is revving up! Check back soon for exclusive events and car enthusiast community features.';
-      case 'clothing':
-        return 'B8 Clothing line is currently in development. Exciting new styles will be available soon!';
-      case 'league':
-        return 'B8 League is getting ready for kickoff! Sports and esports content coming soon.';
-      case 'world':
-        return 'B8 World initiatives are under development. Our global impact projects will be launching soon!';
+      case 'bgr8-car-club':
+        return 'bgr8 Car Club is revving up! Check back soon for exclusive events and car enthusiast community features.';
+      case 'bgr8-clothing':
+        return 'bgr8 Clothing line is currently in development. Exciting new styles will be available soon!';
+      case 'bgr8-league':
+        return 'bgr8 League is getting ready for kickoff! Sports and esports content coming soon.';
+      case 'bgr8-world':
+        return 'bgr8 World initiatives are under development. Our global impact projects will be launching soon!';
       case 'bgr8r':
         return 'Bgr8r programs are being developed. Learn with us soon!';
-      case 'podcast':
-        return 'B8 Podcast portal is under construction. Exciting episodes will be available soon!';
+      case 'bgr8-podcast':
+        return 'bgr8 Podcast portal is under construction. Exciting episodes will be available soon!';
       case 'bgr8':
         return 'BGr8 features are coming soon! Join our community to be part of something great.';
       default:

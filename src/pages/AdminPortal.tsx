@@ -19,7 +19,7 @@ interface UserData {
   admin: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
-  b8Memberships?: Record<string, boolean>;
+  bgr8Memberships?: Record<string, boolean>;
   [key: string]: unknown; // For other potential properties
 }
 
