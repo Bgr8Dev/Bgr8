@@ -8,9 +8,8 @@
 [![Stripe](https://img.shields.io/badge/Stripe-Latest-blue.svg)](https://stripe.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)  
 
-[![Static Linting](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
-[![Code Quality](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)
-[![Security Scan](https://github.com/Hum2a/B8/actions/workflows/security.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/security.yml/badge.svg)
+[![Linting](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
+[![CodeQL](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)
 
 > **B8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
 
