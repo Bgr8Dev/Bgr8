@@ -6,13 +6,13 @@
 [![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-yellow.svg)](https://vitejs.dev/)
 [![Stripe](https://img.shields.io/badge/Stripe-Latest-blue.svg)](https://stripe.com)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)  
+
+[![Static Linting](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
+[![Code Quality](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)
+[![Security Scan](https://github.com/Hum2a/B8/actions/workflows/security.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/security.yml/badge.svg)
 
 > **B8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
-
-![Static Linting](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
-![Code Quality](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)
-![Security Scan](https://github.com/Hum2a/B8/actions/workflows/security.yml/badge.svg)
 
 <details>
 <summary>📖 Table of Contents</summary>
