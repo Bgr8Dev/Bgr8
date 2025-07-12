@@ -2,9 +2,9 @@ name: Security Scan
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   schedule:
     - cron: '0 0 * * 0'  # Run weekly on Sundays
 
@@ -21,10 +21,9 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: npm install
       
     - name: Run npm audit
       run: npm audit
@@ -41,13 +40,16 @@ jobs:
         args: --severity-threshold=high
 
     - name: Upload security scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: snyk.sarif
       if: always()
 
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
       with:
         languages: javascript
-      if: always() 
+      if: always()
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3

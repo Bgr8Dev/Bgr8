@@ -126,7 +126,7 @@ Before you begin, ensure you have:
    ```
 </details>
 
-## 🚀 Deployment
+## 🚀 Local Deployment
 
 <details>
 <summary>Deployment instructions</summary>
@@ -164,7 +164,46 @@ Required environment variables:
 | `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret (server) | ✅ |
 </details>
 
-## 🧪 Testing
+## 🏷️ Release Tag Manager (`release.sh`)
+A cross-platform bash script for managing semantic versioned release tags in Git repositories.
+
+### Prerequisites
+- Git installed and configured
+- Remote repository set up (`origin`)
+- Bash shell (works on Linux/macOS/Git Bash for Windows)
+#### Alias Bash in Windows Powershell
+```bash
+Set-Alias -Name bash -Value "<absolute_path_to_git_installtion>\bin\bash.exe"  # e.g: C:\Program Files\Git\bin\bash.exe
+```
+
+### Usage
+- Linux/MacOS
+```bash
+./release.sh [OPTIONS]
+```
+- Windows
+```bash
+bash release.sh [OPTIONS]
+```
+
+#### Options
+| Flag | Description |
+|------|-------------|
+| `--major` | Increment major version (vX.0.0) |
+| `--minor` | Increment minor version (v0.X.0) |
+| `--patch` | Increment patch version (v0.0.X) (default) |
+| `--name NAME` | Append custom name (e.g., `--name beta` → v1.0.0-beta) |
+| `--set-tag TAG` | Set specific tag (must be vX.Y.Z format) |
+| `--current` | Show current release tag |
+| `--force` | Force tag creation on already-tagged commits |
+| `--help` | Show this help message |
+
+### Behavior
+1. Always syncs with remote tags first
+2. Validates tag format (vX.Y.Z or vX.Y.Z-NAME)
+3. Prevents duplicate tags
+
+## 🧪 Testing (WIP)
 
 ```bash
 # Run unit tests
