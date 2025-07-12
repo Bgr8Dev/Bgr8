@@ -210,3 +210,57 @@
     grid-template-columns: 1fr;
   }
 } 
+
+@media (max-width: 600px) {
+  .admin-analytics {
+    padding: 0.5rem;
+  }
+  .analytics-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .metrics-cards {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .metric-card {
+    padding: 0.7rem 0.5rem;
+    font-size: 1rem;
+  }
+  .analytics-row {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .analytics-card {
+    padding: 0.7rem 0.5rem;
+    min-width: 0;
+  }
+  .chart-container, .pie-chart-container {
+    height: 180px;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .events-table {
+    overflow-x: auto;
+  }
+  .events-table table {
+    min-width: 480px;
+    font-size: 0.97rem;
+  }
+  .analytics-note {
+    padding: 0.7rem;
+    font-size: 0.97rem;
+  }
+  .time-range-button {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+  .admin-analytics h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.7rem;
+  }
+} 

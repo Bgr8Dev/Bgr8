@@ -359,3 +359,52 @@
     justify-content: flex-end;
   }
 } 
+
+@media (max-width: 600px) {
+  .bgr8r-admin-container {
+    padding: 8px;
+  }
+  .bgr8r-admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+  .bgr8r-admin-actions button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 1rem;
+    margin-top: 4px;
+  }
+  .bgr8r-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .bgr8r-stat-card {
+    padding: 1rem 0.7rem;
+    font-size: 1rem;
+    text-align: left;
+  }
+  .bgr8r-programs-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .bgr8r-program-card {
+    padding: 1rem 0.7rem;
+    font-size: 1rem;
+  }
+  .bgr8r-program-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 8px 0.7rem;
+  }
+  .bgr8r-program-actions button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 1rem;
+    margin-top: 4px;
+  }
+} 

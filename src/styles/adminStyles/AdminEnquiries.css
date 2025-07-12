@@ -237,6 +237,63 @@
   }
 }
 
+@media (max-width: 600px) {
+  .enquiries-container {
+    padding: 0.5rem 0;
+  }
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .stat-card {
+    padding: 1rem 0.7rem;
+    font-size: 1rem;
+  }
+  .enquiries-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .filter-buttons {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  .search-input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.7rem 0.5rem;
+  }
+  .enquiries-table {
+    overflow-x: auto;
+    border-radius: 8px;
+  }
+  .enquiries-table table {
+    min-width: 600px;
+    font-size: 0.97rem;
+  }
+  .enquiries-details {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .enquiry-detail-card {
+    padding: 1rem 0.7rem;
+    font-size: 1rem;
+  }
+  .action-button, .cancel-button, .send-button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 1rem;
+    margin-top: 0.3rem;
+  }
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+  .modal-content {
+    padding: 0.7rem;
+  }
+}
+
 /* Modal Styling */
 .modal-overlay {
   position: fixed;

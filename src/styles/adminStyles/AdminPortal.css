@@ -639,12 +639,67 @@ th {
 
 /* Responsive badge and button tweaks */
 @media (max-width: 600px) {
-  .admin-badge {
-    font-size: 0.95rem;
-    padding: 0.25em 0.7em 0.25em 0.6em;
+  .admin-portal {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 60px;
+    background: #222;
+    border-radius: 0 0 10px 10px;
+  }
+  .admin-nav {
+    flex-direction: row;
+    gap: 0.3rem;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  .admin-nav-item {
+    font-size: 0.98rem;
+    padding: 0.7rem 0.7rem;
+    border-radius: 6px;
+    min-width: 90px;
+    justify-content: center;
+  }
+  .admin-content {
+    padding: 0.7rem 0.2rem;
+  }
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .stat-card {
+    padding: 1rem 0.7rem;
+    font-size: 1rem;
+  }
+  .users-table {
+    overflow-x: auto;
+    border-radius: 8px;
+  }
+  table {
+    min-width: 600px;
+    font-size: 0.97rem;
+  }
+  th, td {
+    padding: 0.7rem 0.5rem;
+  }
+  .search-bar input[type="text"] {
+    font-size: 0.98rem;
+    padding: 0.5em 0.7em;
+    margin-bottom: 0.7em;
   }
   .toggle-admin-btn {
     font-size: 0.95rem;
     padding: 0.4em 0.7em;
+  }
+  .admin-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
   }
 } 
