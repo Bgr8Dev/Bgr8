@@ -7,7 +7,6 @@ import ContactForm from '../../components/ui/ContactForm';
 import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
 import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
-import BroBot from '../../components/widgets/brobot/BroBot';
 import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgram';
 
 export default function BGr8() {
@@ -85,7 +84,6 @@ export default function BGr8() {
           </section>
 
           <Footer />
-          <BroBot />
         </div>
       </ComingSoonOverlay>
     </PasswordProtectedPage>
