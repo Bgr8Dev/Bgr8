@@ -1,0 +1,32 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: '**'
+
+jobs:
+  quality:
+    name: Code Analysis
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+      if: always()
+
+    - name: CodeQL Security Scan
+      uses: github/codeql-action/analyze@v3
+      with:
+        languages: javascript
+        fail-on: warning

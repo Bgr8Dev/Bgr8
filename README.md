@@ -6,7 +6,10 @@
 [![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-yellow.svg)](https://vitejs.dev/)
 [![Stripe](https://img.shields.io/badge/Stripe-Latest-blue.svg)](https://stripe.com)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)  
+
+[![Linting](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
+[![CodeQL](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)](https://github.com/Hum2a/B8/actions/workflows/code_quality.yml/badge.svg)
 
 > **B8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
 
@@ -126,7 +129,7 @@ Before you begin, ensure you have:
    ```
 </details>
 
-## 🚀 Deployment
+## 🚀 Local Deployment
 
 <details>
 <summary>Deployment instructions</summary>
@@ -164,7 +167,46 @@ Required environment variables:
 | `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret (server) | ✅ |
 </details>
 
-## 🧪 Testing
+## 🏷️ Release Tag Manager (`release.sh`)
+A cross-platform bash script for managing semantic versioned release tags in Git repositories.
+
+### Prerequisites
+- Git installed and configured
+- Remote repository set up (`origin`)
+- Bash shell (works on Linux/macOS/Git Bash for Windows)
+#### Alias Bash in Windows Powershell
+```bash
+Set-Alias -Name bash -Value "<absolute_path_to_git_installtion>\bin\bash.exe"  # e.g: C:\Program Files\Git\bin\bash.exe
+```
+
+### Usage
+- Linux/MacOS
+```bash
+./release.sh [OPTIONS]
+```
+- Windows
+```bash
+bash release.sh [OPTIONS]
+```
+
+#### Options
+| Flag | Description |
+|------|-------------|
+| `--major` | Increment major version (vX.0.0) |
+| `--minor` | Increment minor version (v0.X.0) |
+| `--patch` | Increment patch version (v0.0.X) (default) |
+| `--name NAME` | Append custom name (e.g., `--name beta` → v1.0.0-beta) |
+| `--set-tag TAG` | Set specific tag (must be vX.Y.Z format) |
+| `--current` | Show current release tag |
+| `--force` | Force tag creation on already-tagged commits |
+| `--help` | Show this help message |
+
+### Behavior
+1. Always syncs with remote tags first
+2. Validates tag format (vX.Y.Z or vX.Y.Z-NAME)
+3. Prevents duplicate tags
+
+## 🧪 Testing (WIP)
 
 ```bash
 # Run unit tests
