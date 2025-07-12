@@ -1,4 +1,4 @@
-name: Code Quality
+name: Lint
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   quality:
-    name: Code Analysis
+    name: Lint
     runs-on: ubuntu-latest
     
     permissions:
@@ -26,16 +26,4 @@ jobs:
       run: npm install
 
     - name: Run ESLint
-      run: npx eslint . --ext .js,.jsx,.ts,.tsx --quiet
-      continue-on-error: true
-    
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: javascript
-      if: always()
-
-    - name: CodeQL Security Scan
-      uses: github/codeql-action/analyze@v3
-      with:
-        languages: javascript
+      run: npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
