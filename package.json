@@ -12,7 +12,7 @@
     "security:fix": "npm audit fix",
     "security:snyk": "snyk test",
     "security:snyk-fix": "snyk wizard",
-    "security:lint": "eslint . -c .eslintrc.security.json",
+    "security:lint": "eslint . -c .eslintrc.security.cjs",
     "security:all": "npm run security:audit && npm run security:snyk && npm run security:lint"
   },
   "dependencies": {
