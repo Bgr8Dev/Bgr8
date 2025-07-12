@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './MentorProgram.css';
 import { db } from '../../../firebase/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle } from 'react-icons/fa';
+import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle, FaSyncAlt } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import MentorProfile from './MentorProfile';
 import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
@@ -932,15 +932,19 @@ export default function MentorProgram() {
             background: 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
             color: '#fff',
             border: 'none',
-            borderRadius: 8,
+            borderRadius: 24,
             fontWeight: 700,
             fontSize: '1rem',
             cursor: loadingMatches ? 'not-allowed' : 'pointer',
             boxShadow: '0 2px 12px rgba(255,42,42,0.15)',
             transition: 'background 0.2s, transform 0.2s',
-            opacity: loadingMatches ? 0.7 : 1
+            opacity: loadingMatches ? 0.7 : 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 10
           }}
         >
+          <FaSyncAlt style={{ fontSize: 20, marginRight: 4, verticalAlign: 'middle', animation: loadingMatches ? 'spin 1s linear infinite' : undefined }} />
           {loadingMatches ? 'Refreshing...' : 'Refresh Matches'}
         </button>
         {loadingMatches ? (
