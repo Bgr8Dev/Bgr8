@@ -2448,3 +2448,289 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* --- MOBILE OPTIMIZATIONS FOR MENTOR PAGES --- */
+
+@media (max-width: 480px) {
+  .mentor-program-widget,
+  .mentor-profile,
+  .mentor-availability,
+  .booking-modal,
+  .mentor-modal {
+    padding: 0.7rem 0.2rem !important;
+    margin: 0.5rem auto !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    border-radius: 10px !important;
+  }
+  .mentor-profile-section,
+  .mentor-modal-section {
+    padding: 0.7rem 0.2rem 0.7rem 0.2rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+  .mentor-profile-header h3,
+  .mentor-modal-title {
+    font-size: 1.15rem !important;
+  }
+  .mentor-profile-section h4,
+  .mentor-modal-section h3 {
+    font-size: 1rem !important;
+  }
+  .mentor-profile-field label,
+  .mentor-modal-section b {
+    font-size: 0.98rem !important;
+  }
+  .mentor-profile-value,
+  .mentor-modal-section .field-value {
+    font-size: 0.98rem !important;
+  }
+  .mentor-profile-chip,
+  .mentor-profile-skill-chip,
+  .mentor-profile-hobby-chip,
+  .mentor-profile-industry-chip {
+    font-size: 0.85rem !important;
+    padding: 0.22em 0.5em !important;
+    min-height: 36px;
+  }
+  .mentor-profile-btn-animate,
+  .mentor-profile-edit-btn,
+  .mentor-profile-save-btn,
+  .mentor-profile-cancel-btn,
+  .mentor-add-btn,
+  .mentor-remove-btn,
+  .mentor-skill-toggle,
+  .mentor-modal-close,
+  .booking-modal-close,
+  .booking-modal-confirm-btn {
+    min-height: 44px !important;
+    font-size: 1rem !important;
+    padding: 0.7rem 1.1rem !important;
+  }
+  .mentor-form input,
+  .mentor-form select,
+  .mentor-profile-field input,
+  .mentor-modal input,
+  .mentor-modal select {
+    font-size: 1rem !important;
+    padding: 0.7rem 0.5rem !important;
+    min-height: 44px !important;
+  }
+  .mentor-profile-content,
+  .matches-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.7rem !important;
+  }
+  .mentor-profile-section,
+  .mentor-modal-section {
+    min-width: 0 !important;
+  }
+  .mentor-profile-chips {
+    gap: 0.2rem !important;
+  }
+  .mentor-profile-list {
+    gap: 0.2rem !important;
+  }
+  .mentor-profile-empty,
+  .mentor-profile-loading,
+  .mentor-availability-loading {
+    font-size: 1rem !important;
+    padding: 1rem !important;
+  }
+  .mentor-modal {
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+  }
+  .booking-modal {
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+  }
+  .mentor-modal-section div,
+  .mentor-modal-section a {
+    font-size: 0.95rem !important;
+  }
+  .mentor-modal-linkedin-btn,
+  .mentor-profile-linkedin-btn {
+    font-size: 0.9rem !important;
+    padding: 0.15em 0.4em !important;
+  }
+  .mentor-role-card {
+    min-width: 160px !important;
+    max-width: 98vw !important;
+    padding: 1rem 0.5rem 0.7rem 0.5rem !important;
+  }
+  .mentor-skills-category-title {
+    font-size: 0.95rem !important;
+  }
+  .mentor-skills-toggles {
+    gap: 0.2rem !important;
+  }
+  .mentor-skill-toggle {
+    font-size: 0.9rem !important;
+    padding: 0.4rem 0.7rem !important;
+  }
+  .mentor-form-row {
+    gap: 0.7rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+  .mentor-form-half {
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    gap: 0.7rem !important;
+  }
+  .skills-section {
+    padding: 0.7rem 0.2rem 0.7rem 0.2rem !important;
+  }
+  .mentor-availability-add-section {
+    padding: 0.7rem 0.2rem !important;
+  }
+  .mentor-availability-form-row {
+    gap: 0.5rem !important;
+  }
+  .mentor-availability-slot {
+    font-size: 0.95rem !important;
+    padding: 0.5rem 0.5rem !important;
+  }
+  .booking-modal-slot {
+    font-size: 0.95rem !important;
+    padding: 0.5rem 0.5rem !important;
+  }
+  .mentor-availability-day {
+    padding: 0.7rem 0.2rem !important;
+  }
+  .booking-modal-date {
+    padding: 0.7rem 0.2rem !important;
+  }
+}
+
+/* Make tables horizontally scrollable on small screens */
+@media (max-width: 600px) {
+  .mentor-bookings-table,
+  .mentor-availability-table {
+    display: block;
+    width: 100vw !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.95rem !important;
+  }
+  .mentor-bookings-table thead,
+  .mentor-availability-table thead {
+    display: table-header-group;
+  }
+  .mentor-bookings-table tbody,
+  .mentor-availability-table tbody {
+    display: table-row-group;
+  }
+  .mentor-bookings-table tr,
+  .mentor-availability-table tr {
+    display: table-row;
+  }
+  .mentor-bookings-table th,
+  .mentor-bookings-table td,
+  .mentor-availability-table th,
+  .mentor-availability-table td {
+    min-width: 120px;
+    padding: 0.5rem 0.3rem !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .match-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 1rem 0.5rem 0.7rem 0.5rem !important;
+    min-width: 0 !important;
+    max-width: 98vw !important;
+    width: 100vw !important;
+    border-radius: 10px !important;
+    gap: 0.5rem !important;
+    font-size: 0.97rem !important;
+    box-sizing: border-box !important;
+  }
+  .match-card-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.2rem !important;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .match-card-title {
+    font-size: 1.05rem !important;
+    flex: 1;
+    gap: 0.3rem !important;
+  }
+  .match-card-avatar-wrapper {
+    position: static !important;
+    margin-left: auto;
+    margin-bottom: 0.5rem;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .match-card-info {
+    gap: 0.2rem !important;
+    width: 100%;
+  }
+  .match-card-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.1rem !important;
+    font-size: 0.95rem !important;
+    padding: 0.1rem 0 !important;
+    width: 100%;
+  }
+  .match-card-label {
+    min-width: 0 !important;
+    font-size: 0.97rem !important;
+    margin-bottom: 0.1rem;
+  }
+  .match-card-value {
+    font-size: 0.97rem !important;
+    text-align: left !important;
+    width: 100%;
+    word-break: break-word;
+  }
+  .match-card-reasons {
+    flex-wrap: wrap;
+    gap: 0.3rem !important;
+    margin-top: 0.3rem !important;
+    width: 100%;
+  }
+  .match-card-reason-badge {
+    font-size: 0.93rem !important;
+    padding: 0.3em 0.7em 0.3em 0.7em !important;
+    min-width: 0 !important;
+    width: auto !important;
+    margin-bottom: 0.2rem !important;
+  }
+  .top-match-watermark {
+    font-size: 1.3rem !important;
+    left: 50% !important;
+    top: 10% !important;
+    transform: translate(-50%, 0) rotate(-78deg) !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .match-card .mentor-profile-chip,
+  .match-card .mentor-profile-skill-chip,
+  .match-card .mentor-profile-hobby-chip,
+  .match-card .mentor-profile-industry-chip {
+    font-size: 0.85rem !important;
+    padding: 0.22em 0.5em !important;
+    min-height: 36px;
+  }
+  .match-card button {
+    width: 100% !important;
+    min-height: 44px !important;
+    font-size: 1rem !important;
+    padding: 0.7rem 1.1rem !important;
+    margin-top: 0.5rem !important;
+  }
+}

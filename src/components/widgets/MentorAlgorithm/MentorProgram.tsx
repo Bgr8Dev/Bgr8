@@ -64,6 +64,10 @@ export default function MentorProgram() {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingMentor, setBookingMentor] = useState<MentorMenteeProfile | null>(null);
   const industriesDropdownRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const MATCHES_PER_PAGE = 6;
+  const totalPages = Math.ceil(bestMatches.length / MATCHES_PER_PAGE);
+  const paginatedMatches = bestMatches.slice((currentPage - 1) * MATCHES_PER_PAGE, currentPage * MATCHES_PER_PAGE);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -453,6 +457,11 @@ export default function MentorProgram() {
     if (r.includes('top')) return reasonIconMap.top;
     return reasonIconMap.default;
   }
+
+  // Reset to page 1 if matches change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [bestMatches.length]);
 
   return (
     <section className="mentor-program-widget">
@@ -939,32 +948,34 @@ export default function MentorProgram() {
         ) : bestMatches.length === 0 ? (
           <p>No matches yet. Sign up as a mentor or mentee!</p>
         ) : (
-          <div className="matches-grid">
-            {bestMatches.map((match, idx) => {
-              const user = match.user;
-              let topClass = '';
-              if (idx === 0) topClass = 'top-match-gold';
-              else if (idx === 1) topClass = 'top-match-silver';
-              else if (idx === 2) topClass = 'top-match-bronze';
-              // Animation: fade/slide in, staggered
-              const cardAnimClass = 'match-card-animate';
-              const animDelay = `${idx * 80}ms`;
-              return (
-                <div
-                  className={`match-card ${topClass} ${cardAnimClass}`}
-                  key={idx}
-                  onClick={() => { setModalUser(user); setModalOpen(true); }}
-                  style={{
-                    cursor: 'pointer',
-                    position: 'relative',
-                    animationDelay: animDelay,
-                  }}
-                >
+          <>
+            <div className="matches-grid">
+              {paginatedMatches.map((match, idx) => {
+                const user = match.user;
+                let topClass = '';
+                const globalIdx = (currentPage - 1) * MATCHES_PER_PAGE + idx;
+                if (globalIdx === 0) topClass = 'top-match-gold';
+                else if (globalIdx === 1) topClass = 'top-match-silver';
+                else if (globalIdx === 2) topClass = 'top-match-bronze';
+                // Animation: fade/slide in, staggered
+                const cardAnimClass = 'match-card-animate';
+                const animDelay = `${globalIdx * 80}ms`;
+                return (
+                  <div
+                    className={`match-card ${topClass} ${cardAnimClass}`}
+                    key={globalIdx}
+                    onClick={() => { setModalUser(user); setModalOpen(true); }}
+                    style={{
+                      cursor: 'pointer',
+                      position: 'relative',
+                      animationDelay: animDelay,
+                    }}
+                  >
                   {/* Avatar/Profile Picture */}
                   <div className="match-card-avatar-wrapper">
                     <MatchStrengthRing score={match.score} color={getScoreColor(match.score)} size={60} label="Match Strength" />
                   </div>
-                  {(idx < 3) && (
+                  {(globalIdx < 3) && (
                     <div className="top-match-watermark">Top Match</div>
                   )}
                   <div className="match-card-header">
@@ -1060,6 +1071,41 @@ export default function MentorProgram() {
               );
             })}
           </div>
+            {/* Pagination Controls */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 24 }}>
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                style={{
+                  background: currentPage === 1 ? '#888' : 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '0.7rem 1.5rem',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 1 ? 0.6 : 1
+                }}
+              >Previous</button>
+              <span style={{ color: '#fff', fontWeight: 600, fontSize: '1.05rem' }}>Page {currentPage} of {totalPages}</span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                style={{
+                  background: currentPage === totalPages ? '#888' : 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '0.7rem 1.5rem',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === totalPages ? 0.6 : 1
+                }}
+              >Next</button>
+            </div>
+          </>
         )}
       </div>
       <MentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} />
