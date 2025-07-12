@@ -1,17 +1,19 @@
-name: Linting and Code Qode Quality Check
+name: Linting and Code Quality Check
 
 on:
   push:
     branches: '**'
     tags: '**'
-  pull_request:
-    branches: '**'
 
 jobs:
   lint:
-    name: Setup Node.js
+    name: CodeQL Analysis
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: read
+      security-events: write  # Required for SARIF upload
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
