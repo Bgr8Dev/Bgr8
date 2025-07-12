@@ -1,29 +1,41 @@
-name: Linting and Code Quality Check
+name: Code Quality
 
 on:
   push:
     branches: '**'
-    tags: '**'
 
 jobs:
-  lint:
-    name: CodeQL Analysis
+  quality:
+    name: Code Analysis
     runs-on: ubuntu-latest
     
     permissions:
       contents: read
-      security-events: write  # Required for SARIF upload
+      security-events: write
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run ESLint
+      run: npx eslint . --ext .js,.jsx,.ts,.tsx --quiet
+      continue-on-error: true
+    
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: javascript
       if: always()
 
-    - name: Perform CodeQL Analysis
+    - name: CodeQL Security Scan
       uses: github/codeql-action/analyze@v3
-      if: always()
+      with:
+        languages: javascript

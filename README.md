@@ -10,6 +10,8 @@
 
 > **B8 Platform** is a focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.
 
+![Code Quality](https://github.com/Hum2a/B8/actions/workflows/lint.yml/badge.svg)
+
 <details>
 <summary>📖 Table of Contents</summary>
 
