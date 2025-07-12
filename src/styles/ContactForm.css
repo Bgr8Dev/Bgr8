@@ -287,4 +287,49 @@ textarea:-webkit-autofill:focus {
   .contactForm-form {
     padding: 1.5rem;
   }
+  
+  .contactForm-form-group input,
+  .contactForm-form-group textarea {
+    padding: 0.9rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .contactForm-form button {
+    padding: 1rem 1.8rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contactForm-section {
+    padding: 2.5rem 1rem;
+  }
+
+  .contactForm-section h3 {
+    font-size: 1.8rem;
+  }
+  
+  .contactForm-section > p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .contactForm-form {
+    padding: 1.2rem;
+  }
+  
+  .contactForm-form-group input,
+  .contactForm-form-group textarea {
+    padding: 0.8rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .contactForm-form button {
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .contactForm-form textarea {
+    min-height: 120px;
+  }
 } 

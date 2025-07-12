@@ -121,6 +121,64 @@
   .mentor-program-widget form {
     max-width: 100%;
   }
+  
+  .mentor-program-widget h2 {
+    font-size: 1.8rem;
+  }
+  
+  .mentor-program-widget p {
+    font-size: 0.95rem;
+  }
+  
+  .mentor-program-widget input,
+  .mentor-program-widget select {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .mentor-program-widget button[type="submit"] {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mentor-program-widget {
+    padding: 1rem 0.3rem;
+    margin: 1.5rem auto;
+  }
+  
+  .mentor-program-widget h2 {
+    font-size: 1.6rem;
+  }
+  
+  .mentor-program-widget p {
+    font-size: 0.9rem;
+  }
+  
+  .mentor-program-widget input,
+  .mentor-program-widget select {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.85rem;
+  }
+  
+  .mentor-program-widget button[type="submit"] {
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+  
+  .mentor-role-card {
+    padding: 1.5rem 1rem 1rem 1rem;
+    min-width: 200px;
+  }
+  
+  .mentor-role-card h3 {
+    font-size: 1.3rem;
+  }
+  
+  .mentor-role-card p {
+    font-size: 0.95rem;
+  }
 }
 
 .mentor-role-cards {

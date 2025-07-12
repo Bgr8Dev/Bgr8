@@ -237,34 +237,40 @@
   .mobile-nav a[href="/"]:hover { background-color: #444; color: lightgray; }
   
   /* Responsive Design */
-  @media (max-width: 768px) {
-    .nav {
-      display: none;
-    }
-    .hamburger-menu {
-      display: block;
-    }
-    .auth-buttons {
-      display: none; /* Hide in mobile view, will be shown in hamburger menu */
-    }
-    
-    .mobile-nav {
-      /* ... existing styles ... */
-    }
-    
-    /* Add auth buttons to mobile menu */
-    .mobile-nav .auth-buttons {
-      display: flex;
-      flex-direction: column;
-      margin: 1rem 0;
-      width: 100%;
-    }
-    
-    .mobile-nav .auth-button {
-      width: 100%;
-      text-align: center;
-    }
+@media (max-width: 768px) {
+  .header {
+    padding: 0 1rem;
   }
+  
+  .nav {
+    display: none;
+  }
+  
+  .hamburger-menu {
+    display: block;
+  }
+  
+  .auth-buttons {
+    display: none; /* Hide in mobile view, will be shown in hamburger menu */
+  }
+  
+  .logo img {
+    height: 80px;
+  }
+  
+  .auth-section {
+    margin-left: 1rem;
+  }
+  
+  .user-menu-trigger span {
+    display: none;
+  }
+  
+  .user-menu {
+    right: -10px;
+    min-width: 180px;
+  }
+}
   
   .auth-buttons {
     display: flex;
@@ -384,14 +390,39 @@
   }
   
   @media (max-width: 768px) {
-    .auth-section {
-      margin-left: 1rem;
-    }
-    
-    .user-menu-trigger span {
-      display: none;
-    }
+  .auth-section {
+    margin-left: 1rem;
   }
+  
+  .user-menu-trigger span {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0 0.8rem;
+  }
+  
+  .logo img {
+    height: 70px;
+  }
+  
+  .auth-section {
+    margin-left: 0.5rem;
+  }
+  
+  .user-menu {
+    right: -5px;
+    min-width: 160px;
+  }
+  
+  .user-menu a,
+  .user-menu button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
   
   .admin-link {
     color: #ffd700 !important; /* Gold color to make it stand out */

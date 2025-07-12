@@ -191,6 +191,8 @@
   .footer-container {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 1.5rem;
+    padding: 1.5rem 5%;
   }
   
   .footer-section h4::after {
@@ -205,5 +207,22 @@
   .footer-links a:hover,
   .footer-businesses a:hover {
     transform: none;
+  }
+  
+  .footer-bottom {
+    padding: 1rem 5%;
+  }
+  
+  .footer-legal {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .copyright {
+    font-size: 0.8rem;
+  }
+  
+  .footer-legal a {
+    font-size: 0.8rem;
   }
 } 
