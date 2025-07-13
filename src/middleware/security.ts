@@ -95,7 +95,7 @@ export const corsMiddleware = (req: Request, res: Response, next: NextFunction) 
 };
 
 // Error handling middleware
-export const errorHandler = (error: Error, req: Request, res: Response, _next: NextFunction) => {
+export const errorHandler = (error: Error, req: Request, res: Response) => {
   console.error('Error:', error);
 
   // Generate error ID for tracking

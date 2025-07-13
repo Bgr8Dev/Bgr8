@@ -241,12 +241,14 @@ const AdminAnalytics: React.FC = () => {
       });
 
       // Log an analytics event to record that this data was viewed
-      logEvent(analytics, 'view_user_metrics', {
-        active_users: activeUsers,
-        total_users: totalUsers,
-        new_users: newUsers,
-        time_range: activeTimeRange
-      });
+      if (analytics) {
+        logEvent(analytics, 'view_user_activity_metrics', {
+          active_users: activeUsers,
+          total_users: totalUsers,
+          new_users: newUsers,
+          time_range: activeTimeRange
+        });
+      }
       
     } catch (error) {
       console.error('Error fetching user activity data:', error);
@@ -293,9 +295,11 @@ const AdminAnalytics: React.FC = () => {
       }
       
       // Log that this was viewed
-      logEvent(analytics, 'view_device_metrics', {
-        time_range: activeTimeRange
-      });
+      if (analytics) {
+        logEvent(analytics, 'view_device_metrics', {
+          time_range: activeTimeRange
+        });
+      }
     } catch (error) {
       console.error('Error fetching device data:', error);
     }
@@ -340,9 +344,11 @@ const AdminAnalytics: React.FC = () => {
       }
       
       // Log that this was viewed
-      logEvent(analytics, 'view_location_metrics', {
-        time_range: activeTimeRange
-      });
+      if (analytics) {
+        logEvent(analytics, 'view_location_metrics', {
+          time_range: activeTimeRange
+        });
+      }
     } catch (error) {
       console.error('Error fetching location data:', error);
     }
@@ -362,9 +368,7 @@ const AdminAnalytics: React.FC = () => {
         const testQuery = query(eventsRef, limit(1));
         const testSnapshot = await getDocs(testQuery);
         hasEventsCollection = !testSnapshot.empty;
-      } catch (error) {
-        console.log('No events collection found, using estimated data');
-      }
+      } catch { /* ignore */ }
       
       if (hasEventsCollection) {
         // If we have an events collection, query it
@@ -415,12 +419,12 @@ const AdminAnalytics: React.FC = () => {
       }
       
       // Log that this was viewed
-      logEvent(analytics, 'view_event_metrics', {
-        time_range: activeTimeRange
-      });
-    } catch (error) {
-      console.error('Error fetching event data:', error);
-    }
+      if (analytics) {
+        logEvent(analytics, 'view_event_metrics', {
+          time_range: activeTimeRange
+        });
+      }
+    } catch { /* ignore */ }
   };
 
   // Fetch session data
@@ -440,9 +444,7 @@ const AdminAnalytics: React.FC = () => {
         const testQuery = query(sessionsRef, limit(1));
         const testSnapshot = await getDocs(testQuery);
         hasSessionsCollection = !testSnapshot.empty;
-      } catch (error) {
-        console.log('No sessions collection found, using estimated data');
-      }
+      } catch { /* ignore */ }
       
       if (hasSessionsCollection) {
         // If we have a sessions collection, get session data by day
@@ -463,7 +465,7 @@ const AdminAnalytics: React.FC = () => {
             const sessionsSnapshot = await getDocs(dayQuery);
             
             let totalDuration = 0;
-            let sessionCount = sessionsSnapshot.size;
+            const sessionCount = sessionsSnapshot.size;
             
             sessionsSnapshot.forEach(doc => {
               const sessionData = doc.data();
@@ -512,12 +514,12 @@ const AdminAnalytics: React.FC = () => {
       }
       
       // Log that this was viewed
-      logEvent(analytics, 'view_session_metrics', {
-        time_range: activeTimeRange
-      });
-    } catch (error) {
-      console.error('Error fetching session data:', error);
-    }
+      if (analytics) {
+        logEvent(analytics, 'view_session_metrics', {
+          time_range: activeTimeRange
+        });
+      }
+    } catch { /* ignore */ }
   };
 
   // Fetch revenue data
@@ -536,21 +538,7 @@ const AdminAnalytics: React.FC = () => {
         const testQuery = query(transactionsRef, limit(1));
         const testSnapshot = await getDocs(testQuery);
         hasTransactionsCollection = !testSnapshot.empty;
-      } catch (error) {
-        // Try 'purchases' as an alternative
-        try {
-          const purchasesRef = collection(db, 'purchases');
-          const testPurchasesQuery = query(purchasesRef, limit(1));
-          const testPurchasesSnapshot = await getDocs(testPurchasesQuery);
-          hasTransactionsCollection = !testPurchasesSnapshot.empty;
-          if (hasTransactionsCollection) {
-            // If purchases collection exists, reassign transactionsRef
-            transactionsRef.withConverter = collection(db, 'purchases').withConverter;
-          }
-        } catch (_purchaseError) {
-          console.log('No transactions or purchases collection found, using estimated data');
-        }
-      }
+      } catch { /* ignore */ }
       
       if (hasTransactionsCollection) {
         // If we have a transactions collection, get daily revenue
@@ -615,12 +603,12 @@ const AdminAnalytics: React.FC = () => {
       }
       
       // Log that this was viewed
-      logEvent(analytics, 'view_revenue_metrics', {
-        time_range: activeTimeRange
-      });
-    } catch (error) {
-      console.error('Error fetching revenue data:', error);
-    }
+      if (analytics) {
+        logEvent(analytics, 'view_revenue_metrics', {
+          time_range: activeTimeRange
+        });
+      }
+    } catch { /* ignore */ }
   };
 
   // Helper function to get array of dates between start and end date

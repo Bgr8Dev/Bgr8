@@ -12,9 +12,6 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { validatePassword, validateUserInput, updateLastActivity, handleError } from '../../utils/security';
 
 // Define FirebaseErrorWithCode type to handle Firebase errors
-interface FirebaseErrorWithCode extends Error {
-  code: string;
-}
 
 // Comprehensive list of ethnicities
 const ethnicityOptions = [
