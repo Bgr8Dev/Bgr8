@@ -57,28 +57,26 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
   useEffect(() => {
     if (open && mentor) {
+      const fetchMentorAvailability = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const availabilityDoc = await getDoc(doc(db, 'mentorAvailability', mentor.uid));
+          if (availabilityDoc.exists()) {
+            setAvailability(availabilityDoc.data() as MentorAvailability);
+          } else {
+            setError('This mentor has not set their availability yet.');
+          }
+        } catch (err) {
+          setError('Failed to load mentor availability');
+          console.error('Error fetching availability:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
       fetchMentorAvailability();
     }
   }, [open, mentor]);
-
-  const fetchMentorAvailability = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const availabilityDoc = await getDoc(doc(db, 'mentorAvailability', mentor.uid));
-      if (availabilityDoc.exists()) {
-        setAvailability(availabilityDoc.data() as MentorAvailability);
-      } else {
-        setError('This mentor has not set their availability yet.');
-      }
-    } catch (err) {
-      setError('Failed to load mentor availability');
-      console.error('Error fetching availability:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getAvailableSlotsForDay = (day: string) => {
     if (!availability) return [];
