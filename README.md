@@ -533,9 +533,26 @@ If you discover a security vulnerability, please:
 <sub><b>Hum2a</b></sub>
 </a>
 <br />
-<sub>Lead Developer</sub>
+<sub>Humza Butt</sub>
 </td>
-<!-- Add more contributors here -->
+<td align="center">
+<a href="https://github.com/YakMan101">
+<img src="https://avatars.githubusercontent.com/YakMan101" width="100px;" alt="YakMan101"/>
+<br />
+<sub><b>YakMan101</b></sub>
+</a>
+<br />
+<sub>Shayak Hussain</sub>
+</td>
+<td align="center">
+<a href="https://github.com/aoladuti1">
+<img src="https://avatars.githubusercontent.com/aoladuti1" width="100px;" alt="aoladuti1"/>
+<br />
+<sub><b>aoladuti1</b></sub>
+</a>
+<br />
+<sub>Antonio Oladuti</sub>
+</td>
 </tr>
 </table>
 
