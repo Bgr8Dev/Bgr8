@@ -3,7 +3,7 @@ import './MentorProgram.css';
 import { db } from '../../../firebase/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle, FaSyncAlt } from 'react-icons/fa';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../../hooks/useAuth';
 import MentorProfile from './MentorProfile';
 import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
 import MentorModal from './MentorModal';

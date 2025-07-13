@@ -2,7 +2,7 @@ import { useState, FormEvent, ChangeEvent } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db, storage, auth } from '../../firebase/firebase';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { FaBriefcase, FaUsers, FaRocket, FaFileAlt, FaChevronDown, FaCode, FaVideo, FaUserTie, FaHandshake, FaCheck } from 'react-icons/fa';
 import '../../styles/components/JoinOurTeam.css';
 

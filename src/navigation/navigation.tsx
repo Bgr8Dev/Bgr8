@@ -5,7 +5,7 @@ import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
 import RegisterPage from '../pages/authPages/RegisterPage';
 import ForgotPasswordPage from '../pages/authPages/ForgotPasswordPage';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/animations/LoadingSpinner';
 import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
