@@ -4,17 +4,6 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// For static sites, environment variables must be available at build time
-// Define fallback configurations for development if needed
-const getEnvVariable = (key: string): string => {
-  const value = import.meta.env[key];
-  if (!value && process.env.NODE_ENV === 'development') {
-    console.warn(`Environment variable ${key} is missing. Using empty string as fallback.`);
-    return '';
-  }
-  return value as string;
-};
-
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,

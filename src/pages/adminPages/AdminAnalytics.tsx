@@ -372,7 +372,7 @@ const AdminAnalytics: React.FC = () => {
         const eventsSnapshot = await getDocs(eventsQuery);
         
         const eventCounts: Record<string, number> = {};
-        let latestEvents: Record<string, Timestamp> = {};
+        const latestEvents: Record<string, Timestamp> = {};
         
         eventsSnapshot.forEach(doc => {
           const eventData = doc.data();

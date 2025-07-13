@@ -6,7 +6,7 @@ interface Booking {
   mentorEmail: string;
   menteeName: string;
   menteeEmail: string;
-  sessionDate?: any;
+  sessionDate?: Date | string;
   startTime: string;
   endTime: string;
   status: 'pending' | 'confirmed' | 'cancelled';

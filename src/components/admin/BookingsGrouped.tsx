@@ -6,7 +6,7 @@ interface Booking {
   mentorEmail: string;
   menteeName: string;
   menteeEmail: string;
-  sessionDate?: any;
+  sessionDate?: Date | string;
   startTime: string;
   endTime: string;
   status: 'pending' | 'confirmed' | 'cancelled';
@@ -58,7 +58,7 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
                   <tr key={booking.id}>
                     {groupBy === 'mentor' ? null : <td>{booking.mentorName}</td>}
                     {groupBy === 'mentee' ? null : <td>{booking.menteeName}</td>}
-                    <td>{booking.sessionDate ? (booking.sessionDate.toDate ? booking.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
+                    <td>{booking.sessionDate ? (booking.sessionDate instanceof Date ? booking.sessionDate.toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
                     <td>{booking.startTime} - {booking.endTime}</td>
                     <td>
                       <span style={{

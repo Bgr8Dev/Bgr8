@@ -520,7 +520,7 @@ export default function GenerateRandomProfile() {
   };
 
   const generateRandomProfile = (): MentorMenteeProfile => {
-    let archetypeList = type === 'mentor' ? mentorArchetypes : menteeArchetypes;
+    const archetypeList = type === 'mentor' ? mentorArchetypes : menteeArchetypes;
     const selectedArchetype = archetypeList.find(a => a.key === archetype);
     if (!useArchetype || !selectedArchetype || archetype === 'random') {
       const firstName = getRandomElement(firstNames);

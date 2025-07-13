@@ -6,7 +6,7 @@ interface Booking {
   mentorEmail: string;
   menteeName: string;
   menteeEmail: string;
-  sessionDate?: any;
+  sessionDate?: Date | string;
   startTime: string;
   endTime: string;
   status: 'pending' | 'confirmed' | 'cancelled';
@@ -57,7 +57,7 @@ export default function BookingsTable({ bookings, onView }: BookingsTableProps) 
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
-      let vA: any, vB: any;
+      let vA: string | Date | undefined, vB: string | Date | undefined;
       if (sortField === 'mentor') {
         vA = a.mentorName.toLowerCase(); vB = b.mentorName.toLowerCase();
       } else if (sortField === 'mentee') {
