@@ -36,7 +36,7 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
 };
 
 // Rate limiting middleware
-export const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
+export const rateLimiter = (req: Request, res: Response, _next: NextFunction) => {
   const identifier = req.ip; // Use IP address as identifier
 
   if (!checkApiRateLimit(identifier)) {
@@ -46,11 +46,11 @@ export const rateLimiter = (req: Request, res: Response, next: NextFunction) => 
     });
   }
 
-  next();
+  _next();
 };
 
 // Request validation middleware
-export const validateRequest = (req: Request, res: Response, next: NextFunction) => {
+export const validateRequest = (req: Request, res: Response, _next: NextFunction) => {
   // Validate request method
   const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
   if (!allowedMethods.includes(req.method)) {
@@ -68,7 +68,7 @@ export const validateRequest = (req: Request, res: Response, next: NextFunction)
     return res.status(413).json({ error: 'Request entity too large' });
   }
 
-  next();
+  _next();
 };
 
 // CORS middleware
@@ -95,7 +95,7 @@ export const corsMiddleware = (req: Request, res: Response, next: NextFunction) 
 };
 
 // Error handling middleware
-export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (error: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', error);
 
   // Generate error ID for tracking
