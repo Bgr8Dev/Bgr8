@@ -1,24 +1,9 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
+import { AuthContext } from './AuthContextValue';
 import { auth, db, logAnalyticsEvent } from '../firebase/firebase';
 import { onAuthStateChanged, User, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { UserProfile } from '../utils/userProfile';
-
-export interface AuthContextType {
-  currentUser: User | null;
-  userProfile: UserProfile | null;
-  loading: boolean;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextType>({
-  currentUser: null,
-  userProfile: null,
-  loading: true,
-  changePassword: async () => {},
-  resetPassword: async () => {}
-});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
