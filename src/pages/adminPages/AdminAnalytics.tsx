@@ -105,54 +105,15 @@ const AdminAnalytics: React.FC = () => {
   // Log admin analytics view event with Firebase Analytics
   useEffect(() => {
     // Enable analytics collection (sometimes needed if disabled by default)
-    setAnalyticsCollectionEnabled(analytics, true);
+    if (analytics) {
+      setAnalyticsCollectionEnabled(analytics, true);
 
-    // Log event with Firebase Analytics
-    logEvent(analytics, 'admin_analytics_view', {
-      admin_id: auth.currentUser?.uid || 'unknown',
-      time_range: activeTimeRange
-    });
-  }, [activeTimeRange]);
-
-  // Fetch analytics data based on time range
-  useEffect(() => {
-    const fetchAnalyticsData = async () => {
-      setIsLoading(true);
-      try {
-        // Calculate date range based on activeTimeRange
-        const endDate = new Date();
-        const startDate = new Date();
-        
-        switch (activeTimeRange) {
-          case '7d':
-            startDate.setDate(endDate.getDate() - 7);
-            break;
-          case '30d':
-            startDate.setDate(endDate.getDate() - 30);
-            break;
-          case '90d':
-            startDate.setDate(endDate.getDate() - 90);
-            break;
-        }
-
-        // Fetch Firebase Analytics data
-        await Promise.all([
-          fetchUserActivityData(startDate, endDate),
-          fetchDeviceData(),
-          fetchLocationData(),
-          fetchEventData(),
-          fetchSessionData(startDate, endDate),
-          fetchRevenueData(startDate, endDate)
-        ]);
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching analytics data:', error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchAnalyticsData();
+      // Log event with Firebase Analytics
+      logEvent(analytics, 'admin_analytics_view', {
+        admin_id: auth.currentUser?.uid || 'unknown',
+        time_range: activeTimeRange
+      });
+    }
   }, [activeTimeRange]);
 
   // Fetch user activity data using Firestore as a data source
@@ -673,6 +634,47 @@ const AdminAnalytics: React.FC = () => {
       }
     }
   };
+
+  // Fetch analytics data based on time range
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      setIsLoading(true);
+      try {
+        // Calculate date range based on activeTimeRange
+        const endDate = new Date();
+        const startDate = new Date();
+        
+        switch (activeTimeRange) {
+          case '7d':
+            startDate.setDate(endDate.getDate() - 7);
+            break;
+          case '30d':
+            startDate.setDate(endDate.getDate() - 30);
+            break;
+          case '90d':
+            startDate.setDate(endDate.getDate() - 90);
+            break;
+        }
+
+        // Fetch Firebase Analytics data
+        await Promise.all([
+          fetchUserActivityData(startDate, endDate),
+          fetchDeviceData(),
+          fetchLocationData(),
+          fetchEventData(),
+          fetchSessionData(startDate, endDate),
+          fetchRevenueData(startDate, endDate)
+        ]);
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching analytics data:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, [activeTimeRange, fetchDeviceData, fetchEventData, fetchLocationData, fetchRevenueData, fetchSessionData, fetchUserActivityData]);
 
   return (
     <div className="admin-analytics">

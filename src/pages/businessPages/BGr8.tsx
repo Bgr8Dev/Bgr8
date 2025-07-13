@@ -4,9 +4,7 @@ import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
-import { ComingSoonOverlay } from '../../components/overlays/ComingSoonOverlay';
 import SocialChannels from '../../components/ui/SocialChannels';
-import { PasswordProtectedPage } from '../../components/overlays/PasswordProtectedPage';
 import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgram';
 
 export default function BGr8() {
@@ -19,8 +17,6 @@ export default function BGr8() {
   }, []);
 
   return (
-    <PasswordProtectedPage businessId="bgr8">
-      <ComingSoonOverlay businessId="bgr8">
         <div className="bgr8-page">
           {isMobile ? <HamburgerMenu /> : <Navbar />}
 
@@ -85,7 +81,5 @@ export default function BGr8() {
 
           <Footer />
         </div>
-      </ComingSoonOverlay>
-    </PasswordProtectedPage>
   );
 }
