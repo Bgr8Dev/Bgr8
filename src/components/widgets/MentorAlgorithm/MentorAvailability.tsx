@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { FaClock, FaTrash, FaSearch, FaFileExport, FaCopy, FaCalendarAlt, FaSyncAlt } from 'react-icons/fa';
 import './MentorProgram.css';
@@ -83,11 +83,11 @@ export default function MentorAvailability() {
   }, [currentUser]);
 
   // Add slot (recurring or specific)
-  const addTimeSlot = () => {
-    if (!availability) return;
+  const addTimeSlot = async () => {
+    if (!availability || !currentUser) return;
     
     if (bulkMode) {
-      addBulkTimeSlots();
+      await addBulkTimeSlots();
       return;
     }
     
@@ -126,13 +126,32 @@ export default function MentorAvailability() {
       setError('This time slot already exists');
       return;
     }
-    setAvailability(prev => prev ? { ...prev, timeSlots: [...prev.timeSlots, newSlot] } : null);
-    setError(null);
+
+    try {
+      const updatedAvailability = { 
+        ...availability, 
+        timeSlots: [...availability.timeSlots, newSlot],
+        lastUpdated: new Date()
+      };
+      
+      // Save to Firebase
+      await setDoc(doc(db, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      
+      // Update local state
+      setAvailability(updatedAvailability);
+      setError(null);
+      setModalMessage('Time slot added successfully!');
+      setModalType('success');
+      setModalOpen(true);
+    } catch (err) {
+      console.error('Error saving time slot:', err);
+      setError('Failed to save time slot. Please try again.');
+    }
   };
 
   // Add bulk time slots
-  const addBulkTimeSlots = () => {
-    if (!availability) return;
+  const addBulkTimeSlots = async () => {
+    if (!availability || !currentUser) return;
     
     const duration = parseInt(meetingDuration);
     const startTime = new Date(`2000-01-01T${bulkStartTime}:00`);
@@ -198,12 +217,27 @@ export default function MentorAvailability() {
       setError('No new time slots could be created (all may already exist)');
       return;
     }
-    
-    setAvailability(prev => prev ? { ...prev, timeSlots: [...prev.timeSlots, ...newSlots] } : null);
-    setError(null);
-    setModalMessage(`Successfully created ${newSlots.length} time slots!`);
-    setModalType('success');
-    setModalOpen(true);
+
+    try {
+      const updatedAvailability = { 
+        ...availability, 
+        timeSlots: [...availability.timeSlots, ...newSlots],
+        lastUpdated: new Date()
+      };
+      
+      // Save to Firebase
+      await setDoc(doc(db, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      
+      // Update local state
+      setAvailability(updatedAvailability);
+      setError(null);
+      setModalMessage(`Successfully created ${newSlots.length} time slots!`);
+      setModalType('success');
+      setModalOpen(true);
+    } catch (err) {
+      console.error('Error saving bulk time slots:', err);
+      setError('Failed to save time slots. Please try again.');
+    }
   };
 
   // Remove slot with confirmation
@@ -211,11 +245,31 @@ export default function MentorAvailability() {
     setSlotToRemove(slot);
     setConfirmOpen(true);
   };
-  const confirmRemoveSlot = () => {
-    if (!availability || !slotToRemove) return;
-    setAvailability(prev => prev ? { ...prev, timeSlots: prev.timeSlots.filter(s => s.id !== slotToRemove.id) } : null);
-    setSlotToRemove(null);
-    setConfirmOpen(false);
+  
+  const confirmRemoveSlot = async () => {
+    if (!availability || !slotToRemove || !currentUser) return;
+    
+    try {
+      const updatedAvailability = { 
+        ...availability, 
+        timeSlots: availability.timeSlots.filter(s => s.id !== slotToRemove.id),
+        lastUpdated: new Date()
+      };
+      
+      // Save to Firebase
+      await setDoc(doc(db, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      
+      // Update local state
+      setAvailability(updatedAvailability);
+      setSlotToRemove(null);
+      setConfirmOpen(false);
+      setModalMessage('Time slot removed successfully!');
+      setModalType('success');
+      setModalOpen(true);
+    } catch (err) {
+      console.error('Error removing time slot:', err);
+      setError('Failed to remove time slot. Please try again.');
+    }
   };
 
   // Filtering, sorting, search
