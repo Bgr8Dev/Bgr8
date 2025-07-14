@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../firebase/firebase';
-import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
 import GenerateRandomProfile from './GenerateRandomProfile';
-import { FaSync } from 'react-icons/fa';
+import { FaSync, FaClock, FaUser, FaCalendarAlt } from 'react-icons/fa';
 import MentorModal from '../widgets/MentorAlgorithm/MentorModal';
 import '../../styles/adminStyles/MentorManagement.css';
 import BookingsTable from './BookingsTable';
@@ -13,24 +13,46 @@ import BookingsGrouped from './BookingsGrouped';
 // Add Booking interface for admin view
 interface Booking {
   id: string;
-  mentorId: string;
-  menteeId: string;
   mentorName: string;
-  menteeName: string;
   mentorEmail: string;
+  menteeName: string;
   menteeEmail: string;
-  day: string;
+  sessionDate?: Date | string;
   startTime: string;
   endTime: string;
   status: 'pending' | 'confirmed' | 'cancelled';
-  createdAt: Date | string | number;
-  sessionDate?: Date | string | number;
   meetLink?: string;
   eventId?: string;
 }
 
+// Add Availability interfaces for admin view
+interface TimeSlot {
+  id: string;
+  day?: string; // For recurring
+  date?: string; // For specific date (YYYY-MM-DD)
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+  type: 'recurring' | 'specific';
+}
+
+interface MentorAvailability {
+  mentorId: string;
+  timeSlots: TimeSlot[];
+  lastUpdated: Date;
+}
+
+interface MentorAvailabilityWithProfile extends MentorAvailability {
+  mentorProfile?: MentorMenteeProfile;
+}
+
 interface MentorMenteeProfileWithId extends MentorMenteeProfile {
   id: string;
+}
+
+type FirestoreTimestamp = { toDate: () => Date };
+function isFirestoreTimestamp(val: unknown): val is FirestoreTimestamp {
+  return !!val && typeof val === 'object' && typeof (val as { toDate?: unknown }).toDate === 'function';
 }
 
 export default function MentorManagement() {
@@ -45,7 +67,7 @@ export default function MentorManagement() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<MentorMenteeProfileWithId | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [tab, setTab] = useState<'users' | 'bookings'>('users');
+  const [tab, setTab] = useState<'users' | 'bookings' | 'availability'>('users');
   // Bookings state
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
@@ -55,7 +77,15 @@ export default function MentorManagement() {
   const [groupBy, setGroupBy] = useState<'mentor' | 'mentee'>('mentor');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedAvailability, setSelectedAvailability] = useState<MentorAvailabilityWithProfile | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  // Availability state
+  const [availabilityData, setAvailabilityData] = useState<MentorAvailabilityWithProfile[]>([]);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [availabilitySearch, setAvailabilitySearch] = useState('');
+  const [availabilityStatusFilter, setAvailabilityStatusFilter] = useState<'all' | 'available' | 'booked'>('all');
+  const [availabilityTypeFilter, setAvailabilityTypeFilter] = useState<'all' | 'recurring' | 'specific'>('all');
 
   // Add state for sorting and searching
   const [userSortField, setUserSortField] = useState<'name' | 'type' | 'email' | 'profession' | 'education' | 'county'>('name');
@@ -98,15 +128,62 @@ export default function MentorManagement() {
     setBookingsError(null);
     try {
       const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
-      const bookingsData = bookingsSnapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id
-      })) as Booking[];
+      const bookingsData = bookingsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          mentorName: data.mentorName || 'Unknown',
+          mentorEmail: data.mentorEmail || 'No email',
+          menteeName: data.menteeName || 'Unknown',
+          menteeEmail: data.menteeEmail || 'No email',
+          sessionDate: data.sessionDate,
+          startTime: data.startTime || '',
+          endTime: data.endTime || '',
+          status: data.status || 'pending',
+          meetLink: data.meetLink,
+          eventId: data.eventId
+        } as Booking;
+      });
       setBookings(bookingsData);
     } catch {
       setBookingsError('Failed to load bookings');
     } finally {
       setLoadingBookings(false);
+    }
+  };
+
+  // Fetch availability data when tab is switched to 'availability'
+  const fetchAvailability = async () => {
+    setLoadingAvailability(true);
+    setAvailabilityError(null);
+    try {
+      const availabilitySnapshot = await getDocs(collection(db, 'mentorAvailability'));
+      const availabilityData = availabilitySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        mentorId: doc.id
+      })) as MentorAvailabilityWithProfile[];
+      
+      // Fetch mentor profiles to enrich the data
+      const enrichedData = await Promise.all(
+        availabilityData.map(async (availability) => {
+          try {
+            const mentorDoc = await getDoc(doc(db, 'mentorProgram', availability.mentorId));
+            if (mentorDoc.exists()) {
+              availability.mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+            }
+          } catch (err) {
+            console.error(`Error fetching mentor profile for ${availability.mentorId}:`, err);
+          }
+          return availability;
+        })
+      );
+      
+      setAvailabilityData(enrichedData);
+    } catch (err) {
+      console.error('Error fetching availability:', err);
+      setAvailabilityError('Failed to load availability data');
+    } finally {
+      setLoadingAvailability(false);
     }
   };
 
@@ -118,6 +195,13 @@ export default function MentorManagement() {
   useEffect(() => {
     if (tab === 'bookings') {
       fetchBookings();
+    }
+  }, [tab]);
+
+  // Only fetch availability when tab is switched to 'availability'
+  useEffect(() => {
+    if (tab === 'availability') {
+      fetchAvailability();
     }
   }, [tab]);
 
@@ -144,13 +228,14 @@ export default function MentorManagement() {
     setEditModalOpen(true);
   };
 
-  const handleSaveEdit = async (updatedUser: MentorMenteeProfileWithId) => {
+  const handleSaveEdit = async (updatedUser: MentorMenteeProfile) => {
+    if (!editUser) return;
     setDeleteStatus(null);
     try {
       // Update Firestore
-      await setDoc(doc(db, 'mentorProgram', updatedUser.id), updatedUser);
+      await setDoc(doc(db, 'mentorProgram', editUser.id), updatedUser);
       // Update local state
-      setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+      setUsers(prev => prev.map(u => u.id === editUser.id ? { ...updatedUser, id: editUser.id } : u));
       setEditModalOpen(false);
       setEditUser(null);
       setDeleteStatus(`Updated ${updatedUser.name} successfully.`);
@@ -223,6 +308,36 @@ export default function MentorManagement() {
     });
   }, [filteredUsers, userSortField, userSortDir]);
 
+  // Filter and sort availability data
+  const filteredAvailability = useMemo(() => {
+    return availabilityData.filter(availability => {
+      const mentorName = availability.mentorProfile?.name?.toLowerCase() || '';
+      const mentorEmail = availability.mentorProfile?.email?.toLowerCase() || '';
+      const searchTerm = availabilitySearch.toLowerCase();
+      
+      // Filter by search term
+      if (searchTerm && !mentorName.includes(searchTerm) && !mentorEmail.includes(searchTerm)) {
+        return false;
+      }
+      
+      // Filter by status
+      if (availabilityStatusFilter !== 'all') {
+        const hasMatchingStatus = availability.timeSlots.some(slot => 
+          availabilityStatusFilter === 'available' ? slot.isAvailable : !slot.isAvailable
+        );
+        if (!hasMatchingStatus) return false;
+      }
+      
+      // Filter by type
+      if (availabilityTypeFilter !== 'all') {
+        const hasMatchingType = availability.timeSlots.some(slot => slot.type === availabilityTypeFilter);
+        if (!hasMatchingType) return false;
+      }
+      
+      return true;
+    });
+  }, [availabilityData, availabilitySearch, availabilityStatusFilter, availabilityTypeFilter]);
+
   // Admin action handlers
   const handleDeleteBooking = async (booking: Booking) => {
     setActionLoading(true);
@@ -245,6 +360,35 @@ export default function MentorManagement() {
     }
   };
 
+  // Helper functions for availability display
+  const getMentorName = (availability: MentorAvailabilityWithProfile) => {
+    return availability.mentorProfile?.name || `Mentor ${availability.mentorId.slice(0, 8)}`;
+  };
+
+  const getMentorEmail = (availability: MentorAvailabilityWithProfile) => {
+    return availability.mentorProfile?.email || 'No email';
+  };
+
+  const getTotalSlots = (availability: MentorAvailabilityWithProfile) => {
+    return availability.timeSlots.length;
+  };
+
+  const getAvailableSlots = (availability: MentorAvailabilityWithProfile) => {
+    return availability.timeSlots.filter(slot => slot.isAvailable).length;
+  };
+
+  const getBookedSlots = (availability: MentorAvailabilityWithProfile) => {
+    return availability.timeSlots.filter(slot => !slot.isAvailable).length;
+  };
+
+  const getRecurringSlots = (availability: MentorAvailabilityWithProfile) => {
+    return availability.timeSlots.filter(slot => slot.type === 'recurring').length;
+  };
+
+  const getSpecificSlots = (availability: MentorAvailabilityWithProfile) => {
+    return availability.timeSlots.filter(slot => slot.type === 'specific').length;
+  };
+
   if (loading) {
     return <div className="mentor-management-loading">Loading users...</div>;
   }
@@ -257,9 +401,20 @@ export default function MentorManagement() {
     <div className="mentor-management">
       {/* Tab Switcher */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-        <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>Users</button>
-        <button className={tab === 'bookings' ? 'active' : ''} onClick={() => setTab('bookings')}>Bookings</button>
+        <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>
+          <FaUser style={{ marginRight: 8 }} />
+          Users
+        </button>
+        <button className={tab === 'bookings' ? 'active' : ''} onClick={() => setTab('bookings')}>
+          <FaCalendarAlt style={{ marginRight: 8 }} />
+          Bookings
+        </button>
+        <button className={tab === 'availability' ? 'active' : ''} onClick={() => setTab('availability')}>
+          <FaClock style={{ marginRight: 8 }} />
+          Availability
+        </button>
       </div>
+      
       {/* USERS TAB */}
       {tab === 'users' && (
         <>
@@ -453,6 +608,7 @@ export default function MentorManagement() {
           <MentorModal open={editModalOpen} onClose={() => { setEditModalOpen(false); setEditUser(null); }} user={editUser} editMode={true} onSave={handleSaveEdit} />
         </>
       )}
+      
       {/* BOOKINGS TAB */}
       {tab === 'bookings' && (
         <div>
@@ -485,6 +641,208 @@ export default function MentorManagement() {
               {actionLoading && <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ background: '#222', color: '#fff', padding: '2rem 3rem', borderRadius: 12, fontSize: 20 }}>Processing...</div></div>}
             </div>
           )}
+        </div>
+      )}
+
+      {/* AVAILABILITY TAB */}
+      {tab === 'availability' && (
+        <div>
+          <div className="mentor-management-header">
+            <h2>Mentor Availability Management</h2>
+            <div className="mentor-management-controls">
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 12 }}>
+                <input 
+                  value={availabilitySearch} 
+                  onChange={e => setAvailabilitySearch(e.target.value)} 
+                  placeholder="Search mentor name or email..." 
+                  style={{ padding: '6px 12px', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: 15, minWidth: 180 }} 
+                />
+                <select 
+                  value={availabilityStatusFilter} 
+                  onChange={e => setAvailabilityStatusFilter(e.target.value as 'all' | 'available' | 'booked')} 
+                  style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="available">Available</option>
+                  <option value="booked">Booked</option>
+                </select>
+                <select 
+                  value={availabilityTypeFilter} 
+                  onChange={e => setAvailabilityTypeFilter(e.target.value as 'all' | 'recurring' | 'specific')} 
+                  style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
+                >
+                  <option value="all">All Types</option>
+                  <option value="recurring">Recurring</option>
+                  <option value="specific">One-off</option>
+                </select>
+                <button
+                  className="refresh-button"
+                  onClick={fetchAvailability}
+                  disabled={loadingAvailability}
+                >
+                  <FaSync className={loadingAvailability ? 'spinning' : ''} /> Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Availability Stats */}
+          <div className="mentor-management-stats">
+            <div className="stat-card">
+              <h3>Total Mentors with Availability</h3>
+              <p>{filteredAvailability.length}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Total Time Slots</h3>
+              <p>{filteredAvailability.reduce((total, availability) => total + getTotalSlots(availability), 0)}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Available Slots</h3>
+              <p>{filteredAvailability.reduce((total, availability) => total + getAvailableSlots(availability), 0)}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Booked Slots</h3>
+              <p>{filteredAvailability.reduce((total, availability) => total + getBookedSlots(availability), 0)}</p>
+            </div>
+          </div>
+
+          {/* Availability Content */}
+          {loadingAvailability ? (
+            <div className="mentor-management-loading">Loading availability data...</div>
+          ) : availabilityError ? (
+            <div className="mentor-management-error">{availabilityError}</div>
+          ) : (
+            <div style={{ minHeight: 200, background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 24 }}>
+              <table className="admin-bookings-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th>Mentor</th>
+                    <th>Email</th>
+                    <th>Total Slots</th>
+                    <th>Available</th>
+                    <th>Booked</th>
+                    <th>Recurring</th>
+                    <th>One-off</th>
+                    <th>Last Updated</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAvailability.map((availability) => (
+                    <tr key={availability.mentorId} style={{ transition: 'background 0.18s', cursor: 'pointer' }}
+                      onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,179,0,0.08)'; }}
+                      onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = ''; }}
+                    >
+                      <td>
+                        <div className="user-info">
+                          <span className="user-name">{getMentorName(availability)}</span>
+                          {availability.mentorProfile?.profession && (
+                            <span className="user-age">{availability.mentorProfile.profession}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>{getMentorEmail(availability)}</td>
+                      <td>
+                        <span style={{ background: '#ffb300', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getTotalSlots(availability)}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ background: '#00e676', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getAvailableSlots(availability)}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ background: '#ff4444', color: '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getBookedSlots(availability)}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ background: '#00eaff', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getRecurringSlots(availability)}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ background: '#ff6b35', color: '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getSpecificSlots(availability)}
+                        </span>
+                      </td>
+                      <td>
+                        {(() => {
+                          const val = availability.lastUpdated;
+                          if (!val) return '-';
+                          if (isFirestoreTimestamp(val)) {
+                            return val.toDate().toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                          }
+                          if (val instanceof Date) {
+                            return val.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                          }
+                          // Try to parse as string/number
+                          const parsed = new Date(val);
+                          if (!isNaN(parsed.getTime())) {
+                            return parsed.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                          }
+                          return '-';
+                        })()}
+                      </td>
+                      <td>
+                        <button 
+                          onClick={() => {
+                            setSelectedAvailability(availability);
+                            setDetailsModalOpen(true);
+                          }} 
+                          style={{ background: '#ffb300', color: '#181818', border: 'none', borderRadius: 8, padding: '0.4rem 1rem', fontWeight: 600, cursor: 'pointer' }}
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredAvailability.length === 0 && (
+                <div style={{ marginTop: 24, color: '#ffb300', textAlign: 'center' }}>
+                  {availabilitySearch || availabilityStatusFilter !== 'all' || availabilityTypeFilter !== 'all' 
+                    ? 'No availability data matches your filters.' 
+                    : 'No availability data found.'}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {detailsModalOpen && selectedAvailability && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.35)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#181818', color: '#fff', borderRadius: 12, padding: '2.5rem 2.5rem', minWidth: 420, maxWidth: 700, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.25)', position: 'relative' }}>
+            <button onClick={() => setDetailsModalOpen(false)} style={{ position: 'absolute', top: 12, right: 12, background: '#ff4444', color: '#fff', border: 'none', borderRadius: 8, padding: '0.3rem 1rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Close</button>
+            <h2 style={{ marginBottom: 8 }}>Availability Details</h2>
+            <div><b>Mentor:</b> {getMentorName(selectedAvailability)} ({getMentorEmail(selectedAvailability)})</div>
+            <div style={{ margin: '1rem 0 1.5rem 0', color: '#ffb300' }}><b>Total Slots:</b> {getTotalSlots(selectedAvailability)} | <b>Available:</b> {getAvailableSlots(selectedAvailability)} | <b>Booked:</b> {getBookedSlots(selectedAvailability)}</div>
+            <table style={{ width: '100%', background: 'rgba(24,24,24,0.95)', borderRadius: 8, marginTop: 8 }}>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Day</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedAvailability.timeSlots.length === 0 ? (
+                  <tr><td colSpan={5} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No slots found.</td></tr>
+                ) : selectedAvailability.timeSlots.map(slot => (
+                  <tr key={slot.id} style={{ background: !slot.isAvailable ? 'rgba(255,68,68,0.07)' : undefined }}>
+                    <td><span style={{ background: slot.type === 'recurring' ? '#00eaff' : '#ff6b35', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{slot.type === 'recurring' ? 'Recurring' : 'One-off'}</span></td>
+                    <td>{slot.day || '-'}</td>
+                    <td>{slot.date || '-'}</td>
+                    <td>{slot.startTime} - {slot.endTime}</td>
+                    <td><span style={{ background: slot.isAvailable ? '#00e676' : '#ff4444', color: slot.isAvailable ? '#181818' : '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{slot.isAvailable ? 'Available' : 'Booked'}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
