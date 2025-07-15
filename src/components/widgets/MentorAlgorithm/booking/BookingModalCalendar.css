@@ -1,0 +1,535 @@
+/* Booking Modal Calendar Custom Styles */
+.react-calendar {
+  background: #181818;
+  border-radius: 12px;
+  border: 1.5px solid #ff2a2a;
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(255,42,42,0.12);
+  padding: 0.5rem 1rem 1rem 1rem;
+  font-family: inherit;
+}
+.react-calendar__navigation {
+  background: none;
+  border: none;
+  margin-bottom: 0.5rem;
+}
+.react-calendar__navigation button {
+  color: #ff2a2a;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  transition: background 0.18s;
+}
+.react-calendar__navigation button:enabled:hover {
+  background: #2d0000;
+}
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  color: #ffb300;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.react-calendar__tile {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: background 0.18s, color 0.18s;
+  margin: 2px;
+  font-weight: 500;
+}
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background: #ff2a2a33;
+  color: #ffb300;
+}
+.react-calendar__tile--active {
+  background: linear-gradient(135deg, #ff2a2a 0%, #a80000 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255,42,42,0.18);
+}
+.react-calendar__tile--now {
+  background: #ffb30033;
+  color: #ffb300;
+  font-weight: 700;
+}
+.react-calendar__tile:disabled {
+  background: none;
+  color: #444;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.has-slots {
+  box-shadow: 0 0 0 3px #ffb300, 0 0 12px 2px #ff2a2a99;
+  background: #2d0000 !important;
+  color: #ffb300 !important;
+  font-weight: 700;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+  transition: box-shadow 0.18s, background 0.18s, color 0.18s;
+}
+.has-slots:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 2px; left: 2px; right: 2px; bottom: 2px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Booking Modal Header */
+.booking-modal-header {
+  border-bottom: 1.5px solid #ff2a2a;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.booking-modal-header h3 {
+  color: #ff2a2a;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+}
+.booking-modal-close {
+  background: #ff2a2a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.3rem 1rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.booking-modal-close:hover {
+  background: #a80000;
+}
+
+/* Mobile Progress Indicator */
+.booking-modal-mobile-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+
+.booking-modal-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  position: relative;
+}
+
+.booking-modal-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #333;
+  z-index: 0;
+}
+
+.booking-modal-step.active:not(:last-child)::after {
+  background: #ff2a2a;
+}
+
+.booking-modal-step-number {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #333;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 1;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.booking-modal-step.active .booking-modal-step-number {
+  background: #ff2a2a;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 42, 42, 0.2);
+}
+
+.booking-modal-step-label {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.booking-modal-step.active .booking-modal-step-label {
+  color: #ff2a2a;
+  font-weight: 600;
+}
+
+.booking-modal-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Booking Modal Calendar Section */
+.booking-modal-calendar {
+  margin: 0 auto;
+  max-width: 380px;
+  text-align: center;
+}
+.booking-modal-calendar h4 {
+  color: #ff2a2a;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  letter-spacing: 0.5px;
+}
+
+/* Event Types Grid */
+.booking-modal-event-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.booking-modal-event-types-mobile {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.booking-modal-event-type {
+  padding: 1rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.booking-modal-event-type.selected {
+  border: 2px solid #ff2a2a;
+  background: rgba(255, 42, 42, 0.1);
+  box-shadow: 0 0 0 2px rgba(255, 42, 42, 0.2);
+}
+
+.booking-modal-event-type:hover {
+  border-color: #ff2a2a;
+  background: rgba(255, 42, 42, 0.05);
+}
+
+.booking-modal-event-type-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.booking-modal-event-type-details {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.booking-modal-event-type-description {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* Slot Buttons */
+.booking-modal-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-top: 0.7rem;
+}
+.booking-modal-slot {
+  background: #222;
+  color: #fff;
+  border: 1.5px solid #ff2a2a;
+  border-radius: 8px;
+  padding: 0.7rem 1.3rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  box-shadow: 0 2px 8px rgba(255,42,42,0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.booking-modal-slot.selected,
+.booking-modal-slot:active {
+  background: linear-gradient(135deg, #ff2a2a 0%, #a80000 100%);
+  color: #fff;
+  border-color: #ffb300;
+}
+.booking-modal-slot:disabled {
+  background: #333;
+  color: #888;
+  border-color: #444;
+  cursor: not-allowed;
+}
+
+.booking-modal-slots-mobile {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.booking-modal-slots-mobile .booking-modal-slot {
+  width: 100%;
+  justify-content: center;
+  padding: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Mobile Navigation */
+.booking-modal-mobile-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+}
+
+.booking-modal-nav-btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.booking-modal-nav-prev {
+  background: #333;
+  color: #fff;
+}
+
+.booking-modal-nav-prev:hover {
+  background: #444;
+}
+
+.booking-modal-nav-next {
+  background: #ff2a2a;
+  color: #fff;
+}
+
+.booking-modal-nav-next:hover {
+  background: #a80000;
+}
+
+/* No slots message */
+.booking-modal-no-slots {
+  color: #888;
+  font-style: italic;
+  margin: 1rem 0;
+}
+
+/* Booking Modal Success/Error */
+.booking-modal-success {
+  background: rgba(0,255,0,0.08);
+  border: 1.5px solid #00ff00;
+  color: #00ff00;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.booking-modal-error {
+  background: rgba(255,42,42,0.08);
+  border: 1.5px solid #ff2a2a;
+  color: #ff2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .booking-modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 2.5vh auto !important;
+    max-height: 95vh !important;
+    overflow-y: auto !important;
+  }
+
+  .booking-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .booking-modal-header h3 {
+    font-size: 1.3rem;
+    text-align: center;
+  }
+
+  .booking-modal-calendar {
+    max-width: 100%;
+  }
+
+  .react-calendar {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.5rem 0.8rem 0.5rem;
+  }
+
+  .react-calendar__tile {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.3rem;
+    min-height: 40px;
+  }
+
+  .booking-modal-event-type {
+    padding: 0.8rem;
+    min-height: 70px;
+  }
+
+  .booking-modal-event-type-title {
+    font-size: 0.95rem;
+  }
+
+  .booking-modal-event-type-details {
+    font-size: 0.85rem;
+  }
+
+  .booking-modal-slot {
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+
+  .booking-modal-summary {
+    padding: 1rem;
+  }
+
+  .booking-modal-summary h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .booking-modal-summary-row {
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  .booking-modal-confirm-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+  }
+
+  .booking-modal-overlay {
+    padding: 0 !important;
+  }
+
+  .booking-modal-header {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .booking-modal-content {
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  .booking-modal-step-label {
+    font-size: 0.7rem;
+  }
+
+  .booking-modal-step-number {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 0.8rem;
+  }
+
+  .react-calendar {
+    font-size: 0.8rem;
+  }
+
+  .react-calendar__tile {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.2rem;
+    min-height: 36px;
+  }
+
+  .booking-modal-slot {
+    padding: 1rem;
+    font-size: 1rem;
+    min-height: 52px;
+  }
+
+  .booking-modal-nav-btn {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    min-height: 52px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .booking-modal-slot {
+    min-height: 48px;
+    padding: 1rem 1.5rem;
+  }
+
+  .booking-modal-event-type {
+    min-height: 80px;
+    padding: 1.2rem;
+  }
+
+  .booking-modal-nav-btn {
+    min-height: 48px;
+    padding: 1rem 1.5rem;
+  }
+
+  .booking-modal-close {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+} 

@@ -1,4 +1,4 @@
-import { db } from '../../../firebase/firebase';
+import { db } from '../../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 
 export const MENTOR = 'mentor';
@@ -16,6 +16,7 @@ export interface MentorMenteeProfile {
   profession: string;
   pastProfessions: string[];
   linkedin: string;
+  calCom: string; // Cal.com URL for mentors
   hobbies: string[];
   ethnicity: string;
   religion: string;

@@ -12,6 +12,17 @@ interface Booking {
   status: 'pending' | 'confirmed' | 'cancelled';
   meetLink?: string;
   eventId?: string;
+  isCalComBooking?: boolean;
+  calComBookingId?: string;
+  calComEventType?: {
+    id: number;
+    title: string;
+  };
+  calComAttendees?: Array<{
+    name: string;
+    email: string;
+    timeZone: string;
+  }>;
 }
 
 interface BookingDetailsModalProps {
@@ -31,11 +42,20 @@ export default function BookingDetailsModal({ booking, open, onClose, onDelete, 
         <h2 style={{ marginBottom: 8 }}>Booking Details</h2>
         <div><b>Mentor:</b> {booking.mentorName} ({booking.mentorEmail})</div>
         <div><b>Mentee:</b> {booking.menteeName} ({booking.menteeEmail})</div>
-        <div><b>Date:</b> {booking.sessionDate ? (booking.sessionDate.toDate ? booking.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</div>
+        <div><b>Date:</b> {booking.sessionDate ? (typeof booking.sessionDate === 'object' && 'toDate' in booking.sessionDate ? (booking.sessionDate as { toDate: () => Date }).toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</div>
         <div><b>Time:</b> {booking.startTime} - {booking.endTime}</div>
         <div><b>Status:</b> <span style={{ background: booking.status === 'confirmed' ? '#00e676' : booking.status === 'pending' ? '#ffb300' : '#ff4444', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{booking.status.toUpperCase()}</span></div>
         {booking.meetLink && <div><b>Meet Link:</b> <a href={booking.meetLink} target="_blank" rel="noopener noreferrer" style={{ color: '#00eaff' }}>{booking.meetLink}</a></div>}
         {booking.eventId && <div><b>Event ID:</b> {booking.eventId}</div>}
+        {booking.isCalComBooking && (
+          <>
+            <div style={{ marginTop: 8, padding: 8, background: 'rgba(0,234,255,0.1)', borderRadius: 8, border: '1px solid #00eaff' }}>
+              <div style={{ color: '#00eaff', fontWeight: 600, marginBottom: 4 }}>Cal.com Booking</div>
+              {booking.calComBookingId && <div><b>Cal.com ID:</b> {booking.calComBookingId}</div>}
+              {booking.calComEventType && <div><b>Event Type:</b> {booking.calComEventType.title}</div>}
+            </div>
+          </>
+        )}
         <div><b>Booking ID:</b> {booking.id}</div>
         {/* Admin Actions */}
         <div style={{ display: 'flex', gap: 16, marginTop: 18 }}>

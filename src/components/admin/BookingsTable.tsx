@@ -10,6 +10,13 @@ interface Booking {
   startTime: string;
   endTime: string;
   status: 'pending' | 'confirmed' | 'cancelled';
+  isCalComBooking?: boolean;
+  calComEventType?: {
+    id: number;
+    title: string;
+  };
+  meetLink?: string;
+  eventId?: string;
 }
 
 interface BookingsTableProps {
@@ -24,7 +31,7 @@ function exportToCSV(bookings: Booking[]) {
     b.mentorEmail,
     b.menteeName,
     b.menteeEmail,
-    b.sessionDate ? (b.sessionDate.toDate ? b.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(b.sessionDate).toLocaleDateString('en-GB')) : '-',
+    b.sessionDate ? (typeof b.sessionDate === 'object' && 'toDate' in b.sessionDate ? b.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(b.sessionDate).toLocaleDateString('en-GB')) : '-',
     `${b.startTime} - ${b.endTime}`,
     b.status
   ]);
@@ -63,8 +70,8 @@ export default function BookingsTable({ bookings, onView }: BookingsTableProps) 
       } else if (sortField === 'mentee') {
         vA = a.menteeName.toLowerCase(); vB = b.menteeName.toLowerCase();
       } else if (sortField === 'date') {
-        vA = a.sessionDate?.toDate ? a.sessionDate.toDate() : new Date(a.sessionDate);
-        vB = b.sessionDate?.toDate ? b.sessionDate.toDate() : new Date(b.sessionDate);
+        vA = typeof a.sessionDate === 'object' && 'toDate' in a.sessionDate ? (a.sessionDate as any).toDate() : new Date(a.sessionDate || '');
+        vB = typeof b.sessionDate === 'object' && 'toDate' in b.sessionDate ? (b.sessionDate as any).toDate() : new Date(b.sessionDate || '');
       } else if (sortField === 'status') {
         vA = a.status; vB = b.status;
       }
@@ -110,11 +117,18 @@ export default function BookingsTable({ bookings, onView }: BookingsTableProps) 
               onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,179,0,0.08)'; }}
               onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = ''; }}
             >
-              <td>{booking.mentorName}</td>
+              <td>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{booking.mentorName}</span>
+                  {booking.isCalComBooking && (
+                    <span style={{ background: '#00eaff', color: '#181818', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>Cal.com</span>
+                  )}
+                </div>
+              </td>
               <td>{booking.mentorEmail}</td>
               <td>{booking.menteeName}</td>
               <td>{booking.menteeEmail}</td>
-              <td>{booking.sessionDate ? (booking.sessionDate.toDate ? booking.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
+              <td>{booking.sessionDate ? (typeof booking.sessionDate === 'object' && 'toDate' in booking.sessionDate ? (booking.sessionDate as { toDate: () => Date }).toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
               <td>{booking.startTime} - {booking.endTime}</td>
               <td>
                 <span style={{

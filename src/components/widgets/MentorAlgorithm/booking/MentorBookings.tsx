@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useAuth } from '../../../hooks/useAuth';
-import { db } from '../../../firebase/firebase';
+import { useAuth } from '../../../../hooks/useAuth';
+import { db } from '../../../../firebase/firebase';
 import { collection, query, where, getDocs, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { FaCheck, FaTimes, FaSearch, FaFileExport } from 'react-icons/fa';
-import './MentorProgram.css';
+import { FaCheck, FaTimes, FaSearch, FaFileExport, FaCalendarAlt, FaExternalLinkAlt } from 'react-icons/fa';
+import { CalComService, CalComBookingResponse } from '../CalCom/calComService';
+import '../MentorProgram.css';
 
 interface Booking {
   id: string;
@@ -21,6 +22,18 @@ interface Booking {
   sessionDate?: Timestamp | Date;
   meetLink?: string;
   eventId?: string;
+  // Cal.com specific fields
+  isCalComBooking?: boolean;
+  calComBookingId?: string;
+  calComEventType?: {
+    id: number;
+    title: string;
+  };
+  calComAttendees?: Array<{
+    name: string;
+    email: string;
+    timeZone: string;
+  }>;
 }
 
 // Simple Modal component
@@ -59,6 +72,7 @@ export default function MentorBookings() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterRole, setFilterRole] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [selectedCancelled, setSelectedCancelled] = useState<string[]>([]);
   const [undoQueue, setUndoQueue] = useState<Booking[]>([]);
@@ -69,9 +83,19 @@ export default function MentorBookings() {
   const filtered = bookings.filter(b => {
     if (filterStatus !== 'all' && b.status !== filterStatus) return false;
     if (filterRole !== 'all' && getBookingRole(b) !== filterRole) return false;
+    if (filterType !== 'all') {
+      if (filterType === 'calcom' && !b.isCalComBooking) return false;
+      if (filterType === 'internal' && b.isCalComBooking) return false;
+    }
     if (search) {
       const s = search.toLowerCase();
-      if (!b.mentorName.toLowerCase().includes(s) && !b.menteeName.toLowerCase().includes(s) && !b.startTime.includes(s) && !b.endTime.includes(s) && !getOtherPartyName(b).toLowerCase().includes(s)) return false;
+      const eventTypeTitle = b.calComEventType?.title?.toLowerCase() || '';
+      if (!b.mentorName.toLowerCase().includes(s) && 
+          !b.menteeName.toLowerCase().includes(s) && 
+          !b.startTime.includes(s) && 
+          !b.endTime.includes(s) && 
+          !getOtherPartyName(b).toLowerCase().includes(s) &&
+          !eventTypeTitle.includes(s)) return false;
     }
     return true;
   });
@@ -104,9 +128,15 @@ export default function MentorBookings() {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      if (!currentUser) return;
+      if (!currentUser) {
+        console.log('[CalCom DEBUG] No currentUser, skipping bookings fetch.');
+        return;
+      }
       try {
-        // Fetch bookings where user is either mentor or mentee
+        console.log('[CalCom DEBUG] Current user:', currentUser);
+        const results: Booking[] = [];
+        
+        // Fetch Firestore bookings where user is either mentor or mentee
         const mentorQuery = query(collection(db, 'bookings'), where('mentorId', '==', currentUser.uid));
         const menteeQuery = query(collection(db, 'bookings'), where('menteeId', '==', currentUser.uid));
         
@@ -115,23 +145,68 @@ export default function MentorBookings() {
           getDocs(menteeQuery)
         ]);
         
-        const results: Booking[] = [];
-        
-        // Add mentor bookings
+        // Add Firestore mentor bookings
         mentorSnapshot.forEach(docSnap => {
           const data = docSnap.data() as Booking;
           results.push({ ...data, id: docSnap.id });
         });
         
-        // Add mentee bookings
+        // Add Firestore mentee bookings
         menteeSnapshot.forEach(docSnap => {
           const data = docSnap.data() as Booking;
           results.push({ ...data, id: docSnap.id });
         });
+
+        // Fetch Cal.com bookings if user is a mentor
+        try {
+          console.log('[CalCom DEBUG] Attempting to fetch Cal.com bookings for UID:', currentUser.uid);
+          const calComBookings = await CalComService.getBookings(currentUser.uid);
+          console.log('[CalCom DEBUG] Raw Cal.com bookings response:', calComBookings);
+          const calComBookingsFormatted = calComBookings.map((calBooking: CalComBookingResponse) => {
+            const startDate = new Date(calBooking.startTime);
+            const endDate = new Date(calBooking.endTime);
+            
+            // Find mentor and mentee from attendees
+            const mentor = calBooking.attendees.find(attendee => 
+              attendee.email === currentUser.email
+            );
+            const mentee = calBooking.attendees.find(attendee => 
+              attendee.email !== currentUser.email
+            );
+            const formatted = {
+              id: `calcom-${calBooking.id}`,
+              mentorId: currentUser.uid,
+              menteeId: mentee?.email || 'unknown',
+              mentorName: mentor?.name || currentUser.displayName || 'Unknown Mentor',
+              menteeName: mentee?.name || 'Unknown Mentee',
+              mentorEmail: mentor?.email || currentUser.email || '',
+              menteeEmail: mentee?.email || '',
+              day: startDate.toLocaleDateString('en-GB'),
+              startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+              endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+              status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
+                      calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
+              createdAt: new Date(),
+              sessionDate: startDate,
+              isCalComBooking: true,
+              calComBookingId: calBooking.id,
+              calComEventType: calBooking.eventType,
+              calComAttendees: calBooking.attendees
+            } as Booking;
+            console.log('[CalCom DEBUG] Formatted Cal.com booking:', formatted);
+            return formatted;
+          });
+          
+          results.push(...calComBookingsFormatted);
+          console.log('[CalCom DEBUG] All bookings after merging Cal.com:', results);
+        } catch (calComError) {
+          console.error('[CalCom DEBUG] No Cal.com bookings found or error fetching:', calComError);
+        }
         
         setBookings(results);
+        console.log('[CalCom DEBUG] Final bookings set in state:', results);
       } catch (err) {
-        console.error('Error fetching bookings:', err);
+        console.error('[CalCom DEBUG] Error fetching bookings:', err);
       }
     };
     fetchBookings();
@@ -159,17 +234,13 @@ export default function MentorBookings() {
     };
     
     const eventTitle = `Mentoring Session: ${booking.mentorName} & ${booking.menteeName}`;
-    const eventDescription = `Mentoring session between ${booking.mentorName} (Mentor) and ${booking.menteeName} (Mentee).
-    
-Session Details:
-- Date: ${sessionDate.toLocaleDateString('en-GB')}
-- Time: ${booking.startTime} - ${booking.endTime}
-- Duration: 1 hour
+    const eventDescription = `Mentoring session between ${booking.mentorName} (Mentor) and ${booking.menteeName} (Mentee).\n\nSession Details:\n- Date: ${sessionDate.toLocaleDateString('en-GB')}\n- Time: ${booking.startTime} - ${booking.endTime}\n- Duration: 1 hour\n\nThis meeting will include Google Meet integration.`;
 
-This meeting will include Google Meet integration.`;
-    
-    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${formatDate(startTime)}/${formatDate(endTime)}&details=${encodeURIComponent(eventDescription)}&add=true`;
-    
+    // Add guests parameter with mentor and mentee emails
+    const guests = [booking.mentorEmail, booking.menteeEmail].filter(Boolean).join(',');
+
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${formatDate(startTime)}/${formatDate(endTime)}&details=${encodeURIComponent(eventDescription)}&guests=${encodeURIComponent(guests)}&add=true`;
+
     // Open Google Calendar with pre-filled event details
     window.open(googleCalendarUrl, '_blank');
   };
@@ -198,16 +269,23 @@ This meeting will include Google Meet integration.`;
 
   const cancelBooking = async (booking: Booking) => {
     try {
-      await updateDoc(doc(db, 'bookings', booking.id), {
-        status: 'cancelled'
-      });
+      if (booking.isCalComBooking && booking.calComBookingId) {
+        // Cancel Cal.com booking
+        await CalComService.cancelBooking(currentUser!.uid, booking.calComBookingId);
+        setModalMessage('Cal.com booking cancelled successfully!');
+      } else {
+        // Cancel Firestore booking
+        await updateDoc(doc(db, 'bookings', booking.id), {
+          status: 'cancelled'
+        });
+        setModalMessage('Booking cancelled successfully!');
+      }
       
       // Update local state
       setBookings(prev => prev.map(b => 
         b.id === booking.id ? { ...b, status: 'cancelled' } : b
       ));
       
-      setModalMessage('Booking cancelled successfully!');
       setModalType('success');
       setModalOpen(true);
     } catch (err) {
@@ -225,9 +303,16 @@ This meeting will include Google Meet integration.`;
   const confirmDeleteBooking = async () => {
     if (!bookingToDelete) return;
     try {
-      await deleteDoc(doc(db, 'bookings', bookingToDelete.id));
+      if (bookingToDelete.isCalComBooking && bookingToDelete.calComBookingId) {
+        // Cal.com bookings are managed through Cal.com, so we just remove from local state
+        setModalMessage('Cal.com booking removed from view. The booking is still active in Cal.com.');
+      } else {
+        // Delete Firestore booking
+        await deleteDoc(doc(db, 'bookings', bookingToDelete.id));
+        setModalMessage('Booking deleted successfully!');
+      }
+      
       setBookings(prev => prev.filter(b => b.id !== bookingToDelete.id));
-      setModalMessage('Booking deleted successfully!');
       setModalType('success');
       setModalOpen(true);
     } catch {
@@ -327,7 +412,13 @@ This meeting will include Google Meet integration.`;
         </div>
       } />
       {/* Confirmation Modal for Delete */}
-      <Modal open={confirmDeleteOpen} onClose={() => setConfirmDeleteOpen(false)} message={bookingToDelete ? "Are you sure you want to permanently delete this cancelled booking?" : "Are you sure you want to permanently delete all selected cancelled bookings?"} type="warning" actions={
+      <Modal open={confirmDeleteOpen} onClose={() => setConfirmDeleteOpen(false)} message={
+        bookingToDelete 
+          ? bookingToDelete.isCalComBooking 
+            ? "Are you sure you want to remove this Cal.com booking from view? (The booking will remain active in Cal.com)"
+            : "Are you sure you want to permanently delete this cancelled booking?"
+          : "Are you sure you want to permanently delete all selected cancelled bookings?"
+      } type="warning" actions={
         <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
           <button onClick={bookingToDelete ? confirmDeleteBooking : confirmBulkDelete} style={{ background: '#ff4444', color: '#fff', border: 'none', borderRadius: 8, padding: '0.6rem 1.5rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Yes, Delete</button>
           <button onClick={() => setConfirmDeleteOpen(false)} style={{ background: '#eee', color: '#181818', border: 'none', borderRadius: 8, padding: '0.6rem 1.5rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>No</button>
@@ -364,6 +455,11 @@ This meeting will include Google Meet integration.`;
           <option value="mentor">Mentor</option>
           <option value="mentee">Mentee</option>
         </select>
+        <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}>
+          <option value="all">All Types</option>
+          <option value="internal">Internal</option>
+          <option value="calcom">Cal.com</option>
+        </select>
         {/* Export button placeholder */}
         <button style={{ background: '#ffb300', color: '#181818', border: 'none', borderRadius: 8, padding: '6px 18px', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} title="Export to CSV">
           <FaFileExport /> Export CSV
@@ -390,9 +486,23 @@ This meeting will include Google Meet integration.`;
                 onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = booking.status === 'cancelled' ? 'rgba(255,68,68,0.07)' : ''; (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
               >
                 <td>
-                  <span style={{ background: role === 'mentor' ? 'rgba(255, 42, 42, 0.2)' : 'rgba(0, 255, 255, 0.2)', color: role === 'mentor' ? '#ff2a2a' : '#00eaff', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, textTransform: 'capitalize' }}>{role}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ background: role === 'mentor' ? 'rgba(255, 42, 42, 0.2)' : 'rgba(0, 255, 255, 0.2)', color: role === 'mentor' ? '#ff2a2a' : '#00eaff', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, textTransform: 'capitalize' }}>{role}</span>
+                    {booking.isCalComBooking && (
+                      <FaCalendarAlt style={{ color: '#ffb300', fontSize: '14px' }} title="Cal.com Booking" />
+                    )}
+                  </div>
                 </td>
-                <td>{otherPartyName}</td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>{otherPartyName}</span>
+                    {booking.isCalComBooking && booking.calComEventType && (
+                      <span style={{ background: 'rgba(255, 179, 0, 0.2)', color: '#ffb300', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>
+                        {booking.calComEventType.title}
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td>{booking.sessionDate ? (booking.sessionDate instanceof Timestamp ? booking.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
                 <td>{booking.startTime} - {booking.endTime}</td>
                 <td>{statusBadge(booking.status)}</td>
@@ -403,7 +513,7 @@ This meeting will include Google Meet integration.`;
                   {/* Actions for confirmed and pending bookings */}
                   {booking.status !== 'cancelled' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {booking.status === 'confirmed' && (
+                      {booking.status === 'confirmed' && !booking.isCalComBooking && (
                         <button
                           onClick={() => createCalendarEvent(booking)}
                           style={{ background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)' }}
@@ -412,7 +522,17 @@ This meeting will include Google Meet integration.`;
                           📅 Set up Google Meet
                         </button>
                       )}
-                      {booking.status === 'pending' && (
+                      {booking.isCalComBooking && (
+                        <button
+                          onClick={() => window.open(`https://cal.com/bookings/${booking.calComBookingId}`, '_blank')}
+                          style={{ background: 'linear-gradient(135deg, #ffb300 0%, #ff8c00 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(255, 179, 0, 0.3)' }}
+                          title="View booking in Cal.com"
+                        >
+                          <FaExternalLinkAlt style={{ fontSize: '14px' }} />
+                          View in Cal.com
+                        </button>
+                      )}
+                      {booking.status === 'pending' && !booking.isCalComBooking && (
                         <>
                           {role === 'mentor' && (
                             <button

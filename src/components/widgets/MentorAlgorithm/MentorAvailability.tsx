@@ -335,15 +335,30 @@ export default function MentorAvailability() {
   return (
     <div className="mentor-availability mentor-animate-fadein mentor-animate-slideup">
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
-      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} message="Are you sure you want to remove this slot?" type="warning" actions={
+      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} message="Are you sure you want to remove this internal time slot?" type="warning" actions={
         <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-          <button onClick={confirmRemoveSlot} style={{ background: '#ff4444', color: '#fff', border: 'none', borderRadius: 8, padding: '0.6rem 1.5rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Yes, Remove</button>
-          <button onClick={() => setConfirmOpen(false)} style={{ background: '#eee', color: '#181818', border: 'none', borderRadius: 8, padding: '0.6rem 1.5rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>No</button>
+          <button onClick={confirmRemoveSlot} style={{ background: 'linear-gradient(135deg, #ff4444 0%, #cc0000 100%)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.8rem 1.8rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 4px 12px rgba(255,68,68,0.3)', transition: 'all 0.2s' }}>Yes, Remove</button>
+          <button onClick={() => setConfirmOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, padding: '0.8rem 1.8rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>Cancel</button>
         </div>
       } />
       <div className="mentor-availability-header">
-        <h3>Set Your Availability</h3>
-        <p>Configure when you're available for mentoring sessions</p>
+        <h3>Set Your Internal Availability</h3>
+        <p>Configure your internal time slots for mentoring sessions (separate from Cal.com)</p>
+        <div style={{ 
+          background: 'rgba(255,179,0,0.1)', 
+          border: '1px solid #ffb300', 
+          borderRadius: 8, 
+          padding: '12px 16px', 
+          marginTop: 12,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8
+        }}>
+          <FaClock style={{ color: '#ffb300', fontSize: 16 }} />
+          <span style={{ color: '#ffb300', fontSize: '0.95rem', fontWeight: 600 }}>
+            These are internal platform time slots. For Cal.com integration, use the Cal.com tab in your profile.
+          </span>
+        </div>
       </div>
       {error && <div className="mentor-availability-error">{error}</div>}
       <div className="mentor-availability-content">
@@ -391,7 +406,7 @@ export default function MentorAvailability() {
         
         {/* Add slot form */}
         <div className="mentor-availability-add-section">
-          <h4>{bulkMode ? 'Create Multiple Time Slots' : 'Add Time Slot'}</h4>
+          <h4>{bulkMode ? 'Create Multiple Internal Time Slots' : 'Add Internal Time Slot'}</h4>
           <div className="mentor-availability-form">
             <div className="mentor-availability-form-row">
               {activeTab === 'recurring' ? (
@@ -465,7 +480,7 @@ export default function MentorAvailability() {
                 <label>&nbsp;</label>
                 <button onClick={addTimeSlot} style={{ background: 'linear-gradient(135deg, #ff2a2a 0%, #a80000 100%)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.8rem 1.5rem', fontSize: '1rem', cursor: 'pointer', fontWeight: 600 }}>
                   <FaClock style={{ marginRight: 8 }} />
-                  {bulkMode ? 'Create Slots' : 'Add Slot'}
+                  {bulkMode ? 'Create Internal Slots' : 'Add Internal Slot'}
                 </button>
               </div>
             </div>
@@ -491,7 +506,11 @@ export default function MentorAvailability() {
             <FaFileExport /> Export CSV
           </button>
         </div>
-        {/* Slot list/table */}
+        {/* Internal slot list/table */}
+        <div style={{ marginBottom: 12 }}>
+          <h4 style={{ color: '#ffb300', marginBottom: 8 }}>Your Internal Time Slots</h4>
+          <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: 16 }}>Manage your internal platform availability slots</p>
+        </div>
         <table className="mentor-availability-table mentor-animate-fadein mentor-animate-slideup">
           <thead>
             <tr>
@@ -505,7 +524,7 @@ export default function MentorAvailability() {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No slots found.</td></tr>
+              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No internal time slots found. Add some slots above to get started.</td></tr>
             ) : filtered.map(slot => (
               <tr key={slot.id} className="mentor-animate-row" style={{ background: !slot.isAvailable ? 'rgba(255,68,68,0.07)' : undefined, transition: 'background 0.2s', cursor: 'pointer' }}
                 onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,179,0,0.08)'; (e.currentTarget as HTMLElement).style.transform = 'scale(1.012)'; }}
@@ -529,20 +548,119 @@ export default function MentorAvailability() {
   );
 }
 
-// Simple Modal component (reuse from bookings)
+// Enhanced Modal component with better visibility
 function Modal({ open, onClose, message, type, actions }: { open: boolean, onClose: () => void, message: string, type?: 'success' | 'error' | 'info' | 'warning', actions?: React.ReactNode }) {
   if (!open) return null;
+  
   let icon = '';
-  if (type === 'success') icon = '✅';
-  else if (type === 'error') icon = '❌';
-  else if (type === 'warning') icon = '⚠️';
-  else icon = 'ℹ️';
+  let iconColor = '#ffb300';
+  let borderColor = '#ffb300';
+  
+  if (type === 'success') {
+    icon = '✅';
+    iconColor = '#00e676';
+    borderColor = '#00e676';
+  } else if (type === 'error') {
+    icon = '❌';
+    iconColor = '#ff4444';
+    borderColor = '#ff4444';
+  } else if (type === 'warning') {
+    icon = '⚠️';
+    iconColor = '#ffb300';
+    borderColor = '#ffb300';
+  } else {
+    icon = 'ℹ️';
+    iconColor = '#00eaff';
+    borderColor = '#00eaff';
+  }
+  
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.35)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#181818', color: '#fff', borderRadius: 12, padding: '2rem 2.5rem', minWidth: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>{icon}</div>
-        <div style={{ fontSize: 18, textAlign: 'center', marginBottom: 16 }}>{message}</div>
-        {actions ? actions : <button onClick={onClose} style={{ background: '#ffb3b3', color: '#181818', border: 'none', borderRadius: 8, padding: '0.6rem 1.5rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', marginTop: 8 }}>OK</button>}
+    <div style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      width: '100vw', 
+      height: '100vh', 
+      background: 'rgba(0,0,0,0.6)', 
+      zIndex: 9999, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      backdropFilter: 'blur(4px)'
+    }}>
+      <div style={{ 
+        background: '#181818', 
+        color: '#fff', 
+        borderRadius: 16, 
+        padding: '2.5rem 3rem', 
+        minWidth: 400, 
+        maxWidth: 500,
+        boxShadow: '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        gap: 20,
+        border: `2px solid ${borderColor}`,
+        transform: 'scale(1)',
+        opacity: 1,
+        transition: 'all 0.3s ease-out'
+      }}>
+        <div style={{ 
+          fontSize: 48, 
+          marginBottom: 8,
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+        }}>
+          {icon}
+        </div>
+        <div style={{ 
+          fontSize: 20, 
+          textAlign: 'center', 
+          marginBottom: 8,
+          fontWeight: 600,
+          lineHeight: 1.4,
+          color: iconColor
+        }}>
+          {message}
+        </div>
+        {type === 'warning' && (
+          <div style={{ 
+            fontSize: 14, 
+            textAlign: 'center', 
+            color: '#888',
+            marginBottom: 8,
+            lineHeight: 1.4
+          }}>
+            This action cannot be undone.
+          </div>
+        )}
+        {actions ? actions : (
+          <button 
+            onClick={onClose} 
+            style={{ 
+              background: `linear-gradient(135deg, ${iconColor} 0%, ${iconColor}dd 100%)`, 
+              color: '#181818', 
+              border: 'none', 
+              borderRadius: 10, 
+              padding: '0.8rem 2rem', 
+              fontWeight: 700, 
+              fontSize: 16, 
+              cursor: 'pointer', 
+              marginTop: 8,
+              boxShadow: `0 4px 12px ${iconColor}40`,
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = `0 6px 16px ${iconColor}60`;
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = `0 4px 12px ${iconColor}40`;
+            }}
+          >
+            OK
+          </button>
+        )}
       </div>
     </div>
   );

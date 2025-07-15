@@ -9,9 +9,11 @@ import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
-import { MentorMenteeProfile } from './matchUsers';
+import { MentorMenteeProfile } from './algorithm/matchUsers';
 import MentorAvailability from './MentorAvailability';
-import MentorBookings from './MentorBookings';
+import MentorBookings from './booking/MentorBookings';
+import CalComModal from './CalCom/CalComModal';
+import CalComConnect from './CalCom/CalComConnect';
 
 export default function MentorProfile() {
   const { currentUser } = useAuth();
@@ -27,6 +29,8 @@ export default function MentorProfile() {
   const [mainTab, setMainTab] = useState<'personal' | 'education' | 'skills' | 'additional'>('personal');
   // Add subtab state for skills/hobbies
   const [skillsTab, setSkillsTab] = useState<'skills' | 'hobbies'>('skills');
+  const [calComModalOpen, setCalComModalOpen] = useState(false);
+  const [calComConnectOpen, setCalComConnectOpen] = useState(false);
 
   useEffect(() => {
     setAnimateIn(false);
@@ -62,22 +66,23 @@ export default function MentorProfile() {
     try {
       // Convert profile to a plain object for Firestore
       const profileData = {
-        name: profile.name,
-        email: profile.email,
-        phone: profile.phone,
-        age: profile.age,
-        degree: profile.degree,
-        educationLevel: profile.educationLevel,
-        county: profile.county,
-        profession: profile.profession,
-        pastProfessions: profile.pastProfessions,
-        linkedin: profile.linkedin,
-        hobbies: profile.hobbies,
-        ethnicity: profile.ethnicity,
-        religion: profile.religion,
-        skills: profile.skills,
-        lookingFor: profile.lookingFor,
-        industries: profile.industries,
+        name: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        age: profile.age || '',
+        degree: profile.degree || '',
+        educationLevel: profile.educationLevel || '',
+        county: profile.county || '',
+        profession: profile.profession || '',
+        pastProfessions: profile.pastProfessions || [],
+        linkedin: profile.linkedin || '',
+        calCom: profile.calCom || '',
+        hobbies: profile.hobbies || [],
+        ethnicity: profile.ethnicity || '',
+        religion: profile.religion || '',
+        skills: profile.skills || [],
+        lookingFor: profile.lookingFor || [],
+        industries: profile.industries || [],
       };
 
       await updateDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
@@ -143,7 +148,7 @@ export default function MentorProfile() {
                     <input
                       type="text"
                       name="name"
-                      value={profile.name}
+                      value={profile.name || ''}
                       onChange={handleChange}
                       required
                     />
@@ -161,7 +166,7 @@ export default function MentorProfile() {
                     <input
                       type="tel"
                       name="phone"
-                      value={profile.phone}
+                      value={profile.phone || ''}
                       onChange={handleChange}
                       required
                     />
@@ -175,7 +180,7 @@ export default function MentorProfile() {
                     <input
                       type="number"
                       name="age"
-                      value={profile.age}
+                      value={profile.age || ''}
                       onChange={handleChange}
                       required
                       min="10"
@@ -191,7 +196,7 @@ export default function MentorProfile() {
                     <input
                       type="text"
                       name="county"
-                      value={profile.county}
+                      value={profile.county || ''}
                       onChange={handleChange}
                       required
                     />
@@ -210,7 +215,7 @@ export default function MentorProfile() {
                     <input
                       type="text"
                       name="degree"
-                      value={profile.degree}
+                      value={profile.degree || ''}
                       onChange={handleChange}
                       required
                     />
@@ -223,7 +228,7 @@ export default function MentorProfile() {
                   {isEditing ? (
                     <select
                       name="educationLevel"
-                      value={profile.educationLevel}
+                      value={profile.educationLevel || ''}
                       onChange={handleChange}
                       required
                       style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
@@ -255,7 +260,7 @@ export default function MentorProfile() {
                     <input
                       type="text"
                       name="profession"
-                      value={profile.profession}
+                      value={profile.profession || ''}
                       onChange={handleChange}
                       required
                       className="mentor-profile-input"
@@ -296,9 +301,9 @@ export default function MentorProfile() {
                     <input
                       type="url"
                       name="linkedin"
-                      value={profile.linkedin}
+                      value={profile.linkedin || ''}
                       onChange={handleChange}
-                      pattern="https?://(www\.)?linkedin\.com/in/[A-Za-z0-9\-_/]+/?"
+                      pattern="https?://(www\\.)?linkedin\\.com/in/[A-Za-z0-9_-]+/?"
                       title="Please enter a valid LinkedIn profile URL"
                     />
                   ) : (
@@ -320,6 +325,82 @@ export default function MentorProfile() {
                     </p>
                   )}
                 </div>
+                {profile.type === 'mentor' && (
+                  <div className="mentor-profile-field">
+                    <label>Cal.com</label>
+                    {isEditing ? (
+                      <input
+                        type="url"
+                        name="calCom"
+                        value={profile.calCom || ''}
+                        onChange={handleChange}
+                        required
+                        pattern="https?://.*\.cal\.com/.*"
+                        title="Please enter a valid Cal.com URL (e.g. https://yourname.cal.com/30min)"
+                      />
+                    ) : (
+                      <p className="mentor-profile-value">
+                        {profile.calCom ? (
+                          <a
+                            href={profile.calCom}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mentor-profile-calcom-btn"
+                            title="Book a session"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              padding: '0.4rem 0.8rem',
+                              background: 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
+                              color: '#fff',
+                              textDecoration: 'none',
+                              borderRadius: 6,
+                              fontSize: '0.9rem',
+                              fontWeight: 600,
+                              transition: 'all 0.2s',
+                              boxShadow: '0 2px 8px rgba(255,42,42,0.2)'
+                            }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Book Session
+                          </a>
+                        ) : (
+                          'Not provided'
+                        )}
+                      </p>
+                    )}
+                    {profile.type === 'mentor' && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <button
+                          onClick={() => setCalComConnectOpen(true)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            padding: '0.4rem 0.8rem',
+                            background: 'transparent',
+                            color: '#ff2a2a',
+                            border: '1px solid #ff2a2a',
+                            borderRadius: 6,
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          title="Connect Cal.com API for advanced booking management"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                          </svg>
+                          Connect API
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="mentor-profile-field">
                   <label>{profile.type === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}</label>
                   {isEditing ? (
@@ -421,7 +502,7 @@ export default function MentorProfile() {
                   {isEditing ? (
                     <select
                       name="ethnicity"
-                      value={profile.ethnicity}
+                      value={profile.ethnicity || ''}
                       onChange={handleChange}
                       style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
                     >
@@ -439,7 +520,7 @@ export default function MentorProfile() {
                   {isEditing ? (
                     <select
                       name="religion"
-                      value={profile.religion}
+                      value={profile.religion || ''}
                       onChange={handleChange}
                       style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
                     >
@@ -458,6 +539,16 @@ export default function MentorProfile() {
       )}
       {activeTab === 'availability' && profile && profile.type === 'mentor' && <MentorAvailability />}
       {activeTab === 'bookings' && profile && <MentorBookings />}
+
+      <CalComModal open={calComModalOpen} onClose={() => setCalComModalOpen(false)} mentor={profile} />
+      <CalComConnect 
+        open={calComConnectOpen} 
+        onClose={() => setCalComConnectOpen(false)} 
+        onSuccess={() => {
+          setCalComConnectOpen(false);
+          // Optionally refresh profile data
+        }}
+      />
       {profile?.type === 'mentor' && (
         <div className="mentor-profile-actions">
           {!isEditing ? (

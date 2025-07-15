@@ -1,0 +1,203 @@
+.calcom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.calcom-modal {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  max-width: 540px;
+  min-width: 320px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: calcomModalSlideIn 0.3s ease-out;
+}
+
+@keyframes calcomModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.calcom-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #333;
+  background-color: #1a1a1a;
+}
+
+.calcom-modal-header h3 {
+  color: #ff2a2a;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calcom-modal-close {
+  background: none;
+  border: none;
+  color: #ff2a2a;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calcom-modal-close:hover {
+  background-color: rgba(255, 42, 42, 0.1);
+  transform: scale(1.1);
+}
+
+.calcom-modal-content {
+  padding: 1.5rem 0.5rem;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.calcom-modal-intro {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.calcom-modal-intro p {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: #ffffff;
+  line-height: 1.5;
+}
+
+.calcom-modal-intro b {
+  color: #ff2a2a;
+  font-weight: 700;
+}
+
+.calcom-modal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.08rem;
+  padding: 0.8rem 2.2rem;
+  margin: 0.5rem 0 1.2rem 0;
+  box-shadow: 0 2px 12px rgba(255, 42, 42, 0.15);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.calcom-modal-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 42, 42, 0.25);
+  text-decoration: none;
+  color: #fff;
+}
+
+.calcom-modal-link:active {
+  transform: translateY(0);
+}
+
+.calcom-iframe-container {
+  width: 100%;
+  min-height: 480px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.calcom-iframe {
+  width: 100%;
+  height: 480px;
+  border: none;
+  border-radius: 12px;
+  background-color: #1a1a1a;
+}
+
+.calcom-modal-error {
+  text-align: center;
+  color: #ff2a2a;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .calcom-modal {
+    width: 95%;
+    max-width: none;
+    margin: 1rem;
+  }
+  
+  .calcom-modal-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+  
+  .calcom-modal-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .calcom-modal-content {
+    padding: 1rem 0.25rem;
+  }
+  
+  .calcom-iframe-container {
+    min-height: 400px;
+  }
+  
+  .calcom-iframe {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calcom-modal {
+    width: 98%;
+    margin: 0.5rem;
+  }
+  
+  .calcom-modal-link {
+    padding: 0.7rem 1.8rem;
+    font-size: 1rem;
+  }
+  
+  .calcom-iframe-container {
+    min-height: 350px;
+  }
+  
+  .calcom-iframe {
+    height: 350px;
+  }
+} 

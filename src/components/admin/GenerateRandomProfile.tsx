@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { db } from '../../firebase/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
-import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
+import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import ukCounties from '../../constants/ukCounties';
 import industriesList from '../../constants/industries';
 import '../../styles/adminStyles/MentorManagement.css';
@@ -538,6 +538,7 @@ export default function GenerateRandomProfile() {
         : ukEducationLevels;
 
       return {
+        uid: `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: `${firstName} ${lastName}`,
         email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
         phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
@@ -548,6 +549,7 @@ export default function GenerateRandomProfile() {
         profession: getRandomElement(professions),
         pastProfessions: getRandomElements(professions, Math.floor(Math.random() * 3) + 1),
         linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
+        calCom: type === 'mentor' ? `https://${firstName.toLowerCase()}.cal.com/30min` : '',
         hobbies: getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2),
         ethnicity: getRandomElement(ethnicityOptions),
         religion: getRandomElement(religionOptions),
@@ -555,13 +557,13 @@ export default function GenerateRandomProfile() {
         lookingFor: type === 'mentee' ? lookingFor : [],
         industries,
         type,
-        isGenerated: true,
+        isGenerated: "true",
       };
     }
     // Archetype-based generation
     const firstName = getRandomElement(firstNames);
     const lastName = getRandomElement(lastNames);
-    const age = Math.floor(Math.random() * (selectedArchetype.ageRange[1] - selectedArchetype.ageRange[0] + 1)) + selectedArchetype.ageRange[0];
+    const age = Math.floor(Math.random() * ((selectedArchetype.ageRange?.[1] || 60) - (selectedArchetype.ageRange?.[0] || 18) + 1)) + (selectedArchetype.ageRange?.[0] || 18);
     const skills = getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2);
     const lookingFor = selectedArchetype.type === 'mentee' ? getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2) : [];
     const industries = getRandomElements(selectedArchetype.industries!, 1);
@@ -570,6 +572,7 @@ export default function GenerateRandomProfile() {
     const profession = getRandomElement(selectedArchetype.professions!);
     const hobbiesList = getRandomElements(selectedArchetype.hobbies!, Math.floor(Math.random() * 3) + 1);
     return {
+      uid: `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: `${firstName} ${lastName}`,
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
       phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
@@ -580,6 +583,7 @@ export default function GenerateRandomProfile() {
       profession,
       pastProfessions: [],
       linkedin: `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
+      calCom: selectedArchetype.type === 'mentor' ? `https://${firstName.toLowerCase()}.cal.com/30min` : '',
       hobbies: hobbiesList,
       ethnicity: getRandomElement(ethnicityOptions),
       religion: getRandomElement(religionOptions),

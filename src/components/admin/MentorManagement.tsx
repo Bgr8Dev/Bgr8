@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../firebase/firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
-import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/matchUsers';
+import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../widgets/MentorAlgorithm/CalCom/calComService';
 import GenerateRandomProfile from './GenerateRandomProfile';
-import { FaSync, FaClock, FaUser, FaCalendarAlt } from 'react-icons/fa';
+import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck, FaPoundSign } from 'react-icons/fa';
 import MentorModal from '../widgets/MentorAlgorithm/MentorModal';
 import '../../styles/adminStyles/MentorManagement.css';
 import BookingsTable from './BookingsTable';
 import BookingDetailsModal from './BookingDetailsModal';
 import BookingsGrouped from './BookingsGrouped';
 
-// Add Booking interface for admin view
+// Enhanced Booking interface for admin view with Cal.com support
 interface Booking {
   id: string;
   mentorName: string;
@@ -23,6 +24,24 @@ interface Booking {
   status: 'pending' | 'confirmed' | 'cancelled';
   meetLink?: string;
   eventId?: string;
+  // Cal.com specific fields
+  isCalComBooking?: boolean;
+  calComBookingId?: string;
+  calComEventType?: {
+    id: number;
+    title: string;
+  };
+  calComAttendees?: Array<{
+    name: string;
+    email: string;
+    timeZone: string;
+  }>;
+  // Additional fields for analytics
+  createdAt?: Date;
+  mentorId?: string;
+  menteeId?: string;
+  duration?: number; // in minutes
+  revenue?: number;
 }
 
 // Add Availability interfaces for admin view
@@ -44,6 +63,8 @@ interface MentorAvailability {
 
 interface MentorAvailabilityWithProfile extends MentorAvailability {
   mentorProfile?: MentorMenteeProfile;
+  calComAvailability?: CalComAvailability[];
+  hasCalComIntegration?: boolean;
 }
 
 interface MentorMenteeProfileWithId extends MentorMenteeProfile {
@@ -54,6 +75,48 @@ type FirestoreTimestamp = { toDate: () => Date };
 function isFirestoreTimestamp(val: unknown): val is FirestoreTimestamp {
   return !!val && typeof val === 'object' && typeof (val as { toDate?: unknown }).toDate === 'function';
 }
+
+// Inline BookingAnalytics component
+const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
+  const analytics = useMemo(() => {
+    const totalBookings = bookings.length;
+    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
+    const calComBookings = bookings.filter(b => b.isCalComBooking).length;
+    const internalBookings = bookings.filter(b => !b.isCalComBooking).length;
+    const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
+    const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
+
+    return { totalBookings, confirmedBookings, calComBookings, internalBookings, completionRate, totalRevenue };
+  }, [bookings]);
+
+  return (
+    <div>
+      <h2 style={{ color: '#ffb300', marginBottom: 16 }}>Booking Analytics Dashboard</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+          <FaCalendarAlt style={{ fontSize: 24, color: '#ffb300', marginBottom: 8 }} />
+          <h3 style={{ color: '#ffb300', fontSize: 16, marginBottom: 4 }}>Total Bookings</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{analytics.totalBookings}</p>
+        </div>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+          <FaCheck style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
+          <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Completion Rate</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{analytics.completionRate.toFixed(1)}%</p>
+        </div>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+          <FaPoundSign style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
+          <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Total Revenue</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>£{analytics.totalRevenue}</p>
+        </div>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+          <FaClock style={{ fontSize: 24, color: '#00eaff', marginBottom: 8 }} />
+          <h3 style={{ color: '#00eaff', fontSize: 16, marginBottom: 4 }}>Cal.com Bookings</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{analytics.calComBookings}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function MentorManagement() {
   const [users, setUsers] = useState<MentorMenteeProfileWithId[]>([]);
@@ -67,7 +130,7 @@ export default function MentorManagement() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<MentorMenteeProfileWithId | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [tab, setTab] = useState<'users' | 'bookings' | 'availability'>('users');
+  const [tab, setTab] = useState<'users' | 'bookings' | 'availability' | 'analytics'>('users');
   // Bookings state
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
@@ -122,13 +185,16 @@ export default function MentorManagement() {
     }
   };
 
-  // Only fetch bookings when tab is switched to 'bookings'
+  // Enhanced fetchBookings function that includes Cal.com bookings
   const fetchBookings = async () => {
     setLoadingBookings(true);
     setBookingsError(null);
     try {
+      const results: Booking[] = [];
+      
+      // Fetch Firestore bookings
       const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
-      const bookingsData = bookingsSnapshot.docs.map(doc => {
+      const firestoreBookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -141,11 +207,77 @@ export default function MentorManagement() {
           endTime: data.endTime || '',
           status: data.status || 'pending',
           meetLink: data.meetLink,
-          eventId: data.eventId
+          eventId: data.eventId,
+          mentorId: data.mentorId,
+          menteeId: data.menteeId,
+          createdAt: data.createdAt,
+          duration: data.duration || 60,
+          revenue: data.revenue || 0,
+          isCalComBooking: false
         } as Booking;
       });
-      setBookings(bookingsData);
-    } catch {
+      results.push(...firestoreBookings);
+
+      // Fetch Cal.com bookings from all mentors
+      try {
+        const mentorsSnapshot = await getDocs(collection(db, 'mentorProgram'));
+        const mentorPromises = mentorsSnapshot.docs
+          .filter(doc => doc.data().type === 'mentor')
+          .map(async (mentorDoc) => {
+            const mentorData = mentorDoc.data();
+            try {
+              const calComBookings = await CalComService.getBookings(mentorDoc.id);
+              return calComBookings.map((calBooking: CalComBookingResponse) => {
+                const startDate = new Date(calBooking.startTime);
+                const endDate = new Date(calBooking.endTime);
+                
+                // Find mentor and mentee from attendees
+                const mentor = calBooking.attendees.find(attendee => 
+                  attendee.email === mentorData.email
+                );
+                const mentee = calBooking.attendees.find(attendee => 
+                  attendee.email !== mentorData.email
+                );
+                
+                return {
+                  id: `calcom-${calBooking.id}`,
+                  mentorId: mentorDoc.id,
+                  menteeId: mentee?.email || 'unknown',
+                  mentorName: mentor?.name || mentorData.name || 'Unknown Mentor',
+                  menteeName: mentee?.name || 'Unknown Mentee',
+                  mentorEmail: mentor?.email || mentorData.email || '',
+                  menteeEmail: mentee?.email || '',
+                  sessionDate: startDate,
+                  startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                  endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                  status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
+                          calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
+                  createdAt: new Date(),
+                  duration: (calBooking.eventType as { length?: number; price?: number })?.length || 60,
+                  revenue: (calBooking.eventType as { length?: number; price?: number })?.price || 0,
+                  isCalComBooking: true,
+                  calComBookingId: calBooking.id,
+                  calComEventType: calBooking.eventType,
+                  calComAttendees: calBooking.attendees
+                } as Booking;
+              });
+            } catch (error) {
+              console.error(`Error fetching Cal.com bookings for mentor ${mentorDoc.id}:`, error);
+              return [];
+            }
+          });
+        
+        const calComResults = await Promise.all(mentorPromises);
+        const allCalComBookings = calComResults.flat();
+        results.push(...allCalComBookings);
+      } catch (error) {
+        console.error('Error fetching Cal.com bookings:', error);
+        // Continue with Firestore bookings only
+      }
+
+      setBookings(results);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
       setBookingsError('Failed to load bookings');
     } finally {
       setLoadingBookings(false);
@@ -163,13 +295,42 @@ export default function MentorManagement() {
         mentorId: doc.id
       })) as MentorAvailabilityWithProfile[];
       
-      // Fetch mentor profiles to enrich the data
+      // Fetch mentor profiles and Cal.com availability to enrich the data
       const enrichedData = await Promise.all(
         availabilityData.map(async (availability) => {
           try {
+            // Fetch mentor profile
             const mentorDoc = await getDoc(doc(db, 'mentorProgram', availability.mentorId));
             if (mentorDoc.exists()) {
               availability.mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+            }
+            
+            // Check if mentor has Cal.com integration
+            const hasCalComApiKey = await CalComTokenManager.hasApiKey(availability.mentorId);
+            availability.hasCalComIntegration = hasCalComApiKey;
+            
+            // Fetch Cal.com availability if mentor has integration
+            if (hasCalComApiKey) {
+              try {
+                // Get availability for next 7 days
+                const today = new Date();
+                const nextWeek = new Date(today);
+                nextWeek.setDate(today.getDate() + 7);
+                
+                const dateFrom = today.toISOString().split('T')[0];
+                const dateTo = nextWeek.toISOString().split('T')[0];
+                
+                const calComAvailability = await CalComService.getAvailability(
+                  availability.mentorId,
+                  dateFrom,
+                  dateTo
+                );
+                
+                availability.calComAvailability = calComAvailability;
+              } catch (calComError) {
+                console.error(`Error fetching Cal.com availability for mentor ${availability.mentorId}:`, calComError);
+                // Don't fail the entire request if Cal.com fails
+              }
             }
           } catch (err) {
             console.error(`Error fetching mentor profile for ${availability.mentorId}:`, err);
@@ -381,12 +542,70 @@ export default function MentorManagement() {
     return availability.timeSlots.filter(slot => !slot.isAvailable).length;
   };
 
-  const getRecurringSlots = (availability: MentorAvailabilityWithProfile) => {
-    return availability.timeSlots.filter(slot => slot.type === 'recurring').length;
+  // Cal.com availability helper functions
+  const getCalComTotalSlots = (availability: MentorAvailabilityWithProfile) => {
+    if (!availability.calComAvailability) return 0;
+    return availability.calComAvailability.reduce((total, day) => total + day.slots.length, 0);
   };
 
-  const getSpecificSlots = (availability: MentorAvailabilityWithProfile) => {
-    return availability.timeSlots.filter(slot => slot.type === 'specific').length;
+  const getCalComAvailableSlots = (availability: MentorAvailabilityWithProfile) => {
+    if (!availability.calComAvailability) return 0;
+    return availability.calComAvailability.reduce((total, day) => 
+      total + day.slots.filter(slot => slot.available).length, 0);
+  };
+
+  const getCalComBookedSlots = (availability: MentorAvailabilityWithProfile) => {
+    if (!availability.calComAvailability) return 0;
+    return availability.calComAvailability.reduce((total, day) => 
+      total + day.slots.filter(slot => !slot.available).length, 0);
+  };
+
+  // Booking statistics helper functions
+  const getBookingStats = () => {
+    const totalBookings = bookings.length;
+    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
+    const pendingBookings = bookings.filter(b => b.status === 'pending').length;
+    const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
+    const calComBookings = bookings.filter(b => b.isCalComBooking).length;
+    const internalBookings = bookings.filter(b => !b.isCalComBooking).length;
+    const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
+    const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
+    
+    // Get unique mentors and mentees
+    const uniqueMentors = new Set(bookings.map(b => b.mentorId)).size;
+    const uniqueMentees = new Set(bookings.map(b => b.menteeId)).size;
+    
+    // Get today's bookings
+    const today = new Date();
+    const todayBookings = bookings.filter(b => {
+      const bookingDate = b.sessionDate instanceof Date ? b.sessionDate : new Date(b.sessionDate || '');
+      return bookingDate.toDateString() === today.toDateString();
+    }).length;
+    
+    // Get this week's bookings
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const thisWeekBookings = bookings.filter(b => {
+      const bookingDate = b.sessionDate instanceof Date ? b.sessionDate : new Date(b.sessionDate || '');
+      return bookingDate >= weekStart && bookingDate <= weekEnd;
+    }).length;
+
+    return {
+      totalBookings,
+      confirmedBookings,
+      pendingBookings,
+      cancelledBookings,
+      calComBookings,
+      internalBookings,
+      totalRevenue,
+      completionRate,
+      uniqueMentors,
+      uniqueMentees,
+      todayBookings,
+      thisWeekBookings
+    };
   };
 
   if (loading) {
@@ -412,6 +631,10 @@ export default function MentorManagement() {
         <button className={tab === 'availability' ? 'active' : ''} onClick={() => setTab('availability')}>
           <FaClock style={{ marginRight: 8 }} />
           Availability
+        </button>
+        <button className={tab === 'analytics' ? 'active' : ''} onClick={() => setTab('analytics')}>
+          <FaChartBar style={{ marginRight: 8 }} />
+          Analytics
         </button>
       </div>
       
@@ -612,6 +835,67 @@ export default function MentorManagement() {
       {/* BOOKINGS TAB */}
       {tab === 'bookings' && (
         <div>
+          {/* Booking Statistics Tiles */}
+          {!loadingBookings && !bookingsError && (
+            <div className="mentor-management-stats" style={{ marginBottom: 24 }}>
+              {(() => {
+                const stats = getBookingStats();
+                return (
+                  <>
+                    <div className="stat-card">
+                      <h3>Total Bookings</h3>
+                      <p>{stats.totalBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Confirmed</h3>
+                      <p style={{ color: '#00e676' }}>{stats.confirmedBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Pending</h3>
+                      <p style={{ color: '#ffb300' }}>{stats.pendingBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Cancelled</h3>
+                      <p style={{ color: '#ff4444' }}>{stats.cancelledBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Completion Rate</h3>
+                      <p style={{ color: '#00e676' }}>{stats.completionRate.toFixed(1)}%</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Total Revenue</h3>
+                      <p style={{ color: '#00e676' }}>£{stats.totalRevenue}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Cal.com Bookings</h3>
+                      <p style={{ color: '#00eaff' }}>{stats.calComBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Internal Bookings</h3>
+                      <p style={{ color: '#ffb300' }}>{stats.internalBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Active Mentors</h3>
+                      <p style={{ color: '#ffb300' }}>{stats.uniqueMentors}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Active Mentees</h3>
+                      <p style={{ color: '#00e676' }}>{stats.uniqueMentees}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>Today's Bookings</h3>
+                      <p style={{ color: '#00eaff' }}>{stats.todayBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                      <h3>This Week</h3>
+                      <p style={{ color: '#ffb300' }}>{stats.thisWeekBookings}</p>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+          
           {/* Bookings View Mode Switch */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 18 }}>
             <button className={bookingsView === 'table' ? 'active' : ''} onClick={() => setBookingsView('table')}>Table View</button>
@@ -693,16 +977,16 @@ export default function MentorManagement() {
               <p>{filteredAvailability.length}</p>
             </div>
             <div className="stat-card">
-              <h3>Total Time Slots</h3>
+              <h3>Internal Time Slots</h3>
               <p>{filteredAvailability.reduce((total, availability) => total + getTotalSlots(availability), 0)}</p>
             </div>
             <div className="stat-card">
-              <h3>Available Slots</h3>
-              <p>{filteredAvailability.reduce((total, availability) => total + getAvailableSlots(availability), 0)}</p>
+              <h3>Cal.com Time Slots</h3>
+              <p>{filteredAvailability.reduce((total, availability) => total + getCalComTotalSlots(availability), 0)}</p>
             </div>
             <div className="stat-card">
-              <h3>Booked Slots</h3>
-              <p>{filteredAvailability.reduce((total, availability) => total + getBookedSlots(availability), 0)}</p>
+              <h3>Cal.com Integration</h3>
+              <p>{filteredAvailability.filter(availability => availability.hasCalComIntegration).length}</p>
             </div>
           </div>
 
@@ -718,11 +1002,13 @@ export default function MentorManagement() {
                   <tr>
                     <th>Mentor</th>
                     <th>Email</th>
-                    <th>Total Slots</th>
-                    <th>Available</th>
-                    <th>Booked</th>
-                    <th>Recurring</th>
-                    <th>One-off</th>
+                    <th>Internal Slots</th>
+                    <th>Internal Available</th>
+                    <th>Internal Booked</th>
+                    <th>Cal.com Integration</th>
+                    <th>Cal.com Slots</th>
+                    <th>Cal.com Available</th>
+                    <th>Cal.com Booked</th>
                     <th>Last Updated</th>
                     <th>Actions</th>
                   </tr>
@@ -758,13 +1044,29 @@ export default function MentorManagement() {
                         </span>
                       </td>
                       <td>
+                        {availability.hasCalComIntegration ? (
+                          <span style={{ background: '#00eaff', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                            ✅ Connected
+                          </span>
+                        ) : (
+                          <span style={{ background: '#666', color: '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                            ❌ Not Connected
+                          </span>
+                        )}
+                      </td>
+                      <td>
                         <span style={{ background: '#00eaff', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
-                          {getRecurringSlots(availability)}
+                          {getCalComTotalSlots(availability)}
                         </span>
                       </td>
                       <td>
-                        <span style={{ background: '#ff6b35', color: '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
-                          {getSpecificSlots(availability)}
+                        <span style={{ background: '#00e676', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getCalComAvailableSlots(availability)}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ background: '#ff4444', color: '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {getCalComBookedSlots(availability)}
                         </span>
                       </td>
                       <td>
@@ -817,7 +1119,14 @@ export default function MentorManagement() {
             <button onClick={() => setDetailsModalOpen(false)} style={{ position: 'absolute', top: 12, right: 12, background: '#ff4444', color: '#fff', border: 'none', borderRadius: 8, padding: '0.3rem 1rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Close</button>
             <h2 style={{ marginBottom: 8 }}>Availability Details</h2>
             <div><b>Mentor:</b> {getMentorName(selectedAvailability)} ({getMentorEmail(selectedAvailability)})</div>
-            <div style={{ margin: '1rem 0 1.5rem 0', color: '#ffb300' }}><b>Total Slots:</b> {getTotalSlots(selectedAvailability)} | <b>Available:</b> {getAvailableSlots(selectedAvailability)} | <b>Booked:</b> {getBookedSlots(selectedAvailability)}</div>
+            <div style={{ margin: '1rem 0 1.5rem 0', color: '#ffb300' }}>
+              <b>Internal Slots:</b> {getTotalSlots(selectedAvailability)} | <b>Available:</b> {getAvailableSlots(selectedAvailability)} | <b>Booked:</b> {getBookedSlots(selectedAvailability)}
+            </div>
+            {selectedAvailability.hasCalComIntegration && (
+              <div style={{ margin: '0 0 1.5rem 0', color: '#00eaff' }}>
+                <b>Cal.com Integration:</b> ✅ Connected | <b>Cal.com Slots:</b> {getCalComTotalSlots(selectedAvailability)} | <b>Available:</b> {getCalComAvailableSlots(selectedAvailability)} | <b>Booked:</b> {getCalComBookedSlots(selectedAvailability)}
+              </div>
+            )}
             <table style={{ width: '100%', background: 'rgba(24,24,24,0.95)', borderRadius: 8, marginTop: 8 }}>
               <thead>
                 <tr>
@@ -830,7 +1139,7 @@ export default function MentorManagement() {
               </thead>
               <tbody>
                 {selectedAvailability.timeSlots.length === 0 ? (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No slots found.</td></tr>
+                  <tr><td colSpan={5} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No internal slots found.</td></tr>
                 ) : selectedAvailability.timeSlots.map(slot => (
                   <tr key={slot.id} style={{ background: !slot.isAvailable ? 'rgba(255,68,68,0.07)' : undefined }}>
                     <td><span style={{ background: slot.type === 'recurring' ? '#00eaff' : '#ff6b35', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{slot.type === 'recurring' ? 'Recurring' : 'One-off'}</span></td>
@@ -842,7 +1151,51 @@ export default function MentorManagement() {
                 ))}
               </tbody>
             </table>
+            
+            {/* Cal.com Availability Section */}
+            {selectedAvailability.hasCalComIntegration && selectedAvailability.calComAvailability && (
+              <>
+                <h3 style={{ marginTop: 24, marginBottom: 12, color: '#00eaff' }}>Cal.com Availability (Next 7 Days)</h3>
+                <table style={{ width: '100%', background: 'rgba(0,234,255,0.05)', borderRadius: 8, border: '1px solid #00eaff' }}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Event Type</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedAvailability.calComAvailability.length === 0 ? (
+                      <tr><td colSpan={4} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No Cal.com availability found.</td></tr>
+                    ) : selectedAvailability.calComAvailability.map(day => 
+                      day.slots.map(slot => (
+                        <tr key={`${day.date}-${slot.time}`} style={{ background: !slot.available ? 'rgba(255,68,68,0.07)' : undefined }}>
+                          <td>{new Date(day.date).toLocaleDateString('en-GB')}</td>
+                          <td>{slot.time}</td>
+                          <td>{slot.eventTypeTitle || 'General'}</td>
+                          <td><span style={{ background: slot.available ? '#00e676' : '#ff4444', color: slot.available ? '#181818' : '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{slot.available ? 'Available' : 'Booked'}</span></td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </>
+            )}
           </div>
+        </div>
+      )}
+
+      {/* ANALYTICS TAB */}
+      {tab === 'analytics' && (
+        <div>
+          {loadingBookings ? (
+            <div className="mentor-management-loading">Loading analytics data...</div>
+          ) : bookingsError ? (
+            <div className="mentor-management-error">{bookingsError}</div>
+          ) : (
+            <BookingAnalytics bookings={bookings} />
+          )}
         </div>
       )}
     </div>

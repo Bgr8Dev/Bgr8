@@ -5,9 +5,10 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle, FaSyncAlt } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
 import MentorProfile from './MentorProfile';
-import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './matchUsers';
+import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './algorithm/matchUsers';
 import MentorModal from './MentorModal';
-import BookingModal from './BookingModal';
+import BookingModal from './booking/BookingModal';
+import CalComModal from './CalCom/CalComModal';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
@@ -38,6 +39,7 @@ export default function MentorProgram() {
     profession: '',
     pastProfessions: [''],
     linkedin: '',
+    calCom: '',
     hobbies: [] as string[],
     ethnicity: '',
     religion: '',
@@ -63,6 +65,8 @@ export default function MentorProgram() {
   const [hobbiesDropdownOpen, setHobbiesDropdownOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingMentor, setBookingMentor] = useState<MentorMenteeProfile | null>(null);
+  const [calComModalOpen, setCalComModalOpen] = useState(false);
+  const [calComMentor, setCalComMentor] = useState<MentorMenteeProfile | null>(null);
   const industriesDropdownRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const MATCHES_PER_PAGE = 6;
@@ -218,6 +222,20 @@ export default function MentorProgram() {
       }
     }
 
+    // Cal.com validation for mentors
+    if (selectedRole === 'mentor') {
+      if (!form.calCom || form.calCom.trim() === '') {
+        setError('Cal.com URL is required for mentors.');
+        setLoading(false);
+        return;
+      }
+      if (!form.calCom.match(/^https?:\/\/.*\.cal\.com\/.*$/)) {
+        setError('Please enter a valid Cal.com URL (e.g. https://yourname.cal.com/30min).');
+        setLoading(false);
+        return;
+      }
+    }
+
     if (!currentUser) {
       setError('No user logged in');
       setLoading(false);
@@ -236,6 +254,7 @@ export default function MentorProgram() {
       profession: form.profession,
       pastProfessions: form.pastProfessions.filter(p => p.trim() !== ''),
       linkedin: form.linkedin,
+      calCom: form.calCom,
       hobbies: form.hobbies.filter(h => h.trim() !== ''),
       ethnicity: form.ethnicity,
       religion: form.religion,
@@ -261,7 +280,7 @@ export default function MentorProgram() {
       }
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
-        profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+        profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], industries: [], type: '', subjects: []
       });
       setTimeout(matchMentees, 0); // Update matches after state change
@@ -281,7 +300,7 @@ export default function MentorProgram() {
       setSwipeDirection(null);
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
-        profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+        profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], industries: [], type: role, subjects: []
       });
       setError(null);
@@ -294,7 +313,7 @@ export default function MentorProgram() {
     setShowForm(false);
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
-      profession: '', pastProfessions: [''], linkedin: '', hobbies: [''], ethnicity: '', religion: '',
+      profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
       skills: [], lookingFor: [], industries: [], type: '', subjects: []
     });
     setError(null);
@@ -707,6 +726,19 @@ export default function MentorProgram() {
                         pattern="https?://(www\.)?linkedin\.com/in/[A-Za-z0-9\-_/]+/?"
                         title="Please enter a valid LinkedIn profile URL (e.g. https://www.linkedin.com/in/your-profile)"
                       />
+                      {selectedRole === 'mentor' && (
+                        <input
+                          name="calCom"
+                          value={form.calCom}
+                          onChange={handleChange}
+                          placeholder="Cal.com URL (required for mentors)"
+                          type="url"
+                          required
+                          pattern="https?://.*\.cal\.com/.*"
+                          title="Please enter a valid Cal.com URL (e.g. https://yourname.cal.com/30min)"
+                          style={{ borderColor: form.calCom ? '#3a0a0a' : '#ff2a2a' }}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="mentor-form-half">
@@ -1040,8 +1072,13 @@ export default function MentorProgram() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setBookingMentor(user);
-                          setBookingModalOpen(true);
+                          if (user.calCom && user.calCom.trim()) {
+                            setCalComMentor(user);
+                            setCalComModalOpen(true);
+                          } else {
+                            setBookingMentor(user);
+                            setBookingModalOpen(true);
+                          }
                         }}
                         style={{
                           display: 'inline-flex',
@@ -1120,6 +1157,14 @@ export default function MentorProgram() {
           setBookingMentor(null);
         }} 
         mentor={bookingMentor!} 
+      />
+      <CalComModal
+        open={calComModalOpen}
+        onClose={() => {
+          setCalComModalOpen(false);
+          setCalComMentor(null);
+        }}
+        mentor={calComMentor!}
       />
     </section>
   );

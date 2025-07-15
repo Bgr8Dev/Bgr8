@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MentorMenteeProfile } from './matchUsers';
+import { MentorMenteeProfile } from './algorithm/matchUsers';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
@@ -155,6 +155,9 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                 <button type="button" onClick={() => addArrayField('pastProfessions')} style={{ color: '#ff2a2a', background: 'none', border: 'none', fontSize: 18 }}>+ Add</button>
               </div>
               <div><b>LinkedIn:</b> <input name="linkedin" value={editUser?.linkedin || ''} onChange={handleInputChange} /></div>
+              {user.type === 'mentor' && (
+                <div><b>Cal.com:</b> <input name="calCom" value={editUser?.calCom || ''} onChange={handleInputChange} /></div>
+              )}
             </>
           ) : (
             <>
@@ -174,6 +177,36 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                   View Profile
                 </a>
               ) : 'N/A'}</span></div>
+              {user.type === 'mentor' && (
+                <div><b>Cal.com:</b> <span className="field-value">{user.calCom ? (
+                  <a
+                    href={user.calCom}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mentor-modal-calcom-btn"
+                    title="Book a session"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '0.4rem 0.8rem',
+                      background: 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
+                      color: '#fff',
+                      textDecoration: 'none',
+                      borderRadius: 6,
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      transition: 'all 0.2s',
+                      boxShadow: '0 2px 8px rgba(255,42,42,0.2)'
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Book Session
+                  </a>
+                ) : 'N/A'}</span></div>
+              )}
             </>
           )}
         </div>

@@ -10,6 +10,13 @@ interface Booking {
   startTime: string;
   endTime: string;
   status: 'pending' | 'confirmed' | 'cancelled';
+  isCalComBooking?: boolean;
+  calComEventType?: {
+    id: number;
+    title: string;
+  };
+  meetLink?: string;
+  eventId?: string;
 }
 
 interface BookingsGroupedProps {
@@ -56,7 +63,16 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
               <tbody>
                 {groupBookings.map(booking => (
                   <tr key={booking.id}>
-                    {groupBy === 'mentor' ? null : <td>{booking.mentorName}</td>}
+                    {groupBy === 'mentor' ? null : (
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span>{booking.mentorName}</span>
+                          {booking.isCalComBooking && (
+                            <span style={{ background: '#00eaff', color: '#181818', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>Cal.com</span>
+                          )}
+                        </div>
+                      </td>
+                    )}
                     {groupBy === 'mentee' ? null : <td>{booking.menteeName}</td>}
                     <td>{booking.sessionDate ? (booking.sessionDate instanceof Date ? booking.sessionDate.toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
                     <td>{booking.startTime} - {booking.endTime}</td>
