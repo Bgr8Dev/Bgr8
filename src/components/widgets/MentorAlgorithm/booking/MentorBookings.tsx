@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { db } from '../../../../firebase/firebase';
 import { collection, query, where, getDocs, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { FaCheck, FaTimes, FaSearch, FaFileExport, FaCalendarAlt, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaSearch, FaFileExport, FaCalendarAlt, FaExternalLinkAlt, FaComments } from 'react-icons/fa';
 import { CalComService, CalComBookingResponse } from '../CalCom/calComService';
 import '../MentorProgram.css';
 
@@ -375,6 +375,10 @@ export default function MentorBookings() {
     return booking.mentorId === currentUser?.uid ? booking.menteeName : booking.mentorName;
   };
 
+  const handleFeedbackClick = (booking: Booking) => {
+    window.location.href = `/feedback/${booking.id}`;
+  };
+
   // Status badge helper
   const statusBadge = (status: string) => {
     let color = '#ffb300';
@@ -520,6 +524,18 @@ export default function MentorBookings() {
                           title="Set up Google Meet via calendar event"
                         >
                           📅 Set up Google Meet
+                        </button>
+                      )}
+                      
+                      {/* Feedback button for completed sessions - for both internal and Cal.com bookings */}
+                      {booking.status === 'confirmed' && (
+                        <button
+                          onClick={() => handleFeedbackClick(booking)}
+                          style={{ background: 'linear-gradient(135deg, #00e676 0%, #00cc00 100%)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0, 230, 118, 0.3)' }}
+                          title="Provide feedback for this session"
+                        >
+                          <FaComments style={{ fontSize: '14px' }} />
+                          Give Feedback
                         </button>
                       )}
                       {booking.isCalComBooking && (

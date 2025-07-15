@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/animations/LoadingSpinner';
 import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
+import FeedbackPage from '../pages/utilPages/FeedbackPage';
 import AdminPortal from '../pages/AdminPortal';
 import React from 'react';
 import { UserProfile } from '../utils/userProfile';
@@ -71,6 +72,14 @@ export default function Navigation() {
         element={
           <ProtectedRoute>
             <Settings />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/feedback/:bookingId" 
+        element={
+          <ProtectedRoute>
+            <FeedbackPage />
           </ProtectedRoute>
         } 
       />
