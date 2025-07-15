@@ -80,6 +80,7 @@
 |---------|-------------|:------:|
 | 🌟 **BGr8 Community Hub** | Centralized community platform | ✅ Live |
 | 🤝 **Mentor Matching** | Advanced MentorAlgorithm system | ✅ Live |
+| 📅 **Cal.com Booking System** | Third-party calendar integration | ✅ Live |
 | 🔒 **Secure Authentication** | Firebase-powered security | ✅ Live |
 | 💳 **Payment Processing** | Stripe integration | ✅ Live |
 | 📱 **Responsive Design** | Mobile-first approach | ✅ Live |
@@ -93,6 +94,8 @@
 | 🔑 **Firebase Auth** | User authentication | ✅ Live |
 | 🔥 **Firestore DB** | Real-time database | ✅ Live |
 | 💸 **Stripe Payments** | Secure transactions | ✅ Live |
+| 📅 **Cal.com Integration** | Advanced booking system | ✅ Live |
+| 🔗 **Proxy Server** | CORS-free API access | ✅ Live |
 | ⚡ **Real-time Updates** | Live data synchronization | ✅ Live |
 | 🧑‍💻 **React + TypeScript** | Modern frontend stack | ✅ Live |
 
@@ -116,11 +119,17 @@ graph TD
     K[💳 Payments] --> L[💸 Stripe]
     L --> M[🛒 Stripe Checkout]
     L --> N[🔔 Stripe Webhooks]
+    O[📅 Booking System] --> P[🌐 Cal.com API]
+    P --> Q[🔗 Proxy Server]
+    P --> R[📋 Event Types]
+    P --> S[📊 Bookings Management]
     
     style A fill:#61DAFB
     style D fill:#FFCA28
     style E fill:#FF6B35
     style L fill:#008CDD
+    style O fill:#00E676
+    style P fill:#00E676
 ```
 
 **Our platform leverages cutting-edge technologies for optimal performance and user experience.**
@@ -278,6 +287,7 @@ npm run preview
 | `VITE_FIREBASE_MEASUREMENT_ID` | Firebase Measurement ID | ✅ | `G-XXXXXXXXXX` |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key | ✅ | `pk_test_...` |
 | `VITE_STRIPE_SERVER_URL` | Stripe Server URL | ✅ | `http://localhost:3001` |
+| `VITE_CAL_COM_API_KEY` | Cal.com API Key (optional) | 🔄 | `cal_...` |
 
 ### Backend Variables (`stripe/.env`)
 
@@ -561,6 +571,7 @@ If you discover a security vulnerability, please:
 - ⚛️ **React** - UI framework
 - 🔥 **Firebase** - Backend services
 - 💳 **Stripe** - Payment processing
+- 📅 **Cal.com** - Calendar & booking system
 - ⚡ **Vite** - Build tool
 - 🎨 **CSS3** - Styling
 
