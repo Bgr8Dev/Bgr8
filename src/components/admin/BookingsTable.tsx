@@ -24,6 +24,11 @@ interface BookingsTableProps {
   onView: (booking: Booking) => void;
 }
 
+// Type guard for Firestore Timestamp
+function isFirestoreTimestamp(obj: unknown): obj is { toDate: () => Date } {
+  return typeof obj === 'object' && obj !== null && 'toDate' in obj && typeof (obj as { toDate?: () => Date }).toDate === 'function';
+}
+
 function exportToCSV(bookings: Booking[]) {
   const header = ['Mentor Name', 'Mentor Email', 'Mentee Name', 'Mentee Email', 'Date', 'Time', 'Status'];
   const rows = bookings.map(b => [
@@ -31,7 +36,7 @@ function exportToCSV(bookings: Booking[]) {
     b.mentorEmail,
     b.menteeName,
     b.menteeEmail,
-    b.sessionDate ? (typeof b.sessionDate === 'object' && 'toDate' in b.sessionDate ? b.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(b.sessionDate).toLocaleDateString('en-GB')) : '-',
+    b.sessionDate ? (isFirestoreTimestamp(b.sessionDate) ? b.sessionDate.toDate().toLocaleDateString('en-GB') : new Date(b.sessionDate).toLocaleDateString('en-GB')) : '-',
     `${b.startTime} - ${b.endTime}`,
     b.status
   ]);
@@ -70,8 +75,8 @@ export default function BookingsTable({ bookings, onView }: BookingsTableProps) 
       } else if (sortField === 'mentee') {
         vA = a.menteeName.toLowerCase(); vB = b.menteeName.toLowerCase();
       } else if (sortField === 'date') {
-        vA = typeof a.sessionDate === 'object' && 'toDate' in a.sessionDate ? (a.sessionDate as any).toDate() : new Date(a.sessionDate || '');
-        vB = typeof b.sessionDate === 'object' && 'toDate' in b.sessionDate ? (b.sessionDate as any).toDate() : new Date(b.sessionDate || '');
+        vA = isFirestoreTimestamp(a.sessionDate) ? a.sessionDate.toDate() : new Date(a.sessionDate || '');
+        vB = isFirestoreTimestamp(b.sessionDate) ? b.sessionDate.toDate() : new Date(b.sessionDate || '');
       } else if (sortField === 'status') {
         vA = a.status; vB = b.status;
       }

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FaCalendarAlt, FaClock, FaPoundSign, FaUser, FaChartLine, FaChartBar } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaPoundSign, FaCheck } from 'react-icons/fa';
 
 interface Booking {
   id: string;
@@ -40,7 +40,6 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
   const analytics = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
 
     // Filter bookings by date
     const recentBookings = bookings.filter(booking => {
@@ -48,10 +47,7 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
       return bookingDate >= thirtyDaysAgo;
     });
 
-    const last90DaysBookings = bookings.filter(booking => {
-      const bookingDate = booking.sessionDate instanceof Date ? booking.sessionDate : new Date(booking.sessionDate || '');
-      return bookingDate >= ninetyDaysAgo;
-    });
+
 
     // Calculate metrics
     const totalBookings = bookings.length;
@@ -149,7 +145,7 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
       <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, marginBottom: 20 }}>
         <h3 style={{ color: '#ffb300', marginBottom: 16 }}>Monthly Trends</h3>
         <div style={{ display: 'flex', alignItems: 'end', gap: 8, height: 200, paddingTop: 20 }}>
-          {data.map((month, index) => (
+          {data.map((month) => (
             <div key={month.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div 
