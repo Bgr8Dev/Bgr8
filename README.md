@@ -159,6 +159,9 @@ npm install
 
 # 4️⃣ Start development servers
 npm run dev
+
+# 5️⃣ Start Cal.com server (in another terminal)
+node calComServer/calComServer.mjs
 ```
 
 ---
