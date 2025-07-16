@@ -29,8 +29,7 @@ const skillsByCategory: { [category: string]: string[] } = {
     'Further Mathematics',
     'Statistics',
     'Latin',
-    'Classical Civilisation',
-    'Other'
+    'Classical Civilisation'
   ],
   'Technology & Programming': [
     'Artificial Intelligence', 'C/C++', 'Cybersecurity', 'Java/C#',
@@ -56,8 +55,8 @@ const skillsByCategory: { [category: string]: string[] } = {
     'Japanese', 'Korean', 'Portuguese', 'Russian', 'Spanish'
   ],
   'Soft Skills': [
-    'Adaptability', 'Communication', 'Conflict Resolution',
-    'Critical Thinking', 'Emotional Intelligence', 'Problem Solving',
+    'Adaptability', 'Emotional Intelligence', 'Conflict Resolution',
+    'Critical Thinking', 'Problem Solving',
     'Stress Management', 'Time Management', 'Work Ethics'
   ]
 };
