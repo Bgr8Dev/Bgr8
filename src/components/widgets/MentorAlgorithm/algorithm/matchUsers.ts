@@ -1,6 +1,7 @@
 import { db } from '../../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 
+export type UserType = 'mentor' | 'mentee';
 export const MENTOR = 'mentor';
 export const MENTEE = 'mentee';
 
@@ -23,7 +24,7 @@ export interface MentorMenteeProfile {
   skills: string[];
   lookingFor: string[];
   industries: string[];
-  type: 'mentor' | 'mentee';
+  type: UserType;
   [key: string]: string | string[];
 }
 
@@ -48,21 +49,39 @@ const educationLevelEncoding: { [level: string]: number } = {
 
 const SCORE_WEIGHTINGS: { [feature: string]: number } = {
   'skills': 9,
+  'industries': 5,
+  'profession': 4,
   'educationLevel': 3,
-  'profession': 3,
   'hobbies': 2,
   'county': 2,
   'age': 3,
   'religion': 1
 };
 
-const ageReasonMentee = {
+const ageReasonMenteeExpPref = {
   10: 'More experienced mentor',
   15: 'Notably more experienced mentor',
   20: 'Significantly more experienced mentor'
 };
 
-const ageReasonMentor = ageReasonMentee;
+const ageReasonMenteeClosePref = { 
+  5: 'Very close in age', 
+  10: 'Moderately close in age'
+};
+
+export const educationLevelReasonIDs = ["education level"]
+export const ageCloseReasonIDs = ["in age"]
+export const ageExperiencedMentorReasonIDs = ["experienced mentor"];
+export const ageReasonIDs = [...ageCloseReasonIDs, ...ageExperiencedMentorReasonIDs];
+export const professionReasonIDs = ["profession matched"];
+export const hobbiesReasonIDs = ["hobby/interests matched"];
+export const industriesReasonIDs = ["industry matched", "industries matched"];
+export const skillsReasonIDs = ["skill(s) matched"];
+export const countyReasonIDs = ["county"];
+
+export function checkReasonType(reasonIDs: string[], reason: string): boolean {
+  return reasonIDs.some(id => reason.includes(id));
+}
 
 function lenIntersect<T>(a: T[], b: T[]): number {
   return a.filter(x => b.includes(x)).length;
@@ -96,7 +115,7 @@ function getEducationScore(
   }
   if (eduAddScore > 0) {
     score += eduAddScore;
-    reasons.push('Higher mentor education level');
+    reasons.push(`Higher mentor ${educationLevelReasonIDs[0]}`);
   }
   return score;
 }
@@ -117,7 +136,7 @@ function getAgeScore(
       || (currentUser.age < candidate.age && currentUser.type == MENTOR)) {
       return 0; // if the mentor is younger, return 0. Unlikely, but...
     }
-    const ageReason = currentUser.type == MENTOR ? ageReasonMentor : ageReasonMentee;
+    const ageReason = ageReasonMenteeExpPref;
     for (const ageString in ageReason) {
       const age = Number(ageString);
       if (age > ageDiff) {
@@ -130,7 +149,7 @@ function getAgeScore(
     if (ageDiff < softAgeDiffLimit) {
       score = Math.max(
         Math.ceil(maxScore - ((ageDiff * maxScore) / softAgeDiffLimit)), 0);
-      const ageReason = { 5: 'Very close in age', 10: 'Moderately close in age' };
+      const ageReason = ageReasonMenteeClosePref;
       for (const age in ageReason) {
         if (Number(age) < ageDiff) {
           reasons.push(ageReason[Number(age) as keyof typeof ageReason]);
@@ -157,11 +176,12 @@ function getProfessionalScore(
   const fullMatch =
     userPast.includes(candidateCurrent) ||
     candidatePast.includes(userCurrent) ||
+    currentUser.profession === candidate.profession ||
     lenIntersect(userPast, candidatePast) > 0;
 
   if (fullMatch) {
     score += professionWeight;
-    reasons.push('Similar professional history');
+    reasons.push(`Desired ${professionReasonIDs[0]}`);
   } else {
     const tokenize = (text: string): string[] =>
       text.toLowerCase().split(/\s+/).filter(Boolean);
@@ -176,12 +196,13 @@ function getProfessionalScore(
 
     const hasPartialMatch =
       intersects(currentWordsUser, pastWordsCandidate) ||
-      intersects(currentWordsCandidate, pastWordsUser);
+      intersects(currentWordsCandidate, pastWordsUser) ||
+      intersects(currentWordsUser, currentWordsCandidate);
 
     if (hasPartialMatch) {
       score += Math.floor(0.5 * professionWeight);
       if (score > 0)
-        reasons.push('Potentially similar professional history');
+        reasons.push(`Potentially desired ${professionReasonIDs[0]}`);
     }
   }
   return score;
@@ -219,7 +240,7 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
 
     // County (location)
     score += getSimpleScore(
-      'county', currentUser, candidate, reasons, 'Same county');
+      'county', currentUser, candidate, reasons, `Same ${countyReasonIDs[0]}`);
 
     // Profession / Professional History
     score += getProfessionalScore(currentUser, candidate, reasons);
@@ -235,14 +256,22 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
     // Hobbies/interests
     const hobbyMatches = lenIntersect(currentUser.hobbies, candidate.hobbies);
     score += hobbyMatches * SCORE_WEIGHTINGS['hobbies'];
-    if (hobbyMatches > 0) reasons.push(`${hobbyMatches} hobby/interests matched`);
+    if (hobbyMatches > 0) reasons.push(`${hobbyMatches} ${hobbiesReasonIDs[0]}`);
 
     // Skills match
     const skillMatches = currentUser.type === MENTOR
       ? lenIntersect(currentUser.skills, candidate.lookingFor)
       : lenIntersect(currentUser.lookingFor, candidate.skills);
     score += skillMatches * SCORE_WEIGHTINGS['skills'];
-    if (skillMatches > 0) reasons.push(`${skillMatches} skill(s) matched`);
+    if (skillMatches > 0) reasons.push(`${skillMatches} ${skillsReasonIDs[0]}`);
+
+    // Industries match
+    const industryMatches = lenIntersect(currentUser.industries, candidate.industries);
+    if (industryMatches == 1)
+      reasons.push(`1 ${industriesReasonIDs[0]}`);
+    else if (industryMatches > 1)
+      reasons.push(`${industryMatches} ${industriesReasonIDs[1]}`);
+    score += industryMatches * SCORE_WEIGHTINGS['industries'];
 
     return { user: candidate, score: score, reasons };
   });

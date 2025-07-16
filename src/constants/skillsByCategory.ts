@@ -1,8 +1,34 @@
 const skillsByCategory: { [category: string]: string[] } = {
-  'STEM': [
-    'Biology', 'Chemistry', 'Computer Science', 'Economics',
-    'Engineering', 'Mathematics', 'Physics', 'Psychology',
-    'Statistics / Data Science'
+  'Subjects': [
+    'Mathematics',
+    'English Language',
+    'English Literature',
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'History',
+    'Geography',
+    'French',
+    'Spanish',
+    'German',
+    'Art & Design',
+    'Music',
+    'Drama',
+    'Physical Education',
+    'Religious Studies',
+    'Computer Science',
+    'Design & Technology',
+    'Business Studies',
+    'Economics',
+    'Psychology',
+    'Sociology',
+    'Media Studies',
+    'Politics',
+    'Philosophy',
+    'Further Mathematics',
+    'Statistics',
+    'Latin',
+    'Classical Civilisation'
   ],
   'Technology & Programming': [
     'Artificial Intelligence', 'C/C++', 'Cybersecurity', 'Java/C#',
@@ -28,8 +54,8 @@ const skillsByCategory: { [category: string]: string[] } = {
     'Japanese', 'Korean', 'Portuguese', 'Russian', 'Spanish'
   ],
   'Soft Skills': [
-    'Adaptability', 'Communication', 'Conflict Resolution',
-    'Critical Thinking', 'Emotional Intelligence', 'Problem Solving',
+    'Adaptability', 'Emotional Intelligence', 'Conflict Resolution',
+    'Critical Thinking', 'Problem Solving',
     'Stress Management', 'Time Management', 'Work Ethics'
   ]
 };

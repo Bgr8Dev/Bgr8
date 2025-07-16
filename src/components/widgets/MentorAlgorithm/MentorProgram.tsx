@@ -5,7 +5,8 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle, FaSyncAlt } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
 import MentorProfile from './MentorProfile';
-import { getBestMatchesForUser, MatchResult, MENTOR, MentorMenteeProfile } from './algorithm/matchUsers';
+import { ageCloseReasonIDs, ageExperiencedMentorReasonIDs, checkReasonType, countyReasonIDs, educationLevelReasonIDs, getBestMatchesForUser, 
+  hobbiesReasonIDs, industriesReasonIDs, MatchResult, MENTEE, MENTOR, MentorMenteeProfile, professionReasonIDs, skillsReasonIDs, UserType } from './algorithm/matchUsers';
 import MentorModal from './MentorModal';
 import BookingModal from './booking/BookingModal';
 import CalComModal from './CalCom/CalComModal';
@@ -17,8 +18,6 @@ import {religionOptions} from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
 import hobbiesByCategory from '../../../constants/hobbiesByCategory';
 import MatchStrengthRing from './MatchStrengthRing';
-
-type UserType = 'mentor' | 'mentee';
 
 const MENTEE_MIN_AGE = 15;
 const MENTEE_MAX_AGE = 19;
@@ -34,7 +33,6 @@ export default function MentorProgram() {
     age: '',
     degree: '',
     educationLevel: '',
-    subjects: [] as string[],
     county: '',
     profession: '',
     pastProfessions: [''],
@@ -213,7 +211,7 @@ export default function MentorProgram() {
     setError(null);
     setSuccess(null);
     // Age validation for mentees
-    if (selectedRole === 'mentee') {
+    if (selectedRole === MENTEE) {
       const ageNum = parseInt(form.age, 10);
       if (isNaN(ageNum) || ageNum < MENTEE_MIN_AGE || ageNum > MENTEE_MAX_AGE) {
         setError(`Mentees must be between ${MENTEE_MIN_AGE} and ${MENTEE_MAX_AGE} years old.`);
@@ -223,7 +221,7 @@ export default function MentorProgram() {
     }
 
     // Cal.com validation for mentors
-    if (selectedRole === 'mentor') {
+    if (selectedRole === MENTOR) {
       if (!form.calCom || form.calCom.trim() === '') {
         setError('Cal.com URL is required for mentors.');
         setLoading(false);
@@ -249,7 +247,6 @@ export default function MentorProgram() {
       age: form.age,
       degree: form.degree,
       educationLevel: form.educationLevel,
-      subjects: form.subjects,
       county: form.county,
       profession: form.profession,
       pastProfessions: form.pastProfessions.filter(p => p.trim() !== ''),
@@ -269,11 +266,11 @@ export default function MentorProgram() {
       await setDoc(doc(db, 'mentorProgram', currentUser.uid), user);
       
       // Update user's profile with mentor/mentee status
-      const roleUpdate = selectedRole === 'mentor' ? { mentor: true } : { mentee: true };
+      const roleUpdate = selectedRole === MENTOR ? { mentor: true } : { mentee: true };
       await updateDoc(doc(db, 'users', currentUser.uid), roleUpdate);
 
       setSuccess('Successfully registered!');
-      if (selectedRole === 'mentor') {
+      if (selectedRole === MENTOR) {
         setMentors(prev => [...prev, user]);
       } else {
         setMentees(prev => [...prev, user]);
@@ -281,7 +278,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: '', subjects: []
+        skills: [], lookingFor: [], industries: [], type: ''
       });
       setTimeout(matchMentees, 0); // Update matches after state change
     } catch (err) {
@@ -293,7 +290,7 @@ export default function MentorProgram() {
   };
 
   const handleRoleSelect = (role: UserType) => {
-    setSwipeDirection(role === 'mentor' ? 'left' : 'right');
+    setSwipeDirection(role === MENTOR ? 'left' : 'right');
     setTimeout(() => {
       setSelectedRole(role);
       setShowForm(true);
@@ -301,7 +298,7 @@ export default function MentorProgram() {
       setForm({
         name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: role, subjects: []
+        skills: [], lookingFor: [], industries: [], type: role
       });
       setError(null);
       setSuccess(null);
@@ -314,7 +311,7 @@ export default function MentorProgram() {
     setForm({
       name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], industries: [], type: '', subjects: []
+      skills: [], lookingFor: [], industries: [], type: ''
     });
     setError(null);
     setSuccess(null);
@@ -323,54 +320,39 @@ export default function MentorProgram() {
   // Tooltip logic for match reasons
   function getReasonTooltip(reason: string, match: MatchResult, user: MentorMenteeProfile, currentUserProfile: MentorMenteeProfile | null): string {
     // Skill match
-    if (/skill\(s\) matched/.test(reason)) {
+    if (checkReasonType(skillsReasonIDs, reason)) {
       // Find the actual skills matched
       if (!currentUserProfile) return 'Skills matched.';
-      const isMentor = currentUserProfile.type === 'mentor';
+      const isMentor = currentUserProfile.type === MENTOR;
       const skills = isMentor
         ? currentUserProfile.skills.filter(skill => user.lookingFor.includes(skill))
         : user.skills.filter(skill => currentUserProfile.lookingFor.includes(skill));
       return skills.length > 0 ? `Matched skills: ${skills.join(', ')}` : 'Skills matched.';
     }
-    // Professional history
-    if (reason === 'Similar professional history' || reason === 'Potentially similar professional history') {
-      if (!currentUserProfile) return 'Professional history matched.';
-      const userPast = currentUserProfile.pastProfessions || [];
-      const candidatePast = user.pastProfessions || [];
-      const userCurrent = currentUserProfile.profession || '';
-      const candidateCurrent = user.profession || '';
-      const overlaps = [];
-      if (userPast.includes(candidateCurrent)) overlaps.push(`Their current: ${candidateCurrent}`);
-      if (candidatePast.includes(userCurrent)) overlaps.push(`Your current: ${userCurrent}`);
-      const sharedPast = userPast.filter(p => candidatePast.includes(p));
-      if (sharedPast.length > 0) overlaps.push(`Shared past: ${sharedPast.join(', ')}`);
-      if (overlaps.length > 0) return `Overlap: ${overlaps.join('; ')}`;
-      return 'Some overlap in professional history.';
-    }
     // Hobbies/interests
-    if (/hobby\/interests matched/.test(reason)) {
+    if (checkReasonType(hobbiesReasonIDs, reason)) {
       if (!currentUserProfile) return 'Hobbies/interests matched.';
       const hobbies = currentUserProfile.hobbies.filter(h => user.hobbies.includes(h));
       return hobbies.length > 0 ? `Matched hobbies/interests: ${hobbies.join(', ')}` : 'Hobbies/interests matched.';
     }
     // County
-    if (reason === 'Same county') {
+    if (checkReasonType(countyReasonIDs, reason)) {
       return `Both are in ${user.county}.`;
     }
     // Education
-    if (reason === 'Higher mentor education level') {
+    if (checkReasonType(educationLevelReasonIDs, reason)) {
       if (currentUserProfile?.type == MENTOR)
         return `You have a higher education level: ${currentUserProfile.educationLevel} > ${user.educationLevel}.`;
       else
         return `${user?.name} has a higher education level: ${user.educationLevel} > ${currentUserProfile?.educationLevel}.`;
     }
     // Age/experience
-    if (reason === 'More experienced mentor' || reason === 'Notably more experienced mentor' || reason === 'Significantly more experienced mentor') {
+    if (checkReasonType(ageExperiencedMentorReasonIDs, reason)) {
       if (!currentUserProfile) return 'Mentor is older.';
       const ageDiff = Math.abs(Number(currentUserProfile.age) - Number(user.age));
-      return `${user.name} is older by ${ageDiff} years.`;
+      return `${user.type == MENTOR ? user.name + " is" : "You are"} older by ${ageDiff} years.`;
     }
-    if (reason === 'Very close in age' || reason === 'Moderately close in age') {
+    if (checkReasonType(ageCloseReasonIDs, reason)) {
       if (!currentUserProfile) return 'Close in age.';
       const ageDiff = Math.abs(Number(currentUserProfile.age) - Number(user.age));
       return `You are close in age (difference: ${ageDiff} years).`;
@@ -453,11 +435,12 @@ export default function MentorProgram() {
 
   // Map reason keywords to icon and color
   const reasonIconMap: { [key: string]: { icon: React.ReactNode; color: string } } = {
-    skill: { icon: <FaBrain />, color: '#00e676' },
-    professional: { icon: <FaUserTie />, color: '#ffb300' },
-    hobby: { icon: <FaRegSmile />, color: '#ff6f00' },
+    skills: { icon: <FaBrain />, color: '#00e676' },
+    profession: { icon: <FaUserTie />, color: '#ffb300' },
+    industries: { icon: <FaUserTie />, color: '#ffff30' },
+    hobbies: { icon: <FaRegSmile />, color: '#ff6f00' },
     county: { icon: <FaMapMarkerAlt />, color: '#42a5f5' },
-    education: { icon: <FaGraduationCap />, color: '#ab47bc' },
+    educationLevel: { icon: <FaGraduationCap />, color: '#ab47bc' },
     experience: { icon: <FaChartLine />, color: '#00bcd4' },
     age: { icon: <FaUserFriends />, color: '#ff2a2a' },
     top: { icon: <FaStar />, color: '#ffd700' },
@@ -466,13 +449,14 @@ export default function MentorProgram() {
   // Helper to get icon/color for a reason
   function getReasonBadgeProps(reason: string) {
     const r = reason.toLowerCase();
-    if (r.includes('skill')) return reasonIconMap.skill;
-    if (r.includes('professional')) return reasonIconMap.professional;
-    if (r.includes('hobby')) return reasonIconMap.hobby;
-    if (r.includes('county')) return reasonIconMap.county;
-    if (r.includes('education')) return reasonIconMap.education;
-    if (r.includes('experience')) return reasonIconMap.experience;
-    if (r.includes('age')) return reasonIconMap.age;
+    if (checkReasonType(skillsReasonIDs, reason)) return reasonIconMap.skills;
+    if (checkReasonType(professionReasonIDs, reason)) return reasonIconMap.profession;
+    if (checkReasonType(industriesReasonIDs, reason)) return reasonIconMap.industries;
+    if (checkReasonType(hobbiesReasonIDs, reason)) return reasonIconMap.hobbies;
+    if (checkReasonType(countyReasonIDs, reason)) return reasonIconMap.county;
+    if (checkReasonType(educationLevelReasonIDs, reason)) return reasonIconMap.educationLevel;
+    if (checkReasonType(ageExperiencedMentorReasonIDs, reason)) return reasonIconMap.experience;
+    if (checkReasonType(ageCloseReasonIDs, reason)) return reasonIconMap.age;
     if (r.includes('top')) return reasonIconMap.top;
     return reasonIconMap.default;
   }
@@ -493,12 +477,12 @@ export default function MentorProgram() {
         <>
           {!selectedRole && !showForm ? (
             <div className={`mentor-role-cards${swipeDirection ? ` swipe-${swipeDirection}` : ''}`}>
-              <div className="mentor-role-card mentor" onClick={() => handleRoleSelect('mentor')}>
+              <div className="mentor-role-card mentor" onClick={() => handleRoleSelect(MENTOR)}>
                 <FaChalkboardTeacher size={48} style={{ color: '#ff2a2a', marginBottom: 16 }} />
                 <h3>Become a Mentor</h3>
                 <p>Share your expertise and help guide the next generation. List your skills and get matched with mentees looking for your knowledge.</p>
               </div>
-              <div className="mentor-role-card mentee" onClick={() => handleRoleSelect('mentee')}>
+              <div className="mentor-role-card mentee" onClick={() => handleRoleSelect(MENTEE)}>
                 <FaUserGraduate size={48} style={{ color: '#ff2a2a', marginBottom: 16 }} />
                 <h3>Become a Mentee</h3>
                 <p>Find a mentor to help you grow. Tell us what skills you're looking for and get matched with the right mentor for you.</p>
@@ -536,7 +520,7 @@ export default function MentorProgram() {
                         {ukEducationLevels
                           .filter(level => {
                             // For mentees, only show up to Bachelor's degree
-                            if (selectedRole === 'mentee') {
+                            if (selectedRole === MENTEE) {
                               const menteeLevels = [
                                 'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
                               ];
@@ -557,7 +541,7 @@ export default function MentorProgram() {
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Industries</div>
                       <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
-                        {selectedRole === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}
+                        {selectedRole === MENTOR ? 'Industries (Current/Previous)' : 'Industries (Desired)'}
                         <div
                           ref={industriesDropdownRef}
                           className="custom-multiselect-dropdown"
@@ -687,13 +671,13 @@ export default function MentorProgram() {
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Professional Information</div>
                       <div className="mentor-profile-field">
-                        <label className="mentor-profile-label">{selectedRole === 'mentee' ? 'Desired Profession' : 'Current Profession'}</label>
+                        <label className="mentor-profile-label">{selectedRole === MENTEE ? 'Desired Profession' : 'Current Profession'}</label>
                         <input
                           name="profession"
                           value={form.profession}
                           onChange={handleChange}
                           required
-                          placeholder={selectedRole === 'mentee' ? 'Desired Profession (e.g. Software Engineer)' : 'Current Profession (e.g. Software Engineer)'}
+                          placeholder={selectedRole === MENTEE ? 'Desired Profession (e.g. Software Engineer)' : 'Current Profession (e.g. Software Engineer)'}
                           className="mentor-profile-input"
                           style={{ width: '100%', padding: '0.8rem', border: '1.5px solid #3a0a0a', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
                         />
@@ -726,7 +710,7 @@ export default function MentorProgram() {
                         pattern="https?://(www\.)?linkedin\.com/in/[A-Za-z0-9\-_/]+/?"
                         title="Please enter a valid LinkedIn profile URL (e.g. https://www.linkedin.com/in/your-profile)"
                       />
-                      {selectedRole === 'mentor' && (
+                      {selectedRole === MENTOR && (
                         <input
                           name="calCom"
                           value={form.calCom}
@@ -915,7 +899,7 @@ export default function MentorProgram() {
                   <div className="mentor-form-section-title">Skills</div>
                   <div className="mentor-skills-list">
                     <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block' }}>
-                      {selectedRole === 'mentor' ? 'Select the skills you can offer:' : 'Select the skills you are looking for:'}
+                      {selectedRole === MENTOR ? 'Select the skills you can offer:' : 'Select the skills you are looking for:'}
                     </label>
                     <div className="mentor-skills-categories">
                       {Object.entries(skillsByCategory).map(([category, skills]) => (
@@ -928,9 +912,9 @@ export default function MentorProgram() {
                                 key={skill}
                                 className={
                                   'mentor-skill-toggle' +
-                                  ((selectedRole === 'mentor' ? form.skills : form.lookingFor).includes(skill) ? ' selected' : '')
+                                  ((selectedRole === MENTOR ? form.skills : form.lookingFor).includes(skill) ? ' selected' : '')
                                 }
-                                onClick={() => handleSkillToggle(skill, selectedRole === 'mentor' ? 'skills' : 'lookingFor')}
+                                onClick={() => handleSkillToggle(skill, selectedRole === MENTOR ? 'skills' : 'lookingFor')}
                               >
                                 {skill}
                               </button>
@@ -942,7 +926,7 @@ export default function MentorProgram() {
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading || (selectedRole === 'mentor' ? (form.skills.length === 0) : form.lookingFor.length === 0)}>
+                <button type="submit" disabled={loading || (selectedRole === MENTOR ? (form.skills.length === 0) : form.lookingFor.length === 0)}>
                   {loading ? 'Saving...' : 'Sign Up'}
                 </button>
               </form>
@@ -1067,7 +1051,7 @@ export default function MentorProgram() {
                       );
                     })}
                   </div>
-                  {user.type === 'mentor' && currentUserProfile?.type === 'mentee' && (
+                  {user.type === MENTOR && currentUserProfile?.type === MENTEE && (
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
                       <button
                         onClick={(e) => {
