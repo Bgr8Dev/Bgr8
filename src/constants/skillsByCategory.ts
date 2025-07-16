@@ -6,7 +6,6 @@ const skillsByCategory: { [category: string]: string[] } = {
     'Biology',
     'Chemistry',
     'Physics',
-    'Science (Combined)',
     'History',
     'Geography',
     'French',
