@@ -3,6 +3,13 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Reference the colour scheme in css in future by var(--colortype) e.g. var(--background) */
+  --background: #d8e5f3;
+  --text: #2a3745;
+  --mentor: #e06a5c;
+  --mentee: #1dd5d1;
+  --accent: #3ba7f2;
+
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -11,6 +18,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
 }
 
 a {
