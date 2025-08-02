@@ -272,3 +272,160 @@
     width: 100%;
   }
 } 
+
+/* Booking Details Modal Styles */
+.booking-details-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--modal-overlay);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.booking-details-modal {
+  background: var(--modal-bg);
+  color: var(--text);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.5rem;
+  min-width: 340px;
+  box-shadow: var(--modal-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.booking-details-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--button-error-bg);
+  color: var(--button-error-text);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0.3rem 1rem;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.booking-details-modal-close:hover {
+  background: var(--button-error-hover-bg);
+}
+
+.booking-details-modal-title {
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.booking-details-modal-row {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.booking-details-modal-row b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.booking-details-status {
+  border-radius: var(--radius-md);
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.booking-details-status-confirmed {
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+}
+
+.booking-details-status-pending {
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+}
+
+.booking-details-status-cancelled {
+  background: var(--badge-error-bg);
+  color: var(--badge-error-text);
+}
+
+.booking-details-link {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.booking-details-link:hover {
+  color: var(--link-hover-color);
+}
+
+.booking-details-calcom-section {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--info-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--info);
+}
+
+.booking-details-calcom-title {
+  color: var(--info);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.booking-details-modal-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.booking-details-btn {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 1.2rem;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.booking-details-btn-confirm {
+  background: var(--button-success-bg);
+  color: var(--button-success-text);
+  border: 1px solid var(--button-success-border);
+}
+
+.booking-details-btn-confirm:hover {
+  background: var(--button-success-hover-bg);
+}
+
+.booking-details-btn-cancel {
+  background: var(--button-error-bg);
+  color: var(--button-error-text);
+  border: 1px solid var(--button-error-border);
+}
+
+.booking-details-btn-cancel:hover {
+  background: var(--button-error-hover-bg);
+}
+
+.booking-details-btn-delete {
+  background: var(--button-cancel-bg);
+  color: var(--error);
+  border: 1.5px solid var(--error);
+}
+
+.booking-details-btn-delete:hover {
+  background: var(--error-light);
+  color: var(--error-dark);
+} 

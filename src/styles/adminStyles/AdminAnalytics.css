@@ -1,6 +1,38 @@
 .admin-analytics {
   padding: 20px;
-  color: white;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.analytics-placeholder {
+  background: var(--alert-info-bg);
+  border: 2px dashed var(--alert-info-border);
+  border-radius: var(--radius-xl);
+  padding: 48px 32px;
+  text-align: center;
+  max-width: 600px;
+  box-shadow: var(--card-shadow);
+}
+
+.analytics-placeholder h1 {
+  font-size: 2.5rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.analytics-placeholder h2 {
+  font-size: 2rem;
+  color: var(--warning);
+  margin-bottom: 1.5rem;
+}
+
+.analytics-placeholder p {
+  color: var(--text);
+  font-size: 1.2rem;
 }
 
 .analytics-header {
@@ -17,20 +49,22 @@
 
 .time-range-button {
   padding: 8px 15px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 4px;
-  color: white;
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--button-secondary-border);
+  border-radius: var(--radius-md);
+  color: var(--button-secondary-text);
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .time-range-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--button-secondary-hover-bg);
 }
 
 .time-range-button.active {
-  background-color: #4CAF50;
+  background-color: var(--button-success-bg);
+  color: var(--button-success-text);
+  border: 1px solid var(--button-success-border);
 }
 
 .loading {
@@ -39,6 +73,7 @@
   align-items: center;
   height: 300px;
   font-size: 18px;
+  color: var(--text);
 }
 
 /* Metrics Cards */
@@ -50,24 +85,26 @@
 }
 
 .metric-card {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
   align-items: center;
   transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--gray-200);
 }
 
 .metric-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .metric-icon {
   font-size: 24px;
   margin-right: 15px;
-  color: #4CAF50;
-  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success);
+  background-color: var(--badge-success-bg);
   padding: 12px;
   border-radius: 50%;
   display: flex;
@@ -82,13 +119,14 @@
 .metric-content h3 {
   margin: 0 0 5px 0;
   font-size: 14px;
-  opacity: 0.8;
+  color: var(--gray-600);
 }
 
 .metric-value {
   font-size: 24px;
   font-weight: bold;
   margin: 0;
+  color: var(--text);
 }
 
 .metric-change {
@@ -97,11 +135,11 @@
 }
 
 .metric-change.positive {
-  color: #4CAF50;
+  color: var(--success);
 }
 
 .metric-change.negative {
-  color: #F44336;
+  color: var(--error);
 }
 
 /* Analytics Cards & Charts */
@@ -113,17 +151,18 @@
 }
 
 .analytics-card {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--gray-200);
 }
 
 .analytics-card h3 {
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text);
 }
 
 .chart-container {
@@ -155,42 +194,42 @@
 .events-table td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .events-table th {
-  background-color: rgba(0, 0, 0, 0.3);
-  color: rgba(255, 255, 255, 0.8);
+  background-color: var(--table-header-bg);
+  color: var(--table-header-text);
   font-weight: 600;
 }
 
 .events-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--table-row-hover);
 }
 
 /* Note */
 .analytics-note {
-  background-color: rgba(33, 150, 243, 0.1);
-  border-left: 4px solid #2196F3;
+  background-color: var(--alert-info-bg);
+  border-left: 4px solid var(--alert-info-border);
   padding: 15px;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   margin-top: 20px;
 }
 
 .analytics-note p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--alert-info-text);
 }
 
 .firebase-link {
-  color: #FFCA28;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
 }
 
 .firebase-link:hover {
-  color: #FFA000;
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
@@ -209,7 +248,7 @@
   .metrics-cards {
     grid-template-columns: 1fr;
   }
-} 
+}
 
 @media (max-width: 600px) {
   .admin-analytics {

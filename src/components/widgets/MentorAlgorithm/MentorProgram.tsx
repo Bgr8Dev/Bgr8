@@ -478,12 +478,12 @@ export default function MentorProgram() {
           {!selectedRole && !showForm ? (
             <div className={`mentor-role-cards${swipeDirection ? ` swipe-${swipeDirection}` : ''}`}>
               <div className="mentor-role-card mentor" onClick={() => handleRoleSelect(MENTOR)}>
-                <FaChalkboardTeacher size={48} style={{ color: '#ff2a2a', marginBottom: 16 }} />
+                <FaChalkboardTeacher size={48} style={{ color: 'var(--mentor)', marginBottom: 16 }} />
                 <h3>Become a Mentor</h3>
                 <p>Share your expertise and help guide the next generation. List your skills and get matched with mentees looking for your knowledge.</p>
               </div>
               <div className="mentor-role-card mentee" onClick={() => handleRoleSelect(MENTEE)}>
-                <FaUserGraduate size={48} style={{ color: '#ff2a2a', marginBottom: 16 }} />
+                <FaUserGraduate size={48} style={{ color: 'var(--mentee)', marginBottom: 16 }} />
                 <h3>Become a Mentee</h3>
                 <p>Find a mentor to help you grow. Tell us what skills you're looking for and get matched with the right mentor for you.</p>
               </div>
@@ -502,8 +502,8 @@ export default function MentorProgram() {
                       <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required type="email" />
                       <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required type="tel" />
                       <input name="age" value={form.age} onChange={handleChange} placeholder="Age" required type="number" min="10" max="100" />
-                      <select name="county" value={form.county} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
-                        <option value="" disabled>Select County</option>
+                      <select name="county" value={form.county} onChange={handleChange} required className="mentor-form-select">
+                        <option value="">Select County</option>
                         {ukCounties.map(county => (
                           <option key={county} value={county}>{county}</option>
                         ))}
@@ -515,8 +515,8 @@ export default function MentorProgram() {
                       <div className="mentor-form-section-title">Education</div>
                       <input name="degree" value={form.degree} onChange={handleChange} 
                         placeholder={degreePlaceholders[form.educationLevel] || "Degree (e.g. BSc Computer Science)"} />
-                      <select name="educationLevel" value={form.educationLevel} onChange={handleChange} required style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}>
-                        <option value="" disabled>Select Education Level</option>
+                      <select name="educationLevel" value={form.educationLevel} onChange={handleChange} required className="mentor-form-select">
+                        <option value="">Select Education Level</option>
                         {ukEducationLevels
                           .filter(level => {
                             // For mentees, only show up to Bachelor's degree
@@ -540,7 +540,7 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Industries</div>
-                      <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block', marginTop: 8 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 8, display: 'block', marginTop: 8 }}>
                         {selectedRole === MENTOR ? 'Industries (Current/Previous)' : 'Industries (Desired)'}
                         <div
                           ref={industriesDropdownRef}
@@ -553,7 +553,7 @@ export default function MentorProgram() {
                             style={{
                               background: '#181818',
                               color: '#fff',
-                              border: '1.5px solid #3a0a0a',
+                              border: '1.5px solid var(--input-border)',
                               borderRadius: 8,
                               padding: '0.7rem 1rem',
                               fontSize: '1rem',
@@ -567,10 +567,10 @@ export default function MentorProgram() {
                             onClick={() => setIndustriesDropdownOpen(v => !v)}
                             aria-haspopup="listbox"
                           >
-                            <span style={{ color: form.industries.length === 0 ? '#888' : '#fff' }}>
+                            <span style={{ color: form.industries.length === 0 ? 'var(--gray-500)' : 'var(--text)' }}>
                               {form.industries.length === 0 ? 'Select industries...' : `${form.industries.length} selected`}
                             </span>
-                            <span style={{ fontSize: 18, color: '#ff2a2a', marginLeft: 8 }}>
+                            <span style={{ fontSize: 18, color: 'var(--accent)', marginLeft: 8 }}>
                               ▼
                             </span>
                           </div>
@@ -583,7 +583,7 @@ export default function MentorProgram() {
                                 left: 0,
                                 width: '100%',
                                 background: '#181818',
-                                border: '1.5px solid #3a0a0a',
+                                border: '1.5px solid var(--input-border)',
                                 borderRadius: 8,
                                 zIndex: 20,
                                 maxHeight: 220,
@@ -601,7 +601,7 @@ export default function MentorProgram() {
                                     padding: '0.5rem 1rem',
                                     cursor: 'pointer',
                                     background: form.industries.includes(ind) ? 'rgba(0,119,181,0.13)' : 'transparent',
-                                    color: form.industries.includes(ind) ? '#00eaff' : '#fff',
+                                    color: form.industries.includes(ind) ? 'var(--primary)' : 'var(--text)',
                                     fontWeight: form.industries.includes(ind) ? 700 : 400,
                                     borderRadius: 6,
                                     marginBottom: 0,
@@ -621,7 +621,7 @@ export default function MentorProgram() {
                                       }));
                                     }}
                                     style={{
-                                      accentColor: '#00eaff',
+                                      accentColor: 'var(--primary)',
                                       marginRight: 0,
                                       width: 16,
                                       height: 16,
@@ -649,7 +649,7 @@ export default function MentorProgram() {
                                     style={{
                                       background: 'none',
                                       border: 'none',
-                                      color: '#00eaff',
+                                      color: 'var(--primary)',
                                       fontWeight: 700,
                                       fontSize: 18,
                                       cursor: 'pointer',
@@ -679,7 +679,7 @@ export default function MentorProgram() {
                           required
                           placeholder={selectedRole === MENTEE ? 'Desired Profession (e.g. Software Engineer)' : 'Current Profession (e.g. Software Engineer)'}
                           className="mentor-profile-input"
-                          style={{ width: '100%', padding: '0.8rem', border: '1.5px solid #3a0a0a', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
+                          style={{ width: '100%', padding: '0.8rem', border: '1.5px solid var(--input-border)', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
                         />
                       </div>
                       <div className="mentor-past-professions-list">
@@ -720,7 +720,7 @@ export default function MentorProgram() {
                           required
                           pattern="https?://.*\.cal\.com/.*"
                           title="Please enter a valid Cal.com URL (e.g. https://yourname.cal.com/30min)"
-                          style={{ borderColor: form.calCom ? '#3a0a0a' : '#ff2a2a' }}
+                          style={{ borderColor: form.calCom ? 'var(--input-border)' : 'var(--error)' }}
                         />
                       )}
                     </div>
@@ -733,9 +733,9 @@ export default function MentorProgram() {
                         value={form.ethnicity} 
                         onChange={handleChange} 
                         required
-                        style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
+                        className="mentor-form-select"
                       >
-                        <option value="" disabled>Select Ethnicity</option>
+                        <option value="">Select Ethnicity</option>
                         {ethnicityOptions.map(option => (
                           <option key={option} value={option}>{option}</option>
                         ))}
@@ -744,14 +744,14 @@ export default function MentorProgram() {
                         name="religion" 
                         value={form.religion} 
                         onChange={handleChange} 
-                        style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: '0.5rem' }}
+                        className="mentor-form-select"
                       >
-                        <option value="" disabled>Select Religion</option>
+                        <option value="">Select Religion</option>
                         {religionOptions.map(option => (
                           <option key={option} value={option}>{option}</option>
                         ))}
                       </select>
-                      <div style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, marginTop: 8 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 8, marginTop: 8 }}>
                         Hobbies & Interests
                       </div>
                         <div
@@ -764,7 +764,7 @@ export default function MentorProgram() {
                             style={{
                               background: '#181818',
                               color: '#fff',
-                              border: '1.5px solid #3a0a0a',
+                              border: '1.5px solid var(--input-border)',
                               borderRadius: 8,
                               padding: '0.7rem 1rem',
                               fontSize: '1rem',
@@ -778,12 +778,12 @@ export default function MentorProgram() {
                             onClick={() => setHobbiesDropdownOpen(v => !v)}
                             aria-haspopup="listbox"
                           >
-                            <span style={{ color: form.hobbies.length === 0 ? '#888' : '#fff' }}>
+                            <span style={{ color: form.hobbies.length === 0 ? 'var(--gray-500)' : 'var(--text)' }}>
                               {form.hobbies.filter(h => h && h.trim() !== '').length === 0
                                 ? 'Select hobbies...'
                                 : `${form.hobbies.filter(h => h && h.trim() !== '').length} selected`}
                             </span>
-                            <span style={{ fontSize: 18, color: '#ffb300', marginLeft: 8 }}>
+                            <span style={{ fontSize: 18, color: 'var(--warning)', marginLeft: 8 }}>
                               ▼
                             </span>
                           </div>
@@ -797,7 +797,7 @@ export default function MentorProgram() {
                                 left: 0,
                                 width: '100%',
                                 background: '#181818',
-                                border: '1.5px solid #3a0a0a',
+                                border: '1.5px solid var(--input-border)',
                                 borderRadius: 8,
                                 zIndex: 20,
                                 maxHeight: 320,
@@ -808,7 +808,7 @@ export default function MentorProgram() {
                             >
                               {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
                                 <div key={category} style={{ marginBottom: 8 }}>
-                                  <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>
+                                  <div style={{ fontWeight: 700, color: 'var(--warning)', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>
                                     {category.replace(/([A-Z])/g, ' $1').trim()}
                                   </div>
                                   {hobbies.map(hobby => (
@@ -817,7 +817,7 @@ export default function MentorProgram() {
                                       style={{
                                         display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
                                         background: form.hobbies.includes(hobby) ? 'rgba(255,179,0,0.13)' : 'transparent',
-                                        color: form.hobbies.includes(hobby) ? '#ffb300' : '#fff',
+                                        color: form.hobbies.includes(hobby) ? 'var(--warning)' : 'var(--text)',
                                         fontWeight: form.hobbies.includes(hobby) ? 700 : 400,
                                         borderRadius: 6,
                                         marginBottom: 0,
@@ -843,7 +843,7 @@ export default function MentorProgram() {
                                           });
                                         }}
                                         style={{
-                                          accentColor: '#ffb300',
+                                          accentColor: 'var(--warning)',
                                           marginRight: 0,
                                           width: 16,
                                           height: 16,
@@ -879,7 +879,7 @@ export default function MentorProgram() {
                                       style={{
                                         background: 'none',
                                         border: 'none',
-                                        color: '#ffb300',
+                                        color: 'var(--warning)',
                                         fontWeight: 700,
                                         fontSize: 18,
                                         cursor: 'pointer',
@@ -898,7 +898,7 @@ export default function MentorProgram() {
                 <div className="mentor-form-section skills-section">
                   <div className="mentor-form-section-title">Skills</div>
                   <div className="mentor-skills-list">
-                    <label style={{ fontWeight: 600, color: '#ff2a2a', marginBottom: 8, display: 'block' }}>
+                    <label style={{ fontWeight: 600, color: 'var(--accent)', marginBottom: 8, display: 'block' }}>
                       {selectedRole === MENTOR ? 'Select the skills you can offer:' : 'Select the skills you are looking for:'}
                     </label>
                     <div className="mentor-skills-categories">
@@ -930,7 +930,7 @@ export default function MentorProgram() {
                   {loading ? 'Saving...' : 'Sign Up'}
                 </button>
               </form>
-              {error && <p style={{ color: '#ff2a2a', marginTop: '1rem' }}>{error}</p>}
+              {error && <p style={{ color: 'var(--error)', marginTop: '1rem' }}>{error}</p>}
               <SuccessModal open={!!success} onClose={handleSuccessModalClose} />
             </div>
           )}
@@ -942,23 +942,7 @@ export default function MentorProgram() {
         <button
           onClick={refreshMatches}
           disabled={loadingMatches}
-          style={{
-            marginBottom: '1rem',
-            padding: '0.7rem 1.5rem',
-            background: 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 24,
-            fontWeight: 700,
-            fontSize: '1rem',
-            cursor: loadingMatches ? 'not-allowed' : 'pointer',
-            boxShadow: '0 2px 12px rgba(255,42,42,0.15)',
-            transition: 'background 0.2s, transform 0.2s',
-            opacity: loadingMatches ? 0.7 : 1,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 10
-          }}
+          className="mentor-refresh-matches-btn"
         >
           <FaSyncAlt style={{ fontSize: 20, marginRight: 4, verticalAlign: 'middle', animation: loadingMatches ? 'spin 1s linear infinite' : undefined }} />
           {loadingMatches ? 'Refreshing...' : 'Refresh Matches'}
@@ -1064,29 +1048,7 @@ export default function MentorProgram() {
                             setBookingModalOpen(true);
                           }
                         }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          background: 'linear-gradient(135deg, #ff2a2a 0%, #a80000 100%)',
-                          color: '#fff',
-                          padding: '0.7rem 1.4rem',
-                          borderRadius: '8px',
-                          border: 'none',
-                          fontWeight: 600,
-                          fontSize: '0.95rem',
-                          transition: 'all 0.2s ease',
-                          boxShadow: '0 2px 8px rgba(255,42,42,0.3)',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(255,42,42,0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(255,42,42,0.3)';
-                        }}
+                        className="mentor-book-session-btn"
                       >
                         📅 Book Session
                       </button>
@@ -1101,33 +1063,13 @@ export default function MentorProgram() {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                style={{
-                  background: currentPage === 1 ? '#888' : 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '0.7rem 1.5rem',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  opacity: currentPage === 1 ? 0.6 : 1
-                }}
+                className={`mentor-pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
               >Previous</button>
-              <span style={{ color: '#fff', fontWeight: 600, fontSize: '1.05rem' }}>Page {currentPage} of {totalPages}</span>
+              <span style={{ color: 'var(--text)', fontWeight: 600, fontSize: '1.05rem' }}>Page {currentPage} of {totalPages}</span>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                style={{
-                  background: currentPage === totalPages ? '#888' : 'linear-gradient(90deg, #ff2a2a 60%, #a80000 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '0.7rem 1.5rem',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  opacity: currentPage === totalPages ? 0.6 : 1
-                }}
+                className={`mentor-pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
               >Next</button>
             </div>
           </>

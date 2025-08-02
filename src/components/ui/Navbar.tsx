@@ -4,46 +4,48 @@ import { Link } from 'react-router-dom';
 import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../hooks/useAuth';
-// import { useBusinessAccess } from '../../contexts/BusinessAccessContext';
 import '../../styles/Navbar.css';
 import logo from '../../assets/bgr8-logo-transparent.png';
 
 export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { currentUser, userProfile } = useAuth();
-  // const { isBusinessAccessible } = useBusinessAccess();
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      setShowUserMenu(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
   };
 
+
+
   return (
     <header className="header">
       <h1 className="logo">
-        <Link to="/">
-          <img src={logo} alt="Bgr8 Logo" />
+        <Link to="/" aria-label="BGr8 Home">
+          <img src={logo} alt="BGr8 Logo" />
         </Link>
       </h1>
 
-      {/* <nav className="nav">
-        {isBusinessAccessible('bgr8') && <Link to="/bgr8">Bgr8</Link>}
-      </nav> */}
+      <nav className="nav" role="navigation" aria-label="Main navigation">
+      </nav>
 
       <div className="auth-section">
         {currentUser ? (
           <div className="user-menu-container">
-            <div 
+            <button 
               className="user-menu-trigger"
               onClick={() => setShowUserMenu(!showUserMenu)}
+              aria-haspopup="true"
+              aria-label="User menu"
             >
               {currentUser.photoURL ? (
                 <img 
                   src={currentUser.photoURL} 
-                  alt="Profile" 
+                  alt={`${currentUser.displayName || 'User'} profile`}
                   className="user-avatar"
                 />
               ) : (
@@ -52,23 +54,35 @@ export default function Navbar() {
                 </div>
               )}
               <span>Hello, {currentUser.displayName || 'User'}</span>
-            </div>
+            </button>
             
             {showUserMenu && (
-              <div className="user-menu">
-                <Link to="/profile">Profile</Link>
-                <Link to="/settings">Settings</Link>
+              <div className="user-menu" role="menu">
+                <Link to="/profile" role="menuitem">Profile</Link>
+                <Link to="/settings" role="menuitem">Settings</Link>
                 {userProfile?.admin && (
-                  <Link to="/admin-portal" className="admin-link">Admin Portal</Link>
+                  <Link to="/admin-portal" className="admin-link" role="menuitem">
+                    Admin Portal
+                  </Link>
                 )}
-                <button onClick={handleSignOut}>Sign Out</button>
+                <button 
+                  onClick={handleSignOut} 
+                  role="menuitem"
+                  aria-label="Sign out"
+                >
+                  Sign Out
+                </button>
               </div>
             )}
           </div>
         ) : (
           <div className="auth-buttons">
-            <Link to="/signin" className="auth-button signin">Sign In</Link>
-            <Link to="/register" className="auth-button register">Register</Link>
+            <Link to="/signin" className="auth-button signin">
+              Sign In
+            </Link>
+            <Link to="/register" className="auth-button register">
+              Register
+            </Link>
           </div>
         )}
       </div>

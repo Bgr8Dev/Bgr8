@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,15 +14,15 @@
 }
 
 .calcom-modal {
-  background-color: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 12px;
-  max-width: 540px;
+  background-color: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: var(--radius-lg);
+  max-width: 940px;
   min-width: 320px;
   width: 90%;
   max-height: 90vh;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--modal-shadow);
   animation: calcomModalSlideIn 0.3s ease-out;
 }
 
@@ -42,12 +42,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 1.5rem 1rem 1.5rem;
-  border-bottom: 1px solid #333;
-  background-color: #1a1a1a;
+  border-bottom: 1px solid var(--modal-border);
+  background-color: var(--modal-bg);
 }
 
 .calcom-modal-header h3 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
@@ -59,11 +59,11 @@
 .calcom-modal-close {
   background: none;
   border: none;
-  color: #ff2a2a;
+  color: var(--error);
   font-size: 1.2rem;
   cursor: pointer;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -71,14 +71,14 @@
 }
 
 .calcom-modal-close:hover {
-  background-color: rgba(255, 42, 42, 0.1);
+  background-color: var(--error-light);
   transform: scale(1.1);
 }
 
 .calcom-modal-content {
   padding: 1.5rem 0.5rem;
-  background-color: #1a1a1a;
-  color: #ffffff;
+  background-color: var(--modal-bg);
+  color: var(--text);
 }
 
 .calcom-modal-intro {
@@ -89,12 +89,12 @@
 .calcom-modal-intro p {
   font-size: 1.1rem;
   margin-bottom: 12px;
-  color: #ffffff;
+  color: var(--text);
   line-height: 1.5;
 }
 
 .calcom-modal-intro b {
-  color: #ff2a2a;
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -102,25 +102,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
-  color: #fff;
+  background: var(--button-error-bg);
+  color: var(--button-error-text);
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-weight: 700;
   font-size: 1.08rem;
   padding: 0.8rem 2.2rem;
   margin: 0.5rem 0 1.2rem 0;
-  box-shadow: 0 2px 12px rgba(255, 42, 42, 0.15);
+  box-shadow: var(--shadow-md);
   transition: all 0.2s ease;
-  border: none;
+  border: 1px solid var(--button-error-border);
   cursor: pointer;
 }
 
 .calcom-modal-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255, 42, 42, 0.25);
+  box-shadow: var(--shadow-lg);
   text-decoration: none;
-  color: #fff;
+  color: var(--button-error-hover-text);
+  background: var(--button-error-hover-bg);
 }
 
 .calcom-modal-link:active {
@@ -130,24 +131,24 @@
 .calcom-iframe-container {
   width: 100%;
   min-height: 480px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
-  background-color: #1a1a1a;
-  border: 1px solid #333;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--modal-bg);
+  border: 1px solid var(--modal-border);
 }
 
 .calcom-iframe {
   width: 100%;
   height: 480px;
   border: none;
-  border-radius: 12px;
-  background-color: #1a1a1a;
+  border-radius: var(--radius-lg);
+  background-color: var(--modal-bg);
 }
 
 .calcom-modal-error {
   text-align: center;
-  color: #ff2a2a;
+  color: var(--error);
   font-weight: 600;
   font-size: 1.1rem;
   padding: 2rem;

@@ -619,21 +619,21 @@ export default function MentorManagement() {
   return (
     <div className="mentor-management">
       {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-        <button className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>
-          <FaUser style={{ marginRight: 8 }} />
+      <div className="mentor-management-tabs">
+        <button className={`tab-button ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>
+          <FaUser className="tab-icon" />
           Users
         </button>
-        <button className={tab === 'bookings' ? 'active' : ''} onClick={() => setTab('bookings')}>
-          <FaCalendarAlt style={{ marginRight: 8 }} />
+        <button className={`tab-button ${tab === 'bookings' ? 'active' : ''}`} onClick={() => setTab('bookings')}>
+          <FaCalendarAlt className="tab-icon" />
           Bookings
         </button>
-        <button className={tab === 'availability' ? 'active' : ''} onClick={() => setTab('availability')}>
-          <FaClock style={{ marginRight: 8 }} />
+        <button className={`tab-button ${tab === 'availability' ? 'active' : ''}`} onClick={() => setTab('availability')}>
+          <FaClock className="tab-icon" />
           Availability
         </button>
-        <button className={tab === 'analytics' ? 'active' : ''} onClick={() => setTab('analytics')}>
-          <FaChartBar style={{ marginRight: 8 }} />
+        <button className={`tab-button ${tab === 'analytics' ? 'active' : ''}`} onClick={() => setTab('analytics')}>
+          <FaChartBar className="tab-icon" />
           Analytics
         </button>
       </div>

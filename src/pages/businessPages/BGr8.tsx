@@ -9,6 +9,8 @@ import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgra
 
 export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [donationType, setDonationType] = useState('monthly');
+  const [donationAmount, setDonationAmount] = useState('25');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -20,144 +22,267 @@ export default function BGr8() {
     <div className="bgr8-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
-      {/* Hero Section */}
+      {/* Hero Section with Background Image */}
       <section className="bgr8-hero">
-        <h1>BGr8</h1>
-        <p>Empowering communities through mentorship, education, and sustainable development initiatives.</p>
-      </section>
+        <div className="bgr8-hero-background">
+          <div className="bgr8-hero-overlay">
+            <div className="bgr8-hero-content">
+              <div className="bgr8-hero-text">
+                <h1>BGr8</h1>
+                <p className="bgr8-hero-subtitle">
+                  From mentorship to community development, to long-term empowerment - 
+                  will you start a regular gift to support communities at every stage of their journey?
+                </p>
+              </div>
+              
+              {/* Donation Form Overlay */}
+              <div className="bgr8-donation-form">
+                <div className="bgr8-donation-header">
+                  <span className="bgr8-donation-badge">BGR8 COMMUNITY FUND</span>
+                </div>
+                
+                <div className="bgr8-donation-tabs">
+                  <button 
+                    className={`bgr8-tab ${donationType === 'one-off' ? 'active' : ''}`}
+                    onClick={() => setDonationType('one-off')}
+                  >
+                    One-off
+                  </button>
+                  <button 
+                    className={`bgr8-tab ${donationType === 'monthly' ? 'active' : ''}`}
+                    onClick={() => setDonationType('monthly')}
+                  >
+                    Monthly
+                  </button>
+                </div>
 
-      {/* Hero Video Section */}
-      <section className="bgr8-hero-video">
-        <div className="bgr8-video-placeholder">
-          <p>📹 Watch Our Impact Story</p>
-          <p>Learn how BGr8 is transforming lives through community programs</p>
+                <div className="bgr8-amount-selection">
+                  <p>Choose an amount to donate</p>
+                  <div className="bgr8-amount-buttons">
+                    <button 
+                      className={`bgr8-amount-btn ${donationAmount === '10' ? 'active' : ''}`}
+                      onClick={() => setDonationAmount('10')}
+                    >
+                      £10
+                    </button>
+                    <button 
+                      className={`bgr8-amount-btn ${donationAmount === '25' ? 'active' : ''}`}
+                      onClick={() => setDonationAmount('25')}
+                    >
+                      £25
+                    </button>
+                    <button 
+                      className={`bgr8-amount-btn ${donationAmount === '50' ? 'active' : ''}`}
+                      onClick={() => setDonationAmount('50')}
+                    >
+                      £50
+                    </button>
+                  </div>
+                  <div className="bgr8-custom-amount">
+                    <input 
+                      type="text" 
+                      placeholder="£ Other amount"
+                      className="bgr8-amount-input"
+                    />
+                  </div>
+                </div>
+
+                <button className="bgr8-donate-btn">
+                  Donate now
+                </button>
+
+                <div className="bgr8-payment-options">
+                  <span>Debit/Credit Card</span>
+                  <span>Apple Pay</span>
+                  <span>PayPal</span>
+                </div>
+
+                {donationType === 'monthly' && (
+                  <p className="bgr8-monthly-note">
+                    Monthly donations mean we can plan further into the future
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Intro Section */}
-      <section className="bgr8-intro-section">
-        <h2>Our Mission</h2>
-        <p>
-          BGr8 is a community-focused charity dedicated to creating lasting positive change through 
-          mentorship programs, educational initiatives, and sustainable development projects. We believe 
-          that everyone deserves the opportunity to reach their full potential, regardless of their 
-          background or circumstances.
-        </p>
-      </section>
+      {/* Main Content Section */}
+      <section className="bgr8-main-content">
+        <div className="bgr8-content-wrapper">
+          <nav className="bgr8-breadcrumb">
+            <span>Home</span>
+            <span>›</span>
+            <span>BGr8 in action</span>
+            <span>›</span>
+            <span>Community Programs</span>
+          </nav>
 
-      {/* Stats Section */}
-      <section className="bgr8-stats-section">
-        <h3>Our Impact</h3>
-        <div className="bgr8-stats-grid">
-          <div className="bgr8-stat-item">
-            <span className="bgr8-stat-number">500+</span>
-            <span className="bgr8-stat-label">Lives Impacted</span>
-          </div>
-          <div className="bgr8-stat-item">
-            <span className="bgr8-stat-number">50+</span>
-            <span className="bgr8-stat-label">Community Events</span>
-          </div>
-          <div className="bgr8-stat-item">
-            <span className="bgr8-stat-number">25+</span>
-            <span className="bgr8-stat-label">Partner Organizations</span>
-          </div>
-          <div className="bgr8-stat-item">
-            <span className="bgr8-stat-number">3</span>
-            <span className="bgr8-stat-label">Years of Service</span>
+          <h2 className="bgr8-main-heading">
+            DONATE MONTHLY TO BGR8'S COMMUNITY DEVELOPMENT FUND
+          </h2>
+
+          <p className="bgr8-main-description">
+            Communities around the world are facing unprecedented challenges. Climate-driven 
+            displacement, economic inequality, and lack of access to education are creating 
+            barriers that prevent people from reaching their full potential. Your monthly 
+            donation helps us provide critical support from the first sign of need, to full 
+            community transformation.
+          </p>
+
+          <div className="bgr8-cta-bar">
+            <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
+            <span className="bgr8-arrow">→</span>
           </div>
         </div>
       </section>
 
-      {/* Programs Section */}
-      <section className="bgr8-gallery">
-        <h3>Our Programs</h3>
-        <div className="bgr8-gallery-grid">
-          <div className="bgr8-gallery-item">
-            <img src="/assets/bgr8-1.jpg" alt="Youth Mentorship Program" />
-            <div className="bgr8-gallery-item-content">
-              <h4>Youth Mentorship Program</h4>
-              <p>Connecting young people with experienced mentors to guide their personal and professional development.</p>
-              <span className="bgr8-event-date">Ongoing Program</span>
+      {/* What is the Community Fund Section */}
+      <section className="bgr8-fund-section">
+        <div className="bgr8-content-wrapper">
+          <h3>What is the Community Development Fund?</h3>
+          <p>
+            The Community Development Fund is our comprehensive approach to creating lasting 
+            positive change. We believe that sustainable development requires a holistic 
+            approach that addresses immediate needs while building long-term capacity.
+          </p>
+
+          <div className="bgr8-fund-stages">
+            <div className="bgr8-stage">
+              <h4>Before a crisis hits</h4>
+              <p>Preparation and prevention through education, skill-building, and community resilience programs.</p>
+            </div>
+            <div className="bgr8-stage">
+              <h4>During an emergency</h4>
+              <p>Delivering vital support including mentorship, educational resources, and community outreach.</p>
+            </div>
+            <div className="bgr8-stage">
+              <h4>After the immediate need passes</h4>
+              <p>Rebuilding and strengthening communities through sustainable development initiatives and ongoing support.</p>
             </div>
           </div>
-          <div className="bgr8-gallery-item">
-            <img src="/assets/bgr8-2.jpg" alt="Community Outreach" />
-            <div className="bgr8-gallery-item-content">
-              <h4>Community Outreach</h4>
-              <p>Supporting local communities through food drives, educational workshops, and health awareness campaigns.</p>
-              <span className="bgr8-event-date">Monthly Events</span>
+
+          <p className="bgr8-fund-conclusion">
+            Regular monthly donations help us maintain this fund and respond quickly when 
+            communities need our support most.
+          </p>
+        </div>
+      </section>
+
+      {/* Second Donation Section */}
+      <section className="bgr8-second-donation">
+        <div className="bgr8-second-donation-background">
+          <div className="bgr8-second-donation-overlay">
+            <div className="bgr8-second-donation-content">
+              <div className="bgr8-second-donation-text">
+                <h3>Donate to help provide critical support from the first sign of need, to full recovery</h3>
+                <button className="bgr8-second-donate-btn">DONATE NOW</button>
+              </div>
+              
+              {/* Second Donation Form */}
+              <div className="bgr8-donation-form bgr8-second-form">
+                <div className="bgr8-donation-header">
+                  <span className="bgr8-donation-badge">BGR8 COMMUNITY FUND</span>
+                </div>
+                
+                <div className="bgr8-donation-tabs">
+                  <button 
+                    className={`bgr8-tab ${donationType === 'one-off' ? 'active' : ''}`}
+                    onClick={() => setDonationType('one-off')}
+                  >
+                    One-off
+                  </button>
+                  <button 
+                    className={`bgr8-tab ${donationType === 'monthly' ? 'active' : ''}`}
+                    onClick={() => setDonationType('monthly')}
+                  >
+                    Monthly
+                  </button>
+                </div>
+
+                <div className="bgr8-amount-selection">
+                  <p>Choose an amount to donate</p>
+                  <div className="bgr8-amount-buttons">
+                    <button 
+                      className={`bgr8-amount-btn ${donationAmount === '10' ? 'active' : ''}`}
+                      onClick={() => setDonationAmount('10')}
+                    >
+                      £10
+                    </button>
+                    <button 
+                      className={`bgr8-amount-btn ${donationAmount === '25' ? 'active' : ''}`}
+                      onClick={() => setDonationAmount('25')}
+                    >
+                      £25
+                    </button>
+                    <button 
+                      className={`bgr8-amount-btn ${donationAmount === '50' ? 'active' : ''}`}
+                      onClick={() => setDonationAmount('50')}
+                    >
+                      £50
+                    </button>
+                  </div>
+                  <div className="bgr8-custom-amount">
+                    <input 
+                      type="text" 
+                      placeholder="£ Other amount"
+                      className="bgr8-amount-input"
+                    />
+                  </div>
+                </div>
+
+                <button className="bgr8-donate-btn">
+                  Donate now
+                </button>
+
+                <div className="bgr8-payment-options">
+                  <span>Debit/Credit Card</span>
+                  <span>Apple Pay</span>
+                  <span>PayPal</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="bgr8-gallery-item">
-            <img src="/assets/bgr8-3.jpg" alt="Skills Development" />
-            <div className="bgr8-gallery-item-content">
-              <h4>Skills Development</h4>
-              <p>Providing vocational training and skill-building workshops to enhance employability and economic independence.</p>
-              <span className="bgr8-event-date">Quarterly Sessions</span>
+        </div>
+      </section>
+
+      {/* Discover More Section */}
+      <section className="bgr8-discover-section">
+        <div className="bgr8-content-wrapper">
+          <h3>DISCOVER MORE</h3>
+          <div className="bgr8-discover-cards">
+            <div className="bgr8-discover-card">
+              <h4>Community Programs</h4>
+              <p>Learn about our comprehensive approach to community development and how we're creating lasting positive change.</p>
+            </div>
+            <div className="bgr8-discover-card">
+              <h4>How to leave a gift in your Will</h4>
+              <p>Discover how you can create a lasting legacy by including BGr8 in your estate planning.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Mentor Program Widget */}
-      <section style={{ background: 'var(--white)', padding: '80px 20px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h3 style={{ textAlign: 'center', fontSize: '2rem', color: 'var(--text)', marginBottom: '40px', fontWeight: '600' }}>
-            Join Our Mentorship Network
-          </h3>
+      <section className="bgr8-mentor-section">
+        <div className="bgr8-content-wrapper">
+          <h3>Join Our Mentorship Network</h3>
+          <p>Connect with experienced mentors and mentees to create positive change in your community.</p>
           <MentorProgram />
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bgr8-cta-section">
-        <h3>Make a Difference Today</h3>
-        <p>
-          Join us in our mission to create positive change. Whether you want to volunteer, 
-          donate, or partner with us, every contribution makes a difference.
-        </p>
-        <div className="bgr8-cta-buttons">
-          <a href="#contact" className="bgr8-cta-primary">Get Involved</a>
-          <a href="#donate" className="bgr8-cta-secondary">Donate Now</a>
-        </div>
-      </section>
-
-      {/* Calendar Section */}
-      <section className="bgr8-calendar-section">
-        <h3>Book a Consultation</h3>
-        <p>
-          Interested in learning more about our programs or how you can contribute? 
-          Schedule a meeting with our team to discuss partnership opportunities.
-        </p>
-        <a 
-          href="https://calendly.com" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="bgr8-calendar-link"
-        >
-          📅 Schedule a Meeting
-        </a>
-      </section>
-
-      {/* Social Media Links */}
-      <section style={{ background: 'var(--gray-50)', padding: '60px 20px', textAlign: 'center' }}>
-        <h3 style={{ fontSize: '2rem', color: 'var(--text)', marginBottom: '30px', fontWeight: '600' }}>
-          Stay Connected
-        </h3>
-        <p style={{ fontSize: '1.1rem', color: 'var(--gray-700)', marginBottom: '30px', maxWidth: '600px', margin: '0 auto 30px' }}>
-          Follow our journey and stay updated with our latest initiatives and success stories.
-        </p>
-        <SocialChannels className="bgr8-social-channels" />
-      </section>
-
       {/* Contact Section */}
       <section className="bgr8-contact-section">
-        <h3>Get in Touch</h3>
-        <p>
-          Have questions about our programs or want to learn how you can support our mission? 
-          We'd love to hear from you.
-        </p>
-        <ContactForm source="bgr8" />
+        <div className="bgr8-content-wrapper">
+          <h3>Get in Touch</h3>
+          <p>
+            Have questions about our programs or want to learn how you can support our mission? 
+            We'd love to hear from you.
+          </p>
+          <ContactForm source="bgr8" />
+        </div>
       </section>
 
       <Footer />

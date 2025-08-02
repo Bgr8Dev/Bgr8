@@ -1,12 +1,12 @@
-/* Mentor Program Widget - Black & Red Theme */
+/* Mentor Program Widget - Updated Color Scheme */
 .mentor-program-widget {
-  background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
-  border-radius: 16px;
+  background: var(--white);
+  border-radius: var(--radius-xl);
   padding: 2.5rem 1.5rem;
   margin: 2.5rem auto;
-  color: #fff;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.7);
-  border: 1.5px solid #3a0a0a;
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
   text-align: center;
 }
 
@@ -17,16 +17,15 @@
 }
 
 .mentor-program-widget h2 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 2.3rem;
   margin-bottom: 0.5rem;
   letter-spacing: -1px;
   font-weight: 800;
-  text-shadow: 0 2px 8px #1a0000;
 }
 
 .mentor-program-widget p {
-  color: #e0e0e0;
+  color: var(--gray-700);
   margin-bottom: 1.5rem;
 }
 
@@ -41,12 +40,12 @@
 .mentor-program-widget input,
 .mentor-program-widget select {
   padding: 0.85rem 1rem;
-  border: 1.5px solid #3a0a0a;
-  border-radius: 8px;
-  background: #181818;
-  color: #fff;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--text);
   font-size: 1rem;
-  transition: border 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
   width: 100%;
   max-width: 350px;
   text-align: center;
@@ -55,32 +54,34 @@
 .mentor-program-widget input:focus,
 .mentor-program-widget select:focus {
   outline: none;
-  border-color: #ff2a2a;
-  box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 
 .mentor-program-widget button[type="submit"] {
   padding: 1rem;
-  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
+  background: var(--button-primary-bg);
+  border: 1px solid var(--button-primary-border);
+  border-radius: var(--radius-md);
+  color: var(--button-primary-text);
   font-weight: 700;
   font-size: 1.1rem;
   cursor: pointer;
   margin-top: 0.5rem;
-  box-shadow: 0 2px 12px rgba(255,42,42,0.15);
-  transition: background 0.2s, transform 0.2s;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
 }
 
 .mentor-program-widget button[type="submit"]:hover {
-  background: linear-gradient(90deg, #a80000 0%, #ff2a2a 100%);
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 4px 18px rgba(255,42,42,0.25);
+  background: var(--button-primary-hover-bg);
+  color: var(--button-primary-hover-text);
+  border-color: var(--button-primary-hover-border);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .mentor-program-widget h3 {
-  color: #ff2a2a;
+  color: var(--accent);
   margin-top: 2.5rem;
   margin-bottom: 1rem;
   font-size: 1.3rem;
@@ -215,17 +216,17 @@
 }
 
 .mentor-role-card {
-  background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
-  border: 2.5px solid #ff2a2a;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(255,42,42,0.08), 0 1.5px 8px rgba(0,0,0,0.18);
+  background: var(--white);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
   padding: 2.5rem 2rem 2rem 2rem;
   min-width: 260px;
   max-width: 340px;
   flex: 1 1 300px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.18s, box-shadow 0.18s, border 0.18s;
+  transition: all 0.3s ease;
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -233,20 +234,20 @@
 }
 
 .mentor-role-card:hover, .mentor-role-card:focus {
-  transform: translateY(-6px) scale(1.04);
-  box-shadow: 0 8px 32px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
-  border-color: #ff5555;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-hover);
 }
 
 .mentor-role-card h3 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
   font-weight: 700;
 }
 
 .mentor-role-card p {
-  color: #e0e0e0;
+  color: var(--gray-700);
   font-size: 1.08rem;
   margin-bottom: 0;
 }
@@ -258,19 +259,19 @@
 .mentor-back-btn {
   background: none;
   border: none;
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.2rem;
   cursor: pointer;
-  transition: color 0.2s, transform 0.2s;
+  transition: all 0.3s ease;
   padding: 0.2rem 0.7rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 .mentor-back-btn:hover, .mentor-back-btn:focus {
-  color: #fff;
-  background: #ff2a2a;
-  transform: translateY(-2px) scale(1.04);
+  color: var(--white);
+  background: var(--accent);
+  transform: translateY(-2px);
 }
 
 .mentor-form {
@@ -309,33 +310,33 @@
 }
 
 .mentor-skill-toggle {
-  background: #181818;
-  color: #ff2a2a;
-  border: 2px solid #ff2a2a;
-  border-radius: 20px;
+  background: var(--white);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-full);
   padding: 0.5rem 1.2rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s, border 0.18s, transform 0.15s;
+  transition: all 0.3s ease;
   outline: none;
   margin-bottom: 0.2rem;
 }
 
 .mentor-skill-toggle.selected,
 .mentor-skill-toggle:active {
-  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
-  color: #fff;
-  border-color: #ff2a2a;
-  transform: scale(1.07);
+  background: var(--accent);
+  color: var(--white);
+  border-color: var(--accent);
+  transform: scale(1.05);
 }
 
 .mentor-skill-toggle:hover,
 .mentor-skill-toggle:focus {
-  background: #ff2a2a;
-  color: #fff;
-  border-color: #ff2a2a;
-  transform: scale(1.04);
+  background: var(--accent);
+  color: var(--white);
+  border-color: var(--accent);
+  transform: scale(1.02);
 }
 
 @media (max-width: 600px) {
@@ -356,15 +357,15 @@
 }
 
 .mentor-skills-category {
-  background: rgba(40,0,0,0.25);
-  border-radius: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
   padding: 1.1rem 1rem 0.7rem 1rem;
   margin-bottom: 0.5rem;
-  box-shadow: 0 2px 8px rgba(255,42,42,0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .mentor-skills-category-title {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.13rem;
   font-weight: 700;
   margin-bottom: 0.7rem;
@@ -405,39 +406,39 @@
   margin: 0 auto;
 }
 .mentor-add-btn {
-  background: #181818;
-  color: #ff2a2a;
-  border: 2px solid #ff2a2a;
-  border-radius: 8px;
+  background: var(--white);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-md);
   padding: 0.4rem 1rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s, border 0.18s, transform 0.15s;
+  transition: all 0.3s ease;
   outline: none;
   margin-top: 0.2rem;
 }
 .mentor-add-btn:hover, .mentor-add-btn:focus {
-  background: #ff2a2a;
-  color: #fff;
-  border-color: #ff2a2a;
-  transform: scale(1.04);
+  background: var(--accent);
+  color: var(--white);
+  border-color: var(--accent);
+  transform: scale(1.02);
 }
 .mentor-remove-btn {
   background: none;
-  color: #ff2a2a;
+  color: var(--error);
   border: none;
   font-size: 1.3rem;
   font-weight: bold;
   cursor: pointer;
   margin-left: 0.2rem;
   padding: 0 0.5rem;
-  border-radius: 4px;
-  transition: background 0.18s, color 0.18s;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
 }
 .mentor-remove-btn:hover, .mentor-remove-btn:focus {
-  background: #ff2a2a;
-  color: #fff;
+  background: var(--error);
+  color: var(--white);
 }
 
 .mentor-hobbies-list {
@@ -482,21 +483,21 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 2rem auto;
-  background: rgba(40,0,0,0.18);
-  border-radius: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
   padding: 1.2rem 1rem 1rem 1rem;
-  box-shadow: 0 1px 6px rgba(255,42,42,0.04);
+  box-shadow: var(--shadow-sm);
 }
 .mentor-form-section {
-  background: rgba(40,0,0,0.18);
-  border-radius: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
   padding: 1.2rem 1rem 1rem 1rem;
   margin-bottom: 0;
-  box-shadow: 0 1px 6px rgba(255,42,42,0.04);
+  box-shadow: var(--shadow-sm);
   width: 100%;
 }
 .mentor-form-section-title {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.08rem;
   font-weight: 700;
   margin-bottom: 0.7rem;
@@ -504,8 +505,25 @@
   text-align: left;
 }
 .mentor-form input,
-.mentor-form select {
+.mentor-form select,
+.mentor-form-select {
   margin-bottom: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+}
+
+.mentor-form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 .mentor-form input:last-child,
 .mentor-form select:last-child {
@@ -530,13 +548,13 @@
 
 /* Mentor Profile Styles */
 .mentor-profile {
-  background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
-  border-radius: 16px;
+  background: var(--white);
+  border-radius: var(--radius-xl);
   padding: 2rem;
   margin: 2rem auto;
-  color: #fff;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.7);
-  border: 1.5px solid #3a0a0a;
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
   max-width: 1200px;
 }
 
@@ -546,11 +564,11 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #3a0a0a;
+  border-bottom: 2px solid var(--gray-200);
 }
 
 .mentor-profile-header h3 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.8rem;
   margin: 0;
   font-weight: 700;
@@ -571,28 +589,28 @@
 }
 
 .mentor-profile-edit-btn {
-  background: #ff2a2a;
-  color: #fff;
+  background: var(--accent);
+  color: var(--white);
 }
 
 .mentor-profile-save-btn {
-  background: #ff2a2a;
-  color: #fff;
+  background: var(--accent);
+  color: var(--white);
 }
 
 .mentor-profile-cancel-btn {
-  background: #3a0a0a;
-  color: #fff;
+  background: var(--gray-700);
+  color: var(--white);
 }
 
 .mentor-profile-edit-btn:hover,
 .mentor-profile-save-btn:hover {
-  background: #a80000;
+  background: var(--accent-hover);
   transform: translateY(-2px);
 }
 
 .mentor-profile-cancel-btn:hover {
-  background: #4a0a0a;
+  background: var(--gray-800);
   transform: translateY(-2px);
 }
 
@@ -602,20 +620,20 @@
 }
 
 .mentor-profile-error {
-  background: rgba(255, 42, 42, 0.1);
-  border: 1px solid #ff2a2a;
-  color: #ff2a2a;
+  background: var(--error-light);
+  border: 1px solid var(--error);
+  color: var(--error-dark);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
 }
 
 .mentor-profile-success {
-  background: rgba(0, 255, 0, 0.1);
-  border: 1px solid #00ff00;
-  color: #00ff00;
+  background: var(--success-light);
+  border: 1px solid var(--success);
+  color: var(--success-dark);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
 }
 
@@ -626,10 +644,10 @@
 }
 
 .mentor-profile-section {
-  background: rgba(40,0,0,0.25);
-  border-radius: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
   padding: 2rem 1.5rem 1.5rem 1.5rem;
-  box-shadow: 0 2px 8px rgba(255,42,42,0.04);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 1.5rem;
 }
 
@@ -645,6 +663,9 @@
 .mentor-profile-field {
   margin-bottom: 1.2rem;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .mentor-profile-field label {
@@ -654,11 +675,14 @@
   font-weight: 600;
   font-size: 1.04rem;
   letter-spacing: 0.2px;
+  text-align: left;
 }
 
 .mentor-profile-field p {
   margin: 0;
-  color: #fff;
+  color: #2a3745;
+  text-align: left;
+  width: 100%;
 }
 
 .mentor-profile-field input {
@@ -666,16 +690,41 @@
   padding: 0.8rem;
   border: 1.5px solid #3a0a0a;
   border-radius: 8px;
-  background: #181818;
-  color: #fff;
+  background: #ffffff;
+  color: #2a3745;
   font-size: 1rem;
   transition: border 0.2s, box-shadow 0.2s;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .mentor-profile-field input:focus {
   outline: none;
   border-color: #ff2a2a;
   box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+}
+
+.mentor-profile-field select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1.5px solid #3a0a0a;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #2a3745;
+  font-size: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.mentor-profile-field select:focus {
+  outline: none;
+  border-color: #ff2a2a;
+  box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+}
+
+.mentor-profile-field select[multiple] {
+  min-height: 90px;
 }
 
 .mentor-profile-list {
@@ -718,7 +767,7 @@
 
 .mentor-profile-value {
   font-weight: 600;
-  color: #fff;
+  color: #2a3745;
   letter-spacing: 0.2px;
   margin-bottom: 0.2rem;
   word-break: break-word;
@@ -876,33 +925,33 @@
 
 /* Optional: Style for individual match cards if needed */
 .match-card {
-  background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
-  border-radius: 16px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
   padding: 2.5rem 1.2rem 1.2rem 1.2rem;
-  box-shadow: 0 2px 12px rgba(255,42,42,0.10);
-  border: 1.5px solid #3a0a0a;
-  color: #fff;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
-  transition: box-shadow 0.22s, transform 0.18s, border 0.22s, background 0.22s;
+  transition: all 0.3s ease;
   overflow: hidden;
   position: relative;
   cursor: pointer;
 }
 .match-card:hover, .match-card:focus {
-  box-shadow: 0 8px 32px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
-  border: 2.5px solid #ff2a2a;
-  background: linear-gradient(135deg, #2d0000 80%, #181818 100%);
-  transform: scale(1.025) translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--accent);
+  background: var(--white);
+  transform: translateY(-4px);
   outline: none;
 }
 .match-card:active {
-  background: #181818;
-  border: 2.5px solid #a80000;
-  box-shadow: 0 1px 4px rgba(255,42,42,0.10);
-  transform: scale(0.98) translateY(2px);
+  background: var(--gray-50);
+  border: 2px solid var(--accent-dark);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
 }
 .match-card-header {
   display: flex;
@@ -913,7 +962,7 @@
 .match-card-title {
   font-size: 1.18rem;
   font-weight: 700;
-  color: #ff2a2a;
+  color: var(--accent);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -924,17 +973,16 @@
 }
 .match-card-type {
   font-size: 1rem;
-  color: #fff;
+  color: var(--gray-700);
   font-weight: 400;
-  opacity: 0.85;
 }
 .match-card-score {
   font-size: 1.05rem;
-  color: #fff;
+  color: var(--text);
   font-weight: 500;
 }
 .match-card-score-value {
-  color: #00ff00;
+  color: var(--success);
   font-weight: 700;
   font-size: 1.1rem;
 }
@@ -953,12 +1001,12 @@
   padding: 0.18rem 0;
 }
 .match-card-label {
-  color: #ff2a2a;
+  color: var(--accent);
   font-weight: 600;
   min-width: 90px;
 }
 .match-card-value {
-  color: #fff;
+  color: var(--text);
   font-weight: 500;
   text-align: right;
   flex: 1;
@@ -1074,7 +1122,7 @@
 .mentor-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.75);
+  background: var(--modal-overlay);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -1086,18 +1134,19 @@
   to { opacity: 1; }
 }
 .mentor-modal {
-  background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
-  border-radius: 18px;
-  box-shadow: 0 8px 48px rgba(255,42,42,0.18), 0 2px 12px rgba(0,0,0,0.22);
+  background: var(--modal-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--modal-shadow);
   padding: 2.5rem 2.2rem 2rem 2.2rem;
   min-width: 320px;
   max-width: 800px;
   width: 100%;
-  color: #fff;
+  color: var(--text);
   position: relative;
   animation: fadeInModal 0.3s cubic-bezier(0.77,0,0.175,1);
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid var(--modal-border);
 }
 @keyframes fadeInModal {
   from { opacity: 0; transform: translateY(40px) scale(0.98); }
@@ -1109,7 +1158,7 @@
   right: 1.3rem;
   background: none;
   border: none;
-  color: #ff2a2a;
+  color: var(--error);
   font-size: 2.1rem;
   font-weight: 700;
   cursor: pointer;
@@ -1117,49 +1166,48 @@
   z-index: 10;
 }
 .mentor-modal-close:hover {
-  color: #fff;
+  color: var(--error-dark);
   transform: scale(1.15);
 }
 .mentor-modal-title {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.6rem;
   font-weight: 800;
   margin-bottom: 1.2rem;
   text-align: center;
 }
 .mentor-modal-title span {
-  color: #fff;
+  color: var(--text);
   font-size: 1.1rem;
   font-weight: 400;
   opacity: 0.85;
 }
 .mentor-modal-section {
-  background: rgba(40,0,0,0.22);
-  border-radius: 12px;
-  box-shadow: 0 1px 8px rgba(255,42,42,0.07);
-  border: 1.5px solid #2d0000;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
   padding: 1.5rem 1.2rem 1.2rem 1.2rem;
   margin-bottom: 1.5rem;
   transition: box-shadow 0.18s, border 0.18s, background 0.18s, transform 0.18s;
   text-align: left;
 }
 .mentor-modal-section:hover, .mentor-modal-section:focus-within {
-  background: rgba(40,0,0,0.32);
-  border: 1.5px solid #ff2a2a;
-  box-shadow: 0 4px 18px rgba(255,42,42,0.13);
+  background: var(--card-bg);
+  border: 1px solid var(--accent);
+  box-shadow: var(--card-shadow-hover);
   transform: translateY(-2px) scale(1.01);
 }
 .mentor-modal-section h3 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.18rem;
   font-weight: 700;
   margin-bottom: 1.1rem;
   letter-spacing: 0.5px;
   text-align: center;
-  text-shadow: 0 2px 8px #1a000022;
 }
 .mentor-modal-section b {
-  color: #ff4d4d;
+  color: var(--text);
   font-weight: 700;
   min-width: 120px;
   display: inline-block;
@@ -1169,7 +1217,7 @@
   opacity: 0.92;
 }
 .mentor-modal-section div, .mentor-modal-section a {
-  color: #fff;
+  color: var(--text);
   font-size: 1.05rem;
   margin-bottom: 0.45rem;
   display: block;
@@ -1179,7 +1227,7 @@
   padding-left: 0;
 }
 .mentor-modal-section .field-value {
-  color: #fff;
+  color: var(--text);
   font-weight: 500;
   letter-spacing: 0.1px;
   transition: color 0.18s;
@@ -1267,34 +1315,32 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
-  background: linear-gradient(90deg, #181818 0%, #0077b5 40%, #005983 80%, #0077b5 100%);
-  color: #fff;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
   font-weight: 600;
-  border: none;
-  border-radius: 5px;
+  border: 1px solid var(--button-primary-border);
+  border-radius: var(--radius-md);
   padding: 0.22em 0.7em;
   font-size: 0.98rem;
   text-decoration: none;
-  box-shadow: 0 1px 4px rgba(0,119,181,0.08);
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.13s, background-position 0.7s cubic-bezier(0.77,0,0.175,1);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.13s;
   cursor: pointer;
   outline: none;
   vertical-align: middle;
-  background-size: 300% 100%;
-  background-position: 0% 0%;
 }
 .mentor-modal-linkedin-btn:hover, .mentor-modal-linkedin-btn:focus {
-  background-position: 100% 0%;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0,119,181,0.13);
+  background: var(--button-primary-hover-bg);
+  color: var(--button-primary-hover-text);
+  box-shadow: var(--shadow-md);
   transform: scale(1.03) translateY(-1px);
   text-decoration: none;
 }
 .mentor-modal-linkedin-btn:active {
-  background: #005983;
-  color: #fff;
+  background: var(--button-primary-active-bg);
+  color: var(--button-primary-text);
   transform: scale(0.97) translateY(1px);
-  box-shadow: 0 1px 2px rgba(0,119,181,0.08);
+  box-shadow: var(--shadow-sm);
 }
 .mentor-modal-linkedin-btn .linkedin-icon {
   font-size: 1em;
@@ -1306,6 +1352,93 @@
     font-size: 0.93rem;
     padding: 0.18em 0.5em;
   }
+}
+
+/* New Mentor Modal Components */
+.mentor-modal-select {
+  margin-left: 8px;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mentor-modal-select:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.mentor-modal-array-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.mentor-modal-remove-btn {
+  color: var(--error);
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.mentor-modal-remove-btn:hover {
+  color: var(--error-dark);
+  background-color: var(--error-light);
+}
+
+.mentor-modal-add-btn {
+  color: var(--accent);
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.mentor-modal-add-btn:hover {
+  color: var(--accent-dark);
+  background-color: var(--accent-light);
+}
+
+.mentor-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.mentor-modal-calcom-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.4rem 0.8rem;
+  background: var(--button-error-bg);
+  color: var(--button-error-text);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--button-error-border);
+}
+
+.mentor-modal-calcom-btn:hover {
+  background: var(--button-error-hover-bg);
+  color: var(--button-error-hover-text);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
 }
 
 .mentor-profile-skill-chip {
@@ -1396,13 +1529,13 @@
 
 /* Mentor Availability Styles */
 .mentor-availability {
-  background: linear-gradient(135deg, #181818 80%, #2d0000 100%);
-  border-radius: 16px;
+  background: var(--white);
+  border-radius: var(--radius-xl);
   padding: 2rem;
   margin: 2rem auto;
-  color: #fff;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.7);
-  border: 1.5px solid #3a0a0a;
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
 }
 
 .mentor-availability-header {
@@ -1411,33 +1544,33 @@
 }
 
 .mentor-availability-header h3 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
   font-weight: 700;
 }
 
 .mentor-availability-header p {
-  color: #e0e0e0;
+  color: var(--gray-700);
   font-size: 1rem;
 }
 
 .mentor-availability-error {
-  background: rgba(255,42,42,0.1);
-  border: 1px solid #ff2a2a;
-  color: #ff2a2a;
+  background: var(--error-light);
+  border: 1px solid var(--error);
+  color: var(--error-dark);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
   text-align: center;
 }
 
 .mentor-availability-success {
-  background: rgba(0,255,0,0.1);
-  border: 1px solid #00ff00;
-  color: #00ff00;
+  background: var(--success-light);
+  border: 1px solid var(--success);
+  color: var(--success-dark);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -1449,14 +1582,14 @@
 }
 
 .mentor-availability-add-section {
-  background: rgba(255,42,42,0.05);
-  border: 1px solid rgba(255,42,42,0.2);
-  border-radius: 12px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
 }
 
 .mentor-availability-add-section h4 {
-  color: #ff2a2a;
+  color: var(--accent);
   margin-bottom: 1rem;
   font-size: 1.2rem;
   font-weight: 600;
@@ -1475,20 +1608,40 @@
   gap: 0.5rem;
 }
 
+.mentor-availability-input,
+.mentor-availability-select,
+.mentor-availability-filter-select {
+  padding: 0.8rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.mentor-availability-input:focus,
+.mentor-availability-select:focus,
+.mentor-availability-filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
 .mentor-availability-form-field label {
-  color: #e0e0e0;
+  color: var(--text);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .mentor-availability-schedule {
-  background: rgba(0,0,0,0.3);
-  border-radius: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
 }
 
 .mentor-availability-schedule h4 {
-  color: #ff2a2a;
+  color: var(--accent);
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
   font-weight: 600;
@@ -3082,4 +3235,90 @@
   .mentor-bookings-loading p {
     font-size: 1rem;
   }
+}
+
+/* New button classes using preset colors */
+.mentor-refresh-matches-btn {
+  margin-bottom: 1rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 1px solid var(--button-primary-border);
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mentor-refresh-matches-btn:hover:not(:disabled) {
+  background: var(--button-primary-hover-bg);
+  color: var(--button-primary-hover-text);
+  border-color: var(--button-primary-hover-border);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mentor-refresh-matches-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mentor-book-session-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--button-primary-border);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.mentor-book-session-btn:hover {
+  background: var(--button-primary-hover-bg);
+  color: var(--button-primary-hover-text);
+  border-color: var(--button-primary-hover-border);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mentor-pagination-btn {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 1px solid var(--button-primary-border);
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.mentor-pagination-btn:hover:not(:disabled) {
+  background: var(--button-primary-hover-bg);
+  color: var(--button-primary-hover-text);
+  border-color: var(--button-primary-hover-border);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.mentor-pagination-btn.disabled {
+  background: var(--gray-500);
+  color: var(--gray-300);
+  border-color: var(--gray-400);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
 }

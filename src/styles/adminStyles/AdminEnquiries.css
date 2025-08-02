@@ -1,5 +1,6 @@
 .enquiries-container {
   padding: 1rem 0;
+  color: var(--text);
 }
 
 .enquiries-controls {
@@ -18,21 +19,23 @@
 
 .filter-button {
   padding: 0.5rem 1rem;
-  background-color: #333;
-  border: none;
-  color: white;
-  border-radius: 6px;
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--button-secondary-border);
+  color: var(--button-secondary-text);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .filter-button:hover {
-  background-color: #444;
+  background-color: var(--button-secondary-hover-bg);
 }
 
 .filter-button.active {
-  background-color: #555;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 1px solid var(--button-primary-border);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Stats cards clickable */
@@ -43,7 +46,7 @@
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--card-shadow-hover);
 }
 
 /* Table styles */
@@ -52,40 +55,44 @@
 }
 
 .new-enquiry {
-  background-color: rgba(76, 175, 80, 0.1);
+  background-color: var(--badge-success-bg);
 }
 
 .pending-enquiry {
-  background-color: rgba(255, 152, 0, 0.1);
+  background-color: var(--badge-warning-bg);
 }
 
 .status-badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: bold;
   text-transform: uppercase;
 }
 
 .status-badge-pending {
-  background-color: #FF9800;
-  color: white;
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+  border: 1px solid var(--warning);
 }
 
 .status-badge-new {
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  border: 1px solid var(--success);
 }
 
 .status-badge-read {
-  background-color: #2196F3;
-  color: white;
+  background-color: var(--badge-info-bg);
+  color: var(--badge-info-text);
+  border: 1px solid var(--info);
 }
 
 .status-badge-responded {
-  background-color: #9E9E9E;
-  color: white;
+  background-color: var(--gray-200);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
 }
 
 .action-buttons {
@@ -94,38 +101,44 @@
 }
 
 .email-link {
-  color: #2196F3;
+  color: var(--accent);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .email-link:hover {
-  color: #64B5F6;
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
 .action-button.delete {
-  background-color: #f44336;
+  background-color: var(--button-error-bg);
+  color: var(--button-error-text);
+  border: 1px solid var(--button-error-border);
 }
 
 .action-button.delete:hover {
-  background-color: #e53935;
+  background-color: var(--button-error-hover-bg);
 }
 
 .action-button.undo {
-  background-color: #ff9800;
+  background-color: var(--button-warning-bg);
+  color: var(--button-warning-text);
+  border: 1px solid var(--button-warning-border);
 }
 
 .action-button.undo:hover {
-  background-color: #f57c00;
+  background-color: var(--button-warning-hover-bg);
 }
 
 .action-button.respond {
-  background-color: #4caf50;
+  background-color: var(--button-success-bg);
+  color: var(--button-success-text);
+  border: 1px solid var(--button-success-border);
 }
 
 .action-button.respond:hover {
-  background-color: #388e3c;
+  background-color: var(--button-success-hover-bg);
 }
 
 /* Detailed view */
@@ -136,32 +149,34 @@
 }
 
 .enquiry-detail-card {
-  background-color: #222;
+  background-color: var(--white);
   padding: 1.5rem;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
+  border: 1px solid var(--gray-200);
 }
 
 .enquiry-detail-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .enquiry-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--gray-200);
   padding-bottom: 0.5rem;
 }
 
 .enquiry-header h4 {
   margin: 0;
   font-size: 1.2rem;
+  color: var(--text);
 }
 
 .enquiry-contact, .enquiry-meta {
@@ -172,12 +187,14 @@
 
 .enquiry-contact p, .enquiry-meta p {
   margin: 0;
+  color: var(--text);
 }
 
 .enquiry-message {
-  background-color: #1a1a1a;
+  background-color: var(--gray-50);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
 }
 
 .message-content {
@@ -185,6 +202,7 @@
   white-space: pre-wrap;
   overflow-wrap: break-word;
   line-height: 1.5;
+  color: var(--text);
 }
 
 .enquiry-actions {
@@ -203,16 +221,17 @@
 .no-enquiries {
   text-align: center;
   padding: 3rem;
-  background-color: #222;
-  border-radius: 10px;
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
   font-size: 1.2rem;
-  color: #888;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #888;
+  color: var(--gray-600);
   font-size: 1.2rem;
 }
 
@@ -266,7 +285,7 @@
   }
   .enquiries-table {
     overflow-x: auto;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
   }
   .enquiries-table table {
     min-width: 600px;
@@ -301,7 +320,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -310,20 +329,21 @@
 }
 
 .response-modal {
-  background-color: #222;
-  border-radius: 10px;
+  background-color: var(--modal-bg);
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--modal-shadow);
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--modal-border);
 }
 
 .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--gray-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -332,13 +352,13 @@
 .modal-header h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: white;
+  color: var(--text);
 }
 
 .close-button {
   background: none;
   border: none;
-  color: #999;
+  color: var(--gray-500);
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -349,7 +369,7 @@
 }
 
 .close-button:hover {
-  color: white;
+  color: var(--text);
 }
 
 .modal-content {
@@ -357,10 +377,11 @@
 }
 
 .enquiry-preview {
-  background-color: #333;
+  background-color: var(--gray-50);
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   margin-bottom: 1.5rem;
+  border: 1px solid var(--gray-200);
 }
 
 .message-preview {
@@ -369,7 +390,7 @@
   overflow-wrap: break-word;
   max-height: 100px;
   overflow-y: auto;
-  color: #ccc;
+  color: var(--text);
 }
 
 .response-form {
@@ -386,28 +407,29 @@
 
 .form-group label {
   font-weight: bold;
-  color: #ccc;
+  color: var(--text);
 }
 
 .form-control {
   padding: 0.75rem;
-  border-radius: 4px;
-  border: 1px solid #444;
-  background-color: #333;
-  color: white;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--input-border);
+  background-color: var(--input-bg);
+  color: var(--input-text);
   font-size: 1rem;
   width: 100%;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  border-color: var(--input-focus-border);
+  box-shadow: var(--focus-ring);
 }
 
 .form-control:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  background-color: var(--gray-100);
 }
 
 .message-area {
@@ -424,7 +446,7 @@
 
 .cancel-button, .send-button {
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   border: none;
   font-size: 1rem;
   cursor: pointer;
@@ -432,21 +454,24 @@
 }
 
 .cancel-button {
-  background-color: #424242;
-  color: white;
+  background-color: var(--button-cancel-bg);
+  color: var(--button-cancel-text);
+  border: 1px solid var(--button-cancel-border);
 }
 
 .cancel-button:hover {
-  background-color: #616161;
+  background-color: var(--button-cancel-hover-bg);
+  color: var(--button-cancel-hover-text);
 }
 
 .send-button {
-  background-color: #4caf50;
-  color: white;
+  background-color: var(--button-success-bg);
+  color: var(--button-success-text);
+  border: 1px solid var(--button-success-border);
 }
 
 .send-button:hover {
-  background-color: #388e3c;
+  background-color: var(--button-success-hover-bg);
 }
 
 button:disabled {
@@ -455,17 +480,19 @@ button:disabled {
 }
 
 .error-message {
-  color: #f44336;
+  color: var(--alert-error-text);
   padding: 0.5rem;
-  background-color: rgba(244, 67, 54, 0.1);
-  border-radius: 4px;
+  background-color: var(--alert-error-bg);
+  border-radius: var(--radius-md);
   margin-top: 0.5rem;
+  border-left: 4px solid var(--alert-error-border);
 }
 
 .success-message {
-  color: #4caf50;
+  color: var(--alert-success-text);
   padding: 0.5rem;
-  background-color: rgba(76, 175, 80, 0.1);
-  border-radius: 4px;
+  background-color: var(--alert-success-bg);
+  border-radius: var(--radius-md);
   margin-top: 0.5rem;
+  border-left: 4px solid var(--alert-success-border);
 } 

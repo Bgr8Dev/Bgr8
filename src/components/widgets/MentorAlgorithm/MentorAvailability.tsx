@@ -337,8 +337,8 @@ export default function MentorAvailability() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
       <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} message="Are you sure you want to remove this internal time slot?" type="warning" actions={
         <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-          <button onClick={confirmRemoveSlot} style={{ background: 'linear-gradient(135deg, #ff4444 0%, #cc0000 100%)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.8rem 1.8rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 4px 12px rgba(255,68,68,0.3)', transition: 'all 0.2s' }}>Yes, Remove</button>
-          <button onClick={() => setConfirmOpen(false)} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, padding: '0.8rem 1.8rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>Cancel</button>
+          <button onClick={confirmRemoveSlot} style={{ background: 'var(--button-error-bg)', color: 'var(--button-error-text)', border: '1px solid var(--button-error-border)', borderRadius: 8, padding: '0.8rem 1.8rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 4px 12px rgba(239,68,68,0.2)' }}>Yes, Remove</button>
+          <button onClick={() => setConfirmOpen(false)} style={{ background: 'var(--button-secondary-bg)', color: 'var(--button-secondary-text)', border: '1px solid var(--button-secondary-border)', borderRadius: 8, padding: '0.8rem 1.8rem', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s' }}>Cancel</button>
         </div>
       } />
       <div className="mentor-availability-header">
@@ -364,8 +364,8 @@ export default function MentorAvailability() {
       <div className="mentor-availability-content">
         {/* Tabs for recurring/specific */}
         <div style={{ display: 'flex', gap: 16, marginBottom: 18 }}>
-          <button onClick={() => setActiveTab('recurring')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'recurring' ? '#ff2a2a' : '#181818', color: activeTab === 'recurring' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}><FaSyncAlt style={{ marginRight: 8 }} />Recurring</button>
-          <button onClick={() => setActiveTab('specific')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'specific' ? '#ff2a2a' : '#181818', color: activeTab === 'specific' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}><FaCalendarAlt style={{ marginRight: 8 }} />Specific Date</button>
+          <button onClick={() => setActiveTab('recurring')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'recurring' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'recurring' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}><FaSyncAlt style={{ marginRight: 8 }} />Recurring</button>
+          <button onClick={() => setActiveTab('specific')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'specific' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'specific' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}><FaCalendarAlt style={{ marginRight: 8 }} />Specific Date</button>
         </div>
         
         {/* Mode toggle */}
@@ -412,7 +412,7 @@ export default function MentorAvailability() {
               {activeTab === 'recurring' ? (
               <div className="mentor-availability-form-field">
                 <label>Day</label>
-                  <select value={selectedDay} onChange={e => setSelectedDay(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }}>
+                  <select value={selectedDay} onChange={e => setSelectedDay(e.target.value)} className="mentor-availability-select">
                   {DAYS_OF_WEEK.map(day => (
                     <option key={day} value={day}>{day}</option>
                   ))}
@@ -421,7 +421,7 @@ export default function MentorAvailability() {
               ) : (
                 <div className="mentor-availability-form-field">
                   <label>Date</label>
-                  <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }} />
+                  <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="mentor-availability-input" />
                 </div>
               )}
               
@@ -429,7 +429,7 @@ export default function MentorAvailability() {
                 <>
                   <div className="mentor-availability-form-field">
                     <label>Start Time</label>
-                    <select value={selectedStartTime} onChange={e => setSelectedStartTime(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }}>
+                    <select value={selectedStartTime} onChange={e => setSelectedStartTime(e.target.value)} className="mentor-availability-select">
                       {TIME_SLOTS.map(time => (
                         <option key={time} value={time}>{time}</option>
                       ))}
@@ -437,7 +437,7 @@ export default function MentorAvailability() {
                   </div>
                   <div className="mentor-availability-form-field">
                     <label>End Time</label>
-                    <select value={selectedEndTime} onChange={e => setSelectedEndTime(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }}>
+                    <select value={selectedEndTime} onChange={e => setSelectedEndTime(e.target.value)} className="mentor-availability-select">
                       {TIME_SLOTS.filter(time => time > selectedStartTime).map(time => (
                         <option key={time} value={time}>{time}</option>
                       ))}
@@ -448,7 +448,7 @@ export default function MentorAvailability() {
                 <>
                   <div className="mentor-availability-form-field">
                     <label>Time Range Start</label>
-                    <select value={bulkStartTime} onChange={e => setBulkStartTime(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }}>
+                    <select value={bulkStartTime} onChange={e => setBulkStartTime(e.target.value)} className="mentor-availability-select">
                       {TIME_SLOTS.map(time => (
                         <option key={time} value={time}>{time}</option>
                       ))}
@@ -456,7 +456,7 @@ export default function MentorAvailability() {
                   </div>
                   <div className="mentor-availability-form-field">
                     <label>Time Range End</label>
-                    <select value={bulkEndTime} onChange={e => setBulkEndTime(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }}>
+                    <select value={bulkEndTime} onChange={e => setBulkEndTime(e.target.value)} className="mentor-availability-select">
                       {TIME_SLOTS.filter(time => time > bulkStartTime).map(time => (
                         <option key={time} value={time}>{time}</option>
                       ))}
@@ -464,7 +464,7 @@ export default function MentorAvailability() {
                   </div>
                   <div className="mentor-availability-form-field">
                     <label>Meeting Duration</label>
-                    <select value={meetingDuration} onChange={e => setMeetingDuration(e.target.value)} style={{ padding: '0.8rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem' }}>
+                    <select value={meetingDuration} onChange={e => setMeetingDuration(e.target.value)} className="mentor-availability-select">
                       <option value="15">15 minutes</option>
                       <option value="30">30 minutes</option>
                       <option value="45">45 minutes</option>
@@ -478,7 +478,7 @@ export default function MentorAvailability() {
               
               <div className="mentor-availability-form-field">
                 <label>&nbsp;</label>
-                <button onClick={addTimeSlot} style={{ background: 'linear-gradient(135deg, #ff2a2a 0%, #a80000 100%)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.8rem 1.5rem', fontSize: '1rem', cursor: 'pointer', fontWeight: 600 }}>
+                <button onClick={addTimeSlot} style={{ background: 'var(--button-mentor-bg)', color: 'var(--button-mentor-text)', border: '1px solid var(--button-mentor-border)', borderRadius: 8, padding: '0.8rem 1.5rem', fontSize: '1rem', cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(224,106,92,0.2)' }}>
                   <FaClock style={{ marginRight: 8 }} />
                   {bulkMode ? 'Create Internal Slots' : 'Add Internal Slot'}
                 </button>
@@ -488,28 +488,28 @@ export default function MentorAvailability() {
         </div>
         {/* Controls: search, filter, sort, export */}
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 18, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#222', borderRadius: 8, padding: '4px 12px' }}>
-            <FaSearch style={{ color: '#ffb300', fontSize: 18, marginRight: 8 }} />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search slots..." style={{ background: 'none', border: 'none', color: '#fff', fontSize: 16, outline: 'none', width: 180 }} />
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--gray-100)', borderRadius: 8, padding: '4px 12px' }}>
+            <FaSearch style={{ color: 'var(--warning)', fontSize: 18, marginRight: 8 }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search slots..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 16, outline: 'none', width: 180 }} />
           </div>
-          <select value={filterType} onChange={e => setFilterType(e.target.value as 'all' | 'recurring' | 'specific')} style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}>
+          <select value={filterType} onChange={e => setFilterType(e.target.value as 'all' | 'recurring' | 'specific')} className="mentor-availability-filter-select">
             <option value="all">All Types</option>
             <option value="recurring">Recurring</option>
             <option value="specific">One-off</option>
           </select>
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as 'all' | 'available' | 'booked')} style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as 'all' | 'available' | 'booked')} className="mentor-availability-filter-select">
             <option value="all">All Statuses</option>
             <option value="available">Available</option>
             <option value="booked">Booked</option>
           </select>
-          <button style={{ background: '#ffb300', color: '#181818', border: 'none', borderRadius: 8, padding: '6px 18px', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} title="Export to CSV">
+          <button style={{ background: 'var(--button-warning-bg)', color: 'var(--button-warning-text)', border: '1px solid var(--button-warning-border)', borderRadius: 8, padding: '6px 18px', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.2s' }} title="Export to CSV">
             <FaFileExport /> Export CSV
           </button>
         </div>
         {/* Internal slot list/table */}
         <div style={{ marginBottom: 12 }}>
-          <h4 style={{ color: '#ffb300', marginBottom: 8 }}>Your Internal Time Slots</h4>
-          <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: 16 }}>Manage your internal platform availability slots</p>
+          <h4 style={{ color: 'var(--warning)', marginBottom: 8 }}>Your Internal Time Slots</h4>
+          <p style={{ color: 'var(--gray-600)', fontSize: '0.9rem', marginBottom: 16 }}>Manage your internal platform availability slots</p>
         </div>
         <table className="mentor-availability-table mentor-animate-fadein mentor-animate-slideup">
           <thead>
@@ -524,7 +524,7 @@ export default function MentorAvailability() {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No internal time slots found. Add some slots above to get started.</td></tr>
+              <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--gray-500)', padding: 24 }}>No internal time slots found. Add some slots above to get started.</td></tr>
             ) : filtered.map(slot => (
               <tr key={slot.id} className="mentor-animate-row" style={{ background: !slot.isAvailable ? 'rgba(255,68,68,0.07)' : undefined, transition: 'background 0.2s', cursor: 'pointer' }}
                 onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,179,0,0.08)'; (e.currentTarget as HTMLElement).style.transform = 'scale(1.012)'; }}
@@ -536,8 +536,8 @@ export default function MentorAvailability() {
                 <td>{slot.startTime} - {slot.endTime}</td>
                 <td>{statusBadge(slot)}</td>
                 <td>
-                  <button onClick={() => copySlot(slot)} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '6px 10px', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 600, marginRight: 8 }} title="Copy slot details"><FaCopy /></button>
-                  <button onClick={() => handleRemoveSlot(slot)} style={{ background: 'linear-gradient(135deg, #ff4444 0%, #cc0000 100%)', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: '0.9rem', cursor: slot.isAvailable ? 'pointer' : 'not-allowed', fontWeight: 600 }} title="Remove slot" disabled={!slot.isAvailable}><FaTrash /></button>
+                  <button onClick={() => copySlot(slot)} style={{ background: 'var(--button-secondary-bg)', color: 'var(--button-secondary-text)', border: '1px solid var(--button-secondary-border)', borderRadius: 6, padding: '6px 10px', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 600, marginRight: 8, transition: 'all 0.2s' }} title="Copy slot details"><FaCopy /></button>
+                  <button onClick={() => handleRemoveSlot(slot)} style={{ background: 'var(--button-error-bg)', color: 'var(--button-error-text)', border: '1px solid var(--button-error-border)', borderRadius: 6, padding: '6px 10px', fontSize: '0.9rem', cursor: slot.isAvailable ? 'pointer' : 'not-allowed', opacity: slot.isAvailable ? 1 : 0.5, transition: 'all 0.2s' }} title="Remove slot" disabled={!slot.isAvailable}><FaTrash /></button>
                 </td>
               </tr>
             ))}

@@ -1,8 +1,45 @@
 .mentor-management {
   padding: 2rem;
-  background: #181818;
-  border-radius: 16px;
-  color: #fff;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  color: var(--text);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--card-shadow);
+}
+
+.mentor-management-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--button-secondary-border);
+  border-radius: var(--radius-lg);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab-button:hover {
+  background: var(--button-secondary-hover-bg);
+  border-color: var(--button-secondary-hover-border);
+}
+
+.tab-button.active {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border-color: var(--button-primary-border);
+}
+
+.tab-icon {
+  margin-right: 0.5rem;
 }
 
 .mentor-management-header {
@@ -10,7 +47,7 @@
 }
 
 .mentor-management-header h2 {
-  color: #ff2a2a;
+  color: var(--accent);
   font-size: 2rem;
   margin-bottom: 1.5rem;
 }
@@ -25,10 +62,10 @@
 
 .mentor-management-search input {
   padding: 0.8rem 1.2rem;
-  border: 1.5px solid #3a0a0a;
-  border-radius: 8px;
-  background: #181818;
-  color: #fff;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  background: var(--input-bg);
+  color: var(--input-text);
   font-size: 1rem;
   min-width: 300px;
   transition: border 0.2s, box-shadow 0.2s;
@@ -36,8 +73,8 @@
 
 .mentor-management-search input:focus {
   outline: none;
-  border-color: #ff2a2a;
-  box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+  border-color: var(--input-focus-border);
+  box-shadow: var(--focus-ring);
 }
 
 .mentor-management-filters {
@@ -47,10 +84,10 @@
 
 .mentor-management-filters button {
   padding: 0.8rem 1.5rem;
-  border: 1.5px solid #3a0a0a;
-  border-radius: 8px;
-  background: #181818;
-  color: #fff;
+  border: 1.5px solid var(--button-secondary-border);
+  border-radius: var(--radius-lg);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -60,24 +97,24 @@
 }
 
 .mentor-management-filters button:hover {
-  border-color: #ff2a2a;
-  background: rgba(255,42,42,0.1);
+  border-color: var(--button-secondary-hover-border);
+  background: var(--button-secondary-hover-bg);
 }
 
 .mentor-management-filters button.active {
-  background: #ff2a2a;
-  border-color: #ff2a2a;
-  color: #fff;
+  background: var(--button-primary-bg);
+  border-color: var(--button-primary-border);
+  color: var(--button-primary-text);
 }
 
 .refresh-button {
-  background: #181818 !important;
-  border-color: #3a0a0a !important;
+  background: var(--button-secondary-bg) !important;
+  border-color: var(--button-secondary-border) !important;
 }
 
 .refresh-button:hover {
-  background: rgba(255,42,42,0.1) !important;
-  border-color: #ff2a2a !important;
+  background: var(--button-secondary-hover-bg) !important;
+  border-color: var(--button-secondary-hover-border) !important;
 }
 
 .refresh-button:disabled {
@@ -110,15 +147,16 @@
 }
 
 .stat-card {
-  background: rgba(40,0,0,0.25);
-  border-radius: 12px;
+  background: var(--white);
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
   text-align: center;
-  border: 1px solid #3a0a0a;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--card-shadow);
 }
 
 .stat-card h3 {
-  color: #ff2a2a;
+  color: var(--text);
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
@@ -127,25 +165,28 @@
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
+  color: var(--text);
 }
 
 .mentor-management-table {
-  background: rgba(40,0,0,0.25);
-  border-radius: 12px;
+  background: var(--white);
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
   overflow-x: auto;
   overflow-y: auto;
   max-height: 60vh;
   position: relative;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--card-shadow);
 }
 
 .mentor-management-table::-webkit-scrollbar {
   height: 12px;
-  background: #181818;
+  background: var(--gray-100);
 }
 .mentor-management-table::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 6px;
+  background: var(--gray-300);
+  border-radius: var(--radius-md);
 }
 
 .mentor-management-table table {
@@ -158,9 +199,9 @@
 .mentor-management-table thead th {
   position: sticky;
   top: 0;
-  background: #181818;
+  background: var(--table-header-bg);
   z-index: 2;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .mentor-management-table::after {
@@ -169,7 +210,7 @@
   top: 0; right: 0; bottom: 0;
   width: 32px;
   pointer-events: none;
-  background: linear-gradient(to left, #181818 80%, transparent 100%);
+  background: linear-gradient(to left, var(--white) 80%, transparent 100%);
   opacity: 0.7;
   z-index: 3;
   display: block;
@@ -178,14 +219,14 @@
 .mentor-management-table th {
   text-align: left;
   padding: 1rem;
-  color: #ff2a2a;
+  color: var(--table-header-text);
   font-weight: 600;
-  border-bottom: 2px solid #3a0a0a;
+  border-bottom: 2px solid var(--table-border);
 }
 
 .mentor-management-table td {
   padding: 1rem;
-  border-bottom: 1px solid #3a0a0a;
+  border-bottom: 1px solid var(--table-border);
 }
 
 .user-info {
@@ -196,28 +237,31 @@
 
 .user-name {
   font-weight: 600;
+  color: var(--text);
 }
 
 .user-age {
   font-size: 0.9rem;
-  color: #888;
+  color: var(--gray-600);
 }
 
 .user-type {
   padding: 0.4rem 0.8rem;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
 .user-type.mentor {
-  background: rgba(255,42,42,0.1);
-  color: #ff2a2a;
+  background: var(--badge-mentor-bg);
+  color: var(--badge-mentor-text);
+  border: 1px solid var(--mentor);
 }
 
 .user-type.mentee {
-  background: rgba(0,255,0,0.1);
-  color: #00ff00;
+  background: var(--badge-mentee-bg);
+  color: var(--badge-mentee-text);
+  border: 1px solid var(--mentee);
 }
 
 .profession-info,
@@ -230,12 +274,13 @@
 .current-profession,
 .degree {
   font-weight: 600;
+  color: var(--text);
 }
 
 .past-professions,
 .education-level {
   font-size: 0.9rem;
-  color: #888;
+  color: var(--gray-600);
 }
 
 .skills-list,
@@ -246,15 +291,16 @@
 }
 
 .skill-tag {
-  background: rgba(255,42,42,0.1);
-  color: #ff2a2a;
+  background: var(--badge-mentor-bg);
+  color: var(--badge-mentor-text);
   padding: 0.3rem 0.6rem;
-  border-radius: 16px;
+  border-radius: var(--radius-full);
   font-size: 0.9rem;
+  border: 1px solid var(--mentor);
 }
 
 .more-skills {
-  color: #888;
+  color: var(--gray-600);
   font-size: 0.9rem;
 }
 
@@ -265,30 +311,40 @@
 
 .action-buttons button {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .view-profile {
-  background: #ff2a2a;
-  color: #fff;
-  border: none;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 1px solid var(--button-primary-border);
 }
 
 .view-profile:hover {
-  background: #a80000;
+  background: var(--button-primary-hover-bg);
 }
 
 .edit-profile {
-  background: transparent;
-  color: #ff2a2a;
-  border: 1.5px solid #ff2a2a;
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  border: 1px solid var(--button-secondary-border);
 }
 
 .edit-profile:hover {
-  background: rgba(255,42,42,0.1);
+  background: var(--button-secondary-hover-bg);
+}
+
+.delete-profile {
+  background: var(--button-error-bg);
+  color: var(--button-error-text);
+  border: 1px solid var(--button-error-border);
+}
+
+.delete-profile:hover {
+  background: var(--button-error-hover-bg);
 }
 
 .mentor-management-loading,
@@ -296,10 +352,11 @@
   text-align: center;
   padding: 2rem;
   font-size: 1.2rem;
+  color: var(--text);
 }
 
 .mentor-management-error {
-  color: #ff2a2a;
+  color: var(--error);
 }
 
 .generate-controls {
@@ -312,26 +369,26 @@
 .count-input {
   width: 80px;
   padding: 0.5rem;
-  border: 1.5px solid #3a0a0a;
-  border-radius: 8px;
-  background: #181818;
-  color: #fff;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  background: var(--input-bg);
+  color: var(--input-text);
   font-size: 1rem;
   text-align: center;
 }
 
 .count-input:focus {
   outline: none;
-  border-color: #ff2a2a;
-  box-shadow: 0 0 0 2px rgba(255,42,42,0.15);
+  border-color: var(--input-focus-border);
+  box-shadow: var(--focus-ring);
 }
 
 .generate-button {
   padding: 0.8rem 1.5rem;
-  background: linear-gradient(90deg, #ff2a2a 60%, #a80000 100%);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
+  background: var(--button-mentor-bg);
+  border: 1px solid var(--button-mentor-border);
+  border-radius: var(--radius-lg);
+  color: var(--button-mentor-text);
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
@@ -342,9 +399,9 @@
 }
 
 .generate-button:hover:not(:disabled) {
-  background: linear-gradient(90deg, #a80000 0%, #ff2a2a 100%);
+  background: var(--button-mentor-hover-bg);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,42,42,0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .generate-button:disabled {
@@ -353,21 +410,21 @@
 }
 
 .mentor-management-success {
-  background: rgba(0, 255, 0, 0.1);
-  border: 1px solid #00ff00;
-  color: #00ff00;
+  background: var(--alert-success-bg);
+  border: 1px solid var(--alert-success-border);
+  color: var(--alert-success-text);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   margin: 1rem 0;
   text-align: center;
 }
 
 .mentor-management-error {
-  background: rgba(255, 42, 42, 0.1);
-  border: 1px solid #ff2a2a;
-  color: #ff2a2a;
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
+  color: var(--alert-error-text);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   margin: 1rem 0;
   text-align: center;
 }
@@ -410,7 +467,7 @@
 .stat-real {
   font-size: 1.7rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
   display: block;
   line-height: 1.1;
 }
@@ -418,7 +475,7 @@
 .stat-generated {
   font-size: 1.1rem;
   font-weight: 500;
-  color: #00c8ff;
+  color: var(--accent);
   display: block;
   line-height: 1.1;
 }
@@ -453,7 +510,7 @@
   .mentor-management-table td {
     padding: 0.8rem;
   }
-} 
+}
 
 @media (max-width: 600px) {
   .mentor-management-table {
@@ -478,7 +535,7 @@
     top: 0; right: 0; bottom: 0;
     width: 24px;
     pointer-events: none;
-    background: linear-gradient(to left, #181818 80%, transparent 100%);
+    background: linear-gradient(to left, var(--white) 80%, transparent 100%);
     opacity: 0.7;
     z-index: 3;
     display: block;

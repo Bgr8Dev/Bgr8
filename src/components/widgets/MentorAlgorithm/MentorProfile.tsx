@@ -123,21 +123,21 @@ export default function MentorProfile() {
     <div className={`mentor-profile mentor-profile-animate${animateIn ? ' in' : ''}`}>
       {profile && (
         <div className="mentor-profile-tabs" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-          <button className={activeTab === 'profile' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('profile')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'profile' ? '#ff2a2a' : '#181818', color: activeTab === 'profile' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Profile</button>
+          <button className={activeTab === 'profile' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('profile')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'profile' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'profile' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Profile</button>
           {profile.type === 'mentor' && (
-            <button className={activeTab === 'availability' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('availability')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'availability' ? '#ff2a2a' : '#181818', color: activeTab === 'availability' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Availability</button>
+            <button className={activeTab === 'availability' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('availability')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'availability' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'availability' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Availability</button>
           )}
-          <button className={activeTab === 'bookings' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('bookings')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'bookings' ? '#ff2a2a' : '#181818', color: activeTab === 'bookings' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Bookings</button>
+          <button className={activeTab === 'bookings' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('bookings')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'bookings' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'bookings' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Bookings</button>
         </div>
       )}
       {/* Top-level tab content */}
       {activeTab === 'profile' && (
         <>
           <div className="mentor-profile-section-tabs" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-            <button className={mainTab === 'personal' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('personal')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'personal' ? '#ff2a2a' : '#181818', color: mainTab === 'personal' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Personal Info</button>
-            <button className={mainTab === 'education' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('education')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'education' ? '#ff2a2a' : '#181818', color: mainTab === 'education' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Education & Professional</button>
-            <button className={mainTab === 'skills' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('skills')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'skills' ? '#ff2a2a' : '#181818', color: mainTab === 'skills' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Skills & Interests</button>
-            <button className={mainTab === 'additional' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('additional')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'additional' ? '#ff2a2a' : '#181818', color: mainTab === 'additional' ? '#fff' : '#ff2a2a', transition: 'all 0.18s' }}>Additional Info</button>
+            <button className={mainTab === 'personal' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('personal')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'personal' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: mainTab === 'personal' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Personal Info</button>
+            <button className={mainTab === 'education' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('education')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'education' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: mainTab === 'education' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Education & Professional</button>
+            <button className={mainTab === 'skills' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('skills')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'skills' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: mainTab === 'skills' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Skills & Interests</button>
+            <button className={mainTab === 'additional' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setMainTab('additional')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: mainTab === 'additional' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: mainTab === 'additional' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Additional Info</button>
           </div>
           {mainTab === 'personal' && (
             <div className="mentor-profile-section mentor-profile-section-animate">
@@ -231,7 +231,6 @@ export default function MentorProfile() {
                       value={profile.educationLevel || ''}
                       onChange={handleChange}
                       required
-                      style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
                     >
                       <option value="">Select Education Level</option>
                       {ukEducationLevels
@@ -264,7 +263,6 @@ export default function MentorProfile() {
                       onChange={handleChange}
                       required
                       className="mentor-profile-input"
-                      style={{ width: '100%', padding: '0.8rem', border: '1.5px solid #3a0a0a', borderRadius: 8, background: '#181818', color: '#fff', fontSize: '1rem', marginBottom: 0 }}
                     />
                   ) : (
                     <p className="mentor-profile-value">{profile.profession}</p>
@@ -413,7 +411,6 @@ export default function MentorProfile() {
                           const options = Array.from(e.target.selectedOptions, o => o.value);
                           setProfile(prev => prev ? { ...prev, industries: options } : null);
                         }}
-                        style={{ minHeight: 90, background: '#181818', color: '#fff', border: '1.5px solid #3a0a0a', borderRadius: 8, padding: '0.7rem 1rem', fontSize: '1rem' }}
                       >
                         {industriesList.map(ind => (
                           <option key={ind} value={ind}>{ind}</option>
@@ -460,8 +457,8 @@ export default function MentorProfile() {
           {mainTab === 'skills' && (
             <div className="mentor-profile-section mentor-profile-section-animate">
               <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-                <button className={skillsTab === 'skills' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setSkillsTab('skills')} style={{ fontWeight: 700, fontSize: '1.02rem', padding: '0.5rem 1.2rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: skillsTab === 'skills' ? '#ffb300' : '#181818', color: skillsTab === 'skills' ? '#181818' : '#ffb300', transition: 'all 0.18s' }}>Skills Offered</button>
-                <button className={skillsTab === 'hobbies' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setSkillsTab('hobbies')} style={{ fontWeight: 700, fontSize: '1.02rem', padding: '0.5rem 1.2rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: skillsTab === 'hobbies' ? '#ffb300' : '#181818', color: skillsTab === 'hobbies' ? '#181818' : '#ffb300', transition: 'all 0.18s' }}>Hobbies & Interests</button>
+                <button className={skillsTab === 'skills' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setSkillsTab('skills')} style={{ fontWeight: 700, fontSize: '1.02rem', padding: '0.5rem 1.2rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: skillsTab === 'skills' ? 'var(--warning)' : 'var(--button-secondary-bg)', color: skillsTab === 'skills' ? 'var(--white)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Skills Offered</button>
+                <button className={skillsTab === 'hobbies' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setSkillsTab('hobbies')} style={{ fontWeight: 700, fontSize: '1.02rem', padding: '0.5rem 1.2rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: skillsTab === 'hobbies' ? 'var(--warning)' : 'var(--button-secondary-bg)', color: skillsTab === 'hobbies' ? 'var(--white)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Hobbies & Interests</button>
               </div>
               {skillsTab === 'skills' && (
                 <div className="mentor-profile-skills mentor-profile-chips" style={{ flexWrap: 'wrap', gap: 8, fontSize: '0.95rem' }}>
@@ -477,7 +474,7 @@ export default function MentorProfile() {
                       <React.Fragment key={category}>
                         {profile.hobbies.some(hobby => hobbies.includes(hobby)) && (
                           <div style={{ marginBottom: 4 }}>
-                            <div style={{ fontWeight: 700, color: '#ffb300', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
+                            <div style={{ fontWeight: 700, color: 'var(--warning)', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                               {hobbies.filter(hobby => profile.hobbies.includes(hobby)).map((hobby, idx) => (
                                 <span className="mentor-profile-chip mentor-profile-hobby-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s`, padding: '4px 10px', fontSize: '0.95rem' }} key={hobby}>{hobby}</span>
@@ -504,7 +501,6 @@ export default function MentorProfile() {
                       name="ethnicity"
                       value={profile.ethnicity || ''}
                       onChange={handleChange}
-                      style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
                     >
                       <option value="">Select Ethnicity</option>
                       {ethnicityOptions.map(option => (
@@ -522,7 +518,6 @@ export default function MentorProfile() {
                       name="religion"
                       value={profile.religion || ''}
                       onChange={handleChange}
-                      style={{ padding: '0.85rem 1rem', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: '1rem', width: '100%' }}
                     >
                       <option value="">Select Religion</option>
                       {religionOptions.map(option => (
