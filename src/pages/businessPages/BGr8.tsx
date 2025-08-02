@@ -18,6 +18,13 @@ export default function BGr8() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const scrollToMentorSection = () => {
+    const mentorSection = document.getElementById('mentor-section');
+    if (mentorSection) {
+      mentorSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bgr8-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
@@ -35,73 +42,19 @@ export default function BGr8() {
                 </p>
               </div>
               
-              {/* Donation Form Overlay */}
-              <div className="bgr8-donation-form">
-                <div className="bgr8-donation-header">
-                  <span className="bgr8-donation-badge">BGR8 COMMUNITY FUND</span>
-                </div>
-                
-                <div className="bgr8-donation-tabs">
-                  <button 
-                    className={`bgr8-tab ${donationType === 'one-off' ? 'active' : ''}`}
-                    onClick={() => setDonationType('one-off')}
-                  >
-                    One-off
-                  </button>
-                  <button 
-                    className={`bgr8-tab ${donationType === 'monthly' ? 'active' : ''}`}
-                    onClick={() => setDonationType('monthly')}
-                  >
-                    Monthly
-                  </button>
-                </div>
-
-                <div className="bgr8-amount-selection">
-                  <p>Choose an amount to donate</p>
-                  <div className="bgr8-amount-buttons">
-                    <button 
-                      className={`bgr8-amount-btn ${donationAmount === '10' ? 'active' : ''}`}
-                      onClick={() => setDonationAmount('10')}
-                    >
-                      £10
-                    </button>
-                    <button 
-                      className={`bgr8-amount-btn ${donationAmount === '25' ? 'active' : ''}`}
-                      onClick={() => setDonationAmount('25')}
-                    >
-                      £25
-                    </button>
-                    <button 
-                      className={`bgr8-amount-btn ${donationAmount === '50' ? 'active' : ''}`}
-                      onClick={() => setDonationAmount('50')}
-                    >
-                      £50
-                    </button>
-                  </div>
-                  <div className="bgr8-custom-amount">
-                    <input 
-                      type="text" 
-                      placeholder="£ Other amount"
-                      className="bgr8-amount-input"
-                    />
-                  </div>
-                </div>
-
-                <button className="bgr8-donate-btn">
-                  Donate now
+              {/* Scroll to Mentor Section Button */}
+              <div className="bgr8-scroll-button-container">
+                <button 
+                  className="bgr8-scroll-to-mentor-btn"
+                  onClick={scrollToMentorSection}
+                  aria-label="Scroll to mentor section"
+                >
+                  <span className="bgr8-scroll-btn-text">Join Our Mentorship Network</span>
+                  <span className="bgr8-scroll-btn-arrow">↓</span>
                 </button>
-
-                <div className="bgr8-payment-options">
-                  <span>Debit/Credit Card</span>
-                  <span>Apple Pay</span>
-                  <span>PayPal</span>
-                </div>
-
-                {donationType === 'monthly' && (
-                  <p className="bgr8-monthly-note">
-                    Monthly donations mean we can plan further into the future
-                  </p>
-                )}
+                <p className="bgr8-scroll-btn-description">
+                  Connect with experienced mentors and mentees to create positive change in your community
+                </p>
               </div>
             </div>
           </div>
@@ -265,7 +218,7 @@ export default function BGr8() {
       </section>
 
       {/* Mentor Program Widget */}
-      <section className="bgr8-mentor-section">
+      <section id="mentor-section" className="bgr8-mentor-section">
         <div className="bgr8-content-wrapper">
           <h3>Join Our Mentorship Network</h3>
           <p>Connect with experienced mentors and mentees to create positive change in your community.</p>

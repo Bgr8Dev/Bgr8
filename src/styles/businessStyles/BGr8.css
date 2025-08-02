@@ -76,6 +76,77 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* Scroll to Mentor Section Button */
+.bgr8-scroll-button-container {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  box-shadow: var(--shadow-xl);
+  z-index: 2;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.bgr8-scroll-to-mentor-btn {
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.bgr8-scroll-to-mentor-btn:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.bgr8-scroll-to-mentor-btn:active {
+  transform: translateY(0);
+}
+
+.bgr8-scroll-btn-text {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.bgr8-scroll-btn-arrow {
+  font-size: 1.2rem;
+  font-weight: 700;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+.bgr8-scroll-btn-description {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* Donation Form */
 .bgr8-donation-form {
   background: var(--white);
@@ -546,7 +617,8 @@
     font-size: 1.1rem;
   }
 
-  .bgr8-donation-form {
+  .bgr8-donation-form,
+  .bgr8-scroll-button-container {
     max-width: 100%;
   }
 
@@ -577,7 +649,8 @@
     font-size: 1rem;
   }
 
-  .bgr8-donation-form {
+  .bgr8-donation-form,
+  .bgr8-scroll-button-container {
     padding: 20px;
   }
 
