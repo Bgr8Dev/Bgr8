@@ -4,11 +4,248 @@
   font-weight: 400;
 
   /* Reference the colour scheme in css in future by var(--colortype) e.g. var(--background) */
+  
+  /* Base Colors */
   --background: #d8e5f3;
   --text: #2a3745;
   --mentor: #e06a5c;
   --mentee: #1dd5d1;
   --accent: #3ba7f2;
+  
+  /* Extended Color Palette */
+  --white: #ffffff;
+  --black: #000000;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  /* Mentor/Mentee Variations */
+  --mentor-light: #f5e6e4;
+  --mentor-dark: #c44a3a;
+  --mentor-hover: #d55a4a;
+  --mentee-light: #e6f9f8;
+  --mentee-dark: #15b5b1;
+  --mentee-hover: #2ce5e1;
+  
+  /* Accent Variations */
+  --accent-light: #e6f3fc;
+  --accent-dark: #2988d4;
+  --accent-hover: #4bb8f8;
+  
+  /* Status Colors */
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --success-dark: #059669;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-dark: #d97706;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --error-dark: #dc2626;
+  --info: #3b82f6;
+  --info-light: #dbeafe;
+  --info-dark: #2563eb;
+  
+  /* Button Primary Styles */
+  --button-primary-bg: var(--accent);
+  --button-primary-text: var(--white);
+  --button-primary-border: var(--accent);
+  --button-primary-hover-bg: var(--accent-hover);
+  --button-primary-hover-text: var(--white);
+  --button-primary-hover-border: var(--accent-hover);
+  --button-primary-active-bg: var(--accent-dark);
+  --button-primary-disabled-bg: var(--gray-300);
+  --button-primary-disabled-text: var(--gray-500);
+  
+  /* Button Secondary Styles */
+  --button-secondary-bg: var(--white);
+  --button-secondary-text: var(--accent);
+  --button-secondary-border: var(--accent);
+  --button-secondary-hover-bg: var(--accent-light);
+  --button-secondary-hover-text: var(--accent-dark);
+  --button-secondary-hover-border: var(--accent-dark);
+  --button-secondary-active-bg: var(--accent-light);
+  --button-secondary-disabled-bg: var(--gray-100);
+  --button-secondary-disabled-text: var(--gray-400);
+  
+  /* Button Success Styles */
+  --button-success-bg: var(--success);
+  --button-success-text: var(--white);
+  --button-success-border: var(--success);
+  --button-success-hover-bg: var(--success-dark);
+  --button-success-hover-text: var(--white);
+  --button-success-hover-border: var(--success-dark);
+  
+  /* Button Warning Styles */
+  --button-warning-bg: var(--warning);
+  --button-warning-text: var(--white);
+  --button-warning-border: var(--warning);
+  --button-warning-hover-bg: var(--warning-dark);
+  --button-warning-hover-text: var(--white);
+  --button-warning-hover-border: var(--warning-dark);
+  
+  /* Button Error/Danger Styles */
+  --button-error-bg: var(--error);
+  --button-error-text: var(--white);
+  --button-error-border: var(--error);
+  --button-error-hover-bg: var(--error-dark);
+  --button-error-hover-text: var(--white);
+  --button-error-hover-border: var(--error-dark);
+  
+  /* Button Cancel Styles */
+  --button-cancel-bg: var(--gray-200);
+  --button-cancel-text: var(--gray-700);
+  --button-cancel-border: var(--gray-300);
+  --button-cancel-hover-bg: var(--gray-300);
+  --button-cancel-hover-text: var(--gray-800);
+  --button-cancel-hover-border: var(--gray-400);
+  
+  /* Button Save Styles */
+  --button-save-bg: var(--success);
+  --button-save-text: var(--white);
+  --button-save-border: var(--success);
+  --button-save-hover-bg: var(--success-dark);
+  --button-save-hover-text: var(--white);
+  --button-save-hover-border: var(--success-dark);
+  
+  /* Button Ghost/Text Styles */
+  --button-ghost-bg: transparent;
+  --button-ghost-text: var(--accent);
+  --button-ghost-border: transparent;
+  --button-ghost-hover-bg: var(--accent-light);
+  --button-ghost-hover-text: var(--accent-dark);
+  --button-ghost-hover-border: transparent;
+  
+  /* Mentor Button Styles */
+  --button-mentor-bg: var(--mentor);
+  --button-mentor-text: var(--white);
+  --button-mentor-border: var(--mentor);
+  --button-mentor-hover-bg: var(--mentor-hover);
+  --button-mentor-hover-text: var(--white);
+  --button-mentor-hover-border: var(--mentor-hover);
+  
+  /* Mentee Button Styles */
+  --button-mentee-bg: var(--mentee);
+  --button-mentee-text: var(--white);
+  --button-mentee-border: var(--mentee);
+  --button-mentee-hover-bg: var(--mentee-hover);
+  --button-mentee-hover-text: var(--white);
+  --button-mentee-hover-border: var(--mentee-hover);
+  
+  /* Link Styles */
+  --link-color: var(--accent);
+  --link-hover-color: var(--accent-hover);
+  --link-visited-color: var(--accent-dark);
+  --link-active-color: var(--accent-dark);
+  
+  /* Form Elements */
+  --input-bg: var(--white);
+  --input-border: var(--gray-300);
+  --input-text: var(--text);
+  --input-placeholder: var(--gray-400);
+  --input-focus-border: var(--accent);
+  --input-focus-ring: var(--accent-light);
+  --input-error-border: var(--error);
+  --input-error-bg: var(--error-light);
+  --input-success-border: var(--success);
+  --input-success-bg: var(--success-light);
+  
+  /* Card Styles */
+  --card-bg: var(--white);
+  --card-border: var(--gray-200);
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  /* Modal Styles */
+  --modal-bg: var(--white);
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --modal-border: var(--gray-200);
+  --modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Navigation Styles */
+  --nav-bg: var(--white);
+  --nav-text: var(--text);
+  --nav-hover-bg: var(--gray-100);
+  --nav-active-bg: var(--accent-light);
+  --nav-active-text: var(--accent);
+  --nav-border: var(--gray-200);
+  
+  /* Sidebar Styles */
+  --sidebar-bg: var(--gray-50);
+  --sidebar-text: var(--text);
+  --sidebar-hover-bg: var(--gray-100);
+  --sidebar-active-bg: var(--accent-light);
+  --sidebar-active-text: var(--accent);
+  --sidebar-border: var(--gray-200);
+  
+  /* Table Styles */
+  --table-bg: var(--white);
+  --table-border: var(--gray-200);
+  --table-header-bg: var(--gray-50);
+  --table-header-text: var(--gray-700);
+  --table-row-hover: var(--gray-50);
+  --table-stripe: var(--gray-50);
+  
+  /* Badge/Tag Styles */
+  --badge-success-bg: var(--success-light);
+  --badge-success-text: var(--success-dark);
+  --badge-warning-bg: var(--warning-light);
+  --badge-warning-text: var(--warning-dark);
+  --badge-error-bg: var(--error-light);
+  --badge-error-text: var(--error-dark);
+  --badge-info-bg: var(--info-light);
+  --badge-info-text: var(--info-dark);
+  --badge-mentor-bg: var(--mentor-light);
+  --badge-mentor-text: var(--mentor-dark);
+  --badge-mentee-bg: var(--mentee-light);
+  --badge-mentee-text: var(--mentee-dark);
+  
+  /* Alert/Notification Styles */
+  --alert-success-bg: var(--success-light);
+  --alert-success-border: var(--success);
+  --alert-success-text: var(--success-dark);
+  --alert-warning-bg: var(--warning-light);
+  --alert-warning-border: var(--warning);
+  --alert-warning-text: var(--warning-dark);
+  --alert-error-bg: var(--error-light);
+  --alert-error-border: var(--error);
+  --alert-error-text: var(--error-dark);
+  --alert-info-bg: var(--info-light);
+  --alert-info-border: var(--info);
+  --alert-info-text: var(--info-dark);
+  
+  /* Loading/Spinner Styles */
+  --spinner-primary: var(--accent);
+  --spinner-secondary: var(--gray-300);
+  --spinner-success: var(--success);
+  --spinner-error: var(--error);
+  
+  /* Focus Styles */
+  --focus-ring: 0 0 0 3px rgba(59, 167, 242, 0.1);
+  --focus-ring-success: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  --focus-ring-error: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  --focus-ring-warning: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  
+  /* Shadow Styles */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
