@@ -1026,22 +1026,22 @@
   padding: 0.45em 1.1em 0.45em 0.9em;
   border-radius: 999px;
   font-size: 1.01rem;
-  font-weight: 600;
+  font-weight: 700;
   border: 2px solid transparent;
-  background: #222;
-  color: #fff;
+  background: var(--white);
+  color: var(--text);
   cursor: pointer;
   position: relative;
   transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s, transform 0.13s;
   outline: none;
   min-width: 0;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .match-card-reason-badge:hover, .match-card-reason-badge:focus {
-  background: #181818;
-  color: #fff;
-  border-color: #fff;
-  box-shadow: 0 2px 8px rgba(255,42,42,0.13);
+  background: var(--gray-50);
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   z-index: 2;
   transform: scale(1.06) translateY(-2px);
 }
@@ -1053,7 +1053,7 @@
 }
 .match-card-reason-label {
   font-size: 1em;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.1px;
   color: inherit;
 }

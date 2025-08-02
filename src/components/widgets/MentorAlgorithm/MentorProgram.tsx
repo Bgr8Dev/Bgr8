@@ -1026,7 +1026,7 @@ export default function MentorProgram() {
                           className="match-card-reason-badge"
                           key={i}
                           tabIndex={0}
-                          style={{ background: color + '22', borderColor: color, color }}
+                          style={{ borderColor: color }}
                         >
                           <span className="match-card-reason-icon" style={{ color }}>{icon}</span>
                           <span className="match-card-reason-label">{reason}</span>
