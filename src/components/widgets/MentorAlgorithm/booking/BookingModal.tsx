@@ -433,15 +433,15 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
               {/* Step 1: Event Types Selection */}
               {(!isMobile || currentStep === 'event-types') && hasCalComApiKey && calComEventTypes.length > 0 && (
                 <div className="booking-modal-event-types">
-                  <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                    <FaListUl style={{ color: '#ff2a2a' }} />
+                  <h4 className="booking-modal-event-types h4">
+                    <FaListUl className="booking-modal-event-types-icon" />
                     Select Session Type
                     {bookingMethod === 'calcom' && (
-                      <span style={{ fontSize: '0.9rem', color: '#ff2a2a', fontWeight: 600 }}> *Required</span>
+                      <span className="booking-modal-event-types-required"> *Required</span>
                     )}
                   </h4>
                   {loadingEventTypes ? (
-                    <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
+                    <div className="booking-modal-event-types-loading">
                       Loading session types...
                     </div>
                   ) : (
@@ -504,7 +504,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                               setSessionDate(String(selectedCalendarDate ? selectedCalendarDate.toISOString().split('T')[0] : ''));
                             }}
                           >
-                            <FaClock style={{ marginRight: 8 }} />
+                            <FaClock className="booking-modal-slot-icon" />
                             {slot.startTime} - {slot.endTime}
                           </button>
                         ))}
@@ -568,7 +568,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                             onChange={(e) => setBookingMethod(e.target.value as 'internal' | 'calcom')}
                           />
                           <span className="booking-modal-method-label">
-                            <FaClock style={{ marginRight: 8 }} />
+                            <FaClock className="booking-modal-slot-icon" />
                             Internal Booking
                           </span>
                         </label>
@@ -581,7 +581,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                             onChange={(e) => setBookingMethod(e.target.value as 'internal' | 'calcom')}
                           />
                           <span className="booking-modal-method-label">
-                            <FaCalendarAlt style={{ marginRight: 8 }} />
+                            <FaCalendarAlt className="booking-modal-slot-icon" />
                             Cal.com Booking
                             {mentor.calCom && (
                               <a
@@ -619,7 +619,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                       onClick={goToPreviousStep}
                       className="booking-modal-nav-btn booking-modal-nav-prev"
                     >
-                      <FaArrowLeft style={{ marginRight: 8 }} />
+                      <FaArrowLeft className="booking-modal-nav-prev-icon" />
                       Back
                     </button>
                   )}
@@ -629,7 +629,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                       className="booking-modal-nav-btn booking-modal-nav-next"
                     >
                       Next
-                      <FaArrowRight style={{ marginLeft: 8 }} />
+                      <FaArrowRight className="booking-modal-nav-next-icon" />
                     </button>
                   )}
                 </div>
