@@ -1,7 +1,7 @@
 /* Footer Styles */
 .footer {
-  background-color: #1a1a1a;
-  color: #f5f5f5;
+  background-color: var(--background);
+  color: var(--text);
   padding: 0;
   width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,14 +26,14 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 0.5rem;
-  color: #e10600; /* Red color matching B8 theme */
+  color: var(--accent); /* Using accent color from theme */
   letter-spacing: 1px;
 }
 
 .footer-tagline {
   font-size: 1rem;
   margin: 0 0 1.5rem;
-  color: #cccccc;
+  color: var(--gray-400);
 }
 
 .footer-social {
@@ -49,13 +49,13 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #333;
-  color: #fff;
+  background-color: var(--gray-700);
+  color: var(--white);
   transition: all 0.3s ease;
 }
 
 .footer-social a:hover {
-  background-color: #e10600;
+  background-color: var(--accent);
   transform: translateY(-3px);
 }
 
@@ -68,7 +68,7 @@
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 1.5rem;
-  color: #ffffff;
+  color: var(--white);
   position: relative;
   padding-bottom: 0.75rem;
 }
@@ -80,7 +80,7 @@
   bottom: 0;
   width: 50px;
   height: 2px;
-  background-color: #e10600;
+  background-color: var(--accent);
 }
 
 /* Links Sections */
@@ -93,7 +93,7 @@
 
 .footer-links a,
 .footer-businesses a {
-  color: #cccccc;
+  color: var(--gray-400);
   text-decoration: none;
   transition: color 0.2s ease, transform 0.2s ease;
   display: inline-block;
@@ -108,13 +108,13 @@
   height: 1px;
   bottom: -2px;
   left: 0;
-  background-color: #e10600;
+  background-color: var(--accent);
   transition: width 0.3s ease;
 }
 
 .footer-links a:hover,
 .footer-businesses a:hover {
-  color: #ffffff;
+  color: var(--white);
   transform: translateX(5px);
 }
 
@@ -131,25 +131,25 @@
 
 .footer-contact p {
   margin: 0.5rem 0;
-  color: #cccccc;
+  color: var(--gray-400);
 }
 
 /* Footer Bottom */
 .footer-bottom {
-  background-color: #111111;
+  background-color: var(--gray-900);
   padding: 1.5rem 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--gray-700);
 }
 
 .copyright {
   margin: 0;
   font-size: 0.9rem;
-  color: #999;
+  color: var(--gray-500);
 }
 
 .footer-legal {
@@ -158,14 +158,14 @@
 }
 
 .footer-legal a {
-  color: #999;
+  color: var(--gray-500);
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.2s ease;
 }
 
 .footer-legal a:hover {
-  color: #e10600;
+  color: var(--accent);
 }
 
 /* Responsive Adjustments */
