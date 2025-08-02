@@ -1900,32 +1900,32 @@
 }
 
 .booking-modal-slot:hover {
-  background: rgba(255,42,42,0.2);
+  background: var(--accent-hover, rgba(59, 167, 242, 0.2));
   transform: translateY(-1px);
 }
 
 .booking-modal-slot.selected {
-  background: rgba(255,42,42,0.3);
-  border-color: #ff2a2a;
-  box-shadow: 0 2px 8px rgba(255,42,42,0.3);
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  box-shadow: var(--shadow-md, 0 2px 8px rgba(59, 167, 242, 0.3));
 }
 
 .booking-modal-no-slots {
-  color: #888;
+  color: var(--gray-500);
   text-align: center;
   font-style: italic;
   margin: 1rem 0;
 }
 
 .booking-modal-summary {
-  background: rgba(0,255,0,0.05);
-  border: 1px solid rgba(0,255,0,0.2);
-  border-radius: 8px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md, 8px);
   padding: 1.5rem;
 }
 
 .booking-modal-summary h4 {
-  color: #00ff00;
+  color: var(--accent);
   margin-bottom: 1rem;
   font-size: 1.2rem;
   font-weight: 600;
@@ -1945,20 +1945,20 @@
 }
 
 .booking-modal-summary-row span:first-child {
-  color: #ccc;
+  color: var(--gray-500);
   font-weight: 600;
 }
 
 .booking-modal-summary-row span:last-child {
-  color: #fff;
+  color: var(--text);
   font-weight: 500;
 }
 
 .booking-modal-confirm-btn {
-  background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
-  color: #000;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: var(--white);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 8px);
   padding: 1rem 2rem;
   font-size: 1.1rem;
   cursor: pointer;
@@ -1972,7 +1972,7 @@
 
 .booking-modal-confirm-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,255,0,0.3);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(59, 167, 242, 0.3));
 }
 
 .booking-modal-confirm-btn:disabled {
@@ -1982,7 +1982,7 @@
 
 .booking-modal-no-availability {
   text-align: center;
-  color: #e0e0e0;
+  color: var(--gray-600);
   padding: 2rem;
 }
 
