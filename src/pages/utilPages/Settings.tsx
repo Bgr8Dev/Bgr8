@@ -91,7 +91,7 @@ export default function Settings() {
   return (
     <div className="overlay">
       <div className="overlay-content">
-        <button className="close-button" onClick={() => navigate(-1)}>
+        <button className="close-button" onClick={() => navigate(-1)} aria-label="Close settings">
           <FaTimes />
         </button>
 
