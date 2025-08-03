@@ -61,6 +61,15 @@ export default function BGr8() {
         </div>
       </section>
 
+      {/* Mentor Program Widget - Now directly after hero */}
+      <section id="mentor-section" className="bgr8-mentor-section">
+        <div className="bgr8-content-wrapper">
+          <h3>Join Our Mentorship Network</h3>
+          <p>Connect with experienced mentors and mentees to create positive change in your community.</p>
+          <MentorProgram />
+        </div>
+      </section>
+
       {/* Main Content Section */}
       <section className="bgr8-main-content">
         <div className="bgr8-content-wrapper">
@@ -214,15 +223,6 @@ export default function BGr8() {
               <p>Discover how you can create a lasting legacy by including BGr8 in your estate planning.</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Mentor Program Widget */}
-      <section id="mentor-section" className="bgr8-mentor-section">
-        <div className="bgr8-content-wrapper">
-          <h3>Join Our Mentorship Network</h3>
-          <p>Connect with experienced mentors and mentees to create positive change in your community.</p>
-          <MentorProgram />
         </div>
       </section>
 
