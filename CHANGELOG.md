@@ -72,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0-Blizzard] - 2025-07-18
 
-### � Major Update - "Blizzard" Release
+### 🌨️ Minor Update - "Blizzard" Release
 - Significant platform improvements
 - Enhanced mentor matching system
 - UI/UX overhaul
@@ -97,7 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.3] - 2024-12-XX
 
-### � "Tsunami" Series Updates
+### 🌊 "Tsunami" Series Updates
 - Core mentoring functionality enhancements
 - Platform stability improvements
 
