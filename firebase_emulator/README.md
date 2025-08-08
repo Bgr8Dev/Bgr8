@@ -38,7 +38,7 @@ Manually edit `.firebaserc`:
 ```json
 {
   "projects": {
-    "default": "b8network-dev-2",
+    "default": "b8network",
     "prod": "b8network", 
     "dev": "b8network-dev-2"
   }
