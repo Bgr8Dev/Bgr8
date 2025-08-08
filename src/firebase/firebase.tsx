@@ -4,22 +4,33 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
-  // apiKey: getEnvVariable('VITE_FIREBASE_API_KEY'),
-  // authDomain: getEnvVariable('VITE_FIREBASE_AUTH_DOMAIN'),
-  // projectId: getEnvVariable('VITE_FIREBASE_PROJECT_ID'),
-  // storageBucket: getEnvVariable('VITE_FIREBASE_STORAGE_BUCKET'),
-  // messagingSenderId: getEnvVariable('VITE_FIREBASE_MESSAGING_SENDER_ID'),
-  // appId: getEnvVariable('VITE_FIREBASE_APP_ID'),
-  // measurementId: getEnvVariable('VITE_FIREBASE_MEASUREMENT_ID')
+// Firebase configuration - use minimal config for emulators in dev
+const getFirebaseConfig = () => {
+  // For emulators, we only need minimal config
+  if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+    return {
+      apiKey: '',
+      authDomain: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: '',
+    };
+  }
+
+  // Production configuration
+  return {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  };
 };
+
+const firebaseConfig = getFirebaseConfig();
 
 // Validate that critical environment variables exist
 const validateEnvVariables = () => {
@@ -60,14 +71,20 @@ const validateEnvVariables = () => {
   }
 };
 
-// Validate environment variables before initializing Firebase
-validateEnvVariables();
+// Validate environment variables before initializing Firebase (skip for emulators)
+if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+  console.log('Using emulators - skipping environment variable validation');
+}
+else {
+  validateEnvVariables();
+}
+
 
 // Initialize Firebase App
 let app;
 try {
   app = initializeApp(firebaseConfig);
-  console.log("Firebase initialized successfully");
+  console.log(`Firebase initialized successfully - Mode: ${import.meta.env.VITE_USE_EMULATORS === 'true' ? 'EMULATORS' : 'PRODUCTION'}`);
 } catch (error) {
   console.error("Error initializing Firebase:", error);
   throw error;
@@ -77,6 +94,31 @@ try {
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Connect to emulators if configured
+if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+  console.log('🔧 Connecting to Firebase emulators...');
+  
+  // Connect to Firestore emulator
+  import('firebase/firestore').then(({ connectFirestoreEmulator }) => {
+    try {
+      connectFirestoreEmulator(db, 'localhost', 8080);
+      console.log('✅ Connected to Firestore emulator on localhost:8080');
+    } catch (error) {
+      console.log('⚠️ Firestore emulator connection:', error instanceof Error ? error.message : 'Connection failed');
+    }
+  });
+
+  // Connect to Storage emulator
+  import('firebase/storage').then(({ connectStorageEmulator }) => {
+    try {
+      connectStorageEmulator(storage, 'localhost', 9199);
+      console.log('✅ Connected to Storage emulator on localhost:9199');
+    } catch (error) {
+      console.log('⚠️ Storage emulator connection:', error instanceof Error ? error.message : 'Connection failed');
+    }
+  });
+}
 
 // Initialize Analytics conditionally (may not work in all environments)
 export let analytics: Analytics | null = null;
