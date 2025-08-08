@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Stripe](https://img.shields.io/badge/Stripe-Latest-008CDD?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com)
+[![Firebase](https://img.shields.io/badge/Firebase-11.3-FF6B35?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
 [![Linting](https://github.com/Hum2a/bgr8/actions/workflows/lint.yml/badge.svg?style=for-the-badge)](https://github.com/Hum2a/bgr8/actions/workflows/lint.yml)
@@ -82,8 +82,7 @@
 | 🤝 **Mentor Matching** | Advanced MentorAlgorithm system | ✅ Live |
 | 📅 **Cal.com Booking System** | Third-party calendar integration | ✅ Live |
 | 🔒 **Secure Authentication** | Firebase-powered security | ✅ Live |
-| 💳 **Payment Processing** | Stripe integration | ✅ Live |
-| 📱 **Responsive Design** | Mobile-first approach | ✅ Live |
+|  **Responsive Design** | Mobile-first approach | ✅ Live |
 | 📊 **Analytics Dashboard** | Comprehensive insights | ✅ Live |
 | 💬 **Admin Management** | Complete control panel | ✅ Live |
 
@@ -93,8 +92,7 @@
 |------------|---------|:------:|
 | 🔑 **Firebase Auth** | User authentication | ✅ Live |
 | 🔥 **Firestore DB** | Real-time database | ✅ Live |
-| 💸 **Stripe Payments** | Secure transactions | ✅ Live |
-| 📅 **Cal.com Integration** | Advanced booking system | ✅ Live |
+|  **Cal.com Integration** | Advanced booking system | ✅ Live |
 | 🔗 **Proxy Server** | CORS-free API access | ✅ Live |
 | ⚡ **Real-time Updates** | Live data synchronization | ✅ Live |
 | 🧑‍💻 **React + TypeScript** | Modern frontend stack | ✅ Live |
@@ -116,20 +114,16 @@ graph TD
     E --> G[🗄️ Firestore]
     E --> H[📦 Storage]
     I[📊 Analytics] --> J[📈 Google Analytics]
-    K[💳 Payments] --> L[💸 Stripe]
-    L --> M[🛒 Stripe Checkout]
-    L --> N[🔔 Stripe Webhooks]
-    O[📅 Booking System] --> P[🌐 Cal.com API]
-    P --> Q[🔗 Proxy Server]
-    P --> R[📋 Event Types]
-    P --> S[📊 Bookings Management]
+    K[ Booking System] --> L[🌐 Cal.com API]
+    L --> M[🔗 Proxy Server]
+    L --> N[📋 Event Types]
+    L --> O[📊 Bookings Management]
     
     style A fill:#61DAFB
     style D fill:#FFCA28
     style E fill:#FF6B35
-    style L fill:#008CDD
-    style O fill:#00E676
-    style P fill:#00E676
+    style K fill:#00E676
+    style L fill:#00E676
 ```
 
 **Our platform leverages cutting-edge technologies for optimal performance and user experience.**
@@ -179,8 +173,6 @@ node calComServer/calComServer.mjs
 | 🟢 **Node.js** | `v16.x` or higher | [Download](https://nodejs.org/) |
 | 📦 **npm** | `v8.x` or higher | [Included with Node.js](https://nodejs.org/) |
 | 🔥 **Firebase Account** | Any | [Sign Up](https://firebase.google.com/) |
-| 💳 **Stripe Account** | Any | [Sign Up](https://stripe.com/) |
-| 🛠️ **Stripe CLI** | Latest | [Install Guide](https://stripe.com/docs/stripe-cli) |
 
 ---
 
@@ -211,25 +203,11 @@ npm install
 > **⚠️ Important:** You will need your own Firebase account.
 > Get the correct `.env` file from Hum2a to place in the root directory.
 
-### Step 4: Stripe Server Setup
-
-Place the stripe `.env` file provided by Hum2a into the stripe directory, or create it as follows:
-
-```env
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-PORT=3001
-CLIENT_URL=http://localhost:5173
-```
-
-### Step 5: Launch Development Servers
+### Step 4: Launch Development Server
 
 ```bash
-# Terminal 1: Start the main application
+# Start the main application
 npm run dev
-
-# Terminal 2: Start the Stripe server
-cd stripe && node server.js
 ```
 
 **🎉 Congratulations! Your development environment is now ready.**
@@ -288,16 +266,6 @@ npm run preview
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging Sender ID | ✅ | `123456789` |
 | `VITE_FIREBASE_APP_ID` | Firebase App ID | ✅ | `1:123456789:web:abc123` |
 | `VITE_FIREBASE_MEASUREMENT_ID` | Firebase Measurement ID | ✅ | `G-XXXXXXXXXX` |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key | ✅ | `pk_test_...` |
-| `VITE_STRIPE_SERVER_URL` | Stripe Server URL | ✅ | `http://localhost:3001` |
-| `VITE_CAL_COM_API_KEY` | Cal.com API Key (optional) | 🔄 | `cal_...` |
-
-### Backend Variables (`stripe/.env`)
-
-| Variable | Description | Required | Example |
-|----------|-------------|:--------:|---------|
-| `STRIPE_SECRET_KEY` | Stripe Secret Key | ✅ | `sk_test_...` |
-| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret | ✅ | `whsec_...` |
 
 </details>
 
@@ -422,7 +390,6 @@ bgr8/
 │   ├── 🧭 navigation/         # Navigation logic
 │   ├── 🎨 styles/             # CSS stylesheets
 │   └── 📜 scripts/            # Build scripts
-├── 💳 stripe/                 # Stripe server
 ├── 🌐 public/                 # Static assets
 ├── 📄 docs/                   # Documentation
 └── 🐳 docker/                 # Docker configuration
@@ -573,8 +540,7 @@ If you discover a security vulnerability, please:
 
 - ⚛️ **React** - UI framework
 - 🔥 **Firebase** - Backend services
-- 💳 **Stripe** - Payment processing
-- 📅 **Cal.com** - Calendar & booking system
+-  **Cal.com** - Calendar & booking system
 - ⚡ **Vite** - Build tool
 - 🎨 **CSS3** - Styling
 
