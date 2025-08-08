@@ -124,7 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **bgr8 Platform Changelog**
 
-[0.4.0]: https://github.com/Hum2a/Bgr8/releases/tag/v0.4.0
+[0.4.0-Typhoon]: https://github.com/Hum2a/Bgr8/releases/tag/v0.4.0-Typhoon
 [0.3.1]: https://github.com/Hum2a/Bgr8/releases/tag/v0.3.1
 [0.3.0-Avalanche]: https://github.com/Hum2a/Bgr8/releases/tag/v0.3.0-Avalanche
 [0.2.2]: https://github.com/Hum2a/Bgr8/releases/tag/v0.2.2
