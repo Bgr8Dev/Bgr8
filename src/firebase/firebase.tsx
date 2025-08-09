@@ -7,7 +7,7 @@ import { getStorage } from "firebase/storage";
 // Firebase configuration - use minimal config for emulators in dev
 const getFirebaseConfig = () => {
   // For emulators, we only need minimal config
-  if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+  if (import.meta.env.USE_EMULATORS === 'true') {
     return {
       apiKey: '',
       authDomain: '',
@@ -72,37 +72,34 @@ const validateEnvVariables = () => {
 };
 
 // Validate environment variables before initializing Firebase (skip for emulators)
-if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+if (import.meta.env.USE_EMULATORS === 'true') {
   console.log('Using emulators - skipping environment variable validation');
 }
 else {
   validateEnvVariables();
 }
 
-
 // Initialize Firebase App
-let app;
 try {
-  app = initializeApp(firebaseConfig);
-  console.log(`Firebase initialized successfully - Mode: ${import.meta.env.VITE_USE_EMULATORS === 'true' ? 'EMULATORS' : 'PRODUCTION'}`);
+  let app = initializeApp(firebaseConfig);
+  console.log(`Firebase initialized successfully - Mode: ${import.meta.env.USE_EMULATORS === 'true' ? 'EMULATORS' : 'PRODUCTION'}`);
 } catch (error) {
   console.error("Error initializing Firebase:", error);
   throw error;
 }
 
 // Initialize Firebase services with error handling
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const firestore = getFirestore(app);
 export const storage = getStorage(app);
 
 // Connect to emulators if configured
-if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+if (import.meta.env.USE_EMULATORS === 'true') {
   console.log('🔧 Connecting to Firebase emulators...');
   
   // Connect to Firestore emulator
   import('firebase/firestore').then(({ connectFirestoreEmulator }) => {
     try {
-      connectFirestoreEmulator(db, 'localhost', 8080);
+      connectFirestoreEmulator(firestore, 'localhost', 8080);
       console.log('✅ Connected to Firestore emulator on localhost:8080');
     } catch (error) {
       console.log('⚠️ Firestore emulator connection:', error instanceof Error ? error.message : 'Connection failed');
