@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth, db } from '../../firebase/firebase';
+import { auth, firestore } from '../../firebase/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { createUserProfile } from '../../utils/userProfile';
 import Navbar from '../../components/ui/Navbar';
@@ -69,7 +69,7 @@ export default function SignInPage() {
       const result = await signInWithPopup(auth, provider);
       
       // Check if user profile exists
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+      const userDoc = await getDoc(doc(firestore, 'users', result.user.uid));
       
       if (!userDoc.exists()) {
         // Create user profile for new Google sign-in users

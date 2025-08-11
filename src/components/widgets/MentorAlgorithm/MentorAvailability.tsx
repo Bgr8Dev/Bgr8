@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { FaClock, FaTrash, FaSearch, FaFileExport, FaCopy, FaCalendarAlt, FaSyncAlt } from 'react-icons/fa';
 import './MentorProgram.css';
 
@@ -66,7 +66,7 @@ export default function MentorAvailability() {
     const fetchAvailability = async () => {
       if (!currentUser) return;
       try {
-        const availabilityDoc = await getDoc(doc(db, 'mentorAvailability', currentUser.uid));
+        const availabilityDoc = await getDoc(doc(firestore, 'mentorAvailability', currentUser.uid));
         if (availabilityDoc.exists()) {
           setAvailability(availabilityDoc.data() as MentorAvailability);
         } else {
@@ -135,7 +135,7 @@ export default function MentorAvailability() {
       };
       
       // Save to Firebase
-      await setDoc(doc(db, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      await setDoc(doc(firestore, 'mentorAvailability', currentUser.uid), updatedAvailability);
       
       // Update local state
       setAvailability(updatedAvailability);
@@ -226,7 +226,7 @@ export default function MentorAvailability() {
       };
       
       // Save to Firebase
-      await setDoc(doc(db, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      await setDoc(doc(firestore, 'mentorAvailability', currentUser.uid), updatedAvailability);
       
       // Update local state
       setAvailability(updatedAvailability);
@@ -257,7 +257,7 @@ export default function MentorAvailability() {
       };
       
       // Save to Firebase
-      await setDoc(doc(db, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      await setDoc(doc(firestore, 'mentorAvailability', currentUser.uid), updatedAvailability);
       
       // Update local state
       setAvailability(updatedAvailability);

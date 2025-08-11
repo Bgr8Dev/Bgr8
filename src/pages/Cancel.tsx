@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
+import { firestore } from '../firebase/firebase';
 import { FaTimesCircle } from 'react-icons/fa';
 import '../styles/payment/Cancel.css';
 
@@ -22,7 +22,7 @@ export default function Cancel() {
     const processCancellation = async () => {
       try {
         // Update the invoice status to cancelled
-        const invoiceRef = doc(db, "Bgr8Donations", "Invoices", sessionId);
+        const invoiceRef = doc(firestore, "Bgr8Donations", "Invoices", sessionId);
         await updateDoc(invoiceRef, {
           status: 'cancelled',
           cancelledAt: new Date()

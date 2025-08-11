@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { FaUser, FaEnvelope, FaPhone, FaCommentAlt, FaPaperPlane, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import '../../styles/ContactForm.css';
 
@@ -26,7 +26,7 @@ export default function ContactForm({ source = 'general' }: ContactFormProps) {
     setSubmitError('');
 
     try {
-      await addDoc(collection(db, 'enquiries'), {
+      await addDoc(collection(firestore, 'enquiries'), {
         ...formData,
         source,
         dateSubmitted: serverTimestamp(),

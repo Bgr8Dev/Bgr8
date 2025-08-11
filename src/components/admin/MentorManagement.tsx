@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../widgets/MentorAlgorithm/CalCom/calComService';
@@ -170,7 +170,7 @@ export default function MentorManagement() {
 
   const fetchUsers = async () => {
     try {
-      const usersSnapshot = await getDocs(collection(db, 'mentorProgram'));
+      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
       const usersData = usersSnapshot.docs.map(doc => ({
         ...doc.data() as MentorMenteeProfile,
         id: doc.id
@@ -193,7 +193,7 @@ export default function MentorManagement() {
       const results: Booking[] = [];
       
       // Fetch Firestore bookings
-      const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
+      const bookingsSnapshot = await getDocs(collection(firestore, 'bookings'));
       const firestoreBookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -220,7 +220,7 @@ export default function MentorManagement() {
 
       // Fetch Cal.com bookings from all mentors
       try {
-        const mentorsSnapshot = await getDocs(collection(db, 'mentorProgram'));
+        const mentorsSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
         const mentorPromises = mentorsSnapshot.docs
           .filter(doc => doc.data().type === 'mentor')
           .map(async (mentorDoc) => {
@@ -289,7 +289,7 @@ export default function MentorManagement() {
     setLoadingAvailability(true);
     setAvailabilityError(null);
     try {
-      const availabilitySnapshot = await getDocs(collection(db, 'mentorAvailability'));
+      const availabilitySnapshot = await getDocs(collection(firestore, 'mentorAvailability'));
       const availabilityData = availabilitySnapshot.docs.map(doc => ({
         ...doc.data(),
         mentorId: doc.id
@@ -300,7 +300,7 @@ export default function MentorManagement() {
         availabilityData.map(async (availability) => {
           try {
             // Fetch mentor profile
-            const mentorDoc = await getDoc(doc(db, 'mentorProgram', availability.mentorId));
+            const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', availability.mentorId));
             if (mentorDoc.exists()) {
               availability.mentorProfile = mentorDoc.data() as MentorMenteeProfile;
             }
@@ -376,7 +376,7 @@ export default function MentorManagement() {
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
-      await deleteDoc(doc(db, 'mentorProgram', user.id));
+      await deleteDoc(doc(firestore, 'mentorProgram', user.id));
       setUsers(prev => prev.filter(u => u.id !== user.id));
       setDeleteStatus(`Deleted ${user.name} successfully.`);
     } catch {
@@ -394,7 +394,7 @@ export default function MentorManagement() {
     setDeleteStatus(null);
     try {
       // Update Firestore
-      await setDoc(doc(db, 'mentorProgram', editUser.id), updatedUser);
+      await setDoc(doc(firestore, 'mentorProgram', editUser.id), updatedUser);
       // Update local state
       setUsers(prev => prev.map(u => u.id === editUser.id ? { ...updatedUser, id: editUser.id } : u));
       setEditModalOpen(false);
@@ -423,7 +423,7 @@ export default function MentorManagement() {
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
-      await Promise.all(selectedIds.map(id => deleteDoc(doc(db, 'mentorProgram', id))));
+      await Promise.all(selectedIds.map(id => deleteDoc(doc(firestore, 'mentorProgram', id))));
       setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
       setSelectedIds([]);
       setDeleteStatus(`Deleted ${selectedIds.length} user(s) successfully.`);
@@ -503,7 +503,7 @@ export default function MentorManagement() {
   const handleDeleteBooking = async (booking: Booking) => {
     setActionLoading(true);
     try {
-      await deleteDoc(doc(db, 'bookings', booking.id));
+      await deleteDoc(doc(firestore, 'bookings', booking.id));
       setBookings(prev => prev.filter(b => b.id !== booking.id));
       setDetailsModalOpen(false);
     } finally {
@@ -513,7 +513,7 @@ export default function MentorManagement() {
   const handleUpdateBookingStatus = async (booking: Booking, status: 'confirmed' | 'cancelled') => {
     setActionLoading(true);
     try {
-      await updateDoc(doc(db, 'bookings', booking.id), { status });
+      await updateDoc(doc(firestore, 'bookings', booking.id), { status });
       setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status } : b));
       setDetailsModalOpen(false);
     } finally {

@@ -1,5 +1,5 @@
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { firestore } from "../firebase/firebase";
 
 export interface UserProfile {
   // Basic Info
@@ -127,7 +127,7 @@ export const createUserProfile = async (
   lastName: string,
   additionalData: Partial<UserProfile> = {}
 ) => {
-  const userRef = doc(db, 'users', uid);
+  const userRef = doc(firestore, 'users', uid);
   
   const baseProfile: UserProfile = {
     uid,

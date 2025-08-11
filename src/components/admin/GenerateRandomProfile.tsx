@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
@@ -604,7 +604,7 @@ export default function GenerateRandomProfile() {
       const profiles = Array.from({ length: count }, () => generateRandomProfile());
       
       for (const profile of profiles) {
-        await addDoc(collection(db, 'mentorProgram'), profile);
+        await addDoc(collection(firestore, 'mentorProgram'), profile);
       }
 
       setSuccess(`Successfully generated ${count} ${type}${count > 1 ? 's' : ''}!`);

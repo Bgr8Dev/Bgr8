@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import './MentorProgram.css';
 import industriesList from '../../../constants/industries';
@@ -38,7 +38,7 @@ export default function MentorProfile() {
       if (!currentUser) return;
       
       try {
-        const mentorDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+        const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
         if (mentorDoc.exists()) {
           setProfile(mentorDoc.data() as MentorMenteeProfile);
         }
@@ -85,7 +85,7 @@ export default function MentorProfile() {
         industries: profile.industries || [],
       };
 
-      await updateDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
+      await updateDoc(doc(firestore, 'mentorProgram', currentUser.uid), profileData);
       setSuccess('Profile updated successfully');
       setIsEditing(false);
     } catch (err) {

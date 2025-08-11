@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { AuthContext } from './AuthContextValue';
-import { auth, db, logAnalyticsEvent } from '../firebase/firebase';
+import { auth, firestore, logAnalyticsEvent } from '../firebase/firebase';
 import { onAuthStateChanged, User, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { UserProfile } from '../utils/userProfile';
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         
         // Fetch user profile from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
         if (userDoc.exists()) {
           setUserProfile(userDoc.data() as UserProfile);
         }

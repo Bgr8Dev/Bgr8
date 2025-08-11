@@ -27,7 +27,7 @@ firebase init
 **Select these options:**
 (press *spacebar* to select and *Enter* to confirm)
 1. ✅ **Emulators**: Set up local emulators for development
-2. ✅ **Firebase** and ✅ **Storage**
+2. ✅ **Authentication**, ✅ **Firestore**, and ✅ **Storage**
 3. Enter `Y` for "Would you like to download the emulators now? (Y/n)"
 
 
@@ -68,12 +68,12 @@ gcloud config set project b8network
 
 ### **Usage:**
 
-1. **Navigate to the configs directory:**
+1. **Navigate to the emulator directory:**
    ```bash
-   cd firebase_configs
+   cd firebase_emulator
    ```
 
-2. **Make the script executable:**
+2. **(Linux/MacOS only) Make the script executable:**
    ```bash
    chmod +x download_cloud_data.sh
    ```
@@ -112,21 +112,6 @@ Configuration:
   Local Dir: ./data
 ```
 
-## 📁 Directory Structure
-
-After running the script, you'll have:
-
-```
-firebase_configs/
-├── .firebaserc              # Firebase project configuration
-├── download_cloud_data.sh   # Export script
-├── README.md               # This file
-└── data/                   # Downloaded exports
-    ├── 20250808_143022/    # Timestamped export
-    │   └── exports/        # Firestore data
-    └── latest/             # Symlink to most recent export
-```
-
 ## 🧪 Using Exported Data with Emulators
 
 ### **Start emulators with imported data:**
@@ -135,12 +120,12 @@ firebase_configs/
 cd firebase_emulator
 
 # Start emulators with imported data
-firebase emulators:start --import=firebase_configs/data/<name_of_save_folder>
+firebase emulators:start --import=./data/<name_of_save_folder>
 ```
 
 ### **Start emulators and export on exit:**
 ```bash
-firebase emulators:start --import=firebase_configs/data/<name_of_save_folder> --export-on-exit=firebase_configs/data/latest
+firebase emulators:start --import=./data/<name_of_save_folder> --export-on-exit=./data/latest
 ```
 
 💡 **Tip**: Choose "y" when prompted to clean up Cloud Storage to minimize costs.

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { doc, getDoc, addDoc, collection, updateDoc, query, where, getDocs } from 'firebase/firestore';
 import { SessionFeedback } from '../../types/b8fc';
 import { CalComService, CalComBookingResponse } from '../../components/widgets/MentorAlgorithm/CalCom/calComService';
@@ -54,7 +54,7 @@ export default function FeedbackPage() {
       
       try {
         // First, try to fetch from Firestore bookings
-        const bookingDoc = await getDoc(doc(db, 'bookings', bookingId));
+        const bookingDoc = await getDoc(doc(firestore, 'bookings', bookingId));
         
         if (bookingDoc.exists()) {
           const bookingData = bookingDoc.data() as Booking;
@@ -76,7 +76,7 @@ export default function FeedbackPage() {
               
               // We need to find which mentor this Cal.com booking belongs to
               // For now, we'll try to find it in our Firestore bookings that reference Cal.com
-              const bookingsRef = collection(db, 'bookings');
+              const bookingsRef = collection(firestore, 'bookings');
               const q = query(bookingsRef, where('calComBookingId', '==', calComBookingId));
               const querySnapshot = await getDocs(q);
               
@@ -99,7 +99,7 @@ export default function FeedbackPage() {
                 try {
                   // We need to find which mentor this Cal.com booking belongs to
                   // Let's try to fetch all mentors and check their Cal.com bookings
-                  const mentorsRef = collection(db, 'mentorProgram');
+                  const mentorsRef = collection(firestore, 'mentorProgram');
                   const mentorsSnapshot = await getDocs(mentorsRef);
                   
                   let foundBooking = false;
@@ -248,10 +248,10 @@ export default function FeedbackPage() {
         status: 'submitted'
       };
       
-      const feedbackRef = await addDoc(collection(db, 'feedback'), feedbackData);
+      const feedbackRef = await addDoc(collection(firestore, 'feedback'), feedbackData);
       
       // Update booking status to indicate feedback was given
-      await updateDoc(doc(db, 'bookings', booking.id), {
+      await updateDoc(doc(firestore, 'bookings', booking.id), {
         [`feedbackSubmitted_${feedbackType}`]: true,
         [`feedbackSubmittedAt_${feedbackType}`]: new Date()
       });
@@ -259,7 +259,7 @@ export default function FeedbackPage() {
       // For Cal.com bookings, also store a reference in the feedback
       if (booking.isCalComBooking && booking.calComBookingId) {
         // Update the feedback record with Cal.com reference
-        await updateDoc(doc(db, 'feedback', feedbackRef.id), {
+        await updateDoc(doc(firestore, 'feedback', feedbackRef.id), {
           calComBookingId: booking.calComBookingId,
           isCalComBooking: true
         });

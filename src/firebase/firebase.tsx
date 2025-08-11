@@ -6,19 +6,8 @@ import { getStorage } from "firebase/storage";
 
 // Firebase configuration - use minimal config for emulators in dev
 const getFirebaseConfig = () => {
-  // For emulators, we only need minimal config
-  if (import.meta.env.USE_EMULATORS === 'true') {
-    return {
-      apiKey: '',
-      authDomain: '',
-      projectId: '',
-      storageBucket: '',
-      messagingSenderId: '',
-      appId: '',
-    };
-  }
-
-  // Production configuration
+  // For emulators, we still need valid config but services will connect to local emulators
+  // Using the real config ensures proper initialization
   return {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -70,9 +59,9 @@ const validateEnvVariables = () => {
     );
   }
 };
-
+  
 // Validate environment variables before initializing Firebase (skip for emulators)
-if (import.meta.env.USE_EMULATORS === 'true') {
+if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   console.log('Using emulators - skipping environment variable validation');
 }
 else {
@@ -80,29 +69,57 @@ else {
 }
 
 // Initialize Firebase App
+let app;
 try {
-  let app = initializeApp(firebaseConfig);
-  console.log(`Firebase initialized successfully - Mode: ${import.meta.env.USE_EMULATORS === 'true' ? 'EMULATORS' : 'PRODUCTION'}`);
+  app = initializeApp(firebaseConfig);
+  console.log(`Firebase initialized successfully - Mode: ${import.meta.env.VITE_USE_EMULATORS === 'true' ? 'EMULATORS' : 'PRODUCTION'}`);
 } catch (error) {
   console.error("Error initializing Firebase:", error);
   throw error;
 }
 
 // Initialize Firebase services with error handling
+export const auth = getAuth(app);
 export const firestore = getFirestore(app);
 export const storage = getStorage(app);
 
+// Emulator connection logging helper
+const logEmulatorConnection = (
+  emulator: string,
+  host: string,
+  port: number,
+  success: boolean,
+  error?: unknown
+) => {
+  if (success) {
+    console.log(`✅ Connected to ${emulator} emulator on ${host}:${port}`);
+  } else {
+    const errorMessage = error instanceof Error ? error.message : 'No error message';
+    console.log(`⚠️ ${emulator} emulator connection failed (${host}:${port}): ${errorMessage}`);
+  }
+};
+
 // Connect to emulators if configured
-if (import.meta.env.USE_EMULATORS === 'true') {
+if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   console.log('🔧 Connecting to Firebase emulators...');
+  
+  // Connect to Auth emulator
+  import('firebase/auth').then(({ connectAuthEmulator }) => {
+    try {
+      connectAuthEmulator(auth, 'http://localhost:9099');
+      logEmulatorConnection('Auth', 'localhost', 9099, true);
+    } catch (error) {
+      logEmulatorConnection('Auth', 'localhost', 9099, false, error);
+    }
+  });
   
   // Connect to Firestore emulator
   import('firebase/firestore').then(({ connectFirestoreEmulator }) => {
     try {
       connectFirestoreEmulator(firestore, 'localhost', 8080);
-      console.log('✅ Connected to Firestore emulator on localhost:8080');
+      logEmulatorConnection('Firestore', 'localhost', 8080, true);
     } catch (error) {
-      console.log('⚠️ Firestore emulator connection:', error instanceof Error ? error.message : 'Connection failed');
+      logEmulatorConnection('Firestore', 'localhost', 8080, false, error);
     }
   });
 
@@ -110,9 +127,9 @@ if (import.meta.env.USE_EMULATORS === 'true') {
   import('firebase/storage').then(({ connectStorageEmulator }) => {
     try {
       connectStorageEmulator(storage, 'localhost', 9199);
-      console.log('✅ Connected to Storage emulator on localhost:9199');
+      logEmulatorConnection('Storage', 'localhost', 9199, true);
     } catch (error) {
-      console.log('⚠️ Storage emulator connection:', error instanceof Error ? error.message : 'Connection failed');
+      logEmulatorConnection('Storage', 'localhost', 9199, false, error);
     }
   });
 }
@@ -120,6 +137,12 @@ if (import.meta.env.USE_EMULATORS === 'true') {
 // Initialize Analytics conditionally (may not work in all environments)
 export let analytics: Analytics | null = null;
 const initAnalytics = async () => {
+  // Skip analytics initialization when using emulators
+  if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+    console.log("Analytics disabled - using emulators");
+    return;
+  }
+  
   try {
     if (await isSupported()) {
       analytics = getAnalytics(app);

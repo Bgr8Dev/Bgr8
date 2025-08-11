@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useIsMobile } from '../../../../hooks/useIsMobile';
 import { doc, getDoc, collection, addDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../../../firebase/firebase';
+import { firestore } from '../../../../firebase/firebase';
 import { FaClock, FaTimes, FaCalendarAlt, FaExternalLinkAlt, FaListUl, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../algorithm/matchUsers';
 import { CalComService, CalComEventType, CalComTokenManager } from '../CalCom/calComService';
@@ -86,7 +86,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
         
         try {
           // Fetch mentor availability
-          const availabilityDoc = await getDoc(doc(db, 'mentorAvailability', mentor.uid));
+          const availabilityDoc = await getDoc(doc(firestore, 'mentorAvailability', mentor.uid));
           if (availabilityDoc.exists()) {
             setAvailability(availabilityDoc.data() as MentorAvailability);
           } else {
@@ -179,7 +179,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     // Fallback: fetch mentor email from Firestore if missing
     if (!mentorEmail && mentor.uid) {
       try {
-        const mentorDoc = await getDoc(doc(db, 'mentorProgram', mentor.uid));
+        const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', mentor.uid));
         if (mentorDoc.exists()) {
           const mentorData = mentorDoc.data();
           mentorEmail = mentorData.email || '';
@@ -192,7 +192,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     // Fallback: fetch mentee email from Firestore if missing
     if (!menteeEmail && currentUser.uid) {
       try {
-        const menteeDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+        const menteeDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
         if (menteeDoc.exists()) {
           const menteeData = menteeDoc.data();
           menteeEmail = menteeData.email || '';
@@ -251,7 +251,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
     // Fetch emails if missing
     if (!mentorEmail && mentor.uid) {
-      const mentorDoc = await getDoc(doc(db, 'mentorProgram', mentor.uid));
+      const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', mentor.uid));
       if (mentorDoc.exists()) {
         const mentorData = mentorDoc.data();
         mentorEmail = mentorData.email || '';
@@ -259,7 +259,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     }
 
     if (!menteeEmail && currentUser.uid) {
-      const menteeDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+      const menteeDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
       if (menteeDoc.exists()) {
         const menteeData = menteeDoc.data();
         menteeEmail = menteeData.email || '';
@@ -318,7 +318,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       bookingMethod: 'calcom'
     };
 
-    await addDoc(collection(db, 'bookings'), bookingData);
+    await addDoc(collection(firestore, 'bookings'), bookingData);
     setSuccess(`Booking created successfully! Check your email for confirmation. Booking ID: ${calComBooking.id}`);
   };
 
@@ -330,7 +330,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
     // Fetch emails if missing
     if (!mentorEmail && mentor.uid) {
-      const mentorDoc = await getDoc(doc(db, 'mentorProgram', mentor.uid));
+      const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', mentor.uid));
       if (mentorDoc.exists()) {
         const mentorData = mentorDoc.data();
         mentorEmail = mentorData.email || '';
@@ -338,7 +338,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     }
 
     if (!menteeEmail && currentUser.uid) {
-      const menteeDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+      const menteeDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
       if (menteeDoc.exists()) {
         const menteeData = menteeDoc.data();
         menteeEmail = menteeData.email || '';
@@ -362,10 +362,10 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       sessionDate: sessionDate ? new Date(sessionDate) : new Date()
     };
 
-    await addDoc(collection(db, 'bookings'), bookingData);
+    await addDoc(collection(firestore, 'bookings'), bookingData);
 
     // Update mentor's availability
-    const availabilityRef = doc(db, 'mentorAvailability', mentor.uid);
+    const availabilityRef = doc(firestore, 'mentorAvailability', mentor.uid);
     const availabilitySnap = await getDoc(availabilityRef);
     if (availabilitySnap.exists()) {
       const availabilityData = availabilitySnap.data();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { collection, query, getDocs, orderBy, doc, updateDoc, deleteDoc, Timestamp, addDoc } from 'firebase/firestore';
 import { FaCheck, FaTrash, FaEnvelope, FaUndo, FaArrowLeft, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import '../../styles/adminStyles/AdminEnquiries.css';
@@ -45,7 +45,7 @@ export function AdminEnquiries() {
   const fetchEnquiries = async () => {
     setLoading(true);
     try {
-      const enquiriesRef = collection(db, 'enquiries');
+      const enquiriesRef = collection(firestore, 'enquiries');
       const q = query(enquiriesRef, orderBy('dateSubmitted', 'desc'));
       const querySnapshot = await getDocs(q);
       
@@ -64,7 +64,7 @@ export function AdminEnquiries() {
 
   const markAsRead = async (id: string) => {
     try {
-      const enquiryRef = doc(db, 'enquiries', id);
+      const enquiryRef = doc(firestore, 'enquiries', id);
       await updateDoc(enquiryRef, {
         status: 'read'
       });
@@ -79,7 +79,7 @@ export function AdminEnquiries() {
 
   const markAsResponded = async (id: string) => {
     try {
-      const enquiryRef = doc(db, 'enquiries', id);
+      const enquiryRef = doc(firestore, 'enquiries', id);
       await updateDoc(enquiryRef, {
         status: 'responded'
       });
@@ -95,7 +95,7 @@ export function AdminEnquiries() {
   const deleteEnquiry = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this enquiry? This action cannot be undone.')) {
       try {
-        await deleteDoc(doc(db, 'enquiries', id));
+        await deleteDoc(doc(firestore, 'enquiries', id));
         // Update local state
         setEnquiries(enquiries.filter(enq => enq.id !== id));
       } catch (error) {
@@ -106,7 +106,7 @@ export function AdminEnquiries() {
 
   const markAsPending = async (id: string) => {
     try {
-      const enquiryRef = doc(db, 'enquiries', id);
+      const enquiryRef = doc(firestore, 'enquiries', id);
       await updateDoc(enquiryRef, {
         status: 'pending'
       });
@@ -121,7 +121,7 @@ export function AdminEnquiries() {
 
   const undoResponded = async (id: string) => {
     try {
-      const enquiryRef = doc(db, 'enquiries', id);
+      const enquiryRef = doc(firestore, 'enquiries', id);
       await updateDoc(enquiryRef, {
         status: 'read'
       });
@@ -163,7 +163,7 @@ export function AdminEnquiries() {
     
     try {
       // Create a record of the response in Firestore
-      await addDoc(collection(db, 'emailResponses'), {
+      await addDoc(collection(firestore, 'emailResponses'), {
         enquiryId: currentEnquiry.id,
         to: currentEnquiry.email,
         subject: responseSubject,

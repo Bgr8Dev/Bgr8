@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
-import { db } from '../../../../firebase/firebase';
+import { firestore } from '../../../../firebase/firebase';
 import { collection, query, where, getDocs, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { FaCheck, FaTimes, FaSearch, FaFileExport, FaCalendarAlt, FaExternalLinkAlt, FaComments } from 'react-icons/fa';
 import { CalComService, CalComBookingResponse } from '../CalCom/calComService';
@@ -137,8 +137,8 @@ export default function MentorBookings() {
         const results: Booking[] = [];
         
         // Fetch Firestore bookings where user is either mentor or mentee
-        const mentorQuery = query(collection(db, 'bookings'), where('mentorId', '==', currentUser.uid));
-        const menteeQuery = query(collection(db, 'bookings'), where('menteeId', '==', currentUser.uid));
+        const mentorQuery = query(collection(firestore, 'bookings'), where('mentorId', '==', currentUser.uid));
+        const menteeQuery = query(collection(firestore, 'bookings'), where('menteeId', '==', currentUser.uid));
         
         const [mentorSnapshot, menteeSnapshot] = await Promise.all([
           getDocs(mentorQuery),
@@ -247,7 +247,7 @@ export default function MentorBookings() {
 
   const confirmBooking = async (booking: Booking) => {
     try {
-      await updateDoc(doc(db, 'bookings', booking.id), {
+      await updateDoc(doc(firestore, 'bookings', booking.id), {
         status: 'confirmed'
       });
       
@@ -275,7 +275,7 @@ export default function MentorBookings() {
         setModalMessage('Cal.com booking cancelled successfully!');
       } else {
         // Cancel Firestore booking
-        await updateDoc(doc(db, 'bookings', booking.id), {
+        await updateDoc(doc(firestore, 'bookings', booking.id), {
           status: 'cancelled'
         });
         setModalMessage('Booking cancelled successfully!');
@@ -308,7 +308,7 @@ export default function MentorBookings() {
         setModalMessage('Cal.com booking removed from view. The booking is still active in Cal.com.');
       } else {
         // Delete Firestore booking
-        await deleteDoc(doc(db, 'bookings', bookingToDelete.id));
+        await deleteDoc(doc(firestore, 'bookings', bookingToDelete.id));
         setModalMessage('Booking deleted successfully!');
       }
       
@@ -340,7 +340,7 @@ export default function MentorBookings() {
   const confirmBulkDelete = async () => {
     const toDelete = bookings.filter(b => selectedCancelled.includes(b.id));
     for (const booking of toDelete) {
-      await deleteDoc(doc(db, 'bookings', booking.id));
+      await deleteDoc(doc(firestore, 'bookings', booking.id));
     }
     setUndoQueue(toDelete);
     setBookings(prev => prev.filter(b => !selectedCancelled.includes(b.id)));
@@ -359,7 +359,7 @@ export default function MentorBookings() {
       const bookingData = { ...booking };
       if (bookingData.createdAt instanceof Timestamp) bookingData.createdAt = bookingData.createdAt.toDate();
       if (bookingData.sessionDate instanceof Timestamp) bookingData.sessionDate = bookingData.sessionDate.toDate();
-      await setDoc(doc(db, 'bookings', booking.id), bookingData);
+      await setDoc(doc(firestore, 'bookings', booking.id), bookingData);
     }
     setBookings(prev => [...prev, ...undoQueue]);
     setShowUndo(false);

@@ -138,24 +138,36 @@ graph TD
 
 **Get up and running in under 5 minutes! 🚀**
 
+Requires local instance of Cal.com server running in the background.  
+See in Calcom-Server [repo](https://github.com/YakMan101/B8-Calcom-Server)
+
 </div>
 
+### 1️⃣ Clone the repository
+
 ```bash
-# 1️⃣ Clone the repository
 git clone https://github.com/Hum2a/bgr8.git
 cd bgr8
+```
 
-# 2️⃣ Install dependencies
+### 2️⃣ Install dependencies
+
+```bash
 npm install
+```
 
-# 3️⃣ Set up environment (see Environment Variables section)
-# Get .env file from Hum2a
+### 3️⃣ Set up environment
 
-# 4️⃣ Start development servers
+Get `.env` file from Hum2a (see Environment Variables section for details)
+
+### 4️⃣ (Optional) Start Firebase emulators for development
+
+For local development with Firebase emulators, see detailed setup instructions in [firebase_emulator/README.md](firebase_emulator/README.md)
+
+### 5️⃣ Start development server
+
+```bash
 npm run dev
-
-# 5️⃣ Start Cal.com server (in another terminal)
-node calComServer/calComServer.mjs
 ```
 
 ---
@@ -371,28 +383,47 @@ bgr8/
 │   ├── 🧩 components/         # React components
 │   │   ├── 👨‍💼 admin/          # Admin-specific components
 │   │   ├── 🎬 animations/      # Animation components
-│   │   ├── 🎨 overlays/        # Overlay components
-│   │   ├── 🛡️ ProtectedRoute.tsx
 │   │   ├── 🎨 ui/              # UI components
-│   │   └── 🧠 widgets/         # Widget components
-│   │       └── 🎓 MentorAlgorithm/  # Mentor matching logic
+│   │   ├── 🧠 widgets/         # Widget components
+│   │   │   └── 🎓 MentorAlgorithm/  # Mentor matching logic
+│   │   └── 🛡️ ProtectedRoute.tsx
 │   ├── 📄 pages/              # Page components
 │   │   ├── 👨‍💼 adminPages/      # Admin pages
-│   │   ├── 💼 businessPages/   # Business pages
+│   │   ├── � authPages/       # Authentication pages
+│   │   ├── �💼 businessPages/   # Business pages
 │   │   └── 🛠️ utilPages/        # Utility pages
+│   ├── 🎨 styles/             # CSS stylesheets
+│   │   ├── �‍💼 adminStyles/    # Admin-specific styles
+│   │   ├── 💼 businessStyles/  # Business-specific styles
+│   │   ├── 🧩 components/      # Component-specific styles
+│   │   └── � payment/         # Payment-related styles
 │   ├── 🪝 hooks/              # Custom React hooks
 │   ├── 🔄 contexts/           # React context providers
-│   ├── 🔌 services/           # API and service integrations
 │   ├── 🛠️ utils/              # Utility functions
 │   ├── 📝 types/              # TypeScript type definitions
 │   ├── 🔥 firebase/           # Firebase configuration
 │   ├── 🛡️ middleware/         # Security middleware
 │   ├── 🧭 navigation/         # Navigation logic
-│   ├── 🎨 styles/             # CSS stylesheets
-│   └── 📜 scripts/            # Build scripts
-├── 🌐 public/                 # Static assets
-├── 📄 docs/                   # Documentation
-└── 🐳 docker/                 # Docker configuration
+│   ├── 📊 constants/          # Application constants
+│   ├── 🔧 config/             # Configuration files
+│   └── 🎨 assets/             # Static assets (images, etc.)
+├── 🌐 public/                 # Public static assets
+├── 🔥 firebase_emulator/      # Firebase emulator configuration
+│   ├── 📄 README.md           # Emulator setup instructions
+│   ├── 📜 download_cloud_data.sh # Data export script
+│   ├── ⚙️ firebase.json       # Firebase configuration
+│   ├── 🔧 .firebaserc        # Firebase project configuration
+│   ├── 🛡️ firestore.rules    # Firestore security rules
+│   ├── 📁 storage.rules      # Storage security rules
+│   └── 📊 data/              # Exported data storage
+├── 📄 docs/                  # Documentation files
+├── 🔒 .env                   # Environment variables
+├── 📦 package.json           # Dependencies and scripts
+├── ⚙️ vite.config.ts         # Vite configuration
+├── 📝 tsconfig.json          # TypeScript configuration
+├── 🎨 eslint.config.js       # ESLint configuration
+├── 🏷️ release.sh             # Release tag manager script
+└── 📄 README.md              # This file
 ```
 
 </details>
