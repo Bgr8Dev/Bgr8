@@ -159,6 +159,7 @@ export default function MentorManagement() {
 
   // Stat tile hover state
   const [hoveredTile, setHoveredTile] = useState<'total' | 'mentors' | 'mentees' | null>(null);
+  const [wipingAvailability, setWipingAvailability] = useState(false);
 
   // Calculate counts
   const realUsers = users.filter(u => !u.isGenerated);
@@ -621,6 +622,53 @@ export default function MentorManagement() {
       total + day.slots.filter(slot => !slot.available).length, 0);
   };
 
+  // Function to wipe all availability data from the database
+  const handleWipeAllAvailability = async () => {
+    const confirmed = window.confirm(
+      '🚨 DANGER: WIPE ALL AVAILABILITY DATA 🚨\n\n' +
+      '⚠️  This will permanently delete ALL availability data from the database!\n\n' +
+      '📋 This includes:\n' +
+      '   • All mentor time slots\n' +
+      '   • All recurring availability patterns\n' +
+      '   • All specific date availability\n' +
+      '   • All availability history\n\n' +
+      '❌ This action CANNOT be undone!\n\n' +
+      '🔒 Are you absolutely sure you want to proceed?\n\n' +
+      'Type "WIPE" to confirm:'
+    );
+    
+    if (!confirmed) return;
+    
+    // Additional confirmation - user must type "WIPE"
+    const userInput = prompt('To confirm deletion, please type "WIPE" (case-sensitive):');
+    if (userInput !== 'WIPE') {
+      alert('Deletion cancelled. You did not type "WIPE" correctly.');
+      return;
+    }
+    
+    try {
+      // Get all availability documents
+      const availabilitySnapshot = await getDocs(collection(db, 'mentorAvailability'));
+      
+      if (availabilitySnapshot.empty) {
+        alert('No availability data found to delete.');
+        return;
+      }
+      
+      // Delete all availability documents
+      const deletePromises = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      
+      // Refresh the availability data
+      await fetchAvailability();
+      
+      alert(`✅ SUCCESS: Wiped ${availabilitySnapshot.docs.length} availability records from the database!\n\nAll mentor availability data has been permanently removed.`);
+    } catch (error) {
+      console.error('Error wiping availability data:', error);
+      alert('Error deleting availability data. Please check the console for details.');
+    }
+  };
+
   // Booking statistics helper functions
   const getBookingStats = () => {
     const totalBookings = bookings.length;
@@ -1026,6 +1074,14 @@ export default function MentorManagement() {
                   disabled={loadingAvailability}
                 >
                   <FaSync className={loadingAvailability ? 'spinning' : ''} /> Refresh
+                </button>
+                <button
+                  className="refresh-button"
+                  onClick={handleWipeAllAvailability}
+                  disabled={loadingAvailability}
+                  style={{ background: '#ff2a2a', color: '#fff', border: '1.5px solid #ff2a2a' }}
+                >
+                  🗑️ Wipe All Availability
                 </button>
               </div>
             </div>

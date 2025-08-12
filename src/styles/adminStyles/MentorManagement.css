@@ -130,6 +130,28 @@
   animation: spin 1s linear infinite;
 }
 
+/* Wipe button specific styling */
+.refresh-button[onclick*="handleWipeAllAvailability"] {
+  background: #ff2a2a !important;
+  border-color: #ff2a2a !important;
+  color: #fff !important;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-button[onclick*="handleWipeAllAvailability"]:hover {
+  background: #e02424 !important;
+  border-color: #e02424 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 42, 42, 0.3);
+}
+
+.refresh-button[onclick*="handleWipeAllAvailability"]:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 42, 42, 0.3);
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
