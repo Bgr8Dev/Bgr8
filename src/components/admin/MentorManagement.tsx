@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../firebase/firebase';
-import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../widgets/MentorAlgorithm/CalCom/calComService';
 import GenerateRandomProfile from './GenerateRandomProfile';
@@ -372,15 +372,46 @@ export default function MentorManagement() {
   };
 
   const handleDeleteUser = async (user: MentorMenteeProfileWithId) => {
-    const confirmed = window.confirm(`Are you sure you want to delete ${user.name} (${user.type})? This cannot be undone.`);
+    const confirmed = window.confirm(`Are you sure you want to delete ${user.name} (${user.type})? This will also remove all their availability data and bookings. This cannot be undone.`);
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
+      // Delete the user profile
       await deleteDoc(doc(db, 'mentorProgram', user.id));
+      
+      // Delete all availability data for this user
+      const availabilityQuery = query(
+        collection(db, 'mentorAvailability'),
+        where('mentorId', '==', user.id)
+      );
+      const availabilitySnapshot = await getDocs(availabilityQuery);
+      const availabilityDeletions = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(availabilityDeletions);
+      
+      // Delete all bookings for this user (as mentor or mentee)
+      const bookingsQuery = query(
+        collection(db, 'bookings'),
+        where('mentorId', '==', user.id)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
+      const bookingDeletions = bookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(bookingDeletions);
+      
+      // Also check if they're a mentee in any bookings
+      const menteeBookingsQuery = query(
+        collection(db, 'bookings'),
+        where('menteeId', '==', user.id)
+      );
+      const menteeBookingsSnapshot = await getDocs(menteeBookingsQuery);
+      const menteeBookingDeletions = menteeBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(menteeBookingDeletions);
+      
+      // Update local state
       setUsers(prev => prev.filter(u => u.id !== user.id));
-      setDeleteStatus(`Deleted ${user.name} successfully.`);
-    } catch {
-      setDeleteStatus('Failed to delete user.');
+      setDeleteStatus(`Deleted ${user.name} and all related data successfully.`);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      setDeleteStatus('Failed to delete user and related data.');
     }
   };
 
@@ -419,16 +450,46 @@ export default function MentorManagement() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected user(s)? This cannot be undone.`);
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected user(s)? This will also remove all their availability data and bookings. This cannot be undone.`);
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
+      // Delete all user profiles
       await Promise.all(selectedIds.map(id => deleteDoc(doc(db, 'mentorProgram', id))));
+      
+      // Delete all availability data for these users
+      const availabilityQuery = query(
+        collection(db, 'mentorAvailability'),
+        where('mentorId', 'in', selectedIds)
+      );
+      const availabilitySnapshot = await getDocs(availabilityQuery);
+      const availabilityDeletions = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(availabilityDeletions);
+      
+      // Delete all bookings for these users (as mentors or mentees)
+      const mentorBookingsQuery = query(
+        collection(db, 'bookings'),
+        where('mentorId', 'in', selectedIds)
+      );
+      const mentorBookingsSnapshot = await getDocs(mentorBookingsQuery);
+      const mentorBookingDeletions = mentorBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(mentorBookingDeletions);
+      
+      const menteeBookingsQuery = query(
+        collection(db, 'bookings'),
+        where('menteeId', 'in', selectedIds)
+      );
+      const menteeBookingsSnapshot = await getDocs(menteeBookingsQuery);
+      const menteeBookingDeletions = menteeBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(menteeBookingDeletions);
+      
+      // Update local state
       setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
       setSelectedIds([]);
-      setDeleteStatus(`Deleted ${selectedIds.length} user(s) successfully.`);
-    } catch {
-      setDeleteStatus('Failed to delete selected users.');
+      setDeleteStatus(`Deleted ${selectedIds.length} user(s) and all related data successfully.`);
+    } catch (error) {
+      console.error('Error bulk deleting users:', error);
+      setDeleteStatus('Failed to delete selected users and related data.');
     }
   };
 
