@@ -19,6 +19,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-100);
 }
 
 .admin-nav-item {
@@ -205,20 +207,25 @@ th {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background: var(--button-secondary-bg);
   border: 1px solid var(--button-secondary-border);
   color: var(--button-secondary-text);
   cursor: pointer;
   border-radius: var(--radius-lg);
   transition: all 0.3s ease;
-  margin-bottom: 1rem;
-  width: 100%;
+  margin-bottom: 2rem;
+  width: fit-content;
+  font-size: 0.9rem;
+  align-self: flex-start;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 2px solid var(--gray-200);
 }
 
 .back-button:hover {
   background-color: var(--button-secondary-hover-bg);
   transform: translateX(-5px);
+  box-shadow: var(--shadow-md);
 }
 
 .sidebar-section {
@@ -667,6 +674,12 @@ th {
     min-height: 60px;
     background: var(--white);
     border-radius: 0 0 10px 10px;
+  }
+  .back-button {
+    margin-bottom: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    align-self: center;
   }
   .admin-nav {
     flex-direction: row;

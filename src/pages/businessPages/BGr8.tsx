@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
+import SocialChannels from '../../components/ui/SocialChannels';
 import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgram';
 
 export default function BGr8() {
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
@@ -17,11 +20,8 @@ export default function BGr8() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const scrollToMentorSection = () => {
-    const mentorSection = document.getElementById('mentor-section');
-    if (mentorSection) {
-      mentorSection.scrollIntoView({ behavior: 'smooth' });
-    }
+  const navigateToMentors = () => {
+    navigate('/mentors');
   };
 
   return (
@@ -41,15 +41,15 @@ export default function BGr8() {
                 </p>
               </div>
               
-              {/* Scroll to Mentor Section Button */}
+              {/* Navigate to Mentors Page Button */}
               <div className="bgr8-scroll-button-container">
                 <button 
                   className="bgr8-scroll-to-mentor-btn"
-                  onClick={scrollToMentorSection}
-                  aria-label="Scroll to mentor section"
+                  onClick={navigateToMentors}
+                  aria-label="Navigate to mentors page"
                 >
-                  <span className="bgr8-scroll-btn-text">Join Our Mentorship Network</span>
-                  <span className="bgr8-scroll-btn-arrow">↓</span>
+                  <span className="bgr8-scroll-btn-text">Find Mentors & Join Network</span>
+                  <span className="bgr8-scroll-btn-arrow">→</span>
                 </button>
                 <p className="bgr8-scroll-btn-description">
                   Connect with experienced mentors and mentees to create positive change in your community
@@ -60,14 +60,7 @@ export default function BGr8() {
         </div>
       </section>
 
-      {/* Mentor Program Widget - Now directly after hero */}
-      <section id="mentor-section" className="bgr8-mentor-section">
-        <div className="bgr8-content-wrapper">
-          <h3>Join Our Mentorship Network</h3>
-          <p>Connect with experienced mentors and mentees to create positive change in your community.</p>
-          <MentorProgram />
-        </div>
-      </section>
+
 
       {/* Main Content Section */}
       <section className="bgr8-main-content">

@@ -1,11 +1,55 @@
 import React, { useState } from 'react';
 import { db } from '../../firebase/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, deleteDoc, setDoc, doc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import ukCounties from '../../constants/ukCounties';
 import industriesList from '../../constants/industries';
 import '../../styles/adminStyles/MentorManagement.css';
+
+// Import interfaces for availability
+interface TimeSlot {
+  id: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+  type: 'recurring' | 'specific';
+}
+
+interface MentorAvailability {
+  mentorId: string;
+  timeSlots: TimeSlot[];
+  lastUpdated: Date | string;
+}
+
+interface Booking {
+  id?: string;
+  mentorName: string;
+  mentorEmail: string;
+  menteeName: string;
+  menteeEmail: string;
+  sessionDate?: Date | string;
+  startTime: string;
+  endTime: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  meetLink?: string;
+  eventId?: string;
+  isCalComBooking?: boolean;
+  calComBookingId?: string;
+  mentorId?: string;
+  menteeId?: string;
+  duration?: number;
+  revenue?: number;
+  createdAt?: Date;
+}
+
+interface AvailableMentor {
+  id: string;
+  uid: string;
+  name: string;
+  email: string;
+}
 
 // Sample data for randomization
 const firstNames = [
@@ -504,12 +548,25 @@ export default function GenerateRandomProfile() {
   const [type, setType] = useState<'mentor' | 'mentee'>('mentor');
   const [useArchetype, setUseArchetype] = useState(false);
   const [archetype, setArchetype] = useState('random');
+  const [generateSampleData, setGenerateSampleData] = useState(false);
+  const [generateMentees, setGenerateMentees] = useState(false);
+  const [overwriteAvailability, setOverwriteAvailability] = useState(false);
+  const [mentorSearch, setMentorSearch] = useState('');
+  const [availableMentors, setAvailableMentors] = useState<AvailableMentor[]>([]);
+  const [selectedMentors, setSelectedMentors] = useState<string[]>([]);
+  const [showMentorSelector, setShowMentorSelector] = useState(false);
 
   const getRandomElement = <T,>(array: T[]): T => {
+    if (!array || array.length === 0) {
+      throw new Error('Cannot get random element from empty array');
+    }
     return array[Math.floor(Math.random() * array.length)];
   };
 
   const getRandomElements = <T,>(array: T[], count: number): T[] => {
+    if (!array || array.length === 0 || count <= 0) {
+      return [];
+    }
     const shuffled = [...array].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
@@ -519,7 +576,490 @@ export default function GenerateRandomProfile() {
     return getRandomElements(allSkills, Math.floor(Math.random() * 5) + 3);
   };
 
+  const getDayName = (dayOfWeek: number): string => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayOfWeek];
+  };
+
+  const generateRandomAvailability = (mentorId: string): MentorAvailability => {
+    if (!mentorId || mentorId.trim() === '') {
+      throw new Error('Mentor ID is required for generating availability');
+    }
+    
+    const timeSlots: TimeSlot[] = [];
+    const today = new Date();
+    
+    // Generate availability for the next 14 days (2 weeks)
+    for (let i = 0; i < 14; i++) {
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+      const dateString = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Skip weekends for most mentors (Monday = 1, Friday = 5)
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // Weekend availability - reduced hours, lower availability
+        for (let hour = 10; hour < 16; hour++) { // 10 AM to 4 PM
+          const startTime = `${hour.toString().padStart(2, '0')}:00`;
+          const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+          
+          // 40% chance of being available on weekends
+          const isAvailable = Math.random() > 0.6;
+          
+          timeSlots.push({
+            id: `${mentorId}_${dateString}_${hour}`,
+            day: getDayName(dayOfWeek),
+            startTime,
+            endTime,
+            isAvailable,
+            type: 'specific' as const
+          });
+        }
+      } else {
+        // Weekday availability - full business hours
+        for (let hour = 9; hour < 18; hour++) { // 9 AM to 6 PM
+          const startTime = `${hour.toString().padStart(2, '0')}:00`;
+          const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+          
+          // 75% chance of being available on weekdays
+          const isAvailable = Math.random() > 0.25;
+          
+          timeSlots.push({
+            id: `${mentorId}_${dateString}_${hour}`,
+            day: getDayName(dayOfWeek),
+            startTime,
+            endTime,
+            isAvailable,
+            type: 'specific' as const
+          });
+        }
+      }
+    }
+    
+    // Add some recurring weekly patterns for consistency
+    const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    weekdays.forEach((day) => {
+      // Add recurring morning slots (9-11 AM)
+      timeSlots.push({
+        id: `${mentorId}_recurring_${day}_morning`,
+        day: day,
+        startTime: '09:00',
+        endTime: '11:00',
+        isAvailable: Math.random() > 0.2, // 80% chance of morning availability
+        type: 'recurring' as const
+      });
+      
+      // Add recurring afternoon slots (2-4 PM)
+      timeSlots.push({
+        id: `${mentorId}_recurring_${day}_afternoon`,
+        day: day,
+        startTime: '14:00',
+        endTime: '16:00',
+        isAvailable: Math.random() > 0.15, // 85% chance of afternoon availability
+        type: 'recurring' as const
+      });
+    });
+    
+    // Add more sophisticated recurring patterns
+    const recurringSlots = generateSampleRecurringAvailability(mentorId);
+    timeSlots.push(...recurringSlots);
+    
+    // Add some special availability patterns (holidays, special events, etc.)
+    const specialSlots = generateSpecialAvailability(mentorId);
+    timeSlots.push(...specialSlots);
+    
+    return {
+      mentorId,
+      timeSlots,
+      lastUpdated: new Date()
+    };
+  };
+
+  const generateRandomBooking = (mentor: MentorMenteeProfile, mentorId: string): Booking => {
+    if (!mentor || !mentorId || mentorId.trim() === '') {
+      throw new Error('Mentor and mentor ID are required for generating bookings');
+    }
+    
+    const today = new Date();
+    const randomDaysAhead = Math.floor(Math.random() * 14); // 0-14 days ahead
+    const sessionDate = new Date(today);
+    sessionDate.setDate(today.getDate() + randomDaysAhead);
+    
+    const startHour = Math.floor(Math.random() * 8) + 9; // 9 AM to 5 PM
+    const startTime = `${startHour.toString().padStart(2, '0')}:00`;
+    const endTime = `${(startHour + 1).toString().padStart(2, '0')}:00`;
+    
+    const statuses: ('pending' | 'confirmed' | 'cancelled')[] = ['pending', 'confirmed', 'cancelled'];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    
+    const isCalComBooking = Math.random() > 0.5; // 50% chance of being Cal.com booking
+    
+    // Create the base booking object
+    const booking: Booking = {
+      mentorName: mentor.name,
+      mentorEmail: mentor.email,
+      menteeName: `Test Mentee ${Math.floor(Math.random() * 1000)}`,
+      menteeEmail: `mentee${Math.floor(Math.random() * 1000)}@example.com`,
+      sessionDate: sessionDate.toISOString().split('T')[0],
+      startTime,
+      endTime,
+      status,
+      mentorId,
+      menteeId: `mentee_${Math.random().toString(36).substr(2, 9)}`,
+      duration: 60, // 1 hour sessions
+      revenue: Math.floor(Math.random() * 50) + 25, // £25-75 per session
+      createdAt: new Date()
+    };
+    
+    // Only add Cal.com specific fields if it's a Cal.com booking
+    if (isCalComBooking) {
+      booking.meetLink = `https://meet.google.com/abc-defg-hij`;
+      booking.eventId = `event_${Math.random().toString(36).substr(2, 9)}`;
+      booking.isCalComBooking = true;
+      booking.calComBookingId = `cal_${Math.random().toString(36).substr(2, 9)}`;
+    } else {
+      booking.isCalComBooking = false;
+    }
+    
+    return booking;
+  };
+
+  // Generate some sample recurring availability patterns for mentors
+  const generateSampleRecurringAvailability = (mentorId: string): TimeSlot[] => {
+    if (!mentorId || mentorId.trim() === '') {
+      return [];
+    }
+    
+    const recurringSlots: TimeSlot[] = [];
+    
+    // Different availability patterns based on mentor type (randomized)
+    const mentorType = Math.random();
+    
+    if (mentorType < 0.3) {
+      // Early bird mentor - available early mornings
+      const earlyPatterns = [
+        { day: 'Monday', start: '07:00', end: '11:00', availability: 0.95 },
+        { day: 'Tuesday', start: '07:00', end: '11:00', availability: 0.9 },
+        { day: 'Wednesday', start: '07:00', end: '11:00', availability: 0.95 },
+        { day: 'Thursday', start: '07:00', end: '11:00', availability: 0.9 },
+        { day: 'Friday', start: '07:00', end: '11:00', availability: 0.85 }
+      ];
+      
+      earlyPatterns.forEach((pattern, index) => {
+        recurringSlots.push({
+          id: `${mentorId}_recurring_${pattern.day}_early_${index}`,
+          day: pattern.day,
+          startTime: pattern.start,
+          endTime: pattern.end,
+          isAvailable: Math.random() < pattern.availability,
+          type: 'recurring' as const
+        });
+      });
+    } else if (mentorType < 0.6) {
+      // Standard business hours mentor
+      const standardPatterns = [
+        { day: 'Monday', start: '09:00', end: '12:00', availability: 0.9 },
+        { day: 'Monday', start: '14:00', end: '17:00', availability: 0.8 },
+        { day: 'Tuesday', start: '10:00', end: '13:00', availability: 0.85 },
+        { day: 'Tuesday', start: '15:00', end: '18:00', availability: 0.75 },
+        { day: 'Wednesday', start: '09:00', end: '11:00', availability: 0.9 },
+        { day: 'Wednesday', start: '13:00', end: '16:00', availability: 0.8 },
+        { day: 'Thursday', start: '10:00', end: '14:00', availability: 0.85 },
+        { day: 'Thursday', start: '15:00', end: '17:00', availability: 0.7 },
+        { day: 'Friday', start: '09:00', end: '12:00', availability: 0.8 },
+        { day: 'Friday', start: '14:00', end: '16:00', availability: 0.6 }
+      ];
+      
+      standardPatterns.forEach((pattern, index) => {
+        recurringSlots.push({
+          id: `${mentorId}_recurring_${pattern.day}_standard_${index}`,
+          day: pattern.day,
+          startTime: pattern.start,
+          endTime: pattern.end,
+          isAvailable: Math.random() < pattern.availability,
+          type: 'recurring' as const
+        });
+      });
+    } else {
+      // Evening mentor - available late afternoons and evenings
+      const eveningPatterns = [
+        { day: 'Monday', start: '16:00', end: '20:00', availability: 0.9 },
+        { day: 'Tuesday', start: '16:00', end: '20:00', availability: 0.85 },
+        { day: 'Wednesday', start: '16:00', end: '20:00', availability: 0.9 },
+        { day: 'Thursday', start: '16:00', end: '20:00', availability: 0.85 },
+        { day: 'Friday', start: '16:00', end: '19:00', availability: 0.8 },
+        { day: 'Saturday', start: '10:00', end: '14:00', availability: 0.7 }
+      ];
+      
+      eveningPatterns.forEach((pattern, index) => {
+        recurringSlots.push({
+          id: `${mentorId}_recurring_${pattern.day}_evening_${index}`,
+          day: pattern.day,
+          startTime: pattern.start,
+          endTime: pattern.end,
+          isAvailable: Math.random() < pattern.availability,
+          type: 'recurring' as const
+        });
+      });
+    }
+    
+    return recurringSlots;
+  };
+
+  // Generate special availability patterns (holidays, special events, etc.)
+  const generateSpecialAvailability = (mentorId: string): TimeSlot[] => {
+    if (!mentorId || mentorId.trim() === '') {
+      return [];
+    }
+    
+    const specialSlots: TimeSlot[] = [];
+    const today = new Date();
+    
+    // Generate some special availability patterns for the next 30 days
+    for (let i = 0; i < 30; i++) {
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+      const dateString = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay();
+      
+      // 10% chance of having special availability on any given day
+      if (Math.random() < 0.1) {
+        const specialType = Math.random();
+        
+        if (specialType < 0.3) {
+          // Extended hours day
+          for (let hour = 8; hour < 20; hour++) {
+            specialSlots.push({
+              id: `${mentorId}_special_extended_${dateString}_${hour}`,
+              day: getDayName(dayOfWeek),
+              startTime: `${hour.toString().padStart(2, '0')}:00`,
+              endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+              isAvailable: Math.random() > 0.2, // 80% chance of availability
+              type: 'specific' as const
+            });
+          }
+        } else if (specialType < 0.6) {
+          // Reduced hours day
+          for (let hour = 12; hour < 16; hour++) {
+            specialSlots.push({
+              id: `${mentorId}_special_reduced_${dateString}_${hour}`,
+              day: getDayName(dayOfWeek),
+              startTime: `${hour.toString().padStart(2, '0')}:00`,
+              endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+              isAvailable: Math.random() > 0.3, // 70% chance of availability
+              type: 'specific' as const
+            });
+          }
+        } else {
+          // Weekend special availability
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            for (let hour = 9; hour < 17; hour++) {
+              specialSlots.push({
+                id: `${mentorId}_special_weekend_${dateString}_${hour}`,
+                day: getDayName(dayOfWeek),
+                startTime: `${hour.toString().padStart(2, '0')}:00`,
+                endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+                isAvailable: Math.random() > 0.4, // 60% chance of weekend availability
+                type: 'specific' as const
+              });
+            }
+          }
+        }
+      }
+    }
+    
+    return specialSlots;
+  };
+
+  const generateAvailabilityForExistingMentors = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Get all existing mentors from the mentorProgram collection
+      const mentorsQuery = query(
+        collection(db, 'mentorProgram'),
+        where('type', '==', 'mentor')
+      );
+      const mentorsSnapshot = await getDocs(mentorsQuery);
+      
+      if (mentorsSnapshot.empty) {
+        setError('No mentors found to generate availability for.');
+        return;
+      }
+
+      let generatedCount = 0;
+      for (const mentorDoc of mentorsSnapshot.docs) {
+        // Check if availability already exists for this mentor
+        const availabilityQuery = query(
+          collection(db, 'mentorAvailability'),
+          where('mentorId', '==', mentorDoc.id)
+        );
+        const existingAvailability = await getDocs(availabilityQuery);
+        
+        // If overwriting, delete existing availability first
+        if (overwriteAvailability && !existingAvailability.empty) {
+          const deletePromises = existingAvailability.docs.map(doc => deleteDoc(doc.ref));
+          await Promise.all(deletePromises);
+        }
+        
+        // Generate availability if none exists or if overwriting
+        if (existingAvailability.empty || overwriteAvailability) {
+          const mentorData = mentorDoc.data();
+          const mentorUid = mentorData.uid || mentorDoc.id; // Use uid if available, fallback to doc id
+          const availabilityData = generateRandomAvailability(mentorUid);
+          await setDoc(doc(db, 'mentorAvailability', mentorUid), availabilityData);
+          generatedCount++;
+        }
+      }
+
+      setSuccess(`Generated availability data for ${generatedCount} mentors!`);
+    } catch (err) {
+      console.error('Error generating availability:', err);
+      setError('Failed to generate availability. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAvailableMentors = async () => {
+    try {
+      const mentorsQuery = query(
+        collection(db, 'mentorProgram'),
+        where('type', '==', 'mentor')
+      );
+      const mentorsSnapshot = await getDocs(mentorsQuery);
+      
+      const mentors = mentorsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        uid: doc.data().uid || doc.id, // Use uid if available, fallback to doc id
+        name: doc.data().name || 'Unknown Name',
+        email: doc.data().email || 'No Email'
+      }));
+      
+      setAvailableMentors(mentors);
+    } catch (err) {
+      console.error('Error fetching mentors:', err);
+      setError('Failed to fetch available mentors.');
+    }
+  };
+
+  const generateAvailabilityForSpecificMentors = async () => {
+    if (selectedMentors.length === 0) {
+      setError('Please select at least one mentor.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      let generatedCount = 0;
+      
+      for (const mentorId of selectedMentors) {
+        // Find the mentor document to get their uid
+        const mentorDoc = availableMentors.find(m => m.id === mentorId);
+        if (!mentorDoc) continue;
+        
+        const mentorUid = mentorDoc.uid;
+        
+        // Check if availability already exists for this mentor
+        const availabilityQuery = query(
+          collection(db, 'mentorAvailability'),
+          where('mentorId', '==', mentorUid)
+        );
+        const existingAvailability = await getDocs(availabilityQuery);
+        
+        // If overwriting, delete existing availability first
+        if (overwriteAvailability && !existingAvailability.empty) {
+          const deletePromises = existingAvailability.docs.map(doc => deleteDoc(doc.ref));
+          await Promise.all(deletePromises);
+        }
+        
+        // Generate availability if none exists or if overwriting
+        if (existingAvailability.empty || overwriteAvailability) {
+          const availabilityData = generateRandomAvailability(mentorUid);
+          await setDoc(doc(db, 'mentorAvailability', mentorUid), availabilityData);
+          generatedCount++;
+        }
+      }
+
+      setSuccess(`Generated availability data for ${generatedCount} selected mentors!`);
+      setSelectedMentors([]);
+      setShowMentorSelector(false);
+    } catch (err) {
+      console.error('Error generating availability for specific mentors:', err);
+      setError('Failed to generate availability for selected mentors.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleMentorSelection = (mentorId: string) => {
+    if (!mentorId || mentorId.trim() === '') {
+      return;
+    }
+    
+    setSelectedMentors(prev => 
+      prev.includes(mentorId) 
+        ? prev.filter(id => id !== mentorId)
+        : [...prev, mentorId]
+    );
+  };
+
+  const filteredMentors = availableMentors.filter(mentor =>
+    mentor && mentor.name && mentor.email && mentorSearch &&
+    mentor.name.toLowerCase().includes(mentorSearch.toLowerCase()) ||
+    mentor.email.toLowerCase().includes(mentorSearch.toLowerCase())
+  );
+
+  // Generate site-wide availability settings for mentors
+  const generateSiteWideAvailability = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Get all existing mentors
+      const mentorsQuery = query(
+        collection(db, 'mentorProgram'),
+        where('type', '==', 'mentor')
+      );
+      const mentorsSnapshot = await getDocs(mentorsQuery);
+      
+      if (mentorsSnapshot.empty) {
+        setError('No mentors found to generate site-wide availability for.');
+        return;
+      }
+
+      let generatedCount = 0;
+      for (const mentorDoc of mentorsSnapshot.docs) {
+        // Generate comprehensive availability data
+        const mentorData = mentorDoc.data();
+        const mentorUid = mentorData.uid || mentorDoc.id; // Use uid if available, fallback to doc id
+        const availabilityData = generateRandomAvailability(mentorUid);
+        
+        // Always overwrite existing availability for site-wide generation
+        await setDoc(doc(db, 'mentorAvailability', mentorUid), availabilityData);
+        generatedCount++;
+      }
+
+      setSuccess(`Generated comprehensive site-wide availability for ${generatedCount} mentors!`);
+    } catch (err) {
+      console.error('Error generating site-wide availability:', err);
+      setError('Failed to generate site-wide availability. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const generateRandomProfile = (): MentorMenteeProfile => {
+    if (!type) {
+      throw new Error('Profile type is required for generating profiles');
+    }
+    
     const archetypeList = type === 'mentor' ? mentorArchetypes : menteeArchetypes;
     const selectedArchetype = archetypeList.find(a => a.key === archetype);
     if (!useArchetype || !selectedArchetype || archetype === 'random') {
@@ -556,21 +1096,26 @@ export default function GenerateRandomProfile() {
         skills: type === 'mentor' ? skills : [],
         lookingFor: type === 'mentee' ? lookingFor : [],
         industries,
-        type,
+        type: type || 'mentor',
         isGenerated: "true",
       };
     }
+    
     // Archetype-based generation
+    if (!selectedArchetype) {
+      throw new Error('Selected archetype is required for archetype-based generation');
+    }
+    
     const firstName = getRandomElement(firstNames);
     const lastName = getRandomElement(lastNames);
     const age = Math.floor(Math.random() * ((selectedArchetype.ageRange?.[1] || 60) - (selectedArchetype.ageRange?.[0] || 18) + 1)) + (selectedArchetype.ageRange?.[0] || 18);
-    const skills = getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2);
-    const lookingFor = selectedArchetype.type === 'mentee' ? getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2) : [];
-    const industries = getRandomElements(selectedArchetype.industries!, 1);
-    const degree = getRandomElement(selectedArchetype.degrees!);
-    const educationLevel = getRandomElement(selectedArchetype.educationLevels!);
-    const profession = getRandomElement(selectedArchetype.professions!);
-    const hobbiesList = getRandomElements(selectedArchetype.hobbies!, Math.floor(Math.random() * 3) + 1);
+    const skills = selectedArchetype.skills && selectedArchetype.skills.length > 0 ? getRandomElements(selectedArchetype.skills, Math.floor(Math.random() * 3) + 2) : getRandomSkills();
+    const lookingFor = selectedArchetype.type === 'mentee' && selectedArchetype.skills && selectedArchetype.skills.length > 0 ? getRandomElements(selectedArchetype.skills, Math.floor(Math.random() * 3) + 2) : [];
+    const industries = selectedArchetype.industries && selectedArchetype.industries.length > 0 ? getRandomElements(selectedArchetype.industries, 1) : getRandomElements(industriesList, 1);
+    const degree = selectedArchetype.degrees && selectedArchetype.degrees.length > 0 ? getRandomElement(selectedArchetype.degrees) : getRandomElement(['BSc', 'BA', 'MSc', 'MA']);
+    const educationLevel = selectedArchetype.educationLevels && selectedArchetype.educationLevels.length > 0 ? getRandomElement(selectedArchetype.educationLevels) : getRandomElement(ukEducationLevels);
+    const profession = selectedArchetype.professions && selectedArchetype.professions.length > 0 ? getRandomElement(selectedArchetype.professions) : getRandomElement(professions);
+    const hobbiesList = selectedArchetype.hobbies && selectedArchetype.hobbies.length > 0 ? getRandomElements(selectedArchetype.hobbies, Math.floor(Math.random() * 3) + 1) : getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2);
     return {
       uid: `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: `${firstName} ${lastName}`,
@@ -590,12 +1135,17 @@ export default function GenerateRandomProfile() {
       skills: selectedArchetype.type === 'mentor' ? skills : [],
       lookingFor,
       industries,
-      type: selectedArchetype.type as 'mentor' | 'mentee',
+      type: (selectedArchetype.type as 'mentor' | 'mentee') || type,
       isGenerated: "true",
     };
   };
 
   const handleGenerate = async () => {
+    if (!type) {
+      setError('Please select a profile type');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -604,12 +1154,45 @@ export default function GenerateRandomProfile() {
       const profiles = Array.from({ length: count }, () => generateRandomProfile());
       
       for (const profile of profiles) {
-        await addDoc(collection(db, 'mentorProgram'), profile);
+        // Add the profile to mentorProgram collection
+        const docRef = await addDoc(collection(db, 'mentorProgram'), profile);
+        
+        // If it's a mentor, also generate availability data for testing
+        if (profile.type === 'mentor') {
+          const availabilityData = generateRandomAvailability(profile.uid);
+          await setDoc(doc(db, 'mentorAvailability', profile.uid), availabilityData);
+          
+          // If sample data is enabled, generate some sample bookings
+          if (generateSampleData) {
+            const numBookings = Math.floor(Math.random() * 3) + 1; // 1-3 bookings per mentor
+            for (let i = 0; i < numBookings; i++) {
+              const bookingData = generateRandomBooking(profile, docRef.id);
+              await addDoc(collection(db, 'bookings'), bookingData);
+            }
+          }
+        }
       }
 
-      setSuccess(`Successfully generated ${count} ${type}${count > 1 ? 's' : ''}!`);
+      // If generating mentors and mentees are requested, generate some mentees too
+      if (type === 'mentor' && generateMentees) {
+        const menteeCount = Math.min(count, 5); // Generate up to 5 mentees
+        const menteeProfiles = Array.from({ length: menteeCount }, () => {
+          const menteeProfile = generateRandomProfile();
+          menteeProfile.type = 'mentee';
+          return menteeProfile;
+        });
+        
+        for (const menteeProfile of menteeProfiles) {
+          await addDoc(collection(db, 'mentorProgram'), menteeProfile);
+        }
+      }
+
+      const sampleDataText = generateSampleData ? ' (with sample bookings)' : '';
+      const menteesText = (type === 'mentor' && generateMentees) ? ' (with sample mentees)' : '';
+      setSuccess(`Successfully generated ${count} ${type}${count > 1 ? 's' : ''}!${type === 'mentor' ? ' (with availability data for testing)' : ''}${sampleDataText}${menteesText}`);
     } catch (err) {
       console.error('Error generating profiles:', err);
+      setSuccess(null);
       setError('Failed to generate profiles. Please try again.');
     } finally {
       setLoading(false);
@@ -619,59 +1202,316 @@ export default function GenerateRandomProfile() {
   return (
     <div className="mentor-management">
       <div className="mentor-management-header">
-        <h2>Generate Random Profiles</h2>
-        <div className="mentor-management-controls">
-          <div className="mentor-management-filters">
-            <button
-              className={type === 'mentor' ? 'active' : ''}
-              onClick={() => setType('mentor')}
-            >
-              <FaChalkboardTeacher /> Mentors
-            </button>
-            <button
-              className={type === 'mentee' ? 'active' : ''}
-              onClick={() => setType('mentee')}
-            >
-              <FaUserGraduate /> Mentees
-            </button>
-            <label style={{ marginLeft: 16, fontWeight: 600, fontSize: 15 }}>
-              <input type="checkbox" checked={useArchetype} onChange={e => setUseArchetype(e.target.checked)} style={{ marginRight: 6 }} />
-              Use Archetype/Persona
-            </label>
-            {useArchetype && (
-              <select value={archetype} onChange={e => setArchetype(e.target.value)} style={{ marginLeft: 16, padding: '0.6rem 1.2rem', borderRadius: 8, fontWeight: 600, fontSize: 15 }}>
-                {(type === 'mentor' ? mentorArchetypes : menteeArchetypes).map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
-              </select>
-            )}
-          </div>
+        <h2>🎲 Generate Test Data</h2>
+        <p style={{ color: 'var(--gray-600)', marginTop: 8, fontSize: 14 }}>
+          Create realistic test profiles and data for development and testing purposes
+        </p>
+      </div>
+
+      {/* Profile Type Selection */}
+      <div className="profile-type-selector">
+        <div className="selector-tabs">
+          <button
+            className={`selector-tab ${type === 'mentor' ? 'active' : ''}`}
+            onClick={() => setType('mentor')}
+          >
+            <FaChalkboardTeacher />
+            <span>Mentors</span>
+          </button>
+          <button
+            className={`selector-tab ${type === 'mentee' ? 'active' : ''}`}
+            onClick={() => setType('mentee')}
+          >
+            <FaUserGraduate />
+            <span>Mentees</span>
+          </button>
         </div>
       </div>
 
-      <div className="mentor-management-stats">
-        <div className="stat-card">
-          <h3>Generate</h3>
-          <div className="generate-controls">
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={count}
-              onChange={(e) => setCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-              className="count-input"
-            />
+      {/* Main Generation Section */}
+      <div className="generation-section">
+        <div className="generation-card primary">
+          <div className="card-header">
+            <div className="card-icon">✨</div>
+            <div className="card-title">
+              <h3>Generate New Profiles</h3>
+              <p>Create new {type} profiles with realistic data</p>
+            </div>
+          </div>
+          
+          <div className="generation-controls">
+            <div className="quantity-control">
+              <label>Number of Profiles</label>
+              <div className="quantity-input-group">
+                <button 
+                  className="quantity-btn"
+                  onClick={() => setCount(Math.max(1, count - 1))}
+                  disabled={count <= 1}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={count}
+                  onChange={(e) => setCount(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
+                  className="quantity-input"
+                />
+                <button 
+                  className="quantity-btn"
+                  onClick={() => setCount(Math.min(20, count + 1))}
+                  disabled={count >= 20}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="options-grid">
+              <div className="option-group">
+                <label className="option-label">
+                  <input 
+                    type="checkbox" 
+                    checked={useArchetype} 
+                    onChange={e => setUseArchetype(e.target.checked)}
+                    className="option-checkbox"
+                  />
+                  <span>Use Specific Archetype</span>
+                </label>
+                {useArchetype && (
+                  <select 
+                    value={archetype} 
+                    onChange={e => setArchetype(e.target.value)}
+                    className="archetype-select"
+                  >
+                    {(type === 'mentor' ? mentorArchetypes : menteeArchetypes).map(a => 
+                      <option key={a.key} value={a.key}>{a.label}</option>
+                    )}
+                  </select>
+                )}
+              </div>
+
+              {type === 'mentor' && (
+                <>
+                  <div className="option-group">
+                    <label className="option-label">
+                      <input 
+                        type="checkbox" 
+                        checked={generateSampleData} 
+                        onChange={e => setGenerateSampleData(e.target.checked)}
+                        className="option-checkbox"
+                      />
+                      <span>Include Sample Bookings</span>
+                    </label>
+                    <small>Creates 1-3 sample bookings per mentor</small>
+                  </div>
+
+                  <div className="option-group">
+                    <label className="option-label">
+                      <input 
+                        type="checkbox" 
+                        checked={generateMentees} 
+                        onChange={e => setGenerateMentees(e.target.checked)}
+                        className="option-checkbox"
+                      />
+                      <span>Generate Matching Mentees</span>
+                    </label>
+                    <small>Creates up to 5 mentees for testing</small>
+                  </div>
+
+                  <div className="option-group">
+                    <label className="option-label">
+                      <input 
+                        type="checkbox" 
+                        checked={overwriteAvailability} 
+                        onChange={e => setOverwriteAvailability(e.target.checked)}
+                        className="option-checkbox"
+                      />
+                      <span>Overwrite Existing Availability</span>
+                    </label>
+                    <small>Generate availability for mentors even if it already exists</small>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="generate-button"
+              className="generate-btn primary"
             >
-              <FaRandom /> Generate {count} {type}{count > 1 ? 's' : ''}
+              {loading ? (
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <span>Generating...</span>
+                </div>
+              ) : (
+                <>
+                  <FaRandom />
+                  <span>Generate {count} {type}{count > 1 ? 's' : ''}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
+
+        {/* Availability Generation Section */}
+        <div className="generation-card secondary">
+          <div className="card-header">
+            <div className="card-icon">📅</div>
+            <div className="card-title">
+              <h3>Generate Availability Data</h3>
+              <p>Add availability schedules to existing mentors</p>
+            </div>
+          </div>
+          
+          <div className="availability-info">
+            <div className="info-item">
+              <span className="info-icon">⏰</span>
+              <span>7 days of time slots</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">🕘</span>
+              <span>9 AM - 5 PM daily</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">📊</span>
+              <span>70% availability rate</span>
+            </div>
+          </div>
+
+          <div className="option-group" style={{ marginBottom: 20 }}>
+            <label className="option-label">
+              <input 
+                type="checkbox" 
+                checked={overwriteAvailability} 
+                onChange={e => setOverwriteAvailability(e.target.checked)}
+                className="option-checkbox"
+              />
+              <span>Overwrite Existing Availability</span>
+            </label>
+            <small>Generate availability for all mentors, even if it already exists</small>
+          </div>
+
+          <div className="availability-info">
+            <div className="info-item">
+              <span className="info-icon">📅</span>
+              <span>Generate comprehensive availability data for all mentors, including specific dates, recurring patterns, and realistic scheduling preferences.</span>
+            </div>
+          </div>
+
+          <div className="availability-actions">
+            <button
+              onClick={generateSiteWideAvailability}
+              disabled={loading}
+              className="generate-btn primary"
+            >
+              <FaChalkboardTeacher />
+              <span>Generate Site-Wide Availability</span>
+            </button>
+
+            <button
+              onClick={generateAvailabilityForExistingMentors}
+              disabled={loading}
+              className="generate-btn secondary"
+            >
+              <FaChalkboardTeacher />
+              <span>Generate for All Mentors</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowMentorSelector(!showMentorSelector);
+                if (!showMentorSelector) {
+                  fetchAvailableMentors();
+                }
+              }}
+              disabled={loading}
+              className="generate-btn secondary outline"
+            >
+              <FaChalkboardTeacher />
+              <span>Select Specific Mentors</span>
+            </button>
+          </div>
+
+          {/* Mentor Selector Modal */}
+          {showMentorSelector && (
+            <>
+              {/* Backdrop */}
+              <div 
+                className="mentor-selector-backdrop"
+                onClick={() => setShowMentorSelector(false)}
+              />
+              
+              {/* Modal */}
+              <div className="mentor-selector-modal">
+                <div className="modal-header">
+                  <h4>Select Mentors for Availability Generation</h4>
+                  <button 
+                    onClick={() => setShowMentorSelector(false)}
+                    className="close-btn"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div className="search-section">
+                  <input
+                    type="text"
+                    placeholder="Search mentors by name or email..."
+                    value={mentorSearch}
+                    onChange={(e) => setMentorSearch(e.target.value)}
+                    className="mentor-search-input"
+                  />
+                </div>
+
+                <div className="mentors-list">
+                  {filteredMentors.map(mentor => (
+                    <label key={mentor.id} className="mentor-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedMentors.includes(mentor.id)}
+                        onChange={() => toggleMentorSelection(mentor.id)}
+                        className="mentor-checkbox"
+                      />
+                      <div className="mentor-info">
+                        <span className="mentor-name">{mentor.name}</span>
+                        <span className="mentor-email">{mentor.email}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    onClick={generateAvailabilityForSpecificMentors}
+                    disabled={loading || selectedMentors.length === 0}
+                    className="generate-btn secondary"
+                  >
+                    <FaChalkboardTeacher />
+                    <span>Generate for {selectedMentors.length} Selected</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
-      {error && <div className="mentor-management-error">{error}</div>}
-      {success && <div className="mentor-management-success">{success}</div>}
+      {/* Status Messages */}
+      {error && (
+        <div className="status-message error">
+          <span className="status-icon">❌</span>
+          <span>{error}</span>
+        </div>
+      )}
+      {success && (
+        <div className="status-message success">
+          <span className="status-icon">✅</span>
+          <span>{success}</span>
+        </div>
+      )}
     </div>
   );
 } 

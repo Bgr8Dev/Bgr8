@@ -31,6 +31,7 @@ export default function Navbar() {
       </h1>
 
       <nav className="nav" role="navigation" aria-label="Main navigation">
+        <Link to="/mentors" className="nav-link">Find Mentors</Link>
       </nav>
 
       <div className="auth-section">
