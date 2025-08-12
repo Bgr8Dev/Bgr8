@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db } from '../../firebase/firebase';
-import { collection, addDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, deleteDoc, setDoc, doc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import ukCounties from '../../constants/ukCounties';
@@ -10,7 +10,7 @@ import '../../styles/adminStyles/MentorManagement.css';
 // Import interfaces for availability
 interface TimeSlot {
   id: string;
-  date?: string;
+  day: string;
   startTime: string;
   endTime: string;
   isAvailable: boolean;
@@ -20,7 +20,7 @@ interface TimeSlot {
 interface MentorAvailability {
   mentorId: string;
   timeSlots: TimeSlot[];
-  lastUpdated: Date;
+  lastUpdated: Date | string;
 }
 
 interface Booking {
@@ -42,6 +42,13 @@ interface Booking {
   duration?: number;
   revenue?: number;
   createdAt?: Date;
+}
+
+interface AvailableMentor {
+  id: string;
+  uid: string;
+  name: string;
+  email: string;
 }
 
 // Sample data for randomization
@@ -545,15 +552,21 @@ export default function GenerateRandomProfile() {
   const [generateMentees, setGenerateMentees] = useState(false);
   const [overwriteAvailability, setOverwriteAvailability] = useState(false);
   const [mentorSearch, setMentorSearch] = useState('');
-  const [availableMentors, setAvailableMentors] = useState<Array<{id: string, name: string, email: string}>>([]);
+  const [availableMentors, setAvailableMentors] = useState<AvailableMentor[]>([]);
   const [selectedMentors, setSelectedMentors] = useState<string[]>([]);
   const [showMentorSelector, setShowMentorSelector] = useState(false);
 
   const getRandomElement = <T,>(array: T[]): T => {
+    if (!array || array.length === 0) {
+      throw new Error('Cannot get random element from empty array');
+    }
     return array[Math.floor(Math.random() * array.length)];
   };
 
   const getRandomElements = <T,>(array: T[], count: number): T[] => {
+    if (!array || array.length === 0 || count <= 0) {
+      return [];
+    }
     const shuffled = [...array].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
@@ -563,34 +576,97 @@ export default function GenerateRandomProfile() {
     return getRandomElements(allSkills, Math.floor(Math.random() * 5) + 3);
   };
 
+  const getDayName = (dayOfWeek: number): string => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayOfWeek];
+  };
+
   const generateRandomAvailability = (mentorId: string): MentorAvailability => {
+    if (!mentorId || mentorId.trim() === '') {
+      throw new Error('Mentor ID is required for generating availability');
+    }
+    
     const timeSlots: TimeSlot[] = [];
     const today = new Date();
     
-    // Generate availability for the next 7 days
-    for (let i = 0; i < 7; i++) {
+    // Generate availability for the next 14 days (2 weeks)
+    for (let i = 0; i < 14; i++) {
       const currentDate = new Date(today);
       currentDate.setDate(today.getDate() + i);
       const dateString = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
       
-      // Generate 8 time slots per day (9 AM to 5 PM, 1-hour slots)
-      for (let hour = 9; hour < 17; hour++) {
-        const startTime = `${hour.toString().padStart(2, '0')}:00`;
-        const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
-        
-        // 70% chance of being available, 30% chance of being booked
-        const isAvailable = Math.random() > 0.3;
-        
-        timeSlots.push({
-          id: `${mentorId}_${dateString}_${hour}`,
-          date: dateString,
-          startTime,
-          endTime,
-          isAvailable,
-          type: 'specific' as const
-        });
+      // Skip weekends for most mentors (Monday = 1, Friday = 5)
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // Weekend availability - reduced hours, lower availability
+        for (let hour = 10; hour < 16; hour++) { // 10 AM to 4 PM
+          const startTime = `${hour.toString().padStart(2, '0')}:00`;
+          const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+          
+          // 40% chance of being available on weekends
+          const isAvailable = Math.random() > 0.6;
+          
+          timeSlots.push({
+            id: `${mentorId}_${dateString}_${hour}`,
+            day: getDayName(dayOfWeek),
+            startTime,
+            endTime,
+            isAvailable,
+            type: 'specific' as const
+          });
+        }
+      } else {
+        // Weekday availability - full business hours
+        for (let hour = 9; hour < 18; hour++) { // 9 AM to 6 PM
+          const startTime = `${hour.toString().padStart(2, '0')}:00`;
+          const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+          
+          // 75% chance of being available on weekdays
+          const isAvailable = Math.random() > 0.25;
+          
+          timeSlots.push({
+            id: `${mentorId}_${dateString}_${hour}`,
+            day: getDayName(dayOfWeek),
+            startTime,
+            endTime,
+            isAvailable,
+            type: 'specific' as const
+          });
+        }
       }
     }
+    
+    // Add some recurring weekly patterns for consistency
+    const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    weekdays.forEach((day) => {
+      // Add recurring morning slots (9-11 AM)
+      timeSlots.push({
+        id: `${mentorId}_recurring_${day}_morning`,
+        day: day,
+        startTime: '09:00',
+        endTime: '11:00',
+        isAvailable: Math.random() > 0.2, // 80% chance of morning availability
+        type: 'recurring' as const
+      });
+      
+      // Add recurring afternoon slots (2-4 PM)
+      timeSlots.push({
+        id: `${mentorId}_recurring_${day}_afternoon`,
+        day: day,
+        startTime: '14:00',
+        endTime: '16:00',
+        isAvailable: Math.random() > 0.15, // 85% chance of afternoon availability
+        type: 'recurring' as const
+      });
+    });
+    
+    // Add more sophisticated recurring patterns
+    const recurringSlots = generateSampleRecurringAvailability(mentorId);
+    timeSlots.push(...recurringSlots);
+    
+    // Add some special availability patterns (holidays, special events, etc.)
+    const specialSlots = generateSpecialAvailability(mentorId);
+    timeSlots.push(...specialSlots);
     
     return {
       mentorId,
@@ -600,6 +676,10 @@ export default function GenerateRandomProfile() {
   };
 
   const generateRandomBooking = (mentor: MentorMenteeProfile, mentorId: string): Booking => {
+    if (!mentor || !mentorId || mentorId.trim() === '') {
+      throw new Error('Mentor and mentor ID are required for generating bookings');
+    }
+    
     const today = new Date();
     const randomDaysAhead = Math.floor(Math.random() * 14); // 0-14 days ahead
     const sessionDate = new Date(today);
@@ -644,6 +724,153 @@ export default function GenerateRandomProfile() {
     return booking;
   };
 
+  // Generate some sample recurring availability patterns for mentors
+  const generateSampleRecurringAvailability = (mentorId: string): TimeSlot[] => {
+    if (!mentorId || mentorId.trim() === '') {
+      return [];
+    }
+    
+    const recurringSlots: TimeSlot[] = [];
+    
+    // Different availability patterns based on mentor type (randomized)
+    const mentorType = Math.random();
+    
+    if (mentorType < 0.3) {
+      // Early bird mentor - available early mornings
+      const earlyPatterns = [
+        { day: 'Monday', start: '07:00', end: '11:00', availability: 0.95 },
+        { day: 'Tuesday', start: '07:00', end: '11:00', availability: 0.9 },
+        { day: 'Wednesday', start: '07:00', end: '11:00', availability: 0.95 },
+        { day: 'Thursday', start: '07:00', end: '11:00', availability: 0.9 },
+        { day: 'Friday', start: '07:00', end: '11:00', availability: 0.85 }
+      ];
+      
+      earlyPatterns.forEach((pattern, index) => {
+        recurringSlots.push({
+          id: `${mentorId}_recurring_${pattern.day}_early_${index}`,
+          day: pattern.day,
+          startTime: pattern.start,
+          endTime: pattern.end,
+          isAvailable: Math.random() < pattern.availability,
+          type: 'recurring' as const
+        });
+      });
+    } else if (mentorType < 0.6) {
+      // Standard business hours mentor
+      const standardPatterns = [
+        { day: 'Monday', start: '09:00', end: '12:00', availability: 0.9 },
+        { day: 'Monday', start: '14:00', end: '17:00', availability: 0.8 },
+        { day: 'Tuesday', start: '10:00', end: '13:00', availability: 0.85 },
+        { day: 'Tuesday', start: '15:00', end: '18:00', availability: 0.75 },
+        { day: 'Wednesday', start: '09:00', end: '11:00', availability: 0.9 },
+        { day: 'Wednesday', start: '13:00', end: '16:00', availability: 0.8 },
+        { day: 'Thursday', start: '10:00', end: '14:00', availability: 0.85 },
+        { day: 'Thursday', start: '15:00', end: '17:00', availability: 0.7 },
+        { day: 'Friday', start: '09:00', end: '12:00', availability: 0.8 },
+        { day: 'Friday', start: '14:00', end: '16:00', availability: 0.6 }
+      ];
+      
+      standardPatterns.forEach((pattern, index) => {
+        recurringSlots.push({
+          id: `${mentorId}_recurring_${pattern.day}_standard_${index}`,
+          day: pattern.day,
+          startTime: pattern.start,
+          endTime: pattern.end,
+          isAvailable: Math.random() < pattern.availability,
+          type: 'recurring' as const
+        });
+      });
+    } else {
+      // Evening mentor - available late afternoons and evenings
+      const eveningPatterns = [
+        { day: 'Monday', start: '16:00', end: '20:00', availability: 0.9 },
+        { day: 'Tuesday', start: '16:00', end: '20:00', availability: 0.85 },
+        { day: 'Wednesday', start: '16:00', end: '20:00', availability: 0.9 },
+        { day: 'Thursday', start: '16:00', end: '20:00', availability: 0.85 },
+        { day: 'Friday', start: '16:00', end: '19:00', availability: 0.8 },
+        { day: 'Saturday', start: '10:00', end: '14:00', availability: 0.7 }
+      ];
+      
+      eveningPatterns.forEach((pattern, index) => {
+        recurringSlots.push({
+          id: `${mentorId}_recurring_${pattern.day}_evening_${index}`,
+          day: pattern.day,
+          startTime: pattern.start,
+          endTime: pattern.end,
+          isAvailable: Math.random() < pattern.availability,
+          type: 'recurring' as const
+        });
+      });
+    }
+    
+    return recurringSlots;
+  };
+
+  // Generate special availability patterns (holidays, special events, etc.)
+  const generateSpecialAvailability = (mentorId: string): TimeSlot[] => {
+    if (!mentorId || mentorId.trim() === '') {
+      return [];
+    }
+    
+    const specialSlots: TimeSlot[] = [];
+    const today = new Date();
+    
+    // Generate some special availability patterns for the next 30 days
+    for (let i = 0; i < 30; i++) {
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+      const dateString = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay();
+      
+      // 10% chance of having special availability on any given day
+      if (Math.random() < 0.1) {
+        const specialType = Math.random();
+        
+        if (specialType < 0.3) {
+          // Extended hours day
+          for (let hour = 8; hour < 20; hour++) {
+            specialSlots.push({
+              id: `${mentorId}_special_extended_${dateString}_${hour}`,
+              day: getDayName(dayOfWeek),
+              startTime: `${hour.toString().padStart(2, '0')}:00`,
+              endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+              isAvailable: Math.random() > 0.2, // 80% chance of availability
+              type: 'specific' as const
+            });
+          }
+        } else if (specialType < 0.6) {
+          // Reduced hours day
+          for (let hour = 12; hour < 16; hour++) {
+            specialSlots.push({
+              id: `${mentorId}_special_reduced_${dateString}_${hour}`,
+              day: getDayName(dayOfWeek),
+              startTime: `${hour.toString().padStart(2, '0')}:00`,
+              endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+              isAvailable: Math.random() > 0.3, // 70% chance of availability
+              type: 'specific' as const
+            });
+          }
+        } else {
+          // Weekend special availability
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            for (let hour = 9; hour < 17; hour++) {
+              specialSlots.push({
+                id: `${mentorId}_special_weekend_${dateString}_${hour}`,
+                day: getDayName(dayOfWeek),
+                startTime: `${hour.toString().padStart(2, '0')}:00`,
+                endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+                isAvailable: Math.random() > 0.4, // 60% chance of weekend availability
+                type: 'specific' as const
+              });
+            }
+          }
+        }
+      }
+    }
+    
+    return specialSlots;
+  };
+
   const generateAvailabilityForExistingMentors = async () => {
     setLoading(true);
     setError(null);
@@ -679,8 +906,10 @@ export default function GenerateRandomProfile() {
         
         // Generate availability if none exists or if overwriting
         if (existingAvailability.empty || overwriteAvailability) {
-          const availabilityData = generateRandomAvailability(mentorDoc.id);
-          await addDoc(collection(db, 'mentorAvailability'), availabilityData);
+          const mentorData = mentorDoc.data();
+          const mentorUid = mentorData.uid || mentorDoc.id; // Use uid if available, fallback to doc id
+          const availabilityData = generateRandomAvailability(mentorUid);
+          await setDoc(doc(db, 'mentorAvailability', mentorUid), availabilityData);
           generatedCount++;
         }
       }
@@ -704,6 +933,7 @@ export default function GenerateRandomProfile() {
       
       const mentors = mentorsSnapshot.docs.map(doc => ({
         id: doc.id,
+        uid: doc.data().uid || doc.id, // Use uid if available, fallback to doc id
         name: doc.data().name || 'Unknown Name',
         email: doc.data().email || 'No Email'
       }));
@@ -729,10 +959,16 @@ export default function GenerateRandomProfile() {
       let generatedCount = 0;
       
       for (const mentorId of selectedMentors) {
+        // Find the mentor document to get their uid
+        const mentorDoc = availableMentors.find(m => m.id === mentorId);
+        if (!mentorDoc) continue;
+        
+        const mentorUid = mentorDoc.uid;
+        
         // Check if availability already exists for this mentor
         const availabilityQuery = query(
           collection(db, 'mentorAvailability'),
-          where('mentorId', '==', mentorId)
+          where('mentorId', '==', mentorUid)
         );
         const existingAvailability = await getDocs(availabilityQuery);
         
@@ -744,8 +980,8 @@ export default function GenerateRandomProfile() {
         
         // Generate availability if none exists or if overwriting
         if (existingAvailability.empty || overwriteAvailability) {
-          const availabilityData = generateRandomAvailability(mentorId);
-          await addDoc(collection(db, 'mentorAvailability'), availabilityData);
+          const availabilityData = generateRandomAvailability(mentorUid);
+          await setDoc(doc(db, 'mentorAvailability', mentorUid), availabilityData);
           generatedCount++;
         }
       }
@@ -762,6 +998,10 @@ export default function GenerateRandomProfile() {
   };
 
   const toggleMentorSelection = (mentorId: string) => {
+    if (!mentorId || mentorId.trim() === '') {
+      return;
+    }
+    
     setSelectedMentors(prev => 
       prev.includes(mentorId) 
         ? prev.filter(id => id !== mentorId)
@@ -770,11 +1010,56 @@ export default function GenerateRandomProfile() {
   };
 
   const filteredMentors = availableMentors.filter(mentor =>
+    mentor && mentor.name && mentor.email && mentorSearch &&
     mentor.name.toLowerCase().includes(mentorSearch.toLowerCase()) ||
     mentor.email.toLowerCase().includes(mentorSearch.toLowerCase())
   );
 
+  // Generate site-wide availability settings for mentors
+  const generateSiteWideAvailability = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Get all existing mentors
+      const mentorsQuery = query(
+        collection(db, 'mentorProgram'),
+        where('type', '==', 'mentor')
+      );
+      const mentorsSnapshot = await getDocs(mentorsQuery);
+      
+      if (mentorsSnapshot.empty) {
+        setError('No mentors found to generate site-wide availability for.');
+        return;
+      }
+
+      let generatedCount = 0;
+      for (const mentorDoc of mentorsSnapshot.docs) {
+        // Generate comprehensive availability data
+        const mentorData = mentorDoc.data();
+        const mentorUid = mentorData.uid || mentorDoc.id; // Use uid if available, fallback to doc id
+        const availabilityData = generateRandomAvailability(mentorUid);
+        
+        // Always overwrite existing availability for site-wide generation
+        await setDoc(doc(db, 'mentorAvailability', mentorUid), availabilityData);
+        generatedCount++;
+      }
+
+      setSuccess(`Generated comprehensive site-wide availability for ${generatedCount} mentors!`);
+    } catch (err) {
+      console.error('Error generating site-wide availability:', err);
+      setError('Failed to generate site-wide availability. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const generateRandomProfile = (): MentorMenteeProfile => {
+    if (!type) {
+      throw new Error('Profile type is required for generating profiles');
+    }
+    
     const archetypeList = type === 'mentor' ? mentorArchetypes : menteeArchetypes;
     const selectedArchetype = archetypeList.find(a => a.key === archetype);
     if (!useArchetype || !selectedArchetype || archetype === 'random') {
@@ -811,21 +1096,26 @@ export default function GenerateRandomProfile() {
         skills: type === 'mentor' ? skills : [],
         lookingFor: type === 'mentee' ? lookingFor : [],
         industries,
-        type,
+        type: type || 'mentor',
         isGenerated: "true",
       };
     }
+    
     // Archetype-based generation
+    if (!selectedArchetype) {
+      throw new Error('Selected archetype is required for archetype-based generation');
+    }
+    
     const firstName = getRandomElement(firstNames);
     const lastName = getRandomElement(lastNames);
     const age = Math.floor(Math.random() * ((selectedArchetype.ageRange?.[1] || 60) - (selectedArchetype.ageRange?.[0] || 18) + 1)) + (selectedArchetype.ageRange?.[0] || 18);
-    const skills = getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2);
-    const lookingFor = selectedArchetype.type === 'mentee' ? getRandomElements(selectedArchetype.skills!, Math.floor(Math.random() * 3) + 2) : [];
-    const industries = getRandomElements(selectedArchetype.industries!, 1);
-    const degree = getRandomElement(selectedArchetype.degrees!);
-    const educationLevel = getRandomElement(selectedArchetype.educationLevels!);
-    const profession = getRandomElement(selectedArchetype.professions!);
-    const hobbiesList = getRandomElements(selectedArchetype.hobbies!, Math.floor(Math.random() * 3) + 1);
+    const skills = selectedArchetype.skills && selectedArchetype.skills.length > 0 ? getRandomElements(selectedArchetype.skills, Math.floor(Math.random() * 3) + 2) : getRandomSkills();
+    const lookingFor = selectedArchetype.type === 'mentee' && selectedArchetype.skills && selectedArchetype.skills.length > 0 ? getRandomElements(selectedArchetype.skills, Math.floor(Math.random() * 3) + 2) : [];
+    const industries = selectedArchetype.industries && selectedArchetype.industries.length > 0 ? getRandomElements(selectedArchetype.industries, 1) : getRandomElements(industriesList, 1);
+    const degree = selectedArchetype.degrees && selectedArchetype.degrees.length > 0 ? getRandomElement(selectedArchetype.degrees) : getRandomElement(['BSc', 'BA', 'MSc', 'MA']);
+    const educationLevel = selectedArchetype.educationLevels && selectedArchetype.educationLevels.length > 0 ? getRandomElement(selectedArchetype.educationLevels) : getRandomElement(ukEducationLevels);
+    const profession = selectedArchetype.professions && selectedArchetype.professions.length > 0 ? getRandomElement(selectedArchetype.professions) : getRandomElement(professions);
+    const hobbiesList = selectedArchetype.hobbies && selectedArchetype.hobbies.length > 0 ? getRandomElements(selectedArchetype.hobbies, Math.floor(Math.random() * 3) + 1) : getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2);
     return {
       uid: `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: `${firstName} ${lastName}`,
@@ -845,12 +1135,17 @@ export default function GenerateRandomProfile() {
       skills: selectedArchetype.type === 'mentor' ? skills : [],
       lookingFor,
       industries,
-      type: selectedArchetype.type as 'mentor' | 'mentee',
+      type: (selectedArchetype.type as 'mentor' | 'mentee') || type,
       isGenerated: "true",
     };
   };
 
   const handleGenerate = async () => {
+    if (!type) {
+      setError('Please select a profile type');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -864,8 +1159,8 @@ export default function GenerateRandomProfile() {
         
         // If it's a mentor, also generate availability data for testing
         if (profile.type === 'mentor') {
-          const availabilityData = generateRandomAvailability(docRef.id);
-          await addDoc(collection(db, 'mentorAvailability'), availabilityData);
+          const availabilityData = generateRandomAvailability(profile.uid);
+          await setDoc(doc(db, 'mentorAvailability', profile.uid), availabilityData);
           
           // If sample data is enabled, generate some sample bookings
           if (generateSampleData) {
@@ -1099,7 +1394,23 @@ export default function GenerateRandomProfile() {
             <small>Generate availability for all mentors, even if it already exists</small>
           </div>
 
+          <div className="availability-info">
+            <div className="info-item">
+              <span className="info-icon">📅</span>
+              <span>Generate comprehensive availability data for all mentors, including specific dates, recurring patterns, and realistic scheduling preferences.</span>
+            </div>
+          </div>
+
           <div className="availability-actions">
+            <button
+              onClick={generateSiteWideAvailability}
+              disabled={loading}
+              className="generate-btn primary"
+            >
+              <FaChalkboardTeacher />
+              <span>Generate Site-Wide Availability</span>
+            </button>
+
             <button
               onClick={generateAvailabilityForExistingMentors}
               disabled={loading}
