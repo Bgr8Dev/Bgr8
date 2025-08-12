@@ -1,11 +1,48 @@
 import React, { useState } from 'react';
 import { db } from '../../firebase/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import ukCounties from '../../constants/ukCounties';
 import industriesList from '../../constants/industries';
 import '../../styles/adminStyles/MentorManagement.css';
+
+// Import interfaces for availability
+interface TimeSlot {
+  id: string;
+  date?: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+  type: 'recurring' | 'specific';
+}
+
+interface MentorAvailability {
+  mentorId: string;
+  timeSlots: TimeSlot[];
+  lastUpdated: Date;
+}
+
+interface Booking {
+  id?: string;
+  mentorName: string;
+  mentorEmail: string;
+  menteeName: string;
+  menteeEmail: string;
+  sessionDate?: Date | string;
+  startTime: string;
+  endTime: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  meetLink?: string;
+  eventId?: string;
+  isCalComBooking?: boolean;
+  calComBookingId?: string;
+  mentorId?: string;
+  menteeId?: string;
+  duration?: number;
+  revenue?: number;
+  createdAt?: Date;
+}
 
 // Sample data for randomization
 const firstNames = [
@@ -504,6 +541,13 @@ export default function GenerateRandomProfile() {
   const [type, setType] = useState<'mentor' | 'mentee'>('mentor');
   const [useArchetype, setUseArchetype] = useState(false);
   const [archetype, setArchetype] = useState('random');
+  const [generateSampleData, setGenerateSampleData] = useState(false);
+  const [generateMentees, setGenerateMentees] = useState(false);
+  const [overwriteAvailability, setOverwriteAvailability] = useState(false);
+  const [mentorSearch, setMentorSearch] = useState('');
+  const [availableMentors, setAvailableMentors] = useState<Array<{id: string, name: string, email: string}>>([]);
+  const [selectedMentors, setSelectedMentors] = useState<string[]>([]);
+  const [showMentorSelector, setShowMentorSelector] = useState(false);
 
   const getRandomElement = <T,>(array: T[]): T => {
     return array[Math.floor(Math.random() * array.length)];
@@ -518,6 +562,217 @@ export default function GenerateRandomProfile() {
     const allSkills = Object.values(skillsByCategory).flat();
     return getRandomElements(allSkills, Math.floor(Math.random() * 5) + 3);
   };
+
+  const generateRandomAvailability = (mentorId: string): MentorAvailability => {
+    const timeSlots: TimeSlot[] = [];
+    const today = new Date();
+    
+    // Generate availability for the next 7 days
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+      const dateString = currentDate.toISOString().split('T')[0];
+      
+      // Generate 8 time slots per day (9 AM to 5 PM, 1-hour slots)
+      for (let hour = 9; hour < 17; hour++) {
+        const startTime = `${hour.toString().padStart(2, '0')}:00`;
+        const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+        
+        // 70% chance of being available, 30% chance of being booked
+        const isAvailable = Math.random() > 0.3;
+        
+        timeSlots.push({
+          id: `${mentorId}_${dateString}_${hour}`,
+          date: dateString,
+          startTime,
+          endTime,
+          isAvailable,
+          type: 'specific' as const
+        });
+      }
+    }
+    
+    return {
+      mentorId,
+      timeSlots,
+      lastUpdated: new Date()
+    };
+  };
+
+  const generateRandomBooking = (mentor: MentorMenteeProfile, mentorId: string): Booking => {
+    const today = new Date();
+    const randomDaysAhead = Math.floor(Math.random() * 14); // 0-14 days ahead
+    const sessionDate = new Date(today);
+    sessionDate.setDate(today.getDate() + randomDaysAhead);
+    
+    const startHour = Math.floor(Math.random() * 8) + 9; // 9 AM to 5 PM
+    const startTime = `${startHour.toString().padStart(2, '0')}:00`;
+    const endTime = `${(startHour + 1).toString().padStart(2, '0')}:00`;
+    
+    const statuses: ('pending' | 'confirmed' | 'cancelled')[] = ['pending', 'confirmed', 'cancelled'];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    
+    const isCalComBooking = Math.random() > 0.5; // 50% chance of being Cal.com booking
+    
+    // Create the base booking object
+    const booking: Booking = {
+      mentorName: mentor.name,
+      mentorEmail: mentor.email,
+      menteeName: `Test Mentee ${Math.floor(Math.random() * 1000)}`,
+      menteeEmail: `mentee${Math.floor(Math.random() * 1000)}@example.com`,
+      sessionDate: sessionDate.toISOString().split('T')[0],
+      startTime,
+      endTime,
+      status,
+      mentorId,
+      menteeId: `mentee_${Math.random().toString(36).substr(2, 9)}`,
+      duration: 60, // 1 hour sessions
+      revenue: Math.floor(Math.random() * 50) + 25, // £25-75 per session
+      createdAt: new Date()
+    };
+    
+    // Only add Cal.com specific fields if it's a Cal.com booking
+    if (isCalComBooking) {
+      booking.meetLink = `https://meet.google.com/abc-defg-hij`;
+      booking.eventId = `event_${Math.random().toString(36).substr(2, 9)}`;
+      booking.isCalComBooking = true;
+      booking.calComBookingId = `cal_${Math.random().toString(36).substr(2, 9)}`;
+    } else {
+      booking.isCalComBooking = false;
+    }
+    
+    return booking;
+  };
+
+  const generateAvailabilityForExistingMentors = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Get all existing mentors from the mentorProgram collection
+      const mentorsQuery = query(
+        collection(db, 'mentorProgram'),
+        where('type', '==', 'mentor')
+      );
+      const mentorsSnapshot = await getDocs(mentorsQuery);
+      
+      if (mentorsSnapshot.empty) {
+        setError('No mentors found to generate availability for.');
+        return;
+      }
+
+      let generatedCount = 0;
+      for (const mentorDoc of mentorsSnapshot.docs) {
+        // Check if availability already exists for this mentor
+        const availabilityQuery = query(
+          collection(db, 'mentorAvailability'),
+          where('mentorId', '==', mentorDoc.id)
+        );
+        const existingAvailability = await getDocs(availabilityQuery);
+        
+        // If overwriting, delete existing availability first
+        if (overwriteAvailability && !existingAvailability.empty) {
+          const deletePromises = existingAvailability.docs.map(doc => deleteDoc(doc.ref));
+          await Promise.all(deletePromises);
+        }
+        
+        // Generate availability if none exists or if overwriting
+        if (existingAvailability.empty || overwriteAvailability) {
+          const availabilityData = generateRandomAvailability(mentorDoc.id);
+          await addDoc(collection(db, 'mentorAvailability'), availabilityData);
+          generatedCount++;
+        }
+      }
+
+      setSuccess(`Generated availability data for ${generatedCount} mentors!`);
+    } catch (err) {
+      console.error('Error generating availability:', err);
+      setError('Failed to generate availability. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAvailableMentors = async () => {
+    try {
+      const mentorsQuery = query(
+        collection(db, 'mentorProgram'),
+        where('type', '==', 'mentor')
+      );
+      const mentorsSnapshot = await getDocs(mentorsQuery);
+      
+      const mentors = mentorsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name || 'Unknown Name',
+        email: doc.data().email || 'No Email'
+      }));
+      
+      setAvailableMentors(mentors);
+    } catch (err) {
+      console.error('Error fetching mentors:', err);
+      setError('Failed to fetch available mentors.');
+    }
+  };
+
+  const generateAvailabilityForSpecificMentors = async () => {
+    if (selectedMentors.length === 0) {
+      setError('Please select at least one mentor.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      let generatedCount = 0;
+      
+      for (const mentorId of selectedMentors) {
+        // Check if availability already exists for this mentor
+        const availabilityQuery = query(
+          collection(db, 'mentorAvailability'),
+          where('mentorId', '==', mentorId)
+        );
+        const existingAvailability = await getDocs(availabilityQuery);
+        
+        // If overwriting, delete existing availability first
+        if (overwriteAvailability && !existingAvailability.empty) {
+          const deletePromises = existingAvailability.docs.map(doc => deleteDoc(doc.ref));
+          await Promise.all(deletePromises);
+        }
+        
+        // Generate availability if none exists or if overwriting
+        if (existingAvailability.empty || overwriteAvailability) {
+          const availabilityData = generateRandomAvailability(mentorId);
+          await addDoc(collection(db, 'mentorAvailability'), availabilityData);
+          generatedCount++;
+        }
+      }
+
+      setSuccess(`Generated availability data for ${generatedCount} selected mentors!`);
+      setSelectedMentors([]);
+      setShowMentorSelector(false);
+    } catch (err) {
+      console.error('Error generating availability for specific mentors:', err);
+      setError('Failed to generate availability for selected mentors.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleMentorSelection = (mentorId: string) => {
+    setSelectedMentors(prev => 
+      prev.includes(mentorId) 
+        ? prev.filter(id => id !== mentorId)
+        : [...prev, mentorId]
+    );
+  };
+
+  const filteredMentors = availableMentors.filter(mentor =>
+    mentor.name.toLowerCase().includes(mentorSearch.toLowerCase()) ||
+    mentor.email.toLowerCase().includes(mentorSearch.toLowerCase())
+  );
 
   const generateRandomProfile = (): MentorMenteeProfile => {
     const archetypeList = type === 'mentor' ? mentorArchetypes : menteeArchetypes;
@@ -604,12 +859,45 @@ export default function GenerateRandomProfile() {
       const profiles = Array.from({ length: count }, () => generateRandomProfile());
       
       for (const profile of profiles) {
-        await addDoc(collection(db, 'mentorProgram'), profile);
+        // Add the profile to mentorProgram collection
+        const docRef = await addDoc(collection(db, 'mentorProgram'), profile);
+        
+        // If it's a mentor, also generate availability data for testing
+        if (profile.type === 'mentor') {
+          const availabilityData = generateRandomAvailability(docRef.id);
+          await addDoc(collection(db, 'mentorAvailability'), availabilityData);
+          
+          // If sample data is enabled, generate some sample bookings
+          if (generateSampleData) {
+            const numBookings = Math.floor(Math.random() * 3) + 1; // 1-3 bookings per mentor
+            for (let i = 0; i < numBookings; i++) {
+              const bookingData = generateRandomBooking(profile, docRef.id);
+              await addDoc(collection(db, 'bookings'), bookingData);
+            }
+          }
+        }
       }
 
-      setSuccess(`Successfully generated ${count} ${type}${count > 1 ? 's' : ''}!`);
+      // If generating mentors and mentees are requested, generate some mentees too
+      if (type === 'mentor' && generateMentees) {
+        const menteeCount = Math.min(count, 5); // Generate up to 5 mentees
+        const menteeProfiles = Array.from({ length: menteeCount }, () => {
+          const menteeProfile = generateRandomProfile();
+          menteeProfile.type = 'mentee';
+          return menteeProfile;
+        });
+        
+        for (const menteeProfile of menteeProfiles) {
+          await addDoc(collection(db, 'mentorProgram'), menteeProfile);
+        }
+      }
+
+      const sampleDataText = generateSampleData ? ' (with sample bookings)' : '';
+      const menteesText = (type === 'mentor' && generateMentees) ? ' (with sample mentees)' : '';
+      setSuccess(`Successfully generated ${count} ${type}${count > 1 ? 's' : ''}!${type === 'mentor' ? ' (with availability data for testing)' : ''}${sampleDataText}${menteesText}`);
     } catch (err) {
       console.error('Error generating profiles:', err);
+      setSuccess(null);
       setError('Failed to generate profiles. Please try again.');
     } finally {
       setLoading(false);
@@ -619,59 +907,300 @@ export default function GenerateRandomProfile() {
   return (
     <div className="mentor-management">
       <div className="mentor-management-header">
-        <h2>Generate Random Profiles</h2>
-        <div className="mentor-management-controls">
-          <div className="mentor-management-filters">
-            <button
-              className={type === 'mentor' ? 'active' : ''}
-              onClick={() => setType('mentor')}
-            >
-              <FaChalkboardTeacher /> Mentors
-            </button>
-            <button
-              className={type === 'mentee' ? 'active' : ''}
-              onClick={() => setType('mentee')}
-            >
-              <FaUserGraduate /> Mentees
-            </button>
-            <label style={{ marginLeft: 16, fontWeight: 600, fontSize: 15 }}>
-              <input type="checkbox" checked={useArchetype} onChange={e => setUseArchetype(e.target.checked)} style={{ marginRight: 6 }} />
-              Use Archetype/Persona
-            </label>
-            {useArchetype && (
-              <select value={archetype} onChange={e => setArchetype(e.target.value)} style={{ marginLeft: 16, padding: '0.6rem 1.2rem', borderRadius: 8, fontWeight: 600, fontSize: 15 }}>
-                {(type === 'mentor' ? mentorArchetypes : menteeArchetypes).map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
-              </select>
-            )}
-          </div>
+        <h2>🎲 Generate Test Data</h2>
+        <p style={{ color: 'var(--gray-600)', marginTop: 8, fontSize: 14 }}>
+          Create realistic test profiles and data for development and testing purposes
+        </p>
+      </div>
+
+      {/* Profile Type Selection */}
+      <div className="profile-type-selector">
+        <div className="selector-tabs">
+          <button
+            className={`selector-tab ${type === 'mentor' ? 'active' : ''}`}
+            onClick={() => setType('mentor')}
+          >
+            <FaChalkboardTeacher />
+            <span>Mentors</span>
+          </button>
+          <button
+            className={`selector-tab ${type === 'mentee' ? 'active' : ''}`}
+            onClick={() => setType('mentee')}
+          >
+            <FaUserGraduate />
+            <span>Mentees</span>
+          </button>
         </div>
       </div>
 
-      <div className="mentor-management-stats">
-        <div className="stat-card">
-          <h3>Generate</h3>
-          <div className="generate-controls">
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={count}
-              onChange={(e) => setCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-              className="count-input"
-            />
+      {/* Main Generation Section */}
+      <div className="generation-section">
+        <div className="generation-card primary">
+          <div className="card-header">
+            <div className="card-icon">✨</div>
+            <div className="card-title">
+              <h3>Generate New Profiles</h3>
+              <p>Create new {type} profiles with realistic data</p>
+            </div>
+          </div>
+          
+          <div className="generation-controls">
+            <div className="quantity-control">
+              <label>Number of Profiles</label>
+              <div className="quantity-input-group">
+                <button 
+                  className="quantity-btn"
+                  onClick={() => setCount(Math.max(1, count - 1))}
+                  disabled={count <= 1}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={count}
+                  onChange={(e) => setCount(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
+                  className="quantity-input"
+                />
+                <button 
+                  className="quantity-btn"
+                  onClick={() => setCount(Math.min(20, count + 1))}
+                  disabled={count >= 20}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="options-grid">
+              <div className="option-group">
+                <label className="option-label">
+                  <input 
+                    type="checkbox" 
+                    checked={useArchetype} 
+                    onChange={e => setUseArchetype(e.target.checked)}
+                    className="option-checkbox"
+                  />
+                  <span>Use Specific Archetype</span>
+                </label>
+                {useArchetype && (
+                  <select 
+                    value={archetype} 
+                    onChange={e => setArchetype(e.target.value)}
+                    className="archetype-select"
+                  >
+                    {(type === 'mentor' ? mentorArchetypes : menteeArchetypes).map(a => 
+                      <option key={a.key} value={a.key}>{a.label}</option>
+                    )}
+                  </select>
+                )}
+              </div>
+
+              {type === 'mentor' && (
+                <>
+                  <div className="option-group">
+                    <label className="option-label">
+                      <input 
+                        type="checkbox" 
+                        checked={generateSampleData} 
+                        onChange={e => setGenerateSampleData(e.target.checked)}
+                        className="option-checkbox"
+                      />
+                      <span>Include Sample Bookings</span>
+                    </label>
+                    <small>Creates 1-3 sample bookings per mentor</small>
+                  </div>
+
+                  <div className="option-group">
+                    <label className="option-label">
+                      <input 
+                        type="checkbox" 
+                        checked={generateMentees} 
+                        onChange={e => setGenerateMentees(e.target.checked)}
+                        className="option-checkbox"
+                      />
+                      <span>Generate Matching Mentees</span>
+                    </label>
+                    <small>Creates up to 5 mentees for testing</small>
+                  </div>
+
+                  <div className="option-group">
+                    <label className="option-label">
+                      <input 
+                        type="checkbox" 
+                        checked={overwriteAvailability} 
+                        onChange={e => setOverwriteAvailability(e.target.checked)}
+                        className="option-checkbox"
+                      />
+                      <span>Overwrite Existing Availability</span>
+                    </label>
+                    <small>Generate availability for mentors even if it already exists</small>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="generate-button"
+              className="generate-btn primary"
             >
-              <FaRandom /> Generate {count} {type}{count > 1 ? 's' : ''}
+              {loading ? (
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <span>Generating...</span>
+                </div>
+              ) : (
+                <>
+                  <FaRandom />
+                  <span>Generate {count} {type}{count > 1 ? 's' : ''}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
+
+        {/* Availability Generation Section */}
+        <div className="generation-card secondary">
+          <div className="card-header">
+            <div className="card-icon">📅</div>
+            <div className="card-title">
+              <h3>Generate Availability Data</h3>
+              <p>Add availability schedules to existing mentors</p>
+            </div>
+          </div>
+          
+          <div className="availability-info">
+            <div className="info-item">
+              <span className="info-icon">⏰</span>
+              <span>7 days of time slots</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">🕘</span>
+              <span>9 AM - 5 PM daily</span>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">📊</span>
+              <span>70% availability rate</span>
+            </div>
+          </div>
+
+          <div className="option-group" style={{ marginBottom: 20 }}>
+            <label className="option-label">
+              <input 
+                type="checkbox" 
+                checked={overwriteAvailability} 
+                onChange={e => setOverwriteAvailability(e.target.checked)}
+                className="option-checkbox"
+              />
+              <span>Overwrite Existing Availability</span>
+            </label>
+            <small>Generate availability for all mentors, even if it already exists</small>
+          </div>
+
+          <div className="availability-actions">
+            <button
+              onClick={generateAvailabilityForExistingMentors}
+              disabled={loading}
+              className="generate-btn secondary"
+            >
+              <FaChalkboardTeacher />
+              <span>Generate for All Mentors</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowMentorSelector(!showMentorSelector);
+                if (!showMentorSelector) {
+                  fetchAvailableMentors();
+                }
+              }}
+              disabled={loading}
+              className="generate-btn secondary outline"
+            >
+              <FaChalkboardTeacher />
+              <span>Select Specific Mentors</span>
+            </button>
+          </div>
+
+          {/* Mentor Selector Modal */}
+          {showMentorSelector && (
+            <>
+              {/* Backdrop */}
+              <div 
+                className="mentor-selector-backdrop"
+                onClick={() => setShowMentorSelector(false)}
+              />
+              
+              {/* Modal */}
+              <div className="mentor-selector-modal">
+                <div className="modal-header">
+                  <h4>Select Mentors for Availability Generation</h4>
+                  <button 
+                    onClick={() => setShowMentorSelector(false)}
+                    className="close-btn"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div className="search-section">
+                  <input
+                    type="text"
+                    placeholder="Search mentors by name or email..."
+                    value={mentorSearch}
+                    onChange={(e) => setMentorSearch(e.target.value)}
+                    className="mentor-search-input"
+                  />
+                </div>
+
+                <div className="mentors-list">
+                  {filteredMentors.map(mentor => (
+                    <label key={mentor.id} className="mentor-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedMentors.includes(mentor.id)}
+                        onChange={() => toggleMentorSelection(mentor.id)}
+                        className="mentor-checkbox"
+                      />
+                      <div className="mentor-info">
+                        <span className="mentor-name">{mentor.name}</span>
+                        <span className="mentor-email">{mentor.email}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    onClick={generateAvailabilityForSpecificMentors}
+                    disabled={loading || selectedMentors.length === 0}
+                    className="generate-btn secondary"
+                  >
+                    <FaChalkboardTeacher />
+                    <span>Generate for {selectedMentors.length} Selected</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
-      {error && <div className="mentor-management-error">{error}</div>}
-      {success && <div className="mentor-management-success">{success}</div>}
+      {/* Status Messages */}
+      {error && (
+        <div className="status-message error">
+          <span className="status-icon">❌</span>
+          <span>{error}</span>
+        </div>
+      )}
+      {success && (
+        <div className="status-message success">
+          <span className="status-icon">✅</span>
+          <span>{success}</span>
+        </div>
+      )}
     </div>
   );
 } 
