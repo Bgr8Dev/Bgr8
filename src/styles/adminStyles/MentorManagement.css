@@ -107,19 +107,61 @@
   color: var(--button-primary-text);
 }
 
+/* View Toggle Buttons */
+.view-toggle-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.view-toggle-buttons button {
+  padding: 8px 16px;
+  border: 1.5px solid var(--button-secondary-border);
+  border-radius: var(--radius-md);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-toggle-buttons button:hover {
+  background: var(--button-secondary-hover-bg);
+  border-color: var(--button-secondary-hover-border);
+  color: var(--button-secondary-hover-text);
+}
+
+.view-toggle-buttons button.active {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border-color: var(--button-primary-border);
+}
+
+.view-toggle-buttons button.active:hover {
+  background: var(--button-primary-hover-bg);
+  border-color: var(--button-primary-hover-border);
+  color: var(--button-primary-hover-text);
+}
+
+/* Ensure all white buttons have proper text contrast */
 .refresh-button {
   background: var(--button-secondary-bg) !important;
   border-color: var(--button-secondary-border) !important;
+  color: var(--button-secondary-text) !important;
 }
 
 .refresh-button:hover {
   background: var(--button-secondary-hover-bg) !important;
   border-color: var(--button-secondary-hover-border) !important;
+  color: var(--button-secondary-hover-text) !important;
 }
 
 .refresh-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  color: var(--button-secondary-disabled-text) !important;
 }
 
 .refresh-button svg {

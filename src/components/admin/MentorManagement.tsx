@@ -1006,7 +1006,7 @@ export default function MentorManagement() {
           )}
           
           {/* Bookings View Mode Switch */}
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 18 }}>
+          <div className="view-toggle-buttons">
             <button className={bookingsView === 'table' ? 'active' : ''} onClick={() => setBookingsView('table')}>Table View</button>
             <button className={bookingsView === 'grouped' ? 'active' : ''} onClick={() => setBookingsView('grouped')}>Grouped View</button>
             {bookingsView === 'grouped' && (
