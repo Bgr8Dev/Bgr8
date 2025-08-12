@@ -625,15 +625,15 @@ export default function MentorManagement() {
   // Function to wipe all availability data from the database
   const handleWipeAllAvailability = async () => {
     const confirmed = window.confirm(
-      '🚨 DANGER: WIPE ALL AVAILABILITY DATA 🚨\n\n' +
-      '⚠️  This will permanently delete ALL availability data from the database!\n\n' +
-      '📋 This includes:\n' +
-      '   • All mentor time slots\n' +
-      '   • All recurring availability patterns\n' +
-      '   • All specific date availability\n' +
-      '   • All availability history\n\n' +
-      '❌ This action CANNOT be undone!\n\n' +
-      '🔒 Are you absolutely sure you want to proceed?\n\n' +
+      'DANGER: WIPE ALL AVAILABILITY DATA\n\n' +
+      'This will permanently delete ALL availability data from the database!\n\n' +
+      'This includes:\n' +
+      '• All mentor time slots\n' +
+      '• All recurring availability patterns\n' +
+      '• All specific date availability\n' +
+      '• All availability history\n\n' +
+      'This action CANNOT be undone!\n\n' +
+      'Are you absolutely sure you want to proceed?\n\n' +
       'Type "WIPE" to confirm:'
     );
     
@@ -662,7 +662,7 @@ export default function MentorManagement() {
       // Refresh the availability data
       await fetchAvailability();
       
-      alert(`✅ SUCCESS: Wiped ${availabilitySnapshot.docs.length} availability records from the database!\n\nAll mentor availability data has been permanently removed.`);
+      alert(`SUCCESS: Wiped ${availabilitySnapshot.docs.length} availability records from the database!\n\nAll mentor availability data has been permanently removed.`);
     } catch (error) {
       console.error('Error wiping availability data:', error);
       alert('Error deleting availability data. Please check the console for details.');
