@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../firebase/firebase';
 import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt, FaCog } from 'react-icons/fa';
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, getBestMatchesForUser, MatchResult } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import BookingModal from '../components/widgets/MentorAlgorithm/booking/BookingModal';
 import CalComModal from '../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { CalComService } from '../components/widgets/MentorAlgorithm/CalCom/calComService';
 import MatchStrengthRing from '../components/widgets/MentorAlgorithm/MatchStrengthRing';
+import MentorAvailability from '../components/widgets/MentorAlgorithm/MentorAvailability';
 import skillsByCategory from '../constants/skillsByCategory';
 import ukEducationLevels from '../constants/ukEducationLevels';
 import ukCounties from '../constants/ukCounties';
@@ -38,6 +39,26 @@ export default function MentorPage() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileMentor, setSelectedProfileMentor] = useState<MentorMenteeProfile | null>(null);
   const [mentorAvailability, setMentorAvailability] = useState<{[key: string]: {available: boolean, nextSlot?: string}}>({});
+  const [availabilityModalOpen, setAvailabilityModalOpen] = useState(false);
+  
+  // Enhanced availability data structure
+  const [enhancedAvailability, setEnhancedAvailability] = useState<{[key: string]: {
+    timeSlots: Array<{
+      date: string;
+      startTime: string;
+      endTime: string;
+      isAvailable: boolean;
+    }>;
+  }}>({});
+  
+  // Mentor booking history
+  const [mentorBookings, setMentorBookings] = useState<{[key: string]: Array<{
+    id: string;
+    menteeName: string;
+    sessionDate: string;
+    startTime: string;
+    status: string;
+  }>}>({});
 
   // Registration and Profile States
   const [showRegistration, setShowRegistration] = useState(false);
@@ -507,6 +528,12 @@ export default function MentorPage() {
   const handleProfileCardClick = (mentor: MentorMenteeProfile) => {
     setSelectedProfileMentor(mentor);
     setProfileModalOpen(true);
+    
+    // Fetch enhanced data when modal opens
+    if (mentor.uid) {
+      fetchEnhancedAvailability(mentor.uid);
+      fetchMentorBookings(mentor.uid);
+    }
   };
 
   const getFilterCount = (filterType: string) => {
@@ -569,6 +596,52 @@ export default function MentorPage() {
     } catch (error) {
       console.error('Error checking availability for mentor:', mentor.uid, error);
       return { available: false, nextSlot: 'Unable to check' };
+    }
+  };
+
+  const fetchEnhancedAvailability = async (mentorId: string) => {
+    try {
+      // Fetch from mentorAvailability collection
+      const availabilityDoc = await getDoc(doc(db, 'mentorAvailability', mentorId));
+      if (availabilityDoc.exists()) {
+        const data = availabilityDoc.data();
+        setEnhancedAvailability(prev => ({
+          ...prev,
+          [mentorId]: {
+            timeSlots: data.timeSlots || []
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching enhanced availability:', error);
+    }
+  };
+
+  const fetchMentorBookings = async (mentorId: string) => {
+    try {
+      // Fetch from bookings collection
+      const bookingsQuery = query(
+        collection(db, 'bookings'),
+        where('mentorId', '==', mentorId)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
+      const bookings = bookingsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          menteeName: data.menteeName || 'Unknown',
+          sessionDate: data.sessionDate || '',
+          startTime: data.startTime || '',
+          status: data.status || 'unknown'
+        };
+      });
+      
+      setMentorBookings(prev => ({
+        ...prev,
+        [mentorId]: bookings
+      }));
+    } catch (error) {
+      console.error('Error fetching mentor bookings:', error);
     }
   };
 
@@ -887,6 +960,11 @@ export default function MentorPage() {
                 <button onClick={findMatches} className="find-matches-btn" disabled={loadingMatches}>
                   <FaUserFriends /> {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
                 </button>
+                {currentUserProfile.type === MENTOR && (
+                  <button onClick={() => setAvailabilityModalOpen(true)} className="availability-manage-btn">
+                    <FaCog /> Manage Availability
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -1127,6 +1205,14 @@ export default function MentorPage() {
                 {mentorAvailability[mentor.uid]?.available && mentorAvailability[mentor.uid]?.nextSlot && (
                   <div className="next-slot">
                     Next: {mentorAvailability[mentor.uid]?.nextSlot}
+                  </div>
+                )}
+
+                {/* Cal.com Integration Indicator */}
+                {mentor.calCom && (
+                  <div className="calcom-indicator">
+                    <FaVideo className="video-icon" />
+                    <span>Cal.com Connected</span>
                   </div>
                 )}
               </div>
@@ -1375,8 +1461,88 @@ export default function MentorPage() {
                         Next available: {mentorAvailability[selectedProfileMentor.uid]?.nextSlot}
                       </div>
                     )}
+                    
+                    {/* Enhanced Availability Display */}
+                    {enhancedAvailability[selectedProfileMentor.uid]?.timeSlots && enhancedAvailability[selectedProfileMentor.uid].timeSlots.length > 0 && (
+                      <div className="detailed-availability">
+                        <h5>Upcoming Time Slots</h5>
+                        <div className="time-slots-grid">
+                          {enhancedAvailability[selectedProfileMentor.uid].timeSlots.slice(0, 6).map((slot, index) => (
+                            <div key={index} className={`time-slot ${slot.isAvailable ? 'available' : 'booked'}`}>
+                              <div className="slot-date">{slot.date}</div>
+                              <div className="slot-time">{slot.startTime} - {slot.endTime}</div>
+                              <div className="slot-status">{slot.isAvailable ? 'Available' : 'Booked'}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Cal.com Integration Status */}
+                    {selectedProfileMentor.calCom && (
+                      <div className="calcom-integration">
+                        <FaVideo className="video-icon" />
+                        <span className="integration-status">
+                          <strong>Cal.com Integration:</strong> ✅ Connected
+                        </span>
+                        <a 
+                          href={selectedProfileMentor.calCom} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="calcom-link"
+                        >
+                          View Calendar
+                        </a>
+                      </div>
+                    )}
+                    
+                    {/* Contact Information */}
+                    <div className="contact-info">
+                      <div className="contact-item">
+                        <strong>Email:</strong> {selectedProfileMentor.email || 'Not provided'}
+                      </div>
+                      {selectedProfileMentor.phone && (
+                        <div className="contact-item">
+                          <strong>Phone:</strong> {selectedProfileMentor.phone}
+                        </div>
+                      )}
+                      {selectedProfileMentor.linkedin && (
+                        <div className="contact-item">
+                          <strong>LinkedIn:</strong> 
+                          <a 
+                            href={selectedProfileMentor.linkedin} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="linkedin-link"
+                          >
+                            View Profile
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Booking History Section */}
+                {mentorBookings[selectedProfileMentor.uid] && mentorBookings[selectedProfileMentor.uid].length > 0 && (
+                  <div className="profile-section">
+                    <h4>Recent Bookings</h4>
+                    <div className="bookings-list">
+                      {mentorBookings[selectedProfileMentor.uid].slice(0, 5).map((booking, index) => (
+                        <div key={index} className="booking-item">
+                          <div className="booking-header">
+                            <span className="mentee-name">{booking.menteeName}</span>
+                            <span className={`booking-status ${booking.status}`}>{booking.status}</span>
+                          </div>
+                          <div className="booking-details">
+                            <span className="booking-date">{booking.sessionDate}</span>
+                            <span className="booking-time">{booking.startTime}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="profile-actions">
@@ -1404,6 +1570,23 @@ export default function MentorPage() {
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Availability Management Modal */}
+      {availabilityModalOpen && (
+        <div className="availability-modal-overlay">
+          <div className="availability-modal">
+            <div className="availability-modal-header">
+              <h3>Manage Your Availability</h3>
+              <button onClick={() => setAvailabilityModalOpen(false)} className="close-button" title="Close modal">
+                <FaTimes />
+              </button>
+            </div>
+            <div className="availability-modal-content">
+              <MentorAvailability />
             </div>
           </div>
         </div>

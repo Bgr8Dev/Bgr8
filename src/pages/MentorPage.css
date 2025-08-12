@@ -1294,6 +1294,21 @@
   font-weight: 500;
 }
 
+.calcom-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--info);
+  font-weight: 500;
+}
+
+.calcom-indicator .video-icon {
+  width: 14px;
+  color: var(--info);
+}
+
 /* Action Buttons */
 .mentor-actions {
   display: flex;
@@ -1877,6 +1892,14 @@
   border-radius: 1px;
 }
 
+.profile-section h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--mentor-dark);
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+
 .profile-details {
   display: flex;
   flex-direction: column;
@@ -1927,7 +1950,7 @@
 .availability-info {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .availability-status {
@@ -1956,6 +1979,209 @@
   color: var(--gray-600);
   font-weight: 500;
   padding-left: 32px;
+}
+
+/* Enhanced Availability Display */
+.detailed-availability {
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--gray-200);
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.time-slot {
+  background: var(--white);
+  border-radius: 8px;
+  padding: 12px;
+  border: 2px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.time-slot.available {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+
+.time-slot.booked {
+  border-color: var(--error);
+  background: var(--error-light);
+}
+
+.slot-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 4px;
+}
+
+.slot-time {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.slot-status {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-slot.available .slot-status {
+  color: var(--success-dark);
+}
+
+.time-slot.booked .slot-status {
+  color: var(--error-dark);
+}
+
+/* Cal.com Integration */
+.calcom-integration {
+  background: var(--info-light);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--info);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.video-icon {
+  color: var(--info);
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.integration-status {
+  color: var(--info-dark);
+  font-weight: 500;
+}
+
+.calcom-link {
+  color: var(--info);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1px solid var(--info);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.calcom-link:hover {
+  background: var(--info);
+  color: var(--white);
+}
+
+/* Contact Information */
+.contact-info {
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--gray-200);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--gray-700);
+}
+
+.contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.linkedin-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.linkedin-link:hover {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
+/* Booking History */
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking-item {
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.booking-item:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-300);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mentee-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.booking-status {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.booking-status.confirmed {
+  background: var(--success-light);
+  color: var(--success-dark);
+}
+
+.booking-status.pending {
+  background: var(--warning-light);
+  color: var(--warning-dark);
+}
+
+.booking-status.cancelled {
+  background: var(--error-light);
+  color: var(--error-dark);
+}
+
+.booking-details {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+.booking-date,
+.booking-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .profile-actions {
@@ -1989,4 +2215,126 @@
 .mentor-actions {
   position: relative;
   z-index: 2;
+}
+
+/* Profile Modal Styles */
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.profile-modal {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Availability Management Button */
+.availability-manage-btn {
+  background: var(--button-mentor-bg);
+  color: var(--button-mentor-text);
+  border: 1px solid var(--button-mentor-border);
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(224, 106, 92, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.availability-manage-btn:hover {
+  background: var(--button-mentor-hover-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(224, 106, 92, 0.3);
+}
+
+/* Availability Modal Styles */
+.availability-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.availability-modal {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+.availability-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 20px 20px 0 0;
+}
+
+.availability-modal-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.availability-modal-content {
+  padding: 2rem;
+  max-height: calc(95vh - 120px);
+  overflow-y: auto;
+}
+
+/* Responsive Design for Availability Modal */
+@media (max-width: 768px) {
+  .availability-modal {
+    max-width: 98vw;
+    max-height: 98vh;
+    margin: 1rem;
+  }
+  
+  .availability-modal-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .availability-modal-content {
+    padding: 1.5rem;
+  }
+  
+  .availability-manage-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
 }
