@@ -5,7 +5,7 @@
 > **Empowering individuals through community and mentorship**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -17,7 +17,7 @@
 
 ---
 
-**A focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm.**
+**A focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm with advanced availability management and intelligent search capabilities.**
 
 [🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [🤝 Contributing](#-contributing) • [📄 License](#-license)
 
@@ -63,9 +63,11 @@
 **bgr8 Platform** is dedicated to empowering individuals through the BGr8 community and a robust mentoring program. Our platform focuses exclusively on creating meaningful connections and fostering growth through:
 
 - 🤝 **Community Building** - Connect with like-minded individuals
-- 🎓 **Mentorship Programs** - Advanced algorithm-based matching
+- 🎓 **Mentorship Programs** - Advanced algorithm-based matching with real-time availability
 - 📈 **Personal Growth** - Structured learning and development
 - 🌍 **Diverse Network** - Inclusive and supportive environment
+- 🔍 **Smart Discovery** - Intelligent search and filtering system
+- 📅 **Flexible Scheduling** - Integrated availability management for mentors
 
 ---
 
@@ -79,25 +81,40 @@
 | Feature | Description | Status |
 |---------|-------------|:------:|
 | 🌟 **BGr8 Community Hub** | Centralized community platform | ✅ Live |
-| 🤝 **Mentor Matching** | Advanced MentorAlgorithm system | ✅ Live |
+| 🤝 **Mentor Matching** | Advanced MentorAlgorithm system with real-time availability | ✅ Live |
+| 🔍 **Smart Search System** | Intelligent search with dropdown suggestions and filtering | ✅ Live |
 | 📅 **Cal.com Booking System** | Third-party calendar integration | ✅ Live |
+| 📅 **Availability Management** | Direct mentor availability creation and management | ✅ Live |
 | 🔒 **Secure Authentication** | Firebase-powered security | ✅ Live |
 | 💳 **Payment Processing** | Stripe integration | ✅ Live |
-| 📱 **Responsive Design** | Mobile-first approach | ✅ Live |
-| 📊 **Analytics Dashboard** | Comprehensive insights | ✅ Live |
-| 💬 **Admin Management** | Complete control panel | ✅ Live |
+| 📱 **Responsive Design** | Mobile-first approach with mentor-specific styling | ✅ Live |
+| 📊 **Analytics Dashboard** | Comprehensive insights and mentor management | ✅ Live |
+| 💬 **Admin Management** | Complete control panel with data generation tools | ✅ Live |
 
 ### ⚡ Technical Features
 
 | Technology | Purpose | Status |
 |------------|---------|:------:|
 | 🔑 **Firebase Auth** | User authentication | ✅ Live |
-| 🔥 **Firestore DB** | Real-time database | ✅ Live |
+| 🔥 **Firestore DB** | Real-time database with cascading deletes | ✅ Live |
 | 💸 **Stripe Payments** | Secure transactions | ✅ Live |
 | 📅 **Cal.com Integration** | Advanced booking system | ✅ Live |
 | 🔗 **Proxy Server** | CORS-free API access | ✅ Live |
 | ⚡ **Real-time Updates** | Live data synchronization | ✅ Live |
 | 🧑‍💻 **React + TypeScript** | Modern frontend stack | ✅ Live |
+| 🎨 **CSS Variables** | Consistent design system with mentor branding | ✅ Live |
+
+### 🆕 Recent Enhancements
+
+| Feature | Description | Status |
+|---------|-------------|:------:|
+| 🔍 **Enhanced Search** | Dropdown suggestions, smart filtering, and improved UI | ✅ Live |
+| 📊 **Filter Tabs** | Relevant mentorship categories with count bubbles | ✅ Live |
+| 👤 **Profile Modals** | Clickable mentor cards with full profile display | ✅ Live |
+| 📅 **Availability Integration** | Real-time availability pulling from Cal.com and bookings | ✅ Live |
+| 🛠️ **Data Generation** | Comprehensive testing tools for profiles, availability, and bookings | ✅ Live |
+| 🗑️ **Smart Cleanup** | Cascading deletes and bulk data management | ✅ Live |
+| 🎨 **Mentor Styling** | Coral-like color scheme integration for mentor elements | ✅ Live |
 
 </details>
 
@@ -111,28 +128,33 @@
 graph TD
     A[🎨 Frontend] --> B[⚛️ React + TypeScript]
     A --> C[⚡ Vite]
-    D[🔧 Backend Services] --> E[🔥 Firebase]
-    E --> F[🔐 Authentication]
-    E --> G[🗄️ Firestore]
-    E --> H[📦 Storage]
-    I[📊 Analytics] --> J[📈 Google Analytics]
-    K[💳 Payments] --> L[💸 Stripe]
-    L --> M[🛒 Stripe Checkout]
-    L --> N[🔔 Stripe Webhooks]
-    O[📅 Booking System] --> P[🌐 Cal.com API]
-    P --> Q[🔗 Proxy Server]
-    P --> R[📋 Event Types]
-    P --> S[📊 Bookings Management]
+    A --> D[🎨 CSS Variables & Mentor Styling]
+    E[🔧 Backend Services] --> F[🔥 Firebase]
+    F --> G[🔐 Authentication]
+    F --> H[🗄️ Firestore]
+    F --> I[📦 Storage]
+    J[📊 Analytics] --> K[📈 Google Analytics]
+    L[💳 Payments] --> M[💸 Stripe]
+    M --> N[🛒 Stripe Checkout]
+    M --> O[🔔 Stripe Webhooks]
+    P[📅 Booking System] --> Q[🌐 Cal.com API]
+    P --> R[📅 Availability Management]
+    P --> S[🔗 Proxy Server]
+    P --> T[📋 Event Types]
+    P --> U[📊 Bookings Management]
+    V[🛠️ Admin Tools] --> W[👥 Profile Generation]
+    V --> X[📅 Availability Generation]
+    V --> Y[🗑️ Data Cleanup]
     
     style A fill:#61DAFB
-    style D fill:#FFCA28
-    style E fill:#FF6B35
-    style L fill:#008CDD
-    style O fill:#00E676
+    style E fill:#FFCA28
+    style F fill:#FF6B35
+    style M fill:#008CDD
     style P fill:#00E676
+    style V fill:#FF9800
 ```
 
-**Our platform leverages cutting-edge technologies for optimal performance and user experience.**
+**Our platform leverages cutting-edge technologies for optimal performance and user experience, with enhanced mentor functionality and intelligent data management.**
 
 </div>
 
@@ -388,6 +410,15 @@ npm run test:coverage
 | 🔄 **Integration Tests** | 70%+ | 🔄 In Progress |
 | 🎯 **E2E Tests** | 60%+ | 🔄 In Progress |
 
+### 🆕 Testing Tools
+
+| Tool | Purpose | Status |
+|------|---------|:------:|
+| 🎲 **Profile Generator** | Generate realistic test mentor profiles | ✅ Live |
+| 📅 **Availability Generator** | Create test availability data | ✅ Live |
+| 📊 **Booking Generator** | Generate sample booking data | ✅ Live |
+| 🗑️ **Data Cleanup** | Bulk deletion and cleanup tools | ✅ Live |
+
 </details>
 
 ---
@@ -402,12 +433,19 @@ bgr8/
 ├── 📁 src/
 │   ├── 🧩 components/         # React components
 │   │   ├── 👨‍💼 admin/          # Admin-specific components
+│   │   │   ├── 📊 Analytics components
+│   │   │   ├── 🎲 GenerateRandomProfile.tsx
+│   │   │   ├── 👥 MentorManagement.tsx
+│   │   │   └── 📋 Management components
 │   │   ├── 🎬 animations/      # Animation components
 │   │   ├── 🎨 overlays/        # Overlay components
 │   │   ├── 🛡️ ProtectedRoute.tsx
 │   │   ├── 🎨 ui/              # UI components
 │   │   └── 🧠 widgets/         # Widget components
 │   │       └── 🎓 MentorAlgorithm/  # Mentor matching logic
+│   │           ├── 📅 availability/  # Availability management
+│   │           ├── 📅 booking/       # Booking system
+│   │           └── 🔗 CalCom/        # Cal.com integration
 │   ├── 📄 pages/              # Page components
 │   │   ├── 👨‍💼 adminPages/      # Admin pages
 │   │   ├── 💼 businessPages/   # Business pages
@@ -421,6 +459,8 @@ bgr8/
 │   ├── 🛡️ middleware/         # Security middleware
 │   ├── 🧭 navigation/         # Navigation logic
 │   ├── 🎨 styles/             # CSS stylesheets
+│   │   ├── 👨‍💼 adminStyles/     # Admin-specific styles
+│   │   └── 🎨 component styles
 │   └── 📜 scripts/            # Build scripts
 ├── 💳 stripe/                 # Stripe server
 ├── 🌐 public/                 # Static assets
@@ -454,10 +494,12 @@ bgr8/
 ### Development Guidelines
 
 - ✅ Follow TypeScript best practices
-- 🎨 Maintain consistent code style
+- 🎨 Maintain consistent code style using CSS variables
 - 📝 Write meaningful commit messages
 - 🧪 Add tests for new features
 - 📚 Update documentation as needed
+- 🔍 Ensure proper contrast for UI elements
+- 📱 Test responsive design across devices
 
 ### Code of Conduct
 
@@ -505,6 +547,7 @@ If you discover a security vulnerability, please:
 - 🔒 **HTTPS Only** - Encrypted data transmission
 - 🚫 **XSS Protection** - Cross-site scripting prevention
 - 🛡️ **CSRF Protection** - Cross-site request forgery prevention
+- 🗑️ **Cascading Deletes** - Maintains database integrity
 
 </details>
 
@@ -551,9 +594,9 @@ If you discover a security vulnerability, please:
 <td align="center">
 <a href="https://github.com/YakMan101">
 <img src="https://avatars.githubusercontent.com/YakMan101" width="100px;" alt="YakMan101"/>
+</a>
 <br />
 <sub><b>YakMan101</b></sub>
-</a>
 <br />
 <sub>Shayak Hussain</sub>
 </td>
@@ -576,7 +619,9 @@ If you discover a security vulnerability, please:
 - 💳 **Stripe** - Payment processing
 - 📅 **Cal.com** - Calendar & booking system
 - ⚡ **Vite** - Build tool
-- 🎨 **CSS3** - Styling
+- 🎨 **CSS3** - Styling with CSS variables
+- 🔍 **Search Algorithms** - Intelligent filtering and discovery
+- 📊 **Data Management** - Comprehensive testing and cleanup tools
 
 ---
 
