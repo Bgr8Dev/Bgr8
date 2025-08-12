@@ -1010,6 +1010,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--gray-600);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .filter-pill:hover {
@@ -1021,6 +1025,23 @@
   background: var(--accent);
   color: var(--white);
   border-color: var(--accent);
+}
+
+.filter-count {
+  background: var(--gray-200);
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1;
+}
+
+.filter-pill.active .filter-count {
+  background: var(--white);
+  color: var(--accent);
 }
 
 /* Results Section */

@@ -27,7 +27,7 @@ export default function MentorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedInsurance, setSelectedInsurance] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('');
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<MentorMenteeProfile | null>(null);
   const [calComModalOpen, setCalComModalOpen] = useState(false);
@@ -78,8 +78,8 @@ export default function MentorPage() {
 
 
   // Mock insurance/coverage types
-  const coverageTypes = [
-    'Free Consultation', 'Paid Session', 'Package Deal', 'Subscription'
+  const filterTypes = [
+    'Available now', 'Experienced mentors', 'Video calls', 'In-person', 'Free sessions'
   ];
 
   const degreePlaceholders: { [key: string]: string } = {
@@ -108,7 +108,7 @@ export default function MentorPage() {
 
   useEffect(() => {
     filterMentors();
-  }, [mentors, searchTerm, selectedInsurance]);
+  }, [mentors, searchTerm, selectedFilter]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -222,6 +222,34 @@ export default function MentorPage() {
       );
     }
 
+    // Apply additional filters
+    if (selectedFilter) {
+      switch (selectedFilter) {
+        case 'Available now':
+          filtered = filtered.filter(() => getAvailabilityStatus() === 'Available');
+          break;
+        case 'Experienced mentors':
+          filtered = filtered.filter(mentor => {
+            const educationLevel = String(mentor.educationLevel || '');
+            return ['Master\'s Degree', 'Doctorate/PhD'].includes(educationLevel) ||
+                   (Array.isArray(mentor.pastProfessions) && mentor.pastProfessions.length > 1);
+          });
+          break;
+        case 'Video calls':
+          filtered = filtered.filter(mentor => mentor.calCom);
+          break;
+        case 'In-person':
+          filtered = filtered.filter(mentor => String(mentor.county || '').trim() !== '');
+          break;
+        case 'Free sessions':
+          // This would need to be implemented based on actual pricing data
+          // For now, we'll show all mentors
+          break;
+        default:
+          break;
+      }
+    }
+
     setFilteredMentors(filtered);
   };
 
@@ -295,6 +323,29 @@ export default function MentorPage() {
     const value = suggestion.split(': ')[1] || suggestion;
     setSearchTerm(value);
     setShowSearchDropdown(false);
+  };
+
+  const getFilterCount = (filterType: string) => {
+    if (!filterType) return mentors.length;
+    
+    switch (filterType) {
+      case 'Available now':
+        return mentors.filter(() => getAvailabilityStatus() === 'Available').length;
+      case 'Experienced mentors':
+        return mentors.filter(mentor => {
+          const educationLevel = String(mentor.educationLevel || '');
+          return ['Master\'s Degree', 'Doctorate/PhD'].includes(educationLevel) ||
+                 (Array.isArray(mentor.pastProfessions) && mentor.pastProfessions.length > 1);
+        }).length;
+      case 'Video calls':
+        return mentors.filter(mentor => mentor.calCom).length;
+      case 'In-person':
+        return mentors.filter(mentor => String(mentor.county || '').trim() !== '').length;
+      case 'Free sessions':
+        return mentors.length; // Placeholder for future pricing logic
+      default:
+        return 0;
+    }
   };
 
   const handleRoleSelect = (role: UserType) => {
@@ -912,18 +963,20 @@ export default function MentorPage() {
       <div className="filters-section">
         <div className="filters-container">
           <button 
-            className={`filter-pill ${!selectedInsurance ? 'active' : ''}`}
-            onClick={() => setSelectedInsurance('')}
+            className={`filter-pill ${!selectedFilter ? 'active' : ''}`}
+            onClick={() => setSelectedFilter('')}
           >
-            All types
+            All mentors
+            <span className="filter-count">{mentors.length}</span>
           </button>
-          {coverageTypes.map(type => (
+          {filterTypes.map(type => (
             <button
               key={type}
-              className={`filter-pill ${selectedInsurance === type ? 'active' : ''}`}
-              onClick={() => setSelectedInsurance(type)}
+              className={`filter-pill ${selectedFilter === type ? 'active' : ''}`}
+              onClick={() => setSelectedFilter(type)}
             >
               {type}
+              <span className="filter-count">{getFilterCount(type)}</span>
             </button>
           ))}
         </div>
