@@ -113,6 +113,18 @@
   letter-spacing: 0.5px;
 }
 
+.profile-role.mentor {
+  background: var(--mentor-light);
+  color: var(--mentor-dark);
+  border: 1px solid var(--mentor);
+}
+
+.profile-role.mentee {
+  background: var(--mentee-light);
+  color: var(--mentee-dark);
+  border: 1px solid var(--mentee);
+}
+
 .profile-name {
   font-size: 1.25rem;
   font-weight: 600;
@@ -188,10 +200,22 @@
 
 .role-card.mentor {
   border-color: var(--mentor);
+  background: linear-gradient(135deg, var(--white) 0%, var(--mentor-light) 100%);
+}
+
+.role-card.mentor:hover {
+  background: linear-gradient(135deg, var(--mentor-light) 0%, var(--white) 100%);
+  border-color: var(--mentor-dark);
 }
 
 .role-card.mentee {
   border-color: var(--mentee);
+  background: linear-gradient(135deg, var(--white) 0%, var(--mentee-light) 100%);
+}
+
+.role-card.mentee:hover {
+  background: linear-gradient(135deg, var(--mentee-light) 0%, var(--white) 100%);
+  border-color: var(--mentee-dark);
 }
 
 .role-card h3 {
@@ -445,15 +469,15 @@
 }
 
 .matches-summary {
-  background: var(--accent-light);
-  color: var(--accent-dark);
+  background: var(--mentor-light);
+  color: var(--mentor-dark);
   padding: 12px 20px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
   display: inline-block;
   margin-top: 16px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--mentor);
 }
 
 .matches-grid {
@@ -545,7 +569,7 @@
   border-radius: 6px;
   margin-bottom: 8px;
   font-size: 14px;
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--mentor);
 }
 
 .match-actions {
@@ -904,8 +928,8 @@
 }
 
 .search-bar:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(59, 167, 242, 0.1);
+  border-color: var(--mentor);
+  box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.1);
   transform: translateY(-1px);
 }
 
@@ -972,8 +996,8 @@
 }
 
 .suggestion-item:hover {
-  background: var(--accent-light);
-  color: var(--accent-dark);
+  background: var(--mentor-light);
+  color: var(--mentor-dark);
 }
 
 .suggestion-item:first-child {
@@ -1022,9 +1046,14 @@
 }
 
 .filter-pill.active {
-  background: var(--accent);
+  background: var(--mentor);
   color: var(--white);
-  border-color: var(--accent);
+  border-color: var(--mentor);
+}
+
+.filter-pill.active .filter-count {
+  background: var(--white);
+  color: var(--mentor);
 }
 
 .filter-count {
@@ -1037,11 +1066,6 @@
   min-width: 20px;
   text-align: center;
   line-height: 1;
-}
-
-.filter-pill.active .filter-count {
-  background: var(--white);
-  color: var(--accent);
 }
 
 /* Results Section */
@@ -1088,6 +1112,7 @@
 .mentor-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
+  border-color: var(--mentor);
 }
 
 .mentor-card-header {
@@ -1118,7 +1143,7 @@
 .mentor-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text);
+  color: var(--mentor-dark);
   margin-bottom: 4px;
   line-height: 1.2;
 }
@@ -1293,23 +1318,27 @@
 }
 
 .action-button.primary {
-  background: var(--warning);
-  color: var(--text);
+  background: var(--mentor);
+  color: var(--white);
+  border: 1px solid var(--mentor);
 }
 
 .action-button.primary:hover {
-  background: var(--warning-dark);
+  background: var(--mentor-dark);
   transform: translateY(-1px);
+  border-color: var(--mentor-dark);
 }
 
 .action-button.secondary {
-  background: var(--gray-600);
+  background: var(--mentee);
   color: var(--white);
+  border: 1px solid var(--mentee);
 }
 
 .action-button.secondary:hover {
-  background: var(--gray-700);
+  background: var(--mentee-dark);
   transform: translateY(-1px);
+  border-color: var(--mentee-dark);
 }
 
 /* No Results */
@@ -1523,6 +1552,70 @@
   .matches-grid {
     grid-template-columns: 1fr;
   }
+
+  /* Profile Modal Mobile Styles */
+  .profile-modal {
+    padding: 10px;
+  }
+
+  .profile-modal .modal-content {
+    max-width: 95%;
+    border-radius: 16px;
+  }
+
+  .profile-modal .modal-header {
+    padding: 20px 20px 16px 20px;
+  }
+
+  .profile-modal .modal-header h3 {
+    font-size: 1.5rem;
+  }
+
+  .profile-modal-content {
+    padding: 20px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-info h2 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .profile-profession {
+    text-align: center;
+  }
+
+  .profile-rating {
+    justify-content: center;
+  }
+
+  .profile-sections {
+    gap: 24px;
+  }
+
+  .profile-section {
+    padding: 20px;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .profile-actions .action-button {
+    width: 100%;
+    min-width: auto;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1615,4 +1708,285 @@
     padding: 20px;
     margin-bottom: 24px;
   }
+}
+
+/* Profile Modal */
+.profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(224, 106, 92, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(29, 213, 209, 0.1) 0%, transparent 50%),
+    rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.profile-modal .modal-content {
+  background: var(--white);
+  border-radius: 20px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--gray-200);
+  animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.profile-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 32px 24px 32px;
+  border-bottom: 2px solid var(--gray-100);
+  background: linear-gradient(135deg, var(--white) 0%, var(--mentor-light) 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+.profile-modal .modal-header h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--mentor-dark);
+  margin: 0;
+}
+
+.profile-modal .close-button {
+  background: var(--gray-100);
+  border: none;
+  font-size: 18px;
+  color: var(--gray-600);
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.profile-modal .close-button:hover {
+  background: var(--mentor);
+  color: var(--white);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 8px 25px rgba(224, 106, 92, 0.3);
+}
+
+.profile-modal-content {
+  padding: 32px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--mentor-light);
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 4px solid var(--mentor-light);
+  box-shadow: 0 8px 25px rgba(224, 106, 92, 0.2);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--mentor-dark);
+  margin: 0 0 8px 0;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+}
+
+.profile-profession {
+  font-size: 1.25rem;
+  color: var(--gray-600);
+  margin: 0 0 16px 0;
+  font-weight: 500;
+}
+
+.profile-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--mentor-dark);
+}
+
+.profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.profile-section {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--gray-100);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.profile-section:hover {
+  border-color: var(--mentor);
+  box-shadow: 0 4px 20px rgba(224, 106, 92, 0.1);
+}
+
+.profile-section h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--mentor-dark);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--mentor-light);
+  position: relative;
+}
+
+.profile-section h4::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--mentor);
+  border-radius: 1px;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-details .detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gray-700);
+  font-size: 16px;
+}
+
+.profile-details .detail-item svg {
+  color: var(--mentor);
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.skills-grid,
+.hobbies-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.skill-tag,
+.hobby-tag {
+  background: var(--mentor-light);
+  color: var(--mentor-dark);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--mentor);
+  transition: all 0.2s ease;
+}
+
+.skill-tag:hover,
+.hobby-tag:hover {
+  background: var(--mentor);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(224, 106, 92, 0.3);
+}
+
+.availability-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.availability-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.availability-status .clock-icon {
+  color: var(--mentor);
+  width: 20px;
+}
+
+.availability-status span.available {
+  color: var(--success);
+}
+
+.availability-status span.unavailable {
+  color: var(--error);
+}
+
+.next-slot {
+  font-size: 14px;
+  color: var(--gray-600);
+  font-weight: 500;
+  padding-left: 32px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid var(--gray-100);
+}
+
+.profile-actions .action-button {
+  min-width: 160px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Make mentor cards clickable */
+.mentor-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mentor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--mentor);
+}
+
+.mentor-actions {
+  position: relative;
+  z-index: 2;
 }

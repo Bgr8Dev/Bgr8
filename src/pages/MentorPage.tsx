@@ -6,6 +6,7 @@ import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, 
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, getBestMatchesForUser, MatchResult } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import BookingModal from '../components/widgets/MentorAlgorithm/booking/BookingModal';
 import CalComModal from '../components/widgets/MentorAlgorithm/CalCom/CalComModal';
+import { CalComService } from '../components/widgets/MentorAlgorithm/CalCom/calComService';
 import MatchStrengthRing from '../components/widgets/MentorAlgorithm/MatchStrengthRing';
 import skillsByCategory from '../constants/skillsByCategory';
 import ukEducationLevels from '../constants/ukEducationLevels';
@@ -34,6 +35,9 @@ export default function MentorPage() {
   const [calComMentor, setCalComMentor] = useState<MentorMenteeProfile | null>(null);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedProfileMentor, setSelectedProfileMentor] = useState<MentorMenteeProfile | null>(null);
+  const [mentorAvailability, setMentorAvailability] = useState<{[key: string]: {available: boolean, nextSlot?: string}}>({});
 
   // Registration and Profile States
   const [showRegistration, setShowRegistration] = useState(false);
@@ -184,15 +188,21 @@ export default function MentorPage() {
       const querySnapshot = await getDocs(mentorsQuery);
       
       console.log('MentorPage: Query executed, processing results...');
-      const mentorsData = querySnapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id
-      })) as unknown as MentorMenteeProfile[];
+      const mentorsData = querySnapshot.docs.map(doc => {
+        const mentorData = doc.data();
+        return {
+          ...mentorData,
+          id: doc.id
+        };
+      }) as unknown as MentorMenteeProfile[];
       
       console.log('MentorPage: Found mentors:', mentorsData.length, mentorsData);
       
       setMentors(mentorsData);
       setFilteredMentors(mentorsData);
+      
+      // Update availability for all mentors
+      await updateAllMentorAvailability();
     } catch (error) {
       console.error('MentorPage: Error fetching mentors:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch mentors');
@@ -226,7 +236,10 @@ export default function MentorPage() {
     if (selectedFilter) {
       switch (selectedFilter) {
         case 'Available now':
-          filtered = filtered.filter(() => getAvailabilityStatus() === 'Available');
+          filtered = filtered.filter(mentor => {
+            const availability = mentorAvailability[mentor.uid];
+            return availability?.available || false;
+          });
           break;
         case 'Experienced mentors':
           filtered = filtered.filter(mentor => {
@@ -323,29 +336,6 @@ export default function MentorPage() {
     const value = suggestion.split(': ')[1] || suggestion;
     setSearchTerm(value);
     setShowSearchDropdown(false);
-  };
-
-  const getFilterCount = (filterType: string) => {
-    if (!filterType) return mentors.length;
-    
-    switch (filterType) {
-      case 'Available now':
-        return mentors.filter(() => getAvailabilityStatus() === 'Available').length;
-      case 'Experienced mentors':
-        return mentors.filter(mentor => {
-          const educationLevel = String(mentor.educationLevel || '');
-          return ['Master\'s Degree', 'Doctorate/PhD'].includes(educationLevel) ||
-                 (Array.isArray(mentor.pastProfessions) && mentor.pastProfessions.length > 1);
-        }).length;
-      case 'Video calls':
-        return mentors.filter(mentor => mentor.calCom).length;
-      case 'In-person':
-        return mentors.filter(mentor => String(mentor.county || '').trim() !== '').length;
-      case 'Free sessions':
-        return mentors.length; // Placeholder for future pricing logic
-      default:
-        return 0;
-    }
   };
 
   const handleRoleSelect = (role: UserType) => {
@@ -514,14 +504,83 @@ export default function MentorPage() {
     setCalComModalOpen(true);
   };
 
-  const getAvailabilityStatus = () => {
-    const hasAvailability = Math.random() > 0.3;
-    return hasAvailability ? 'Available' : 'No availability';
+  const handleProfileCardClick = (mentor: MentorMenteeProfile) => {
+    setSelectedProfileMentor(mentor);
+    setProfileModalOpen(true);
   };
 
-  const getNextAvailableSlot = () => {
-    const days = ['Today', 'Tomorrow', 'This week', 'Next week'];
-    return days[Math.floor(Math.random() * days.length)];
+  const getFilterCount = (filterType: string) => {
+    if (!filterType) return mentors.length;
+    
+    switch (filterType) {
+      case 'Available now':
+        return mentors.filter(mentor => {
+          const availability = mentorAvailability[mentor.uid];
+          return availability?.available || false;
+        }).length;
+      case 'Experienced mentors':
+        return mentors.filter(mentor => {
+          const educationLevel = String(mentor.educationLevel || '');
+          return ['Master\'s Degree', 'Doctorate/PhD'].includes(educationLevel) ||
+                 (Array.isArray(mentor.pastProfessions) && mentor.pastProfessions.length > 1);
+        }).length;
+      case 'Video calls':
+        return mentors.filter(mentor => mentor.calCom).length;
+      case 'In-person':
+        return mentors.filter(mentor => String(mentor.county || '').trim() !== '').length;
+      case 'Free sessions':
+        return mentors.length; // Placeholder for future pricing logic
+      default:
+        return 0;
+    }
+  };
+
+  const checkMentorAvailability = async (mentor: MentorMenteeProfile) => {
+    if (!mentor.calCom) return false;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const availability = await CalComService.getAvailability(mentor.uid, today, tomorrow);
+      
+      // Check if mentor has any available slots today
+      const hasAvailabilityToday = availability.some(day => 
+        day.date === today && day.slots.some(slot => slot.available)
+      );
+      
+      // Get next available slot
+      let nextSlot = 'No availability';
+      for (const day of availability) {
+        const availableSlot = day.slots.find(slot => slot.available);
+        if (availableSlot) {
+          if (day.date === today) {
+            nextSlot = 'Today';
+          } else if (day.date === tomorrow) {
+            nextSlot = 'Tomorrow';
+          } else {
+            nextSlot = 'This week';
+          }
+          break;
+        }
+      }
+      
+      return { available: hasAvailabilityToday, nextSlot };
+    } catch (error) {
+      console.error('Error checking availability for mentor:', mentor.uid, error);
+      return { available: false, nextSlot: 'Unable to check' };
+    }
+  };
+
+  const updateAllMentorAvailability = async () => {
+    const availabilityPromises = mentors.map(async (mentor) => {
+      const availability = await checkMentorAvailability(mentor);
+      return { [mentor.uid]: availability };
+    });
+    
+    const results = await Promise.all(availabilityPromises);
+    const newAvailability = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    setMentorAvailability(newAvailability as {[key: string]: {available: boolean, nextSlot?: string}});
   };
 
   // Show error state
@@ -816,7 +875,9 @@ export default function MentorPage() {
           {currentUserProfile && (
             <div className="user-profile-summary">
               <div className="profile-info">
-                <span className="profile-role">{currentUserProfile.type === MENTOR ? 'Mentor' : 'Mentee'}</span>
+                <span className={`profile-role ${currentUserProfile.type === MENTOR ? 'mentor' : 'mentee'}`}>
+                  {currentUserProfile.type === MENTOR ? 'Mentor' : 'Mentee'}
+                </span>
                 <span className="profile-name">{currentUserProfile.name}</span>
               </div>
               <div className="profile-actions">
@@ -991,7 +1052,11 @@ export default function MentorPage() {
 
         <div className="mentors-grid">
           {filteredMentors.map((mentor) => (
-            <div key={String(mentor.id || mentor.uid)} className="mentor-card">
+            <div 
+              key={String(mentor.id || mentor.uid)} 
+              className="mentor-card"
+              onClick={() => handleProfileCardClick(mentor)}
+            >
               <div className="mentor-card-header">
                 <div className="mentor-avatar">
                   <img 
@@ -1054,19 +1119,19 @@ export default function MentorPage() {
               <div className="mentor-availability">
                 <div className="availability-status">
                   <FaClock className="clock-icon" />
-                  <span className={getAvailabilityStatus() === 'Available' ? 'available' : 'unavailable'}>
-                    {getAvailabilityStatus()}
+                  <span className={mentorAvailability[mentor.uid]?.available ? 'available' : 'unavailable'}>
+                    {mentorAvailability[mentor.uid]?.available ? 'Available now' : 'No availability'}
                   </span>
                 </div>
                 
-                {getAvailabilityStatus() === 'Available' && (
+                {mentorAvailability[mentor.uid]?.available && mentorAvailability[mentor.uid]?.nextSlot && (
                   <div className="next-slot">
-                    Next: {getNextAvailableSlot()}
+                    Next: {mentorAvailability[mentor.uid]?.nextSlot}
                   </div>
                 )}
               </div>
 
-              <div className="mentor-actions">
+              <div className="mentor-actions" onClick={(e) => e.stopPropagation()}>
                 <button 
                   className="action-button primary"
                   onClick={() => handleBooking(mentor)}
@@ -1223,6 +1288,125 @@ export default function MentorPage() {
           onClose={() => setCalComModalOpen(false)}
           mentor={calComMentor}
         />
+      )}
+
+      {/* Profile Modal */}
+      {profileModalOpen && selectedProfileMentor && (
+        <div className="profile-modal">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Mentor Profile</h3>
+              <button onClick={() => setProfileModalOpen(false)} className="close-button" title="Close modal">
+                <FaTimes />
+              </button>
+            </div>
+            <div className="profile-modal-content">
+              <div className="profile-header">
+                <div className="profile-avatar">
+                  <img 
+                    src={Array.isArray(selectedProfileMentor.profilePicture) ? selectedProfileMentor.profilePicture[0] || `https://ui-avatars.com/api/?name=${String(selectedProfileMentor.name || 'Mentor')}&background=random` : selectedProfileMentor.profilePicture || `https://ui-avatars.com/api/?name=${String(selectedProfileMentor.name || 'Mentor')}&background=random`} 
+                    alt={String(selectedProfileMentor.name || 'Mentor')}
+                  />
+                </div>
+                <div className="profile-info">
+                  <h2>{String(selectedProfileMentor.name || 'Mentor')}</h2>
+                  <p className="profile-profession">{String(selectedProfileMentor.profession || 'Professional')}</p>
+                  <div className="profile-rating">
+                    <FaStar className="star-icon" />
+                    <span>4.8</span>
+                    <span className="review-count">(24 reviews)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="profile-sections">
+                <div className="profile-section">
+                  <h4>Education & Background</h4>
+                  <div className="profile-details">
+                    <div className="detail-item">
+                      <FaGraduationCap />
+                      <span><strong>Education Level:</strong> {String(selectedProfileMentor.educationLevel || 'Not specified')}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span><strong>Degree:</strong> {String(selectedProfileMentor.degree || 'Not specified')}</span>
+                    </div>
+                    <div className="detail-item">
+                      <FaIndustry />
+                      <span><strong>Industries:</strong> {Array.isArray(selectedProfileMentor.industries) ? selectedProfileMentor.industries.join(', ') : 'Various industries'}</span>
+                    </div>
+                    <div className="detail-item">
+                      <FaMapMarkerAlt />
+                      <span><strong>Location:</strong> {String(selectedProfileMentor.county || 'Location not specified')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="profile-section">
+                  <h4>Skills & Expertise</h4>
+                  <div className="skills-grid">
+                    {Array.isArray(selectedProfileMentor.skills) && selectedProfileMentor.skills.map((skill, index) => (
+                      <span key={index} className="skill-tag">{skill}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {Array.isArray(selectedProfileMentor.hobbies) && selectedProfileMentor.hobbies.length > 0 && (
+                  <div className="profile-section">
+                    <h4>Interests & Hobbies</h4>
+                    <div className="hobbies-grid">
+                      {selectedProfileMentor.hobbies.map((hobby, index) => (
+                        <span key={index} className="hobby-tag">{hobby}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="profile-section">
+                  <h4>Availability & Contact</h4>
+                  <div className="availability-info">
+                    <div className="availability-status">
+                      <FaClock className="clock-icon" />
+                      <span className={mentorAvailability[selectedProfileMentor.uid]?.available ? 'available' : 'unavailable'}>
+                        {mentorAvailability[selectedProfileMentor.uid]?.available ? 'Available now' : 'No availability'}
+                      </span>
+                    </div>
+                    {mentorAvailability[selectedProfileMentor.uid]?.available && mentorAvailability[selectedProfileMentor.uid]?.nextSlot && (
+                      <div className="next-slot">
+                        Next available: {mentorAvailability[selectedProfileMentor.uid]?.nextSlot}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="profile-actions">
+                <button 
+                  className="action-button primary"
+                  onClick={() => {
+                    setProfileModalOpen(false);
+                    handleBooking(selectedProfileMentor);
+                  }}
+                >
+                  <FaCalendarAlt />
+                  Book Session
+                </button>
+                
+                {selectedProfileMentor.calCom && (
+                  <button 
+                    className="action-button secondary"
+                    onClick={() => {
+                      setProfileModalOpen(false);
+                      handleCalCom(selectedProfileMentor);
+                    }}
+                  >
+                    <FaVideo />
+                    Schedule Call
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
