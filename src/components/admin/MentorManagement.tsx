@@ -159,7 +159,6 @@ export default function MentorManagement() {
 
   // Stat tile hover state
   const [hoveredTile, setHoveredTile] = useState<'total' | 'mentors' | 'mentees' | null>(null);
-  const [wipingAvailability, setWipingAvailability] = useState(false);
 
   // Calculate counts
   const realUsers = users.filter(u => !u.isGenerated);
