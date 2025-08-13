@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { firestore } from '../firebase/firebase';
-import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt, FaCog } from 'react-icons/fa';
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, getBestMatchesForUser, MatchResult } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
-import { Booking } from '../types/bookings';
+
 import BookingModal from '../components/widgets/MentorAlgorithm/booking/BookingModal';
 import CalComModal from '../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { CalComService } from '../components/widgets/MentorAlgorithm/CalCom/calComService';
@@ -97,9 +97,7 @@ export default function MentorPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [matchesPerPage] = useState(6);
 
-  // UI States
-  const [industriesDropdownOpen, setIndustriesDropdownOpen] = useState(false);
-  const [skillsDropdownOpen, setSkillsDropdownOpen] = useState(false);
+  // UI States - Removed dropdown states as we're using tag-based selection now
 
 
 
@@ -877,71 +875,99 @@ export default function MentorPage() {
               <div className="form-section">
                 <h3>Skills & Interests</h3>
                 <div className="form-row">
-                  <div className="multiselect-container">
+                  <div className="skills-selection-container">
                     <label>Skills {selectedRole === MENTOR ? '(What you can teach)' : '(What you want to learn)'}</label>
-                    <div className="multiselect-dropdown">
-                      <div className="multiselect-control" onClick={() => setSkillsDropdownOpen(!skillsDropdownOpen)}>
-                        <span>{profileForm.skills.length === 0 ? 'Select skills...' : `${profileForm.skills.length} selected`}</span>
-                        <span>▼</span>
-                      </div>
-                      {skillsDropdownOpen && (
-                        <div className="multiselect-options">
-                          {Object.entries(skillsByCategory).map(([category, skills]) => (
-                            <div key={category} className="skill-category">
-                              <div className="category-header">{category}</div>
-                              {skills.map(skill => (
-                                <label key={skill} className="skill-option">
-                                  <input
-                                    type="checkbox"
-                                    checked={profileForm.skills.includes(skill)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        handleArrayChange('skills', [...profileForm.skills, skill]);
-                                      } else {
-                                        handleArrayChange('skills', profileForm.skills.filter(s => s !== skill));
-                                      }
-                                    }}
-                                  />
-                                  {skill}
-                                </label>
-                              ))}
-                            </div>
+                    <div className="skills-tags-container">
+                      {Object.entries(skillsByCategory).map(([category, skills]) => (
+                        <div key={category} className="skill-category-section">
+                          <h4 className="category-title">{category}</h4>
+                          <div className="tags-grid">
+                            {skills.map(skill => (
+                              <button
+                                key={skill}
+                                type="button"
+                                className={`skill-tag-selectable ${profileForm.skills.includes(skill) ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (profileForm.skills.includes(skill)) {
+                                    handleArrayChange('skills', profileForm.skills.filter(s => s !== skill));
+                                  } else {
+                                    handleArrayChange('skills', [...profileForm.skills, skill]);
+                                  }
+                                }}
+                                tabIndex={0}
+                              >
+                                {skill}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {profileForm.skills.length > 0 && (
+                      <div className="selected-skills-summary">
+                        <span className="summary-label">Selected: {profileForm.skills.length}</span>
+                        <div className="selected-tags">
+                          {profileForm.skills.map(skill => (
+                            <span key={skill} className="selected-tag">
+                              {skill}
+                              <button
+                                type="button"
+                                className="remove-tag"
+                                onClick={() => handleArrayChange('skills', profileForm.skills.filter(s => s !== skill))}
+                              >
+                                ×
+                              </button>
+                            </span>
                           ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="form-row">
-                  <div className="multiselect-container">
+                  <div className="industries-selection-container">
                     <label>Industries {selectedRole === MENTOR ? '(Current/Previous)' : '(Desired)'}</label>
-                    <div className="multiselect-dropdown">
-                      <div className="multiselect-control" onClick={() => setIndustriesDropdownOpen(!industriesDropdownOpen)}>
-                        <span>{profileForm.industries.length === 0 ? 'Select industries...' : `${profileForm.industries.length} selected`}</span>
-                        <span>▼</span>
+                    <div className="industries-tags-container">
+                      <div className="tags-grid">
+                        {industriesList.map(industry => (
+                          <button
+                            key={industry}
+                            type="button"
+                            className={`industry-tag-selectable ${profileForm.industries.includes(industry) ? 'selected' : ''}`}
+                            onClick={() => {
+                              if (profileForm.industries.includes(industry)) {
+                                handleArrayChange('industries', profileForm.industries.filter(i => i !== industry));
+                              } else {
+                                handleArrayChange('industries', [...profileForm.industries, industry]);
+                              }
+                            }}
+                            tabIndex={0}
+                          >
+                            {industry}
+                          </button>
+                        ))}
                       </div>
-                      {industriesDropdownOpen && (
-                        <div className="multiselect-options">
-                          {industriesList.map(industry => (
-                            <label key={industry} className="industry-option">
-                              <input
-                                type="checkbox"
-                                checked={profileForm.industries.includes(industry)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    handleArrayChange('industries', [...profileForm.industries, industry]);
-                                  } else {
-                                    handleArrayChange('industries', profileForm.industries.filter(i => i !== industry));
-                                  }
-                                }}
-                              />
+                    </div>
+                    {profileForm.industries.length > 0 && (
+                      <div className="selected-industries-summary">
+                        <span className="summary-label">Selected: {profileForm.industries.length}</span>
+                        <div className="selected-tags">
+                          {profileForm.industries.map(industry => (
+                            <span key={industry} className="selected-tag">
                               {industry}
-                            </label>
+                              <button
+                                type="button"
+                                className="remove-tag"
+                                onClick={() => handleArrayChange('industries', profileForm.industries.filter(i => i !== industry))}
+                              >
+                                ×
+                              </button>
+                            </span>
                           ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1407,6 +1433,67 @@ export default function MentorPage() {
                     onChange={handleFormChange}
                     placeholder="LinkedIn Profile (optional)"
                   />
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h4>Skills & Interests</h4>
+                <div className="form-row">
+                  <div className="skills-selection-container">
+                    <label>Skills</label>
+                    <div className="skills-tags-container">
+                      {Object.entries(skillsByCategory).map(([category, skills]) => (
+                        <div key={category} className="skill-category-section">
+                          <h5 className="category-title">{category}</h5>
+                          <div className="tags-grid">
+                            {skills.map(skill => (
+                              <button
+                                key={skill}
+                                type="button"
+                                className={`skill-tag-selectable ${profileForm.skills.includes(skill) ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (profileForm.skills.includes(skill)) {
+                                    handleArrayChange('skills', profileForm.skills.filter(s => s !== skill));
+                                  } else {
+                                    handleArrayChange('skills', [...profileForm.skills, skill]);
+                                  }
+                                }}
+                                tabIndex={0}
+                              >
+                                {skill}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="industries-selection-container">
+                    <label>Industries</label>
+                    <div className="industries-tags-container">
+                      <div className="tags-grid">
+                        {industriesList.map(industry => (
+                          <button
+                            key={industry}
+                            type="button"
+                            className={`industry-tag-selectable ${profileForm.industries.includes(industry) ? 'selected' : ''}`}
+                            onClick={() => {
+                              if (profileForm.industries.includes(industry)) {
+                                handleArrayChange('industries', profileForm.industries.filter(i => i !== industry));
+                              } else {
+                                handleArrayChange('industries', [...profileForm.industries, industry]);
+                              }
+                            }}
+                            tabIndex={0}
+                          >
+                            {industry}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

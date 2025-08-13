@@ -11,7 +11,7 @@ import {
   Timestamp,
   writeBatch
 } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
+import { firestore } from '../firebase/firebase';
 import { Session, SessionFeedback, FeedbackQuestion, FeedbackFormData } from '../types/sessions';
 
 export class SessionsService {
@@ -21,7 +21,7 @@ export class SessionsService {
 
   // Create a new session from a booking
   static async createSession(sessionData: Omit<Session, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const sessionRef = await addDoc(collection(db, this.SESSIONS_COLLECTION), {
+    const sessionRef = await addDoc(collection(firestore, this.SESSIONS_COLLECTION), {
       ...sessionData,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
@@ -33,7 +33,7 @@ export class SessionsService {
 
   // Get a session by ID
   static async getSession(sessionId: string): Promise<Session | null> {
-    const sessionDoc = await getDoc(doc(db, this.SESSIONS_COLLECTION, sessionId));
+    const sessionDoc = await getDoc(doc(firestore, this.SESSIONS_COLLECTION, sessionId));
     if (sessionDoc.exists()) {
       return { id: sessionDoc.id, ...sessionDoc.data() } as Session;
     }
@@ -43,13 +43,13 @@ export class SessionsService {
   // Get all sessions for a user (as mentor or mentee)
   static async getUserSessions(userId: string): Promise<Session[]> {
     const q = query(
-      collection(db, this.SESSIONS_COLLECTION),
+      collection(firestore, this.SESSIONS_COLLECTION),
       where('mentorId', '==', userId),
       orderBy('sessionDate', 'desc')
     );
     
     const menteeQuery = query(
-      collection(db, this.SESSIONS_COLLECTION),
+      collection(firestore, this.SESSIONS_COLLECTION),
       where('menteeId', '==', userId),
       orderBy('sessionDate', 'desc')
     );
@@ -75,7 +75,7 @@ export class SessionsService {
 
   // Update session status
   static async updateSessionStatus(sessionId: string, status: Session['status']): Promise<void> {
-    const sessionRef = doc(db, this.SESSIONS_COLLECTION, sessionId);
+    const sessionRef = doc(firestore, this.SESSIONS_COLLECTION, sessionId);
     await updateDoc(sessionRef, {
       status,
       updatedAt: Timestamp.now()
@@ -84,10 +84,10 @@ export class SessionsService {
 
   // Submit feedback for a session
   static async submitFeedback(sessionId: string, feedbackData: FeedbackFormData): Promise<void> {
-    const batch = writeBatch(db);
+    const batch = writeBatch(firestore);
     
     // Create feedback document
-    const feedbackRef = doc(collection(db, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION));
+    const feedbackRef = doc(collection(firestore, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION));
     const feedback: SessionFeedback = {
       feedbackId: feedbackRef.id,
       giverUserId: feedbackData.giverUserId,
@@ -100,7 +100,7 @@ export class SessionsService {
     
     // Create question documents
     feedbackData.questions.forEach(questionData => {
-      const questionRef = doc(collection(db, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION, feedbackRef.id, this.QUESTIONS_COLLECTION));
+      const questionRef = doc(collection(firestore, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION, feedbackRef.id, this.QUESTIONS_COLLECTION));
       const question: FeedbackQuestion = {
         questionId: questionRef.id,
         question: questionData.question,
@@ -112,7 +112,7 @@ export class SessionsService {
     });
     
     // Update session feedback tracking
-    const sessionRef = doc(db, this.SESSIONS_COLLECTION, sessionId);
+    const sessionRef = doc(firestore, this.SESSIONS_COLLECTION, sessionId);
     const updateData: Partial<Session> = {
       updatedAt: Timestamp.now()
     };
@@ -131,7 +131,7 @@ export class SessionsService {
   // Get feedback for a session
   static async getSessionFeedback(sessionId: string): Promise<SessionFeedback[]> {
     const feedbackQuery = query(
-      collection(db, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION),
+      collection(firestore, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION),
       orderBy('submittedAt', 'desc')
     );
     
@@ -142,7 +142,7 @@ export class SessionsService {
   // Get questions for specific feedback
   static async getFeedbackQuestions(sessionId: string, feedbackId: string): Promise<FeedbackQuestion[]> {
     const questionsQuery = query(
-      collection(db, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION, feedbackId, this.QUESTIONS_COLLECTION)
+      collection(firestore, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION, feedbackId, this.QUESTIONS_COLLECTION)
     );
     
     const questionDocs = await getDocs(questionsQuery);
@@ -152,7 +152,7 @@ export class SessionsService {
   // Check if user has already submitted feedback for a session
   static async hasUserSubmittedFeedback(sessionId: string, userId: string, feedbackType: 'mentor' | 'mentee'): Promise<boolean> {
     const feedbackQuery = query(
-      collection(db, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION),
+      collection(firestore, this.SESSIONS_COLLECTION, sessionId, this.FEEDBACK_COLLECTION),
       where('giverUserId', '==', userId),
       where('feedbackType', '==', feedbackType)
     );
