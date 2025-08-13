@@ -51,57 +51,8 @@
   color: var(--white);
 }
 
-/* Specific hover effects for each nav item using new color system */
-.nav a[href="/b8-marketing"]:hover {
-  background-color: rgba(59, 167, 242, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/bgr8"]:hover {
-  background-color: rgba(224, 106, 92, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/b8-car-club"]:hover {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/b8-clothing"]:hover {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/b8-league"]:hover {
-  background-color: rgba(245, 158, 11, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/b8-world"]:hover {
-  background-color: rgba(29, 213, 209, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/bgr8r"]:hover {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/b8-careers"]:hover {
-  background-color: rgba(107, 114, 128, 0.2);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-.nav a[href="/b8-podcast"]:hover {
-  background-color: rgba(107, 114, 128, 0.2);
+.nav a[href="/mentors"]:hover {
+  background-color: rgba(102, 126, 234, 0.2);
   color: var(--white);
   box-shadow: var(--shadow-md);
 }

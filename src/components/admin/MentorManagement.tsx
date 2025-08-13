@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { firestore } from '../../firebase/firebase';
-import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../widgets/MentorAlgorithm/CalCom/calComService';
 import GenerateRandomProfile from './GenerateRandomProfile';
@@ -159,6 +159,7 @@ export default function MentorManagement() {
 
   // Stat tile hover state
   const [hoveredTile, setHoveredTile] = useState<'total' | 'mentors' | 'mentees' | null>(null);
+  const [wipingAvailability, setWipingAvailability] = useState(false);
 
   // Calculate counts
   const realUsers = users.filter(u => !u.isGenerated);
@@ -372,15 +373,46 @@ export default function MentorManagement() {
   };
 
   const handleDeleteUser = async (user: MentorMenteeProfileWithId) => {
-    const confirmed = window.confirm(`Are you sure you want to delete ${user.name} (${user.type})? This cannot be undone.`);
+    const confirmed = window.confirm(`Are you sure you want to delete ${user.name} (${user.type})? This will also remove all their availability data and bookings. This cannot be undone.`);
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
+      // Delete the user profile
       await deleteDoc(doc(firestore, 'mentorProgram', user.id));
+      
+      // Delete all availability data for this user
+      const availabilityQuery = query(
+        collection(firestore, 'mentorAvailability'),
+        where('mentorId', '==', user.id)
+      );
+      const availabilitySnapshot = await getDocs(availabilityQuery);
+      const availabilityDeletions = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(availabilityDeletions);
+      
+      // Delete all bookings for this user (as mentor or mentee)
+      const bookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('mentorId', '==', user.id)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
+      const bookingDeletions = bookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(bookingDeletions);
+      
+      // Also check if they're a mentee in any bookings
+      const menteeBookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('menteeId', '==', user.id)
+      );
+      const menteeBookingsSnapshot = await getDocs(menteeBookingsQuery);
+      const menteeBookingDeletions = menteeBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(menteeBookingDeletions);
+      
+      // Update local state
       setUsers(prev => prev.filter(u => u.id !== user.id));
-      setDeleteStatus(`Deleted ${user.name} successfully.`);
-    } catch {
-      setDeleteStatus('Failed to delete user.');
+      setDeleteStatus(`Deleted ${user.name} and all related data successfully.`);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      setDeleteStatus('Failed to delete user and related data.');
     }
   };
 
@@ -419,16 +451,46 @@ export default function MentorManagement() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected user(s)? This cannot be undone.`);
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected user(s)? This will also remove all their availability data and bookings. This cannot be undone.`);
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
+      // Delete all user profiles
       await Promise.all(selectedIds.map(id => deleteDoc(doc(firestore, 'mentorProgram', id))));
+      
+      // Delete all availability data for these users
+      const availabilityQuery = query(
+        collection(firestore, 'mentorAvailability'),
+        where('mentorId', 'in', selectedIds)
+      );
+      const availabilitySnapshot = await getDocs(availabilityQuery);
+      const availabilityDeletions = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(availabilityDeletions);
+      
+      // Delete all bookings for these users (as mentors or mentees)
+      const mentorBookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('mentorId', 'in', selectedIds)
+      );
+      const mentorBookingsSnapshot = await getDocs(mentorBookingsQuery);
+      const mentorBookingDeletions = mentorBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(mentorBookingDeletions);
+      
+      const menteeBookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('menteeId', 'in', selectedIds)
+      );
+      const menteeBookingsSnapshot = await getDocs(menteeBookingsQuery);
+      const menteeBookingDeletions = menteeBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(menteeBookingDeletions);
+      
+      // Update local state
       setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
       setSelectedIds([]);
-      setDeleteStatus(`Deleted ${selectedIds.length} user(s) successfully.`);
-    } catch {
-      setDeleteStatus('Failed to delete selected users.');
+      setDeleteStatus(`Deleted ${selectedIds.length} user(s) and all related data successfully.`);
+    } catch (error) {
+      console.error('Error bulk deleting users:', error);
+      setDeleteStatus('Failed to delete selected users and related data.');
     }
   };
 
@@ -558,6 +620,53 @@ export default function MentorManagement() {
     if (!availability.calComAvailability) return 0;
     return availability.calComAvailability.reduce((total, day) => 
       total + day.slots.filter(slot => !slot.available).length, 0);
+  };
+
+  // Function to wipe all availability data from the database
+  const handleWipeAllAvailability = async () => {
+    const confirmed = window.confirm(
+      'DANGER: WIPE ALL AVAILABILITY DATA\n\n' +
+      'This will permanently delete ALL availability data from the database!\n\n' +
+      'This includes:\n' +
+      '• All mentor time slots\n' +
+      '• All recurring availability patterns\n' +
+      '• All specific date availability\n' +
+      '• All availability history\n\n' +
+      'This action CANNOT be undone!\n\n' +
+      'Are you absolutely sure you want to proceed?\n\n' +
+      'Type "WIPE" to confirm:'
+    );
+    
+    if (!confirmed) return;
+    
+    // Additional confirmation - user must type "WIPE"
+    const userInput = prompt('To confirm deletion, please type "WIPE" (case-sensitive):');
+    if (userInput !== 'WIPE') {
+      alert('Deletion cancelled. You did not type "WIPE" correctly.');
+      return;
+    }
+    
+    try {
+      // Get all availability documents
+      const availabilitySnapshot = await getDocs(collection(firestore, 'mentorAvailability'));
+      
+      if (availabilitySnapshot.empty) {
+        alert('No availability data found to delete.');
+        return;
+      }
+      
+      // Delete all availability documents
+      const deletePromises = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      
+      // Refresh the availability data
+      await fetchAvailability();
+      
+      alert(`SUCCESS: Wiped ${availabilitySnapshot.docs.length} availability records from the database!\n\nAll mentor availability data has been permanently removed.`);
+    } catch (error) {
+      console.error('Error wiping availability data:', error);
+      alert('Error deleting availability data. Please check the console for details.');
+    }
   };
 
   // Booking statistics helper functions
@@ -897,7 +1006,7 @@ export default function MentorManagement() {
           )}
           
           {/* Bookings View Mode Switch */}
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 18 }}>
+          <div className="view-toggle-buttons">
             <button className={bookingsView === 'table' ? 'active' : ''} onClick={() => setBookingsView('table')}>Table View</button>
             <button className={bookingsView === 'grouped' ? 'active' : ''} onClick={() => setBookingsView('grouped')}>Grouped View</button>
             {bookingsView === 'grouped' && (
@@ -965,6 +1074,14 @@ export default function MentorManagement() {
                   disabled={loadingAvailability}
                 >
                   <FaSync className={loadingAvailability ? 'spinning' : ''} /> Refresh
+                </button>
+                <button
+                  className="refresh-button"
+                  onClick={handleWipeAllAvailability}
+                  disabled={loadingAvailability}
+                  style={{ background: '#ff2a2a', color: '#fff', border: '1.5px solid #ff2a2a' }}
+                >
+                  🗑️ Wipe All Availability
                 </button>
               </div>
             </div>
