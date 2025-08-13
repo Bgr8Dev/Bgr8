@@ -3,6 +3,7 @@ import { firestore } from '../../firebase/firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where } from 'firebase/firestore';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../widgets/MentorAlgorithm/CalCom/calComService';
+import { Booking } from '../../types/bookings';
 import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck, FaPoundSign } from 'react-icons/fa';
 import MentorModal from '../widgets/MentorAlgorithm/MentorModal';
@@ -11,38 +12,7 @@ import BookingsTable from './BookingsTable';
 import BookingDetailsModal from './BookingDetailsModal';
 import BookingsGrouped from './BookingsGrouped';
 
-// Enhanced Booking interface for admin view with Cal.com support
-interface Booking {
-  id: string;
-  mentorName: string;
-  mentorEmail: string;
-  menteeName: string;
-  menteeEmail: string;
-  sessionDate?: Date | string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  meetLink?: string;
-  eventId?: string;
-  // Cal.com specific fields
-  isCalComBooking?: boolean;
-  calComBookingId?: string;
-  calComEventType?: {
-    id: number;
-    title: string;
-  };
-  calComAttendees?: Array<{
-    name: string;
-    email: string;
-    timeZone: string;
-  }>;
-  // Additional fields for analytics
-  createdAt?: Date;
-  mentorId?: string;
-  menteeId?: string;
-  duration?: number; // in minutes
-  revenue?: number;
-}
+
 
 // Add Availability interfaces for admin view
 interface TimeSlot {
@@ -163,25 +133,41 @@ export default function MentorManagement() {
   // Calculate counts
   const realUsers = users.filter(u => !u.isGenerated);
   const generatedUsers = users.filter(u => u.isGenerated);
-  const realMentors = realUsers.filter(u => u.type === 'mentor');
-  const generatedMentors = generatedUsers.filter(u => u.type === 'mentor');
-  const realMentees = realUsers.filter(u => u.type === 'mentee');
-  const generatedMentees = generatedUsers.filter(u => u.type === 'mentee');
+  const realMentors = realUsers.filter(u => u.isMentor);
+  const generatedMentors = generatedUsers.filter(u => u.isMentor);
+  const realMentees = realUsers.filter(u => u.isMentee);
+  const generatedMentees = generatedUsers.filter(u => u.isMentee);
 
+  // Fetch users from mentorProgram subcollections
   const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
-      const usersData = usersSnapshot.docs.map(doc => ({
-        ...doc.data() as MentorMenteeProfile,
-        id: doc.id
-      }));
+      // Get all users and check their mentorProgram subcollections
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      const usersData: MentorMenteeProfileWithId[] = [];
+      
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            usersData.push({
+              ...userData,
+              id: userDoc.id
+            } as MentorMenteeProfileWithId);
+          }
+        } catch (error) {
+          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+        }
+      }
+      
       setUsers(usersData);
-    } catch (err) {
-      console.error('Error fetching users:', err);
+    } catch (error) {
+      console.error('Error fetching users:', error);
       setError('Failed to load users');
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -222,7 +208,7 @@ export default function MentorManagement() {
       try {
         const mentorsSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
         const mentorPromises = mentorsSnapshot.docs
-          .filter(doc => doc.data().type === 'mentor')
+          .filter(doc => doc.data().isMentor)
           .map(async (mentorDoc) => {
             const mentorData = mentorDoc.data();
             try {
@@ -289,11 +275,33 @@ export default function MentorManagement() {
     setLoadingAvailability(true);
     setAvailabilityError(null);
     try {
-      const availabilitySnapshot = await getDocs(collection(firestore, 'mentorAvailability'));
-      const availabilityData = availabilitySnapshot.docs.map(doc => ({
+      // Get all users from mentorProgram collection
+      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
+      const usersData = usersSnapshot.docs.map(doc => ({
         ...doc.data(),
-        mentorId: doc.id
-      })) as MentorAvailabilityWithProfile[];
+        id: doc.id
+      })) as MentorMenteeProfileWithId[];
+      
+      // Fetch availability data from users/{uid}/availabilities subcollections
+      const availabilityPromises = usersData.map(async (user) => {
+        try {
+          const availabilityDoc = await getDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'));
+          if (availabilityDoc.exists()) {
+            const availabilityData = availabilityDoc.data();
+            return {
+              ...availabilityData,
+              mentorId: user.id
+            } as MentorAvailabilityWithProfile;
+          }
+          return null;
+        } catch (error) {
+          console.error(`Error fetching availability for user ${user.id}:`, error);
+          return null;
+        }
+      });
+      
+      const availabilityResults = await Promise.all(availabilityPromises);
+      const availabilityData = availabilityResults.filter(Boolean) as MentorAvailabilityWithProfile[];
       
       // Fetch mentor profiles and Cal.com availability to enrich the data
       const enrichedData = await Promise.all(
@@ -377,15 +385,12 @@ export default function MentorManagement() {
     setDeleteStatus(null);
     try {
       // Delete the user profile
-      await deleteDoc(doc(firestore, 'mentorProgram', user.id));
+      await deleteDoc(doc(firestore, 'users', user.id, 'mentorProgram', 'profile'));
       
-      // Delete all availability data for this user
-      const availabilityQuery = query(
-        collection(firestore, 'mentorAvailability'),
-        where('mentorId', '==', user.id)
-      );
-      const availabilitySnapshot = await getDocs(availabilityQuery);
-      const availabilityDeletions = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      // Delete all availability data for this user from subcollections
+      const availabilityDeletions = [
+        deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'))
+      ];
       await Promise.all(availabilityDeletions);
       
       // Delete all bookings for this user (as mentor or mentee)
@@ -425,7 +430,7 @@ export default function MentorManagement() {
     setDeleteStatus(null);
     try {
       // Update Firestore
-      await setDoc(doc(firestore, 'mentorProgram', editUser.id), updatedUser);
+      await setDoc(doc(firestore, 'users', editUser.id, 'mentorProgram', 'profile'), updatedUser);
       // Update local state
       setUsers(prev => prev.map(u => u.id === editUser.id ? { ...updatedUser, id: editUser.id } : u));
       setEditModalOpen(false);
@@ -455,15 +460,12 @@ export default function MentorManagement() {
     setDeleteStatus(null);
     try {
       // Delete all user profiles
-      await Promise.all(selectedIds.map(id => deleteDoc(doc(firestore, 'mentorProgram', id))));
+      await Promise.all(selectedIds.map(id => deleteDoc(doc(firestore, 'users', id, 'mentorProgram', 'profile'))));
       
-      // Delete all availability data for these users
-      const availabilityQuery = query(
-        collection(firestore, 'mentorAvailability'),
-        where('mentorId', 'in', selectedIds)
+      // Delete all availability data for these users from subcollections
+      const availabilityDeletions = selectedIds.map(id => 
+        deleteDoc(doc(firestore, 'users', id, 'availabilities', 'default'))
       );
-      const availabilitySnapshot = await getDocs(availabilityQuery);
-      const availabilityDeletions = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(availabilityDeletions);
       
       // Delete all bookings for these users (as mentors or mentees)
@@ -646,22 +648,27 @@ export default function MentorManagement() {
     }
     
     try {
-      // Get all availability documents
-      const availabilitySnapshot = await getDocs(collection(firestore, 'mentorAvailability'));
+      // Get all users from mentorProgram collection to find mentors
+      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
+      let deletedCount = 0;
       
-      if (availabilitySnapshot.empty) {
-        alert('No availability data found to delete.');
-        return;
+      // Delete availability from each mentor's subcollection
+      for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+        if (userData.isMentor) {
+          try {
+            await deleteDoc(doc(firestore, 'users', userDoc.id, 'availabilities', 'default'));
+            deletedCount++;
+          } catch (error) {
+            console.error(`Error deleting availability for user ${userDoc.id}:`, error);
+          }
+        }
       }
-      
-      // Delete all availability documents
-      const deletePromises = availabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
       
       // Refresh the availability data
       await fetchAvailability();
       
-      alert(`SUCCESS: Wiped ${availabilitySnapshot.docs.length} availability records from the database!\n\nAll mentor availability data has been permanently removed.`);
+      alert(`SUCCESS: Wiped availability data for ${deletedCount} mentors from the database!\n\nAll mentor availability data has been permanently removed.`);
     } catch (error) {
       console.error('Error wiping availability data:', error);
       alert('Error deleting availability data. Please check the console for details.');
@@ -813,7 +820,7 @@ export default function MentorManagement() {
               <h3>Mentors</h3>
               <div className="stat-animated-number-container">
                 <div className={`stat-animated-number stat-total${hoveredTile === 'mentors' ? ' stat-hidden' : ''}`}>
-                  <p>{users.filter(u => u.type === 'mentor').length}</p>
+                  <p>{users.filter(u => u.isMentor).length}</p>
                 </div>
                 <div className={`stat-animated-number stat-split${hoveredTile === 'mentors' ? ' stat-visible' : ''}`}>
                   <span className="stat-real">Real: {realMentors.length}</span>
@@ -825,7 +832,7 @@ export default function MentorManagement() {
               <h3>Mentees</h3>
               <div className="stat-animated-number-container">
                 <div className={`stat-animated-number stat-total${hoveredTile === 'mentees' ? ' stat-hidden' : ''}`}>
-                  <p>{users.filter(u => u.type === 'mentee').length}</p>
+                  <p>{users.filter(u => u.isMentee).length}</p>
                 </div>
                 <div className={`stat-animated-number stat-split${hoveredTile === 'mentees' ? ' stat-visible' : ''}`}>
                   <span className="stat-real">Real: {realMentees.length}</span>
@@ -881,8 +888,8 @@ export default function MentorManagement() {
                       </div>
                     </td>
                     <td>
-                      <span className={`user-type ${user.type}`}>
-                        {user.type.charAt(0).toUpperCase() + user.type.slice(1)}
+                      <span className={`user-type ${user.isMentor ? 'mentor' : 'mentee'}`}>
+                        {user.isMentor ? 'Mentor' : 'Mentee'}
                       </span>
                     </td>
                     <td>{user.email}</td>

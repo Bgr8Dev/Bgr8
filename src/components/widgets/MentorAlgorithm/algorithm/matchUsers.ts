@@ -7,7 +7,9 @@ export const MENTEE = 'mentee';
 
 export interface MentorMenteeProfile {
   uid: string;
-  name: string;
+  userRef: string; // Reference back to the user document (users/{uid})
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   age: string;
@@ -24,8 +26,9 @@ export interface MentorMenteeProfile {
   skills: string[];
   lookingFor: string[];
   industries: string[];
-  type: UserType;
-  [key: string]: string | string[];
+  isMentor: boolean;
+  isMentee: boolean;
+  [key: string]: string | string[] | boolean;
 }
 
 export interface MatchResult {
@@ -108,7 +111,7 @@ function getEducationScore(
     educationLevelEncoding[currentUser.educationLevel]
     - educationLevelEncoding[candidate.educationLevel]));
   if (eduAddScore < 0) {
-    if (currentUser.type === MENTOR)
+    if (currentUser.isMentor)
       eduAddScore = 0
     else
       eduAddScore *= -1; // if a mentee has a lower education level it's good
@@ -132,8 +135,8 @@ function getAgeScore(
   const ageDiff = Math.abs(ageDiffPure);
   const softAgeDiffLimit = 25;
   if (olderMentorPref) {
-    if ((currentUser.age > candidate.age && currentUser.type == MENTEE)
-      || (currentUser.age < candidate.age && currentUser.type == MENTOR)) {
+    if ((currentUser.age > candidate.age && currentUser.isMentee)
+      || (currentUser.age < candidate.age && currentUser.isMentor)) {
       return 0; // if the mentor is younger, return 0. Unlikely, but...
     }
     const ageReason = ageReasonMenteeExpPref;
@@ -210,25 +213,31 @@ function getProfessionalScore(
 
 // Main matching function
 export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]> {
-  // Get current user's profile
-  const collectionName = 'mentorProgram';
-  const userDoc = await getDoc(doc(firestore, collectionName, uid));
+  // Get current user's profile from subcollection
+  const userDoc = await getDoc(doc(firestore, 'users', uid, 'mentorProgram', 'profile'));
   if (!userDoc.exists()) throw new Error('User profile not found');
   const currentUser = userDoc.data() as MentorMenteeProfile;
 
-  // Get all mentorProgram users
-  const allDocs = await getDocs(collection(firestore, collectionName));
+  // Get all users and check their mentorProgram subcollections
+  const allUsersDocs = await getDocs(collection(firestore, 'users'));
   const allUsers: MentorMenteeProfile[] = [];
-  allDocs.forEach(docSnap => {
-    if (docSnap.id !== uid) {
-      const data = docSnap.data() as MentorMenteeProfile;
-      allUsers.push({ ...data, uid: docSnap.id });
+  
+  for (const userDoc of allUsersDocs.docs) {
+    if (userDoc.id !== uid) {
+      try {
+        const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+        if (mentorProgramDoc.exists()) {
+          const data = mentorProgramDoc.data() as MentorMenteeProfile;
+          allUsers.push({ ...data, uid: userDoc.id });
+        }
+      } catch (error) {
+        console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+      }
     }
-  });
+  }
 
   // Determine who to match with
-  const targetType = currentUser.type === MENTOR ? MENTEE : MENTOR;
-  const candidates = allUsers.filter(u => u.type === targetType);
+  const candidates = allUsers.filter(u => u.isMentor === !currentUser.isMentor);
 
   // Scoring
   const results: MatchResult[] = candidates.map(candidate => {
@@ -259,7 +268,7 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
     if (hobbyMatches > 0) reasons.push(`${hobbyMatches} ${hobbiesReasonIDs[0]}`);
 
     // Skills match
-    const skillMatches = currentUser.type === MENTOR
+    const skillMatches = currentUser.isMentor
       ? lenIntersect(currentUser.skills, candidate.lookingFor)
       : lenIntersect(currentUser.lookingFor, candidate.skills);
     score += skillMatches * SCORE_WEIGHTINGS['skills'];

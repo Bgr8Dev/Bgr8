@@ -5,24 +5,9 @@ import { firestore } from '../../firebase/firebase';
 import { doc, getDoc, addDoc, collection, updateDoc, query, where, getDocs } from 'firebase/firestore';
 import { SessionFeedback } from '../../types/b8fc';
 import { CalComService, CalComBookingResponse } from '../../components/widgets/MentorAlgorithm/CalCom/calComService';
+import { Booking } from '../../types/bookings';
 import { FaStar, FaArrowLeft, FaCheck, FaTimes } from 'react-icons/fa';
 import '../../styles/FeedbackPage.css';
-
-interface Booking {
-  id: string;
-  mentorId: string;
-  menteeId: string;
-  mentorName: string;
-  menteeName: string;
-  mentorEmail: string;
-  menteeEmail: string;
-  sessionDate: Date;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  isCalComBooking?: boolean;
-  calComBookingId?: string;
-}
 
 export default function FeedbackPage() {
   const { currentUser } = useAuth();
@@ -97,67 +82,68 @@ export default function FeedbackPage() {
               } else {
                 // If not found in Firestore, try to fetch from Cal.com API
                 try {
-                  // We need to find which mentor this Cal.com booking belongs to
-                  // Let's try to fetch all mentors and check their Cal.com bookings
-                  const mentorsRef = collection(firestore, 'mentorProgram');
-                  const mentorsSnapshot = await getDocs(mentorsRef);
-                  
-                  let foundBooking = false;
-                  
-                  for (const mentorDoc of mentorsSnapshot.docs) {
-                    const mentorData = mentorDoc.data();
-                    if (mentorData.type === 'mentor' && mentorData.calCom) {
-                      try {
-                        const calComBookings = await CalComService.getBookings(mentorDoc.id);
-                        const matchingBooking = calComBookings.find((booking: CalComBookingResponse) => 
-                          booking.id.toString() === calComBookingId
-                        );
-                        
-                        if (matchingBooking) {
-                          // Found the booking! Create a proper booking object
-                          const startDate = new Date(matchingBooking.startTime);
-                          const endDate = new Date(matchingBooking.endTime);
-                          
-                          // Find mentor and mentee from attendees
-                          const mentor = matchingBooking.attendees.find(attendee => 
-                            attendee.email === mentorData.email
-                          );
-                          const mentee = matchingBooking.attendees.find(attendee => 
-                            attendee.email !== mentorData.email
-                          );
-                          
-                          const bookingData: Booking = {
-                            id: bookingId,
-                            mentorId: mentorDoc.id,
-                            menteeId: mentee?.email || currentUser.uid,
-                            mentorName: mentor?.name || mentorData.name || 'Unknown Mentor',
-                            menteeName: mentee?.name || 'Unknown Mentee',
-                            mentorEmail: mentor?.email || mentorData.email || '',
-                            menteeEmail: mentee?.email || '',
-                            sessionDate: startDate,
-                            startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                            endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                            status: 'confirmed',
-                            isCalComBooking: true,
-                            calComBookingId: calComBookingId
-                          };
-                          
-                          // Determine user role
-                          const role = bookingData.mentorId === currentUser.uid ? 'mentor' : 'mentee';
-                          const feedbackType = role === 'mentor' ? 'mentee' : 'mentor';
-                          
-                          setBooking(bookingData);
-                          setUserRole(role);
-                          setFeedbackType(feedbackType);
-                          foundBooking = true;
-                          break;
-                        }
-                      } catch (err) {
-                        console.error(`Error fetching Cal.com bookings for mentor ${mentorDoc.id}:`, err);
-                        // Continue to next mentor
-                      }
-                    }
-                  }
+                                     // We need to find which mentor this Cal.com booking belongs to
+                   // Let's try to fetch all mentors and check their Cal.com bookings
+                   const usersSnapshot = await getDocs(collection(firestore, 'users'));
+                   let foundBooking = false;
+                   
+                   for (const userDoc of usersSnapshot.docs) {
+                     try {
+                       const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+                       if (mentorProgramDoc.exists()) {
+                         const mentorData = mentorProgramDoc.data();
+                         if (mentorData.isMentor && mentorData.calCom) {
+                           const calComBookings = await CalComService.getBookings(userDoc.id);
+                           const matchingBooking = calComBookings.find((booking: CalComBookingResponse) => 
+                             booking.id.toString() === calComBookingId
+                           );
+                           
+                           if (matchingBooking) {
+                             // Found the booking! Create a proper booking object
+                             const startDate = new Date(matchingBooking.startTime);
+                             const endDate = new Date(matchingBooking.endTime);
+                             
+                             // Find mentor and mentee from attendees
+                             const mentor = matchingBooking.attendees.find(attendee => 
+                               attendee.email === mentorData.email
+                             );
+                             const mentee = matchingBooking.attendees.find(attendee => 
+                               attendee.email !== mentorData.email
+                             );
+                             
+                             const bookingData: Booking = {
+                               id: bookingId,
+                               mentorId: userDoc.id,
+                               menteeId: mentee?.email || currentUser.uid,
+                               mentorName: mentor?.name || `${mentorData.firstName || 'Unknown'} ${mentorData.lastName || 'Mentor'}`,
+                               menteeName: mentee?.name || 'Unknown Mentee',
+                               mentorEmail: mentor?.email || mentorData.email || '',
+                               menteeEmail: mentee?.email || '',
+                               sessionDate: startDate,
+                               startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                               endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                               status: 'confirmed',
+                               isCalComBooking: true,
+                               calComBookingId: calComBookingId
+                             };
+                             
+                             // Determine user role
+                             const role = bookingData.mentorId === currentUser.uid ? 'mentor' : 'mentee';
+                             const feedbackType = role === 'mentor' ? 'mentee' : 'mentor';
+                             
+                             setBooking(bookingData);
+                             setUserRole(role);
+                             setFeedbackType(feedbackType);
+                             foundBooking = true;
+                             break;
+                           }
+                         }
+                       }
+                     } catch (err) {
+                       console.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, err);
+                       // Continue to next mentor
+                     }
+                   }
                   
                   if (!foundBooking) {
                     setError('Cal.com booking not found. This booking may not be associated with any mentor in our system.');

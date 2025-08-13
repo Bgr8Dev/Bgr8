@@ -35,7 +35,6 @@ const TIME_SLOTS = [
 export default function MentorAvailability() {
   const { currentUser } = useAuth();
   const [availability, setAvailability] = useState<MentorAvailability | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'recurring' | 'specific'>('recurring');
   // Recurring slot state
@@ -62,24 +61,31 @@ export default function MentorAvailability() {
   const [modalMessage, setModalMessage] = useState('');
   const [modalType, setModalType] = useState<'success' | 'error' | 'info' | 'warning'>('info');
 
+  // Load availability data
   useEffect(() => {
-    const fetchAvailability = async () => {
+    const loadAvailability = async () => {
       if (!currentUser) return;
+      
       try {
-        const availabilityDoc = await getDoc(doc(firestore, 'mentorAvailability', currentUser.uid));
+        const availabilityDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'availabilities', 'default'));
         if (availabilityDoc.exists()) {
           setAvailability(availabilityDoc.data() as MentorAvailability);
         } else {
-          setAvailability({ mentorId: currentUser.uid, timeSlots: [], lastUpdated: new Date() });
+          // Create default availability structure
+          const defaultAvailability: MentorAvailability = {
+            mentorId: currentUser.uid,
+            timeSlots: [],
+            lastUpdated: new Date()
+          };
+          setAvailability(defaultAvailability);
         }
       } catch (err) {
-        setError('Failed to load availability');
-        console.error('Error fetching availability:', err);
-      } finally {
-        setLoading(false);
+        console.error('Error loading availability:', err);
+        setError('Failed to load availability data');
       }
     };
-    fetchAvailability();
+
+    loadAvailability();
   }, [currentUser]);
 
   // Add slot (recurring or specific)
@@ -134,8 +140,8 @@ export default function MentorAvailability() {
         lastUpdated: new Date()
       };
       
-      // Save to Firebase
-      await setDoc(doc(firestore, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      // Save to Firebase - now using subcollection
+      await setDoc(doc(firestore, 'users', currentUser.uid, 'availabilities', 'default'), updatedAvailability);
       
       // Update local state
       setAvailability(updatedAvailability);
@@ -225,8 +231,8 @@ export default function MentorAvailability() {
         lastUpdated: new Date()
       };
       
-      // Save to Firebase
-      await setDoc(doc(firestore, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      // Save to Firebase - now using subcollection
+      await setDoc(doc(firestore, 'users', currentUser.uid, 'availabilities', 'default'), updatedAvailability);
       
       // Update local state
       setAvailability(updatedAvailability);
@@ -256,8 +262,8 @@ export default function MentorAvailability() {
         lastUpdated: new Date()
       };
       
-      // Save to Firebase
-      await setDoc(doc(firestore, 'mentorAvailability', currentUser.uid), updatedAvailability);
+      // Save to Firebase - now using subcollection
+      await setDoc(doc(firestore, 'users', currentUser.uid, 'availabilities', 'default'), updatedAvailability);
       
       // Update local state
       setAvailability(updatedAvailability);
@@ -328,7 +334,7 @@ export default function MentorAvailability() {
     setModalOpen(true);
   };
 
-  if (loading) {
+  if (!availability) {
     return <div className="mentor-availability-loading">Loading availability...</div>;
   }
 

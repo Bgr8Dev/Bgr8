@@ -14,6 +14,10 @@ export interface UserProfile {
   lastUpdated: Date;
   admin: boolean;
 
+  // Mentor/Mentee Profile References
+  mentorProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
+  menteeProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
+
   // Demographic Info
   ethnicity?: string;
   nationality?: string;
@@ -36,32 +40,6 @@ export interface UserProfile {
     linkedin?: string;
     twitter?: string;
     youtube?: string;
-  };
-
-  // Preferences
-  preferences: {
-    marketingEmails: boolean;
-    notifications: boolean;
-    orderUpdates: boolean;
-    newProductAlerts: boolean;
-    theme: 'light' | 'dark' | 'system';
-    fontSize: 'small' | 'medium' | 'large';
-    colorScheme: 'default' | 'high-contrast' | 'colorful';
-    language: string;
-    currency: string;
-    timezone: string;
-  };
-
-  // bgr8 Platform Specific
-  bgr8Memberships?: {
-    marketing?: boolean;
-    carClub?: boolean;
-    clothing?: boolean;
-    league?: boolean;
-    charity?: boolean;
-    education?: boolean;
-    careers?: boolean;
-    world?: boolean;
   };
 
   // Education Info
@@ -104,20 +82,6 @@ export interface UserProfile {
       total: number;
     }[];
   };
-
-  // Security Settings
-  security?: {
-    twoFactorEnabled: boolean;
-    lastPasswordChange?: Date;
-    loginDevices?: string[];
-  };
-
-  // Privacy Settings
-  privacy: {
-    showProfile: boolean;
-    activityStatus: boolean;
-    dataCollection: boolean;
-  };
 }
 
 export const createUserProfile = async (
@@ -140,36 +104,6 @@ export const createUserProfile = async (
     admin: false,
     ethnicity: 'N/A',
     nationality: 'N/A',
-    preferences: {
-      marketingEmails: true,
-      notifications: true,
-      orderUpdates: true,
-      newProductAlerts: false,
-      theme: 'dark',
-      fontSize: 'medium',
-      colorScheme: 'default',
-      language: 'en',
-      currency: 'GBP',
-      timezone: 'UTC'
-    },
-    bgr8Memberships: {
-      marketing: false,
-      carClub: false,
-      clothing: false,
-      league: false,
-      charity: false,
-      education: false,
-      careers: false,
-      world: false
-    },
-    security: {
-      twoFactorEnabled: false
-    },
-    privacy: {
-      showProfile: true,
-      activityStatus: true,
-      dataCollection: true
-    },
     activityLog: {
       lastLogin: new Date(),
       loginCount: 1

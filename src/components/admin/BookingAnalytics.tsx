@@ -1,35 +1,6 @@
 import React, { useMemo } from 'react';
 import { FaCalendarAlt, FaClock, FaPoundSign, FaCheck } from 'react-icons/fa';
-
-interface Booking {
-  id: string;
-  mentorName: string;
-  mentorEmail: string;
-  menteeName: string;
-  menteeEmail: string;
-  sessionDate?: Date | string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  meetLink?: string;
-  eventId?: string;
-  isCalComBooking?: boolean;
-  calComBookingId?: string;
-  calComEventType?: {
-    id: number;
-    title: string;
-  };
-  calComAttendees?: Array<{
-    name: string;
-    email: string;
-    timeZone: string;
-  }>;
-  createdAt?: Date;
-  mentorId?: string;
-  menteeId?: string;
-  duration?: number;
-  revenue?: number;
-}
+import { Booking } from '../../types/bookings';
 
 interface BookingAnalyticsProps {
   bookings: Booking[];
@@ -43,7 +14,16 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
 
     // Filter bookings by date
     const recentBookings = bookings.filter(booking => {
-      const bookingDate = booking.sessionDate instanceof Date ? booking.sessionDate : new Date(booking.sessionDate || '');
+      let bookingDate: Date;
+      if (booking.sessionDate instanceof Date) {
+        bookingDate = booking.sessionDate;
+      } else if (typeof booking.sessionDate === 'string') {
+        bookingDate = new Date(booking.sessionDate);
+      } else if (booking.sessionDate && typeof booking.sessionDate === 'object' && 'toDate' in booking.sessionDate) {
+        bookingDate = (booking.sessionDate as { toDate: () => Date }).toDate();
+      } else {
+        return false; // Skip bookings without valid dates
+      }
       return bookingDate >= thirtyDaysAgo;
     });
 
@@ -78,7 +58,16 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
       const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       
       const monthBookings = bookings.filter(booking => {
-        const bookingDate = booking.sessionDate instanceof Date ? booking.sessionDate : new Date(booking.sessionDate || '');
+        let bookingDate: Date;
+        if (booking.sessionDate instanceof Date) {
+          bookingDate = booking.sessionDate;
+        } else if (typeof booking.sessionDate === 'string') {
+          bookingDate = new Date(booking.sessionDate);
+        } else if (booking.sessionDate && typeof booking.sessionDate === 'object' && 'toDate' in booking.sessionDate) {
+          bookingDate = (booking.sessionDate as { toDate: () => Date }).toDate();
+        } else {
+          return false; // Skip bookings without valid dates
+        }
         return bookingDate >= monthStart && bookingDate <= monthEnd;
       });
 

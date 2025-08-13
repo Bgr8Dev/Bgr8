@@ -32,6 +32,9 @@ export default function Navbar() {
 
       <nav className="nav" role="navigation" aria-label="Main navigation">
         <Link to="/mentors" className="nav-link">Find Mentors</Link>
+        {currentUser && (
+          <Link to="/sessions" className="nav-link">My Sessions</Link>
+        )}
       </nav>
 
       <div className="auth-section">

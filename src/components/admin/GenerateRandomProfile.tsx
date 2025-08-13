@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { firestore } from '../../firebase/firebase';
-import { collection, addDoc, query, where, getDocs, deleteDoc, setDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { Booking } from '../../types/bookings';
 import ukCounties from '../../constants/ukCounties';
 import industriesList from '../../constants/industries';
 import '../../styles/adminStyles/MentorManagement.css';
@@ -23,26 +24,7 @@ interface MentorAvailability {
   lastUpdated: Date | string;
 }
 
-interface Booking {
-  id?: string;
-  mentorName: string;
-  mentorEmail: string;
-  menteeName: string;
-  menteeEmail: string;
-  sessionDate?: Date | string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  meetLink?: string;
-  eventId?: string;
-  isCalComBooking?: boolean;
-  calComBookingId?: string;
-  mentorId?: string;
-  menteeId?: string;
-  duration?: number;
-  revenue?: number;
-  createdAt?: Date;
-}
+
 
 interface AvailableMentor {
   id: string;
@@ -552,7 +534,7 @@ export default function GenerateRandomProfile() {
   const [generateMentees, setGenerateMentees] = useState(false);
   const [overwriteAvailability, setOverwriteAvailability] = useState(false);
   const [mentorSearch, setMentorSearch] = useState('');
-  const [availableMentors, setAvailableMentors] = useState<AvailableMentor[]>([]);
+  const [availableMentors, setAvailableMentors] = useState<MentorMenteeProfile[]>([]);
   const [selectedMentors, setSelectedMentors] = useState<string[]>([]);
   const [showMentorSelector, setShowMentorSelector] = useState(false);
 
@@ -877,39 +859,48 @@ export default function GenerateRandomProfile() {
     setSuccess(null);
 
     try {
-      // Get all existing mentors from the mentorProgram collection
-      const mentorsQuery = query(
-        collection(firestore, 'mentorProgram'),
-        where('type', '==', 'mentor')
-      );
-      const mentorsSnapshot = await getDocs(mentorsQuery);
+      // Get all existing mentors from the users collection by checking mentorProgram subcollections
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      const mentorsData: MentorMenteeProfile[] = [];
       
-      if (mentorsSnapshot.empty) {
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            if (userData.type === 'mentor') {
+              mentorsData.push({
+                ...userData,
+                id: userDoc.id
+              } as MentorMenteeProfile);
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+        }
+      }
+      
+      if (mentorsData.length === 0) {
         setError('No mentors found to generate availability for.');
         return;
       }
 
       let generatedCount = 0;
-      for (const mentorDoc of mentorsSnapshot.docs) {
+      for (const mentor of mentorsData) {
         // Check if availability already exists for this mentor
-        const availabilityQuery = query(
-          collection(firestore, 'mentorAvailability'),
-          where('mentorId', '==', mentorDoc.id)
-        );
-        const existingAvailability = await getDocs(availabilityQuery);
+        const mentorId = typeof mentor.id === 'string' ? mentor.id : mentor.uid;
+        const availabilityDoc = await getDoc(doc(firestore, 'users', mentorId, 'availabilities', 'default'));
         
         // If overwriting, delete existing availability first
-        if (overwriteAvailability && !existingAvailability.empty) {
-          const deletePromises = existingAvailability.docs.map(doc => deleteDoc(doc.ref));
-          await Promise.all(deletePromises);
+        if (overwriteAvailability && availabilityDoc.exists()) {
+          await deleteDoc(doc(firestore, 'users', mentorId, 'availabilities', 'default'));
         }
         
         // Generate availability if none exists or if overwriting
-        if (existingAvailability.empty || overwriteAvailability) {
-          const mentorData = mentorDoc.data();
-          const mentorUid = mentorData.uid || mentorDoc.id; // Use uid if available, fallback to doc id
+        if (!availabilityDoc.exists() || overwriteAvailability) {
+          const mentorUid = mentor.uid || mentorId; // Use uid if available, fallback to doc id
           const availabilityData = generateRandomAvailability(mentorUid);
-          await setDoc(doc(firestore, 'mentorAvailability', mentorUid), availabilityData);
+          await setDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'), availabilityData);
           generatedCount++;
         }
       }
@@ -923,25 +914,34 @@ export default function GenerateRandomProfile() {
     }
   };
 
+
+
   const fetchAvailableMentors = async () => {
     try {
-      const mentorsQuery = query(
-        collection(firestore, 'mentorProgram'),
-        where('type', '==', 'mentor')
-      );
-      const mentorsSnapshot = await getDocs(mentorsQuery);
+      // Get all users and check their mentorProgram subcollections
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      const mentorsData: MentorMenteeProfile[] = [];
       
-      const mentors = mentorsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        uid: doc.data().uid || doc.id, // Use uid if available, fallback to doc id
-        name: doc.data().name || 'Unknown Name',
-        email: doc.data().email || 'No Email'
-      }));
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            if (userData.type === 'mentor') {
+              mentorsData.push({
+                ...userData,
+                id: userDoc.id
+              } as MentorMenteeProfile);
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+        }
+      }
       
-      setAvailableMentors(mentors);
-    } catch (err) {
-      console.error('Error fetching mentors:', err);
-      setError('Failed to fetch available mentors.');
+      setAvailableMentors(mentorsData);
+    } catch (error) {
+      console.error('Error fetching available mentors:', error);
     }
   };
 
@@ -966,22 +966,17 @@ export default function GenerateRandomProfile() {
         const mentorUid = mentorDoc.uid;
         
         // Check if availability already exists for this mentor
-        const availabilityQuery = query(
-          collection(firestore, 'mentorAvailability'),
-          where('mentorId', '==', mentorUid)
-        );
-        const existingAvailability = await getDocs(availabilityQuery);
+        const availabilityDoc = await getDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'));
         
         // If overwriting, delete existing availability first
-        if (overwriteAvailability && !existingAvailability.empty) {
-          const deletePromises = existingAvailability.docs.map(doc => deleteDoc(doc.ref));
-          await Promise.all(deletePromises);
+        if (overwriteAvailability && availabilityDoc.exists()) {
+          await deleteDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'));
         }
         
         // Generate availability if none exists or if overwriting
-        if (existingAvailability.empty || overwriteAvailability) {
+        if (!availabilityDoc.exists() || overwriteAvailability) {
           const availabilityData = generateRandomAvailability(mentorUid);
-          await setDoc(doc(firestore, 'mentorAvailability', mentorUid), availabilityData);
+          await setDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'), availabilityData);
           generatedCount++;
         }
       }
@@ -1022,31 +1017,30 @@ export default function GenerateRandomProfile() {
     setSuccess(null);
 
     try {
-      // Get all existing mentors
-      const mentorsQuery = query(
-        collection(firestore, 'mentorProgram'),
-        where('type', '==', 'mentor')
-      );
-      const mentorsSnapshot = await getDocs(mentorsQuery);
-      
-      if (mentorsSnapshot.empty) {
-        setError('No mentors found to generate site-wide availability for.');
-        return;
-      }
-
+      // Get all users and check their mentorProgram subcollections
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       let generatedCount = 0;
-      for (const mentorDoc of mentorsSnapshot.docs) {
-        // Generate comprehensive availability data
-        const mentorData = mentorDoc.data();
-        const mentorUid = mentorData.uid || mentorDoc.id; // Use uid if available, fallback to doc id
-        const availabilityData = generateRandomAvailability(mentorUid);
-        
-        // Always overwrite existing availability for site-wide generation
-        await setDoc(doc(firestore, 'mentorAvailability', mentorUid), availabilityData);
-        generatedCount++;
+      
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            if (userData.type === 'mentor') {
+              const mentorUid = userData.uid || userDoc.id;
+              
+              // Always overwrite existing availability for site-wide generation
+              const availabilityData = generateRandomAvailability(mentorUid);
+              await setDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          }
+        } catch (error) {
+          console.error(`Error processing user ${userDoc.id}:`, error);
+        }
       }
-
-      setSuccess(`Generated comprehensive site-wide availability for ${generatedCount} mentors!`);
+      
+      setSuccess(`Generated availability data for ${generatedCount} mentors!`);
     } catch (err) {
       console.error('Error generating site-wide availability:', err);
       setError('Failed to generate site-wide availability. Please try again.');
@@ -1077,9 +1071,13 @@ export default function GenerateRandomProfile() {
           ].includes(level))
         : ukEducationLevels;
 
+      const generatedUid = `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       return {
-        uid: `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: `${firstName} ${lastName}`,
+        uid: generatedUid,
+        userRef: `users/${generatedUid}`, // Two-way key reference using the actual uid
+        firstName: firstName,
+        lastName: lastName,
         email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
         phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
         age: age.toString(),
@@ -1096,7 +1094,8 @@ export default function GenerateRandomProfile() {
         skills: type === 'mentor' ? skills : [],
         lookingFor: type === 'mentee' ? lookingFor : [],
         industries,
-        type: type || 'mentor',
+        isMentor: type === 'mentor',
+        isMentee: type === 'mentee',
         isGenerated: "true",
       };
     }
@@ -1116,9 +1115,14 @@ export default function GenerateRandomProfile() {
     const educationLevel = selectedArchetype.educationLevels && selectedArchetype.educationLevels.length > 0 ? getRandomElement(selectedArchetype.educationLevels) : getRandomElement(ukEducationLevels);
     const profession = selectedArchetype.professions && selectedArchetype.professions.length > 0 ? getRandomElement(selectedArchetype.professions) : getRandomElement(professions);
     const hobbiesList = selectedArchetype.hobbies && selectedArchetype.hobbies.length > 0 ? getRandomElements(selectedArchetype.hobbies, Math.floor(Math.random() * 3) + 1) : getRandomElements(hobbies, Math.floor(Math.random() * 4) + 2);
+    
+    const generatedUid = `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     return {
-      uid: `generated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: `${firstName} ${lastName}`,
+      uid: generatedUid,
+      userRef: `users/${generatedUid}`, // Two-way key reference using the actual uid
+      firstName: firstName,
+      lastName: lastName,
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
       phone: `+44${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       age: age.toString(),
@@ -1135,7 +1139,8 @@ export default function GenerateRandomProfile() {
       skills: selectedArchetype.type === 'mentor' ? skills : [],
       lookingFor,
       industries,
-      type: (selectedArchetype.type as 'mentor' | 'mentee') || type,
+      isMentor: selectedArchetype.type === 'mentor',
+      isMentee: selectedArchetype.type === 'mentee',
       isGenerated: "true",
     };
   };
@@ -1154,19 +1159,45 @@ export default function GenerateRandomProfile() {
       const profiles = Array.from({ length: count }, () => generateRandomProfile());
       
       for (const profile of profiles) {
-        // Add the profile to mentorProgram collection
-        const docRef = await addDoc(collection(firestore, 'mentorProgram'), profile);
+        // Create user document with profile reference
+        const userData = {
+          uid: profile.uid,
+          email: profile.email,
+          firstName: profile.name.split(' ')[0],
+          lastName: profile.name.split(' ')[1] || '',
+          displayName: profile.name,
+          dateCreated: new Date(),
+          lastUpdated: new Date(),
+          admin: false,
+          developer: false,
+          mentor: profile.type === 'mentor',
+          mentee: profile.type === 'mentee',
+          mentorProfileRef: profile.type === 'mentor' ? `users/${profile.uid}/mentorProgram/profile` : undefined,
+          menteeProfileRef: profile.type === 'mentee' ? `users/${profile.uid}/mentorProgram/profile` : undefined,
+          ethnicity: 'N/A',
+          nationality: 'N/A',
+          activityLog: {
+            lastLogin: new Date(),
+            loginCount: 1
+          }
+        };
+
+        // Create the user document first
+        await setDoc(doc(firestore, 'users', profile.uid), userData);
+        
+        // Add the profile to users/{uid}/mentorProgram subcollection
+        await setDoc(doc(firestore, 'users', profile.uid, 'mentorProgram', 'profile'), profile);
         
         // If it's a mentor, also generate availability data for testing
         if (profile.type === 'mentor') {
           const availabilityData = generateRandomAvailability(profile.uid);
-          await setDoc(doc(firestore, 'mentorAvailability', profile.uid), availabilityData);
+          await setDoc(doc(firestore, 'users', profile.uid, 'availabilities', 'default'), availabilityData);
           
           // If sample data is enabled, generate some sample bookings
           if (generateSampleData) {
             const numBookings = Math.floor(Math.random() * 3) + 1; // 1-3 bookings per mentor
             for (let i = 0; i < numBookings; i++) {
-              const bookingData = generateRandomBooking(profile, docRef.id);
+              const bookingData = generateRandomBooking(profile, profile.uid);
               await addDoc(collection(firestore, 'bookings'), bookingData);
             }
           }
@@ -1183,16 +1214,44 @@ export default function GenerateRandomProfile() {
         });
         
         for (const menteeProfile of menteeProfiles) {
-          await addDoc(collection(firestore, 'mentorProgram'), menteeProfile);
-        }
-      }
+          // Create user document with profile reference for mentees
+          const userData = {
+            uid: menteeProfile.uid,
+            email: menteeProfile.email,
+            firstName: menteeProfile.name.split(' ')[0],
+            lastName: menteeProfile.name.split(' ')[1] || '',
+            displayName: menteeProfile.name,
+            dateCreated: new Date(),
+            lastUpdated: new Date(),
+            admin: false,
+            developer: false,
+            mentor: false,
+            mentee: true,
+            mentorProfileRef: undefined,
+            menteeProfileRef: `users/${menteeProfile.uid}/mentorProgram/profile`,
+            ethnicity: 'N/A',
+            nationality: 'N/A',
+            activityLog: {
+              lastLogin: new Date(),
+              loginCount: 1
+            }
+          };
 
-      const sampleDataText = generateSampleData ? ' (with sample bookings)' : '';
-      const menteesText = (type === 'mentor' && generateMentees) ? ' (with sample mentees)' : '';
-      setSuccess(`Successfully generated ${count} ${type}${count > 1 ? 's' : ''}!${type === 'mentor' ? ' (with availability data for testing)' : ''}${sampleDataText}${menteesText}`);
+          // Create the user document first
+          await setDoc(doc(firestore, 'users', menteeProfile.uid), userData);
+          
+          await setDoc(doc(firestore, 'users', menteeProfile.uid, 'mentorProgram', 'profile'), menteeProfile);
+        }
+        
+        const menteesText = ` and ${menteeCount} mentee profile(s)`;
+        const sampleDataText = generateSampleData ? ' (with sample bookings)' : '';
+        setSuccess(`Successfully generated ${count} ${type} profile(s)${sampleDataText}${menteesText}!`);
+      } else {
+        const sampleDataText = generateSampleData ? ' (with sample bookings)' : '';
+        setSuccess(`Successfully generated ${count} ${type} profile(s)${sampleDataText}!`);
+      }
     } catch (err) {
       console.error('Error generating profiles:', err);
-      setSuccess(null);
       setError('Failed to generate profiles. Please try again.');
     } finally {
       setLoading(false);

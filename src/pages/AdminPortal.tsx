@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { firestore } from '../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminSettings } from './adminPages/AdminSettings';
@@ -11,6 +11,7 @@ import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
 import MentorManagement from '../components/admin/MentorManagement';
 import FeedbackAnalytics from '../components/admin/FeedbackAnalytics';
+import { SessionsManagement } from '../components/admin/SessionsManagement';
 
 interface UserData {
   uid: string;
@@ -20,7 +21,6 @@ interface UserData {
   admin: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
-  bgr8Memberships?: Record<string, boolean>;
   [key: string]: unknown; // For other potential properties
 }
 
@@ -148,6 +148,13 @@ export default function AdminPortal() {
           </button>
           
           <button 
+            className={`admin-nav-item ${activeSection === 'sessions' ? 'active' : ''}`}
+            onClick={() => setActiveSection('sessions')}
+          >
+            <FaCalendarAlt /> Sessions
+          </button>
+          
+          <button 
             className={`admin-nav-item ${activeSection === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveSection('settings')}
           >
@@ -228,6 +235,7 @@ export default function AdminPortal() {
         {activeSection === 'enquiries' && <AdminEnquiries />}
         {activeSection === 'mentors' && <MentorManagement />}
         {activeSection === 'feedback' && <FeedbackAnalytics />}
+        {activeSection === 'sessions' && <SessionsManagement />}
         {activeSection === 'settings' && <AdminSettings />}
       </div>
     </div>

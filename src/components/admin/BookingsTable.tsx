@@ -1,23 +1,5 @@
 import React, { useState, useMemo } from 'react';
-
-interface Booking {
-  id: string;
-  mentorName: string;
-  mentorEmail: string;
-  menteeName: string;
-  menteeEmail: string;
-  sessionDate?: Date | string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  isCalComBooking?: boolean;
-  calComEventType?: {
-    id: number;
-    title: string;
-  };
-  meetLink?: string;
-  eventId?: string;
-}
+import { Booking } from '../../types/bookings';
 
 interface BookingsTableProps {
   bookings: Booking[];

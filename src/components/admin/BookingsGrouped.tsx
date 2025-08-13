@@ -1,23 +1,5 @@
 import React, { useState } from 'react';
-
-interface Booking {
-  id: string;
-  mentorName: string;
-  mentorEmail: string;
-  menteeName: string;
-  menteeEmail: string;
-  sessionDate?: Date | string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  isCalComBooking?: boolean;
-  calComEventType?: {
-    id: number;
-    title: string;
-  };
-  meetLink?: string;
-  eventId?: string;
-}
+import { Booking } from '../../types/bookings';
 
 interface BookingsGroupedProps {
   bookings: Booking[];
@@ -74,7 +56,7 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
                       </td>
                     )}
                     {groupBy === 'mentee' ? null : <td>{booking.menteeName}</td>}
-                    <td>{booking.sessionDate ? (booking.sessionDate instanceof Date ? booking.sessionDate.toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
+                    <td>{booking.sessionDate ? (booking.sessionDate instanceof Date ? booking.sessionDate.toLocaleDateString('en-GB') : (typeof booking.sessionDate === 'string' ? new Date(booking.sessionDate).toLocaleDateString('en-GB') : booking.sessionDate.toDate().toLocaleDateString('en-GB'))) : '-'}</td>
                     <td>{booking.startTime} - {booking.endTime}</td>
                     <td>
                       <span style={{

@@ -27,7 +27,8 @@ export default function MentorProgram() {
   const [mentors, setMentors] = useState<MentorMenteeProfile[]>([]);
   const [mentees, setMentees] = useState<MentorMenteeProfile[]>([]);
   const [form, setForm] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     age: '',
@@ -44,7 +45,6 @@ export default function MentorProgram() {
     skills: [] as string[],
     lookingFor: [] as string[],
     industries: [] as string[],
-    type: '' as UserType | ''
   });
   const [, setMatches] = useState<{ mentee: MentorMenteeProfile; mentor: MentorMenteeProfile }[]>([]);
   const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
@@ -71,13 +71,25 @@ export default function MentorProgram() {
   const totalPages = Math.ceil(bestMatches.length / MATCHES_PER_PAGE);
   const paginatedMatches = bestMatches.slice((currentPage - 1) * MATCHES_PER_PAGE, currentPage * MATCHES_PER_PAGE);
 
+  // Check if user already has a profile
   useEffect(() => {
     const checkProfile = async () => {
       if (!currentUser) return;
       
       try {
-        const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
-        setHasProfile(mentorDoc.exists());
+        const mentorDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
+        if (mentorDoc.exists()) {
+          const profileData = mentorDoc.data() as MentorMenteeProfile;
+          if (profileData.isMentor) {
+            setHasProfile(true);
+            setCurrentUserProfile(profileData);
+            setMentors(prev => [...prev, profileData]);
+          } else if (profileData.isMentee) {
+            setHasProfile(true);
+            setCurrentUserProfile(profileData);
+            setMentees(prev => [...prev, profileData]);
+          }
+        }
       } catch (err) {
         console.error('Error checking profile:', err);
       }
@@ -241,7 +253,9 @@ export default function MentorProgram() {
     }
     const user: MentorMenteeProfile = {
       uid: currentUser.uid,
-      name: form.name,
+      userRef: `users/${currentUser.uid}`, // Two-way key reference to user document
+      firstName: form.firstName || 'no name provided',
+      lastName: form.lastName || 'no name provided',
       email: form.email,
       phone: form.phone,
       age: form.age,
@@ -258,15 +272,24 @@ export default function MentorProgram() {
       skills: form.skills,
       lookingFor: form.lookingFor,
       industries: form.industries,
-      type: selectedRole!,
+      isMentor: selectedRole === MENTOR,
+      isMentee: selectedRole === MENTEE,
     };
     try {
       
-      // Save mentor/mentee profile with user.uid as document ID
-      await setDoc(doc(firestore, 'mentorProgram', currentUser.uid), user);
+      // Save mentor/mentee profile with user.uid as document ID in subcollection
+      await setDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), user);
       
-      // Update user's profile with mentor/mentee status
-      const roleUpdate = selectedRole === MENTOR ? { mentor: true } : { mentee: true };
+      // Update user's profile with mentor/mentee status and profile reference
+      const roleUpdate = selectedRole === MENTOR ? 
+        { 
+          mentor: true, 
+          mentorProfileRef: `users/${currentUser.uid}/mentorProgram/profile` 
+        } : 
+        { 
+          mentee: true, 
+          menteeProfileRef: `users/${currentUser.uid}/mentorProgram/profile` 
+        };
       await updateDoc(doc(firestore, 'users', currentUser.uid), roleUpdate);
 
       setSuccess('Successfully registered!');
@@ -276,9 +299,9 @@ export default function MentorProgram() {
         setMentees(prev => [...prev, user]);
       }
       setForm({
-        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
+        firstName: '', lastName: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: ''
+        skills: [], lookingFor: [], industries: [],
       });
       setTimeout(matchMentees, 0); // Update matches after state change
     } catch (err) {
@@ -296,9 +319,9 @@ export default function MentorProgram() {
       setShowForm(true);
       setSwipeDirection(null);
       setForm({
-        name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
+        firstName: '', lastName: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
-        skills: [], lookingFor: [], industries: [], type: role
+        skills: [], lookingFor: [], industries: [],
       });
       setError(null);
       setSuccess(null);
@@ -309,9 +332,9 @@ export default function MentorProgram() {
     setSelectedRole(null);
     setShowForm(false);
     setForm({
-      name: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
+      firstName: '', lastName: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
-      skills: [], lookingFor: [], industries: [], type: ''
+      skills: [], lookingFor: [], industries: [],
     });
     setError(null);
     setSuccess(null);
@@ -323,7 +346,7 @@ export default function MentorProgram() {
     if (checkReasonType(skillsReasonIDs, reason)) {
       // Find the actual skills matched
       if (!currentUserProfile) return 'Skills matched.';
-      const isMentor = currentUserProfile.type === MENTOR;
+      const isMentor = currentUserProfile.isMentor;
       const skills = isMentor
         ? currentUserProfile.skills.filter(skill => user.lookingFor.includes(skill))
         : user.skills.filter(skill => currentUserProfile.lookingFor.includes(skill));
@@ -341,7 +364,7 @@ export default function MentorProgram() {
     }
     // Education
     if (checkReasonType(educationLevelReasonIDs, reason)) {
-      if (currentUserProfile?.type == MENTOR)
+      if (currentUserProfile?.isMentor)
         return `You have a higher education level: ${currentUserProfile.educationLevel} > ${user.educationLevel}.`;
       else
         return `${user?.name} has a higher education level: ${user.educationLevel} > ${currentUserProfile?.educationLevel}.`;
@@ -350,7 +373,7 @@ export default function MentorProgram() {
     if (checkReasonType(ageExperiencedMentorReasonIDs, reason)) {
       if (!currentUserProfile) return 'Mentor is older.';
       const ageDiff = Math.abs(Number(currentUserProfile.age) - Number(user.age));
-      return `${user.type == MENTOR ? user.name + " is" : "You are"} older by ${ageDiff} years.`;
+      return `${user.isMentor ? user.name + " is" : "You are"} older by ${ageDiff} years.`;
     }
     if (checkReasonType(ageCloseReasonIDs, reason)) {
       if (!currentUserProfile) return 'Close in age.';
@@ -498,7 +521,8 @@ export default function MentorProgram() {
                   <div className="mentor-form-half">
                     <div className="mentor-form-section">
                       <div className="mentor-form-section-title">Personal Information</div>
-                      <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
+                      <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required />
+                      <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required />
                       <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required type="email" />
                       <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required type="tel" />
                       <input name="age" value={form.age} onChange={handleChange} placeholder="Age" required type="number" min="10" max="100" />
@@ -994,7 +1018,7 @@ export default function MentorProgram() {
                       <span className="match-card-value">{user.email}</span>
                     </div>
                     <div className="match-card-row">
-                      <span className="match-card-label">{(user.type == MENTOR) ? "Profession:" : "Desired Profession:"}</span>
+                      <span className="match-card-label">{(user.isMentor) ? "Profession:" : "Desired Profession:"}</span>
                       <span className="match-card-value">{user.profession}</span>
                     </div>
                     <div className="match-card-row">
@@ -1035,7 +1059,7 @@ export default function MentorProgram() {
                       );
                     })}
                   </div>
-                  {user.type === MENTOR && currentUserProfile?.type === MENTEE && (
+                  {user.isMentor && currentUserProfile?.isMentee && (
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
                       <button
                         onClick={(e) => {

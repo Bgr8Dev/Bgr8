@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { firestore } from '../firebase/firebase';
-import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt, FaCog } from 'react-icons/fa';
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, getBestMatchesForUser, MatchResult } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { Booking } from '../types/bookings';
 import BookingModal from '../components/widgets/MentorAlgorithm/booking/BookingModal';
 import CalComModal from '../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { CalComService } from '../components/widgets/MentorAlgorithm/CalCom/calComService';
@@ -67,7 +68,8 @@ export default function MentorPage() {
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     age: '',
@@ -84,7 +86,6 @@ export default function MentorPage() {
     skills: [] as string[],
     lookingFor: [] as string[],
     industries: [] as string[],
-    type: MENTOR as UserType
   });
 
   // Matchmaking States
@@ -150,42 +151,27 @@ export default function MentorPage() {
   }, []);
 
   const checkUserProfile = async () => {
-    if (!currentUser) {
-      setLoading(false);
-      return;
-    }
-    
     try {
-      const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
-      setHasProfile(mentorDoc.exists());
+      setLoading(true);
+      setError(null);
       
+      if (!currentUser) {
+        setError('User not authenticated');
+        return;
+      }
+
+      // Check if user has a mentor/mentee profile
+      const mentorDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
       if (mentorDoc.exists()) {
         const profileData = mentorDoc.data() as MentorMenteeProfile;
         setCurrentUserProfile(profileData);
-        setProfileForm({
-          name: profileData.name || '',
-          email: profileData.email || '',
-          phone: profileData.phone || '',
-          age: profileData.age || '',
-          degree: profileData.degree || '',
-          educationLevel: profileData.educationLevel || '',
-          county: profileData.county || '',
-          profession: profileData.profession || '',
-          pastProfessions: profileData.pastProfessions || [''],
-          linkedin: profileData.linkedin || '',
-          calCom: profileData.calCom || '',
-          hobbies: profileData.hobbies || [],
-          ethnicity: profileData.ethnicity || '',
-          religion: profileData.religion || '',
-          skills: profileData.skills || [],
-          lookingFor: profileData.lookingFor || [],
-          industries: profileData.industries || [],
-          type: profileData.type || ''
-        });
+        setHasProfile(true);
+      } else {
+        setHasProfile(false);
       }
-    } catch (err) {
-      console.error('Error checking profile:', err);
-      setError('Failed to check profile');
+    } catch (error) {
+      console.error('Error checking user profile:', error);
+      setError('Failed to check user profile');
     } finally {
       setLoading(false);
     }
@@ -200,22 +186,28 @@ export default function MentorPage() {
         throw new Error('Firebase database not initialized');
       }
 
-      const mentorsQuery = query(
-        collection(firestore, 'mentorProgram'),
-        where('type', '==', 'mentor')
-      );
+      // Get all users and check their mentorProgram subcollections
+      const usersQuery = query(collection(firestore, 'users'));
+      const usersSnapshot = await getDocs(usersQuery);
       
-      console.log('MentorPage: Query created, executing...');
-      const querySnapshot = await getDocs(mentorsQuery);
+      const mentorsData: MentorMenteeProfile[] = [];
       
-      console.log('MentorPage: Query executed, processing results...');
-      const mentorsData = querySnapshot.docs.map(doc => {
-        const mentorData = doc.data();
-        return {
-          ...mentorData,
-          id: doc.id
-        };
-      }) as unknown as MentorMenteeProfile[];
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const mentorData = mentorProgramDoc.data() as MentorMenteeProfile;
+            if (mentorData.type === 'mentor') {
+              mentorsData.push({
+                ...mentorData,
+                id: userDoc.id
+              } as MentorMenteeProfile);
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+        }
+      }
       
       console.log('MentorPage: Found mentors:', mentorsData.length, mentorsData);
       
@@ -370,7 +362,8 @@ export default function MentorPage() {
       setShowRegistration(false);
       setSelectedRole(null);
       setProfileForm({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
         age: '',
@@ -409,11 +402,30 @@ export default function MentorPage() {
       setLoading(true);
       const profileData = {
         uid: currentUser.uid,
-        ...profileForm,
-        email: currentUser.email || profileForm.email
+        userRef: `users/${currentUser.uid}`,
+        firstName: profileForm.firstName || 'no name provided',
+        lastName: profileForm.lastName || 'no name provided',
+        email: currentUser.email || profileForm.email,
+        phone: profileForm.phone,
+        age: profileForm.age,
+        degree: profileForm.degree,
+        educationLevel: profileForm.educationLevel,
+        county: profileForm.county,
+        profession: profileForm.profession,
+        pastProfessions: profileForm.pastProfessions,
+        linkedin: profileForm.linkedin,
+        calCom: profileForm.calCom,
+        hobbies: profileForm.hobbies,
+        ethnicity: profileForm.ethnicity,
+        religion: profileForm.religion,
+        skills: profileForm.skills,
+        lookingFor: profileForm.lookingFor,
+        industries: profileForm.industries,
+        isMentor: selectedRole === MENTOR,
+        isMentee: selectedRole === MENTEE,
       };
 
-      await setDoc(doc(firestore, 'mentorProgram', currentUser.uid), profileData);
+      await setDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
       setHasProfile(true);
       setCurrentUserProfile(profileData);
       setShowRegistration(false);
@@ -437,12 +449,31 @@ export default function MentorPage() {
     try {
       setLoading(true);
       const profileData = {
-        ...profileForm,
         uid: currentUser.uid,
-        email: currentUser.email || profileForm.email
+        userRef: `users/${currentUser.uid}`,
+        firstName: profileForm.firstName || 'no name provided',
+        lastName: profileForm.lastName || 'no name provided',
+        email: currentUser.email || profileForm.email,
+        phone: profileForm.phone,
+        age: profileForm.age,
+        degree: profileForm.degree,
+        educationLevel: profileForm.educationLevel,
+        county: profileForm.county,
+        profession: profileForm.profession,
+        pastProfessions: profileForm.pastProfessions,
+        linkedin: profileForm.linkedin,
+        calCom: profileForm.calCom,
+        hobbies: profileForm.hobbies,
+        ethnicity: profileForm.ethnicity,
+        religion: profileForm.religion,
+        skills: profileForm.skills,
+        lookingFor: profileForm.lookingFor,
+        industries: profileForm.industries,
+        isMentor: currentUserProfile.isMentor,
+        isMentee: currentUserProfile.isMentee,
       };
 
-      await updateDoc(doc(firestore, 'mentorProgram', currentUser.uid), profileData);
+      await updateDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
       setCurrentUserProfile(profileData);
       setIsEditingProfile(false);
       await fetchMentors();
@@ -458,7 +489,8 @@ export default function MentorPage() {
     setIsEditingProfile(false);
     if (currentUserProfile) {
       setProfileForm({
-        name: currentUserProfile.name || '',
+        firstName: currentUserProfile.firstName || '',
+        lastName: currentUserProfile.lastName || '',
         email: currentUserProfile.email || '',
         phone: currentUserProfile.phone || '',
         age: currentUserProfile.age || '',
@@ -475,7 +507,6 @@ export default function MentorPage() {
         skills: currentUserProfile.skills || [],
         lookingFor: currentUserProfile.lookingFor || [],
         industries: currentUserProfile.industries || [],
-        type: currentUserProfile.type || ''
       });
     }
   };
@@ -601,8 +632,8 @@ export default function MentorPage() {
 
   const fetchEnhancedAvailability = async (mentorId: string) => {
     try {
-      // Fetch from mentorAvailability collection
-      const availabilityDoc = await getDoc(doc(firestore, 'mentorAvailability', mentorId));
+      // Fetch from users/{uid}/availabilities subcollection
+      const availabilityDoc = await getDoc(doc(firestore, 'users', mentorId, 'availabilities', 'default'));
       if (availabilityDoc.exists()) {
         const data = availabilityDoc.data();
         setEnhancedAvailability(prev => ({
@@ -738,10 +769,27 @@ export default function MentorPage() {
                 <h3>Personal Information</h3>
                 <div className="form-row">
                   <input
-                    name="name"
-                    value={profileForm.name}
+                    name="firstName"
+                    value={profileForm.firstName}
                     onChange={handleFormChange}
-                    placeholder="Full Name"
+                    placeholder="First Name"
+                    required
+                  />
+                  <input
+                    name="lastName"
+                    value={profileForm.lastName}
+                    onChange={handleFormChange}
+                    placeholder="Last Name"
+                    required
+                  />
+                </div>
+                <div className="form-row">
+                  <input
+                    name="email"
+                    value={profileForm.email}
+                    onChange={handleFormChange}
+                    placeholder="Email Address"
+                    type="email"
                     required
                   />
                   <input
@@ -1267,10 +1315,27 @@ export default function MentorPage() {
                 <h4>Personal Information</h4>
                 <div className="form-row">
                   <input
-                    name="name"
-                    value={profileForm.name}
+                    name="firstName"
+                    value={profileForm.firstName}
                     onChange={handleFormChange}
-                    placeholder="Full Name"
+                    placeholder="First Name"
+                    required
+                  />
+                  <input
+                    name="lastName"
+                    value={profileForm.lastName}
+                    onChange={handleFormChange}
+                    placeholder="Last Name"
+                    required
+                  />
+                </div>
+                <div className="form-row">
+                  <input
+                    name="email"
+                    value={profileForm.email}
+                    onChange={handleFormChange}
+                    placeholder="Email Address"
+                    type="email"
                     required
                   />
                   <input

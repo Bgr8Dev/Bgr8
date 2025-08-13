@@ -1,0 +1,293 @@
+/* Sessions List Styles */
+.sessions-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.sessions-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.sessions-header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.sessions-header p {
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.session-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.session-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.session-info h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.session-details {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.session-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.session-status.scheduled {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.session-status.completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.session-status.cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.session-status.no-show {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.session-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.join-session-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.join-session-btn:hover {
+  background-color: #2563eb;
+}
+
+.feedback-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.feedback-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.feedback-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.feedback-btn.submit {
+  background-color: #10b981;
+  color: white;
+}
+
+.feedback-btn.submit:hover {
+  background-color: #059669;
+}
+
+.feedback-btn.submitted {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: default;
+}
+
+/* Feedback Modal Styles */
+.feedback-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.feedback-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.feedback-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feedback-modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.feedback-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.feedback-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.feedback-modal-content {
+  padding: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sessions-container {
+    padding: 1rem;
+  }
+  
+  .session-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .session-actions {
+    justify-content: flex-start;
+  }
+  
+  .feedback-buttons {
+    flex-direction: column;
+  }
+  
+  .feedback-modal {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+/* Loading and Error States */
+.sessions-loading,
+.sessions-error {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.sessions-loading {
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.sessions-error {
+  color: #dc2626;
+}
+
+.sessions-error .error-message {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.retry-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.retry-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Empty State */
+.sessions-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #6b7280;
+}
+
+.sessions-empty h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.sessions-empty p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}

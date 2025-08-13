@@ -32,26 +32,28 @@ export default function MentorProfile() {
   const [calComModalOpen, setCalComModalOpen] = useState(false);
   const [calComConnectOpen, setCalComConnectOpen] = useState(false);
 
+  // Load user profile
   useEffect(() => {
     setAnimateIn(false);
-    const fetchProfile = async () => {
+    const loadProfile = async () => {
       if (!currentUser) return;
       
       try {
-        const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
+        setLoading(true);
+        const mentorDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
         if (mentorDoc.exists()) {
           setProfile(mentorDoc.data() as MentorMenteeProfile);
         }
       } catch (err) {
+        console.error('Error loading profile:', err);
         setError('Failed to load profile');
-        console.error('Error fetching profile:', err);
       } finally {
         setLoading(false);
         setTimeout(() => setAnimateIn(true), 100); // trigger entrance animation
       }
     };
 
-    fetchProfile();
+    loadProfile();
   }, [currentUser]);
 
   const handleEdit = () => {
@@ -66,7 +68,10 @@ export default function MentorProfile() {
     try {
       // Convert profile to a plain object for Firestore
       const profileData = {
-        name: profile.name || '',
+        uid: profile.uid,
+        userRef: profile.userRef || `users/${currentUser.uid}`, // Ensure userRef is set
+        firstName: profile.firstName || 'no name provided',
+        lastName: profile.lastName || 'no name provided',
         email: profile.email || '',
         phone: profile.phone || '',
         age: profile.age || '',
@@ -83,9 +88,11 @@ export default function MentorProfile() {
         skills: profile.skills || [],
         lookingFor: profile.lookingFor || [],
         industries: profile.industries || [],
+        isMentor: profile.isMentor || false,
+        isMentee: profile.isMentee || false,
       };
 
-      await updateDoc(doc(firestore, 'mentorProgram', currentUser.uid), profileData);
+      await updateDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
       setSuccess('Profile updated successfully');
       setIsEditing(false);
     } catch (err) {
@@ -124,7 +131,7 @@ export default function MentorProfile() {
       {profile && (
         <div className="mentor-profile-tabs" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
           <button className={activeTab === 'profile' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('profile')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'profile' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'profile' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Profile</button>
-          {profile.type === 'mentor' && (
+          {profile.isMentor && (
             <button className={activeTab === 'availability' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('availability')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'availability' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'availability' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Availability</button>
           )}
           <button className={activeTab === 'bookings' ? 'mentor-profile-tab-active' : 'mentor-profile-tab'} onClick={() => setActiveTab('bookings')} style={{ fontWeight: 700, fontSize: '1.08rem', padding: '0.7rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: activeTab === 'bookings' ? 'var(--button-primary-bg)' : 'var(--button-secondary-bg)', color: activeTab === 'bookings' ? 'var(--button-primary-text)' : 'var(--button-secondary-text)', transition: 'all 0.18s' }}>Bookings</button>
@@ -145,15 +152,26 @@ export default function MentorProfile() {
                 <div className="mentor-profile-field">
                   <label>Name</label>
                   {isEditing ? (
-                    <input
-                      type="text"
-                      name="name"
-                      value={profile.name || ''}
-                      onChange={handleChange}
-                      required
-                    />
+                    <>
+                      <input
+                        name="firstName"
+                        value={profile.firstName || ''}
+                        onChange={handleChange}
+                        type="text"
+                        placeholder="First Name"
+                        disabled={!isEditing}
+                      />
+                      <input
+                        name="lastName"
+                        value={profile.lastName || ''}
+                        onChange={handleChange}
+                        type="text"
+                        placeholder="Last Name"
+                        disabled={!isEditing}
+                      />
+                    </>
                   ) : (
-                    <p className="mentor-profile-value">{profile.name}</p>
+                    <p className="mentor-profile-value">{profile.firstName || 'no name provided'} {profile.lastName || ''}</p>
                   )}
                 </div>
                 <div className="mentor-profile-field">
@@ -236,7 +254,7 @@ export default function MentorProfile() {
                       {ukEducationLevels
                         .filter(level => {
                           // For mentees, only show up to Bachelor's degree
-                          if (profile.type === 'mentee') {
+                          if (profile.isMentee) {
                             const menteeLevels = [
                               'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
                             ];
@@ -254,7 +272,7 @@ export default function MentorProfile() {
                   )}
                 </div>
                 <div className="mentor-profile-field">
-                  <label className="mentor-profile-label">{profile.type === 'mentee' ? 'Desired Profession' : 'Current Profession'}</label>
+                  <label className="mentor-profile-label">{profile.isMentee ? 'Desired Profession' : 'Current Profession'}</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -323,7 +341,32 @@ export default function MentorProfile() {
                     </p>
                   )}
                 </div>
-                {profile.type === 'mentor' && (
+                {profile.isMentor && (
+                  <div className="mentor-profile-field">
+                    <label className="mentor-profile-label">Cal.com URL</label>
+                    {isEditing ? (
+                      <input
+                        name="calCom"
+                        value={profile.calCom || ''}
+                        onChange={handleChange}
+                        type="url"
+                        placeholder="https://yourname.cal.com/30min"
+                        disabled={!isEditing}
+                      />
+                    ) : (
+                      <p className="mentor-profile-value">
+                        {profile.calCom ? (
+                          <a href={profile.calCom} target="_blank" rel="noopener noreferrer">
+                            {profile.calCom}
+                          </a>
+                        ) : (
+                          'Not provided'
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {profile.isMentor && (
                   <div className="mentor-profile-field">
                     <label>Cal.com</label>
                     {isEditing ? (
@@ -370,7 +413,7 @@ export default function MentorProfile() {
                         )}
                       </p>
                     )}
-                    {profile.type === 'mentor' && (
+                    {profile.isMentor && (
                       <div style={{ marginTop: '0.5rem' }}>
                         <button
                           onClick={() => setCalComConnectOpen(true)}
@@ -400,7 +443,7 @@ export default function MentorProfile() {
                   </div>
                 )}
                 <div className="mentor-profile-field">
-                  <label>{profile.type === 'mentor' ? 'Industries (Current/Previous)' : 'Industries (Desired)'}</label>
+                  <label>{profile.isMentor ? 'Industries (Current/Previous)' : 'Industries (Desired)'}</label>
                   {isEditing ? (
                     <>
                       <select
@@ -462,7 +505,7 @@ export default function MentorProfile() {
               </div>
               {skillsTab === 'skills' && (
                 <div className="mentor-profile-skills mentor-profile-chips" style={{ flexWrap: 'wrap', gap: 8, fontSize: '0.95rem' }}>
-                  {(profile.type === 'mentor' ? profile.skills : profile.lookingFor).map((skill, idx) => (
+                  {(profile.isMentor ? profile.skills : profile.lookingFor).map((skill, idx) => (
                     <span className="mentor-profile-chip mentor-profile-skill-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s`, padding: '4px 10px', fontSize: '0.95rem' }} key={idx}>{skill}</span>
                   ))}
                 </div>
@@ -532,7 +575,7 @@ export default function MentorProfile() {
           )}
         </>
       )}
-      {activeTab === 'availability' && profile && profile.type === 'mentor' && <MentorAvailability />}
+      {activeTab === 'availability' && profile && profile.isMentor && <MentorAvailability />}
       {activeTab === 'bookings' && profile && <MentorBookings />}
 
       <CalComModal open={calComModalOpen} onClose={() => setCalComModalOpen(false)} mentor={profile} />
@@ -544,7 +587,7 @@ export default function MentorProfile() {
           // Optionally refresh profile data
         }}
       />
-      {profile?.type === 'mentor' && (
+      {profile?.isMentor && (
         <div className="mentor-profile-actions">
           {!isEditing ? (
             <button onClick={handleEdit} className="mentor-profile-edit-btn mentor-profile-btn-animate">

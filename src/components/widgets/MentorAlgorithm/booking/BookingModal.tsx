@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useIsMobile } from '../../../../hooks/useIsMobile';
-import { doc, getDoc, collection, addDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../../firebase/firebase';
 import { FaClock, FaTimes, FaCalendarAlt, FaExternalLinkAlt, FaListUl, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../algorithm/matchUsers';
 import { CalComService, CalComEventType, CalComTokenManager } from '../CalCom/calComService';
+import { Booking } from '../../../../types/bookings';
+import { SessionsService } from '../../../../services/sessionsService';
 import '../MentorProgram.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -25,21 +27,7 @@ interface MentorAvailability {
   lastUpdated: Date;
 }
 
-interface Booking {
-  id: string;
-  mentorId: string;
-  menteeId: string;
-  mentorName: string;
-  menteeName: string;
-  mentorEmail: string;
-  menteeEmail: string;
-  day: string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  createdAt: Date;
-  sessionDate?: Date;
-}
+
 
 interface BookingModalProps {
   open: boolean;
@@ -77,6 +65,24 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       setCurrentStep('event-types');
     }
   }, [open]);
+
+  // Load mentor's availability
+  useEffect(() => {
+    const loadAvailability = async () => {
+      if (!mentor || !open) return;
+      
+      try {
+        const availabilityDoc = await getDoc(doc(firestore, 'users', mentor.uid, 'availabilities', 'default'));
+        if (availabilityDoc.exists()) {
+          setAvailability(availabilityDoc.data() as MentorAvailability);
+        }
+      } catch (error) {
+        console.error('Error loading availability:', error);
+      }
+    };
+
+    loadAvailability();
+  }, [mentor, open]);
 
   useEffect(() => {
     if (open && mentor) {
@@ -179,7 +185,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     // Fallback: fetch mentor email from Firestore if missing
     if (!mentorEmail && mentor.uid) {
       try {
-        const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', mentor.uid));
+        const mentorDoc = await getDoc(doc(firestore, 'users', mentor.uid, 'mentorProgram', 'profile'));
         if (mentorDoc.exists()) {
           const mentorData = mentorDoc.data();
           mentorEmail = mentorData.email || '';
@@ -192,7 +198,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     // Fallback: fetch mentee email from Firestore if missing
     if (!menteeEmail && currentUser.uid) {
       try {
-        const menteeDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
+        const menteeDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
         if (menteeDoc.exists()) {
           const menteeData = menteeDoc.data();
           menteeEmail = menteeData.email || '';
@@ -251,7 +257,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
     // Fetch emails if missing
     if (!mentorEmail && mentor.uid) {
-      const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', mentor.uid));
+      const mentorDoc = await getDoc(doc(firestore, 'users', mentor.uid, 'mentorProgram', 'profile'));
       if (mentorDoc.exists()) {
         const mentorData = mentorDoc.data();
         mentorEmail = mentorData.email || '';
@@ -259,7 +265,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     }
 
     if (!menteeEmail && currentUser.uid) {
-      const menteeDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
+      const menteeDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
       if (menteeDoc.exists()) {
         const menteeData = menteeDoc.data();
         menteeEmail = menteeData.email || '';
@@ -319,6 +325,29 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     };
 
     await addDoc(collection(firestore, 'bookings'), bookingData);
+    
+    // Create a session from the confirmed booking
+    try {
+      const sessionData = {
+        bookingId: calComBooking.id.toString(),
+        mentorId: mentor.uid,
+        menteeId: currentUser.uid,
+        sessionDate: Timestamp.fromDate(sessionDateObj),
+        startTime: Timestamp.fromDate(sessionDateObj),
+        endTime: Timestamp.fromDate(endTime),
+        sessionLink: '', // Will be populated when Cal.com sends the meeting link
+        sessionLocation: 'Virtual', // Default to virtual for Cal.com bookings
+        status: 'scheduled' as const,
+        feedbackSubmitted_mentor: false,
+        feedbackSubmitted_mentee: false
+      };
+
+      await SessionsService.createSession(sessionData);
+    } catch (sessionError) {
+      console.error('Failed to create session:', sessionError);
+      // Don't fail the booking if session creation fails
+    }
+    
     setSuccess(`Booking created successfully! Check your email for confirmation. Booking ID: ${calComBooking.id}`);
   };
 
@@ -330,7 +359,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
     // Fetch emails if missing
     if (!mentorEmail && mentor.uid) {
-      const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', mentor.uid));
+      const mentorDoc = await getDoc(doc(firestore, 'users', mentor.uid, 'mentorProgram', 'profile'));
       if (mentorDoc.exists()) {
         const mentorData = mentorDoc.data();
         mentorEmail = mentorData.email || '';
@@ -338,7 +367,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     }
 
     if (!menteeEmail && currentUser.uid) {
-      const menteeDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
+      const menteeDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
       if (menteeDoc.exists()) {
         const menteeData = menteeDoc.data();
         menteeEmail = menteeData.email || '';
@@ -364,8 +393,30 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
     await addDoc(collection(firestore, 'bookings'), bookingData);
 
+    // Create a session from the internal booking
+    try {
+      const sessionData = {
+        bookingId: '', // Internal bookings don't have external IDs yet
+        mentorId: mentor.uid,
+        menteeId: currentUser.uid,
+        sessionDate: Timestamp.fromDate(sessionDate ? new Date(sessionDate) : new Date()),
+        startTime: Timestamp.fromDate(sessionDate ? new Date(sessionDate) : new Date()),
+        endTime: Timestamp.fromDate(sessionDate ? new Date(sessionDate) : new Date()),
+        sessionLink: '', // Will be added when meeting link is provided
+        sessionLocation: 'TBD', // To be determined
+        status: 'scheduled' as const,
+        feedbackSubmitted_mentor: false,
+        feedbackSubmitted_mentee: false
+      };
+
+      await SessionsService.createSession(sessionData);
+    } catch (sessionError) {
+      console.error('Failed to create session:', sessionError);
+      // Don't fail the booking if session creation fails
+    }
+
     // Update mentor's availability
-    const availabilityRef = doc(firestore, 'mentorAvailability', mentor.uid);
+    const availabilityRef = doc(firestore, 'users', mentor.uid, 'availabilities', 'default');
     const availabilitySnap = await getDoc(availabilityRef);
     if (availabilitySnap.exists()) {
       const availabilityData = availabilitySnap.data();

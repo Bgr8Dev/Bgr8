@@ -72,7 +72,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
     <div className="mentor-modal-overlay" onClick={onClose}>
       <div className="mentor-modal" onClick={e => e.stopPropagation()}>
         <button className="mentor-modal-close" onClick={onClose}>&times;</button>
-        <h2 className="mentor-modal-title">{user.name} <span>({user.type})</span></h2>
+        <h2 className="mentor-modal-title">{user.firstName} {user.lastName} <span>({user.isMentor ? 'Mentor' : 'Mentee'})</span></h2>
         <div className="mentor-modal-section">
           <h3>Contact</h3>
           {editMode ? (
@@ -130,7 +130,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                   {ukEducationLevels
                     .filter(level => {
                       // For mentees, only show up to Bachelor's degree
-                      if (user.type === 'mentee') {
+                      if (user.isMentee) {
                         const menteeLevels = [
                           'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
                         ];
@@ -144,7 +144,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                     ))}
                 </select>
               </div>
-              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <input name="profession" value={editUser?.profession || ''} onChange={handleInputChange} /></div>
+              <div><b>{user.isMentee ? 'Desired Profession:' : 'Current Profession:'}</b> <input name="profession" value={editUser?.profession || ''} onChange={handleInputChange} /></div>
               <div><b>Past Professions:</b>
                 {editUser?.pastProfessions && editUser.pastProfessions.map((prof: string, idx: number) => (
                   <div key={idx} className="mentor-modal-array-field">
@@ -155,7 +155,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                 <button type="button" onClick={() => addArrayField('pastProfessions')} className="mentor-modal-add-btn">+ Add</button>
               </div>
               <div><b>LinkedIn:</b> <input name="linkedin" value={editUser?.linkedin || ''} onChange={handleInputChange} /></div>
-              {user.type === 'mentor' && (
+              {user.isMentor && (
                 <div><b>Cal.com:</b> <input name="calCom" value={editUser?.calCom || ''} onChange={handleInputChange} /></div>
               )}
             </>
@@ -163,7 +163,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
             <>
               <div><b>Degree:</b> <span className="field-value">{user.degree}</span></div>
               <div><b>Education Level:</b> <span className="field-value">{user.educationLevel}</span></div>
-              <div><b>{user.type === 'mentee' ? 'Desired Profession:' : 'Current Profession:'}</b> <span className="field-value">{user.profession}</span></div>
+              <div><b>{user.isMentee ? 'Desired Profession:' : 'Current Profession:'}</b> <span className="field-value">{user.profession}</span></div>
               <div><b>Past Professions:</b> <span className="field-value">{user.pastProfessions && user.pastProfessions.length > 0 ? user.pastProfessions.join(', ') : 'N/A'}</span></div>
               <div><b>LinkedIn:</b> <span className="field-value">{user.linkedin ? (
                 <a
@@ -177,7 +177,7 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
                   View Profile
                 </a>
               ) : 'N/A'}</span></div>
-              {user.type === 'mentor' && (
+              {user.isMentor && (
                 <div><b>Cal.com:</b> <span className="field-value">{user.calCom ? (
                   <a
                     href={user.calCom}

@@ -12,6 +12,7 @@ import Settings from '../pages/utilPages/Settings';
 import FeedbackPage from '../pages/utilPages/FeedbackPage';
 import AdminPortal from '../pages/AdminPortal';
 import MentorPage from '../pages/MentorPage';
+import { SessionsPage } from '../pages/SessionsPage';
 import React from 'react';
 import { UserProfile } from '../utils/userProfile';
 import Success from '../pages/Success';
@@ -58,6 +59,14 @@ export default function Navigation() {
       <Route path="/" element={<BGr8 />} />
       <Route path="/bgr8" element={<BGr8 />} />
       <Route path="/mentors" element={<MentorPage />} />
+      <Route 
+        path="/sessions" 
+        element={
+          <ProtectedRoute>
+            <SessionsPage />
+          </ProtectedRoute>
+        } 
+      />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

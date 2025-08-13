@@ -4,37 +4,8 @@ import { firestore } from '../../../../firebase/firebase';
 import { collection, query, where, getDocs, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { FaCheck, FaTimes, FaSearch, FaFileExport, FaCalendarAlt, FaExternalLinkAlt, FaComments } from 'react-icons/fa';
 import { CalComService, CalComBookingResponse } from '../CalCom/calComService';
+import { Booking } from '../../../../types/bookings';
 import '../MentorProgram.css';
-
-interface Booking {
-  id: string;
-  mentorId: string;
-  menteeId: string;
-  mentorName: string;
-  menteeName: string;
-  mentorEmail: string;
-  menteeEmail: string;
-  day: string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  createdAt: Timestamp | Date;
-  sessionDate?: Timestamp | Date;
-  meetLink?: string;
-  eventId?: string;
-  // Cal.com specific fields
-  isCalComBooking?: boolean;
-  calComBookingId?: string;
-  calComEventType?: {
-    id: number;
-    title: string;
-  };
-  calComAttendees?: Array<{
-    name: string;
-    email: string;
-    timeZone: string;
-  }>;
-}
 
 // Simple Modal component
 function Modal({ open, onClose, message, type, actions }: { open: boolean, onClose: () => void, message: string, type?: 'success' | 'error' | 'info' | 'warning', actions?: React.ReactNode }) {
@@ -147,14 +118,24 @@ export default function MentorBookings() {
         
         // Add Firestore mentor bookings
         mentorSnapshot.forEach(docSnap => {
-          const data = docSnap.data() as Booking;
-          results.push({ ...data, id: docSnap.id });
+          const data = docSnap.data();
+          results.push({ 
+            ...data, 
+            id: docSnap.id,
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.fromDate(data.createdAt || new Date()),
+            sessionDate: data.sessionDate instanceof Timestamp ? data.sessionDate : data.sessionDate ? Timestamp.fromDate(data.sessionDate) : undefined
+          } as Booking);
         });
         
         // Add Firestore mentee bookings
         menteeSnapshot.forEach(docSnap => {
-          const data = docSnap.data() as Booking;
-          results.push({ ...data, id: docSnap.id });
+          const data = docSnap.data();
+          results.push({ 
+            ...data, 
+            id: docSnap.id,
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.fromDate(data.createdAt || new Date()),
+            sessionDate: data.sessionDate instanceof Timestamp ? data.sessionDate : data.sessionDate ? Timestamp.fromDate(data.sessionDate) : undefined
+          } as Booking);
         });
 
         // Fetch Cal.com bookings if user is a mentor
@@ -186,8 +167,8 @@ export default function MentorBookings() {
               endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
               status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
                       calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
-              createdAt: new Date(),
-              sessionDate: startDate,
+              createdAt: Timestamp.fromDate(new Date()),
+              sessionDate: Timestamp.fromDate(startDate),
               isCalComBooking: true,
               calComBookingId: calBooking.id,
               calComEventType: calBooking.eventType,

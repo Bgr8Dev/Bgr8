@@ -1,30 +1,6 @@
 import React from 'react';
+import { Booking } from '../../types/bookings';
 import '../../styles/adminStyles/AdminModal.css';
-
-interface Booking {
-  id: string;
-  mentorName: string;
-  mentorEmail: string;
-  menteeName: string;
-  menteeEmail: string;
-  sessionDate?: Date | string;
-  startTime: string;
-  endTime: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  meetLink?: string;
-  eventId?: string;
-  isCalComBooking?: boolean;
-  calComBookingId?: string;
-  calComEventType?: {
-    id: number;
-    title: string;
-  };
-  calComAttendees?: Array<{
-    name: string;
-    email: string;
-    timeZone: string;
-  }>;
-}
 
 interface BookingDetailsModalProps {
   booking: Booking | null;

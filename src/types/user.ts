@@ -1,26 +1,3 @@
-export interface UserPreferences {
-  marketingEmails: boolean;
-  notifications: boolean;
-  orderUpdates: boolean;
-  newProductAlerts: boolean;
-  theme: 'light' | 'dark' | 'system';
-  fontSize: 'small' | 'medium' | 'large';
-  colorScheme: 'default' | 'high-contrast' | 'colorful';
-  language: string;
-  currency: string;
-  timezone: string;
-}
-
-export interface UserSecurity {
-  twoFactorEnabled: boolean;
-}
-
-export interface UserPrivacy {
-  showProfile: boolean;
-  activityStatus: boolean;
-  dataCollection: boolean;
-}
-
 export interface UserProfile {
   uid: string;
   email: string;
@@ -34,18 +11,58 @@ export interface UserProfile {
   admin: boolean;
   developer: boolean;
   
-  preferences: UserPreferences;
-  security: UserSecurity;
-  privacy: UserPrivacy;
+  // Mentor/Mentee Profile References
+  mentorProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
+  menteeProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
   
-  bgr8Memberships: {
-    marketing: boolean;
-    carClub: boolean;
-    clothing: boolean;
-    league: boolean;
-    world: boolean;
-    education: boolean;
-    careers: boolean;
+  // Demographic Info
+  ethnicity?: string;
+  nationality?: string;
+  secondNationality?: string;
+  countryOfOrigin?: string;
+
+  // Additional Personal Info
+  dateOfBirth?: string;
+  gender?: string;
+  location?: {
+    city: string;
+    country: string;
+  };
+  
+  // Social Media
+  socialMedia?: {
+    instagram?: string;
+    linkedin?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+
+  // Education Info
+  education?: {
+    isStudent?: boolean;
+    school?: string;
+    householdIncome?: string;
+    qualifications?: string[];
+  };
+
+  // Career Info
+  career?: {
+    currentPosition?: string;
+    company?: string;
+    industry?: string;
+    experience?: string;
+    skills?: string[];
+    cv?: string; // URL to stored CV
+    professionalWebsite?: string;
+  };
+
+  // Car Club Info
+  carClub?: {
+    carMake?: string;
+    carModel?: string;
+    numberPlate?: string;
+    membershipType?: string;
+    joinDate?: Date;
   };
   
   activityLog: {
@@ -58,11 +75,6 @@ export interface UserProfile {
       items: string[];
       total: number;
     }[];
-  };
-  
-  location?: {
-    city: string;
-    country: string;
   };
 }
 
@@ -78,40 +90,13 @@ export const createUserProfile = async (
     email,
     firstName,
     lastName,
-    privacy: {
-      showProfile: false,
-      activityStatus: false,
-      dataCollection: false
-    },
     displayName: `${firstName} ${lastName}`,
     dateCreated: new Date(),
     lastUpdated: new Date(),
     admin: false,
     developer: false,
-    preferences: {
-      marketingEmails: true,
-      notifications: true,
-      theme: 'dark',
-      language: 'en',
-      timezone: 'UTC',
-      currency: 'USD',
-      orderUpdates: true,
-      newProductAlerts: true,
-      fontSize: 'medium',
-      colorScheme: 'default'
-    },
-    bgr8Memberships: {
-      marketing: false,
-      carClub: false,
-      clothing: false,
-      league: false,
-      world: false,
-      education: false,
-      careers: false
-    },
-    security: {
-      twoFactorEnabled: false
-    },
+    ethnicity: 'N/A',
+    nationality: 'N/A',
     activityLog: {
       lastLogin: new Date(),
       loginCount: 1

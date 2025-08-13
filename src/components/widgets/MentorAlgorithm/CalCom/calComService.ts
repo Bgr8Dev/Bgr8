@@ -1,5 +1,5 @@
 import { firestore } from '../../../../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 
 // Use local proxy for Cal.com API in development, production proxy for production
 const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
@@ -10,8 +10,8 @@ export interface CalComApiKeyData {
   mentorUid: string;
   apiKey: string;
   calComUsername: string;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 // Interface for Cal.com booking creation
@@ -136,8 +136,8 @@ export class CalComTokenManager {
         mentorUid,
         apiKey,
         calComUsername,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
       };
       await setDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), apiKeyData);
       console.log(`Cal.com API key stored for mentor: ${mentorUid}`);
@@ -169,7 +169,7 @@ export class CalComTokenManager {
     try {
       await updateDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), {
         apiKey,
-        updatedAt: Date.now()
+        updatedAt: Timestamp.now()
       });
       console.log(`Cal.com API key updated for mentor: ${mentorUid}`);
     } catch (error) {
