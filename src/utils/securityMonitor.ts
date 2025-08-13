@@ -1,7 +1,7 @@
 import { logEvent } from 'firebase/analytics';
 import { analytics } from '../firebase/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
+import { firestore } from '../firebase/firebase';
 
 interface SecurityEvent {
   type: string;
@@ -49,7 +49,7 @@ class SecurityMonitor {
   private async logToFirestore(event: SecurityEvent): Promise<void> {
     try {
       const eventId = `security_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      await setDoc(doc(db, 'security_events', eventId), {
+      await setDoc(doc(firestore, 'security_events', eventId), {
         ...event,
         timestamp: serverTimestamp()
       });
@@ -93,7 +93,7 @@ class SecurityMonitor {
   private async createSecurityAlert(alert: SecurityAlert): Promise<void> {
     try {
       // Log to Firestore
-      await setDoc(doc(db, 'security_alerts', alert.id), {
+      await setDoc(doc(firestore, 'security_alerts', alert.id), {
         ...alert,
         timestamp: serverTimestamp()
       });

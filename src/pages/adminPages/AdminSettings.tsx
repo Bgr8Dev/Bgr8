@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { doc, getDocs, updateDoc, collection, query } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { FaUserCog, FaCheck, FaTimes } from 'react-icons/fa';
 import '../../styles/adminStyles/AdminSettings.css';
 
@@ -27,7 +27,7 @@ export function AdminSettings() {
   const fetchUsers = async () => {
     try {
       setLoadingUsers(true);
-      const usersRef = collection(db, 'users');
+      const usersRef = collection(firestore, 'users');
       const querySnapshot = await getDocs(query(usersRef));
       const userData: UserData[] = [];
       querySnapshot.forEach((doc) => {
@@ -53,7 +53,7 @@ export function AdminSettings() {
   const toggleUserDeveloper = async (userId: string, isDeveloper: boolean) => {
     try {
       setSaving(userId);
-      const userRef = doc(db, 'users', userId);
+      const userRef = doc(firestore, 'users', userId);
       await updateDoc(userRef, {
         developer: !isDeveloper
       });

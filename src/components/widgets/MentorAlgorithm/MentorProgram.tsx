@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MentorProgram.css';
-import { db } from '../../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaGraduationCap, FaBrain, FaStar, FaRegSmile, FaChartLine, FaUserTie, FaQuestionCircle, FaSyncAlt } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
@@ -76,7 +76,7 @@ export default function MentorProgram() {
       if (!currentUser) return;
       
       try {
-        const mentorDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+        const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
         setHasProfile(mentorDoc.exists());
       } catch (err) {
         console.error('Error checking profile:', err);
@@ -90,7 +90,7 @@ export default function MentorProgram() {
     const fetchProfile = async () => {
       if (!currentUser) return;
       try {
-        const docSnap = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+        const docSnap = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
         if (docSnap.exists()) setCurrentUserProfile(docSnap.data() as MentorMenteeProfile);
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -263,11 +263,11 @@ export default function MentorProgram() {
     try {
       
       // Save mentor/mentee profile with user.uid as document ID
-      await setDoc(doc(db, 'mentorProgram', currentUser.uid), user);
+      await setDoc(doc(firestore, 'mentorProgram', currentUser.uid), user);
       
       // Update user's profile with mentor/mentee status
       const roleUpdate = selectedRole === MENTOR ? { mentor: true } : { mentee: true };
-      await updateDoc(doc(db, 'users', currentUser.uid), roleUpdate);
+      await updateDoc(doc(firestore, 'users', currentUser.uid), roleUpdate);
 
       setSuccess('Successfully registered!');
       if (selectedRole === MENTOR) {

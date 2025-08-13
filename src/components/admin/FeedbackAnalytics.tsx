@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { SessionFeedback } from '../../types/b8fc';
 import type { FeedbackAnalytics } from '../../types/b8fc';
@@ -17,7 +17,7 @@ export default function FeedbackAnalytics() {
       try {
         setLoading(true);
         const feedbackQuery = query(
-          collection(db, 'feedback'),
+          collection(firestore, 'feedback'),
           orderBy('submittedAt', 'desc'),
           limit(100)
         );

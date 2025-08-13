@@ -1,7 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { db, storage, auth } from '../../firebase/firebase';
+import { firestore, storage, auth } from '../../firebase/firebase';
 import { useAuth } from '../../hooks/useAuth';
 import { FaBriefcase, FaUsers, FaRocket, FaFileAlt, FaChevronDown, FaCode, FaVideo, FaUserTie, FaHandshake, FaCheck } from 'react-icons/fa';
 import '../../styles/components/JoinOurTeam.css';
@@ -181,13 +181,13 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
       };
 
       // Store CV data in bgr8Marketing collection using name as document ID
-      const cvDocRef = doc(collection(db, 'bgr8Marketing', 'careers', 'applications'), cvForm.name);
+      const cvDocRef = doc(collection(firestore, 'bgr8Marketing', 'careers', 'applications'), cvForm.name);
       await setDoc(cvDocRef, cvData);
 
       // Update user profile if logged in
       if (auth.currentUser && userProfile) {
         // Update the user's profile
-        const userRef = doc(db, 'users', auth.currentUser.uid);
+        const userRef = doc(firestore, 'users', auth.currentUser.uid);
         await updateDoc(userRef, {
           'career.hasUploadedCV': true,
           'career.lastCVUpdate': serverTimestamp(),

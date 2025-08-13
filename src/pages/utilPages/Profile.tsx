@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 
@@ -102,7 +102,7 @@ export default function Profile() {
     if (!userProfile?.uid) return;
 
     try {
-      const userRef = doc(db, 'users', userProfile.uid);
+      const userRef = doc(firestore, 'users', userProfile.uid);
       await updateDoc(userRef, {
         firstName: formData.firstName,
         lastName: formData.lastName,

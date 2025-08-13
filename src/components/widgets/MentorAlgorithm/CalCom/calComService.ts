@@ -1,4 +1,4 @@
-import { db } from '../../../../firebase/firebase';
+import { firestore } from '../../../../firebase/firebase';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 // Use local proxy for Cal.com API in development, production proxy for production
@@ -139,7 +139,7 @@ export class CalComTokenManager {
         createdAt: Date.now(),
         updatedAt: Date.now()
       };
-      await setDoc(doc(db, this.COLLECTION_NAME, mentorUid), apiKeyData);
+      await setDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), apiKeyData);
       console.log(`Cal.com API key stored for mentor: ${mentorUid}`);
     } catch (error) {
       console.error('Error storing Cal.com API key:', error);
@@ -150,7 +150,7 @@ export class CalComTokenManager {
   // Retrieve a mentor's Cal.com API key
   static async getApiKeyData(mentorUid: string): Promise<CalComApiKeyData | null> {
     try {
-      const apiKeyDoc = await getDoc(doc(db, this.COLLECTION_NAME, mentorUid));
+      const apiKeyDoc = await getDoc(doc(firestore, this.COLLECTION_NAME, mentorUid));
       if (!apiKeyDoc.exists()) {
         return null;
       }
@@ -167,7 +167,7 @@ export class CalComTokenManager {
     apiKey: string
   ): Promise<void> {
     try {
-      await updateDoc(doc(db, this.COLLECTION_NAME, mentorUid), {
+      await updateDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), {
         apiKey,
         updatedAt: Date.now()
       });
@@ -181,7 +181,7 @@ export class CalComTokenManager {
   // Remove a mentor's Cal.com API key
   static async removeApiKey(mentorUid: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, this.COLLECTION_NAME, mentorUid));
+      await deleteDoc(doc(firestore, this.COLLECTION_NAME, mentorUid));
       console.log(`Cal.com API key removed for mentor: ${mentorUid}`);
     } catch (error) {
       console.error('Error removing Cal.com API key:', error);

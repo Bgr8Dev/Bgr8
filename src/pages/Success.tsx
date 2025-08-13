@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
+import { firestore } from '../firebase/firebase';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import '../styles/payment/Success.css';
 
@@ -22,14 +22,14 @@ export default function Success() {
     const processPayment = async () => {
       try {
         // Update the invoice status
-        const invoiceRef = doc(db, "Bgr8Donations", "Invoices", sessionId);
+        const invoiceRef = doc(firestore, "Bgr8Donations", "Invoices", sessionId);
         await updateDoc(invoiceRef, {
           status: 'completed',
           completedAt: new Date()
         });
 
         // Update the total fundraised amount
-        const fundraisedRef = doc(db, "Bgr8Donations", "Fundraised");
+        const fundraisedRef = doc(firestore, "Bgr8Donations", "Fundraised");
         const fundraisedDoc = await getDoc(fundraisedRef);
         
         if (fundraisedDoc.exists()) {

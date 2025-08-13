@@ -5,8 +5,6 @@ import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
-import SocialChannels from '../../components/ui/SocialChannels';
-import MentorProgram from '../../components/widgets/MentorAlgorithm/MentorProgram';
 
 export default function BGr8() {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { db } from '../../../../firebase/firebase';
+import { firestore } from '../../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 
 export type UserType = 'mentor' | 'mentee';
@@ -212,12 +212,12 @@ function getProfessionalScore(
 export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]> {
   // Get current user's profile
   const collectionName = 'mentorProgram';
-  const userDoc = await getDoc(doc(db, collectionName, uid));
+  const userDoc = await getDoc(doc(firestore, collectionName, uid));
   if (!userDoc.exists()) throw new Error('User profile not found');
   const currentUser = userDoc.data() as MentorMenteeProfile;
 
   // Get all mentorProgram users
-  const allDocs = await getDocs(collection(db, collectionName));
+  const allDocs = await getDocs(collection(firestore, collectionName));
   const allUsers: MentorMenteeProfile[] = [];
   allDocs.forEach(docSnap => {
     if (docSnap.id !== uid) {

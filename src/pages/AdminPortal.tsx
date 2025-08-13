@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { db } from '../firebase/firebase';
+import { firestore } from '../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
@@ -48,7 +48,7 @@ export default function AdminPortal() {
 
   const fetchUsers = async () => {
     try {
-      const usersRef = collection(db, 'users');
+      const usersRef = collection(firestore, 'users');
       const q = query(usersRef, orderBy('dateCreated', 'desc'));
       const querySnapshot = await getDocs(q);
       
@@ -81,7 +81,7 @@ export default function AdminPortal() {
 
   const toggleUserAdmin = async (uid: string, currentAdminStatus: boolean) => {
     try {
-      const userRef = doc(db, 'users', uid);
+      const userRef = doc(firestore, 'users', uid);
       await updateDoc(userRef, {
         admin: !currentAdminStatus
       });

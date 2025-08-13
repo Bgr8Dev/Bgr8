@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { db } from '../firebase/firebase';
+import { firestore } from '../firebase/firebase';
 import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt, FaCog } from 'react-icons/fa';
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, getBestMatchesForUser, MatchResult } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
@@ -156,7 +156,7 @@ export default function MentorPage() {
     }
     
     try {
-      const mentorDoc = await getDoc(doc(db, 'mentorProgram', currentUser.uid));
+      const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', currentUser.uid));
       setHasProfile(mentorDoc.exists());
       
       if (mentorDoc.exists()) {
@@ -196,12 +196,12 @@ export default function MentorPage() {
       console.log('MentorPage: Starting to fetch mentors...');
       setError(null);
       
-      if (!db) {
+      if (!firestore) {
         throw new Error('Firebase database not initialized');
       }
 
       const mentorsQuery = query(
-        collection(db, 'mentorProgram'),
+        collection(firestore, 'mentorProgram'),
         where('type', '==', 'mentor')
       );
       
@@ -413,7 +413,7 @@ export default function MentorPage() {
         email: currentUser.email || profileForm.email
       };
 
-      await setDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
+      await setDoc(doc(firestore, 'mentorProgram', currentUser.uid), profileData);
       setHasProfile(true);
       setCurrentUserProfile(profileData);
       setShowRegistration(false);
@@ -442,7 +442,7 @@ export default function MentorPage() {
         email: currentUser.email || profileForm.email
       };
 
-      await updateDoc(doc(db, 'mentorProgram', currentUser.uid), profileData);
+      await updateDoc(doc(firestore, 'mentorProgram', currentUser.uid), profileData);
       setCurrentUserProfile(profileData);
       setIsEditingProfile(false);
       await fetchMentors();
@@ -602,7 +602,7 @@ export default function MentorPage() {
   const fetchEnhancedAvailability = async (mentorId: string) => {
     try {
       // Fetch from mentorAvailability collection
-      const availabilityDoc = await getDoc(doc(db, 'mentorAvailability', mentorId));
+      const availabilityDoc = await getDoc(doc(firestore, 'mentorAvailability', mentorId));
       if (availabilityDoc.exists()) {
         const data = availabilityDoc.data();
         setEnhancedAvailability(prev => ({
@@ -621,7 +621,7 @@ export default function MentorPage() {
     try {
       // Fetch from bookings collection
       const bookingsQuery = query(
-        collection(db, 'bookings'),
+        collection(firestore, 'bookings'),
         where('mentorId', '==', mentorId)
       );
       const bookingsSnapshot = await getDocs(bookingsQuery);

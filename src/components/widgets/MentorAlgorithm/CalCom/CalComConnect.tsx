@@ -22,12 +22,6 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
     username: string;
   } | null>(null);
 
-  useEffect(() => {
-    if (open) {
-      checkConnectionStatus();
-    }
-  }, [open]);
-
   const checkConnectionStatus = async () => {
     if (!currentUser) return;
     try {
@@ -45,6 +39,12 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
       console.error('Error checking connection status:', error);
     }
   };
+  
+  useEffect(() => {
+    if (open) {
+      checkConnectionStatus();
+    }
+  }, [open, checkConnectionStatus]);
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();

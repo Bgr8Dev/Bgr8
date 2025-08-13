@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import { FaTimes } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 
@@ -65,7 +65,7 @@ export default function Settings() {
     if (!userProfile?.uid) return;
 
     try {
-      const userRef = doc(db, 'users', userProfile.uid);
+      const userRef = doc(firestore, 'users', userProfile.uid);
       await updateDoc(userRef, {
         'preferences.marketingEmails': settings.marketingEmails,
         'preferences.notifications': settings.notifications,
