@@ -278,6 +278,7 @@ npm run preview
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging Sender ID | ✅ | `123456789` |
 | `VITE_FIREBASE_APP_ID` | Firebase App ID | ✅ | `1:123456789:web:abc123` |
 | `VITE_FIREBASE_MEASUREMENT_ID` | Firebase Measurement ID | ✅ | `G-XXXXXXXXXX` |
+| `VITE_USE_EMULATORS` | Enable Firebase emulators for development | ⚠️ | `true` or `false` |
 
 </details>
 

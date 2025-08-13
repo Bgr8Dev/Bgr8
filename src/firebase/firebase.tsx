@@ -3,6 +3,7 @@ import { getAnalytics, logEvent, isSupported, Analytics } from "firebase/analyti
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { logEmulatorConnection } from "./emulatorUtils";
 
 // Firebase configuration - use minimal config for emulators in dev
 const getFirebaseConfig = () => {
@@ -83,25 +84,9 @@ export const auth = getAuth(app);
 export const firestore = getFirestore(app);
 export const storage = getStorage(app);
 
-// Emulator connection logging helper
-const logEmulatorConnection = (
-  emulator: string,
-  host: string,
-  port: number,
-  success: boolean,
-  error?: unknown
-) => {
-  if (success) {
-    console.log(`✅ Connected to ${emulator} emulator on ${host}:${port}`);
-  } else {
-    const errorMessage = error instanceof Error ? error.message : 'No error message';
-    console.log(`⚠️ ${emulator} emulator connection failed (${host}:${port}): ${errorMessage}`);
-  }
-};
-
 // Connect to emulators if configured
 if (import.meta.env.VITE_USE_EMULATORS === 'true') {
-  console.log('🔧 Connecting to Firebase emulators...');
+  console.log('Connecting to Firebase emulators...');
   
   // Connect to Auth emulator
   import('firebase/auth').then(({ connectAuthEmulator }) => {

@@ -73,12 +73,7 @@ gcloud config set project b8network
    cd firebase_emulator
    ```
 
-2. **(Linux/MacOS only) Make the script executable:**
-   ```bash
-   chmod +x download_cloud_data.sh
-   ```
-
-3. **Run the export script:**
+2. **Run the export script:**
    Linux/MacOS
    ```
    ./download_cloud_data.sh
@@ -90,7 +85,7 @@ gcloud config set project b8network
    bash ./download_cloud_data.sh
    ```
 
-4. **Follow the prompts:**
+3. **Follow the prompts:**
    - Choose your Firebase environment (prod, dev, etc.)
    - Wait for export and download to complete
    - Optionally clean up Cloud Storage to save costs
@@ -115,6 +110,13 @@ Configuration:
 ## 🧪 Using Exported Data with Emulators
 
 ### **Start emulators with imported data:**
+
+Make sure the `.env` in the root directory has set:
+```bash
+VITE_USE_EMULATORS=true
+```
+
+Then
 ```bash
 # Navigate to firebase_emulator directory if not already there
 cd firebase_emulator
@@ -148,21 +150,6 @@ firebase emulators:start --import=./data/<name_of_save_folder> --export-on-exit=
    
    # List available projects
    firebase projects:list
-   ```
-
-3. **"Bucket does not exist" errors**
-   ```bash
-   # Ensure your project has a storage bucket
-   # Go to Firebase Console > Storage and initialize
-   ```
-
-4. **Emulator import failures**
-   ```bash
-   # Check the import path exists
-   ls -la ./data/<folder>/
-   
-   # Try importing with full path
-   firebase emulators:start --import=/full/path/to/data/<folder>
    ```
 
 ## 📚 Additional Resources
