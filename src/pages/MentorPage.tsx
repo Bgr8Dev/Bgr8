@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { firestore } from '../firebase/firebase';
-import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt, FaCog } from 'react-icons/fa';
+import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { FaSearch, FaStar, FaVideo, FaCalendarAlt, FaGraduationCap, FaIndustry, FaClock, FaCheckCircle, FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTimes, FaUserFriends, FaMapMarkerAlt, FaCog, FaInfoCircle } from 'react-icons/fa';
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, getBestMatchesForUser, MatchResult } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 
 import BookingModal from '../components/widgets/MentorAlgorithm/booking/BookingModal';
@@ -11,6 +11,7 @@ import { CalComService } from '../components/widgets/MentorAlgorithm/CalCom/calC
 import MatchStrengthRing from '../components/widgets/MentorAlgorithm/MatchStrengthRing';
 import MentorAvailability from '../components/widgets/MentorAlgorithm/MentorAvailability';
 import skillsByCategory from '../constants/skillsByCategory';
+import hobbiesByCategory from '../constants/hobbiesByCategory';
 import ukEducationLevels from '../constants/ukEducationLevels';
 import ukCounties from '../constants/ukCounties';
 import { ethnicityOptions } from '../constants/ethnicityOptions';
@@ -67,6 +68,9 @@ export default function MentorPage() {
   const [hasProfile, setHasProfile] = useState(false);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [profileForm, setProfileForm] = useState({
     firstName: '',
     lastName: '',
@@ -145,6 +149,23 @@ export default function MentorPage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Developer mode keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+Shift+D to toggle developer mode
+      if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+        event.preventDefault();
+        setIsDeveloperMode(prev => !prev);
+        console.log('Developer mode toggled via keyboard shortcut');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -351,7 +372,15 @@ export default function MentorPage() {
 
   const handleRoleSelect = (role: UserType) => {
     setSelectedRole(role);
-    setProfileForm(prev => ({ ...prev, type: role }));
+    setValidationErrors({});
+    setProfileForm(prev => ({ 
+      ...prev, 
+      pastProfessions: [''],
+      skills: [],
+      industries: [],
+      hobbies: [],
+      lookingFor: []
+    }));
     setShowRegistration(true);
   };
 
@@ -359,6 +388,7 @@ export default function MentorPage() {
     if (showRegistration) {
       setShowRegistration(false);
       setSelectedRole(null);
+      setValidationErrors({});
       setProfileForm({
         firstName: '',
         lastName: '',
@@ -377,8 +407,7 @@ export default function MentorPage() {
         religion: '',
         skills: [],
         lookingFor: [],
-        industries: [],
-        type: MENTOR
+        industries: []
       });
     }
   };
@@ -386,15 +415,224 @@ export default function MentorPage() {
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProfileForm(prev => ({ ...prev, [name]: value }));
+    
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleArrayChange = (field: keyof MentorMenteeProfile, value: string[]) => {
     setProfileForm(prev => ({ ...prev, [field]: value }));
+    
+    // Clear validation error for this field when user makes changes
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const handlePastProfessionChange = (index: number, value: string) => {
+    const newPastProfessions = [...profileForm.pastProfessions];
+    newPastProfessions[index] = value;
+    handleArrayChange('pastProfessions', newPastProfessions);
+  };
+
+  const addPastProfession = () => {
+    handleArrayChange('pastProfessions', [...profileForm.pastProfessions, '']);
+  };
+
+  const removePastProfession = (index: number) => {
+    if (profileForm.pastProfessions.length > 1) {
+      const newPastProfessions = profileForm.pastProfessions.filter((_, i) => i !== index);
+      handleArrayChange('pastProfessions', newPastProfessions);
+    }
+  };
+
+  const scrollToFirstError = () => {
+    const firstErrorField = document.querySelector('.validation-error');
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  };
+
+  const calculateFormProgress = () => {
+    const totalFields = 17; // Updated to include past professions and looking for
+    let completedFields = 0;
+    
+    // Personal Information (6 fields)
+    if (profileForm.firstName.trim()) completedFields++;
+    if (profileForm.lastName.trim()) completedFields++;
+    if (profileForm.email.trim()) completedFields++;
+    if (profileForm.phone.trim()) completedFields++;
+    if (profileForm.age.trim()) completedFields++;
+    if (profileForm.county.trim()) completedFields++;
+    
+    // Education & Career (4 fields)
+    if (profileForm.degree.trim()) completedFields++;
+    if (profileForm.educationLevel.trim()) completedFields++;
+    if (profileForm.profession.trim()) completedFields++;
+    if (profileForm.linkedin.trim()) completedFields++;
+    
+    // Skills & Interests (3 fields)
+    if (profileForm.skills.length > 0) completedFields++;
+    if (profileForm.industries.length > 0) completedFields++;
+    if (profileForm.hobbies.length > 0) completedFields++;
+    
+    // Additional Information (2 fields)
+    if (profileForm.ethnicity.trim()) completedFields++;
+    if (profileForm.religion.trim()) completedFields++;
+    
+    // Past Professions (1 field - at least one non-empty)
+    if (profileForm.pastProfessions.some(p => p.trim())) completedFields++;
+    
+    // Looking For (1 field - for mentees only)
+    if (selectedRole === MENTEE) {
+      if (profileForm.lookingFor.length > 0) completedFields++;
+    } else {
+      // For mentors, this field is not required, so count it as completed
+      completedFields++;
+    }
+    
+    return { completedFields, totalFields };
+  };
+
+  const getMissingFields = () => {
+    const missingFields: string[] = [];
+    
+    if (!profileForm.firstName.trim()) missingFields.push('First Name');
+    if (!profileForm.lastName.trim()) missingFields.push('Last Name');
+    if (!profileForm.email.trim()) missingFields.push('Email');
+    if (!profileForm.phone.trim()) missingFields.push('Phone Number');
+    if (!profileForm.age.trim()) missingFields.push('Age');
+    if (!profileForm.county.trim()) missingFields.push('County');
+    if (!profileForm.degree.trim()) missingFields.push('Degree/Qualification');
+    if (!profileForm.educationLevel.trim()) missingFields.push('Education Level');
+    if (!profileForm.profession.trim()) missingFields.push('Current Profession');
+    if (!profileForm.linkedin.trim()) missingFields.push('LinkedIn Profile');
+    if (profileForm.skills.length === 0) missingFields.push('Skills');
+    if (profileForm.industries.length === 0) missingFields.push('Industries');
+    if (profileForm.hobbies.length === 0) missingFields.push('Hobbies & Interests');
+    if (!profileForm.ethnicity.trim()) missingFields.push('Ethnicity');
+    if (!profileForm.religion.trim()) missingFields.push('Religion');
+    if (!profileForm.pastProfessions.some(p => p.trim())) missingFields.push('Past Professions');
+    
+    if (selectedRole === MENTEE && profileForm.lookingFor.length === 0) {
+      missingFields.push('Learning Goals');
+    }
+    
+    return missingFields;
+  };
+
+  const getSectionStatus = () => {
+    const sections: { [key: string]: { completed: boolean; total: number } } = {
+      'Personal Information': {
+        completed: Boolean(profileForm.firstName.trim() && profileForm.lastName.trim() && 
+                   profileForm.email.trim() && profileForm.phone.trim() && 
+                   profileForm.age.trim() && profileForm.county.trim()),
+        total: 6
+      },
+      'Education & Career': {
+        completed: Boolean(profileForm.degree.trim() && profileForm.educationLevel.trim() && 
+                   profileForm.profession.trim() && profileForm.linkedin.trim()),
+        total: 4
+      },
+      'Skills & Interests': {
+        completed: profileForm.skills.length > 0 && profileForm.industries.length > 0 && 
+                   profileForm.hobbies.length > 0,
+        total: 3
+      },
+      'Additional Information': {
+        completed: Boolean(profileForm.ethnicity.trim() && profileForm.religion.trim()),
+        total: 2
+      },
+      'Professional Background': {
+        completed: profileForm.pastProfessions.some(p => p.trim()),
+        total: 1
+      }
+    };
+    
+    if (selectedRole === MENTEE) {
+      sections['Learning Goals'] = {
+        completed: profileForm.lookingFor.length > 0,
+        total: 1
+      };
+    }
+    
+    return sections;
+  };
+
+  const validateProfileForm = (): {[key: string]: string} => {
+    const errors: {[key: string]: string} = {};
+    
+    // Personal Information
+    if (!profileForm.firstName.trim()) errors.firstName = 'First name is required';
+    if (!profileForm.lastName.trim()) errors.lastName = 'Last name is required';
+    if (!profileForm.email.trim()) errors.email = 'Email is required';
+    if (!profileForm.phone.trim()) errors.phone = 'Phone number is required';
+    if (!profileForm.age.trim()) errors.age = 'Age is required';
+    if (!profileForm.county.trim()) errors.county = 'County is required';
+    
+    // Education & Career
+    if (!profileForm.degree.trim()) errors.degree = 'Degree/Qualification is required';
+    if (!profileForm.educationLevel.trim()) errors.educationLevel = 'Education level is required';
+    if (!profileForm.profession.trim()) errors.profession = 'Current profession is required';
+    if (!profileForm.linkedin.trim()) errors.linkedin = 'LinkedIn profile is required';
+    
+    // Skills & Interests
+    if (profileForm.skills.length === 0) errors.skills = 'At least one skill is required';
+    if (profileForm.industries.length === 0) errors.industries = 'At least one industry is required';
+    if (profileForm.hobbies.length === 0) errors.hobbies = 'At least one hobby is required';
+    
+    // Additional Information
+    if (!profileForm.ethnicity.trim()) errors.ethnicity = 'Ethnicity is required';
+    if (!profileForm.religion.trim()) errors.religion = 'Religion is required';
+    
+    // Past Professions (at least one non-empty entry)
+    const nonEmptyPastProfessions = profileForm.pastProfessions.filter(p => p.trim());
+    if (nonEmptyPastProfessions.length === 0) {
+      errors.pastProfessions = 'At least one past profession is required';
+    }
+    
+    // Looking For (for mentees)
+    if (selectedRole === MENTEE && profileForm.lookingFor.length === 0) {
+      errors.lookingFor = 'At least one learning goal is required';
+    }
+    
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) return;
+    console.log('handleSubmit called!');
+    if (!currentUser) {
+      console.log('No current user, returning');
+      return;
+    }
+
+    // Validate all required fields
+    const errors = validateProfileForm();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      console.log('Validation errors:', errors);
+      scrollToFirstError();
+      return;
+    }
+
+    // Clear any previous validation errors
+    setValidationErrors({});
+
+    console.log('Form submission started', { profileForm, selectedRole });
 
     try {
       setLoading(true);
@@ -410,7 +648,7 @@ export default function MentorPage() {
         educationLevel: profileForm.educationLevel,
         county: profileForm.county,
         profession: profileForm.profession,
-        pastProfessions: profileForm.pastProfessions,
+        pastProfessions: profileForm.pastProfessions.filter(p => p.trim()),
         linkedin: profileForm.linkedin,
         calCom: profileForm.calCom,
         hobbies: profileForm.hobbies,
@@ -421,13 +659,19 @@ export default function MentorPage() {
         industries: profileForm.industries,
         isMentor: selectedRole === MENTOR,
         isMentee: selectedRole === MENTEE,
+
       };
 
+      console.log('Profile data to save:', profileData);
+
       await setDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
+      console.log('Profile saved successfully');
+      
       setHasProfile(true);
       setCurrentUserProfile(profileData);
       setShowRegistration(false);
       setSelectedRole(null);
+      setValidationErrors({});
       await fetchMentors();
     } catch (err) {
       console.error('Error creating profile:', err);
@@ -444,6 +688,18 @@ export default function MentorPage() {
   const handleProfileSave = async () => {
     if (!currentUser || !currentUserProfile) return;
 
+    // Validate all required fields
+    const errors = validateProfileForm();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      console.log('Validation errors:', errors);
+      scrollToFirstError();
+      return;
+    }
+
+    // Clear any previous validation errors
+    setValidationErrors({});
+
     try {
       setLoading(true);
       const profileData = {
@@ -458,7 +714,7 @@ export default function MentorPage() {
         educationLevel: profileForm.educationLevel,
         county: profileForm.county,
         profession: profileForm.profession,
-        pastProfessions: profileForm.pastProfessions,
+        pastProfessions: profileForm.pastProfessions.filter(p => p.trim()),
         linkedin: profileForm.linkedin,
         calCom: profileForm.calCom,
         hobbies: profileForm.hobbies,
@@ -469,6 +725,7 @@ export default function MentorPage() {
         industries: profileForm.industries,
         isMentor: currentUserProfile.isMentor,
         isMentee: currentUserProfile.isMentee,
+
       };
 
       await updateDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
@@ -485,6 +742,7 @@ export default function MentorPage() {
 
   const handleProfileCancel = () => {
     setIsEditingProfile(false);
+    setValidationErrors({});
     if (currentUserProfile) {
       setProfileForm({
         firstName: currentUserProfile.firstName || '',
@@ -506,6 +764,61 @@ export default function MentorPage() {
         lookingFor: currentUserProfile.lookingFor || [],
         industries: currentUserProfile.industries || [],
       });
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!currentUser || !currentUserProfile) return;
+    
+    // Show the delete confirmation modal instead of using window.confirm
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteProfile = async () => {
+    if (!currentUser || !currentUserProfile) return;
+    
+    try {
+      setLoading(true);
+      
+      // Delete the profile document
+      await deleteDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
+      
+      // Reset all profile-related state
+      setCurrentUserProfile(null);
+      setHasProfile(false);
+      setIsEditingProfile(false);
+      setShowMatches(false);
+      setBestMatches([]);
+      
+      // Reset form
+      setProfileForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        age: '',
+        degree: '',
+        educationLevel: '',
+        county: '',
+        profession: '',
+        pastProfessions: [''],
+        linkedin: '',
+        calCom: '',
+        hobbies: [],
+        ethnicity: '',
+        religion: '',
+        skills: [],
+        lookingFor: [],
+        industries: []
+      });
+      
+      console.log('Profile deleted successfully');
+      setShowDeleteConfirmModal(false); // Close the modal after successful deletion
+    } catch (err) {
+      console.error('Error deleting profile:', err);
+      setError('Failed to delete profile');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -756,127 +1069,295 @@ export default function MentorPage() {
         {showRegistration && (
           <div className="mentor-registration">
             <div className="registration-header">
-              <button className="back-button" onClick={handleBack}>
+              <button className="back-button" onClick={handleBack} title="Go back to role selection" data-tooltip="Go back to role selection">
                 <FaTimes /> Back
               </button>
               <h2>Create Your {selectedRole === MENTOR ? 'Mentor' : 'Mentee'} Profile</h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="registration-form">
+            <form onSubmit={(e) => {
+              console.log('Form submitted!', e);
+              console.log('Form data:', profileForm);
+              console.log('Selected role:', selectedRole);
+              console.log('Current user:', currentUser);
+              handleSubmit(e);
+            }} className="registration-form">
+              
+              {/* Validation Summary */}
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="validation-summary">
+                  <h4>Please complete the following required fields:</h4>
+                  <ul>
+                    {getMissingFields().map((field, index) => (
+                      <li key={index}>
+                        {field}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Required Fields Note */}
+              <div className="required-fields-note">
+                <p><strong>Note:</strong> All fields marked with <span className="required-asterisk">*</span> are mandatory and must be completed before you can create your profile.</p>
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="form-progress">
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ 
+                      width: `${Math.round((calculateFormProgress().completedFields / calculateFormProgress().totalFields) * 100)}%` 
+                    }}
+                  ></div>
+                </div>
+                <p className="progress-text">
+                  {calculateFormProgress().completedFields} of {calculateFormProgress().totalFields} required fields completed
+                </p>
+              </div>
+
               <div className="form-section">
                 <h3>Personal Information</h3>
-                <div className="form-row">
-                  <input
-                    name="firstName"
-                    value={profileForm.firstName}
-                    onChange={handleFormChange}
-                    placeholder="First Name"
-                    required
-                  />
-                  <input
-                    name="lastName"
-                    value={profileForm.lastName}
-                    onChange={handleFormChange}
-                    placeholder="Last Name"
-                    required
-                  />
+                <div className="section-status">
+                  <span className={`status-indicator ${getSectionStatus()['Personal Information'].completed ? 'completed' : 'incomplete'}`}>
+                    {getSectionStatus()['Personal Information'].completed ? '✓ Complete' : '⚠ Incomplete'}
+                  </span>
                 </div>
                 <div className="form-row">
-                  <input
-                    name="email"
-                    value={profileForm.email}
-                    onChange={handleFormChange}
-                    placeholder="Email Address"
-                    type="email"
-                    required
-                  />
-                  <input
-                    name="phone"
-                    value={profileForm.phone}
-                    onChange={handleFormChange}
-                    placeholder="Phone Number"
-                    type="tel"
-                    required
-                  />
+                  <div className="input-group">
+                    <label className="field-label">
+                      First Name <FaInfoCircle className="info-icon" title="Enter your legal first name as it appears on official documents" />
+                    </label>
+                    <input
+                      name="firstName"
+                      value={profileForm.firstName}
+                      onChange={handleFormChange}
+                      placeholder="First Name"
+                      required
+                      className={validationErrors.firstName ? 'error' : ''}
+                      title="Enter your legal first name as it appears on official documents"
+                      data-tooltip="Enter your legal first name as it appears on official documents"
+                    />
+                    {validationErrors.firstName && (
+                      <div className="validation-error">{validationErrors.firstName}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Last Name <FaInfoCircle className="info-icon" title="Enter your legal last name as it appears on official documents" />
+                    </label>
+                    <input
+                      name="lastName"
+                      value={profileForm.lastName}
+                      onChange={handleFormChange}
+                      placeholder="Last Name"
+                      required
+                      className={validationErrors.lastName ? 'error' : ''}
+                      title="Enter your legal last name as it appears on official documents"
+                      data-tooltip="Enter your legal last name as it appears on official documents"
+                    />
+                    {validationErrors.lastName && (
+                      <div className="validation-error">{validationErrors.lastName}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="form-row">
-                  <input
-                    name="age"
-                    value={profileForm.age}
-                    onChange={handleFormChange}
-                    placeholder="Age"
-                    type="number"
-                    min={selectedRole === MENTEE ? MENTEE_MIN_AGE : 18}
-                    max={selectedRole === MENTEE ? MENTEE_MAX_AGE : 100}
-                    required
-                  />
-                  <select
-                    name="county"
-                    value={profileForm.county}
-                    onChange={handleFormChange}
-                    required
-                  >
-                    <option value="">Select County</option>
-                    {ukCounties.map(county => (
-                      <option key={county} value={county}>{county}</option>
-                    ))}
-                  </select>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Email Address <FaInfoCircle className="info-icon" title="Enter your primary email address for communication and account verification" />
+                    </label>
+                    <input
+                      name="email"
+                      value={profileForm.email}
+                      onChange={handleFormChange}
+                      placeholder="Email Address"
+                      type="email"
+                      required
+                      className={validationErrors.email ? 'error' : ''}
+                      title="Enter your primary email address for communication and account verification"
+                      data-tooltip="Enter your primary email address for communication and account verification"
+                    />
+                    {validationErrors.email && (
+                      <div className="validation-error">{validationErrors.email}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Phone Number <FaInfoCircle className="info-icon" title="Enter your phone number including country code (e.g., +44 for UK)" />
+                    </label>
+                    <input
+                      name="phone"
+                      value={profileForm.phone}
+                      onChange={handleFormChange}
+                      placeholder="Phone Number"
+                      type="tel"
+                      required
+                      className={validationErrors.phone ? 'error' : ''}
+                      title="Enter your phone number including country code (e.g., +44 for UK)"
+                      data-tooltip="Enter your phone number including country code (e.g., +44 for UK)"
+                    />
+                    {validationErrors.phone && (
+                      <div className="validation-error">{validationErrors.phone}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="input-group">
+                    <label className="field-label">
+                      Age <FaInfoCircle className="info-icon" title={`Enter your current age. Mentees must be ${MENTEE_MIN_AGE}-${MENTEE_MAX_AGE} years old, mentors must be 18+`} />
+                    </label>
+                    <input
+                      name="age"
+                      value={profileForm.age}
+                      onChange={handleFormChange}
+                      placeholder="Age"
+                      type="number"
+                      min={selectedRole === MENTEE ? MENTEE_MIN_AGE : 18}
+                      max={selectedRole === MENTEE ? MENTEE_MAX_AGE : 100}
+                      required
+                      className={validationErrors.age ? 'error' : ''}
+                      title={`Enter your current age. Mentees must be ${MENTEE_MIN_AGE}-${MENTEE_MAX_AGE} years old, mentors must be 18+`}
+                      data-tooltip={`Enter your current age. Mentees must be ${MENTEE_MIN_AGE}-${MENTEE_MAX_AGE} years old, mentors must be 18+`}
+                    />
+                    {validationErrors.age && (
+                      <div className="validation-error">{validationErrors.age}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      County <FaInfoCircle className="info-icon" title="Select your current county of residence for location-based matching" />
+                    </label>
+                    <select
+                      name="county"
+                      value={profileForm.county}
+                      onChange={handleFormChange}
+                      required
+                      className={validationErrors.county ? 'error' : ''}
+                      title="Select your current county of residence for location-based matching"
+                      data-tooltip="Select your current county of residence for location-based matching"
+                    >
+                      <option value="">Select County</option>
+                      {ukCounties.map(county => (
+                        <option key={county} value={county}>{county}</option>
+                      ))}
+                    </select>
+                    {validationErrors.county && (
+                      <div className="validation-error">{validationErrors.county}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="form-section">
                 <h3>Education & Career</h3>
-                <div className="form-row">
-                  <input
-                    name="degree"
-                    value={profileForm.degree}
-                    onChange={handleFormChange}
-                    placeholder={degreePlaceholders[profileForm.educationLevel] || "Degree/Qualification"}
-                  />
-                  <select
-                    name="educationLevel"
-                    value={profileForm.educationLevel}
-                    onChange={handleFormChange}
-                    required
-                  >
-                    <option value="">Select Education Level</option>
-                    {ukEducationLevels
-                      .filter(level => {
-                        if (selectedRole === MENTEE) {
-                          const menteeLevels = [
-                            'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
-                          ];
-                          return menteeLevels.includes(level);
-                        }
-                        return true;
-                      })
-                      .map(level => (
-                        <option key={level} value={level}>{level}</option>
-                      ))}
-                  </select>
+                <div className="section-status">
+                  <span className={`status-indicator ${getSectionStatus()['Education & Career'].completed ? 'completed' : 'incomplete'}`}>
+                    {getSectionStatus()['Education & Career'].completed ? '✓ Complete' : '⚠ Incomplete'}
+                  </span>
                 </div>
                 <div className="form-row">
-                  <input
-                    name="profession"
-                    value={profileForm.profession}
-                    onChange={handleFormChange}
-                    placeholder="Current Profession"
-                    required
-                  />
-                  <input
-                    name="linkedin"
-                    value={profileForm.linkedin}
-                    onChange={handleFormChange}
-                    placeholder="LinkedIn Profile (optional)"
-                  />
+                  <div className="input-group">
+                    <label className="field-label">
+                      Degree/Qualification <FaInfoCircle className="info-icon" title="Enter your specific degree, qualification, or certification details" />
+                    </label>
+                    <input
+                      name="degree"
+                      value={profileForm.degree}
+                      onChange={handleFormChange}
+                      placeholder={degreePlaceholders[profileForm.educationLevel] || "Degree/Qualification"}
+                      className={validationErrors.degree ? 'error' : ''}
+                      title="Enter your specific degree, qualification, or certification details"
+                      data-tooltip="Enter your specific degree, qualification, or certification details"
+                    />
+                    {validationErrors.degree && (
+                      <div className="validation-error">{validationErrors.degree}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Education Level <FaInfoCircle className="info-icon" title="Select your highest completed level of education" />
+                    </label>
+                    <select
+                      name="educationLevel"
+                      value={profileForm.educationLevel}
+                      onChange={handleFormChange}
+                      required
+                      className={validationErrors.educationLevel ? 'error' : ''}
+                      title="Select your highest completed level of education"
+                      data-tooltip="Select your highest completed level of education"
+                    >
+                      <option value="">Select Education Level</option>
+                      {ukEducationLevels
+                        .filter(level => {
+                          if (selectedRole === MENTEE) {
+                            const menteeLevels = [
+                              'GCSEs', 'A-Levels', 'BTEC', 'Foundation Degree', "Bachelor's Degree"
+                            ];
+                            return menteeLevels.includes(level);
+                          }
+                          return true;
+                        })
+                        .map(level => (
+                          <option key={level} value={level}>{level}</option>
+                        ))}
+                    </select>
+                    {validationErrors.educationLevel && (
+                      <div className="validation-error">{validationErrors.educationLevel}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="input-group">
+                    <label className="field-label">
+                      Current Profession <FaInfoCircle className="info-icon" title="Enter your current job title or professional role" />
+                    </label>
+                    <input
+                      name="profession"
+                      value={profileForm.profession}
+                      onChange={handleFormChange}
+                      placeholder="Current Profession"
+                      required
+                      className={validationErrors.profession ? 'error' : ''}
+                      title="Enter your current job title or professional role"
+                      data-tooltip="Enter your current job title or professional role"
+                    />
+                    {validationErrors.profession && (
+                      <div className="validation-error">{validationErrors.profession}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      LinkedIn Profile <FaInfoCircle className="info-icon" title="Enter your LinkedIn profile URL to showcase your professional background" />
+                    </label>
+                    <input
+                      name="linkedin"
+                      value={profileForm.linkedin}
+                      onChange={handleFormChange}
+                      placeholder="LinkedIn Profile"
+                      className={validationErrors.linkedin ? 'error' : ''}
+                      title="Enter your LinkedIn profile URL to showcase your professional background"
+                      data-tooltip="Enter your LinkedIn profile URL to showcase your professional background"
+                    />
+                    {validationErrors.linkedin && (
+                      <div className="validation-error">{validationErrors.linkedin}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="form-section">
                 <h3>Skills & Interests</h3>
+                <div className="section-status">
+                  <span className={`status-indicator ${getSectionStatus()['Skills & Interests'].completed ? 'completed' : 'incomplete'}`}>
+                    {getSectionStatus()['Skills & Interests'].completed ? '✓ Complete' : '⚠ Incomplete'}
+                  </span>
+                </div>
                 <div className="form-row">
                   <div className="skills-selection-container">
-                    <label>Skills {selectedRole === MENTOR ? '(What you can teach)' : '(What you want to learn)'}</label>
+                    <label className="field-label" title="Select skills you can teach (mentors) or want to learn (mentees)" data-tooltip="Select skills you can teach (mentors) or want to learn (mentees)">
+                      Skills {selectedRole === MENTOR ? '(What you can teach)' : '(What you want to learn)'} <FaInfoCircle className="info-icon" title="Select skills you can teach (mentors) or want to learn (mentees)" />
+                    </label>
                     <div className="skills-tags-container">
                       {Object.entries(skillsByCategory).map(([category, skills]) => (
                         <div key={category} className="skill-category-section">
@@ -895,6 +1376,8 @@ export default function MentorPage() {
                                   }
                                 }}
                                 tabIndex={0}
+                                title={`Click to ${profileForm.skills.includes(skill) ? 'remove' : 'add'} ${skill}`}
+                                data-tooltip={`Click to ${profileForm.skills.includes(skill) ? 'remove' : 'add'} ${skill}`}
                               >
                                 {skill}
                               </button>
@@ -914,6 +1397,8 @@ export default function MentorPage() {
                                 type="button"
                                 className="remove-tag"
                                 onClick={() => handleArrayChange('skills', profileForm.skills.filter(s => s !== skill))}
+                                title={`Remove ${skill}`}
+                                data-tooltip={`Remove ${skill}`}
                               >
                                 ×
                               </button>
@@ -922,12 +1407,17 @@ export default function MentorPage() {
                         </div>
                       </div>
                     )}
+                    {validationErrors.skills && (
+                      <div className="validation-error">{validationErrors.skills}</div>
+                    )}
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="industries-selection-container">
-                    <label>Industries {selectedRole === MENTOR ? '(Current/Previous)' : '(Desired)'}</label>
+                    <label className="field-label" title="Select industries you have experience in (mentors) or are interested in (mentees)" data-tooltip="Select industries you have experience in (mentors) or are interested in (mentees)">
+                      Industries {selectedRole === MENTOR ? '(Current/Previous)' : '(Desired)'} <FaInfoCircle className="info-icon" title="Select industries you have experience in (mentors) or are interested in (mentees)" />
+                    </label>
                     <div className="industries-tags-container">
                       <div className="tags-grid">
                         {industriesList.map(industry => (
@@ -943,6 +1433,8 @@ export default function MentorPage() {
                               }
                             }}
                             tabIndex={0}
+                            title={`Click to ${profileForm.industries.includes(industry) ? 'remove' : 'add'} ${industry}`}
+                            data-tooltip={`Click to ${profileForm.industries.includes(industry) ? 'remove' : 'add'} ${industry}`}
                           >
                             {industry}
                           </button>
@@ -960,6 +1452,8 @@ export default function MentorPage() {
                                 type="button"
                                 className="remove-tag"
                                 onClick={() => handleArrayChange('industries', profileForm.industries.filter(i => i !== industry))}
+                                title={`Remove ${industry}`}
+                                data-tooltip={`Remove ${industry}`}
                               >
                                 ×
                               </button>
@@ -968,38 +1462,278 @@ export default function MentorPage() {
                         </div>
                       </div>
                     )}
+                    {validationErrors.industries && (
+                      <div className="validation-error">{validationErrors.industries}</div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="hobbies-selection-container">
+                    <label className="field-label" title="Select hobbies and interests to help with personality-based matching" data-tooltip="Select hobbies and interests to help with personality-based matching">
+                      Hobbies & Interests {selectedRole === MENTOR ? '(What you enjoy)' : '(What interests you)'} <FaInfoCircle className="info-icon" title="Select hobbies and interests to help with personality-based matching" />
+                    </label>
+                    <div className="hobbies-tags-container">
+                      {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
+                        <div key={category} className="hobby-category-section">
+                          <h4 className="category-title">{category}</h4>
+                          <div className="tags-grid">
+                            {hobbies.map(hobby => (
+                              <button
+                                key={hobby}
+                                type="button"
+                                className={`hobby-tag-selectable ${profileForm.hobbies.includes(hobby) ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (profileForm.hobbies.includes(hobby)) {
+                                    handleArrayChange('hobbies', profileForm.hobbies.filter(h => h !== hobby));
+                                  } else {
+                                    handleArrayChange('hobbies', [...profileForm.hobbies, hobby]);
+                                  }
+                                }}
+                                tabIndex={0}
+                                title={`Click to ${profileForm.hobbies.includes(hobby) ? 'remove' : 'add'} ${hobby}`}
+                                data-tooltip={`Click to ${profileForm.hobbies.includes(hobby) ? 'remove' : 'add'} ${hobby}`}
+                              >
+                                {hobby}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {profileForm.hobbies.length > 0 && (
+                      <div className="selected-hobbies-summary">
+                        <span className="summary-label">Selected: {profileForm.hobbies.length}</span>
+                        <div className="selected-tags">
+                          {profileForm.hobbies.map(hobby => (
+                            <span key={hobby} className="selected-tag">
+                              {hobby}
+                              <button
+                                type="button"
+                                className="remove-tag"
+                                onClick={() => handleArrayChange('hobbies', profileForm.hobbies.filter(h => h !== hobby))}
+                                title={`Remove ${hobby}`}
+                                data-tooltip={`Remove ${hobby}`}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {validationErrors.hobbies && (
+                      <div className="validation-error">{validationErrors.hobbies}</div>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="form-section">
                 <h3>Additional Information</h3>
+                <div className="section-status">
+                  <span className={`status-indicator ${getSectionStatus()['Additional Information'].completed ? 'completed' : 'incomplete'}`}>
+                    {getSectionStatus()['Additional Information'].completed ? '✓ Complete' : '⚠ Incomplete'}
+                  </span>
+                </div>
                 <div className="form-row">
-                  <select
-                    name="ethnicity"
-                    value={profileForm.ethnicity}
-                    onChange={handleFormChange}
-                  >
-                    <option value="">Select Ethnicity (optional)</option>
-                    {ethnicityOptions.map(ethnicity => (
-                      <option key={ethnicity} value={ethnicity}>{ethnicity}</option>
-                    ))}
-                  </select>
-                  <select
-                    name="religion"
-                    value={profileForm.religion}
-                    onChange={handleFormChange}
-                  >
-                    <option value="">Select Religion (optional)</option>
-                    {religionOptions.map(religion => (
-                      <option key={religion} value={religion}>{religion}</option>
-                    ))}
-                  </select>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Ethnicity <FaInfoCircle className="info-icon" title="Select your ethnicity for diversity and inclusion purposes" />
+                    </label>
+                    <select
+                      name="ethnicity"
+                      value={profileForm.ethnicity}
+                      onChange={handleFormChange}
+                      className={validationErrors.ethnicity ? 'error' : ''}
+                      title="Select your ethnicity for diversity and inclusion purposes"
+                      data-tooltip="Select your ethnicity for diversity and inclusion purposes"
+                    >
+                      <option value="">Select Ethnicity</option>
+                      {ethnicityOptions.map(ethnicity => (
+                        <option key={ethnicity} value={ethnicity}>{ethnicity}</option>
+                      ))}
+                    </select>
+                    {validationErrors.ethnicity && (
+                      <div className="validation-error">{validationErrors.ethnicity}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Religion <FaInfoCircle className="info-icon" title="Select your religious affiliation if applicable" />
+                    </label>
+                    <select
+                      name="religion"
+                      value={profileForm.religion}
+                      onChange={handleFormChange}
+                      className={validationErrors.religion ? 'error' : ''}
+                      title="Select your religious affiliation if applicable"
+                      data-tooltip="Select your religious affiliation if applicable"
+                    >
+                      <option value="">Select Religion</option>
+                      {religionOptions.map(religion => (
+                        <option key={religion} value={religion}>{religion}</option>
+                      ))}
+                    </select>
+                    {validationErrors.religion && (
+                      <div className="validation-error">{validationErrors.religion}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <button type="submit" className="submit-button" disabled={loading}>
+              <div className="form-section">
+                <h3>Professional Background</h3>
+                <div className="section-status">
+                  <span className={`status-indicator ${getSectionStatus()['Professional Background'].completed ? 'completed' : 'incomplete'}`}>
+                    {getSectionStatus()['Professional Background'].completed ? '✓ Complete' : '⚠ Incomplete'}
+                  </span>
+                </div>
+                <div className="form-row">
+                  <div className="past-professions-container">
+                    <label className="field-label" title="List your previous job roles and professional experience" data-tooltip="List your previous job roles and professional experience">
+                      Past Professions (Previous roles and experience) <FaInfoCircle className="info-icon" title="List your previous job roles and professional experience" />
+                    </label>
+                    {profileForm.pastProfessions.map((profession, index) => (
+                      <div key={index} className="profession-input-row">
+                        <input
+                          type="text"
+                          value={profession}
+                          onChange={(e) => handlePastProfessionChange(index, e.target.value)}
+                          placeholder={`Past profession ${index + 1}`}
+                          className={validationErrors.pastProfessions ? 'error' : ''}
+                          title={`Enter your ${index + 1}${index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'} previous job role or position`}
+                          data-tooltip={`Enter your ${index + 1}${index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'} previous job role or position`}
+                        />
+                        {profileForm.pastProfessions.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removePastProfession(index)}
+                            className="remove-profession-btn"
+                            title={`Remove past profession ${index + 1}`}
+                            data-tooltip={`Remove past profession ${index + 1}`}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addPastProfession}
+                      className="add-profession-btn"
+                      title="Add another past profession to your profile"
+                      data-tooltip="Add another past profession to your profile"
+                    >
+                      + Add Another Profession
+                    </button>
+                    {validationErrors.pastProfessions && (
+                      <div className="validation-error">{validationErrors.pastProfessions}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {selectedRole === MENTEE && (
+                <div className="form-section">
+                  <h3>Learning Goals</h3>
+                  <div className="section-status">
+                    <span className={`status-indicator ${getSectionStatus()['Learning Goals'].completed ? 'completed' : 'incomplete'}`}>
+                      {getSectionStatus()['Learning Goals'].completed ? '✓ Complete' : '⚠ Incomplete'}
+                    </span>
+                  </div>
+                  <div className="form-row">
+                    <div className="looking-for-container">
+                      <label className="field-label" title="Select skills and knowledge areas you want to develop with a mentor" data-tooltip="Select skills and knowledge areas you want to develop with a mentor">
+                        What are you looking to learn? (Select at least one) <FaInfoCircle className="info-icon" title="Select skills and knowledge areas you want to develop with a mentor" />
+                      </label>
+                      <div className="looking-for-tags-container">
+                        {Object.entries(skillsByCategory).map(([category, skills]) => (
+                          <div key={category} className="skill-category-section">
+                            <h4 className="category-title">{category}</h4>
+                            <div className="tags-grid">
+                              {skills.map(skill => (
+                                <button
+                                  key={skill}
+                                  type="button"
+                                  className={`skill-tag-selectable ${profileForm.lookingFor.includes(skill) ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    if (profileForm.lookingFor.includes(skill)) {
+                                      handleArrayChange('lookingFor', profileForm.lookingFor.filter(s => s !== skill));
+                                    } else {
+                                      handleArrayChange('lookingFor', [...profileForm.lookingFor, skill]);
+                                    }
+                                  }}
+                                  tabIndex={0}
+                                  title={`Click to ${profileForm.lookingFor.includes(skill) ? 'remove' : 'add'} ${skill} to your learning goals`}
+                                  data-tooltip={`Click to ${profileForm.lookingFor.includes(skill) ? 'remove' : 'add'} ${skill} to your learning goals`}
+                                >
+                                  {skill}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {profileForm.lookingFor.length > 0 && (
+                        <div className="selected-looking-for-summary">
+                          <span className="summary-label">Selected: {profileForm.lookingFor.length}</span>
+                          <div className="selected-tags">
+                            {profileForm.lookingFor.map(skill => (
+                              <span key={skill} className="selected-tag">
+                                {skill}
+                                <button
+                                  type="button"
+                                  className="remove-tag"
+                                  onClick={() => handleArrayChange('lookingFor', profileForm.lookingFor.filter(s => s !== skill))}
+                                  title={`Remove ${skill} from learning goals`}
+                                  data-tooltip={`Remove ${skill} from learning goals`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {validationErrors.lookingFor && (
+                        <div className="validation-error">{validationErrors.lookingFor}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button type="submit" className="submit-button" disabled={loading} title="Submit your profile once all required fields are completed" data-tooltip="Submit your profile once all required fields are completed">
                 {loading ? 'Creating Profile...' : 'Create Profile'}
+              </button>
+              
+              {/* Form Status */}
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="form-status">
+                  <p className="status-error">
+                    ⚠️ {getMissingFields().length} required field{getMissingFields().length !== 1 ? 's' : ''} still need{getMissingFields().length !== 1 ? '' : 's'} to be completed
+                  </p>
+                </div>
+              )}
+              
+              {/* Debug button to test form submission */}
+              <button 
+                type="button" 
+                onClick={() => {
+                  console.log('Debug button clicked');
+                  console.log('Form data:', profileForm);
+                  console.log('Selected role:', selectedRole);
+                  console.log('Current user:', currentUser);
+                  if (currentUser) {
+                    handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+                  }
+                }}
+                style={{ marginTop: '10px', padding: '10px', backgroundColor: '#ff6b6b' }}
+                title="Debug: Test form submission without validation (for development purposes)"
+                data-tooltip="Debug: Test form submission without validation (for development purposes)"
+              >
+                Debug: Test Form Submission
               </button>
             </form>
           </div>
@@ -1028,14 +1762,14 @@ export default function MentorPage() {
                 <span className="profile-name">{currentUserProfile.name}</span>
               </div>
               <div className="profile-actions">
-                <button onClick={handleProfileEdit} className="profile-edit-btn">
+                <button onClick={handleProfileEdit} className="profile-edit-btn" title="Edit your profile information" data-tooltip="Edit your profile information">
                   <FaEdit /> Edit Profile
                 </button>
-                <button onClick={findMatches} className="find-matches-btn" disabled={loadingMatches}>
+                <button onClick={findMatches} className="find-matches-btn" disabled={loadingMatches} title="Find mentors/mentees that match your profile" data-tooltip="Find mentors/mentees that match your profile">
                   <FaUserFriends /> {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
                 </button>
                 {currentUserProfile.type === MENTOR && (
-                  <button onClick={() => setAvailabilityModalOpen(true)} className="availability-manage-btn">
+                  <button onClick={() => setAvailabilityModalOpen(true)} className="availability-manage-btn" title="Manage your availability schedule for mentee bookings" data-tooltip="Manage your availability schedule for mentee bookings">
                     <FaCog /> Manage Availability
                   </button>
                 )}
@@ -1112,11 +1846,13 @@ export default function MentorPage() {
                 </div>
                 <div className="match-actions">
                   <button className="action-button primary" onClick={() => handleBooking(match.user)}>
-                    <FaCalendarAlt /> Book Session
+                    <FaCalendarAlt />
+                    Book Session
                   </button>
                   {match.user.calCom && (
                     <button className="action-button secondary" onClick={() => handleCalCom(match.user)}>
-                      <FaVideo /> Schedule Call
+                      <FaVideo />
+                      Schedule Call
                     </button>
                   )}
                 </div>
@@ -1295,6 +2031,8 @@ export default function MentorPage() {
                 <button 
                   className="action-button primary"
                   onClick={() => handleBooking(mentor)}
+                  title="Book a mentoring session with this mentor"
+                  data-tooltip="Book a mentoring session with this mentor"
                 >
                   <FaCalendarAlt />
                   Book Session
@@ -1304,6 +2042,8 @@ export default function MentorPage() {
                   <button 
                     className="action-button secondary"
                     onClick={() => handleCalCom(mentor)}
+                    title="Schedule a video call using Cal.com integration"
+                    data-tooltip="Schedule a video call using Cal.com integration"
                   >
                     <FaVideo />
                     Schedule Call
@@ -1325,114 +2065,235 @@ export default function MentorPage() {
         )}
       </div>
 
-      {/* Profile Edit Modal */}
-      {isEditingProfile && (
-        <div className="profile-edit-modal">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Edit Profile</h3>
-              <button onClick={handleProfileCancel} className="close-button" title="Close modal">
-                <FaTimes />
-              </button>
-            </div>
+             {/* Profile Edit Modal */}
+       {isEditingProfile && (
+         <div className="profile-edit-modal">
+           <div className="modal-content">
+             <div className="modal-header">
+               <h3>Edit Profile</h3>
+               <div className="modal-header-actions">
+                 {/* Developer Mode Toggle */}
+                 <button 
+                   onClick={() => setIsDeveloperMode(!isDeveloperMode)}
+                   className={`dev-mode-toggle ${isDeveloperMode ? 'active' : ''}`}
+                   title="Toggle Developer Mode"
+                 >
+                   <span className="dev-icon">⚙️</span>
+                   Dev Mode
+                 </button>
+                 <button onClick={handleProfileCancel} className="close-button" title="Close modal">
+                   <FaTimes />
+                 </button>
+               </div>
+             </div>
             <form onSubmit={(e) => { e.preventDefault(); handleProfileSave(); }} className="profile-edit-form">
               {/* Similar form fields as registration but with current values */}
               <div className="form-section">
                 <h4>Personal Information</h4>
                 <div className="form-row">
-                  <input
-                    name="firstName"
-                    value={profileForm.firstName}
-                    onChange={handleFormChange}
-                    placeholder="First Name"
-                    required
-                  />
-                  <input
-                    name="lastName"
-                    value={profileForm.lastName}
-                    onChange={handleFormChange}
-                    placeholder="Last Name"
-                    required
-                  />
+                  <div className="input-group">
+                    <label className="field-label">
+                      First Name <FaInfoCircle className="info-icon" title="Enter your legal first name as it appears on official documents" />
+                    </label>
+                    <input
+                      name="firstName"
+                      value={profileForm.firstName}
+                      onChange={handleFormChange}
+                      placeholder="First Name"
+                      required
+                      className={validationErrors.firstName ? 'error' : ''}
+                      title="Enter your legal first name as it appears on official documents"
+                      data-tooltip="Enter your legal first name as it appears on official documents"
+                    />
+                    {validationErrors.firstName && (
+                      <div className="validation-error">{validationErrors.firstName}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Last Name <FaInfoCircle className="info-icon" title="Enter your legal last name as it appears on official documents" />
+                    </label>
+                    <input
+                      name="lastName"
+                      value={profileForm.lastName}
+                      onChange={handleFormChange}
+                      placeholder="Last Name"
+                      required
+                      className={validationErrors.lastName ? 'error' : ''}
+                      title="Enter your legal last name as it appears on official documents"
+                      data-tooltip="Enter your legal last name as it appears on official documents"
+                    />
+                    {validationErrors.lastName && (
+                      <div className="validation-error">{validationErrors.lastName}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="form-row">
-                  <input
-                    name="email"
-                    value={profileForm.email}
-                    onChange={handleFormChange}
-                    placeholder="Email Address"
-                    type="email"
-                    required
-                  />
-                  <input
-                    name="phone"
-                    value={profileForm.phone}
-                    onChange={handleFormChange}
-                    placeholder="Phone Number"
-                    type="tel"
-                    required
-                  />
+                  <div className="input-group">
+                    <label className="field-label">
+                      Email Address <FaInfoCircle className="info-icon" title="Enter your primary email address for communication and account verification" />
+                    </label>
+                    <input
+                      name="email"
+                      value={profileForm.email}
+                      onChange={handleFormChange}
+                      placeholder="Email Address"
+                      type="email"
+                      required
+                      className={validationErrors.email ? 'error' : ''}
+                      title="Enter your primary email address for communication and account verification"
+                      data-tooltip="Enter your primary email address for communication and account verification"
+                    />
+                    {validationErrors.email && (
+                      <div className="validation-error">{validationErrors.email}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Phone Number <FaInfoCircle className="info-icon" title="Enter your phone number including country code (e.g., +44 for UK)" />
+                    </label>
+                    <input
+                      name="phone"
+                      value={profileForm.phone}
+                      onChange={handleFormChange}
+                      placeholder="Phone Number"
+                      type="tel"
+                      required
+                      className={validationErrors.phone ? 'error' : ''}
+                      title="Enter your phone number including country code (e.g., +44 for UK)"
+                      data-tooltip="Enter your phone number including country code (e.g., +44 for UK)"
+                    />
+                    {validationErrors.phone && (
+                      <div className="validation-error">{validationErrors.phone}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="form-row">
-                  <input
-                    name="age"
-                    value={profileForm.age}
-                    onChange={handleFormChange}
-                    placeholder="Age"
-                    type="number"
-                    min={currentUserProfile?.type === MENTEE ? MENTEE_MIN_AGE : 18}
-                    max={currentUserProfile?.type === MENTEE ? MENTEE_MAX_AGE : 100}
-                    required
-                  />
-                  <select
-                    name="county"
-                    value={profileForm.county}
-                    onChange={handleFormChange}
-                    required
-                  >
-                    <option value="">Select County</option>
-                    {ukCounties.map(county => (
-                      <option key={county} value={county}>{county}</option>
-                    ))}
-                  </select>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Age <FaInfoCircle className="info-icon" title={`Enter your current age. Mentees must be ${MENTEE_MIN_AGE}-${MENTEE_MAX_AGE} years old, mentors must be 18+`} />
+                    </label>
+                    <input
+                      name="age"
+                      value={profileForm.age}
+                      onChange={handleFormChange}
+                      placeholder="Age"
+                      type="number"
+                      min={currentUserProfile?.type === MENTEE ? MENTEE_MIN_AGE : 18}
+                      max={currentUserProfile?.type === MENTEE ? MENTEE_MAX_AGE : 100}
+                      required
+                      className={validationErrors.age ? 'error' : ''}
+                      title={`Enter your current age. Mentees must be ${MENTEE_MIN_AGE}-${MENTEE_MAX_AGE} years old, mentors must be 18+`}
+                      data-tooltip={`Enter your current age. Mentees must be ${MENTEE_MIN_AGE}-${MENTEE_MAX_AGE} years old, mentors must be 18+`}
+                    />
+                    {validationErrors.age && (
+                      <div className="validation-error">{validationErrors.age}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      County <FaInfoCircle className="info-icon" title="Select your current county of residence for location-based matching" />
+                    </label>
+                    <select
+                      name="county"
+                      value={profileForm.county}
+                      onChange={handleFormChange}
+                      required
+                      className={validationErrors.county ? 'error' : ''}
+                      title="Select your current county of residence for location-based matching"
+                      data-tooltip="Select your current county of residence for location-based matching"
+                    >
+                      <option value="">Select County</option>
+                      {ukCounties.map(county => (
+                        <option key={county} value={county}>{county}</option>
+                      ))}
+                    </select>
+                    {validationErrors.county && (
+                      <div className="validation-error">{validationErrors.county}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="form-section">
                 <h4>Education & Career</h4>
                 <div className="form-row">
-                  <input
-                    name="degree"
-                    value={profileForm.degree}
-                    onChange={handleFormChange}
-                    placeholder="Degree/Qualification"
-                  />
-                  <select
-                    name="educationLevel"
-                    value={profileForm.educationLevel}
-                    onChange={handleFormChange}
-                    required
-                  >
-                    <option value="">Select Education Level</option>
-                    {ukEducationLevels.map(level => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Degree/Qualification <FaInfoCircle className="info-icon" title="Enter your specific degree, qualification, or certification details" />
+                    </label>
+                    <input
+                      name="degree"
+                      value={profileForm.degree}
+                      onChange={handleFormChange}
+                      placeholder="Degree/Qualification"
+                      className={validationErrors.degree ? 'error' : ''}
+                      title="Enter your specific degree, qualification, or certification details"
+                      data-tooltip="Enter your specific degree, qualification, or certification details"
+                    />
+                    {validationErrors.degree && (
+                      <div className="validation-error">{validationErrors.degree}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      Education Level <FaInfoCircle className="info-icon" title="Select your highest completed level of education" />
+                    </label>
+                    <select
+                      name="educationLevel"
+                      value={profileForm.educationLevel}
+                      onChange={handleFormChange}
+                      required
+                      className={validationErrors.educationLevel ? 'error' : ''}
+                      title="Select your highest completed level of education"
+                      data-tooltip="Select your highest completed level of education"
+                    >
+                      <option value="">Select Education Level</option>
+                      {ukEducationLevels.map(level => (
+                        <option key={level} value={level}>{level}</option>
+                      ))}
+                    </select>
+                    {validationErrors.educationLevel && (
+                      <div className="validation-error">{validationErrors.educationLevel}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="form-row">
-                  <input
-                    name="profession"
-                    value={profileForm.profession}
-                    onChange={handleFormChange}
-                    placeholder="Current Profession"
-                    required
-                  />
-                  <input
-                    name="linkedin"
-                    value={profileForm.linkedin}
-                    onChange={handleFormChange}
-                    placeholder="LinkedIn Profile (optional)"
-                  />
+                  <div className="input-group">
+                    <label className="field-label">
+                      Current Profession <FaInfoCircle className="info-icon" title="Enter your current job title or professional role" />
+                    </label>
+                    <input
+                      name="profession"
+                      value={profileForm.profession}
+                      onChange={handleFormChange}
+                      placeholder="Current Profession"
+                      required
+                      className={validationErrors.profession ? 'error' : ''}
+                      title="Enter your current job title or professional role"
+                      data-tooltip="Enter your current job title or professional role"
+                    />
+                    {validationErrors.profession && (
+                      <div className="validation-error">{validationErrors.profession}</div>
+                    )}
+                  </div>
+                  <div className="input-group">
+                    <label className="field-label">
+                      LinkedIn Profile <FaInfoCircle className="info-icon" title="Enter your LinkedIn profile URL to showcase your professional background" />
+                    </label>
+                    <input
+                      name="linkedin"
+                      value={profileForm.linkedin}
+                      onChange={handleFormChange}
+                      placeholder="LinkedIn Profile"
+                      className={validationErrors.linkedin ? 'error' : ''}
+                      title="Enter your LinkedIn profile URL to showcase your professional background"
+                      data-tooltip="Enter your LinkedIn profile URL to showcase your professional background"
+                    />
+                    {validationErrors.linkedin && (
+                      <div className="validation-error">{validationErrors.linkedin}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1440,7 +2301,9 @@ export default function MentorPage() {
                 <h4>Skills & Interests</h4>
                 <div className="form-row">
                   <div className="skills-selection-container">
-                    <label>Skills</label>
+                    <label className="field-label" title="Select skills you can teach (mentors) or want to learn (mentees)" data-tooltip="Select skills you can teach (mentors) or want to learn (mentees)">
+                      Skills <FaInfoCircle className="info-icon" title="Select skills you can teach (mentors) or want to learn (mentees)" />
+                    </label>
                     <div className="skills-tags-container">
                       {Object.entries(skillsByCategory).map(([category, skills]) => (
                         <div key={category} className="skill-category-section">
@@ -1459,6 +2322,8 @@ export default function MentorPage() {
                                   }
                                 }}
                                 tabIndex={0}
+                                title={`Click to ${profileForm.skills.includes(skill) ? 'remove' : 'add'} ${skill}`}
+                                data-tooltip={`Click to ${profileForm.skills.includes(skill) ? 'remove' : 'add'} ${skill}`}
                               >
                                 {skill}
                               </button>
@@ -1471,7 +2336,9 @@ export default function MentorPage() {
                 </div>
                 <div className="form-row">
                   <div className="industries-selection-container">
-                    <label>Industries</label>
+                    <label className="field-label" title="Select industries you have experience in (mentors) or are interested in (mentees)" data-tooltip="Select industries you have experience in (mentors) or are interested in (mentees)">
+                      Industries <FaInfoCircle className="info-icon" title="Select industries you have experience in (mentors) or are interested in (mentees)" />
+                    </label>
                     <div className="industries-tags-container">
                       <div className="tags-grid">
                         {industriesList.map(industry => (
@@ -1487,6 +2354,8 @@ export default function MentorPage() {
                               }
                             }}
                             tabIndex={0}
+                            title={`Click to ${profileForm.industries.includes(industry) ? 'remove' : 'add'} ${industry}`}
+                            data-tooltip={`Click to ${profileForm.industries.includes(industry) ? 'remove' : 'add'} ${industry}`}
                           >
                             {industry}
                           </button>
@@ -1497,14 +2366,43 @@ export default function MentorPage() {
                 </div>
               </div>
 
-              <div className="form-actions">
-                <button type="button" onClick={handleProfileCancel} className="cancel-button">
-                  Cancel
-                </button>
-                <button type="submit" className="save-button" disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
+                             <div className="form-actions">
+                  <button type="button" onClick={handleProfileCancel} className="cancel-button" title="Cancel editing and revert to original profile data" data-tooltip="Cancel editing and revert to original profile data">
+                    Cancel
+                  </button>
+                  <button type="submit" className="save-button" disabled={loading} title="Save your profile changes" data-tooltip="Save your profile changes">
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+
+                {/* Developer Mode Section */}
+                {isDeveloperMode && (
+                  <div className="developer-mode-section">
+                    <div className="dev-section-header">
+                      <h4>🚀 Developer Mode</h4>
+                      <p className="dev-warning">⚠️ Advanced features - use with caution</p>
+                    </div>
+                    
+                    <div className="dev-actions">
+                      <button 
+                        type="button" 
+                        onClick={handleDeleteProfile}
+                        className="delete-profile-button"
+                        disabled={loading}
+                        title="Permanently delete your mentor profile"
+                        data-tooltip="Permanently delete your mentor profile"
+                      >
+                        🗑️ Delete Profile
+                      </button>
+                      
+                      <div className="dev-info">
+                        <p><strong>Profile ID:</strong> {currentUserProfile?.uid}</p>
+                        <p><strong>Profile Type:</strong> {currentUserProfile?.isMentor ? 'Mentor' : 'Mentee'}</p>
+                        <p><strong>Created:</strong> {currentUserProfile?.userRef ? 'Yes' : 'No'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
             </form>
           </div>
         </div>
@@ -1700,10 +2598,9 @@ export default function MentorPage() {
               <div className="profile-actions">
                 <button 
                   className="action-button primary"
-                  onClick={() => {
-                    setProfileModalOpen(false);
-                    handleBooking(selectedProfileMentor);
-                  }}
+                  onClick={() => handleBooking(selectedProfileMentor)}
+                  title="Book a mentoring session with this mentor"
+                  data-tooltip="Book a mentoring session with this mentor"
                 >
                   <FaCalendarAlt />
                   Book Session
@@ -1712,10 +2609,9 @@ export default function MentorPage() {
                 {selectedProfileMentor.calCom && (
                   <button 
                     className="action-button secondary"
-                    onClick={() => {
-                      setProfileModalOpen(false);
-                      handleCalCom(selectedProfileMentor);
-                    }}
+                    onClick={() => handleCalCom(selectedProfileMentor)}
+                    title="Schedule a video call using Cal.com integration"
+                    data-tooltip="Schedule a video call using Cal.com integration"
                   >
                     <FaVideo />
                     Schedule Call
@@ -1739,6 +2635,56 @@ export default function MentorPage() {
             </div>
             <div className="availability-modal-content">
               <MentorAvailability />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmModal && (
+        <div className="delete-confirm-modal-overlay">
+          <div className="delete-confirm-modal">
+            <div className="delete-confirm-modal-header">
+              <h3>⚠️ Delete Profile Confirmation</h3>
+              <button 
+                onClick={() => setShowDeleteConfirmModal(false)} 
+                className="close-button" 
+                title="Cancel deletion"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="delete-confirm-modal-content">
+              <div className="delete-warning">
+                <p><strong>Are you absolutely sure you want to delete your mentor profile?</strong></p>
+                <p>This action <strong>cannot be undone</strong> and will permanently remove:</p>
+                <ul>
+                  <li>All your profile data</li>
+                  <li>Your mentor/mentee matches</li>
+                  <li>All your session bookings</li>
+                  <li>Your availability settings</li>
+                </ul>
+                <p className="delete-note">This is a permanent action. Please make sure you have backed up any important information.</p>
+              </div>
+              
+              <div className="delete-confirm-actions">
+                <button 
+                  type="button" 
+                  onClick={() => setShowDeleteConfirmModal(false)}
+                  className="cancel-delete-button"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  onClick={confirmDeleteProfile}
+                  className="confirm-delete-button"
+                  disabled={loading}
+                >
+                  {loading ? 'Deleting...' : 'Yes, Delete My Profile'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
