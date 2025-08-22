@@ -2,7 +2,8 @@
 
 .mentor-page {
   min-height: 100vh;
-  background-color: var(--gray-50);
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  padding-top: 80px; /* Add top padding to account for fixed navbar */
 }
 
 /* Loading State */
@@ -13,6 +14,7 @@
   justify-content: center;
   min-height: 60vh;
   text-align: center;
+  padding-top: 80px; /* Add top padding for navbar spacing */
 }
 
 .loading-spinner {
@@ -33,7 +35,7 @@
 /* Error State */
 .error-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px 60px 20px; /* Increased top padding for navbar spacing */
   color: var(--gray-600);
 }
 
@@ -52,8 +54,9 @@
 .mentor-header {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: var(--white);
-  padding: 60px 0;
+  padding: 80px 0 60px 0; /* Increased top padding for better spacing */
   text-align: center;
+  margin-bottom: 40px; /* Add bottom margin for separation */
 }
 
 .mentor-header-content {
@@ -172,7 +175,7 @@
 .mentor-role-selection {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 80px 20px 40px 20px; /* Increased top padding for navbar spacing */
 }
 
 .role-cards {
@@ -279,7 +282,7 @@
 .mentor-registration {
   max-width: 900px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 80px 20px 40px 20px; /* Increased top padding for navbar spacing */
 }
 
 .registration-header {
@@ -294,7 +297,8 @@
   border: 1px solid var(--card-border);
 }
 
-.back-button {
+/* General back button styles for other components */
+.mentor-page .back-button:not(.back-button-container .back-button) {
   background: var(--button-cancel-bg);
   color: var(--button-cancel-text);
   border: 1px solid var(--button-cancel-border);
@@ -310,7 +314,7 @@
   min-height: 44px;
 }
 
-.back-button:hover {
+.mentor-page .back-button:not(.back-button-container .back-button):hover {
   background: var(--button-cancel-hover-bg);
   border-color: var(--button-cancel-hover-border);
   color: var(--button-cancel-hover-text);
@@ -782,7 +786,7 @@
     font-size: 1.875rem;
   }
   
-  .back-button {
+  .mentor-registration .back-button {
     align-self: flex-start;
   }
   
@@ -822,6 +826,7 @@
   background: var(--white);
   padding: 60px 0;
   border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 40px; /* Add bottom margin for separation */
 }
 
 .matches-header {
@@ -1536,8 +1541,7 @@
 /* Search Container */
 .search-container {
   max-width: 600px;
-  margin: 0 auto;
-  margin-bottom: 20px;
+  margin: 0 auto 40px auto; /* Increased bottom margin for better separation */
 }
 
 .search-bar {
@@ -1643,8 +1647,9 @@
 /* Filters Section */
 .filters-section {
   background: var(--white);
-  padding: 24px 0;
+  padding: 32px 0; /* Increased padding for better spacing */
   border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 40px; /* Add bottom margin for separation */
 }
 
 .filters-container {
@@ -1704,7 +1709,7 @@
 .mentor-results {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 60px 20px; /* Increased padding for better spacing */
 }
 
 .results-header {
@@ -2122,6 +2127,15 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .mentor-page {
+    padding-top: 70px; /* Slightly reduce top padding on mobile */
+  }
+  
+  .mentor-header {
+    padding: 60px 0 40px 0; /* Reduce padding on mobile */
+    margin-bottom: 30px;
+  }
+  
   .mentor-header h1 {
     font-size: 2rem;
   }
@@ -2182,6 +2196,14 @@
 
   .role-card {
     padding: 32px 24px;
+  }
+  
+  .mentor-role-selection {
+    padding: 60px 20px 30px 20px; /* Reduce padding on mobile */
+  }
+  
+  .mentor-registration {
+    padding: 60px 20px 30px 20px; /* Reduce padding on mobile */
   }
   
   .role-card svg {
@@ -2281,6 +2303,10 @@
 }
 
 @media (max-width: 480px) {
+  .mentor-page {
+    padding-top: 60px; /* Further reduce top padding on small mobile */
+  }
+  
   .mentor-header {
     padding: 40px 0;
   }
@@ -2312,6 +2338,14 @@
   
   .role-card {
     padding: 24px 20px;
+  }
+  
+  .mentor-role-selection {
+    padding: 50px 20px 20px 20px; /* Further reduce padding on small mobile */
+  }
+  
+  .mentor-registration {
+    padding: 50px 20px 20px 20px; /* Further reduce padding on small mobile */
   }
   
   .role-card svg {

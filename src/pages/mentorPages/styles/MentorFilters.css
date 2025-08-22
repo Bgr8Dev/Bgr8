@@ -1,0 +1,66 @@
+/* Filters Section */
+.filters-section {
+  background: var(--white);
+  padding: 24px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.filters-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  background: var(--gray-50);
+  border: 2px solid transparent;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--gray-600);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-pill:hover {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.filter-pill.active {
+  background: var(--mentor);
+  color: var(--white);
+  border-color: var(--mentor);
+}
+
+.filter-pill.active .filter-count {
+  background: var(--white);
+  color: var(--mentor);
+}
+
+.filter-count {
+  background: var(--gray-200);
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filters-container {
+    justify-content: center;
+  }
+}

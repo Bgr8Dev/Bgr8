@@ -11,7 +11,7 @@ import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
 import FeedbackPage from '../pages/utilPages/FeedbackPage';
 import AdminPortal from '../pages/AdminPortal';
-import MentorPage from '../pages/MentorPage';
+import MentorPage from '../pages/mentorPages/MentorPage';
 import { SessionsPage } from '../pages/SessionsPage';
 import React from 'react';
 import { UserProfile } from '../utils/userProfile';

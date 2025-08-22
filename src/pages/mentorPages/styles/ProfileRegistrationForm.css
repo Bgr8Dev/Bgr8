@@ -1,0 +1,607 @@
+/* Profile Registration Form */
+.mentor-registration {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.registration-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Fixed Back Button Container */
+.back-button-container {
+  position: sticky;
+  top: 80px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 16px 0;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.back-button {
+  background: var(--white);
+  border: 2px solid var(--accent);
+  padding: 12px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(59, 167, 242, 0.15);
+  min-height: 44px;
+}
+
+.back-button:hover {
+  background: var(--accent);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 167, 242, 0.3);
+}
+
+.registration-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 20px 0 16px;
+  line-height: 1.2;
+}
+
+.registration-header p {
+  font-size: 1.125rem;
+  color: var(--gray-600);
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form Progress */
+.form-progress {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--mentor) 0%, var(--mentee) 100%);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 14px;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+/* Section Status */
+.section-status {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.status-dot.completed {
+  background: var(--success);
+  box-shadow: 0 0 0 2px var(--success-light);
+}
+
+.status-dot.incomplete {
+  background: var(--gray-400);
+  box-shadow: 0 0 0 2px var(--gray-200);
+}
+
+.status-count {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+/* Registration Form */
+.registration-form {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+  position: relative;
+}
+
+.registration-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--mentor) 0%, var(--mentee) 100%);
+  border-radius: 24px 24px 0 0;
+}
+
+.form-section {
+  margin-bottom: 40px;
+  padding: 32px;
+  background: var(--gray-50);
+  border-radius: 16px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.form-section:hover {
+  border-color: var(--mentor-light);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.form-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--gray-200);
+  position: relative;
+}
+
+.form-section h3::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--mentor);
+  border-radius: 1px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.registration-form input,
+.registration-form select {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--white);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.registration-form input:focus,
+.registration-form select:focus {
+  border-color: var(--mentor);
+  box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.1);
+  transform: translateY(-1px);
+}
+
+.registration-form input::placeholder {
+  color: var(--gray-500);
+  font-weight: 400;
+}
+
+.registration-form select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linecap='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 16px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 48px;
+}
+
+.registration-form select:hover {
+  border-color: var(--gray-300);
+}
+
+/* Skills Selection */
+.skills-selection-container,
+.hobbies-selection-container {
+  margin-bottom: 32px;
+}
+
+.skills-selection-container .field-label,
+.hobbies-selection-container .field-label {
+  display: block;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.category-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin: 24px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.skill-tag-selectable,
+.hobby-tag-selectable {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  color: var(--gray-700);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 4px;
+  display: inline-block;
+}
+
+.skill-tag-selectable:hover:not(.selected),
+.hobby-tag-selectable:hover:not(.selected) {
+  border-color: var(--mentor);
+  background: var(--mentor-light);
+  color: var(--mentor-dark);
+  transform: translateY(-1px);
+}
+
+.skill-tag-selectable:focus,
+.hobby-tag-selectable:focus {
+  outline: none;
+  border-color: var(--mentor);
+  box-shadow: 0 0 0 3px rgba(224, 106, 92, 0.1);
+}
+
+.skill-tag-selectable.selected,
+.hobby-tag-selectable.selected {
+  background: var(--mentor);
+  color: var(--white);
+  border-color: var(--mentor);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.skill-tag-selectable.selected:hover,
+.hobby-tag-selectable.selected:hover {
+  background: var(--mentor-dark);
+  border-color: var(--mentor-dark);
+}
+
+.tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.selected-skills-summary,
+.selected-hobbies-summary {
+  background: var(--success-light);
+  border: 1px solid var(--success);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.summary-label {
+  display: block;
+  font-weight: 600;
+  color: var(--success-dark);
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-tag {
+  background: var(--success);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remove-tag {
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.remove-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Past Professions */
+.past-professions-container {
+  margin-top: 24px;
+}
+
+.profession-input-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.profession-input-row input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.profession-input-row input:focus {
+  border-color: var(--mentor);
+  box-shadow: 0 0 0 3px rgba(224, 106, 92, 0.1);
+}
+
+.remove-profession-btn {
+  background: var(--error);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.remove-profession-btn:hover {
+  background: var(--error-dark);
+  transform: translateY(-1px);
+}
+
+.add-profession-btn {
+  background: var(--mentor);
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.add-profession-btn:hover {
+  background: var(--mentor-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Looking For Container */
+.looking-for-container {
+  margin-top: 24px;
+}
+
+.looking-for-tags-container {
+  margin-bottom: 16px;
+}
+
+.selected-looking-for-summary {
+  background: var(--info-light);
+  border: 1px solid var(--info);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.selected-looking-for-summary .summary-label {
+  color: var(--info-dark);
+}
+
+.selected-looking-for-summary .selected-tag {
+  background: var(--info);
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--mentor) 0%, var(--mentee) 100%);
+  color: var(--white);
+  border: none;
+  padding: 20px 32px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 32px;
+}
+
+.submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.submit-button:hover::before {
+  left: 100%;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-button:disabled::after {
+  content: 'Please complete all required fields';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+/* Validation */
+.registration-form input:invalid,
+.registration-form select:invalid {
+  border-color: var(--error);
+}
+
+.registration-form input:valid,
+.registration-form select:valid {
+  border-color: var(--success);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mentor-registration {
+    padding: 20px;
+  }
+
+  .back-button-container {
+    top: 70px;
+    padding: 12px 0;
+    margin-bottom: 20px;
+  }
+
+  .back-button {
+    padding: 10px 16px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .registration-form {
+    padding: 24px;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .registration-header {
+    margin-bottom: 32px;
+  }
+
+  .registration-header h2 {
+    font-size: 2rem;
+  }
+
+  .submit-button {
+    padding: 16px 24px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-button-container {
+    top: 60px;
+    padding: 10px 0;
+    margin-bottom: 16px;
+  }
+
+  .back-button {
+    padding: 8px 14px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  .registration-form {
+    padding: 20px;
+  }
+
+  .form-section {
+    padding: 16px;
+  }
+
+  .registration-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .submit-button {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}
