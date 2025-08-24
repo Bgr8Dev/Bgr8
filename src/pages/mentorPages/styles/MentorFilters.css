@@ -1,11 +1,11 @@
 /* Filters Section */
-.filters-section {
+.mf-filters-section {
   background: var(--white);
   padding: 24px 0;
   border-bottom: 1px solid var(--gray-200);
 }
 
-.filters-container {
+.mf-filters-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
@@ -14,7 +14,7 @@
   flex-wrap: wrap;
 }
 
-.filter-pill {
+.mf-filter-pill {
   background: var(--gray-50);
   border: 2px solid transparent;
   padding: 8px 16px;
@@ -30,23 +30,23 @@
   gap: 8px;
 }
 
-.filter-pill:hover {
+.mf-filter-pill:hover {
   background: var(--gray-200);
   color: var(--gray-700);
 }
 
-.filter-pill.active {
+.mf-filter-pill.active {
   background: var(--mentor);
   color: var(--white);
   border-color: var(--mentor);
 }
 
-.filter-pill.active .filter-count {
+.mf-filter-pill.active .mf-filter-count {
   background: var(--white);
   color: var(--mentor);
 }
 
-.filter-count {
+.mf-filter-count {
   background: var(--gray-200);
   color: var(--gray-700);
   font-size: 12px;
@@ -60,7 +60,7 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .filters-container {
+  .mf-filters-container {
     justify-content: center;
   }
 }

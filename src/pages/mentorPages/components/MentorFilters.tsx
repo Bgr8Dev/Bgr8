@@ -16,23 +16,23 @@ export const MentorFilters: React.FC<MentorFiltersProps> = ({
   totalMentors
 }) => {
   return (
-    <div className="filters-section">
-      <div className="filters-container">
+    <div className="mf-filters-section">
+      <div className="mf-filters-container">
         <button 
-          className={`filter-pill ${!selectedFilter ? 'active' : ''}`}
+          className={`mf-filter-pill ${!selectedFilter ? 'active' : ''}`}
           onClick={() => onFilterChange('')}
         >
           All mentors
-          <span className="filter-count">{totalMentors}</span>
+          <span className="mf-filter-count">{totalMentors}</span>
         </button>
         {filterTypes.map(type => (
           <button
             key={type}
-            className={`filter-pill ${selectedFilter === type ? 'active' : ''}`}
+            className={`mf-filter-pill ${selectedFilter === type ? 'active' : ''}`}
             onClick={() => onFilterChange(type)}
           >
             {type}
-            <span className="filter-count">{getFilterCount(type)}</span>
+            <span className="mf-filter-count">{getFilterCount(type)}</span>
           </button>
         ))}
       </div>
