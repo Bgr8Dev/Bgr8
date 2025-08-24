@@ -1,16 +1,16 @@
 /* Matches Section */
-.matches-section {
+.ms-matches-section {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
 }
 
-.matches-header {
+.ms-matches-header {
   text-align: center;
   margin-bottom: 40px;
 }
 
-.matches-header-content h2 {
+.ms-matches-header-content h2 {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--text);
@@ -18,7 +18,7 @@
   line-height: 1.2;
 }
 
-.matches-header-content p {
+.ms-matches-header-content p {
   font-size: 1.125rem;
   color: var(--gray-600);
   margin: 0;
@@ -28,7 +28,7 @@
 }
 
 /* Matches Summary */
-.matches-summary {
+.ms-matches-summary {
   background: var(--white);
   border-radius: 16px;
   padding: 32px;
@@ -37,13 +37,13 @@
   border: 1px solid var(--gray-200);
 }
 
-.summary-stats {
+.ms-summary-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 24px;
 }
 
-.stat-item {
+.ms-stat-item {
   text-align: center;
   padding: 20px;
   background: var(--gray-50);
@@ -52,14 +52,14 @@
   transition: all 0.3s ease;
 }
 
-.stat-item:hover {
+.ms-stat-item:hover {
   border-color: var(--mentor);
   background: var(--white);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
-.stat-number {
+.ms-stat-number {
   display: block;
   font-size: 2.5rem;
   font-weight: 800;
@@ -68,7 +68,7 @@
   line-height: 1;
 }
 
-.stat-label {
+.ms-stat-label {
   font-size: 14px;
   color: var(--gray-600);
   font-weight: 500;
@@ -77,13 +77,13 @@
 }
 
 /* Matches Grid */
-.matches-grid {
+.ms-matches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 24px;
 }
 
-.match-card {
+.ms-match-card {
   background: var(--white);
   border-radius: 16px;
   padding: 24px;
@@ -93,20 +93,20 @@
   cursor: pointer;
 }
 
-.match-card:hover {
+.ms-match-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
   border-color: var(--mentor);
 }
 
-.match-header {
+.ms-match-header {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.match-avatar {
+.ms-match-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -114,17 +114,17 @@
   flex-shrink: 0;
 }
 
-.match-avatar img {
+.ms-match-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.match-info {
+.ms-match-info {
   flex: 1;
 }
 
-.match-info h3 {
+.ms-match-info h3 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--mentor-dark);
@@ -132,13 +132,13 @@
   line-height: 1.2;
 }
 
-.match-info p {
+.ms-match-info p {
   color: var(--gray-600);
   font-size: 1rem;
   margin: 0;
 }
 
-.match-score {
+.ms-match-score {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -148,12 +148,12 @@
   text-align: center;
 }
 
-.match-score svg {
+.ms-match-score svg {
   font-size: 24px;
   margin-bottom: 4px;
 }
 
-.score-label {
+.ms-score-label {
   font-size: 12px;
   font-weight: 500;
   opacity: 0.8;
@@ -162,24 +162,24 @@
 }
 
 /* Match Reasons */
-.match-reasons {
+.ms-match-reasons {
   margin-bottom: 20px;
 }
 
-.match-reasons h4 {
+.ms-match-reasons h4 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 12px;
 }
 
-.match-reasons ul {
+.ms-match-reasons ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.match-reasons li {
+.ms-match-reasons li {
   padding: 8px 0;
   color: var(--gray-700);
   font-size: 14px;
@@ -188,7 +188,7 @@
   padding-left: 20px;
 }
 
-.match-reasons li::before {
+.ms-match-reasons li::before {
   content: '✓';
   position: absolute;
   left: 0;
@@ -197,23 +197,23 @@
   font-size: 16px;
 }
 
-.match-reasons .more-reasons {
+.ms-match-reasons .ms-more-reasons {
   color: var(--gray-500);
   font-style: italic;
   font-weight: 500;
 }
 
-.match-reasons .more-reasons::before {
+.ms-match-reasons .ms-more-reasons::before {
   content: '+';
   color: var(--mentor);
 }
 
 /* Match Details */
-.match-details {
+.ms-match-details {
   margin-bottom: 20px;
 }
 
-.detail-item {
+.ms-detail-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -222,20 +222,20 @@
   font-size: 14px;
 }
 
-.detail-item svg {
+.ms-detail-item svg {
   color: var(--gray-400);
   width: 16px;
   flex-shrink: 0;
 }
 
 /* Match Actions */
-.match-actions {
+.ms-match-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.action-button {
+.ms-action-button {
   flex: 1;
   min-width: 120px;
   padding: 12px 20px;
@@ -251,37 +251,37 @@
   gap: 8px;
 }
 
-.action-button.primary {
+.ms-action-button.primary {
   background: var(--mentor);
   color: var(--white);
   border: 1px solid var(--mentor);
 }
 
-.action-button.primary:hover {
+.ms-action-button.primary:hover {
   background: var(--mentor-dark);
   transform: translateY(-1px);
   border-color: var(--mentor-dark);
 }
 
-.action-button.secondary {
+.ms-action-button.secondary {
   background: var(--mentee);
   color: var(--white);
   border: 1px solid var(--mentee);
 }
 
-.action-button.secondary:hover {
+.ms-action-button.secondary:hover {
   background: var(--mentee-dark);
   transform: translateY(-1px);
   border-color: var(--mentee-dark);
 }
 
-.action-button.tertiary {
+.ms-action-button.tertiary {
   background: var(--info);
   color: var(--white);
   border: 1px solid var(--info);
 }
 
-.action-button.tertiary:hover {
+.ms-action-button.tertiary:hover {
   background: var(--info-dark);
   transform: translateY(-1px);
   border-color: var(--info-dark);
@@ -289,53 +289,53 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .matches-section {
+  .ms-matches-section {
     padding: 20px;
   }
 
-  .matches-header-content h2 {
+  .ms-matches-header-content h2 {
     font-size: 2rem;
   }
 
-  .summary-stats {
+  .ms-summary-stats {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .matches-grid {
+  .ms-matches-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .match-card {
+  .ms-match-card {
     padding: 20px;
   }
 
-  .match-header {
+  .ms-match-header {
     flex-direction: column;
     text-align: center;
   }
 
-  .match-score {
+  .ms-match-score {
     margin-top: 16px;
   }
 
-  .action-button {
+  .ms-action-button {
     min-width: auto;
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .matches-header-content h2 {
+  .ms-matches-header-content h2 {
     font-size: 1.75rem;
   }
 
-  .stat-number {
+  .ms-stat-number {
     font-size: 2rem;
   }
 
-  .match-card {
+  .ms-match-card {
     padding: 16px;
   }
 }
