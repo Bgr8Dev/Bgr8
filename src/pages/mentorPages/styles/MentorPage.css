@@ -35,11 +35,13 @@ html, body {
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   padding: 24px;
   overflow-y: auto;
+  overflow-x: hidden;
   height: calc(100vh - 60px);
   position: sticky;
   top: 60px;
   box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
   z-index: 10; /* Ensure sidebar is above main content */
+  box-sizing: border-box;
 }
 
 .mentor-main-content {
@@ -57,11 +59,14 @@ html, body {
   padding: 0;
   position: relative;
   z-index: 5;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .mentor-sidebar .search-bar {
   width: 100%;
-  max-width: none;
+  max-width: 100%;
   margin: 0;
   background: var(--white);
   border: 2px solid var(--gray-200);
@@ -71,6 +76,7 @@ html, body {
   transition: all 0.2s ease;
   position: relative;
   z-index: 5;
+  box-sizing: border-box;
 }
 
 .mentor-sidebar .search-bar:hover {
@@ -698,10 +704,51 @@ html, body {
 @media (max-width: 768px) {
   .mentor-sidebar {
     padding: 16px;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   
   .mentor-main-content {
     padding: 16px;
+  }
+  
+  .mentor-sidebar .search-container {
+    margin: 0 0 20px 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .mentor-sidebar .search-bar {
+    width: 100%;
+    max-width: 100%;
+    padding: 14px 16px;
+    box-sizing: border-box;
+  }
+  
+  .mentor-sidebar .search-bar input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .mentor-sidebar .filters-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .mentor-sidebar .filter-pill {
+    width: auto;
+    min-width: 120px;
+    max-width: calc(50% - 4px);
+    flex-shrink: 0;
   }
   
   .mentor-sidebar .ms-matches-grid {
@@ -3303,9 +3350,6 @@ html, body {
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .mentor-page {
-    padding-top: 70px;
-  }
   
   .mentor-header {
     padding: 60px 0 40px 0;
@@ -3393,6 +3437,54 @@ html, body {
   
   .mentor-header h1 {
     font-size: 1.75rem;
+  }
+  
+  .mentor-sidebar {
+    padding: 12px;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  .mentor-sidebar .search-container {
+    margin: 0 0 16px 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .mentor-sidebar .search-bar {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 14px;
+    box-sizing: border-box;
+  }
+  
+  .mentor-sidebar .search-bar input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+  
+  .mentor-sidebar .filters-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .mentor-sidebar .filter-pill {
+    width: auto;
+    min-width: 100px;
+    max-width: calc(50% - 3px);
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 6px 12px;
   }
   
   .filters-container {
