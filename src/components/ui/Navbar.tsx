@@ -5,7 +5,7 @@ import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/Navbar.css';
-import logo from '../../assets/bgr8-logo-transparent.png';
+import logo from '../../assets/bgr8_logo.png';
 
 export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
