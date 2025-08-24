@@ -39,9 +39,25 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       return mentor.email.split('@')[0];
     }
     // Final fallback
-    return 'Mentor';
+    return currentUserRole === 'mentee' ? 'Mentor' : 'Mentee';
   };
 
+  // Handle card click to show profile modal
+  const handleCardClick = () => {
+    onProfileClick(mentor);
+  };
+
+  // Handle booking button click
+  const handleBookingClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBooking(mentor);
+  };
+
+  // Handle Cal.com button click
+  const handleCalComClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCalCom(mentor);
+  };
 
 
   const getProfileImageSrc = () => {
@@ -57,7 +73,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   return (
     <div 
       className="mc-mentor-card"
-      onClick={() => onProfileClick(mentor)}
+      onClick={handleCardClick}
     >
       <div className="mc-mentor-card-header">
         <div className="mc-mentor-avatar">
@@ -166,7 +182,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       <div className="mc-mentor-actions" onClick={(e) => e.stopPropagation()}>
         <button 
           className="mc-action-button primary"
-          onClick={() => onBooking(mentor)}
+          onClick={handleBookingClick}
           title={
             currentUserRole === 'mentee' 
               ? "Book a mentoring session with this mentor"
@@ -185,7 +201,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         {mentor.calCom && (
           <button 
             className="mc-action-button secondary"
-            onClick={() => onCalCom(mentor)}
+            onClick={handleCalComClick}
             title={
               currentUserRole === 'mentee'
                 ? "Schedule a video call using Cal.com integration"

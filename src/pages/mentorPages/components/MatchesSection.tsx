@@ -135,12 +135,18 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
               <button 
                 className="ms-action-button primary"
                 onClick={() => onProfileClick(match.user)}
+                title="View full profile details"
               >
                 View Full Profile
               </button>
               <button 
                 className="ms-action-button secondary"
                 onClick={() => onBooking(match.user)}
+                title={
+                  currentUserProfile?.type === 'mentee' 
+                    ? 'Book a mentoring session' 
+                    : 'Connect with this mentee'
+                }
               >
                 {currentUserProfile?.type === 'mentee' ? 'Book Session' : 'Connect'}
               </button>
@@ -148,6 +154,11 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
                 <button 
                   className="ms-action-button tertiary"
                   onClick={() => onCalCom(match.user)}
+                  title={
+                    currentUserProfile?.type === 'mentee'
+                      ? 'Schedule a video call'
+                      : 'Schedule a video call with this mentee'
+                  }
                 >
                   {currentUserProfile?.type === 'mentee' ? 'Schedule Call' : 'Video Call'}
                 </button>

@@ -14,6 +14,9 @@ import {
   ProfileFormData,
   MentorMenteeProfile
 } from './types';
+import { ProfileViewModal } from './components/ProfileViewModal';
+import { default as BookingModal } from '../../components/widgets/MentorAlgorithm/booking/BookingModal';
+import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import Navbar from '../../components/ui/Navbar';
 import './styles/MentorPage.css';
 
@@ -21,6 +24,12 @@ export default function MentorPage() {
   const { currentUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
+  
+  // Modal state management
+  const [showProfileViewModal, setShowProfileViewModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showCalComModal, setShowCalComModal] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<MentorMenteeProfile | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [mentorsPerPage] = useState(12);
@@ -149,19 +158,23 @@ export default function MentorPage() {
     console.log('Availability management not yet implemented');
   };
 
+  const handleProfileCardClick = (mentor: MentorMenteeProfile) => {
+    setSelectedMentor(mentor);
+    setShowProfileViewModal(true);
+    fetchEnhancedAvailability(mentor.uid);
+    fetchMentorBookings(mentor.uid);
+  };
+
   const handleBooking = (mentor: MentorMenteeProfile) => {
-    // TODO: Implement booking functionality
-    console.log('Booking not yet implemented for:', mentor.name);
+    setSelectedMentor(mentor);
+    setShowBookingModal(true);
+    console.log('Booking not yet implemented for:', mentor.firstName);
   };
 
   const handleCalCom = (mentor: MentorMenteeProfile) => {
-    // TODO: Implement Cal.com integration
-    console.log('Cal.com integration not yet implemented for:', mentor.name);
-  };
-
-  const handleProfileCardClick = (mentor: MentorMenteeProfile) => {
-    fetchEnhancedAvailability(mentor.uid);
-    fetchMentorBookings(mentor.uid);
+    setSelectedMentor(mentor);
+    setShowCalComModal(true);
+    console.log('Cal.com integration not yet implemented for:', mentor.firstName);
   };
 
   const handlePageChange = (page: number) => {
@@ -492,6 +505,34 @@ export default function MentorPage() {
           onPastProfessionChange={handlePastProfessionChange}
           onAddPastProfession={addPastProfession}
           onRemovePastProfession={removePastProfession}
+        />
+      )}
+
+      {/* Profile View Modal */}
+      {showProfileViewModal && selectedMentor && (
+        <ProfileViewModal
+          isOpen={showProfileViewModal}
+          profile={selectedMentor}
+          onClose={() => setShowProfileViewModal(false)}
+          currentUserRole={currentUserProfile?.type === 'mentor' || currentUserProfile?.type === 'mentee' ? currentUserProfile.type : undefined}
+        />
+      )}
+
+      {/* Booking Modal */}
+      {showBookingModal && selectedMentor && (
+        <BookingModal
+          open={showBookingModal}
+          mentor={selectedMentor}
+          onClose={() => setShowBookingModal(false)}
+        />
+      )}
+
+      {/* Cal.com Modal */}
+      {showCalComModal && selectedMentor && (
+        <CalComModal
+          open={showCalComModal}
+          mentor={selectedMentor}
+          onClose={() => setShowCalComModal(false)}
         />
       )}
     </div>
