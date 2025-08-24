@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+
 import { 
   RoleSelection,
   MentorFilters,
@@ -14,6 +15,7 @@ import {
   ProfileFormData,
   MentorMenteeProfile
 } from './types';
+
 import { ProfileViewModal } from './components/ProfileViewModal';
 import { default as BookingModal } from '../../components/widgets/MentorAlgorithm/booking/BookingModal';
 import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
@@ -124,9 +126,12 @@ export default function MentorPage() {
   };
 
   const handleProfileEdit = () => {
+    console.log('handleProfileEdit called');
+    console.log('currentUserProfile:', currentUserProfile);
     if (currentUserProfile) {
       setFormData(currentUserProfile);
       setShowProfileEdit(true);
+      console.log('showProfileEdit set to true');
     }
   };
 
@@ -392,6 +397,20 @@ export default function MentorPage() {
       };
     }
   }, [showProfileViewModal, selectedMentor]);
+
+  // Debug: Track ProfileEditModal rendering
+  useEffect(() => {
+    console.log('🔧 ProfileEditModal state changed:', { 
+      showProfileEdit, 
+      hasProfile, 
+      currentUserProfile: currentUserProfile ? 'exists' : 'null' 
+    });
+    
+    if (showProfileEdit && currentUserProfile) {
+      console.log('🔧 ProfileEditModal should be visible');
+      console.log('🔧 currentUserProfile type:', currentUserProfile.type);
+    }
+  }, [showProfileEdit, hasProfile, currentUserProfile]);
 
   // Loading state
   if (loading) {

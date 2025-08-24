@@ -42,6 +42,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   onAddPastProfession,
   onRemovePastProfession
 }) => {
+  const [activeSection, setActiveSection] = useState<string>('section-personal-information');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -449,9 +450,57 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {/* Right Content - Form */}
           <div className="pem-modal-right-content">
+            {/* Mobile Tabs Navigation */}
+            <div className="pem-mobile-tabs-nav">
+              {/* Mobile Progress Bar */}
+              <div className="pem-mobile-progress">
+                <div className="pem-mobile-progress-header">
+                  <h4>Profile Progress</h4>
+                  <span className="pem-mobile-progress-text">
+                    {formProgress.completedFields} of {formProgress.totalFields} fields completed
+                  </span>
+                </div>
+                <div className="pem-mobile-progress-bar">
+                  <div 
+                    className="pem-mobile-progress-fill" 
+                    style={{ width: `${(formProgress.completedFields / formProgress.totalFields) * 100}%` }}
+                  />
+                </div>
+              </div>
+              
+              {/* Mobile Tabs */}
+              <div className="pem-mobile-tabs">
+                {Object.entries(sectionStatus).map(([sectionName, status]) => {
+                  // Skip "Professional Background" since it's combined with "Education & Career"
+                  if (sectionName === 'Professional Background') return null;
+                  
+                  const isCompleted = status.completed;
+                  const sectionId = `section-${sectionName.toLowerCase().replace(/\s+/g, '-')}`;
+                  const isActive = activeSection === sectionId;
+                  
+                  return (
+                    <button
+                      key={sectionName}
+                      type="button"
+                      className={`pem-mobile-tab ${isCompleted ? 'completed' : 'incomplete'} ${isActive ? 'active' : ''}`}
+                      onClick={() => {
+                        scrollToSection(sectionName);
+                        setActiveSection(sectionId);
+                      }}
+                      title={`Jump to ${sectionName} section`}
+                    >
+                      <div className={`pem-mobile-tab-dot ${isCompleted ? 'completed' : 'incomplete'}`} />
+                      <span className="pem-mobile-tab-text">{sectionName}</span>
+                      <span className="pem-mobile-tab-count">({status.completed}/{status.total})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <form onSubmit={handleSave} className="pem-profile-edit-form">
-                             {/* Personal Information Section */}
-             <div id="section-personal-information" className="pem-form-section">
+              {/* Personal Information Section */}
+              <div id="section-personal-information" className="pem-form-section">
                <h4>Personal Information</h4>
               <div className="pem-form-row">
                 <div className="pem-input-group">
