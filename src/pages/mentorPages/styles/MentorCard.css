@@ -1,5 +1,5 @@
 /* Mentor Card */
-.mentor-card {
+.mc-mentor-card {
   background: var(--white);
   border-radius: 16px;
   padding: 24px;
@@ -9,20 +9,20 @@
   cursor: pointer;
 }
 
-.mentor-card:hover {
+.mc-mentor-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
   border-color: var(--mentor);
 }
 
-.mentor-card-header {
+.mc-mentor-card-header {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.mentor-avatar {
+.mc-mentor-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -30,17 +30,17 @@
   flex-shrink: 0;
 }
 
-.mentor-avatar img {
+.mc-mentor-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.mentor-info {
+.mc-mentor-info {
   flex: 1;
 }
 
-.mentor-name {
+.mc-mentor-name {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--mentor-dark);
@@ -48,13 +48,13 @@
   line-height: 1.2;
 }
 
-.mentor-title {
+.mc-mentor-title {
   color: var(--gray-600);
   font-size: 1rem;
   margin-bottom: 8px;
 }
 
-.mentor-rating {
+.mc-mentor-rating {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -62,25 +62,25 @@
   color: var(--text);
 }
 
-.star-icon {
+.mc-star-icon {
   color: var(--warning);
   font-size: 16px;
 }
 
-.review-count {
+.mc-review-count {
   color: var(--gray-600);
   font-weight: 400;
   font-size: 14px;
 }
 
-.mentor-badges {
+.mc-mentor-badges {
   display: flex;
   flex-direction: column;
   gap: 8px;
   align-items: flex-end;
 }
 
-.badge {
+.mc-badge {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -91,22 +91,22 @@
   white-space: nowrap;
 }
 
-.video-badge {
+.mc-video-badge {
   background: var(--info-light);
   color: var(--info-dark);
 }
 
-.verified-badge {
+.mc-verified-badge {
   background: var(--success-light);
   color: var(--success-dark);
 }
 
 /* Mentor Details */
-.mentor-details {
+.mc-mentor-details {
   margin-bottom: 20px;
 }
 
-.detail-item {
+.mc-detail-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -115,31 +115,31 @@
   font-size: 14px;
 }
 
-.detail-item svg {
+.mc-detail-item svg {
   color: var(--gray-400);
   width: 16px;
   flex-shrink: 0;
 }
 
 /* Skills Section */
-.mentor-skills {
+.mc-mentor-skills {
   margin-bottom: 20px;
 }
 
-.mentor-skills h4 {
+.mc-mentor-skills h4 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 12px;
 }
 
-.skills-tags {
+.mc-skills-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.skill-tag {
+.mc-skill-tag {
   background: var(--gray-50);
   color: var(--gray-700);
   padding: 6px 12px;
@@ -149,52 +149,52 @@
   border: 1px solid var(--gray-200);
 }
 
-.skill-tag.more {
+.mc-skill-tag.more {
   background: var(--gray-200);
   color: var(--gray-600);
   font-style: italic;
 }
 
 /* Availability Section */
-.mentor-availability {
+.mc-mentor-availability {
   background: var(--gray-50);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 20px;
 }
 
-.availability-status {
+.mc-availability-status {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
 
-.clock-icon {
+.mc-clock-icon {
   color: var(--gray-600);
   width: 16px;
 }
 
-.availability-status span {
+.mc-availability-status span {
   font-weight: 600;
   font-size: 14px;
 }
 
-.availability-status span.available {
+.mc-availability-status span.available {
   color: var(--success);
 }
 
-.availability-status span.unavailable {
+.mc-availability-status span.unavailable {
   color: var(--error);
 }
 
-.next-slot {
+.mc-next-slot {
   font-size: 13px;
   color: var(--gray-600);
   font-weight: 500;
 }
 
-.calcom-indicator {
+.mc-calcom-indicator {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -204,13 +204,13 @@
   font-weight: 500;
 }
 
-.calcom-indicator .video-icon {
+.mc-calcom-indicator .mc-video-icon {
   width: 14px;
   color: var(--info);
 }
 
 /* Action Buttons */
-.mentor-actions {
+.mc-mentor-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -218,7 +218,7 @@
   z-index: 2;
 }
 
-.action-button {
+.mc-action-button {
   flex: 1;
   min-width: 140px;
   padding: 12px 20px;
@@ -234,25 +234,25 @@
   gap: 8px;
 }
 
-.action-button.primary {
+.mc-action-button.primary {
   background: var(--mentor);
   color: var(--white);
   border: 1px solid var(--mentor);
 }
 
-.action-button.primary:hover {
+.mc-action-button.primary:hover {
   background: var(--mentor-dark);
   transform: translateY(-1px);
   border-color: var(--mentor-dark);
 }
 
-.action-button.secondary {
+.mc-action-button.secondary {
   background: var(--mentee);
   color: var(--white);
   border: 1px solid var(--mentee);
 }
 
-.action-button.secondary:hover {
+.mc-action-button.secondary:hover {
   background: var(--mentee-dark);
   transform: translateY(-1px);
   border-color: var(--mentee-dark);
@@ -260,21 +260,21 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .mentor-card {
+  .mc-mentor-card {
     padding: 20px;
   }
   
-  .mentor-card-header {
+  .mc-mentor-card-header {
     flex-direction: column;
     text-align: center;
   }
   
-  .mentor-badges {
+  .mc-mentor-badges {
     align-items: center;
     margin-top: 16px;
   }
   
-  .action-button {
+  .mc-action-button {
     min-width: auto;
     flex: none;
     width: 100%;
@@ -282,7 +282,7 @@
 }
 
 @media (max-width: 480px) {
-  .mentor-card {
+  .mc-mentor-card {
     padding: 16px;
   }
 }

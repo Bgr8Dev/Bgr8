@@ -22,98 +22,101 @@ export const MentorCard: React.FC<MentorCardProps> = ({
     if (Array.isArray(mentor.profilePicture)) {
       return mentor.profilePicture[0] || `https://ui-avatars.com/api/?name=${String(mentor.name || 'Mentor')}&background=random`;
     }
-    return mentor.profilePicture || `https://ui-avatars.com/api/?name=${String(mentor.name || 'Mentor')}&background=random`;
+    if (typeof mentor.profilePicture === 'string') {
+      return mentor.profilePicture;
+    }
+    return `https://ui-avatars.com/api/?name=${String(mentor.name || 'Mentor')}&background=random`;
   };
 
   return (
     <div 
-      className="mentor-card"
+      className="mc-mentor-card"
       onClick={() => onProfileClick(mentor)}
     >
-      <div className="mentor-card-header">
-        <div className="mentor-avatar">
+      <div className="mc-mentor-card-header">
+        <div className="mc-mentor-avatar">
           <img 
             src={getProfileImageSrc()}
             alt={String(mentor.name || 'Mentor')}
           />
         </div>
         
-        <div className="mentor-info">
-          <h3 className="mentor-name">{String(mentor.name || 'Mentor')}</h3>
-          <p className="mentor-title">{String(mentor.profession || 'Professional')}</p>
-          <div className="mentor-rating">
-            <FaStar className="star-icon" />
+        <div className="mc-mentor-info">
+          <h3 className="mc-mentor-name">{String(mentor.name || 'Mentor')}</h3>
+          <p className="mc-mentor-title">{String(mentor.profession || 'Professional')}</p>
+          <div className="mc-mentor-rating">
+            <FaStar className="mc-star-icon" />
             <span>4.8</span>
-            <span className="review-count">(24 reviews)</span>
+            <span className="mc-review-count">(24 reviews)</span>
           </div>
         </div>
 
-        <div className="mentor-badges">
+        <div className="mc-mentor-badges">
           {mentor.calCom && (
-            <div className="badge video-badge">
+            <div className="mc-badge mc-video-badge">
               <FaVideo />
               Video calls
             </div>
           )}
-          <div className="badge verified-badge">
+          <div className="mc-badge mc-verified-badge">
             <FaCheckCircle />
             Verified
           </div>
         </div>
       </div>
 
-      <div className="mentor-details">
-        <div className="detail-item">
+      <div className="mc-mentor-details">
+        <div className="mc-detail-item">
           <FaGraduationCap />
           <span>{String(mentor.educationLevel || 'Not specified')}</span>
         </div>
-        <div className="detail-item">
+        <div className="mc-detail-item">
           <FaIndustry />
           <span>{Array.isArray(mentor.industries) ? mentor.industries.join(', ') : 'Various industries'}</span>
         </div>
-        <div className="detail-item">
+        <div className="mc-detail-item">
           <span>{String(mentor.county || 'Location not specified')}</span>
         </div>
       </div>
 
-      <div className="mentor-skills">
+      <div className="mc-mentor-skills">
         <h4>Expertise</h4>
-        <div className="skills-tags">
+        <div className="mc-skills-tags">
           {Array.isArray(mentor.skills) && mentor.skills.slice(0, 3).map((skill, index) => (
-            <span key={index} className="skill-tag">{skill}</span>
+            <span key={index} className="mc-skill-tag">{skill}</span>
           ))}
           {Array.isArray(mentor.skills) && mentor.skills.length > 3 && (
-            <span className="skill-tag more">+{mentor.skills.length - 3} more</span>
+            <span className="mc-skill-tag more">+{mentor.skills.length - 3} more</span>
           )}
         </div>
       </div>
 
-      <div className="mentor-availability">
-        <div className="availability-status">
-          <FaClock className="clock-icon" />
+      <div className="mc-mentor-availability">
+        <div className="mc-availability-status">
+          <FaClock className="mc-clock-icon" />
           <span className={mentorAvailability[mentor.uid]?.available ? 'available' : 'unavailable'}>
             {mentorAvailability[mentor.uid]?.available ? 'Available now' : 'No availability'}
           </span>
         </div>
         
         {mentorAvailability[mentor.uid]?.available && mentorAvailability[mentor.uid]?.nextSlot && (
-          <div className="next-slot">
+          <div className="mc-next-slot">
             Next: {mentorAvailability[mentor.uid]?.nextSlot}
           </div>
         )}
 
         {/* Cal.com Integration Indicator */}
         {mentor.calCom && (
-          <div className="calcom-indicator">
-            <FaVideo className="video-icon" />
+          <div className="mc-calcom-indicator">
+            <FaVideo className="mc-video-icon" />
             <span>Cal.com Connected</span>
           </div>
         )}
       </div>
 
-      <div className="mentor-actions" onClick={(e) => e.stopPropagation()}>
+      <div className="mc-mentor-actions" onClick={(e) => e.stopPropagation()}>
         <button 
-          className="action-button primary"
+          className="mc-action-button primary"
           onClick={() => onBooking(mentor)}
           title="Book a mentoring session with this mentor"
           data-tooltip="Book a mentoring session with this mentor"
@@ -124,7 +127,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         
         {mentor.calCom && (
           <button 
-            className="action-button secondary"
+            className="mc-action-button secondary"
             onClick={() => onCalCom(mentor)}
             title="Schedule a video call using Cal.com integration"
             data-tooltip="Schedule a video call using Cal.com integration"
