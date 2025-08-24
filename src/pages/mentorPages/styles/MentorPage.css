@@ -3078,70 +3078,87 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  padding: 20px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .availability-modal {
-  background: var(--bg-primary);
+  background: var(--white);
   border-radius: 20px;
-  max-width: 95vw;
-  max-height: 95vh;
-  overflow-y: auto;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border-color);
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 .availability-modal-header {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: var(--white);
+  padding: 24px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  border-radius: 20px 20px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .availability-modal-header h3 {
   margin: 0;
-  color: var(--text-primary);
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
 }
 
+.availability-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--white);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.availability-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
 .availability-modal-content {
-  padding: 2rem;
-  max-height: calc(95vh - 120px);
+  flex: 1;
   overflow-y: auto;
+  padding: 0;
 }
 
 /* Responsive Design for Availability Modal */
 @media (max-width: 768px) {
   .availability-modal {
-    max-width: 98vw;
-    max-height: 98vh;
-    margin: 1rem;
+    max-height: 95vh;
+    margin: 10px;
   }
   
   .availability-modal-header {
-    padding: 1rem 1.5rem;
+    padding: 20px 24px;
   }
   
-  .availability-modal-content {
-    padding: 1.5rem;
-  }
-  
-  .availability-manage-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
+  .availability-modal-header h3 {
+    font-size: 1.5rem;
   }
 }
 

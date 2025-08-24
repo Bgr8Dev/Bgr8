@@ -17,6 +17,7 @@ import {
 import { ProfileViewModal } from './components/ProfileViewModal';
 import { default as BookingModal } from '../../components/widgets/MentorAlgorithm/booking/BookingModal';
 import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
+import { default as MentorAvailability } from '../../components/widgets/MentorAlgorithm/MentorAvailability';
 import Navbar from '../../components/ui/Navbar';
 import './styles/MentorPage.css';
 
@@ -29,6 +30,7 @@ export default function MentorPage() {
   const [showProfileViewModal, setShowProfileViewModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showCalComModal, setShowCalComModal] = useState(false);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<MentorMenteeProfile | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,8 +156,7 @@ export default function MentorPage() {
   };
 
   const handleAvailabilityManage = () => {
-    // TODO: Implement availability management
-    console.log('Availability management not yet implemented');
+    setShowAvailabilityModal(true);
   };
 
   const handleProfileCardClick = (mentor: MentorMenteeProfile) => {
@@ -534,6 +535,27 @@ export default function MentorPage() {
           mentor={selectedMentor}
           onClose={() => setShowCalComModal(false)}
         />
+      )}
+
+      {/* Availability Management Modal */}
+      {showAvailabilityModal && (
+        <div className="availability-modal-overlay" onClick={() => setShowAvailabilityModal(false)}>
+          <div className="availability-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="availability-modal-header">
+              <h3>Manage Your Availability</h3>
+              <button 
+                className="availability-modal-close" 
+                onClick={() => setShowAvailabilityModal(false)}
+                title="Close availability management"
+              >
+                ×
+              </button>
+            </div>
+            <div className="availability-modal-content">
+              <MentorAvailability />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
