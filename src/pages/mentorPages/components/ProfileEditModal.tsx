@@ -452,6 +452,20 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           <div className="pem-modal-right-content">
             {/* Mobile Tabs Navigation */}
             <div className="pem-mobile-tabs-nav">
+              {/* Mobile Header with Exit Button */}
+              <div className="pem-mobile-header">
+                <div className="pem-mobile-header-content">
+                  <h3>Edit Your Profile</h3>
+                  <button 
+                    className="pem-mobile-exit-button" 
+                    onClick={onClose}
+                    title="Close modal"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              </div>
+              
               {/* Mobile Progress Bar */}
               <div className="pem-mobile-progress">
                 <div className="pem-mobile-progress-header">

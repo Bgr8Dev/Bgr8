@@ -1455,6 +1455,55 @@
   z-index: 10;
 }
 
+/* Mobile Header with Exit Button */
+.pem-mobile-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.pem-mobile-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.pem-mobile-header-content h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-900);
+  flex: 1;
+}
+
+.pem-mobile-exit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--gray-600);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.pem-mobile-exit-button:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-300);
+  color: var(--gray-700);
+  transform: scale(1.05);
+}
+
+.pem-mobile-exit-button:active {
+  transform: scale(0.95);
+}
+
 /* Mobile Progress Bar */
 .pem-mobile-progress {
   margin-bottom: 24px;
@@ -1754,6 +1803,22 @@
     margin-bottom: 16px;
     padding: 16px;
     border-radius: 12px;
+  }
+  
+  /* Mobile header responsive adjustments */
+  .pem-mobile-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .pem-mobile-header-content h3 {
+    font-size: 16px;
+  }
+  
+  .pem-mobile-exit-button {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
   
   .pem-modal-right-content {
@@ -2122,5 +2187,46 @@
   .pem-cancel-button,
   .pem-save-button {
     min-height: 44px; /* iOS recommended touch target size */
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .pem-mobile-tabs-nav {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .pem-mobile-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+  
+  .pem-mobile-header-content h3 {
+    font-size: 15px;
+  }
+  
+  .pem-mobile-exit-button {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .pem-mobile-tabs {
+    gap: 4px;
+  }
+  
+  .pem-mobile-tab {
+    padding: 10px 6px;
+    min-width: 90px;
+    font-size: 11px;
+  }
+  
+  .pem-mobile-tab-text {
+    font-size: 10px;
+  }
+  
+  .pem-mobile-tab-count {
+    font-size: 8px;
   }
 }
