@@ -41,7 +41,12 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
       <div className="ms-matches-header">
         <div className="ms-matches-header-content">
           <h2>Your Best Matches</h2>
-          <p>Based on your profile, here are the mentors/mentees we think would be perfect for you</p>
+          <p>
+            {currentUserProfile?.type === 'mentee'
+              ? 'Based on your profile, here are the mentors we think would be perfect for you'
+              : 'Based on your profile, here are the mentees we think would be perfect for you'
+            }
+          </p>
         </div>
       </div>
 
@@ -72,16 +77,23 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
             <div className="ms-match-header">
               <div className="ms-match-avatar">
                 <img 
-                  src={Array.isArray(match.profile.profilePicture as string[]) 
-                    ? match.profile.profilePicture[0] as string || `https://ui-avatars.com/api/?name=${String(match.profile.name || 'User')}&background=random`
-                    : match.profile.profilePicture as string || `https://ui-avatars.com/api/?name=${String(match.profile.name || 'User')}&background=random`
+                  src={Array.isArray(match.user.profilePicture) 
+                    ? match.user.profilePicture[0] || `https://ui-avatars.com/api/?name=${match.user.firstName || 'User'}&background=random`
+                    : typeof match.user.profilePicture === 'string' 
+                      ? match.user.profilePicture 
+                      : `https://ui-avatars.com/api/?name=${match.user.firstName || 'User'}&background=random`
                   }
-                  alt={String(match.profile.name as string || 'User')}
+                  alt={match.user.firstName || 'User'}
                 />
               </div>
               <div className="ms-match-info">
-                <h3>{String(match.profile.name as string || 'User')}</h3>
-                <p>{String(match.profile.profession as string || 'Professional')}</p>
+                <h3>{match.user.firstName} {match.user.lastName}</h3>
+                <p>{match.user.profession || match.user.educationLevel || 'Professional'}</p>
+                {match.user.isGenerated && (
+                  <span className="ms-generated-indicator" title="Generated Profile">
+                    🎲 Generated
+                  </span>
+                )}
               </div>
               <div className="ms-match-score" style={{ color: getMatchScoreColor(match.score) }}>
                 <FaStar />
@@ -105,13 +117,13 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
             <div className="ms-match-details">
               <div className="ms-detail-item">
                 <FaGraduationCap />
-                <span>{String(match.profile.educationLevel as string[] || 'Not specified')}</span>
+                <span>{match.user.educationLevel || 'Not specified'}</span>
               </div>
               <div className="ms-detail-item">
                 <FaMapMarkerAlt />
-                <span>{String(match.profile.county as string[] || 'Location not specified')}</span>
+                <span>{match.user.county || 'Location not specified'}</span>
               </div>
-              {match.profile.calCom as string[] && (
+              {match.user.calCom && (
                 <div className="ms-detail-item">
                   <FaVideo />
                   <span>Video calls available</span>
@@ -122,22 +134,22 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
             <div className="ms-match-actions">
               <button 
                 className="ms-action-button primary"
-                onClick={() => onProfileClick(match.profile as MentorMenteeProfile)}
+                onClick={() => onProfileClick(match.user)}
               >
                 View Full Profile
               </button>
               <button 
                 className="ms-action-button secondary"
-                onClick={() => onBooking(match.profile as MentorMenteeProfile)}
+                onClick={() => onBooking(match.user)}
               >
-                Book Session
+                {currentUserProfile?.type === 'mentee' ? 'Book Session' : 'Connect'}
               </button>
-              {match.profile.calCom as string[] && (
+              {match.user.calCom && (
                 <button 
                   className="ms-action-button tertiary"
-                  onClick={() => onCalCom(match.profile as MentorMenteeProfile)}
+                  onClick={() => onCalCom(match.user)}
                 >
-                  Schedule Call
+                  {currentUserProfile?.type === 'mentee' ? 'Schedule Call' : 'Video Call'}
                 </button>
               )}
             </div>

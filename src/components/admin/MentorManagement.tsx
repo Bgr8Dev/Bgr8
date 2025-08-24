@@ -39,6 +39,7 @@ interface MentorAvailabilityWithProfile extends MentorAvailability {
 
 interface MentorMenteeProfileWithId extends MentorMenteeProfile {
   id: string;
+  isGenerated?: boolean;
 }
 
 type FirestoreTimestamp = { toDate: () => Date };
@@ -138,23 +139,25 @@ export default function MentorManagement() {
   const realMentees = realUsers.filter(u => u.isMentee);
   const generatedMentees = generatedUsers.filter(u => u.isMentee);
 
-  // Fetch users from mentorProgram subcollections
+  // Fetch users from mentorProgram subcollections and generated collections
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Get all users and check their mentorProgram subcollections
+      const allUsers: MentorMenteeProfileWithId[] = [];
+      
+      // Get all users and check their mentorProgram subcollections (original profiles)
       const usersSnapshot = await getDocs(collection(firestore, 'users'));
-      const usersData: MentorMenteeProfileWithId[] = [];
       
       for (const userDoc of usersSnapshot.docs) {
         try {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const userData = mentorProgramDoc.data();
-            usersData.push({
+            allUsers.push({
               ...userData,
-              id: userDoc.id
+              id: userDoc.id,
+              isGenerated: false // Mark as original profile
             } as MentorMenteeProfileWithId);
           }
         } catch (error) {
@@ -162,7 +165,37 @@ export default function MentorManagement() {
         }
       }
       
-      setUsers(usersData);
+      // Fetch generated mentors from "Generated Mentors" collection
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        generatedMentorsSnapshot.docs.forEach(doc => {
+          const mentorData = doc.data();
+          allUsers.push({
+            ...mentorData,
+            id: doc.id,
+            isGenerated: true // Mark as generated profile
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentors:', error);
+      }
+      
+      // Fetch generated mentees from "Generated Mentees" collection
+      try {
+        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        generatedMenteesSnapshot.docs.forEach(doc => {
+          const menteeData = doc.data();
+          allUsers.push({
+            ...menteeData,
+            id: doc.id,
+            isGenerated: true // Mark as generated profile
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentees:', error);
+      }
+      
+      setUsers(allUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       setError('Failed to load users');
@@ -772,6 +805,9 @@ export default function MentorManagement() {
                   <option value="real">Real Profiles</option>
                   <option value="generated">Generated Profiles</option>
                 </select>
+                <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                  🎲 = Generated Profile
+                </div>
               </div>
               <div className="mentor-management-filters">
                 <button
@@ -844,6 +880,58 @@ export default function MentorManagement() {
 
           <GenerateRandomProfile />
 
+          {/* Profile Source Summary */}
+          <div style={{ 
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', 
+            padding: '20px', 
+            borderRadius: '12px', 
+            marginBottom: '24px',
+            border: '1px solid #2a2a3e'
+          }}>
+            <h3 style={{ color: '#fff', marginBottom: '16px', fontSize: '18px' }}>📊 Profile Source Breakdown</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <div style={{ 
+                background: 'rgba(0, 200, 255, 0.1)', 
+                padding: '16px', 
+                borderRadius: '8px',
+                border: '1px solid rgba(0, 200, 255, 0.3)'
+              }}>
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>👥</div>
+                <div style={{ color: '#fff', fontWeight: '600', marginBottom: '4px' }}>Real Profiles</div>
+                <div style={{ color: '#00c8ff', fontSize: '24px', fontWeight: 'bold' }}>{realUsers.length}</div>
+                <div style={{ color: '#888', fontSize: '12px' }}>
+                  {realMentors.length} mentors, {realMentees.length} mentees
+                </div>
+              </div>
+              <div style={{ 
+                background: 'rgba(102, 126, 234, 0.1)', 
+                padding: '16px', 
+                borderRadius: '8px',
+                border: '1px solid rgba(102, 126, 234, 0.3)'
+              }}>
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>🎲</div>
+                <div style={{ color: '#fff', fontWeight: '600', marginBottom: '4px' }}>Generated Profiles</div>
+                <div style={{ color: '#667eea', fontSize: '24px', fontWeight: 'bold' }}>{generatedUsers.length}</div>
+                <div style={{ color: '#888', fontSize: '12px' }}>
+                  {generatedMentors.length} mentors, {generatedMentees.length} mentees
+                </div>
+              </div>
+              <div style={{ 
+                background: 'rgba(255, 193, 7, 0.1)', 
+                padding: '16px', 
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 193, 7, 0.3)'
+              }}>
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>📈</div>
+                <div style={{ color: '#fff', fontWeight: '600', marginBottom: '4px' }}>Total</div>
+                <div style={{ color: '#ffc107', fontSize: '24px', fontWeight: 'bold' }}>{users.length}</div>
+                <div style={{ color: '#888', fontSize: '12px' }}>
+                  {users.filter(u => u.isMentor).length} mentors, {users.filter(u => u.isMentee).length} mentees
+                </div>
+              </div>
+            </div>
+          </div>
+
           {deleteStatus && (
             <div className={deleteStatus.startsWith('Deleted') ? 'mentor-management-success' : 'mentor-management-error'} style={{ marginBottom: '1rem' }}>
               {deleteStatus}
@@ -883,7 +971,14 @@ export default function MentorManagement() {
                     <td><input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => handleSelectRow(user.id)} /></td>
                     <td>
                       <div className="user-info">
-                        <span className="user-name">{user.name}</span>
+                        <span className="user-name">
+                          {user.name}
+                          {user.isGenerated && (
+                            <span className="generated-badge" title="Generated Profile">
+                              🎲
+                            </span>
+                          )}
+                        </span>
                         <span className="user-age">{user.age} years</span>
                       </div>
                     </td>

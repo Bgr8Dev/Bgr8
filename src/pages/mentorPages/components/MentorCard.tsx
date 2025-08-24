@@ -6,6 +6,7 @@ import '../styles/MentorCard.css';
 interface MentorCardProps {
   mentor: MentorMenteeProfile;
   mentorAvailability: MentorAvailability;
+  currentUserRole?: 'mentor' | 'mentee';
   onProfileClick: (mentor: MentorMenteeProfile) => void;
   onBooking: (mentor: MentorMenteeProfile) => void;
   onCalCom: (mentor: MentorMenteeProfile) => void;
@@ -14,6 +15,7 @@ interface MentorCardProps {
 export const MentorCard: React.FC<MentorCardProps> = ({
   mentor,
   mentorAvailability,
+  currentUserRole,
   onProfileClick,
   onBooking,
   onCalCom
@@ -67,7 +69,9 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         
         <div className="mc-mentor-info">
           <h3 className="mc-mentor-name">{getDisplayName()}</h3>
-          <p className="mc-mentor-title">{mentor.profession || mentor.educationLevel || 'Professional'}</p>
+          <p className="mc-mentor-title">
+            {mentor.profession || mentor.educationLevel || (currentUserRole === 'mentee' ? 'Professional' : 'Student')}
+          </p>
           <div className="mc-mentor-rating">
             <FaStar className="mc-star-icon" />
             <span>4.8</span>
@@ -86,6 +90,11 @@ export const MentorCard: React.FC<MentorCardProps> = ({
             <FaCheckCircle />
             Verified
           </div>
+          {mentor.isGenerated && (
+            <div className="mc-badge mc-generated-badge" title="Generated Profile">
+              🎲 Generated
+            </div>
+          )}
         </div>
       </div>
 
@@ -109,7 +118,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       </div>
 
       <div className="mc-mentor-skills">
-        <h4>Expertise</h4>
+        <h4>{currentUserRole === 'mentee' ? 'Expertise' : 'Interests & Goals'}</h4>
         <div className="mc-skills-tags">
           {Array.isArray(mentor.skills) && mentor.skills.length > 0 ? (
             <>
@@ -121,7 +130,9 @@ export const MentorCard: React.FC<MentorCardProps> = ({
               )}
             </>
           ) : (
-            <span className="mc-skill-tag">General expertise</span>
+            <span className="mc-skill-tag">
+              {currentUserRole === 'mentee' ? 'General expertise' : 'Various interests'}
+            </span>
           )}
         </div>
       </div>
@@ -130,7 +141,10 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         <div className="mc-availability-status">
           <FaClock className="mc-clock-icon" />
           <span className={mentorAvailability[mentor.uid]?.available ? 'available' : 'unavailable'}>
-            {mentorAvailability[mentor.uid]?.available ? 'Available now' : 'No availability'}
+            {mentorAvailability[mentor.uid]?.available 
+              ? (currentUserRole === 'mentee' ? 'Available now' : 'Available for connection')
+              : (currentUserRole === 'mentee' ? 'No availability' : 'Not available')
+            }
           </span>
         </div>
         
@@ -153,22 +167,38 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         <button 
           className="mc-action-button primary"
           onClick={() => onBooking(mentor)}
-          title="Book a mentoring session with this mentor"
-          data-tooltip="Book a mentoring session with this mentor"
+          title={
+            currentUserRole === 'mentee' 
+              ? "Book a mentoring session with this mentor"
+              : "Connect with this mentee"
+          }
+          data-tooltip={
+            currentUserRole === 'mentee' 
+              ? "Book a mentoring session with this mentor"
+              : "Connect with this mentee"
+          }
         >
           <FaCalendarAlt />
-          Book Session
+          {currentUserRole === 'mentee' ? 'Book Session' : 'Connect'}
         </button>
         
         {mentor.calCom && (
           <button 
             className="mc-action-button secondary"
             onClick={() => onCalCom(mentor)}
-            title="Schedule a video call using Cal.com integration"
-            data-tooltip="Schedule a video call using Cal.com integration"
+            title={
+              currentUserRole === 'mentee'
+                ? "Schedule a video call using Cal.com integration"
+                : "Schedule a video call with this mentee"
+            }
+            data-tooltip={
+              currentUserRole === 'mentee'
+                ? "Schedule a video call using Cal.com integration"
+                : "Schedule a video call with this mentee"
+            }
           >
             <FaVideo />
-            Schedule Call
+            {currentUserRole === 'mentee' ? 'Schedule Call' : 'Video Call'}
           </button>
         )}
       </div>

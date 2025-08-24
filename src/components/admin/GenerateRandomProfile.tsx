@@ -26,12 +26,7 @@ interface MentorAvailability {
 
 
 
-interface AvailableMentor {
-  id: string;
-  uid: string;
-  name: string;
-  email: string;
-}
+
 
 // Sample data for randomization
 const firstNames = [
@@ -1096,7 +1091,8 @@ export default function GenerateRandomProfile() {
         industries,
         isMentor: type === 'mentor',
         isMentee: type === 'mentee',
-        isGenerated: "true",
+        type: type,
+        isGenerated: true,
       };
     }
     
@@ -1141,7 +1137,8 @@ export default function GenerateRandomProfile() {
       industries,
       isMentor: selectedArchetype.type === 'mentor',
       isMentee: selectedArchetype.type === 'mentee',
-      isGenerated: "true",
+      type: selectedArchetype.type,
+      isGenerated: true,
     };
   };
 
@@ -1159,39 +1156,15 @@ export default function GenerateRandomProfile() {
       const profiles = Array.from({ length: count }, () => generateRandomProfile());
       
       for (const profile of profiles) {
-        // Create user document with profile reference
-        const userData = {
-          uid: profile.uid,
-          email: profile.email,
-          firstName: profile.name.split(' ')[0],
-          lastName: profile.name.split(' ')[1] || '',
-          displayName: profile.name,
-          dateCreated: new Date(),
-          lastUpdated: new Date(),
-          admin: false,
-          developer: false,
-          mentor: profile.type === 'mentor',
-          mentee: profile.type === 'mentee',
-          mentorProfileRef: profile.type === 'mentor' ? `users/${profile.uid}/mentorProgram/profile` : undefined,
-          menteeProfileRef: profile.type === 'mentee' ? `users/${profile.uid}/mentorProgram/profile` : undefined,
-          ethnicity: 'N/A',
-          nationality: 'N/A',
-          activityLog: {
-            lastLogin: new Date(),
-            loginCount: 1
-          }
-        };
-
-        // Create the user document first
-        await setDoc(doc(firestore, 'users', profile.uid), userData);
-        
-        // Add the profile to users/{uid}/mentorProgram subcollection
-        await setDoc(doc(firestore, 'users', profile.uid, 'mentorProgram', 'profile'), profile);
-        
-        // If it's a mentor, also generate availability data for testing
+        // Create the profile in the appropriate generated collection
         if (profile.type === 'mentor') {
-          const availabilityData = generateRandomAvailability(profile.uid);
-          await setDoc(doc(firestore, 'users', profile.uid, 'availabilities', 'default'), availabilityData);
+          // Add to "Generated Mentors" collection
+          await addDoc(collection(firestore, 'Generated Mentors'), {
+            ...profile,
+            generatedAt: new Date(),
+            isActive: true,
+            profileId: profile.uid
+          });
           
           // If sample data is enabled, generate some sample bookings
           if (generateSampleData) {
@@ -1201,6 +1174,14 @@ export default function GenerateRandomProfile() {
               await addDoc(collection(firestore, 'bookings'), bookingData);
             }
           }
+        } else {
+          // Add to "Generated Mentees" collection
+          await addDoc(collection(firestore, 'Generated Mentees'), {
+            ...profile,
+            generatedAt: new Date(),
+            isActive: true,
+            profileId: profile.uid
+          });
         }
       }
 
@@ -1214,33 +1195,13 @@ export default function GenerateRandomProfile() {
         });
         
         for (const menteeProfile of menteeProfiles) {
-          // Create user document with profile reference for mentees
-          const userData = {
-            uid: menteeProfile.uid,
-            email: menteeProfile.email,
-            firstName: menteeProfile.name.split(' ')[0],
-            lastName: menteeProfile.name.split(' ')[1] || '',
-            displayName: menteeProfile.name,
-            dateCreated: new Date(),
-            lastUpdated: new Date(),
-            admin: false,
-            developer: false,
-            mentor: false,
-            mentee: true,
-            mentorProfileRef: undefined,
-            menteeProfileRef: `users/${menteeProfile.uid}/mentorProgram/profile`,
-            ethnicity: 'N/A',
-            nationality: 'N/A',
-            activityLog: {
-              lastLogin: new Date(),
-              loginCount: 1
-            }
-          };
-
-          // Create the user document first
-          await setDoc(doc(firestore, 'users', menteeProfile.uid), userData);
-          
-          await setDoc(doc(firestore, 'users', menteeProfile.uid, 'mentorProgram', 'profile'), menteeProfile);
+          // Add to "Generated Mentees" collection
+          await addDoc(collection(firestore, 'Generated Mentees'), {
+            ...menteeProfile,
+            generatedAt: new Date(),
+            isActive: true,
+            profileId: menteeProfile.uid
+          });
         }
         
         const menteesText = ` and ${menteeCount} mentee profile(s)`;

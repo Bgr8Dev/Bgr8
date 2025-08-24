@@ -252,8 +252,26 @@ export default function MentorPage() {
       {/* Hero Section */}
       <div className="mentor-header">
         <div className="mentor-header-content">
-          <h1>Find Your Perfect Mentor</h1>
-          <p>Connect with experienced professionals who can guide you on your journey to success</p>
+          <h1>
+            {currentUserProfile?.type === 'mentee' 
+              ? 'Find Your Perfect Mentor' 
+              : 'Connect with Other Mentors'
+            }
+          </h1>
+          <p>
+            {currentUserProfile?.type === 'mentee'
+              ? 'Connect with experienced professionals who can guide you on your journey to success'
+              : 'Network and collaborate with fellow mentors to share knowledge and best practices'
+            }
+          </p>
+          
+          {/* Generated Profiles Info */}
+          <div className="generated-profiles-info">
+            <p className="info-text">
+              💡 <strong>Tip:</strong> This platform includes both real user profiles and generated test profiles 
+              (marked with 🎲) to help you explore the matching system and test features.
+            </p>
+          </div>
           
           {/* User Profile Summary */}
           {currentUserProfile && (
@@ -306,7 +324,11 @@ export default function MentorPage() {
           </div>
           <input
             type="text"
-            placeholder="Search for mentors by name, skills, industry, or education..."
+            placeholder={
+              currentUserProfile?.type === 'mentee'
+                ? "Search for mentors by name, skills, industry, or education..."
+                : "Search for other mentors by name, skills, industry, or education..."
+            }
             value={searchTerm}
             onChange={handleSearchChange}
             onClick={(e) => e.stopPropagation()}
@@ -327,6 +349,20 @@ export default function MentorPage() {
             </div>
           )}
         </div>
+        
+        {/* Profile Type Legend */}
+        {searchFilteredMentors.some(m => m.isGenerated) && (
+          <div className="profile-legend">
+            <span className="legend-item">
+              <span className="legend-icon real">👥</span>
+              <span className="legend-text">Real Profiles</span>
+            </span>
+            <span className="legend-item">
+              <span className="legend-icon generated">🎲</span>
+              <span className="legend-text">Generated Profiles</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -351,13 +387,41 @@ export default function MentorPage() {
       {/* Mentor Results */}
       <div className="mentor-results">
         <div className="results-header">
-          <h2>Available Mentors</h2>
-          <p>Showing {searchFilteredMentors.length} mentors</p>
+          <h2>
+            {currentUserProfile?.type === 'mentee' 
+              ? 'Available Mentors' 
+              : 'Other Mentors'
+            }
+          </h2>
+          <div className="results-summary">
+            <p>
+              Showing {searchFilteredMentors.length} {
+                currentUserProfile?.type === 'mentee' ? 'mentors' : 'mentors'
+              }
+            </p>
+            {searchFilteredMentors.length > 0 && (
+              <div className="profile-breakdown">
+                <span className="breakdown-item">
+                  <span className="breakdown-label">Real Profiles:</span>
+                  <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
+                </span>
+                <span className="breakdown-item">
+                  <span className="breakdown-label">Generated:</span>
+                  <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {currentMentors.length === 0 ? (
           <div className="no-results">
-            <h3>No mentors found</h3>
+            <h3>
+              {currentUserProfile?.type === 'mentee' 
+                ? 'No mentors found' 
+                : 'No other mentors found'
+              }
+            </h3>
             <p>Try adjusting your search criteria or filters</p>
           </div>
         ) : (
@@ -368,6 +432,7 @@ export default function MentorPage() {
                   key={mentor.uid}
                   mentor={mentor}
                   mentorAvailability={mentorAvailability}
+                  currentUserRole={currentUserProfile?.type === 'mentor' || currentUserProfile?.type === 'mentee' ? currentUserProfile.type : undefined}
                   onProfileClick={handleProfileCardClick}
                   onBooking={handleBooking}
                   onCalCom={handleCalCom}

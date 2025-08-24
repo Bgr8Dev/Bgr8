@@ -28,7 +28,8 @@ export interface MentorMenteeProfile {
   industries: string[];
   isMentor: boolean;
   isMentee: boolean;
-  [key: string]: string | string[] | boolean;
+  isGenerated?: boolean; // Flag to identify generated profiles
+  [key: string]: string | string[] | boolean | undefined;
 }
 
 export interface MatchResult {

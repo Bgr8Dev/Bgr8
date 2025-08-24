@@ -287,6 +287,25 @@
   border-color: var(--info-dark);
 }
 
+.ms-generated-indicator {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-top: 4px;
+  font-weight: 500;
+  cursor: help;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.ms-generated-indicator:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .ms-matches-section {

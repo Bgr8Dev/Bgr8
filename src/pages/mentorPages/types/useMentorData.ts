@@ -65,20 +65,25 @@ export const useMentorData = () => {
         throw new Error('Firebase database not initialized');
       }
 
+      const mentorsData: MentorMenteeProfile[] = [];
+      
+      // Fetch from traditional user profiles
       const usersQuery = query(collection(firestore, 'users'));
       const usersSnapshot = await getDocs(usersQuery);
-      
-      const mentorsData: MentorMenteeProfile[] = [];
       
       for (const userDoc of usersSnapshot.docs) {
         try {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const mentorData = mentorProgramDoc.data() as MentorMenteeProfile;
-            if (mentorData.type === 'mentor') {
+            // If current user is a mentee, show other mentees for networking
+            // If current user is a mentor, show other mentors for collaboration
+            if (currentUserProfile?.type === 'mentee' ? mentorData.type === 'mentee' : mentorData.type === 'mentor') {
               mentorsData.push({
                 ...mentorData,
-                id: userDoc.id
+                id: userDoc.id,
+                uid: userDoc.id,
+                isGenerated: false
               } as MentorMenteeProfile);
             }
           }
@@ -87,7 +92,26 @@ export const useMentorData = () => {
         }
       }
       
-      console.log('MentorPage: Found mentors:', mentorsData.length, mentorsData);
+      // Fetch from appropriate generated collection based on current user's role
+      try {
+        const collectionName = currentUserProfile?.type === 'mentee' ? 'Generated Mentees' : 'Generated Mentors';
+        const generatedQuery = query(collection(firestore, collectionName));
+        const generatedSnapshot = await getDocs(generatedQuery);
+        
+        generatedSnapshot.docs.forEach(doc => {
+          const profileData = doc.data() as MentorMenteeProfile;
+          mentorsData.push({
+            ...profileData,
+            id: doc.id,
+            uid: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfile);
+        });
+      } catch (error) {
+        console.error('Error fetching generated profiles:', error);
+      }
+      
+      console.log('MentorPage: Found profiles:', mentorsData.length, mentorsData);
       
       setMentors(mentorsData);
       setFilteredMentors(mentorsData);
