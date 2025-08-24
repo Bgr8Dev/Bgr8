@@ -18,14 +18,38 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   onBooking,
   onCalCom
 }) => {
+  // Helper function to get the best available name
+  const getDisplayName = () => {
+    // First try to construct from firstName + lastName
+    if (mentor.firstName && mentor.lastName) {
+      return `${mentor.firstName} ${mentor.lastName}`;
+    }
+    // Fall back to just firstName
+    if (mentor.firstName) {
+      return mentor.firstName;
+    }
+    // Fall back to just lastName
+    if (mentor.lastName) {
+      return mentor.lastName;
+    }
+    // Fall back to email (without domain)
+    if (mentor.email) {
+      return mentor.email.split('@')[0];
+    }
+    // Final fallback
+    return 'Mentor';
+  };
+
+
+
   const getProfileImageSrc = () => {
     if (Array.isArray(mentor.profilePicture)) {
-      return mentor.profilePicture[0] || `https://ui-avatars.com/api/?name=${String(mentor.name || 'Mentor')}&background=random`;
+      return mentor.profilePicture[0] || `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
     }
     if (typeof mentor.profilePicture === 'string') {
       return mentor.profilePicture;
     }
-    return `https://ui-avatars.com/api/?name=${String(mentor.name || 'Mentor')}&background=random`;
+    return `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
   };
 
   return (
@@ -37,13 +61,13 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         <div className="mc-mentor-avatar">
           <img 
             src={getProfileImageSrc()}
-            alt={String(mentor.name || 'Mentor')}
+            alt={getDisplayName()}
           />
         </div>
         
         <div className="mc-mentor-info">
-          <h3 className="mc-mentor-name">{String(mentor.name || 'Mentor')}</h3>
-          <p className="mc-mentor-title">{String(mentor.profession || 'Professional')}</p>
+          <h3 className="mc-mentor-name">{getDisplayName()}</h3>
+          <p className="mc-mentor-title">{mentor.profession || mentor.educationLevel || 'Professional'}</p>
           <div className="mc-mentor-rating">
             <FaStar className="mc-star-icon" />
             <span>4.8</span>
@@ -68,25 +92,36 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       <div className="mc-mentor-details">
         <div className="mc-detail-item">
           <FaGraduationCap />
-          <span>{String(mentor.educationLevel || 'Not specified')}</span>
+          <span>{mentor.educationLevel || 'Not specified'}</span>
         </div>
         <div className="mc-detail-item">
           <FaIndustry />
-          <span>{Array.isArray(mentor.industries) ? mentor.industries.join(', ') : 'Various industries'}</span>
+          <span>
+            {Array.isArray(mentor.industries) && mentor.industries.length > 0 
+              ? mentor.industries.join(', ') 
+              : mentor.profession || 'Various industries'
+            }
+          </span>
         </div>
         <div className="mc-detail-item">
-          <span>{String(mentor.county || 'Location not specified')}</span>
+          <span>{mentor.county || 'Location not specified'}</span>
         </div>
       </div>
 
       <div className="mc-mentor-skills">
         <h4>Expertise</h4>
         <div className="mc-skills-tags">
-          {Array.isArray(mentor.skills) && mentor.skills.slice(0, 3).map((skill, index) => (
-            <span key={index} className="mc-skill-tag">{skill}</span>
-          ))}
-          {Array.isArray(mentor.skills) && mentor.skills.length > 3 && (
-            <span className="mc-skill-tag more">+{mentor.skills.length - 3} more</span>
+          {Array.isArray(mentor.skills) && mentor.skills.length > 0 ? (
+            <>
+              {mentor.skills.slice(0, 3).map((skill, index) => (
+                <span key={index} className="mc-skill-tag">{skill}</span>
+              ))}
+              {mentor.skills.length > 3 && (
+                <span className="mc-skill-tag more">+{mentor.skills.length - 3} more</span>
+              )}
+            </>
+          ) : (
+            <span className="mc-skill-tag">General expertise</span>
           )}
         </div>
       </div>
