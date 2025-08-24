@@ -1,10 +1,66 @@
 /* MentorPage.css - Modern, clean design inspired by Zocdoc */
 
+/* Ensure full page background coverage */
+html, body {
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .mentor-page {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
-  padding-top: 80px; /* Add top padding to account for fixed navbar */
+  background-attachment: fixed;
+  background-size: cover;
+  position: relative;
 }
+
+/* Ensure background covers the entire content area */
+.mentor-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Additional background coverage for content areas */
+.mentor-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure full page coverage */
+.mentor-page {
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Add a fallback background for any potential gaps */
+.mentor-page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  z-index: -2;
+  pointer-events: none;
+}
+
+
 
 /* Loading State */
 .mentor-page-loading {
@@ -14,7 +70,7 @@
   justify-content: center;
   min-height: 60vh;
   text-align: center;
-  padding-top: 80px; /* Add top padding for navbar spacing */
+  padding-top: 60px; /* Add top padding for navbar spacing */
 }
 
 .loading-spinner {
@@ -54,15 +110,17 @@
 .mentor-header {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: var(--white);
-  padding: 80px 0 60px 0; /* Increased top padding for better spacing */
+  padding: 60px 0 60px 0; /* Reduced top padding for better header spacing */
   text-align: center;
-  margin-bottom: 40px; /* Add bottom margin for separation */
+  margin-bottom: 30px; /* Reduced bottom margin for tighter spacing */
+  position: relative;
+  z-index: 2;
 }
 
 .mentor-header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -845,6 +903,8 @@
   padding: 60px 0;
   border-bottom: 1px solid var(--gray-200);
   margin-bottom: 40px; /* Add bottom margin for separation */
+  position: relative;
+  z-index: 1;
 }
 
 .matches-header {
@@ -1559,8 +1619,10 @@
 /* Search Container */
 .search-container {
   max-width: 1200px;
-  margin: 0 auto 40px auto;
+  margin: 0 auto 30px auto; /* Reduced bottom margin for tighter spacing */
   padding: 0 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .search-bar {
@@ -1712,6 +1774,8 @@
   padding: 32px 0; /* Increased padding for better spacing */
   border-bottom: 1px solid var(--gray-200);
   margin-bottom: 40px; /* Add bottom margin for separation */
+  position: relative;
+  z-index: 1;
 }
 
 .filters-container {
@@ -1772,6 +1836,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 60px 20px; /* Increased padding for better spacing */
+  position: relative;
+  z-index: 1;
 }
 
 .results-header {

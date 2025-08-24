@@ -260,11 +260,9 @@ export default function MentorPage() {
   // Main mentor page
   return (
     <div className="mentor-page">
-      {/* Sitewide Header Navbar */}
-      <Navbar />
-      
       {/* Hero Section */}
       <div className="mentor-header">
+        <Navbar isMentorPage={true} />
         <div className="mentor-header-content">
           <h1>
             {currentUserProfile?.type === 'mentee' 
