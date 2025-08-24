@@ -1,18 +1,18 @@
 /* Role Selection */
-.mentor-role-selection {
+.rs-mentor-role-selection {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
 }
 
-.role-cards {
+.rs-role-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 40px;
   margin-top: 40px;
 }
 
-.role-card {
+.rs-role-card {
   background: var(--white);
   border-radius: 24px;
   padding: 48px 40px;
@@ -25,7 +25,7 @@
   overflow: hidden;
 }
 
-.role-card::before {
+.rs-role-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -35,52 +35,52 @@
   background: linear-gradient(90deg, var(--mentor) 0%, var(--mentee) 100%);
 }
 
-.role-card:hover {
+.rs-role-card:hover {
   transform: translateY(-12px) scale(1.02);
   box-shadow: var(--shadow-xl);
 }
 
-.role-card.mentor {
+.rs-role-card.rs-mentor {
   border-color: var(--mentor);
   background: linear-gradient(135deg, var(--white) 0%, var(--mentor-light) 100%);
 }
 
-.role-card.mentor:hover {
+.rs-role-card.rs-mentor:hover {
   background: linear-gradient(135deg, var(--mentor-light) 0%, var(--white) 100%);
   border-color: var(--mentor-dark);
   box-shadow: 0 20px 40px rgba(224, 106, 92, 0.3);
 }
 
-.role-card.mentee {
+.rs-role-card.rs-mentee {
   border-color: var(--mentee);
   background: linear-gradient(135deg, var(--white) 0%, var(--mentee-light) 100%);
 }
 
-.role-card.mentee:hover {
+.rs-role-card.rs-mentee:hover {
   background: linear-gradient(135deg, var(--mentee-light) 0%, var(--white) 100%);
   border-color: var(--mentee-dark);
   box-shadow: 0 20px 40px rgba(29, 213, 209, 0.3);
 }
 
-.role-card svg {
+.rs-role-card svg {
   font-size: 64px;
   margin-bottom: 24px;
   transition: all 0.3s ease;
 }
 
-.role-card:hover svg {
+.rs-role-card:hover svg {
   transform: scale(1.1);
 }
 
-.role-card.mentor svg {
+.rs-role-card.rs-mentor svg {
   color: var(--mentor);
 }
 
-.role-card.mentee svg {
+.rs-role-card.rs-mentee svg {
   color: var(--mentee);
 }
 
-.role-card h3 {
+.rs-role-card h3 {
   font-size: 2rem;
   font-weight: 800;
   margin: 24px 0 20px;
@@ -88,15 +88,15 @@
   transition: color 0.3s ease;
 }
 
-.role-card.mentor:hover h3 {
+.rs-role-card.rs-mentor:hover h3 {
   color: var(--mentor-dark);
 }
 
-.role-card.mentee:hover h3 {
+.rs-role-card.rs-mentee:hover h3 {
   color: var(--mentee-dark);
 }
 
-.role-card p {
+.rs-role-card p {
   color: var(--gray-600);
   line-height: 1.7;
   font-size: 1.125rem;
@@ -107,51 +107,51 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .role-cards {
+  .rs-role-cards {
     grid-template-columns: 1fr;
     gap: 24px;
   }
 
-  .role-card {
+  .rs-role-card {
     padding: 32px 24px;
   }
   
-  .role-card svg {
+  .rs-role-card svg {
     font-size: 56px;
     margin-bottom: 20px;
   }
   
-  .role-card h3 {
+  .rs-role-card h3 {
     font-size: 1.75rem;
     margin: 20px 0 16px;
   }
   
-  .role-card p {
+  .rs-role-card p {
     font-size: 1rem;
     max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .role-cards {
+  .rs-role-cards {
     gap: 20px;
   }
   
-  .role-card {
+  .rs-role-card {
     padding: 24px 20px;
   }
   
-  .role-card svg {
+  .rs-role-card svg {
     font-size: 48px;
     margin-bottom: 16px;
   }
   
-  .role-card h3 {
+  .rs-role-card h3 {
     font-size: 1.5rem;
     margin: 16px 0 12px;
   }
   
-  .role-card p {
+  .rs-role-card p {
     font-size: 0.95rem;
     line-height: 1.6;
   }
