@@ -49,6 +49,46 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
   if (!isOpen) return null;
 
+  const scrollToSection = (sectionName: string) => {
+    // Map section names to their actual IDs in the form
+    const sectionMapping: { [key: string]: string } = {
+      'Personal Information': 'section-personal-information',
+      'Education & Career': 'section-education-career',
+      'Skills & Interests': 'section-skills-interests',
+      'Additional Information': 'section-additional-information'
+    };
+    
+    const sectionId = sectionMapping[sectionName];
+    if (!sectionId) return;
+    
+    const sectionElement = document.getElementById(sectionId);
+    
+    if (sectionElement) {
+      const rightContent = document.querySelector('.pem-modal-right-content');
+      if (rightContent) {
+        // Get the section's position relative to the scrollable container
+        const sectionTop = sectionElement.offsetTop;
+        
+        // Calculate target scroll position with offset for better positioning
+        const targetScrollTop = sectionTop - 40;
+        
+        // Ensure we don't scroll past the top
+        const finalScrollTop = Math.max(0, targetScrollTop);
+        
+        rightContent.scrollTo({
+          top: finalScrollTop,
+          behavior: 'smooth'
+        });
+        
+        // Add a brief highlight effect
+        sectionElement.classList.add('pem-section-highlight');
+        setTimeout(() => {
+          sectionElement.classList.remove('pem-section-highlight');
+        }, 2000);
+      }
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -113,21 +153,21 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   };
 
   const renderSkillsSelection = () => (
-    <div className="skills-selection-container">
-      <label className="field-label">
+    <div className="pem-skills-selection-container">
+      <label className="pem-field-label">
         Skills {profile.type === 'mentor' ? 'you can teach' : 'you want to learn'} *
-        <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('skills')} />
+        <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('skills')} />
       </label>
-      <div className="skills-tags-container">
+      <div className="pem-skills-tags-container">
         {Object.entries(skillsByCategory).map(([category, skills]) => (
-          <div key={category} className="skill-category-section">
-            <h5 className="category-title">{category}</h5>
-            <div className="tags-grid">
+          <div key={category} className="pem-skill-category-section">
+            <h5 className="pem-category-title">{category}</h5>
+            <div className="pem-tags-grid">
               {skills.map((skill) => (
                 <button
                   key={skill}
                   type="button"
-                  className={`skill-tag-selectable ${
+                  className={`pem-skill-tag-selectable ${
                     profile.skills?.includes(skill) ? 'selected' : ''
                   }`}
                   onClick={() => {
@@ -146,15 +186,15 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         ))}
       </div>
       {profile.skills && profile.skills.length > 0 && (
-        <div className="selected-skills-summary">
-          <span className="summary-label">Selected skills:</span>
-          <div className="selected-tags">
+        <div className="pem-selected-skills-summary">
+          <span className="pem-summary-label">Selected skills:</span>
+          <div className="pem-selected-tags">
             {profile.skills.map((skill, index) => (
-              <span key={index} className="selected-tag">
+              <span key={index} className="pem-selected-tag">
                 {skill}
                 <button
                   type="button"
-                  className="remove-tag"
+                  className="pem-remove-tag"
                   onClick={() => {
                     const newSkills = profile.skills?.filter((_, i) => i !== index) || [];
                     onArrayChange('skills', newSkills);
@@ -169,24 +209,24 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         </div>
       )}
       {validationErrors.skills && (
-        <div className="validation-error">{validationErrors.skills}</div>
+        <div className="pem-validation-error">{validationErrors.skills}</div>
       )}
     </div>
   );
 
   const renderIndustriesSelection = () => (
-    <div className="skills-selection-container">
-      <label className="field-label">
+    <div className="pem-skills-selection-container">
+      <label className="pem-field-label">
         Industries {profile.type === 'mentor' ? 'you work in' : 'you\'re interested in'} *
-        <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('industries')} />
+        <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('industries')} />
       </label>
-      <div className="skills-tags-container">
-        <div className="tags-grid">
+      <div className="pem-skills-tags-container">
+        <div className="pem-tags-grid">
           {industriesList.map((industry) => (
             <button
               key={industry}
               type="button"
-              className={`skill-tag-selectable ${
+              className={`pem-skill-tag-selectable ${
                 profile.industries?.includes(industry) ? 'selected' : ''
               }`}
               onClick={() => {
@@ -203,15 +243,15 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         </div>
       </div>
       {profile.industries && profile.industries.length > 0 && (
-        <div className="selected-skills-summary">
-          <span className="summary-label">Selected industries:</span>
-          <div className="selected-tags">
+        <div className="pem-selected-skills-summary">
+          <span className="pem-summary-label">Selected industries:</span>
+          <div className="pem-selected-tags">
             {profile.industries.map((industry, index) => (
-              <span key={index} className="selected-tag">
+              <span key={index} className="pem-selected-tag">
                 {industry}
                 <button
                   type="button"
-                  className="remove-tag"
+                  className="pem-remove-tag"
                   onClick={() => {
                     const newIndustries = profile.industries?.filter((_, i) => i !== index) || [];
                     onArrayChange('industries', newIndustries);
@@ -225,27 +265,27 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         </div>
       )}
       {validationErrors.industries && (
-        <div className="validation-error">{validationErrors.industries}</div>
+        <div className="pem-validation-error">{validationErrors.industries}</div>
       )}
     </div>
   );
 
   const renderHobbiesSelection = () => (
-    <div className="hobbies-selection-container">
-      <label className="field-label">
+    <div className="pem-hobbies-selection-container">
+      <label className="pem-field-label">
         Hobbies & Interests *
-        <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('hobbies')} />
+        <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('hobbies')} />
       </label>
-      <div className="hobbies-tags-container">
+      <div className="pem-hobbies-tags-container">
         {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
-          <div key={category} className="hobby-category-section">
-            <h5 className="category-title">{category}</h5>
-            <div className="tags-grid">
+          <div key={category} className="pem-hobby-category-section">
+            <h5 className="pem-category-title">{category}</h5>
+            <div className="pem-tags-grid">
               {hobbies.map((hobby) => (
                 <button
                   key={hobby}
                   type="button"
-                  className={`hobby-tag-selectable ${
+                  className={`pem-hobby-tag-selectable ${
                     profile.hobbies?.includes(hobby) ? 'selected' : ''
                   }`}
                   onClick={() => {
@@ -264,15 +304,15 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         ))}
       </div>
       {profile.hobbies && profile.hobbies.length > 0 && (
-        <div className="selected-hobbies-summary">
-          <span className="summary-label">Selected hobbies:</span>
-          <div className="selected-tags">
+        <div className="pem-selected-hobbies-summary">
+          <span className="pem-summary-label">Selected hobbies:</span>
+          <div className="pem-selected-tags">
             {profile.hobbies.map((hobby, index) => (
-              <span key={index} className="selected-tag">
+              <span key={index} className="pem-selected-tag">
                 {hobby}
                 <button
                   type="button"
-                  className="remove-tag"
+                  className="pem-remove-tag"
                   onClick={() => {
                     const newHobbies = profile.hobbies?.filter((_, i) => i !== index) || [];
                     onArrayChange('hobbies', newHobbies);
@@ -286,7 +326,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
         </div>
       )}
       {validationErrors.hobbies && (
-        <div className="validation-error">{validationErrors.hobbies}</div>
+        <div className="pem-validation-error">{validationErrors.hobbies}</div>
       )}
     </div>
   );
@@ -295,54 +335,102 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     <>
       <div className="pem-profile-edit-modal-overlay" onClick={onClose}>
         <div className="pem-profile-edit-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="pem-modal-header">
+          {/* Left Sidebar - Progress & Status */}
+          <div className="pem-modal-left-sidebar">
             <div className="pem-modal-header-content">
               <h3>Edit Your Profile</h3>
               <p>Update your information to improve your matches</p>
             </div>
-            <div className="pem-modal-header-actions">
-              <button
-                className="pem-dev-mode-toggle"
-                onClick={() => setDevMode(!devMode)}
-                title="Toggle developer mode"
-              >
-                <FaEdit className="pem-dev-icon" />
-                {devMode ? 'Dev Mode ON' : 'Dev Mode'}
-              </button>
-              <button className="pem-close-button" onClick={onClose} title="Close">
-                <FaTimes />
-              </button>
-            </div>
-          </div>
 
-          {/* Form Progress */}
-          <div className="pem-form-progress">
-            <div className="pem-progress-bar">
-              <div 
-                className="pem-progress-fill" 
-                style={{ width: `${(formProgress.completedFields / formProgress.totalFields) * 100}%` }}
-              />
-            </div>
-            <div className="pem-progress-text">
-              {formProgress.completedFields} of {formProgress.totalFields} fields completed
-            </div>
-          </div>
-
-          {/* Section Status */}
-          <div className="pem-section-status">
-            {Object.entries(sectionStatus).map(([sectionName, status]) => (
-              <div key={sectionName} className="pem-status-indicator">
-                <span className={`pem-status-dot ${status.completed ? 'completed' : 'incomplete'}`} />
-                <span className="pem-status-text">{sectionName}</span>
-                <span className="pem-status-count">({status.completed}/{status.total})</span>
+            {/* Form Progress */}
+            <div className="pem-form-progress">
+              <div className="pem-progress-bar">
+                <div 
+                  className="pem-progress-fill" 
+                  style={{ width: `${(formProgress.completedFields / formProgress.totalFields) * 100}%` }}
+                />
               </div>
-            ))}
+              <div className="pem-progress-text">
+                {formProgress.completedFields} of {formProgress.totalFields} fields completed
+              </div>
+            </div>
+
+            {/* Section Status */}
+            <div className="pem-section-status">
+              {Object.entries(sectionStatus).map(([sectionName, status]) => {
+                // Skip "Professional Background" since it's combined with "Education & Career"
+                if (sectionName === 'Professional Background') return null;
+                
+                return (
+                  <div 
+                    key={sectionName} 
+                    className="pem-status-indicator"
+                    onClick={() => scrollToSection(sectionName)}
+                    title={`Click to jump to ${sectionName} section`}
+                  >
+                    <span className={`pem-status-dot ${status.completed ? 'completed' : 'incomplete'}`} />
+                    <span className="pem-status-text">{sectionName}</span>
+                    <span className="pem-status-count">({status.completed}/{status.total})</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Developer Mode Section */}
+            {devMode && (
+              <div className="pem-developer-mode-section">
+                <div className="pem-dev-section-header">
+                  <h4>⚠️ Developer Mode</h4>
+                  <p>Advanced options for development and testing</p>
+                </div>
+                
+                <div className="pem-dev-warning">
+                  <FaExclamationTriangle />
+                  <span>These actions cannot be undone!</span>
+                </div>
+                
+                <div className="pem-dev-actions">
+                  <button
+                    type="button"
+                    className="pem-delete-profile-button"
+                    onClick={confirmDelete}
+                    disabled={isDeleting}
+                  >
+                    <FaTrash />
+                    {isDeleting ? 'Deleting...' : 'Delete Profile'}
+                  </button>
+                </div>
+                
+                <div className="pem-dev-info">
+                  <p><strong>Profile ID:</strong> {profile.id || 'Not assigned'}</p>
+                  <p><strong>User Type:</strong> {profile.type || 'Unknown'}</p>
+                  <p><strong>Created:</strong> {profile.createdAt ? new Date(profile.createdAt as string).toLocaleDateString() : 'Unknown'}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Dev Mode Toggle */}
+            <button
+              className={`pem-dev-mode-toggle ${devMode ? 'active' : ''}`}
+              onClick={() => setDevMode(!devMode)}
+              title="Toggle developer mode"
+            >
+              <FaEdit className="pem-dev-icon" />
+              {devMode ? 'Dev Mode ON' : 'Dev Mode'}
+            </button>
+
+            {/* Close Button */}
+            <button className="pem-close-button" onClick={onClose} title="Close">
+              <FaTimes />
+            </button>
           </div>
 
-          <form onSubmit={handleSave} className="pem-profile-edit-form">
-            {/* Personal Information Section */}
-            <div className="pem-form-section">
-              <h4>Personal Information</h4>
+          {/* Right Content - Form */}
+          <div className="pem-modal-right-content">
+            <form onSubmit={handleSave} className="pem-profile-edit-form">
+                             {/* Personal Information Section */}
+             <div id="section-personal-information" className="pem-form-section">
+               <h4>Personal Information</h4>
               <div className="pem-form-row">
                 <div className="pem-input-group">
                   <label htmlFor="edit-firstName" className="pem-field-label">
@@ -470,9 +558,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
             </div>
 
-            {/* Education & Career Section */}
-            <div className="pem-form-section">
-              <h4>Education & Career</h4>
+                         {/* Education & Career Section */}
+             <div id="section-education-career" className="pem-form-section">
+               <h4>Education & Career</h4>
               <div className="pem-form-row">
                 <div className="pem-input-group">
                   <label htmlFor="edit-degree" className="pem-field-label">
@@ -615,17 +703,17 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
             </div>
 
-            {/* Skills & Interests Section */}
-            <div className="pem-form-section">
-              <h4>Skills & Interests</h4>
+                         {/* Skills & Interests Section */}
+             <div id="section-skills-interests" className="pem-form-section">
+               <h4>Skills & Interests</h4>
               {renderSkillsSelection()}
               {renderIndustriesSelection()}
               {renderHobbiesSelection()}
             </div>
 
-            {/* Additional Information Section */}
-            <div className="pem-form-section">
-              <h4>Additional Information</h4>
+                         {/* Additional Information Section */}
+             <div id="section-additional-information" className="pem-form-section">
+               <h4>Additional Information</h4>
               <div className="pem-form-row">
                 <div className="pem-input-group">
                   <label htmlFor="edit-ethnicity" className="pem-field-label">
@@ -674,39 +762,6 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
             </div>
 
-            {/* Developer Mode Section */}
-            {devMode && (
-              <div className="pem-developer-mode-section">
-                <div className="pem-dev-section-header">
-                  <h4>⚠️ Developer Mode</h4>
-                  <p>Advanced options for development and testing</p>
-                </div>
-                
-                <div className="pem-dev-warning">
-                  <FaExclamationTriangle />
-                  <span>These actions cannot be undone!</span>
-                </div>
-                
-                <div className="pem-dev-actions">
-                  <button
-                    type="button"
-                    className="pem-delete-profile-button"
-                    onClick={confirmDelete}
-                    disabled={isDeleting}
-                  >
-                    <FaTrash />
-                    {isDeleting ? 'Deleting...' : 'Delete Profile'}
-                  </button>
-                </div>
-                
-                <div className="pem-dev-info">
-                  <p><strong>Profile ID:</strong> {profile.id || 'Not assigned'}</p>
-                  <p><strong>User Type:</strong> {profile.type || 'Unknown'}</p>
-                  <p><strong>Created:</strong> {profile.createdAt ? new Date(profile.createdAt as string).toLocaleDateString() : 'Unknown'}</p>
-                </div>
-              </div>
-            )}
-
             <div className="pem-form-actions">
               <button type="button" className="pem-cancel-button" onClick={onClose}>
                 Cancel
@@ -718,6 +773,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           </form>
         </div>
       </div>
+    </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
