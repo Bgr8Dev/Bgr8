@@ -293,61 +293,61 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
   return (
     <>
-      <div className="profile-edit-modal-overlay" onClick={onClose}>
-        <div className="profile-edit-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <div className="modal-header-content">
+      <div className="pem-profile-edit-modal-overlay" onClick={onClose}>
+        <div className="pem-profile-edit-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="pem-modal-header">
+            <div className="pem-modal-header-content">
               <h3>Edit Your Profile</h3>
               <p>Update your information to improve your matches</p>
             </div>
-            <div className="modal-header-actions">
+            <div className="pem-modal-header-actions">
               <button
-                className="dev-mode-toggle"
+                className="pem-dev-mode-toggle"
                 onClick={() => setDevMode(!devMode)}
                 title="Toggle developer mode"
               >
-                <FaEdit className="dev-icon" />
+                <FaEdit className="pem-dev-icon" />
                 {devMode ? 'Dev Mode ON' : 'Dev Mode'}
               </button>
-              <button className="close-button" onClick={onClose} title="Close">
+              <button className="pem-close-button" onClick={onClose} title="Close">
                 <FaTimes />
               </button>
             </div>
           </div>
 
           {/* Form Progress */}
-          <div className="form-progress">
-            <div className="progress-bar">
+          <div className="pem-form-progress">
+            <div className="pem-progress-bar">
               <div 
-                className="progress-fill" 
+                className="pem-progress-fill" 
                 style={{ width: `${(formProgress.completedFields / formProgress.totalFields) * 100}%` }}
               />
             </div>
-            <div className="progress-text">
+            <div className="pem-progress-text">
               {formProgress.completedFields} of {formProgress.totalFields} fields completed
             </div>
           </div>
 
           {/* Section Status */}
-          <div className="section-status">
+          <div className="pem-section-status">
             {Object.entries(sectionStatus).map(([sectionName, status]) => (
-              <div key={sectionName} className="status-indicator">
-                <span className={`status-dot ${status.completed ? 'completed' : 'incomplete'}`} />
-                <span className="status-text">{sectionName}</span>
-                <span className="status-count">({status.completed}/{status.total})</span>
+              <div key={sectionName} className="pem-status-indicator">
+                <span className={`pem-status-dot ${status.completed ? 'completed' : 'incomplete'}`} />
+                <span className="pem-status-text">{sectionName}</span>
+                <span className="pem-status-count">({status.completed}/{status.total})</span>
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleSave} className="profile-edit-form">
+          <form onSubmit={handleSave} className="pem-profile-edit-form">
             {/* Personal Information Section */}
-            <div className="form-section">
+            <div className="pem-form-section">
               <h4>Personal Information</h4>
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-firstName" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-firstName" className="pem-field-label">
                     First Name *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('firstName')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('firstName')} />
                   </label>
                   <input
                     type="text"
@@ -360,13 +360,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('firstName')}
                   />
                   {validationErrors.firstName && (
-                    <div className="validation-error">{validationErrors.firstName}</div>
+                    <div className="pem-validation-error">{validationErrors.firstName}</div>
                   )}
                 </div>
-                <div className="input-group">
-                  <label htmlFor="edit-lastName" className="field-label">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-lastName" className="pem-field-label">
                     Last Name *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('lastName')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('lastName')} />
                   </label>
                   <input
                     type="text"
@@ -379,16 +379,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('lastName')}
                   />
                   {validationErrors.lastName && (
-                    <div className="validation-error">{validationErrors.lastName}</div>
+                    <div className="pem-validation-error">{validationErrors.lastName}</div>
                   )}
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-email" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-email" className="pem-field-label">
                     Email Address *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('email')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('email')} />
                   </label>
                   <input
                     type="email"
@@ -401,13 +401,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('email')}
                   />
                   {validationErrors.email && (
-                    <div className="validation-error">{validationErrors.email}</div>
+                    <div className="pem-validation-error">{validationErrors.email}</div>
                   )}
                 </div>
-                <div className="input-group">
-                  <label htmlFor="edit-phone" className="field-label">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-phone" className="pem-field-label">
                     Phone Number *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('phone')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('phone')} />
                   </label>
                   <input
                     type="tel"
@@ -420,16 +420,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('phone')}
                   />
                   {validationErrors.phone && (
-                    <div className="validation-error">{validationErrors.phone}</div>
+                    <div className="pem-validation-error">{validationErrors.phone}</div>
                   )}
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-age" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-age" className="pem-field-label">
                     Age *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('age')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('age')} />
                   </label>
                   <input
                     type="number"
@@ -442,13 +442,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('age')}
                   />
                   {validationErrors.age && (
-                    <div className="validation-error">{validationErrors.age}</div>
+                    <div className="pem-validation-error">{validationErrors.age}</div>
                   )}
                 </div>
-                <div className="input-group">
-                  <label htmlFor="edit-county" className="field-label">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-county" className="pem-field-label">
                     County/Location *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('county')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('county')} />
                   </label>
                   <select
                     id="edit-county"
@@ -464,20 +464,20 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     ))}
                   </select>
                   {validationErrors.county && (
-                    <div className="validation-error">{validationErrors.county}</div>
+                    <div className="pem-validation-error">{validationErrors.county}</div>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Education & Career Section */}
-            <div className="form-section">
+            <div className="pem-form-section">
               <h4>Education & Career</h4>
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-degree" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-degree" className="pem-field-label">
                     Degree/Qualification *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('degree')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('degree')} />
                   </label>
                   <input
                     type="text"
@@ -490,13 +490,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('degree')}
                   />
                   {validationErrors.degree && (
-                    <div className="validation-error">{validationErrors.degree}</div>
+                    <div className="pem-validation-error">{validationErrors.degree}</div>
                   )}
                 </div>
-                <div className="input-group">
-                  <label htmlFor="edit-educationLevel" className="field-label">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-educationLevel" className="pem-field-label">
                     Education Level *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('educationLevel')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('educationLevel')} />
                   </label>
                   <select
                     id="edit-educationLevel"
@@ -512,16 +512,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     ))}
                   </select>
                   {validationErrors.educationLevel && (
-                    <div className="validation-error">{validationErrors.educationLevel}</div>
+                    <div className="pem-validation-error">{validationErrors.educationLevel}</div>
                   )}
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-profession" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-profession" className="pem-field-label">
                     Current Profession *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('profession')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('profession')} />
                   </label>
                   <input
                     type="text"
@@ -534,13 +534,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('profession')}
                   />
                   {validationErrors.profession && (
-                    <div className="validation-error">{validationErrors.profession}</div>
+                    <div className="pem-validation-error">{validationErrors.profession}</div>
                   )}
                 </div>
-                <div className="input-group">
-                  <label htmlFor="edit-linkedin" className="field-label">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-linkedin" className="pem-field-label">
                     LinkedIn Profile *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('linkedin')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('linkedin')} />
                   </label>
                   <input
                     type="url"
@@ -553,16 +553,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     data-tooltip={getFieldTooltip('linkedin')}
                   />
                   {validationErrors.linkedin && (
-                    <div className="validation-error">{validationErrors.linkedin}</div>
+                    <div className="pem-validation-error">{validationErrors.linkedin}</div>
                   )}
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-calCom" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-calCom" className="pem-field-label">
                     Cal.com Username
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('calCom')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('calCom')} />
                   </label>
                   <input
                     type="text"
@@ -577,13 +577,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
 
               {/* Past Professions */}
-              <div className="past-professions-container">
-                <label className="field-label">
+              <div className="pem-past-professions-container">
+                <label className="pem-field-label">
                   Past Professions *
-                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
+                  <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
                 </label>
                 {(profile.pastProfessions || ['']).map((profession, index) => (
-                  <div key={index} className="profession-input-row">
+                  <div key={index} className="pem-profession-input-row">
                     <input
                       type="text"
                       value={profession}
@@ -594,7 +594,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     {(profile.pastProfessions || []).length > 1 && (
                       <button
                         type="button"
-                        className="remove-profession-btn"
+                        className="pem-remove-profession-btn"
                         onClick={() => onRemovePastProfession(index)}
                       >
                         Remove
@@ -604,19 +604,19 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 ))}
                 <button
                   type="button"
-                  className="add-profession-btn"
+                  className="pem-add-profession-btn"
                   onClick={onAddPastProfession}
                 >
                   + Add Another Profession
                 </button>
                 {validationErrors.pastProfessions && (
-                  <div className="validation-error">{validationErrors.pastProfessions}</div>
+                  <div className="pem-validation-error">{validationErrors.pastProfessions}</div>
                 )}
               </div>
             </div>
 
             {/* Skills & Interests Section */}
-            <div className="form-section">
+            <div className="pem-form-section">
               <h4>Skills & Interests</h4>
               {renderSkillsSelection()}
               {renderIndustriesSelection()}
@@ -624,13 +624,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             </div>
 
             {/* Additional Information Section */}
-            <div className="form-section">
+            <div className="pem-form-section">
               <h4>Additional Information</h4>
-              <div className="form-row">
-                <div className="input-group">
-                  <label htmlFor="edit-ethnicity" className="field-label">
+              <div className="pem-form-row">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-ethnicity" className="pem-field-label">
                     Ethnicity *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('ethnicity')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('ethnicity')} />
                   </label>
                   <select
                     id="edit-ethnicity"
@@ -646,13 +646,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     ))}
                   </select>
                   {validationErrors.ethnicity && (
-                    <div className="validation-error">{validationErrors.ethnicity}</div>
+                    <div className="pem-validation-error">{validationErrors.ethnicity}</div>
                   )}
                 </div>
-                <div className="input-group">
-                  <label htmlFor="edit-religion" className="field-label">
+                <div className="pem-input-group">
+                  <label htmlFor="edit-religion" className="pem-field-label">
                     Religion *
-                    <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('religion')} />
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('religion')} />
                   </label>
                   <select
                     id="edit-religion"
@@ -668,7 +668,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     ))}
                   </select>
                   {validationErrors.religion && (
-                    <div className="validation-error">{validationErrors.religion}</div>
+                    <div className="pem-validation-error">{validationErrors.religion}</div>
                   )}
                 </div>
               </div>
@@ -676,21 +676,21 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
             {/* Developer Mode Section */}
             {devMode && (
-              <div className="developer-mode-section">
-                <div className="dev-section-header">
+              <div className="pem-developer-mode-section">
+                <div className="pem-dev-section-header">
                   <h4>⚠️ Developer Mode</h4>
                   <p>Advanced options for development and testing</p>
                 </div>
                 
-                <div className="dev-warning">
+                <div className="pem-dev-warning">
                   <FaExclamationTriangle />
                   <span>These actions cannot be undone!</span>
                 </div>
                 
-                <div className="dev-actions">
+                <div className="pem-dev-actions">
                   <button
                     type="button"
-                    className="delete-profile-button"
+                    className="pem-delete-profile-button"
                     onClick={confirmDelete}
                     disabled={isDeleting}
                   >
@@ -699,7 +699,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   </button>
                 </div>
                 
-                <div className="dev-info">
+                <div className="pem-dev-info">
                   <p><strong>Profile ID:</strong> {profile.id || 'Not assigned'}</p>
                   <p><strong>User Type:</strong> {profile.type || 'Unknown'}</p>
                   <p><strong>Created:</strong> {profile.createdAt ? new Date(profile.createdAt as string).toLocaleDateString() : 'Unknown'}</p>
@@ -707,11 +707,11 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
             )}
 
-            <div className="form-actions">
-              <button type="button" className="cancel-button" onClick={onClose}>
+            <div className="pem-form-actions">
+              <button type="button" className="pem-cancel-button" onClick={onClose}>
                 Cancel
               </button>
-              <button type="submit" className="save-button" disabled={isSaving}>
+              <button type="submit" className="pem-save-button" disabled={isSaving}>
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
@@ -721,13 +721,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="delete-confirm-modal-overlay" onClick={cancelDelete}>
-          <div className="delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="delete-confirm-modal-header">
+        <div className="pem-delete-confirm-modal-overlay" onClick={cancelDelete}>
+          <div className="pem-delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pem-delete-confirm-modal-header">
               <h3>⚠️ Confirm Profile Deletion</h3>
             </div>
-            <div className="delete-confirm-modal-content">
-              <div className="delete-warning">
+            <div className="pem-delete-confirm-modal-content">
+              <div className="pem-delete-warning">
                 <h4>This action cannot be undone!</h4>
                 <p>Deleting your profile will:</p>
                 <ul>
@@ -736,15 +736,15 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   <li>Remove you from the matching system</li>
                 </ul>
               </div>
-              <div className="delete-note">
+              <div className="pem-delete-note">
                 <h5>Note:</h5>
                 <p>If you want to keep your account but just update your information, use the "Save Changes" button instead.</p>
               </div>
-              <div className="delete-confirm-actions">
-                <button className="cancel-delete-button" onClick={cancelDelete}>
+              <div className="pem-delete-confirm-actions">
+                <button className="pem-cancel-delete-button" onClick={cancelDelete}>
                   Cancel
                 </button>
-                <button className="confirm-delete-button" onClick={handleDelete} disabled={isDeleting}>
+                <button className="pem-confirm-delete-button" onClick={handleDelete} disabled={isDeleting}>
                   {isDeleting ? 'Deleting...' : 'Yes, Delete My Profile'}
                 </button>
               </div>

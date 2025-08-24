@@ -1,4 +1,4 @@
-.profile-edit-modal {
+.pem-profile-edit-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.profile-edit-modal-content {
+.pem-profile-edit-modal-content {
   background: white;
   border-radius: 12px;
   padding: 24px;
@@ -23,7 +23,7 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-.profile-edit-modal-header {
+.pem-profile-edit-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,14 +32,14 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
-.profile-edit-modal-title {
+.pem-profile-edit-modal-title {
   font-size: 24px;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.profile-edit-modal-close {
+.pem-profile-edit-modal-close {
   background: none;
   border: none;
   font-size: 24px;
@@ -50,25 +50,25 @@
   transition: all 0.2s ease;
 }
 
-.profile-edit-modal-close:hover {
+.pem-profile-edit-modal-close:hover {
   background-color: #f0f0f0;
   color: #333;
 }
 
-.profile-edit-form {
+.pem-profile-edit-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.form-section {
+.pem-form-section {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
   border-left: 4px solid #007bff;
 }
 
-.form-section-title {
+.pem-form-section-title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
@@ -78,49 +78,49 @@
   gap: 8px;
 }
 
-.form-section-title .section-status {
+.pem-form-section-title .pem-section-status {
   font-size: 14px;
   padding: 4px 8px;
   border-radius: 12px;
   font-weight: 500;
 }
 
-.section-status.completed {
+.pem-section-status.completed {
   background-color: #d4edda;
   color: #155724;
 }
 
-.section-status.incomplete {
+.pem-section-status.incomplete {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-.form-row {
+.pem-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 16px;
 }
 
-.form-row.full-width {
+.pem-form-row.full-width {
   grid-template-columns: 1fr;
 }
 
-.form-group {
+.pem-form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.form-label {
+.pem-form-label {
   font-weight: 500;
   color: #555;
   font-size: 14px;
 }
 
-.form-input,
-.form-select,
-.form-textarea {
+.pem-form-input,
+.pem-form-select,
+.pem-form-textarea {
   padding: 10px 12px;
   border: 2px solid #e1e5e9;
   border-radius: 6px;
@@ -128,48 +128,48 @@
   transition: border-color 0.2s ease;
 }
 
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.pem-form-input:focus,
+.pem-form-select:focus,
+.pem-form-textarea:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.form-textarea {
+.pem-form-textarea {
   resize: vertical;
   min-height: 80px;
 }
 
-.form-input.error,
-.form-select.error,
-.form-textarea.error {
+.pem-form-input.error,
+.pem-form-select.error,
+.pem-form-textarea.error {
   border-color: #dc3545;
 }
 
-.error-message {
+.pem-error-message {
   color: #dc3545;
   font-size: 12px;
   margin-top: 4px;
 }
 
-.array-input-container {
+.pem-array-input-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.array-input-row {
+.pem-array-input-row {
   display: flex;
   gap: 8px;
   align-items: center;
 }
 
-.array-input-row input {
+.pem-array-input-row input {
   flex: 1;
 }
 
-.array-input-row button {
+.pem-array-input-row button {
   background: #dc3545;
   color: white;
   border: none;
@@ -180,11 +180,11 @@
   transition: background-color 0.2s ease;
 }
 
-.array-input-row button:hover {
+.pem-array-input-row button:hover {
   background: #c82333;
 }
 
-.add-button {
+.pem-add-button {
   background: #28a745;
   color: white;
   border: none;
@@ -196,18 +196,18 @@
   align-self: flex-start;
 }
 
-.add-button:hover {
+.pem-add-button:hover {
   background: #218838;
 }
 
-.form-progress {
+.pem-form-progress {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 20px;
 }
 
-.progress-bar {
+.pem-progress-bar {
   width: 100%;
   height: 8px;
   background: #e9ecef;
@@ -216,20 +216,20 @@
   margin-bottom: 8px;
 }
 
-.progress-fill {
+.pem-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #007bff, #0056b3);
   transition: width 0.3s ease;
 }
 
-.progress-text {
+.pem-progress-text {
   text-align: center;
   font-size: 14px;
   color: #666;
   font-weight: 500;
 }
 
-.modal-actions {
+.pem-modal-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -238,7 +238,7 @@
   border-top: 2px solid #f0f0f0;
 }
 
-.developer-mode-toggle {
+.pem-developer-mode-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -246,12 +246,12 @@
   color: #666;
 }
 
-.developer-mode-toggle input[type="checkbox"] {
+.pem-developer-mode-toggle input[type="checkbox"] {
   width: 16px;
   height: 16px;
 }
 
-.delete-profile-button {
+.pem-delete-profile-button {
   background: #dc3545;
   color: white;
   border: none;
@@ -262,21 +262,21 @@
   transition: background-color 0.2s ease;
 }
 
-.delete-profile-button:hover {
+.pem-delete-profile-button:hover {
   background: #c82333;
 }
 
-.delete-profile-button:disabled {
+.pem-delete-profile-button:disabled {
   background: #6c757d;
   cursor: not-allowed;
 }
 
-.action-buttons {
+.pem-action-buttons {
   display: flex;
   gap: 12px;
 }
 
-.cancel-button {
+.pem-cancel-button {
   background: #6c757d;
   color: white;
   border: none;
@@ -287,11 +287,11 @@
   transition: background-color 0.2s ease;
 }
 
-.cancel-button:hover {
+.pem-cancel-button:hover {
   background: #5a6268;
 }
 
-.save-button {
+.pem-save-button {
   background: #007bff;
   color: white;
   border: none;
@@ -302,33 +302,281 @@
   transition: background-color 0.2s ease;
 }
 
-.save-button:hover {
+.pem-save-button:hover {
   background: #0056b3;
 }
 
-.save-button:disabled {
+.pem-save-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Additional classes needed for the TSX */
+.pem-profile-edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.pem-modal-header-content h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.pem-modal-header-content p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.pem-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pem-field-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pem-info-icon {
+  color: #007bff;
+  font-size: 14px;
+  cursor: help;
+}
+
+.pem-validation-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.pem-past-professions-container {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.pem-profession-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pem-profession-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.pem-remove-profession-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.pem-remove-profession-btn:hover {
+  background: #c82333;
+}
+
+.pem-add-profession-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+  align-self: flex-start;
+}
+
+.pem-add-profession-btn:hover {
+  background: #218838;
+}
+
+.pem-developer-mode-section {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.pem-dev-section-header h4 {
+  color: #856404;
+  margin: 0 0 8px 0;
+}
+
+.pem-dev-section-header p {
+  color: #856404;
+  margin: 0;
+  font-size: 14px;
+}
+
+.pem-dev-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #856404;
+  font-weight: 600;
+  margin: 16px 0;
+}
+
+.pem-dev-actions {
+  margin: 16px 0;
+}
+
+.pem-dev-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #856404;
+}
+
+.pem-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.pem-delete-confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+}
+
+.pem-delete-confirm-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.pem-delete-confirm-modal-header h3 {
+  color: #dc3545;
+  margin: 0 0 16px 0;
+}
+
+.pem-delete-warning h4 {
+  color: #dc3545;
+  margin: 0 0 12px 0;
+}
+
+.pem-delete-warning ul {
+  margin: 12px 0;
+  padding-left: 20px;
+}
+
+.pem-delete-warning li {
+  margin: 4px 0;
+  color: #333;
+}
+
+.pem-delete-note h5 {
+  color: #666;
+  margin: 16px 0 8px 0;
+}
+
+.pem-delete-note p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.pem-delete-confirm-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pem-cancel-delete-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.pem-cancel-delete-button:hover {
+  background: #5a6268;
+}
+
+.pem-confirm-delete-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.pem-confirm-delete-button:hover {
+  background: #c82333;
+}
+
+.pem-confirm-delete-button:disabled {
   background: #6c757d;
   cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
-  .profile-edit-modal-content {
+  .pem-profile-edit-modal-content {
     width: 95%;
     padding: 16px;
     max-height: 95vh;
   }
 
-  .form-row {
+  .pem-form-row {
     grid-template-columns: 1fr;
   }
 
-  .modal-actions {
+  .pem-modal-actions {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
 
-  .action-buttons {
+  .pem-action-buttons {
     justify-content: center;
   }
 }
