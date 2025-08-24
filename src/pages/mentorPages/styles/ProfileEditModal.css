@@ -3,7 +3,7 @@
   border-radius: 20px;
   max-width: 1200px;
   width: 95%;
-  max-height: 90vh;
+  max-height: 95vh;
   overflow: hidden;
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -27,13 +27,13 @@
 
 /* Left Sidebar - Progress Section */
 .pem-modal-left-sidebar {
-  width: 300px;
+  width: 280px;
   background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
   border-right: 1px solid var(--gray-200);
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
@@ -60,7 +60,7 @@
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  max-height: 90vh;
+  max-height: 95vh;
 }
 
 .pem-profile-edit-modal-content {
@@ -116,9 +116,9 @@
 .pem-form-section {
   background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
   border-radius: 20px;
-  padding: 28px;
+  padding: 24px;
   border-left: 6px solid var(--accent);
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -219,8 +219,8 @@
 .pem-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 16px;
   animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
@@ -490,7 +490,7 @@
   gap: 12px;
   font-size: 15px;
   font-weight: 700;
-  color: var(--white);
+  color: var(--white) !important;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   align-self: flex-start;
@@ -501,6 +501,39 @@
   letter-spacing: 0.5px;
   min-width: 140px;
   justify-content: center;
+  font-family: inherit;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Ensure button styles are not overridden */
+  background-image: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  /* Ensure text styling */
+  text-decoration: none;
+  line-height: 1.2;
+  white-space: nowrap;
+  /* Force button styling */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Ensure proper button behavior */
+  -webkit-tap-highlight-color: transparent;
+  /* Ensure focus states work properly */
+  outline: none;
+}
+
+.pem-developer-mode-toggle:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pem-developer-mode-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .pem-developer-mode-toggle::before {
@@ -552,9 +585,10 @@
 
 .pem-dev-icon {
   font-size: 16px;
-  color: var(--white);
+  color: var(--white) !important;
   transition: all 0.3s ease;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  flex-shrink: 0;
 }
 
 .pem-developer-mode-toggle:hover .pem-dev-icon {
@@ -564,14 +598,14 @@
 
 /* Active state when dev mode is enabled */
 .pem-developer-mode-toggle.active {
-  background: linear-gradient(135deg, var(--success), var(--success-dark));
-  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
-  animation: activeGlow 2s ease-in-out infinite alternate;
+  background: linear-gradient(135deg, var(--success), var(--success-dark)) !important;
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4) !important;
+  animation: activeGlow 2s ease-in-out infinite alternate, devModeToggleActive 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .pem-developer-mode-toggle.active:hover {
-  background: linear-gradient(135deg, var(--success-dark), var(--success));
-  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, var(--success-dark), var(--success)) !important;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5) !important;
 }
 
 @keyframes activeGlow {
@@ -580,6 +614,86 @@
   }
   100% { 
     box-shadow: 0 6px 24px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+}
+
+@keyframes devModeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px) scale(0.98);
+    max-height: 200px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-top: 12px;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 800px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    margin-top: auto;
+  }
+}
+
+@keyframes devModeSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 800px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    margin-top: auto;
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px) scale(0.98);
+    max-height: 200px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-top: 12px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+  }
+}
+
+@keyframes devModeToggleActive {
+  0% {
+    transform: scale(0.95);
+    filter: brightness(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes devModeElementSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -853,7 +967,15 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: devModeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transform-origin: top center;
+  /* Ensure smooth exit animation */
+  will-change: transform, opacity, max-height;
+}
+
+.pem-developer-mode-section.exiting {
+  animation: devModeSlideOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .pem-developer-mode-section:hover {
@@ -875,12 +997,16 @@
 .pem-dev-section-header h4 {
   color: var(--warning-dark);
   margin: 0 0 8px 0;
+  animation: devModeElementSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: 0.1s;
 }
 
 .pem-dev-section-header p {
   color: var(--warning-dark);
   margin: 0;
   font-size: 14px;
+  animation: devModeElementSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: 0.2s;
 }
 
 .pem-dev-warning {
@@ -890,16 +1016,22 @@
   color: var(--warning-dark);
   font-weight: 600;
   margin: 16px 0;
+  animation: devModeElementSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: 0.3s;
 }
 
 .pem-dev-actions {
   margin: 16px 0;
+  animation: devModeElementSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: 0.4s;
 }
 
 .pem-dev-info p {
   margin: 4px 0;
   font-size: 14px;
   color: var(--warning-dark);
+  animation: devModeElementSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: 0.5s;
 }
 
 .pem-form-actions {
@@ -1310,7 +1442,7 @@
 @media (max-width: 768px) {
   .pem-profile-edit-modal {
     flex-direction: column;
-    max-height: 95vh;
+    max-height: 98vh;
     width: 98%;
   }
 
@@ -1319,6 +1451,7 @@
     border-right: none;
     border-bottom: 1px solid var(--gray-200);
     padding: 16px;
+    gap: 16px;
   }
 
   .pem-modal-right-content {
@@ -1329,11 +1462,18 @@
   .pem-profile-edit-modal-content {
     width: 95%;
     padding: 16px;
-    max-height: 95vh;
+    max-height: 98vh;
   }
 
   .pem-form-row {
     grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .pem-form-section {
+    padding: 20px;
+    margin-bottom: 20px;
   }
 
   .pem-modal-actions {

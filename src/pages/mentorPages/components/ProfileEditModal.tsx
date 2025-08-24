@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTimes, FaEdit, FaTrash, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
 import { MentorMenteeProfile, ProfileFormData, ValidationErrors, FormProgress, SectionStatus } from '../types/mentorTypes';
 import { degreePlaceholders } from '../types/mentorConstants';
@@ -46,6 +46,22 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [devMode, setDevMode] = useState(false);
+  const [isDevModeExiting, setIsDevModeExiting] = useState(false);
+
+  // Handle dev mode exit animation
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (!devMode && isDevModeExiting) {
+      // Wait for exit animation to complete before resetting
+      timer = setTimeout(() => {
+        setIsDevModeExiting(false);
+      }, 500); // Match CSS animation duration
+    } else if (devMode && !isDevModeExiting) {
+      // Reset exiting state when dev mode is turned on
+      setIsDevModeExiting(false);
+    }
+    return () => clearTimeout(timer);
+  }, [devMode, isDevModeExiting]);
 
   if (!isOpen) return null;
 
@@ -377,8 +393,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             </div>
 
             {/* Developer Mode Section */}
-            {devMode && (
-              <div className="pem-developer-mode-section">
+            {(devMode || isDevModeExiting) && (
+              <div className={`pem-developer-mode-section ${isDevModeExiting ? 'exiting' : ''}`}>
                 <div className="pem-dev-section-header">
                   <h4>⚠️ Developer Mode</h4>
                   <p>Advanced options for development and testing</p>
@@ -411,8 +427,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
             {/* Dev Mode Toggle */}
             <button
-              className={`pem-dev-mode-toggle ${devMode ? 'active' : ''}`}
-              onClick={() => setDevMode(!devMode)}
+              className={`pem-developer-mode-toggle ${devMode ? 'active' : ''}`}
+              onClick={() => {
+                if (devMode) {
+                  // Start exit animation when turning off dev mode
+                  setIsDevModeExiting(true);
+                }
+                setDevMode(!devMode);
+              }}
               title="Toggle developer mode"
             >
               <FaEdit className="pem-dev-icon" />
