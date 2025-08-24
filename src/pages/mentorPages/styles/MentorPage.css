@@ -3427,13 +3427,7 @@ html, body {
 }
 
 @media (max-width: 480px) {
-  .mentor-page {
-    padding-top: 60px;
-  }
   
-  .mentor-header {
-    padding: 40px 0;
-  }
   
   .mentor-header h1 {
     font-size: 1.75rem;
