@@ -854,53 +854,103 @@ export default function GenerateRandomProfile() {
     setSuccess(null);
 
     try {
-      // Get all existing mentors from the users collection by checking mentorProgram subcollections
+      // 1. Get all existing mentors from the users collection by checking mentorProgram subcollections
       const usersSnapshot = await getDocs(collection(firestore, 'users'));
       const mentorsData: MentorMenteeProfile[] = [];
-      
+
       for (const userDoc of usersSnapshot.docs) {
         try {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const userData = mentorProgramDoc.data();
             if (userData.type === 'mentor') {
-              mentorsData.push({
-                ...userData,
-                id: userDoc.id
-              } as MentorMenteeProfile);
+              const profile = mapDocumentToMentorMenteeProfile(userData, userDoc.id);
+              profile.isGenerated = false;
+              mentorsData.push(profile);
             }
           }
         } catch (error) {
           console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
         }
       }
-      
-      if (mentorsData.length === 0) {
-        setError('No mentors found to generate availability for.');
+
+      // 2. Get all generated mentors from the "Generated Mentors" collection
+      let generatedMentorsData: MentorMenteeProfile[] = [];
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        generatedMentorsData = generatedMentorsSnapshot.docs.map(doc => {
+          const profile = mapDocumentToMentorMenteeProfile(doc.data(), doc.id);
+          profile.isGenerated = true;
+          return profile;
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentors:', error);
+      }
+
+      // 3. Get all generated mentees from the "Generated Mentees" collection
+      let generatedMenteesData: MentorMenteeProfile[] = [];
+      try {
+        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        generatedMenteesData = generatedMenteesSnapshot.docs.map(doc => {
+          const profile = mapDocumentToMentorMenteeProfile(doc.data(), doc.id);
+          profile.isGenerated = true;
+          return profile;
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentees:', error);
+      }
+
+      // Combine all profiles that need availability data
+      const allProfiles = [...mentorsData, ...generatedMentorsData, ...generatedMenteesData];
+
+      if (allProfiles.length === 0) {
+        setError('No profiles found to generate availability for.');
         return;
       }
 
       let generatedCount = 0;
-      for (const mentor of mentorsData) {
-        // Check if availability already exists for this mentor
-        const mentorId = typeof mentor.id === 'string' ? mentor.id : mentor.uid;
-        const availabilityDoc = await getDoc(doc(firestore, 'users', mentorId, 'availabilities', 'default'));
-        
-        // If overwriting, delete existing availability first
-        if (overwriteAvailability && availabilityDoc.exists()) {
-          await deleteDoc(doc(firestore, 'users', mentorId, 'availabilities', 'default'));
-        }
-        
-        // Generate availability if none exists or if overwriting
-        if (!availabilityDoc.exists() || overwriteAvailability) {
-          const mentorUid = mentor.uid || mentorId; // Use uid if available, fallback to doc id
-          const availabilityData = generateRandomAvailability(mentorUid);
-          await setDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'), availabilityData);
-          generatedCount++;
+      for (const profile of allProfiles) {
+        try {
+          // Check if availability already exists for this profile
+          const profileId = typeof profile.id === 'string' ? profile.id : profile.uid;
+          
+          if (profile.isGenerated) {
+            // For generated profiles, store availability in the generated collection itself
+            const availabilityDoc = await getDoc(doc(firestore, profile.type === 'mentor' ? 'Generated Mentors' : 'Generated Mentees', profileId, 'availabilities', 'default'));
+            
+            // If overwriting, delete existing availability first
+            if (overwriteAvailability && availabilityDoc.exists()) {
+              await deleteDoc(doc(firestore, profile.type === 'mentor' ? 'Generated Mentors' : 'Generated Mentees', profileId, 'availabilities', 'default'));
+            }
+            
+            // Generate availability if none exists or if overwriting
+            if (!availabilityDoc.exists() || overwriteAvailability) {
+              const availabilityData = generateRandomAvailability(profileId);
+              await setDoc(doc(firestore, profile.type === 'mentor' ? 'Generated Mentors' : 'Generated Mentees', profileId, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          } else {
+            // For existing profiles, store availability in the users collection
+            const availabilityDoc = await getDoc(doc(firestore, 'users', profileId, 'availabilities', 'default'));
+            
+            // If overwriting, delete existing availability first
+            if (overwriteAvailability && availabilityDoc.exists()) {
+              await deleteDoc(doc(firestore, 'users', profileId, 'availabilities', 'default'));
+            }
+            
+            // Generate availability if none exists or if overwriting
+            if (!availabilityDoc.exists() || overwriteAvailability) {
+              const availabilityData = generateRandomAvailability(profileId);
+              await setDoc(doc(firestore, 'users', profileId, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          }
+        } catch (error) {
+          console.error(`Error processing availability for profile ${profile.id}:`, error);
         }
       }
 
-      setSuccess(`Generated availability data for ${generatedCount} mentors!`);
+      setSuccess(`Generated availability data for ${generatedCount} profiles (${mentorsData.length} existing mentors, ${generatedMentorsData.length} generated mentors, ${generatedMenteesData.length} generated mentees)!`);
     } catch (err) {
       console.error('Error generating availability:', err);
       setError('Failed to generate availability. Please try again.');
@@ -909,29 +959,77 @@ export default function GenerateRandomProfile() {
     }
   };
 
-
+  // Helper function to safely map DocumentData to MentorMenteeProfile
+  const mapDocumentToMentorMenteeProfile = (data: Record<string, any>, id: string): MentorMenteeProfile => {
+    return {
+      uid: data.uid || id,
+      userRef: data.userRef || `users/${id}`,
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      name: data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'Unknown',
+      email: data.email || '',
+      phone: data.phone || '',
+      age: data.age || '',
+      degree: data.degree || '',
+      educationLevel: data.educationLevel || '',
+      county: data.county || '',
+      profession: data.profession || '',
+      pastProfessions: data.pastProfessions || [],
+      linkedin: data.linkedin || '',
+      calCom: data.calCom || '',
+      hobbies: data.hobbies || [],
+      ethnicity: data.ethnicity || '',
+      religion: data.religion || '',
+      skills: data.skills || [],
+      lookingFor: data.lookingFor || [],
+      industries: data.industries || [],
+      isMentor: data.isMentor || data.type === 'mentor',
+      isMentee: data.isMentee || data.type === 'mentee',
+      type: data.type || 'mentor',
+      isGenerated: data.isGenerated || false,
+      id: id
+    };
+  };
 
   const fetchAvailableMentors = async () => {
     try {
-      // Get all users and check their mentorProgram subcollections
-      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       const mentorsData: MentorMenteeProfile[] = [];
       
+      // 1. Get all existing mentors from users collection
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       for (const userDoc of usersSnapshot.docs) {
         try {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const userData = mentorProgramDoc.data();
             if (userData.type === 'mentor') {
-              mentorsData.push({
-                ...userData,
-                id: userDoc.id
-              } as MentorMenteeProfile);
+              const profile = mapDocumentToMentorMenteeProfile(userData, userDoc.id);
+              profile.isGenerated = false;
+              mentorsData.push(profile);
             }
           }
         } catch (error) {
           console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
         }
+      }
+      
+      // 2. Get all generated mentors from "Generated Mentors" collection
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        for (const mentorDoc of generatedMentorsSnapshot.docs) {
+          try {
+            const mentorData = mentorDoc.data();
+            if (mentorData.type === 'mentor') {
+              const profile = mapDocumentToMentorMenteeProfile(mentorData, mentorDoc.id);
+              profile.isGenerated = true;
+              mentorsData.push(profile);
+            }
+          } catch (error) {
+            console.error(`Error processing generated mentor ${mentorDoc.id}:`, error);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching generated mentors:', error);
       }
       
       setAvailableMentors(mentorsData);
@@ -954,25 +1052,45 @@ export default function GenerateRandomProfile() {
       let generatedCount = 0;
       
       for (const mentorId of selectedMentors) {
-        // Find the mentor document to get their uid
+        // Find the mentor document to get their details
         const mentorDoc = availableMentors.find(m => m.id === mentorId);
         if (!mentorDoc) continue;
         
-        const mentorUid = mentorDoc.uid;
-        
-        // Check if availability already exists for this mentor
-        const availabilityDoc = await getDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'));
-        
-        // If overwriting, delete existing availability first
-        if (overwriteAvailability && availabilityDoc.exists()) {
-          await deleteDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'));
-        }
-        
-        // Generate availability if none exists or if overwriting
-        if (!availabilityDoc.exists() || overwriteAvailability) {
-          const availabilityData = generateRandomAvailability(mentorUid);
-          await setDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'), availabilityData);
-          generatedCount++;
+        try {
+          if (mentorDoc.isGenerated) {
+            // For generated mentors, store availability in the Generated Mentors collection
+            const availabilityDoc = await getDoc(doc(firestore, 'Generated Mentors', mentorId, 'availabilities', 'default'));
+            
+            // If overwriting, delete existing availability first
+            if (overwriteAvailability && availabilityDoc.exists()) {
+              await deleteDoc(doc(firestore, 'Generated Mentors', mentorId, 'availabilities', 'default'));
+            }
+            
+            // Generate availability if none exists or if overwriting
+            if (!availabilityDoc.exists() || overwriteAvailability) {
+              const availabilityData = generateRandomAvailability(mentorId);
+              await setDoc(doc(firestore, 'Generated Mentors', mentorId, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          } else {
+            // For existing mentors, store availability in the users collection
+            const mentorUid = mentorDoc.uid || mentorId;
+            const availabilityDoc = await getDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'));
+            
+            // If overwriting, delete existing availability first
+            if (overwriteAvailability && availabilityDoc.exists()) {
+              await deleteDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'));
+            }
+            
+            // Generate availability if none exists or if overwriting
+            if (!availabilityDoc.exists() || overwriteAvailability) {
+              const availabilityData = generateRandomAvailability(mentorUid);
+              await setDoc(doc(firestore, 'users', mentorUid, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          }
+        } catch (error) {
+          console.error(`Error processing availability for mentor ${mentorId}:`, error);
         }
       }
 
@@ -1012,10 +1130,10 @@ export default function GenerateRandomProfile() {
     setSuccess(null);
 
     try {
-      // Get all users and check their mentorProgram subcollections
-      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       let generatedCount = 0;
       
+      // 1. Get all existing mentors from users collection
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       for (const userDoc of usersSnapshot.docs) {
         try {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
@@ -1035,7 +1153,51 @@ export default function GenerateRandomProfile() {
         }
       }
       
-      setSuccess(`Generated availability data for ${generatedCount} mentors!`);
+      // 2. Get all generated mentors and generate availability for them
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        for (const mentorDoc of generatedMentorsSnapshot.docs) {
+          try {
+            const mentorData = mentorDoc.data();
+            if (mentorData.type === 'mentor') {
+              const mentorId = mentorDoc.id;
+              
+              // Always overwrite existing availability for site-wide generation
+              const availabilityData = generateRandomAvailability(mentorId);
+              await setDoc(doc(firestore, 'Generated Mentors', mentorId, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          } catch (error) {
+            console.error(`Error processing generated mentor ${mentorDoc.id}:`, error);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing generated mentors:', error);
+      }
+      
+      // 3. Get all generated mentees and generate availability for them (if they need it)
+      try {
+        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        for (const menteeDoc of generatedMenteesSnapshot.docs) {
+          try {
+            const menteeData = menteeDoc.data();
+            if (menteeData.type === 'mentee') {
+              const menteeId = menteeDoc.id;
+              
+              // Always overwrite existing availability for site-wide generation
+              const availabilityData = generateRandomAvailability(menteeId);
+              await setDoc(doc(firestore, 'Generated Mentees', menteeId, 'availabilities', 'default'), availabilityData);
+              generatedCount++;
+            }
+          } catch (error) {
+            console.error(`Error processing generated mentee ${menteeDoc.id}:`, error);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing generated mentees:', error);
+      }
+      
+      setSuccess(`Generated availability data for ${generatedCount} profiles!`);
     } catch (err) {
       console.error('Error generating site-wide availability:', err);
       setError('Failed to generate site-wide availability. Please try again.');
