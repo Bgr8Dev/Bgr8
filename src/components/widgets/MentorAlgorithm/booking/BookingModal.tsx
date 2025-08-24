@@ -168,7 +168,19 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   };
 
   const handleBooking = async () => {
-    if (!currentUser || !selectedSlot || !sessionDate) return;
+    console.log('=== BOOKING BUTTON CLICKED ===');
+    console.log('Current user:', currentUser);
+    console.log('Selected slot:', selectedSlot);
+    console.log('Session date:', sessionDate);
+    console.log('Booking method:', bookingMethod);
+    console.log('Selected event type:', selectedEventType);
+    console.log('=============================');
+    
+    if (!currentUser || !selectedSlot || !sessionDate) {
+      console.error('Missing required data for booking:', { currentUser, selectedSlot, sessionDate });
+      setError('Missing required data for booking. Please try again.');
+      return;
+    }
     
     // Validate Cal.com booking requirements
     if (bookingMethod === 'calcom' && !selectedEventType) {
@@ -295,7 +307,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       language: 'en',
       metadata: {
         source: 'B8 Mentor Platform',
-        mentorName: mentor.name,
+        mentorName: String(mentor.name || 'Unknown'),
         menteeName: currentUser.displayName || menteeEmail || 'Unknown'
       }
     };
@@ -307,7 +319,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     const bookingData = {
       mentorId: mentor.uid,
       menteeId: currentUser.uid,
-      mentorName: mentor.name,
+      mentorName: String(mentor.name || 'Unknown'),
       menteeName: currentUser.displayName || (menteeEmail || 'Unknown'),
       mentorEmail: mentorEmail || '',
       menteeEmail: menteeEmail || '',
@@ -315,8 +327,8 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       startTime: selectedSlot.startTime,
       endTime: selectedSlot.endTime,
       status: 'confirmed', // Cal.com bookings are confirmed immediately
-      createdAt: new Date(),
-      sessionDate: sessionDate ? new Date(sessionDate) : new Date(),
+      createdAt: Timestamp.fromDate(new Date()),
+      sessionDate: sessionDate ? Timestamp.fromDate(new Date(sessionDate)) : Timestamp.fromDate(new Date()),
       calComBookingId: calComBooking.id,
       calComBookingUid: calComBooking.uid,
       eventTypeId: selectedEventType.id,
@@ -374,12 +386,10 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       }
     }
 
-
-
     const bookingData: Omit<Booking, 'id'> = {
       mentorId: mentor.uid,
       menteeId: currentUser.uid,
-      mentorName: mentor.name,
+      mentorName: String(mentor.name || 'Unknown'),
       menteeName: currentUser.displayName || (menteeEmail || 'Unknown'),
       mentorEmail: mentorEmail || '',
       menteeEmail: menteeEmail || '',
@@ -387,8 +397,8 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       startTime: selectedSlot!.startTime,
       endTime: selectedSlot!.endTime,
       status: 'pending',
-      createdAt: new Date(),
-      sessionDate: sessionDate ? new Date(sessionDate) : new Date()
+      createdAt: Timestamp.fromDate(new Date()),
+      sessionDate: sessionDate ? Timestamp.fromDate(new Date(sessionDate)) : Timestamp.fromDate(new Date())
     };
 
     await addDoc(collection(firestore, 'bookings'), bookingData);
@@ -656,6 +666,13 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                     onClick={handleBooking}
                     disabled={booking}
                     className="booking-modal-confirm-btn"
+                    style={{ 
+                      display: 'block', 
+                      visibility: 'visible', 
+                      opacity: 1,
+                      position: 'relative',
+                      zIndex: 10
+                    }}
                   >
                     {booking ? 'Creating Booking...' : 'Confirm Booking'}
                   </button>
