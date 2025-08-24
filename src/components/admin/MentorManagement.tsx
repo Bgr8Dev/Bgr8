@@ -6,7 +6,7 @@ import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenMa
 import { Booking } from '../../types/bookings';
 import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck, FaPoundSign } from 'react-icons/fa';
-import MentorModal from '../widgets/MentorAlgorithm/MentorModal';
+import AdminMentorModal from './AdminMentorModal';
 import '../../styles/adminStyles/MentorManagement.css';
 import BookingsTable from './BookingsTable';
 import BookingDetailsModal from './BookingDetailsModal';
@@ -1037,8 +1037,8 @@ export default function MentorManagement() {
               </tbody>
             </table>
           </div>
-          <MentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} />
-          <MentorModal open={editModalOpen} onClose={() => { setEditModalOpen(false); setEditUser(null); }} user={editUser} editMode={true} onSave={handleSaveEdit} />
+          <AdminMentorModal open={modalOpen} onClose={() => setModalOpen(false)} user={modalUser} mode="view" />
+          <AdminMentorModal open={editModalOpen} onClose={() => { setEditModalOpen(false); setEditUser(null); }} user={editUser} mode="edit" onSave={handleSaveEdit} />
         </>
       )}
       
