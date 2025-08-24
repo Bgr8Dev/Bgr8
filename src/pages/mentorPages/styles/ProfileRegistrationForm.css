@@ -1,24 +1,21 @@
 /* Profile Registration Form */
-.mentor-registration {
+.prf-mentor-registration {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
 }
 
-.registration-header {
+.prf-registration-header {
   text-align: center;
   margin-bottom: 40px;
 }
 
 /* Fixed Back Button Container */
-.back-button-container {
+.prf-back-button-container {
   position: sticky;
   top: 80px;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.95);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--gray-200);
+  background: transparent;
   padding: 16px 0;
   margin-bottom: 24px;
   display: flex;
@@ -26,7 +23,7 @@
   align-items: center;
 }
 
-.back-button {
+.prf-back-button {
   background: var(--white);
   border: 2px solid var(--accent);
   padding: 12px 20px;
@@ -43,14 +40,14 @@
   min-height: 44px;
 }
 
-.back-button:hover {
+.prf-back-button:hover {
   background: var(--accent);
   color: var(--white);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(59, 167, 242, 0.3);
 }
 
-.registration-header h2 {
+.prf-registration-header h2 {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--text);
@@ -58,7 +55,7 @@
   line-height: 1.2;
 }
 
-.registration-header p {
+.prf-registration-header p {
   font-size: 1.125rem;
   color: var(--gray-600);
   margin: 0;
@@ -68,12 +65,12 @@
 }
 
 /* Form Progress */
-.form-progress {
+.prf-form-progress {
   margin-bottom: 32px;
   text-align: center;
 }
 
-.progress-bar {
+.prf-progress-bar {
   width: 100%;
   height: 8px;
   background: var(--gray-200);
@@ -82,20 +79,20 @@
   margin-bottom: 12px;
 }
 
-.progress-fill {
+.prf-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--mentor) 0%, var(--mentee) 100%);
   transition: width 0.3s ease;
 }
 
-.progress-text {
+.prf-progress-text {
   font-size: 14px;
   color: var(--gray-600);
   font-weight: 500;
 }
 
 /* Section Status */
-.section-status {
+.prf-section-status {
   display: flex;
   justify-content: center;
   gap: 24px;
@@ -103,7 +100,7 @@
   flex-wrap: wrap;
 }
 
-.status-indicator {
+.prf-status-indicator {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -111,30 +108,30 @@
   color: var(--gray-600);
 }
 
-.status-dot {
+.prf-status-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
 
-.status-dot.completed {
+.prf-status-dot.completed {
   background: var(--success);
   box-shadow: 0 0 0 2px var(--success-light);
 }
 
-.status-dot.incomplete {
+.prf-status-dot.incomplete {
   background: var(--gray-400);
   box-shadow: 0 0 0 2px var(--gray-200);
 }
 
-.status-count {
+.prf-status-count {
   font-weight: 600;
   color: var(--gray-700);
 }
 
 /* Registration Form */
-.registration-form {
+.prf-registration-form {
   background: var(--white);
   border-radius: 24px;
   padding: 40px;
@@ -143,7 +140,7 @@
   position: relative;
 }
 
-.registration-form::before {
+.prf-registration-form::before {
   content: '';
   position: absolute;
   top: 0;
@@ -154,58 +151,82 @@
   border-radius: 24px 24px 0 0;
 }
 
-.form-section {
-  margin-bottom: 40px;
-  padding: 32px;
+.prf-form-section {
+  margin-bottom: 48px;
+  padding: 40px;
   background: var(--gray-50);
-  border-radius: 16px;
+  border-radius: 20px;
   border: 2px solid transparent;
   transition: all 0.3s ease;
   position: relative;
 }
 
-.form-section:hover {
+.prf-form-section:hover {
   border-color: var(--mentor-light);
   background: var(--white);
   box-shadow: var(--shadow-md);
 }
 
-.form-section h3 {
+.prf-form-section h3 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 24px;
   padding-bottom: 16px;
+  padding-left: 0;
   border-bottom: 2px solid var(--gray-200);
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.form-section h3::before {
+.prf-form-section h3::before {
   content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 60px;
-  height: 2px;
+  width: 4px;
+  height: 24px;
   background: var(--mentor);
-  border-radius: 1px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
-.form-row {
+.prf-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: 32px;
+  margin-bottom: 32px;
 }
 
-.form-row:last-child {
+.prf-form-row:last-child {
   margin-bottom: 0;
 }
 
-.registration-form input,
-.registration-form select {
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.info-icon {
+  color: var(--gray-500);
+  font-size: 14px;
+  cursor: help;
+}
+
+.prf-registration-form input,
+.prf-registration-form select {
   width: 100%;
-  padding: 16px 20px;
+  padding: 18px 20px;
   border: 2px solid var(--gray-200);
   border-radius: 12px;
   font-size: 16px;
@@ -214,21 +235,23 @@
   background: var(--white);
   transition: all 0.2s ease;
   outline: none;
+  min-height: 56px;
+  box-sizing: border-box;
 }
 
-.registration-form input:focus,
-.registration-form select:focus {
+.prf-registration-form input:focus,
+.prf-registration-form select:focus {
   border-color: var(--mentor);
   box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.1);
   transform: translateY(-1px);
 }
 
-.registration-form input::placeholder {
+.prf-registration-form input::placeholder {
   color: var(--gray-500);
   font-weight: 400;
 }
 
-.registration-form select {
+.prf-registration-form select {
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linecap='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
@@ -238,36 +261,38 @@
   padding-right: 48px;
 }
 
-.registration-form select:hover {
+.prf-registration-form select:hover {
   border-color: var(--gray-300);
 }
 
 /* Skills Selection */
-.skills-selection-container,
-.hobbies-selection-container {
-  margin-bottom: 32px;
+.prf-skills-selection-container,
+.prf-hobbies-selection-container {
+  margin-bottom: 40px;
 }
 
-.skills-selection-container .field-label,
-.hobbies-selection-container .field-label {
-  display: block;
-  margin-bottom: 16px;
+.prf-skills-selection-container .field-label,
+.prf-hobbies-selection-container .field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
   font-weight: 600;
   color: var(--text);
   font-size: 16px;
 }
 
-.category-title {
+.prf-category-title {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--gray-700);
-  margin: 24px 0 16px;
-  padding-bottom: 8px;
+  margin: 28px 0 20px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--gray-200);
 }
 
-.skill-tag-selectable,
-.hobby-tag-selectable {
+.prf-skill-tag-selectable,
+.prf-hobby-tag-selectable {
   background: var(--white);
   border: 2px solid var(--gray-200);
   color: var(--gray-700);
@@ -281,23 +306,23 @@
   display: inline-block;
 }
 
-.skill-tag-selectable:hover:not(.selected),
-.hobby-tag-selectable:hover:not(.selected) {
+.prf-skill-tag-selectable:hover:not(.selected),
+.prf-hobby-tag-selectable:hover:not(.selected) {
   border-color: var(--mentor);
-  background: var(--mentor-light);
-  color: var(--mentor-dark);
-  transform: translateY(-1px);
+  background: var(--mentor-hover);
+  color: var(--white);
+  transform: translateY(-1px);  
 }
 
-.skill-tag-selectable:focus,
-.hobby-tag-selectable:focus {
+.prf-skill-tag-selectable:focus,
+.prf-hobby-tag-selectable:focus {
   outline: none;
   border-color: var(--mentor);
   box-shadow: 0 0 0 3px rgba(224, 106, 92, 0.1);
 }
 
-.skill-tag-selectable.selected,
-.hobby-tag-selectable.selected {
+.prf-skill-tag-selectable.selected,
+.prf-hobby-tag-selectable.selected {
   background: var(--mentor);
   color: var(--white);
   border-color: var(--mentor);
@@ -305,21 +330,21 @@
   box-shadow: var(--shadow-md);
 }
 
-.skill-tag-selectable.selected:hover,
-.hobby-tag-selectable.selected:hover {
+.prf-skill-tag-selectable.selected:hover,
+.prf-hobby-tag-selectable.selected:hover {
   background: var(--mentor-dark);
   border-color: var(--mentor-dark);
 }
 
-.tags-grid {
+.prf-tags-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.selected-skills-summary,
-.selected-hobbies-summary {
+.prf-selected-skills-summary,
+.prf-selected-hobbies-summary {
   background: var(--success-light);
   border: 1px solid var(--success);
   border-radius: 12px;
@@ -327,7 +352,7 @@
   margin-top: 16px;
 }
 
-.summary-label {
+.prf-summary-label {
   display: block;
   font-weight: 600;
   color: var(--success-dark);
@@ -335,13 +360,13 @@
   font-size: 14px;
 }
 
-.selected-tags {
+.prf-selected-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.selected-tag {
+.prf-selected-tag {
   background: var(--success);
   color: var(--white);
   padding: 6px 12px;
@@ -353,7 +378,7 @@
   gap: 8px;
 }
 
-.remove-tag {
+.prf-remove-tag {
   background: none;
   border: none;
   color: var(--white);
@@ -370,83 +395,92 @@
   transition: all 0.2s ease;
 }
 
-.remove-tag:hover {
+.prf-remove-tag:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
 /* Past Professions */
-.past-professions-container {
-  margin-top: 24px;
+.prf-past-professions-container {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gray-200);
 }
 
-.profession-input-row {
+.prf-profession-input-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
   align-items: center;
 }
 
-.profession-input-row input {
+.prf-profession-input-row input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 16px 20px;
   border: 2px solid var(--gray-200);
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  min-height: 56px;
+  box-sizing: border-box;
 }
 
-.profession-input-row input:focus {
+.prf-profession-input-row input:focus {
   border-color: var(--mentor);
   box-shadow: 0 0 0 3px rgba(224, 106, 92, 0.1);
 }
 
-.remove-profession-btn {
+.prf-remove-profession-btn {
   background: var(--error);
   color: var(--white);
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  min-width: 80px;
+  min-width: 100px;
+  min-height: 56px;
+  box-sizing: border-box;
 }
 
-.remove-profession-btn:hover {
+.prf-remove-profession-btn:hover {
   background: var(--error-dark);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-.add-profession-btn {
+.prf-add-profession-btn {
   background: var(--mentor);
   color: var(--white);
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 16px 28px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 8px;
+  margin-top: 16px;
+  min-height: 56px;
+  box-sizing: border-box;
 }
 
-.add-profession-btn:hover {
+.prf-add-profession-btn:hover {
   background: var(--mentor-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
 /* Looking For Container */
-.looking-for-container {
+.prf-looking-for-container {
   margin-top: 24px;
 }
 
-.looking-for-tags-container {
+.prf-looking-for-tags-container {
   margin-bottom: 16px;
 }
 
-.selected-looking-for-summary {
+.prf-selected-looking-for-summary {
   background: var(--info-light);
   border: 1px solid var(--info);
   border-radius: 12px;
@@ -454,32 +488,34 @@
   margin-top: 16px;
 }
 
-.selected-looking-for-summary .summary-label {
+.prf-selected-looking-for-summary .prf-summary-label {
   color: var(--info-dark);
 }
 
-.selected-looking-for-summary .selected-tag {
+.prf-selected-looking-for-summary .prf-selected-tag {
   background: var(--info);
 }
 
 /* Submit Button */
-.submit-button {
+.prf-submit-button {
   width: 100%;
   background: linear-gradient(135deg, var(--mentor) 0%, var(--mentee) 100%);
   color: var(--white);
   border: none;
-  padding: 20px 32px;
-  border-radius: 16px;
+  padding: 24px 32px;
+  border-radius: 20px;
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  margin-top: 32px;
+  margin-top: 40px;
+  min-height: 72px;
+  box-sizing: border-box;
 }
 
-.submit-button::before {
+.prf-submit-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -490,26 +526,26 @@
   transition: left 0.5s ease;
 }
 
-.submit-button:hover::before {
+.prf-submit-button:hover::before {
   left: 100%;
 }
 
-.submit-button:hover:not(:disabled) {
+.prf-submit-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-xl);
 }
 
-.submit-button:active:not(:disabled) {
+.prf-submit-button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.submit-button:disabled {
+.prf-submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-.submit-button:disabled::after {
+.prf-submit-button:disabled::after {
   content: 'Please complete all required fields';
   position: absolute;
   top: 50%;
@@ -520,87 +556,87 @@
 }
 
 /* Validation */
-.registration-form input:invalid,
-.registration-form select:invalid {
+.prf-registration-form input:invalid,
+.prf-registration-form select:invalid {
   border-color: var(--error);
 }
 
-.registration-form input:valid,
-.registration-form select:valid {
+.prf-registration-form input:valid,
+.prf-registration-form select:valid {
   border-color: var(--success);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .mentor-registration {
+  .prf-mentor-registration {
     padding: 20px;
   }
 
-  .back-button-container {
+  .prf-back-button-container {
     top: 70px;
     padding: 12px 0;
     margin-bottom: 20px;
   }
 
-  .back-button {
+  .prf-back-button {
     padding: 10px 16px;
     font-size: 13px;
     min-height: 40px;
   }
 
-  .registration-form {
+  .prf-registration-form {
     padding: 24px;
   }
 
-  .form-section {
+  .prf-form-section {
     padding: 20px;
   }
 
-  .form-row {
+  .prf-form-row {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .registration-header {
+  .prf-registration-header {
     margin-bottom: 32px;
   }
 
-  .registration-header h2 {
+  .prf-registration-header h2 {
     font-size: 2rem;
   }
 
-  .submit-button {
+  .prf-submit-button {
     padding: 16px 24px;
     font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .back-button-container {
+  .prf-back-button-container {
     top: 60px;
     padding: 10px 0;
     margin-bottom: 16px;
   }
 
-  .back-button {
+  .prf-back-button {
     padding: 8px 14px;
     font-size: 12px;
     min-height: 36px;
   }
 
-  .registration-form {
+  .prf-registration-form {
     padding: 20px;
   }
 
-  .form-section {
+  .prf-form-section {
     padding: 16px;
   }
 
-  .registration-header h2 {
+  .prf-registration-header h2 {
     font-size: 1.75rem;
   }
 
-  .submit-button {
+  .prf-submit-button {
     padding: 14px 20px;
     font-size: 15px;
   }

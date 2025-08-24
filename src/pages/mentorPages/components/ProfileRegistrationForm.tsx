@@ -65,7 +65,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   };
 
   const renderSkillsSelection = () => (
-    <div className="skills-selection-container">
+    <div className="prf-skills-selection-container">
       <label className="field-label">
         Skills {selectedRole === MENTOR ? 'you can teach' : 'you want to learn'} *
         <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('skills')} />
@@ -73,13 +73,13 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       <div className="skills-tags-container">
         {Object.entries(skillsByCategory).map(([category, skills]) => (
           <div key={category} className="skill-category-section">
-            <h5 className="category-title">{category}</h5>
-            <div className="tags-grid">
+            <h5 className="prf-category-title">{category}</h5>
+            <div className="prf-tags-grid">
               {skills.map((skill) => (
                 <button
                   key={skill}
                   type="button"
-                  className={`skill-tag-selectable ${
+                  className={`prf-skill-tag-selectable ${
                     profileForm.skills.includes(skill) ? 'selected' : ''
                   }`}
                   onClick={() => {
@@ -97,15 +97,15 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         ))}
       </div>
       {profileForm.skills.length > 0 && (
-        <div className="selected-skills-summary">
-          <span className="summary-label">Selected skills:</span>
-          <div className="selected-tags">
+        <div className="prf-selected-skills-summary">
+          <span className="prf-summary-label">Selected skills:</span>
+          <div className="prf-selected-tags">
             {profileForm.skills.map((skill, index) => (
-              <span key={index} className="selected-tag">
+              <span key={index} className="prf-selected-tag">
                 {skill}
                 <button
                   type="button"
-                  className="remove-tag"
+                  className="prf-remove-tag"
                   onClick={() => {
                     const newSkills = profileForm.skills.filter((_, i) => i !== index);
                     onArrayChange('skills', newSkills);
@@ -125,18 +125,18 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   );
 
   const renderIndustriesSelection = () => (
-    <div className="skills-selection-container">
+    <div className="prf-skills-selection-container">
       <label className="field-label">
         Industries {selectedRole === MENTOR ? 'you work in' : 'you\'re interested in'} *
         <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('industries')} />
       </label>
       <div className="skills-tags-container">
-        <div className="tags-grid">
+        <div className="prf-tags-grid">
           {industriesList.map((industry) => (
             <button
               key={industry}
               type="button"
-              className={`skill-tag-selectable ${
+              className={`prf-skill-tag-selectable ${
                 profileForm.industries.includes(industry) ? 'selected' : ''
               }`}
               onClick={() => {
@@ -152,15 +152,15 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
       </div>
       {profileForm.industries.length > 0 && (
-        <div className="selected-skills-summary">
-          <span className="summary-label">Selected industries:</span>
-          <div className="selected-tags">
+        <div className="prf-selected-skills-summary">
+          <span className="prf-summary-label">Selected industries:</span>
+          <div className="prf-selected-tags">
             {profileForm.industries.map((industry, index) => (
-              <span key={index} className="selected-tag">
+              <span key={index} className="prf-selected-tag">
                 {industry}
                 <button
                   type="button"
-                  className="remove-tag"
+                  className="prf-remove-tag"
                   onClick={() => {
                     const newIndustries = profileForm.industries.filter((_, i) => i !== index);
                     onArrayChange('industries', newIndustries);
@@ -180,7 +180,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   );
 
   const renderHobbiesSelection = () => (
-    <div className="hobbies-selection-container">
+    <div className="prf-hobbies-selection-container">
       <label className="field-label">
         Hobbies & Interests *
         <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('hobbies')} />
@@ -188,13 +188,13 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       <div className="hobbies-tags-container">
         {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
           <div key={category} className="hobby-category-section">
-            <h5 className="category-title">{category}</h5>
-            <div className="tags-grid">
+            <h5 className="prf-category-title">{category}</h5>
+            <div className="prf-tags-grid">
               {hobbies.map((hobby) => (
                 <button
                   key={hobby}
                   type="button"
-                  className={`hobby-tag-selectable ${
+                  className={`prf-hobby-tag-selectable ${
                     profileForm.hobbies.includes(hobby) ? 'selected' : ''
                   }`}
                   onClick={() => {
@@ -212,15 +212,15 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         ))}
       </div>
       {profileForm.hobbies.length > 0 && (
-        <div className="selected-hobbies-summary">
-          <span className="summary-label">Selected hobbies:</span>
-          <div className="selected-tags">
+        <div className="prf-selected-hobbies-summary">
+          <span className="prf-summary-label">Selected hobbies:</span>
+          <div className="prf-selected-tags">
             {profileForm.hobbies.map((hobby, index) => (
-              <span key={index} className="selected-tag">
+              <span key={index} className="prf-selected-tag">
                 {hobby}
                 <button
                   type="button"
-                  className="remove-tag"
+                  className="prf-remove-tag"
                   onClick={() => {
                     const newHobbies = profileForm.hobbies.filter((_, i) => i !== index);
                     onArrayChange('hobbies', newHobbies);
@@ -243,18 +243,18 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     if (selectedRole !== MENTEE) return null;
 
     return (
-      <div className="looking-for-container">
+      <div className="prf-looking-for-container">
         <label className="field-label">
           What are you looking to learn? *
           <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('lookingFor')} />
         </label>
-        <div className="looking-for-tags-container">
-          <div className="tags-grid">
+        <div className="prf-looking-for-tags-container">
+          <div className="prf-tags-grid">
             {Object.values(skillsByCategory).flat().map((skill) => (
               <button
                 key={skill}
                 type="button"
-                className={`skill-tag-selectable ${
+                className={`prf-skill-tag-selectable ${
                   profileForm.lookingFor.includes(skill) ? 'selected' : ''
                 }`}
                 onClick={() => {
@@ -270,15 +270,15 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           </div>
         </div>
         {profileForm.lookingFor.length > 0 && (
-          <div className="selected-looking-for-summary">
-            <span className="summary-label">Learning goals:</span>
-            <div className="selected-tags">
+          <div className="prf-selected-looking-for-summary">
+            <span className="prf-summary-label">Learning goals:</span>
+            <div className="prf-selected-tags">
               {profileForm.lookingFor.map((goal, index) => (
-                <span key={index} className="selected-tag">
+                <span key={index} className="prf-selected-tag">
                   {goal}
                   <button
                     type="button"
-                    className="remove-tag"
+                    className="prf-remove-tag"
                     onClick={() => {
                       const newLookingFor = profileForm.lookingFor.filter((_, i) => i !== index);
                       onArrayChange('lookingFor', newLookingFor);
@@ -299,48 +299,48 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   };
 
   return (
-    <div className="mentor-registration">
+    <div className="prf-mentor-registration">
       {/* Fixed Back Button - Always visible at top */}
-      <div className="back-button-container">
-        <button onClick={onBack} className="back-button">
+      <div className="prf-back-button-container">
+        <button onClick={onBack} className="prf-back-button">
           <FaArrowLeft /> Back to role selection
         </button>
       </div>
       
-      <div className="registration-header">
+      <div className="prf-registration-header">
         <h2>Complete Your {selectedRole === MENTOR ? 'Mentor' : 'Mentee'} Profile</h2>
         <p>Help us find the perfect match by providing detailed information about yourself</p>
       </div>
 
       {/* Form Progress */}
-      <div className="form-progress">
-        <div className="progress-bar">
+      <div className="prf-form-progress">
+        <div className="prf-progress-bar">
           <div 
-            className="progress-fill" 
+            className="prf-progress-fill" 
             style={{ width: `${(formProgress.completedFields / formProgress.totalFields) * 100}%` }}
           />
         </div>
-        <div className="progress-text">
+        <div className="prf-progress-text">
           {formProgress.completedFields} of {formProgress.totalFields} fields completed
         </div>
       </div>
 
       {/* Section Status */}
-      <div className="section-status">
+      <div className="prf-section-status">
         {Object.entries(sectionStatus).map(([sectionName, status]) => (
-          <div key={sectionName} className="status-indicator">
-            <span className={`status-dot ${status.completed ? 'completed' : 'incomplete'}`} />
+          <div key={sectionName} className="prf-status-indicator">
+            <span className={`prf-status-dot ${status.completed ? 'completed' : 'incomplete'}`} />
             <span className="status-text">{sectionName}</span>
-            <span className="status-count">({status.completed}/{status.total})</span>
+            <span className="prf-status-count">({status.completed}/{status.total})</span>
           </div>
         ))}
       </div>
 
-      <form onSubmit={onSubmit} className="registration-form">
+      <form onSubmit={onSubmit} className="prf-registration-form">
         {/* Personal Information Section */}
-        <div className="form-section">
+        <div className="prf-form-section">
           <h3>Personal Information</h3>
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="firstName" className="field-label">
                 First Name *
@@ -381,7 +381,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="email" className="field-label">
                 Email Address *
@@ -422,7 +422,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="age" className="field-label">
                 Age *
@@ -470,9 +470,9 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
 
         {/* Education & Career Section */}
-        <div className="form-section">
+        <div className="prf-form-section">
           <h3>Education & Career</h3>
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="degree" className="field-label">
                 Degree/Qualification *
@@ -516,7 +516,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="profession" className="field-label">
                 Current Profession *
@@ -557,7 +557,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="calCom" className="field-label">
                 Cal.com Username
@@ -576,13 +576,13 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           </div>
 
           {/* Past Professions */}
-          <div className="past-professions-container">
+          <div className="prf-past-professions-container">
             <label className="field-label">
               Past Professions *
               <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
             </label>
             {profileForm.pastProfessions.map((profession, index) => (
-              <div key={index} className="profession-input-row">
+              <div key={index} className="prf-profession-input-row">
                 <input
                   type="text"
                   value={profession}
@@ -593,7 +593,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
                 {profileForm.pastProfessions.length > 1 && (
                   <button
                     type="button"
-                    className="remove-profession-btn"
+                    className="prf-remove-profession-btn"
                     onClick={() => onRemovePastProfession(index)}
                   >
                     Remove
@@ -603,7 +603,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             ))}
             <button
               type="button"
-              className="add-profession-btn"
+              className="prf-add-profession-btn"
               onClick={onAddPastProfession}
             >
               + Add Another Profession
@@ -615,7 +615,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
 
         {/* Skills & Interests Section */}
-        <div className="form-section">
+        <div className="prf-form-section">
           <h3>Skills & Interests</h3>
           {renderSkillsSelection()}
           {renderIndustriesSelection()}
@@ -624,9 +624,9 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
 
         {/* Additional Information Section */}
-        <div className="form-section">
+        <div className="prf-form-section">
           <h3>Additional Information</h3>
-          <div className="form-row">
+          <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="ethnicity" className="field-label">
                 Ethnicity *
@@ -674,7 +674,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           </div>
         </div>
 
-        <button type="submit" className="submit-button">
+        <button type="submit" className="prf-submit-button">
           Complete Profile
         </button>
       </form>
