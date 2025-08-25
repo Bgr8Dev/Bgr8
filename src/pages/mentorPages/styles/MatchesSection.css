@@ -138,25 +138,57 @@
   margin: 0;
 }
 
+/* Match Score Display */
 .ms-match-score {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-weight: 700;
-  font-size: 1.25rem;
+  gap: 8px;
   text-align: center;
 }
 
-.ms-match-score svg {
-  font-size: 24px;
-  margin-bottom: 4px;
+.ms-match-percentage-display {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-percentage-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ms-percentage-circle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: var(--white);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.ms-percentage-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  z-index: 2;
+  position: relative;
 }
 
 .ms-score-label {
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0.8;
+  font-size: 0.875rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -308,53 +340,73 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .ms-matches-section {
-    padding: 20px;
-  }
-
-  .ms-matches-header-content h2 {
-    font-size: 2rem;
-  }
-
-  .ms-summary-stats {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
   .ms-matches-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-
+  
   .ms-match-card {
     padding: 20px;
   }
-
+  
   .ms-match-header {
     flex-direction: column;
     text-align: center;
+    gap: 16px;
   }
-
-  .ms-match-score {
-    margin-top: 16px;
+  
+  .ms-percentage-circle {
+    width: 60px;
+    height: 60px;
   }
-
-  .ms-action-button {
-    min-width: auto;
-    width: 100%;
+  
+  .ms-percentage-circle::before {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .ms-percentage-text {
+    font-size: 1rem;
+  }
+  
+  .ms-summary-stats {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .ms-stat-item {
+    padding: 16px;
+  }
+  
+  .ms-stat-number {
+    font-size: 2rem;
   }
 }
 
 @media (max-width: 480px) {
-  .ms-matches-header-content h2 {
-    font-size: 1.75rem;
+  .ms-matches-section {
+    padding: 20px 16px;
   }
-
-  .ms-stat-number {
+  
+  .ms-matches-header-content h2 {
     font-size: 2rem;
   }
-
+  
   .ms-match-card {
     padding: 16px;
+  }
+  
+  .ms-percentage-circle {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .ms-percentage-circle::before {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .ms-percentage-text {
+    font-size: 0.875rem;
   }
 }

@@ -3,13 +3,22 @@ import { useAuth } from '../../../hooks/useAuth';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { CalComService } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
-import { getBestMatchesForUser } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { getBestMatchesForUser, MatchResult, calculateMatchScore } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { 
   MentorMenteeProfile, 
   MentorAvailability,
   EnhancedAvailability,
   MentorBookings
 } from './mentorTypes';
+
+// Type for profiles with match data
+type ProfileWithMatchData = MentorMenteeProfile & {
+  matchData?: {
+    score: number;
+    percentage: number;
+    reasons: string[];
+  };
+};
 
 export const useMentorData = () => {
   const { currentUser } = useAuth();
@@ -22,8 +31,57 @@ export const useMentorData = () => {
   const [mentorBookings, setMentorBookings] = useState<MentorBookings>({});
   const [hasProfile, setHasProfile] = useState(false);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
-  const [bestMatches, setBestMatches] = useState<any[]>([]);
+  const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
+
+  // Function to calculate match score for a single profile
+  const calculateProfileMatch = async (profile: MentorMenteeProfile): Promise<ProfileWithMatchData> => {
+    if (!currentUserProfile || !currentUser) {
+      return profile as ProfileWithMatchData;
+    }
+
+    try {
+      // Use the algorithm's scoring logic to calculate match
+      const matchResult = await calculateMatchScore(currentUserProfile, profile);
+      
+      // Add match information to the profile
+      return {
+        ...profile,
+        // Store match data in a way that doesn't conflict with the base interface
+        matchData: {
+          score: matchResult.score,
+          percentage: matchResult.percentage,
+          reasons: matchResult.reasons
+        }
+      };
+    } catch (error) {
+      console.error('Error calculating match score for profile:', profile.uid, error);
+      return profile as ProfileWithMatchData;
+    }
+  };
+
+  // Function to calculate match scores for all profiles
+  const calculateAllProfileMatches = async (profiles: MentorMenteeProfile[]): Promise<MentorMenteeProfile[]> => {
+    if (!currentUserProfile) {
+      return profiles;
+    }
+
+    const profilesWithMatches: ProfileWithMatchData[] = [];
+    
+    for (const profile of profiles) {
+      const profileWithMatch = await calculateProfileMatch(profile);
+      profilesWithMatches.push(profileWithMatch);
+    }
+
+    // Sort profiles by match percentage (highest first)
+    profilesWithMatches.sort((a, b) => {
+      const aScore = a.matchData?.percentage || 0;
+      const bScore = b.matchData?.percentage || 0;
+      return bScore - aScore;
+    });
+
+    return profilesWithMatches;
+  };
 
   const checkUserProfile = async () => {
     try {
@@ -40,6 +98,10 @@ export const useMentorData = () => {
         const profileData = mentorDoc.data() as MentorMenteeProfile;
         setCurrentUserProfile(profileData);
         setHasProfile(true);
+        
+        // Automatically find matches when profile is first loaded
+        console.log('MentorPage: Profile found, automatically finding matches...');
+        setTimeout(() => findMatches(), 1000); // Small delay to ensure state is set
       } else {
         setHasProfile(false);
       }
@@ -69,6 +131,10 @@ export const useMentorData = () => {
         return;
       }
 
+      // Normalize the type to lowercase for consistent comparison
+      const normalizedTargetType = typeof targetType === 'string' ? targetType.toLowerCase() : targetType.toString().toLowerCase();
+      console.log('MentorPage: Normalized target type:', normalizedTargetType);
+
       const profilesData: MentorMenteeProfile[] = [];
       
       // Fetch from traditional user profiles
@@ -80,9 +146,13 @@ export const useMentorData = () => {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const mentorData = mentorProgramDoc.data() as MentorMenteeProfile;
+            
+            // Normalize the profile type for comparison
+            const profileType = typeof mentorData.type === 'string' ? mentorData.type.toLowerCase() : '';
+            
             // If current user is a mentee, show mentors to learn from
             // If current user is a mentor, show mentees to mentor
-            if (targetType === 'MENTEE' ? mentorData.type === 'MENTOR' : mentorData.type === 'MENTEE') {
+            if (normalizedTargetType === 'mentee' ? profileType === 'mentor' : profileType === 'mentee') {
               profilesData.push({
                 ...mentorData,
                 id: userDoc.id,
@@ -98,7 +168,7 @@ export const useMentorData = () => {
       
       // Fetch from appropriate generated collection based on current user's role
       try {
-        const collectionName = targetType === 'MENTEE' ? 'Generated Mentors' : 'Generated Mentees';
+        const collectionName = normalizedTargetType === 'mentee' ? 'Generated Mentors' : 'Generated Mentees';
         console.log('MentorPage: Fetching from collection:', collectionName);
         const generatedQuery = query(collection(firestore, collectionName));
         const generatedSnapshot = await getDocs(generatedQuery);
@@ -118,10 +188,16 @@ export const useMentorData = () => {
       
       console.log('MentorPage: Found profiles:', profilesData.length, profilesData);
       
-      setMentors(profilesData);
-      setFilteredMentors(profilesData);
+      setMentors(await calculateAllProfileMatches(profilesData));
+      setFilteredMentors(await calculateAllProfileMatches(profilesData));
       
       await updateAllMentorAvailability();
+      
+      // Automatically find matches after profiles are loaded
+      if (currentUser && currentUserProfile) {
+        console.log('MentorPage: Automatically finding matches after profile fetch...');
+        await findMatches();
+      }
     } catch (error) {
       console.error('MentorPage: Error fetching mentors:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch mentors');
@@ -223,7 +299,12 @@ export const useMentorData = () => {
 
     try {
       setLoadingMatches(true);
+      console.log('Finding matches for user:', currentUser.uid);
+      console.log('Current user profile:', currentUserProfile);
+      
       const matches = await getBestMatchesForUser(currentUser.uid);
+      console.log('Algorithm found matches:', matches);
+      
       setBestMatches(matches);
       setLoadingMatches(false);
       return matches;
@@ -280,6 +361,9 @@ export const useMentorData = () => {
       const updateData = {
         ...profileData,
         updatedAt: new Date().toISOString(),
+        // Ensure boolean fields are set based on type
+        isMentor: typeof profileData.type === 'string' ? profileData.type.toLowerCase() === 'mentor' : false,
+        isMentee: typeof profileData.type === 'string' ? profileData.type.toLowerCase() === 'mentee' : false
       };
 
       await updateDoc(profileRef, updateData);
@@ -324,7 +408,7 @@ export const useMentorData = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    if (hasProfile && currentUser && currentUserProfile?.type) {
+    if (hasProfile && currentUser && currentUserProfile?.type && typeof currentUserProfile.type === 'string') {
       fetchProfiles(currentUserProfile.type);
     }
   }, [hasProfile, currentUser, currentUserProfile?.type]);

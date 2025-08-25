@@ -55,7 +55,6 @@ export default function MentorPage() {
     loadingMatches,
     fetchEnhancedAvailability,
     fetchMentorBookings,
-    findMatches,
     createProfile,
     updateProfile,
     deleteProfile
@@ -126,16 +125,22 @@ export default function MentorPage() {
       ...profileForm,
       type: selectedRole,
       uid: currentUser?.uid || '',
+      userRef: currentUser?.uid || '',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      isMentor: selectedRole.toLowerCase() === 'mentor',
+      isMentee: selectedRole.toLowerCase() === 'mentee'
     });
 
     const profileData = {
       ...profileForm,
       type: selectedRole,
       uid: currentUser?.uid || '',
+      userRef: currentUser?.uid || '',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      isMentor: selectedRole.toLowerCase() === 'mentor',
+      isMentee: selectedRole.toLowerCase() === 'mentee'
     };
 
     console.log('Calling createProfile...');
@@ -164,7 +169,9 @@ export default function MentorPage() {
   const handleProfileSave = async (profileData: ProfileFormData) => {
     const updatedProfile = {
       ...profileData,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      isMentor: profileData.type?.toLowerCase() === 'mentor',
+      isMentee: profileData.type?.toLowerCase() === 'mentee'
     };
     
     const success = await updateProfile(updatedProfile);
@@ -180,10 +187,6 @@ export default function MentorPage() {
       setShowProfileEdit(false);
     }
     return success;
-  };
-
-  const handleFindMatches = async () => {
-    await findMatches();
   };
 
   const handleAvailabilityManage = () => {
@@ -310,6 +313,12 @@ export default function MentorPage() {
     setSelectedMentor(mentor);
     setShowCalComModal(true);
     console.log('Cal.com integration not yet implemented for:', mentor.firstName);
+  };
+
+  // Helper function to extract match score from profile
+  const getMatchScore = (profile: MentorMenteeProfile): number | undefined => {
+    const profileWithMatch = profile as MentorMenteeProfile & { matchData?: { percentage: number } };
+    return profileWithMatch.matchData?.percentage;
   };
 
   const handlePageChange = (page: number) => {
@@ -557,6 +566,9 @@ export default function MentorPage() {
               💡 <strong>Tip:</strong> This platform includes both real user profiles and generated test profiles 
               (marked with 🎲) to help you explore the matching system and test features.
             </p>
+            <p className="info-text" style={{ marginTop: '8px', fontSize: '0.9rem', opacity: '0.9' }}>
+              🎯 <strong>Smart Matching:</strong> Your matches are automatically calculated and ranked by compatibility percentage.
+            </p>
           </div>
           
           {/* User Profile Summary */}
@@ -578,14 +590,6 @@ export default function MentorPage() {
                   data-tooltip="Edit your profile information"
                 >
                   Edit Profile
-                </button>
-                <button 
-                  className="find-matches-btn"
-                  onClick={handleFindMatches}
-                  disabled={loadingMatches}
-                  data-tooltip="Find mentors/mentees that match your profile"
-                >
-                  {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
                 </button>
                 {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' && (
                   <button 
@@ -669,7 +673,18 @@ export default function MentorPage() {
         {/* Right Main Content */}
         <div className="mentor-main-content">
           {/* Matches Section - Moved from sidebar to main content */}
-          {bestMatches.length > 0 && (
+          {loadingMatches ? (
+            <div className="main-matches-section">
+              <div className="ms-matches-header">
+                <h2>Finding Your Best Matches...</h2>
+                <p>We're analyzing profiles to find the perfect matches for you</p>
+              </div>
+              <div className="loading-spinner">
+                <div className="spinner"></div>
+                <p>Calculating matches...</p>
+              </div>
+            </div>
+          ) : bestMatches.length > 0 ? (
             <div className="main-matches-section">
               <MatchesSection
                 bestMatches={bestMatches}
@@ -679,7 +694,7 @@ export default function MentorPage() {
                 onCalCom={handleCalCom}
               />
             </div>
-          )}
+          ) : null}
 
           {/* Bookings Widget - Only show for mentors */}
           {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' && (
@@ -815,6 +830,7 @@ export default function MentorPage() {
                       onProfileClick={handleProfileCardClick}
                       onBooking={handleBooking}
                       onCalCom={handleCalCom}
+                      matchScore={getMatchScore(profile)}
                     />
                   ))}
                 </div>

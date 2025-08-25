@@ -23,6 +23,9 @@ export interface ProfileFormData {
   skills: string[];
   lookingFor: string[];
   industries: string[];
+  userRef?: string;
+  isMentor?: boolean;
+  isMentee?: boolean;
 }
 
 export interface MentorAvailability {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaStar, FaVideo, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
+import { FaVideo, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
 import { MentorMenteeProfile, MatchResult } from '../types/mentorTypes';
 import '../styles/MatchesSection.css';
 
@@ -22,17 +22,17 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
     return null;
   }
 
-  const getMatchScoreColor = (score: number) => {
-    if (score >= 90) return 'var(--success)';
-    if (score >= 80) return 'var(--warning)';
-    if (score >= 70) return 'var(--info)';
+  const getMatchScoreColor = (percentage: number) => {
+    if (percentage >= 90) return 'var(--success)';
+    if (percentage >= 80) return 'var(--warning)';
+    if (percentage >= 70) return 'var(--info)';
     return 'var(--error)';
   };
 
-  const getMatchScoreLabel = (score: number) => {
-    if (score >= 90) return 'Excellent Match';
-    if (score >= 80) return 'Great Match';
-    if (score >= 70) return 'Good Match';
+  const getMatchScoreLabel = (percentage: number) => {
+    if (percentage >= 90) return 'Excellent Match';
+    if (percentage >= 80) return 'Great Match';
+    if (percentage >= 70) return 'Good Match';
     return 'Fair Match';
   };
 
@@ -58,13 +58,13 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
           </div>
           <div className="ms-stat-item">
             <span className="ms-stat-number">
-              {Math.round(bestMatches.reduce((sum, match) => sum + match.score, 0) / bestMatches.length)}
+              {Math.round(bestMatches.reduce((sum, match) => sum + match.percentage, 0) / bestMatches.length)}
             </span>
-            <span className="ms-stat-label">Average Score</span>
+            <span className="ms-stat-label">Average Match %</span>
           </div>
           <div className="ms-stat-item">
             <span className="ms-stat-number">
-              {bestMatches.filter(match => match.score >= 80).length}
+              {bestMatches.filter(match => match.percentage >= 80).length}
             </span>
             <span className="ms-stat-label">High-Quality Matches</span>
           </div>
@@ -95,10 +95,15 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
                   </span>
                 )}
               </div>
-              <div className="ms-match-score" style={{ color: getMatchScoreColor(match.score) }}>
-                <FaStar />
-                <span>{match.score}%</span>
-                <span className="ms-score-label">{getMatchScoreLabel(match.score)}</span>
+              <div className="ms-match-score" style={{ color: getMatchScoreColor(match.percentage) }}>
+                <div className="ms-match-percentage-display">
+                  <div className="ms-percentage-circle" style={{ 
+                    background: `conic-gradient(${getMatchScoreColor(match.percentage)} ${match.percentage * 3.6}deg, #e5e7eb ${match.percentage * 3.6}deg)` 
+                  }}>
+                    <span className="ms-percentage-text">{match.percentage}%</span>
+                  </div>
+                </div>
+                <span className="ms-score-label">{getMatchScoreLabel(match.percentage)}</span>
               </div>
             </div>
 

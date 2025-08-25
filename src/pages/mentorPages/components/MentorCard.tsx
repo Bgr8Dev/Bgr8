@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaCalendarAlt } from 'react-icons/fa';
 import { MentorMenteeProfile, MentorAvailability } from '../types/mentorTypes';
+import MatchStrengthDisplay from '../../../components/widgets/MentorAlgorithm/MatchStrengthDisplay';
 import '../styles/MentorCard.css';
 
 interface MentorCardProps {
@@ -10,6 +11,7 @@ interface MentorCardProps {
   onProfileClick: (mentor: MentorMenteeProfile) => void;
   onBooking: (mentor: MentorMenteeProfile) => void;
   onCalCom: (mentor: MentorMenteeProfile) => void;
+  matchScore?: number; // Add match score prop
 }
 
 export const MentorCard: React.FC<MentorCardProps> = ({
@@ -18,7 +20,8 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   currentUserRole,
   onProfileClick,
   onBooking,
-  onCalCom
+  onCalCom,
+  matchScore
 }) => {
   // Helper function to get the best available name
   const getDisplayName = () => {
@@ -96,6 +99,18 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         </div>
 
         <div className="mc-mentor-badges">
+          {/* Match Strength Display */}
+          {matchScore !== undefined && (
+            <div className="mc-match-strength-badge">
+              <MatchStrengthDisplay 
+                score={matchScore} 
+                size={45} 
+                showLabel={false}
+                className="mc-match-strength"
+              />
+            </div>
+          )}
+          
           {mentor.calCom && (
             <div className="mc-badge mc-video-badge">
               <FaVideo />

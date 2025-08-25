@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { MentorBooking } from '../types/mentorTypes';
-import './ViewBookingsModal.css';
+import '../styles/ViewBookingsModal.css';
 
 interface ViewBookingsModalProps {
   isOpen: boolean;
