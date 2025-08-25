@@ -73,8 +73,8 @@ export default function MentorBookings() {
   filtered.sort((a, b) => {
     let vA: unknown, vB: unknown;
     if (sortField === 'date') {
-      vA = a.sessionDate instanceof Timestamp ? a.sessionDate.toDate() : new Date(a.sessionDate!);
-      vB = b.sessionDate instanceof Timestamp ? b.sessionDate.toDate() : new Date(b.sessionDate!);
+      vA = a.sessionDate instanceof Timestamp ? a.sessionDate.toDate() : a.sessionDate;
+      vB = b.sessionDate instanceof Timestamp ? b.sessionDate.toDate() : b.sessionDate;
     } else if (sortField === 'status') {
       vA = a.status; vB = b.status;
     } else if (sortField === 'role') {
@@ -336,10 +336,8 @@ export default function MentorBookings() {
   };
   const handleUndo = async () => {
     for (const booking of undoQueue) {
-      // Convert Firestore Timestamp fields to JS Date if needed
+      // Do not convert Timestamps to Date; Firestore expects Timestamps
       const bookingData = { ...booking };
-      if (bookingData.createdAt instanceof Timestamp) bookingData.createdAt = bookingData.createdAt.toDate();
-      if (bookingData.sessionDate instanceof Timestamp) bookingData.sessionDate = bookingData.sessionDate.toDate();
       await setDoc(doc(firestore, 'bookings', booking.id), bookingData);
     }
     setBookings(prev => [...prev, ...undoQueue]);

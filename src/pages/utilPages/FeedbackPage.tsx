@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { firestore } from '../../firebase/firebase';
-import { doc, getDoc, addDoc, collection, updateDoc, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, updateDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { SessionFeedback } from '../../types/b8fc';
 import { CalComService, CalComBookingResponse } from '../../components/widgets/MentorAlgorithm/CalCom/calComService';
 import { Booking } from '../../types/bookings';
@@ -13,13 +13,13 @@ export default function FeedbackPage() {
   const { currentUser } = useAuth();
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
-  
+
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   // Feedback form state
   const [helpfulness, setHelpfulness] = useState(0);
   const [comfort, setComfort] = useState(0);
@@ -28,27 +28,27 @@ export default function FeedbackPage() {
   const [improvements, setImprovements] = useState('');
   const [learnings, setLearnings] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
-  
+
   // Determine user role and feedback type
   const [userRole, setUserRole] = useState<'mentor' | 'mentee' | null>(null);
   const [feedbackType, setFeedbackType] = useState<'mentor' | 'mentee' | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchBooking = async () => {
       if (!bookingId || !currentUser) return;
-      
+
       try {
         // First, try to fetch from Firestore bookings
         const bookingDoc = await getDoc(doc(firestore, 'bookings', bookingId));
-        
+
         if (bookingDoc.exists()) {
           const bookingData = bookingDoc.data() as Booking;
           bookingData.id = bookingDoc.id;
-          
+
           // Determine user role
           const role = bookingData.mentorId === currentUser.uid ? 'mentor' : 'mentee';
           const feedbackType = role === 'mentor' ? 'mentee' : 'mentor';
-          
+
           setBooking(bookingData);
           setUserRole(role);
           setFeedbackType(feedbackType);
@@ -58,97 +58,104 @@ export default function FeedbackPage() {
             try {
               // Extract the actual Cal.com booking ID
               const calComBookingId = bookingId.replace('calcom-', '');
-              
+
               // We need to find which mentor this Cal.com booking belongs to
               // For now, we'll try to find it in our Firestore bookings that reference Cal.com
               const bookingsRef = collection(firestore, 'bookings');
               const q = query(bookingsRef, where('calComBookingId', '==', calComBookingId));
               const querySnapshot = await getDocs(q);
-              
+
               if (!querySnapshot.empty) {
                 const bookingDoc = querySnapshot.docs[0];
                 const bookingData = bookingDoc.data() as Booking;
                 bookingData.id = bookingDoc.id;
                 bookingData.isCalComBooking = true;
                 bookingData.calComBookingId = calComBookingId;
-                
+
                 // Determine user role
                 const role = bookingData.mentorId === currentUser.uid ? 'mentor' : 'mentee';
                 const feedbackType = role === 'mentor' ? 'mentee' : 'mentor';
-                
+
                 setBooking(bookingData);
                 setUserRole(role);
                 setFeedbackType(feedbackType);
               } else {
                 // If not found in Firestore, try to fetch from Cal.com API
                 try {
-                                     // We need to find which mentor this Cal.com booking belongs to
-                   // Let's try to fetch all mentors and check their Cal.com bookings
-                   const usersSnapshot = await getDocs(collection(firestore, 'users'));
-                   let foundBooking = false;
-                   
-                   for (const userDoc of usersSnapshot.docs) {
-                     try {
-                       const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
-                       if (mentorProgramDoc.exists()) {
-                         const mentorData = mentorProgramDoc.data();
-                         if (mentorData.isMentor && mentorData.calCom) {
-                           const calComBookings = await CalComService.getBookings(userDoc.id);
-                           const matchingBooking = calComBookings.find((booking: CalComBookingResponse) => 
-                             booking.id.toString() === calComBookingId
-                           );
-                           
-                           if (matchingBooking) {
-                             // Found the booking! Create a proper booking object
-                             const startDate = new Date(matchingBooking.startTime);
-                             const endDate = new Date(matchingBooking.endTime);
-                             
-                             // Find mentor and mentee from attendees
-                             const mentor = matchingBooking.attendees.find(attendee => 
-                               attendee.email === mentorData.email
-                             );
-                             const mentee = matchingBooking.attendees.find(attendee => 
-                               attendee.email !== mentorData.email
-                             );
-                             
-                             const bookingData: Booking = {
-                               id: bookingId,
-                               mentorId: userDoc.id,
-                               menteeId: mentee?.email || currentUser.uid,
-                               mentorName: mentor?.name || `${mentorData.firstName || 'Unknown'} ${mentorData.lastName || 'Mentor'}`,
-                               menteeName: mentee?.name || 'Unknown Mentee',
-                               mentorEmail: mentor?.email || mentorData.email || '',
-                               menteeEmail: mentee?.email || '',
-                               sessionDate: startDate,
-                               startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                               endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                               status: 'confirmed',
-                               isCalComBooking: true,
-                               calComBookingId: calComBookingId
-                             };
-                             
-                             // Determine user role
-                             const role = bookingData.mentorId === currentUser.uid ? 'mentor' : 'mentee';
-                             const feedbackType = role === 'mentor' ? 'mentee' : 'mentor';
-                             
-                             setBooking(bookingData);
-                             setUserRole(role);
-                             setFeedbackType(feedbackType);
-                             foundBooking = true;
-                             break;
-                           }
-                         }
-                       }
-                     } catch (err) {
-                       console.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, err);
-                       // Continue to next mentor
-                     }
-                   }
-                  
+                  // We need to find which mentor this Cal.com booking belongs to
+                  // Let's try to fetch all mentors and check their Cal.com bookings
+                  const usersSnapshot = await getDocs(collection(firestore, 'users'));
+                  let foundBooking = false;
+
+                  for (const userDoc of usersSnapshot.docs) {
+                    try {
+                      const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+                      if (mentorProgramDoc.exists()) {
+                        const mentorData = mentorProgramDoc.data();
+                        if (mentorData.isMentor && mentorData.calCom) {
+                          const calComBookings = await CalComService.getBookings(userDoc.id);
+                          const matchingBooking = calComBookings.find((booking: CalComBookingResponse) =>
+                            booking.id.toString() === calComBookingId
+                          );
+
+                          if (matchingBooking) {
+                            // Found the booking! Create a proper booking object
+                            const startDate = new Date(matchingBooking.startTime);
+                            const endDate = new Date(matchingBooking.endTime);
+
+                            // Find mentor and mentee from attendees
+                            const mentor = matchingBooking.attendees.find(attendee =>
+                              attendee.email === mentorData.email
+                            );
+                            const mentee = matchingBooking.attendees.find(attendee =>
+                              attendee.email !== mentorData.email
+                            );
+
+                            let createdAtTS = (
+                              matchingBooking.createdAt
+                                ? Timestamp.fromDate(new Date(matchingBooking.createdAt))
+                                : Timestamp.fromDate(new Date()));
+
+                            const bookingData: Booking = {
+                              id: bookingId,
+                              day: startDate.toLocaleDateString('en-GB', { weekday: 'long' }),
+                              createdAt: createdAtTS,
+                              mentorId: userDoc.id,
+                              menteeId: mentee?.email || currentUser.uid,
+                              mentorName: mentor?.name || `${mentorData.firstName || 'Unknown'} ${mentorData.lastName || 'Mentor'}`,
+                              menteeName: mentee?.name || 'Unknown Mentee',
+                              mentorEmail: mentor?.email || mentorData.email || '',
+                              menteeEmail: mentee?.email || '',
+                              sessionDate: Timestamp.fromDate(startDate),
+                              startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                              endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                              status: 'confirmed',
+                              isCalComBooking: true,
+                              calComBookingId: calComBookingId
+                            };
+
+                            // Determine user role
+                            const role = bookingData.mentorId === currentUser.uid ? 'mentor' : 'mentee';
+                            const feedbackType = role === 'mentor' ? 'mentee' : 'mentor';
+
+                            setBooking(bookingData);
+                            setUserRole(role);
+                            setFeedbackType(feedbackType);
+                            foundBooking = true;
+                            break;
+                          }
+                        }
+                      }
+                    } catch (err) {
+                      console.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, err);
+                      // Continue to next mentor
+                    }
+                  }
+
                   if (!foundBooking) {
                     setError('Cal.com booking not found. This booking may not be associated with any mentor in our system.');
                   }
-                  
+
                 } catch (err) {
                   console.error('Error fetching from Cal.com API:', err);
                   setError('Failed to fetch Cal.com booking details. Please try again or contact support.');
@@ -162,10 +169,10 @@ export default function FeedbackPage() {
             setError('Booking not found');
           }
         }
-        
+
         // Check if feedback already exists
         // Note: In a real implementation, you'd query for existing feedback
-        
+
       } catch (err) {
         console.error('Error fetching booking:', err);
         setError('Failed to load booking details');
@@ -173,7 +180,7 @@ export default function FeedbackPage() {
         setLoading(false);
       }
     };
-    
+
     fetchBooking();
   }, [bookingId, currentUser]);
 
@@ -193,33 +200,33 @@ export default function FeedbackPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!booking || !currentUser || !feedbackType) return;
-    
+
     // Validate required fields
     if (helpfulness === 0 || comfort === 0 || support === 0) {
       setError('Please provide ratings for all questions');
       return;
     }
-    
+
     if (!strengths.trim() || !improvements.trim() || !learnings.trim()) {
       setError('Please fill in all text fields');
       return;
     }
-    
+
     setSubmitting(true);
     setError(null);
-    
+
     try {
       const overallRating = Math.round((helpfulness + comfort + support) / 3);
-      
+
       const feedbackData: Omit<SessionFeedback, 'id'> = {
         bookingId: booking.id,
         mentorId: booking.mentorId,
         menteeId: booking.menteeId,
         mentorName: booking.mentorName,
         menteeName: booking.menteeName,
-        sessionDate: booking.sessionDate,
+        sessionDate: booking.sessionDate!.toDate(),
         feedbackType,
         submittedBy: currentUser.uid,
         submittedAt: new Date(),
@@ -233,15 +240,15 @@ export default function FeedbackPage() {
         isAnonymous,
         status: 'submitted'
       };
-      
+
       const feedbackRef = await addDoc(collection(firestore, 'feedback'), feedbackData);
-      
+
       // Update booking status to indicate feedback was given
       await updateDoc(doc(firestore, 'bookings', booking.id), {
         [`feedbackSubmitted_${feedbackType}`]: true,
         [`feedbackSubmittedAt_${feedbackType}`]: new Date()
       });
-      
+
       // For Cal.com bookings, also store a reference in the feedback
       if (booking.isCalComBooking && booking.calComBookingId) {
         // Update the feedback record with Cal.com reference
@@ -250,14 +257,14 @@ export default function FeedbackPage() {
           isCalComBooking: true
         });
       }
-      
+
       setSuccess('Thank you for your feedback! Your response has been submitted successfully.');
-      
+
       // Redirect after 2 seconds
       setTimeout(() => {
         navigate('/profile');
       }, 2000);
-      
+
     } catch (err) {
       console.error('Error submitting feedback:', err);
       setError('Failed to submit feedback. Please try again.');
@@ -274,35 +281,35 @@ export default function FeedbackPage() {
     return (
       <div className="star-rating">
         {[1, 2, 3, 4, 5].map((star) => (
-                     <button
-             key={star}
-             type="button"
-             className={`star ${star <= value ? 'filled' : ''}`}
-             onClick={() => onChange(star)}
-             title={`Rate ${star} star${star > 1 ? 's' : ''}`}
-             onMouseEnter={(e) => {
-               const stars = e.currentTarget.parentElement?.children;
-               if (stars) {
-                 for (let i = 0; i < stars.length; i++) {
-                   if (i < star) {
-                     stars[i].classList.add('hover');
-                   } else {
-                     stars[i].classList.remove('hover');
-                   }
-                 }
-               }
-             }}
-             onMouseLeave={(e) => {
-               const stars = e.currentTarget.parentElement?.children;
-               if (stars) {
-                 for (let i = 0; i < stars.length; i++) {
-                   stars[i].classList.remove('hover');
-                 }
-               }
-             }}
-           >
-             <FaStar />
-           </button>
+          <button
+            key={star}
+            type="button"
+            className={`star ${star <= value ? 'filled' : ''}`}
+            onClick={() => onChange(star)}
+            title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+            onMouseEnter={(e) => {
+              const stars = e.currentTarget.parentElement?.children;
+              if (stars) {
+                for (let i = 0; i < stars.length; i++) {
+                  if (i < star) {
+                    stars[i].classList.add('hover');
+                  } else {
+                    stars[i].classList.remove('hover');
+                  }
+                }
+              }
+            }}
+            onMouseLeave={(e) => {
+              const stars = e.currentTarget.parentElement?.children;
+              if (stars) {
+                for (let i = 0; i < stars.length; i++) {
+                  stars[i].classList.remove('hover');
+                }
+              }
+            }}
+          >
+            <FaStar />
+          </button>
         ))}
         <span className="rating-label">
           {value === 0 && 'Select rating'}
@@ -358,12 +365,20 @@ export default function FeedbackPage() {
   }
 
   const otherPartyName = userRole === 'mentor' ? booking.menteeName : booking.mentorName;
-  const sessionDate = new Date(booking.sessionDate).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const sessionDate =
+    booking.sessionDate
+      ? new Date(
+        // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
+        typeof (booking.sessionDate as any).toDate === 'function'
+          ? (booking.sessionDate as any).toDate()
+          : booking.sessionDate
+      ).toLocaleDateString('en-GB', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      : '';
 
   return (
     <div className="feedback-page">
@@ -397,7 +412,7 @@ export default function FeedbackPage() {
             <p className="section-description">
               Please rate your experience on a scale of 1 to 5, where 1 is Poor and 5 is Excellent.
             </p>
-            
+
             <div className="rating-question">
               <label>
                 How helpful and engaged has your {feedbackType} been during your sessions?
@@ -427,7 +442,7 @@ export default function FeedbackPage() {
             <p className="section-description">
               Please provide specific examples and constructive feedback to help improve the mentorship experience.
             </p>
-            
+
             <div className="text-question">
               <label htmlFor="strengths">
                 What's one thing your {feedbackType} does well?

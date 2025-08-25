@@ -47,6 +47,7 @@ export interface CalComBookingResponse {
     link?: string;
     reason?: string;
   };
+  createdAt: string;
 }
 
 // Interface for Cal.com event types

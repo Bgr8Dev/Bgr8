@@ -39,7 +39,7 @@ interface BookingModalProps {
 
 export default function BookingModal({ open, onClose, mentor }: BookingModalProps) {
   const { currentUser } = useAuth();
-  const { isMobile } = useIsMobile();
+  const isMobile = useIsMobile();
   const [availability, setAvailability] = useState<MentorAvailability | null>(null);
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
