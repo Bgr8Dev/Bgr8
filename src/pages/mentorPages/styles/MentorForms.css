@@ -1,0 +1,649 @@
+/* MentorForms.css - Form Styles for Role Selection, Registration, and Profile Editing */
+
+/* Role Selection */
+.mentor-role-selection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 20px 40px 20px;
+}
+
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.role-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 48px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 3px solid transparent;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--mentor) 0%, var(--mentee) 100%);
+}
+
+.role-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+}
+
+.role-card.mentor {
+  border-color: var(--mentor);
+  background: linear-gradient(135deg, var(--white) 0%, var(--mentor-light) 100%);
+}
+
+.role-card.mentor:hover {
+  background: linear-gradient(135deg, var(--mentor-light) 0%, var(--white) 100%);
+  border-color: var(--mentor-dark);
+  box-shadow: 0 20px 40px rgba(224, 106, 92, 0.3);
+}
+
+.role-card.mentee {
+  border-color: var(--mentee);
+  background: linear-gradient(135deg, var(--white) 0%, var(--mentee-light) 100%);
+}
+
+.role-card.mentee:hover {
+  background: linear-gradient(135deg, var(--mentee-light) 0%, var(--white) 100%);
+  border-color: var(--mentee-dark);
+  box-shadow: 0 20px 40px rgba(29, 213, 209, 0.3);
+}
+
+.role-card svg {
+  font-size: 64px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+.role-card:hover svg {
+  transform: scale(1.1);
+}
+
+.role-card.mentor svg {
+  color: var(--mentor);
+}
+
+.role-card.mentee svg {
+  color: var(--mentee);
+}
+
+.role-card h3 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 24px 0 20px;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+.role-card.mentor:hover h3 {
+  color: var(--mentor-dark);
+}
+
+.role-card.mentee:hover h3 {
+  color: var(--mentee-dark);
+}
+
+.role-card p {
+  color: var(--gray-600);
+  line-height: 1.7;
+  font-size: 1.125rem;
+  font-weight: 500;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Registration Form */
+.mentor-registration {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 80px 20px 40px 20px;
+}
+
+.registration-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+  background: var(--white);
+  padding: 24px 32px;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+}
+
+/* General back button styles for other components */
+.mentor-page .back-button:not(.back-button-container .back-button) {
+  background: var(--button-cancel-bg);
+  color: var(--button-cancel-text);
+  border: 1px solid var(--button-cancel-border);
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.mentor-page .back-button:not(.back-button-container .back-button):hover {
+  background: var(--button-cancel-hover-bg);
+  border-color: var(--button-cancel-hover-border);
+  color: var(--button-cancel-hover-text);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.registration-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.registration-form {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 48px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--card-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.registration-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--mentor) 0%, var(--mentee) 50%, var(--accent) 100%);
+}
+
+.form-section {
+  margin-bottom: 40px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 32px;
+  border: 1px solid var(--card-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.form-section:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.form-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid var(--accent);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-section h3::before {
+  content: '';
+  width: 8px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.registration-form input,
+.registration-form select {
+  width: 100%;
+  padding: 18px 24px;
+  border: 2px solid var(--input-border);
+  border-radius: var(--radius-xl);
+  font-size: 16px;
+  background: var(--input-bg);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--input-text);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  min-height: 56px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.registration-form input:focus,
+.registration-form select:focus {
+  outline: none;
+  border-color: var(--input-focus-border);
+  background: var(--white);
+  box-shadow: var(--focus-ring);
+  transform: translateY(-2px);
+}
+
+.registration-form input::placeholder {
+  color: var(--input-placeholder);
+  font-weight: 500;
+}
+
+.registration-form select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 20px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 56px;
+  appearance: none;
+}
+
+.registration-form select:hover {
+  border-color: var(--accent);
+}
+
+/* Tag-based Selection Interface */
+.skills-selection-container,
+.industries-selection-container {
+  width: 100%;
+}
+
+.skills-selection-container label,
+.industries-selection-container label {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.skills-tags-container,
+.industries-tags-container {
+  background: var(--gray-50);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+  transition: all 0.2s ease;
+}
+
+.skills-tags-container:hover,
+.industries-tags-container:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.skill-category-section {
+  margin-bottom: 32px;
+}
+
+.skill-category-section:last-child {
+  margin-bottom: 0;
+}
+
+.category-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--accent-light);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin: -12px -16px 16px -16px;
+}
+
+.tags-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.skill-tag-selectable,
+.industry-tag-selectable {
+  background: var(--white);
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-full);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  border: 2px solid var(--gray-300);
+}
+
+.skill-tag-selectable:hover:not(.selected),
+.industry-tag-selectable:hover:not(.selected) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.skill-tag-selectable:focus,
+.industry-tag-selectable:focus {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  box-shadow: 0 0 0 3px rgba(59, 167, 242, 0.1);
+  transform: translateY(-2px);
+}
+
+.skill-tag-selectable.selected,
+.industry-tag-selectable.selected {
+  background: var(--mentor) !important;
+  color: var(--white) !important;
+  border-color: var(--mentor-dark) !important;
+  box-shadow: var(--shadow-md);
+}
+
+.skill-tag-selectable.selected:hover,
+.industry-tag-selectable.selected:hover {
+  background: var(--mentor-dark) !important;
+  color: var(--white) !important;
+  border-color: var(--mentor-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.selected-skills-summary,
+.selected-industries-summary {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--success-light);
+  border: 1px solid var(--success);
+  border-radius: var(--radius-md);
+}
+
+.summary-label {
+  display: block;
+  font-weight: 600;
+  color: var(--success-dark);
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-tag {
+  background: var(--success);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--success-dark);
+}
+
+.remove-tag {
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.remove-tag:hover {
+  background: var(--success-dark);
+  transform: scale(1.1);
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: var(--white);
+  border: none;
+  padding: 20px 32px;
+  border-radius: var(--radius-xl);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 32px;
+  min-height: 64px;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.submit-button:hover::before {
+  left: 100%;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-xl);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  background: var(--gray-400);
+  position: relative;
+}
+
+.submit-button:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 3px solid transparent;
+  border-top: 3px solid var(--white);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Form validation styles */
+.registration-form input:invalid,
+.registration-form select:invalid {
+  border-color: var(--input-error-border);
+  background: var(--input-error-bg);
+}
+
+.registration-form input:valid,
+.registration-form select:valid {
+  border-color: var(--input-success-border);
+  background: var(--input-success-bg);
+}
+
+/* Responsive adjustments for tag-based selection */
+@media (max-width: 768px) {
+  .tags-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .skill-tag-selectable,
+  .industry-tag-selectable {
+    padding: 8px 12px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+  
+  .skills-tags-container,
+  .industries-tags-container {
+    padding: 16px;
+    max-height: 350px;
+  }
+  
+  .category-title {
+    font-size: 1rem;
+    padding: 10px 12px;
+    margin: -10px -12px 12px -12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tags-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  
+  .skill-tag-selectable,
+  .industry-tag-selectable {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+  
+  .skills-tags-container,
+  .industries-tags-container {
+    padding: 12px;
+    max-height: 300px;
+  }
+}
+
+/* Responsive adjustments for the form */
+@media (max-width: 768px) {
+  .mentor-registration {
+    padding: 20px 16px;
+  }
+  
+  .registration-form {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+  
+  .form-section {
+    padding: 24px 20px;
+    margin-bottom: 32px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .registration-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 20px 24px;
+  }
+  
+  .registration-header h2 {
+    font-size: 1.875rem;
+  }
+  
+  .mentor-registration .back-button {
+    align-self: flex-start;
+  }
+  
+  .submit-button {
+    padding: 18px 24px;
+    font-size: 16px;
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .registration-form {
+    padding: 24px 20px;
+  }
+  
+  .form-section {
+    padding: 20px 16px;
+  }
+  
+  .registration-form input,
+  .registration-form select,
+  .multiselect-control {
+    padding: 16px 20px;
+    min-height: 52px;
+    font-size: 15px;
+  }
+  
+  .submit-button {
+    padding: 16px 20px;
+    font-size: 15px;
+    min-height: 52px;
+  }
+}

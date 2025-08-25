@@ -22,7 +22,23 @@ import { default as BookingModal } from '../../components/widgets/MentorAlgorith
 import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { default as MentorAvailability } from '../../components/widgets/MentorAlgorithm/MentorAvailability';
 import Navbar from '../../components/ui/Navbar';
+
+// Import all CSS files to ensure styles are loaded
 import './styles/MentorPage.css';
+import './styles/MentorHeader.css';
+import './styles/MentorSidebar.css';
+import './styles/MentorForms.css';
+import './styles/MentorModals.css';
+import './styles/MentorAnimations.css';
+import './styles/MentorResponsive.css';
+import './styles/MentorCard.css';
+import './styles/MatchesSection.css';
+import './styles/ProfileViewModal.css';
+import './styles/ViewBookingsModal.css';
+import './styles/RoleSelection.css';
+import './styles/ProfileRegistrationForm.css';
+import './styles/ProfileEditModal.css';
+import './styles/MentorFilters.css';
 
 export default function MentorPage() {
   const { currentUser } = useAuth();
@@ -40,6 +56,7 @@ export default function MentorPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(12);
   const [isBookingWidgetMinimized, setIsBookingWidgetMinimized] = useState(false);
+  const [isMenteesSectionMinimized, setIsMenteesSectionMinimized] = useState(false);
 
   // Custom hooks for data management
   const {
@@ -205,6 +222,10 @@ export default function MentorPage() {
 
   const toggleBookingWidget = () => {
     setIsBookingWidgetMinimized(!isBookingWidgetMinimized);
+  };
+
+  const toggleMenteesSection = () => {
+    setIsMenteesSectionMinimized(!isMenteesSectionMinimized);
   };
 
   const handleAcceptBooking = (bookingId: string) => {
@@ -804,96 +825,110 @@ export default function MentorPage() {
           )}
 
           {/* Mentor Results */}
-          <div className="mentor-results">
-            <div className="results-header">
-              <h2>
-                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-                  ? 'Available Mentors' 
-                  : 'Available Mentees'
-                }
-              </h2>
-              <div className="results-summary">
-                <p>
-                  Showing {searchFilteredMentors.length} {
-                    typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentors' : 'mentees'
+          <div className={`mentor-results ${isMenteesSectionMinimized ? 'minimized' : ''}`}>
+            <div className="results-header" onClick={toggleMenteesSection}>
+              <div className="results-header-content">
+                <h2>
+                  {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
+                    ? 'Available Mentors' 
+                    : 'Available Mentees'
                   }
-                </p>
-                {searchFilteredMentors.length > 0 && (
-                  <div className="profile-breakdown">
-                    <span className="breakdown-item">
-                      <span className="breakdown-label">Real Profiles:</span>
-                      <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
-                    </span>
-                    <span className="breakdown-item">
-                      <span className="breakdown-label">Generated:</span>
-                      <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
-                    </span>
-                  </div>
-                )}
+                </h2>
+                <div className="results-summary">
+                  <p>
+                    Showing {searchFilteredMentors.length} {
+                      typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentors' : 'mentees'
+                    }
+                  </p>
+                  {searchFilteredMentors.length > 0 && (
+                    <div className="profile-breakdown">
+                      <span className="breakdown-item">
+                        <span className="breakdown-label">Real Profiles:</span>
+                        <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
+                      </span>
+                      <span className="breakdown-item">
+                        <span className="breakdown-label">Generated:</span>
+                        <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
+              <button 
+                className="minimize-toggle-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMenteesSection();
+                }}
+                aria-label={isMenteesSectionMinimized ? 'Expand section' : 'Minimize section'}
+              >
+                {isMenteesSectionMinimized ? '▼' : '▲'}
+              </button>
             </div>
 
-            {currentProfiles.length === 0 ? (
-              <div className="no-results">
-                <h3>
-                  {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-                    ? 'No mentors found' 
-                    : 'No mentees found'
-                  }
-                </h3>
-                <p>Try adjusting your search criteria or filters</p>
-              </div>
-            ) : (
-              <>
-                <div className="profiles-grid">
-                  {currentProfiles.map((profile) => (
-                    <MentorCard
-                      key={profile.uid}
-                      mentor={profile}
-                      mentorAvailability={mentorAvailability}
-                      currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
-                      onProfileClick={handleProfileCardClick}
-                      onBooking={handleBooking}
-                      onCalCom={handleCalCom}
-                      matchScore={getMatchScore(profile)}
-                    />
-                  ))}
+            <div className="results-content">
+              {currentProfiles.length === 0 ? (
+                <div className="no-results">
+                  <h3>
+                    {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
+                      ? 'No mentors found' 
+                      : 'No mentees found'
+                    }
+                  </h3>
+                  <p>Try adjusting your search criteria or filters</p>
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="pagination-container">
-                    <button
-                      className="pagination-btn prev"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </button>
-                    
-                    <div className="page-numbers">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          className={`page-number ${page === currentPage ? 'active' : ''}`}
-                          onClick={() => handlePageChange(page)}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <button
-                      className="pagination-btn next"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </button>
+              ) : (
+                <>
+                  <div className="profiles-grid">
+                    {currentProfiles.map((profile) => (
+                      <MentorCard
+                        key={profile.uid}
+                        mentor={profile}
+                        mentorAvailability={mentorAvailability}
+                        currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
+                        onProfileClick={handleProfileCardClick}
+                        onBooking={handleBooking}
+                        onCalCom={handleCalCom}
+                        matchScore={getMatchScore(profile)}
+                      />
+                    ))}
                   </div>
-                )}
-              </>
-            )}
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="pagination-container">
+                      <button
+                        className="pagination-btn prev"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </button>
+                      
+                      <div className="page-numbers">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <button
+                            key={page}
+                            className={`page-number ${page === currentPage ? 'active' : ''}`}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <button
+                        className="pagination-btn next"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

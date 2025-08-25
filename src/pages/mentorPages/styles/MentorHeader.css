@@ -1,15 +1,19 @@
+/* MentorHeader.css - Header Section Styles */
+
 /* Header Section */
 .mentor-header {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: var(--white);
-  padding: 60px 0;
+  padding: 60px 0 60px 0;
   text-align: center;
+  position: relative;
+  z-index: 2;
 }
 
 .mentor-header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,6 +36,24 @@
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+}
+
+.generated-profiles-info {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.generated-profiles-info .info-text {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.95;
+  line-height: 1.4;
 }
 
 /* User Profile Summary */
@@ -116,6 +138,70 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Main Content Header Adjustments */
+.mentor-main-content .mentor-header {
+  background: transparent;
+  padding: 0 0 32px 0;
+  margin: 0;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
+
+.mentor-main-content .mentor-header-content {
+  padding: 0;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mentor-main-content .mentor-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.mentor-main-content .mentor-header p {
+  font-size: 1.1rem;
+  margin-bottom: 0;
+  text-align: left;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.mentor-main-content .generated-profiles-info {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.mentor-main-content .user-profile-summary {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mentor-main-content .profile-actions {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.mentor-main-content .profile-edit-btn,
+.mentor-main-content .find-matches-btn,
+.mentor-main-content .availability-manage-btn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
 }
 
 /* Search Container */
@@ -250,6 +336,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .mentor-header {
+    padding: 60px 0 40px 0;
+    margin-bottom: 30px;
+  }
+  
   .mentor-header h1 {
     font-size: 2rem;
   }
@@ -258,38 +349,29 @@
     font-size: 1.1rem;
   }
   
-  .search-container {
-    margin: 0 20px 20px 20px;
+  .mentor-main-content .mentor-header h1 {
+    font-size: 2rem;
   }
   
-  .search-bar {
-    padding: 14px 16px;
-    min-height: 52px;
-  }
-  
-  .search-icon {
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-  }
-  
-  .search-bar input {
-    padding-left: 44px;
-    font-size: 15px;
-  }
-
-  .profile-actions {
+  .mentor-main-content .profile-actions {
     flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mentor-main-content .profile-edit-btn,
+  .mentor-main-content .find-matches-btn,
+  .mentor-main-content .availability-manage-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .mentor-header {
-    padding: 40px 0;
-  }
-  
   .mentor-header h1 {
     font-size: 1.75rem;
+  }
+  
+  .mentor-header p {
+    font-size: 1rem;
   }
 }
