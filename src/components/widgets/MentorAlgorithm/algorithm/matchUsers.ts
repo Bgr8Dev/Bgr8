@@ -94,7 +94,7 @@ function lenIntersect<T>(a: T[], b: T[]): number {
 // A weighted score for when currentUser and candidate match on a property key
 function getSimpleScore(
   property: string, currentUser: MentorMenteeProfile,
-  candidate: MentorMenteeProfile, reasons: string[], reason: string) {
+  candidate: MentorMenteeProfile, reasons: string[], reason: string): number {
   let score = 0;
   if (currentUser[property] === candidate[property]) {
     score += SCORE_WEIGHTINGS[property];
@@ -106,7 +106,7 @@ function getSimpleScore(
 function getEducationScore(
     currentUser: MentorMenteeProfile,
     candidate: MentorMenteeProfile,
-    reasons: string[]) {
+    reasons: string[]): number {
   let score = 0;
   let eduAddScore = Math.round(0.5 * SCORE_WEIGHTINGS["educationLevel"] * (
     educationLevelEncoding[currentUser.educationLevel]
@@ -129,7 +129,7 @@ function getAgeScore(
   currentUser: MentorMenteeProfile,
   candidate: MentorMenteeProfile,
   olderMentorPref: boolean,
-  reasons: string[]) {
+  reasons: string[]): number {
   let score = 0;
   const maxScore = SCORE_WEIGHTINGS['age'];
   const ageDiffPure = Number(currentUser.age) - Number(candidate.age);
@@ -168,7 +168,7 @@ function getAgeScore(
 function getProfessionalScore(
   currentUser: MentorMenteeProfile,
   candidate: MentorMenteeProfile,
-  reasons: string[]) {
+  reasons: string[]): number{
   let score = 0;
   const professionWeight = SCORE_WEIGHTINGS['profession'];
 
@@ -213,7 +213,7 @@ function getProfessionalScore(
 }
 
 // Main matching function
-export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]> {
+export async function getBestMatchesForUser(uid: string, olderMentorPreferred: boolean = true): Promise<MatchResult[]> {
   // Get current user's profile from subcollection
   const userDoc = await getDoc(doc(firestore, 'users', uid, 'mentorProgram', 'profile'));
   if (!userDoc.exists()) throw new Error('User profile not found');
@@ -256,7 +256,6 @@ export async function getBestMatchesForUser(uid: string): Promise<MatchResult[]>
     score += getProfessionalScore(currentUser, candidate, reasons);
 
     // Age
-    const olderMentorPreferred = true; // TODO: this should be decided on the website maybe under "YoE"
     score += getAgeScore(currentUser, candidate, olderMentorPreferred, reasons);
 
     // Religion [HIDDEN]
