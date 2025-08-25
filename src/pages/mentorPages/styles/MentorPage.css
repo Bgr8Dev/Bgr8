@@ -3687,3 +3687,225 @@ html, body {
     padding: 16px;
   }
 }
+
+/* Main Content Matches Section */
+.main-matches-section {
+  margin-bottom: 40px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.main-matches-section:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.main-matches-section .ms-matches-section {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.main-matches-section .ms-matches-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.main-matches-section .ms-matches-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.main-matches-section .ms-matches-header p {
+  font-size: 1rem;
+  color: var(--gray-600);
+}
+
+.main-matches-section .ms-matches-summary {
+  margin-bottom: 24px;
+}
+
+.main-matches-section .ms-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.main-matches-section .ms-stat-item {
+  text-align: center;
+  padding: 16px;
+  background: var(--accent-light);
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+}
+
+.main-matches-section .ms-stat-number {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.main-matches-section .ms-stat-label {
+  font-size: 0.9rem;
+  color: var(--accent-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.main-matches-section .ms-matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.main-matches-section .ms-match-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.main-matches-section .ms-match-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.main-matches-section .ms-match-header {
+  margin-bottom: 16px;
+}
+
+.main-matches-section .ms-match-avatar {
+  width: 56px;
+  height: 56px;
+}
+
+.main-matches-section .ms-match-info h3 {
+  font-size: 1.125rem;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.main-matches-section .ms-match-info p {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: var(--gray-600);
+}
+
+.main-matches-section .ms-match-score {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.main-matches-section .ms-match-reasons {
+  margin-bottom: 16px;
+}
+
+.main-matches-section .ms-match-reasons h4 {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.main-matches-section .ms-match-reasons ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.main-matches-section .ms-match-reasons li {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: var(--accent-light);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  color: var(--accent-dark);
+}
+
+.main-matches-section .ms-match-actions {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.main-matches-section .ms-action-button {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+/* Responsive adjustments for main matches section */
+@media (max-width: 1024px) {
+  .main-matches-section .ms-matches-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-matches-section {
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  
+  .main-matches-section .ms-matches-header h2 {
+    font-size: 1.375rem;
+  }
+  
+  .main-matches-section .ms-summary-stats {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  
+  .main-matches-section .ms-matches-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .main-matches-section .ms-match-actions {
+    flex-direction: column;
+  }
+  
+  .main-matches-section .ms-action-button {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-matches-section {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .main-matches-section .ms-matches-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .main-matches-section .ms-summary-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .main-matches-section .ms-stat-item {
+    padding: 12px;
+  }
+  
+  .main-matches-section .ms-stat-number {
+    font-size: 1.5rem;
+  }
+}

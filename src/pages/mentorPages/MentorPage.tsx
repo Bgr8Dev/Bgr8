@@ -600,21 +600,23 @@ export default function MentorPage() {
             getFilterCount={getFilterCount}
             totalMentors={mentors.length}
           />
-
-          {/* Matches Section */}
-          {bestMatches.length > 0 && (
-            <MatchesSection
-              bestMatches={bestMatches}
-              currentUserProfile={currentUserProfile}
-              onProfileClick={handleProfileCardClick}
-              onBooking={handleBooking}
-              onCalCom={handleCalCom}
-            />
-          )}
         </div>
 
         {/* Right Main Content */}
         <div className="mentor-main-content">
+          {/* Matches Section - Moved from sidebar to main content */}
+          {bestMatches.length > 0 && (
+            <div className="main-matches-section">
+              <MatchesSection
+                bestMatches={bestMatches}
+                currentUserProfile={currentUserProfile}
+                onProfileClick={handleProfileCardClick}
+                onBooking={handleBooking}
+                onCalCom={handleCalCom}
+              />
+            </div>
+          )}
+
           {/* Mentor Results */}
           <div className="mentor-results">
             <div className="results-header">
