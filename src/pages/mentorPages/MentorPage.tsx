@@ -598,7 +598,7 @@ export default function MentorPage() {
             selectedFilter={selectedFilter}
             onFilterChange={setSelectedFilter}
             getFilterCount={getFilterCount}
-            totalMentors={searchFilteredMentors.length}
+            totalMentors={mentors.length}
           />
 
           {/* Matches Section */}

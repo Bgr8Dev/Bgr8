@@ -1783,6 +1783,31 @@
   font-weight: 500;
 }
 
+/* Looking For Container - For Mentees */
+.pem-looking-for-container {
+  margin-top: 24px;
+}
+
+.pem-looking-for-tags-container {
+  margin-bottom: 16px;
+}
+
+.pem-selected-looking-for-summary {
+  background: var(--info-light);
+  border: 1px solid var(--info);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.pem-selected-looking-for-summary .pem-summary-label {
+  color: var(--info-dark);
+}
+
+.pem-selected-looking-for-summary .pem-selected-tag {
+  background: var(--info);
+}
+
 /* Responsive Design for Mobile */
 @media (max-width: 768px) {
   .pem-profile-edit-modal {
@@ -2229,4 +2254,23 @@
   .pem-mobile-tab-count {
     font-size: 8px;
   }
+}
+
+/* Field Text Color - Coral */
+.pem-form-input,
+.pem-form-select,
+.pem-form-textarea,
+.pem-input-group input,
+.pem-input-group select {
+  color: coral;
+}
+
+/* Ensure placeholder text also uses coral color */
+.pem-form-input::placeholder,
+.pem-form-select::placeholder,
+.pem-form-textarea::placeholder,
+.pem-input-group input::placeholder,
+.pem-input-group select::placeholder {
+  color: coral;
+  opacity: 0.7;
 }

@@ -152,12 +152,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
       email: 'We\'ll use this to send you important updates and match notifications',
       phone: 'Your phone number helps mentors/mentees contact you for sessions',
       age: 'Your age helps us ensure appropriate matches',
-      degree: 'Tell us about your highest qualification or what you\'re currently studying',
-      educationLevel: 'Select the highest level of education you\'ve completed',
+      degree: (profile.isMentor ? 'Tell us about your highest qualification or what you\'re currently studying'
+        : 'Tell us about your current education level and what you\'re studying'),
+      educationLevel: (profile.isMentor ? 'Select the highest level of education you\'ve completed'
+        : 'Select your current education level'),
       county: 'Your location helps match you with nearby mentors/mentees',
-      profession: 'What do you currently do for work or study?',
-      pastProfessions: 'List your previous work experience to show your background',
-      linkedin: 'Your LinkedIn profile helps verify your professional experience',
+      profession: (profile.isMentor ? 'What do you currently do for work? This helps mentees understand your expertise'
+        : 'What career path are you interested in pursuing? This helps mentors provide relevant guidance'),
+      pastProfessions: 'List your previous work experience to show your background and expertise',
+      linkedin: (profile.isMentor ? 'Your LinkedIn profile helps verify your professional experience'
+        : 'Your LinkedIn profile helps verify your professional experience (optional for mentees)'),
       calCom: 'Connect your Cal.com account to enable video call scheduling',
       skills: 'Select the skills you can teach (mentors) or want to learn (mentees)',
       industries: 'Choose the industries you work in or are interested in',
@@ -172,7 +176,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   const renderSkillsSelection = () => (
     <div className="pem-skills-selection-container">
       <label className="pem-field-label">
-        Skills {profile.type === 'mentor' ? 'you can teach' : 'you want to learn'} *
+        Skills {profile.isMentor ? 'you can teach' : 'you want to learn'} *
         <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('skills')} />
       </label>
       <div className="pem-skills-tags-container">
@@ -234,7 +238,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   const renderIndustriesSelection = () => (
     <div className="pem-skills-selection-container">
       <label className="pem-field-label">
-        Industries {profile.type === 'mentor' ? 'you work in' : 'you\'re interested in'} *
+        Industries {profile.isMentor ? 'you work in' : 'you\'re interested in'} *
         <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('industries')} />
       </label>
       <div className="pem-skills-tags-container">
@@ -348,6 +352,66 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     </div>
   );
 
+  const renderLookingForSelection = () => {
+    if (!profile.isMentee) return null;
+
+    return (
+      <div className="pem-looking-for-container">
+        <label className="pem-field-label">
+          What are you looking to learn? *
+          <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('lookingFor')} />
+        </label>
+        <div className="pem-looking-for-tags-container">
+          <div className="pem-tags-grid">
+            {Object.values(skillsByCategory).flat().map((skill) => (
+              <button
+                key={skill}
+                type="button"
+                className={`pem-skill-tag-selectable ${
+                  profile.lookingFor?.includes(skill) ? 'selected' : ''
+                }`}
+                onClick={() => {
+                  const currentLookingFor = profile.lookingFor || [];
+                  const newLookingFor = currentLookingFor.includes(skill)
+                    ? currentLookingFor.filter(s => s !== skill)
+                    : [...currentLookingFor, skill];
+                  onArrayChange('lookingFor', newLookingFor);
+                }}
+              >
+                {skill}
+              </button>
+            ))}
+          </div>
+        </div>
+        {profile.lookingFor && profile.lookingFor.length > 0 && (
+          <div className="pem-selected-looking-for-summary">
+            <span className="pem-summary-label">Learning goals:</span>
+            <div className="pem-selected-tags">
+              {profile.lookingFor.map((goal, index) => (
+                <span key={index} className="pem-selected-tag">
+                  {goal}
+                  <button
+                    type="button"
+                    className="pem-remove-tag"
+                    onClick={() => {
+                      const newLookingFor = profile.lookingFor?.filter((_, i) => i !== index) || [];
+                      onArrayChange('lookingFor', newLookingFor);
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {validationErrors.lookingFor && (
+          <div className="pem-validation-error">{validationErrors.lookingFor}</div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="pem-profile-edit-modal-overlay" onClick={onClose}>
@@ -419,8 +483,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 </div>
                 
                 <div className="pem-dev-info">
-                  <p><strong>Profile ID:</strong> {profile.id || 'Not assigned'}</p>
-                  <p><strong>User Type:</strong> {profile.type || 'Unknown'}</p>
+                  <p><strong>Profile ID:</strong> {profile.uid || 'Not assigned'}</p>
+                  <p><strong>User Type:</strong> {profile.isMentor ? 'Mentor' : 'Mentee'}</p>
                   <p><strong>Created:</strong> {profile.createdAt ? new Date(profile.createdAt as string).toLocaleDateString() : 'Unknown'}</p>
                 </div>
               </div>
@@ -649,7 +713,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               <div className="pem-form-row">
                 <div className="pem-input-group">
                   <label htmlFor="edit-degree" className="pem-field-label">
-                    Degree/Qualification *
+                    {profile.isMentor ? 'Degree/Qualification' : 'Education/Studies'} *
                     <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('degree')} />
                   </label>
                   <input
@@ -659,7 +723,10 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     value={profile.degree || ''}
                     onChange={onFormChange}
                     className={validationErrors.degree ? 'error' : ''}
-                    placeholder={degreePlaceholders[profile.educationLevel || ''] || "e.g., BSc Computer Science"}
+                    placeholder={profile.isMentor 
+                      ? (degreePlaceholders[profile.educationLevel || ''] || "e.g., BSc Computer Science")
+                      : "e.g., A-Levels, GCSEs, or what you're currently studying"
+                    }
                     data-tooltip={getFieldTooltip('degree')}
                   />
                   {validationErrors.degree && (
@@ -668,7 +735,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 </div>
                 <div className="pem-input-group">
                   <label htmlFor="edit-educationLevel" className="pem-field-label">
-                    Education Level *
+                    {profile.isMentor ? 'Education Level' : 'Current Education Level'} *
                     <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('educationLevel')} />
                   </label>
                   <select
@@ -693,7 +760,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               <div className="pem-form-row">
                 <div className="pem-input-group">
                   <label htmlFor="edit-profession" className="pem-field-label">
-                    Current Profession *
+                    {profile.isMentor ? 'Current Profession' : 'Desired Profession'} *
                     <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('profession')} />
                   </label>
                   <input
@@ -703,7 +770,10 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     value={profile.profession || ''}
                     onChange={onFormChange}
                     className={validationErrors.profession ? 'error' : ''}
-                    placeholder="e.g., Software Developer, Student, Teacher"
+                    placeholder={profile.isMentor 
+                      ? "e.g., Software Developer, Teacher" 
+                      : "e.g., Software Developer, Doctor, Engineer"
+                    }
                     data-tooltip={getFieldTooltip('profession')}
                   />
                   {validationErrors.profession && (
@@ -712,7 +782,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 </div>
                 <div className="pem-input-group">
                   <label htmlFor="edit-linkedin" className="pem-field-label">
-                    LinkedIn Profile *
+                    LinkedIn Profile
                     <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('linkedin')} />
                   </label>
                   <input
@@ -731,61 +801,66 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 </div>
               </div>
 
-              <div className="pem-form-row">
-                <div className="pem-input-group">
-                  <label htmlFor="edit-calCom" className="pem-field-label">
-                    Cal.com Username
-                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('calCom')} />
-                  </label>
-                  <input
-                    type="text"
-                    id="edit-calCom"
-                    name="calCom"
-                    value={profile.calCom || ''}
-                    onChange={onFormChange}
-                    placeholder="yourusername"
-                    data-tooltip={getFieldTooltip('calCom')}
-                  />
-                </div>
-              </div>
-
-              {/* Past Professions */}
-              <div className="pem-past-professions-container">
-                <label className="pem-field-label">
-                  Past Professions *
-                  <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
-                </label>
-                {(profile.pastProfessions || ['']).map((profession, index) => (
-                  <div key={index} className="pem-profession-input-row">
+              {/* Cal.com field - Only for mentors */}
+              {profile.isMentor && (
+                <div className="pem-form-row">
+                  <div className="pem-input-group">
+                    <label htmlFor="edit-calCom" className="pem-field-label">
+                      Cal.com Username
+                      <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('calCom')} />
+                    </label>
                     <input
                       type="text"
-                      value={profession}
-                      onChange={(e) => onPastProfessionChange(index, e.target.value)}
-                      placeholder={`Past profession ${index + 1}`}
-                      data-tooltip={getFieldTooltip('pastProfessions')}
+                      id="edit-calCom"
+                      name="calCom"
+                      value={profile.calCom || ''}
+                      onChange={onFormChange}
+                      placeholder="yourusername"
+                      data-tooltip={getFieldTooltip('calCom')}
                     />
-                    {(profile.pastProfessions || []).length > 1 && (
-                      <button
-                        type="button"
-                        className="pem-remove-profession-btn"
-                        onClick={() => onRemovePastProfession(index)}
-                      >
-                        Remove
-                      </button>
-                    )}
                   </div>
-                ))}
-                <button
-                  type="button"
-                  className="pem-add-profession-btn"
-                  onClick={onAddPastProfession}
-                >
-                  + Add Another Profession
-                </button>
-                {validationErrors.pastProfessions && (
-                  <div className="pem-validation-error">{validationErrors.pastProfessions}</div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* Past Professions - Only for mentors */}
+              {profile.isMentor && (
+                <div className="pem-past-professions-container">
+                  <label className="pem-field-label">
+                    Past Professions *
+                    <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
+                  </label>
+                  {(profile.pastProfessions || ['']).map((profession, index) => (
+                    <div key={index} className="pem-profession-input-row">
+                      <input
+                        type="text"
+                        value={profession}
+                        onChange={(e) => onPastProfessionChange(index, e.target.value)}
+                        placeholder={`Past profession ${index + 1}`}
+                        data-tooltip={getFieldTooltip('pastProfessions')}
+                      />
+                      {(profile.pastProfessions || []).length > 1 && (
+                        <button
+                          type="button"
+                          className="pem-remove-profession-btn"
+                          onClick={() => onRemovePastProfession(index)}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="pem-add-profession-btn"
+                    onClick={onAddPastProfession}
+                  >
+                    + Add Another Profession
+                  </button>
+                  {validationErrors.pastProfessions && (
+                    <div className="pem-validation-error">{validationErrors.pastProfessions}</div>
+                  )}
+                </div>
+              )}
             </div>
 
                          {/* Skills & Interests Section */}
@@ -845,6 +920,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   )}
                 </div>
               </div>
+
+              {/* Looking For - Only for mentees */}
+              {renderLookingForSelection()}
             </div>
 
             <div className="pem-form-actions">
