@@ -101,14 +101,31 @@ export default function MentorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('MentorPage handleSubmit called');
+    console.log('Profile form data:', profileForm);
+    console.log('Selected role:', selectedRole);
     
     const errors = validateProfileForm();
+    console.log('Validation errors:', errors);
+    
     if (Object.keys(errors).length > 0) {
+      console.log('Validation failed, setting errors');
       setValidationErrors(errors);
       return;
     }
 
-    if (!selectedRole) return;
+    if (!selectedRole) {
+      console.log('No selected role, returning');
+      return;
+    }
+
+    console.log('Creating profile with data:', {
+      ...profileForm,
+      type: selectedRole,
+      uid: currentUser?.uid || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
 
     const profileData = {
       ...profileForm,
@@ -118,10 +135,16 @@ export default function MentorPage() {
       updatedAt: new Date().toISOString()
     };
 
+    console.log('Calling createProfile...');
     const success = await createProfile(profileData);
+    console.log('createProfile result:', success);
+    
     if (success) {
+      console.log('Profile created successfully, resetting form');
       setSelectedRole(null);
       resetForm();
+    } else {
+      console.log('Profile creation failed');
     }
   };
 
@@ -434,6 +457,7 @@ export default function MentorPage() {
   if (error) {
     return (
       <div className="mentor-page error-state">
+        <Navbar />
         <h3>Something went wrong</h3>
         <p>{error}</p>
         <button onClick={() => setError(null)}>Try Again</button>

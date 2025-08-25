@@ -859,19 +859,116 @@ html, body {
 /* Error State */
 .error-state {
   text-align: center;
-  padding: 80px 20px 60px 20px; /* Increased top padding for navbar spacing */
+  padding: 120px 20px 80px 20px; /* Increased top padding for navbar spacing */
   color: var(--gray-600);
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .error-state h3 {
-  font-size: 1.5rem;
-  margin-bottom: 16px;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
   color: var(--error);
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
 }
 
 .error-state p {
-  margin-bottom: 20px;
-  color: var(--gray-600);
+  margin-bottom: 32px;
+  color: var(--gray-700);
+  font-size: 1.125rem;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.error-state button {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: var(--white);
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 140px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.error-state button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.error-state button:hover::before {
+  left: 100%;
+}
+
+.error-state button:hover {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.error-state button:active {
+  transform: translateY(-1px);
+}
+
+/* Error state responsive design */
+@media (max-width: 768px) {
+  .error-state {
+    padding: 100px 20px 60px 20px;
+  }
+  
+  .error-state h3 {
+    font-size: 2rem;
+  }
+  
+  .error-state p {
+    font-size: 1rem;
+    margin-bottom: 28px;
+  }
+  
+  .error-state button {
+    padding: 14px 28px;
+    font-size: 15px;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-state {
+    padding: 80px 16px 40px 16px;
+  }
+  
+  .error-state h3 {
+    font-size: 1.75rem;
+  }
+  
+  .error-state p {
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+  
+  .error-state button {
+    padding: 12px 24px;
+    font-size: 14px;
+    min-width: 100px;
+  }
 }
 
 /* Header Section */
