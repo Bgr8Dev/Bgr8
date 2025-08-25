@@ -2959,8 +2959,8 @@ html, body {
   color: white;
 }
 
-/* Mentors Grid with Animations */
-.mentors-grid {
+/* Profiles Grid with Animations */
+.profiles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 24px;
@@ -3680,7 +3680,7 @@ html, body {
     font-size: 15px;
   }
   
-  .mentors-grid {
+  .profiles-grid {
     grid-template-columns: 1fr;
   }
   

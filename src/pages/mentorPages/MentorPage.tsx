@@ -36,11 +36,11 @@ export default function MentorPage() {
   const [selectedMentor, setSelectedMentor] = useState<MentorMenteeProfile | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [mentorsPerPage] = useState(12);
+  const [profilesPerPage] = useState(12);
 
   // Custom hooks for data management
   const {
-    mentors,
+    mentors: availableProfiles,
     setFilteredMentors,
     loading,
     error,
@@ -69,7 +69,7 @@ export default function MentorPage() {
     handleSearchChange,
     handleSuggestionClick,
     getFilterCount
-  } = useMentorSearch(mentors, mentorAvailability);
+  } = useMentorSearch(availableProfiles, mentorAvailability);
 
   const {
     profileForm,
@@ -185,7 +185,7 @@ export default function MentorPage() {
 
   const handleAvailabilityManage = () => {
     // Only mentors can manage availability
-    if (currentUserProfile?.type !== 'MENTOR') {
+    if (typeof currentUserProfile?.type !== 'string' || currentUserProfile.type.toLowerCase() !== 'mentor') {
       console.warn('Only mentors can manage availability');
       return;
     }
@@ -296,10 +296,10 @@ export default function MentorPage() {
   };
 
   // Pagination
-  const indexOfLastMentor = currentPage * mentorsPerPage;
-  const indexOfFirstMentor = indexOfLastMentor - mentorsPerPage;
-  const currentMentors = searchFilteredMentors.slice(indexOfFirstMentor, indexOfLastMentor);
-  const totalPages = Math.ceil(searchFilteredMentors.length / mentorsPerPage);
+  const indexOfLastProfile = currentPage * profilesPerPage;
+  const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
+  const currentProfiles = searchFilteredMentors.slice(indexOfFirstProfile, indexOfLastProfile);
+  const totalPages = Math.ceil(searchFilteredMentors.length / profilesPerPage);
 
   // Effects
   useEffect(() => {
@@ -506,15 +506,15 @@ export default function MentorPage() {
         <Navbar />
         <div className="mentor-header-content">
           <h1>
-            {currentUserProfile?.type === 'mentee' 
+            {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
               ? 'Find Your Perfect Mentor' 
-              : 'Connect with Other Mentors'
+              : 'Find Mentees to Mentor'
             }
           </h1>
           <p>
-            {currentUserProfile?.type === 'mentee'
+            {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
               ? 'Connect with experienced professionals who can guide you on your journey to success'
-              : 'Network and collaborate with fellow mentors to share knowledge and best practices'
+              : 'Find mentees who can benefit from your knowledge and experience'
             }
           </p>
           
@@ -530,8 +530,8 @@ export default function MentorPage() {
           {currentUserProfile && (
             <div className="user-profile-summary">
               <div className="profile-info">
-                <div className={`profile-role ${currentUserProfile.type === 'MENTOR' ? 'mentor' : 'mentee'}`}>
-                  {currentUserProfile.type === 'MENTOR' ? 'Mentor' : 'Mentee'}
+                <div className={`profile-role ${typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : 'mentee'}`}>
+                  {typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'Mentor' : 'Mentee'}
                 </div>
                 <div className="profile-name">
                   {currentUserProfile.firstName} {currentUserProfile.lastName}
@@ -554,7 +554,7 @@ export default function MentorPage() {
                 >
                   {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
                 </button>
-                {currentUserProfile?.type === 'MENTOR' && (
+                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' && (
                   <button 
                     className="availability-manage-btn"
                     onClick={handleAvailabilityManage}
@@ -584,9 +584,9 @@ export default function MentorPage() {
               <input
                 type="text"
                 placeholder={
-                  currentUserProfile?.type === 'mentee'
+                  typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
                     ? "Search for mentors by name, skills, industry, or education..."
-                    : "Search for other mentors by name, skills, industry, or education..."
+                    : "Search for mentees by name, skills, industry, or education..."
                 }
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -629,7 +629,7 @@ export default function MentorPage() {
             selectedFilter={selectedFilter}
             onFilterChange={setSelectedFilter}
             getFilterCount={getFilterCount}
-            totalMentors={mentors.length}
+            totalMentors={availableProfiles.length}
           />
         </div>
 
@@ -652,15 +652,15 @@ export default function MentorPage() {
           <div className="mentor-results">
             <div className="results-header">
               <h2>
-                {currentUserProfile?.type === 'mentee' 
+                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
                   ? 'Available Mentors' 
-                  : 'Other Mentors'
+                  : 'Available Mentees'
                 }
               </h2>
               <div className="results-summary">
                 <p>
                   Showing {searchFilteredMentors.length} {
-                    currentUserProfile?.type === 'mentee' ? 'mentors' : 'mentors'
+                    typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentors' : 'mentees'
                   }
                 </p>
                 {searchFilteredMentors.length > 0 && (
@@ -678,25 +678,25 @@ export default function MentorPage() {
               </div>
             </div>
 
-            {currentMentors.length === 0 ? (
+            {currentProfiles.length === 0 ? (
               <div className="no-results">
                 <h3>
-                  {currentUserProfile?.type === 'mentee' 
+                  {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
                     ? 'No mentors found' 
-                    : 'No other mentors found'
+                    : 'No mentees found'
                   }
                 </h3>
                 <p>Try adjusting your search criteria or filters</p>
               </div>
             ) : (
               <>
-                <div className="mentors-grid">
-                  {currentMentors.map((mentor) => (
+                <div className="profiles-grid">
+                  {currentProfiles.map((profile) => (
                     <MentorCard
-                      key={mentor.uid}
-                      mentor={mentor}
+                      key={profile.uid}
+                      mentor={profile}
                       mentorAvailability={mentorAvailability}
-                      currentUserRole={currentUserProfile?.type === 'mentor' || currentUserProfile?.type === 'mentee' ? currentUserProfile.type : undefined}
+                      currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
                       onProfileClick={handleProfileCardClick}
                       onBooking={handleBooking}
                       onCalCom={handleCalCom}
@@ -773,7 +773,7 @@ export default function MentorPage() {
               isOpen={showProfileViewModal}
               profile={selectedMentor}
               onClose={handleCloseProfileViewModal}
-              currentUserRole={currentUserProfile?.type === 'mentor' || currentUserProfile?.type === 'mentee' ? currentUserProfile.type : undefined}
+              currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
             />
           </div>
         </div>
