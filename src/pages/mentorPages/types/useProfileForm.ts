@@ -83,16 +83,15 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     if (profileForm.age.trim()) completedFields++;
     if (profileForm.county.trim()) completedFields++;
     
-    // Education & Career (4 fields for mentees, 5 for mentors)
+    // Education & Career (4 fields for mentees, 4 for mentors - past professions no longer required)
     if (selectedRole === MENTOR) {
-      totalFields += 5; // degree, educationLevel, profession, linkedin, pastProfessions
+      totalFields += 4; // degree, educationLevel, profession, linkedin
       if (profileForm.degree.trim()) completedFields++;
       if (profileForm.educationLevel.trim()) completedFields++;
       if (profileForm.profession.trim()) completedFields++;
       if (profileForm.linkedin.trim()) completedFields++;
-      if (profileForm.pastProfessions.some(p => p.trim())) completedFields++;
     } else {
-      totalFields += 3; // degree, educationLevel, profession (no linkedin or pastProfessions for mentees)
+      totalFields += 3; // degree, educationLevel, profession
       if (profileForm.degree.trim()) completedFields++;
       if (profileForm.educationLevel.trim()) completedFields++;
       if (profileForm.profession.trim()) completedFields++;
@@ -136,18 +135,16 @@ export const useProfileForm = (selectedRole: UserType | null) => {
       missingFields.push('LinkedIn Profile');
     }
     
+    // Past Professions are now optional for mentors, so no validation required
+    
+    // Skills & Interests
     if (profileForm.skills.length === 0) missingFields.push('Skills');
     if (profileForm.industries.length === 0) missingFields.push('Industries');
     if (profileForm.hobbies.length === 0) missingFields.push('Hobbies & Interests');
     if (!profileForm.ethnicity.trim()) missingFields.push('Ethnicity');
     if (!profileForm.religion.trim()) missingFields.push('Religion');
     
-    // Past Professions only required for mentors
-    if (selectedRole === MENTOR && !profileForm.pastProfessions.some(p => p.trim())) {
-      missingFields.push('Past Professions');
-    }
-    
-    // Looking For only required for mentees
+    // Looking For (for mentees)
     if (selectedRole === MENTEE && profileForm.lookingFor.length === 0) {
       missingFields.push('Learning Goals');
     }
@@ -185,8 +182,8 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     // Professional Background section only for mentors
     if (selectedRole === MENTOR) {
       sections['Professional Background'] = {
-        completed: profileForm.pastProfessions.some(p => p.trim()),
-        total: 1
+        completed: true, // Past professions are now optional
+        total: 0 // No required fields in this section
       };
     }
     
@@ -202,6 +199,9 @@ export const useProfileForm = (selectedRole: UserType | null) => {
   };
 
   const validateProfileForm = (): ValidationErrors => {
+    console.log('validateProfileForm called for role:', selectedRole);
+    console.log('Profile form data:', profileForm);
+    
     const errors: ValidationErrors = {};
     
     // Personal Information
@@ -231,19 +231,14 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     if (!profileForm.ethnicity.trim()) errors.ethnicity = 'Ethnicity is required';
     if (!profileForm.religion.trim()) errors.religion = 'Religion is required';
     
-    // Past Professions (only required for mentors)
-    if (selectedRole === MENTOR) {
-      const nonEmptyPastProfessions = profileForm.pastProfessions.filter(p => p.trim());
-      if (nonEmptyPastProfessions.length === 0) {
-        errors.pastProfessions = 'At least one past profession is required for mentors';
-      }
-    }
+    // Past Professions are now optional for mentors, so no validation required
     
     // Looking For (for mentees)
     if (selectedRole === MENTEE && profileForm.lookingFor.length === 0) {
       errors.lookingFor = 'At least one learning goal is required';
     }
     
+    console.log('Validation errors found:', errors);
     return errors;
   };
 

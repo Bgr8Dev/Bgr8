@@ -1,5 +1,5 @@
-import React from 'react';
-import { FaArrowLeft, FaInfoCircle } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaArrowLeft, FaInfoCircle, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 import { UserType, MENTOR, MENTEE, ProfileFormData, ValidationErrors, FormProgress, SectionStatus } from '../types/mentorTypes';
 import { degreePlaceholders } from '../types/mentorConstants';
 import skillsByCategory from '../../../constants/skillsByCategory';
@@ -26,6 +26,92 @@ interface ProfileRegistrationFormProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
+// Missing Fields Modal Component
+const MissingFieldsModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  missingFields: string[];
+  onScrollToField: (fieldName: string) => void;
+}> = ({ isOpen, onClose, missingFields, onScrollToField }) => {
+  if (!isOpen) return null;
+
+  const getFieldSection = (fieldName: string): string => {
+    const personalFields = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Age', 'County'];
+    const educationFields = ['Degree/Qualification', 'Education Level', 'Profession', 'LinkedIn Profile'];
+    const skillsFields = ['Skills', 'Industries', 'Hobbies & Interests'];
+    const additionalFields = ['Ethnicity', 'Religion'];
+    const menteeFields = ['Learning Goals'];
+
+    if (personalFields.includes(fieldName)) return 'Personal Information';
+    if (educationFields.includes(fieldName)) return 'Education & Career';
+    if (skillsFields.includes(fieldName)) return 'Skills & Interests';
+    if (additionalFields.includes(fieldName)) return 'Additional Information';
+    if (menteeFields.includes(fieldName)) return 'Learning Goals';
+    return 'Other';
+  };
+
+  const groupedFields = missingFields.reduce((acc, field) => {
+    const section = getFieldSection(field);
+    if (!acc[section]) acc[section] = [];
+    acc[section].push(field);
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  return (
+    <div className="missing-fields-modal-overlay" onClick={onClose}>
+      <div className="missing-fields-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="missing-fields-modal-header">
+          <div className="missing-fields-modal-title">
+            <FaExclamationTriangle className="warning-icon" />
+            <h3>Missing Required Fields</h3>
+          </div>
+          <button 
+            className="missing-fields-modal-close" 
+            onClick={onClose}
+            aria-label="Close missing fields modal"
+            title="Close modal"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        
+        <div className="missing-fields-modal-content">
+          <p className="missing-fields-intro">
+            Please complete the following required fields to continue:
+          </p>
+          
+          {Object.entries(groupedFields).map(([section, fields]) => (
+            <div key={section} className="missing-fields-section">
+              <h4 className="missing-fields-section-title">{section}</h4>
+              <div className="missing-fields-list">
+                {fields.map((field) => (
+                  <button
+                    key={field}
+                    className="missing-field-item"
+                    onClick={() => {
+                      onScrollToField(field);
+                      onClose();
+                    }}
+                  >
+                    {field}
+                    <span className="scroll-hint">Click to scroll to field</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="missing-fields-modal-footer">
+          <button className="missing-fields-close-btn" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = ({
   selectedRole,
   profileForm,
@@ -40,6 +126,9 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   onRemovePastProfession,
   onSubmit
 }) => {
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const getFieldTooltip = (fieldName: string) => {
     const tooltips: { [key: string]: string } = {
       firstName: 'Enter your legal first name as it appears on official documents',
@@ -57,9 +146,9 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       profession: selectedRole === MENTOR 
         ? 'What do you currently do for work? This helps mentees understand your expertise'
         : 'What career path are you interested in pursuing? This helps mentors provide relevant guidance',
-      pastProfessions: 'List your previous work experience to show your background and expertise',
+      pastProfessions: 'List your previous work experience to show your background and expertise (optional)',
       linkedin: 'Your LinkedIn profile helps verify your professional experience (optional for mentees)',
-      calCom: 'Connect your Cal.com account to enable video call scheduling',
+      calCom: 'Connect your Cal.com public page to enable video call scheduling',
       skills: 'Select the skills you can teach (mentors) or want to learn (mentees)',
       industries: 'Choose the industries you work in or are interested in',
       hobbies: 'Your interests help create better matches and conversation starters',
@@ -304,6 +393,92 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     );
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submission started');
+    console.log('Selected role:', selectedRole);
+    console.log('Profile form data:', profileForm);
+    
+    const requiredFields: string[] = [];
+
+    if (!profileForm.firstName) requiredFields.push('First Name');
+    if (!profileForm.lastName) requiredFields.push('Last Name');
+    if (!profileForm.email) requiredFields.push('Email');
+    if (!profileForm.phone) requiredFields.push('Phone Number');
+    if (!profileForm.age) requiredFields.push('Age');
+    if (!profileForm.county) requiredFields.push('County');
+
+    if (selectedRole === MENTOR) {
+      if (!profileForm.degree) requiredFields.push('Degree/Qualification');
+      if (!profileForm.educationLevel) requiredFields.push('Education Level');
+      if (!profileForm.profession) requiredFields.push('Current Profession');
+      if (!profileForm.linkedin) requiredFields.push('LinkedIn Profile');
+      // Cal.com is optional for mentors, so not included in required fields
+    } else { // MENTEE
+      if (!profileForm.degree) requiredFields.push('Degree/Qualification');
+      if (!profileForm.educationLevel) requiredFields.push('Education Level');
+      if (!profileForm.profession) requiredFields.push('Desired Profession');
+      if (profileForm.lookingFor.length === 0) requiredFields.push('Learning Goals');
+    }
+
+    if (profileForm.skills.length === 0) requiredFields.push('Skills');
+    if (profileForm.industries.length === 0) requiredFields.push('Industries');
+    if (profileForm.hobbies.length === 0) requiredFields.push('Hobbies & Interests');
+    if (profileForm.ethnicity === '') requiredFields.push('Ethnicity');
+    if (profileForm.religion === '') requiredFields.push('Religion');
+
+    console.log('Required fields found:', requiredFields);
+
+    if (requiredFields.length > 0) {
+      console.log('Opening missing fields modal');
+      setMissingFields(requiredFields);
+      setIsModalOpen(true);
+    } else {
+      console.log('All required fields completed, calling onSubmit');
+      onSubmit(e);
+    }
+  };
+
+  const scrollToField = (fieldName: string) => {
+    // Map field names to their corresponding section IDs
+    const fieldToSection: Record<string, string> = {
+      'First Name': 'firstName',
+      'Last Name': 'lastName',
+      'Email': 'email',
+      'Phone Number': 'phone',
+      'Age': 'age',
+      'County': 'county',
+      'Degree/Qualification': 'degree',
+      'Education Level': 'educationLevel',
+      'Current Profession': 'profession',
+      'Desired Profession': 'profession', // For mentees
+      'LinkedIn Profile': 'linkedin',
+      'Cal.com Public Page Link': 'calCom',
+      'Skills': 'skills',
+      'Industries': 'industries',
+      'Hobbies & Interests': 'hobbies',
+      'Ethnicity': 'ethnicity',
+      'Religion': 'religion',
+      'Learning Goals': 'lookingFor'
+    };
+
+    const fieldId = fieldToSection[fieldName];
+    if (fieldId) {
+      const element = document.getElementById(fieldId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Add a brief highlight effect
+        element.style.transition = 'all 0.3s ease';
+        element.style.boxShadow = '0 0 0 4px rgba(59, 167, 242, 0.3)';
+        element.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          element.style.boxShadow = '';
+          element.style.transform = '';
+        }, 2000);
+      }
+    }
+  };
+
   return (
     <div className="prf-mentor-registration">
       {/* Fixed Back Button - Always visible at top */}
@@ -342,9 +517,9 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         ))}
       </div>
 
-      <form onSubmit={onSubmit} className="prf-registration-form">
+      <form onSubmit={handleSubmit} className="prf-registration-form">
         {/* Personal Information Section */}
-        <div className="prf-form-section">
+        <div className="prf-form-section" id="personal-info">
           <h3>Personal Information</h3>
           <div className="prf-form-row">
             <div className="input-group">
@@ -476,7 +651,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
 
         {/* Education & Career Section */}
-        <div className="prf-form-section">
+        <div className="prf-form-section" id="education-career">
           <h3>Education & Career</h3>
           <div className="prf-form-row">
             <div className="input-group">
@@ -570,16 +745,16 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             <div className="prf-form-row">
               <div className="input-group">
                 <label htmlFor="calCom" className="field-label">
-                  Cal.com Username
+                  Cal.com Public Page Link
                   <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('calCom')} />
                 </label>
                 <input
-                  type="text"
+                  type="url"
                   id="calCom"
                   name="calCom"
                   value={profileForm.calCom}
                   onChange={onFormChange}
-                  placeholder="yourusername"
+                  placeholder="https://cal.com/yourusername"
                   data-tooltip={getFieldTooltip('calCom')}
                 />
               </div>
@@ -590,7 +765,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           {selectedRole === MENTOR && (
             <div className="prf-past-professions-container">
               <label className="field-label">
-                Past Professions *
+                Past Professions
                 <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
               </label>
               {profileForm.pastProfessions.map((profession, index) => (
@@ -628,7 +803,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
 
         {/* Skills & Interests Section */}
-        <div className="prf-form-section">
+        <div className="prf-form-section" id="skills-interests">
           <h3>Skills & Interests</h3>
           {renderSkillsSelection()}
           {renderIndustriesSelection()}
@@ -637,7 +812,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         </div>
 
         {/* Additional Information Section */}
-        <div className="prf-form-section">
+        <div className="prf-form-section" id="additional-info">
           <h3>Additional Information</h3>
           <div className="prf-form-row">
             <div className="input-group">
@@ -691,6 +866,15 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           Complete Profile
         </button>
       </form>
+
+      {isModalOpen && (
+        <MissingFieldsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          missingFields={missingFields}
+          onScrollToField={scrollToField}
+        />
+      )}
     </div>
   );
 };

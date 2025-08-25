@@ -806,16 +806,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 <div className="pem-form-row">
                   <div className="pem-input-group">
                     <label htmlFor="edit-calCom" className="pem-field-label">
-                      Cal.com Username
+                      Cal.com Public Page Link
                       <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('calCom')} />
                     </label>
                     <input
-                      type="text"
+                      type="url"
                       id="edit-calCom"
                       name="calCom"
                       value={profile.calCom || ''}
                       onChange={onFormChange}
-                      placeholder="yourusername"
+                      placeholder="https://cal.com/yourusername"
                       data-tooltip={getFieldTooltip('calCom')}
                     />
                   </div>
