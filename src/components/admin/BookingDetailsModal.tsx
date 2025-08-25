@@ -17,8 +17,18 @@ export default function BookingDetailsModal({ booking, open, onClose, onDelete, 
       <div className="booking-details-modal">
         <button onClick={onClose} className="booking-details-modal-close">Close</button>
         <h2 className="booking-details-modal-title">Booking Details</h2>
-        <div className="booking-details-modal-row"><b>Mentor:</b> {booking.mentorName} ({booking.mentorEmail})</div>
-        <div className="booking-details-modal-row"><b>Mentee:</b> {booking.menteeName} ({booking.menteeEmail})</div>
+        <div className="booking-details-modal-row">
+          <b>Mentor:</b> {booking.mentorName} ({booking.mentorEmail})
+          {(booking as any).isGeneratedMentor && (
+            <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600, marginLeft: 8 }} title="Generated Mentor">🎲 Generated</span>
+          )}
+        </div>
+        <div className="booking-details-modal-row">
+          <b>Mentee:</b> {booking.menteeName} ({booking.menteeEmail})
+          {(booking as any).isGeneratedMentee && (
+            <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600, marginLeft: 8 }} title="Generated Mentee">🎲 Generated</span>
+          )}
+        </div>
         <div className="booking-details-modal-row"><b>Date:</b> {booking.sessionDate ? (typeof booking.sessionDate === 'object' && 'toDate' in booking.sessionDate ? (booking.sessionDate as { toDate: () => Date }).toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</div>
         <div className="booking-details-modal-row"><b>Time:</b> {booking.startTime} - {booking.endTime}</div>
         <div className="booking-details-modal-row"><b>Status:</b> <span className={`booking-details-status booking-details-status-${booking.status}`}>{booking.status.toUpperCase()}</span></div>

@@ -52,10 +52,22 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
                           {booking.isCalComBooking && (
                             <span style={{ background: '#00eaff', color: '#181818', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>Cal.com</span>
                           )}
+                          {(booking as any).isGeneratedMentor && (
+                            <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentor">🎲</span>
+                          )}
                         </div>
                       </td>
                     )}
-                    {groupBy === 'mentee' ? null : <td>{booking.menteeName}</td>}
+                    {groupBy === 'mentee' ? null : (
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span>{booking.menteeName}</span>
+                          {(booking as any).isGeneratedMentee && (
+                            <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentee">🎲</span>
+                          )}
+                        </div>
+                      </td>
+                    )}
                     <td>{booking.sessionDate ? (booking.sessionDate instanceof Date ? booking.sessionDate.toLocaleDateString('en-GB') : (typeof booking.sessionDate === 'string' ? new Date(booking.sessionDate).toLocaleDateString('en-GB') : booking.sessionDate.toDate().toLocaleDateString('en-GB'))) : '-'}</td>
                     <td>{booking.startTime} - {booking.endTime}</td>
                     <td>

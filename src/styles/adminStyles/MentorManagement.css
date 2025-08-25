@@ -194,6 +194,109 @@
   box-shadow: 0 2px 6px rgba(255, 42, 42, 0.3);
 }
 
+/* New Availability Management Button Styles */
+.refresh-button[onclick*="generateAvailabilityForGeneratedProfiles"] {
+  background: #00e676 !important;
+  color: #181818 !important;
+  border: 1.5px solid #00e676 !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.refresh-button[onclick*="generateAvailabilityForGeneratedProfiles"]:hover:not(:disabled) {
+  background: #00c853 !important;
+  border-color: #00c853 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 230, 118, 0.3);
+}
+
+.refresh-button[onclick*="generateAvailabilityForGeneratedProfiles"]:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 230, 118, 0.3);
+}
+
+.refresh-button[onclick*="clearGeneratedProfileAvailability"] {
+  background: #ff6b35 !important;
+  color: #fff !important;
+  border: 1.5px solid #ff6b35 !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.refresh-button[onclick*="clearGeneratedProfileAvailability"]:hover:not(:disabled) {
+  background: #ff5722 !important;
+  border-color: #ff5722 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.refresh-button[onclick*="clearGeneratedProfileAvailability"]:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+}
+
+.refresh-button[onclick*="handleWipeAllAvailability"] {
+  background: #ff2a2a !important;
+  color: #fff !important;
+  border: 1.5px solid #ff2a2a !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.refresh-button[onclick*="handleWipeAllAvailability"]:hover:not(:disabled) {
+  background: #d32f2f !important;
+  border-color: #d32f2f !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 42, 42, 0.3);
+}
+
+.refresh-button[onclick*="handleWipeAllAvailability"]:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 42, 42, 0.3);
+}
+
+/* Enhanced button spacing for availability controls */
+.mentor-management-controls .refresh-button {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.mentor-management-controls .refresh-button:last-child {
+  margin-right: 0;
+}
+
+/* Responsive button layout for smaller screens */
+@media (max-width: 1200px) {
+  .mentor-management-controls .refresh-button {
+    margin-right: 6px;
+    margin-bottom: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mentor-management-controls .refresh-button {
+    margin-right: 4px;
+    margin-bottom: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    min-width: auto;
+  }
+  
+  /* Stack buttons vertically on very small screens */
+  .mentor-management-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mentor-management-controls .refresh-button {
+    margin-right: 0;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
