@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { firestore } from '../../firebase/firebase';
-import { doc, getDoc, addDoc, collection, updateDoc, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, updateDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { SessionFeedback } from '../../types/b8fc';
 import { CalComService, CalComBookingResponse } from '../../components/widgets/MentorAlgorithm/CalCom/calComService';
 import { Booking } from '../../types/bookings';
@@ -110,16 +110,23 @@ export default function FeedbackPage() {
                              const mentee = matchingBooking.attendees.find(attendee => 
                                attendee.email !== mentorData.email
                              );
+
+                             let createdAtTS = (
+                              matchingBooking.createdAt 
+                              ? Timestamp.fromDate(new Date(matchingBooking.createdAt)) 
+                              : Timestamp.fromDate(new Date()));
                              
                              const bookingData: Booking = {
                                id: bookingId,
+                               day: startDate.toLocaleDateString('en-GB', { weekday: 'long' }),
+                               createdAt: createdAtTS,
                                mentorId: userDoc.id,
                                menteeId: mentee?.email || currentUser.uid,
                                mentorName: mentor?.name || `${mentorData.firstName || 'Unknown'} ${mentorData.lastName || 'Mentor'}`,
                                menteeName: mentee?.name || 'Unknown Mentee',
                                mentorEmail: mentor?.email || mentorData.email || '',
                                menteeEmail: mentee?.email || '',
-                               sessionDate: startDate,
+                               sessionDate: Timestamp.fromDate(startDate),
                                startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
                                endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
                                status: 'confirmed',
@@ -219,7 +226,7 @@ export default function FeedbackPage() {
         menteeId: booking.menteeId,
         mentorName: booking.mentorName,
         menteeName: booking.menteeName,
-        sessionDate: booking.sessionDate,
+        sessionDate: booking.sessionDate!.toDate(),
         feedbackType,
         submittedBy: currentUser.uid,
         submittedAt: new Date(),
@@ -358,12 +365,20 @@ export default function FeedbackPage() {
   }
 
   const otherPartyName = userRole === 'mentor' ? booking.menteeName : booking.mentorName;
-  const sessionDate = new Date(booking.sessionDate).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const sessionDate =
+    booking.sessionDate
+      ? new Date(
+          // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
+          typeof (booking.sessionDate as any).toDate === 'function'
+            ? (booking.sessionDate as any).toDate()
+            : booking.sessionDate
+        ).toLocaleDateString('en-GB', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      : '';
 
   return (
     <div className="feedback-page">
