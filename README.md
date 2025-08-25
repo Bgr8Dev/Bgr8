@@ -12,9 +12,6 @@
 [![Firebase](https://img.shields.io/badge/Firebase-11.3-FF6B35?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
-[![Linting](https://github.com/Hum2a/bgr8/actions/workflows/lint.yml/badge.svg?style=for-the-badge)](https://github.com/Hum2a/bgr8/actions/workflows/lint.yml)
-[![CodeQL](https://github.com/Hum2a/bgr8/actions/workflows/code_quality.yml/badge.svg?style=for-the-badge)](https://github.com/Hum2a/bgr8/actions/workflows/code_quality.yml)
-
 ---
 
 **A focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm with advanced availability management and intelligent search capabilities.**
@@ -38,7 +35,6 @@
 - [🚀 Installation](#-installation)
 - [🌐 Deployment](#-deployment)
 - [🔧 Environment Variables](#-environment-variables)
-- [🧪 Testing](#-testing)
 - [📁 Project Structure](#-project-structure)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -86,9 +82,8 @@
 | 📅 **Cal.com Booking System** | Third-party calendar integration | ✅ Live |
 | 📅 **Availability Management** | Direct mentor availability creation and management | ✅ Live |
 | 🔒 **Secure Authentication** | Firebase-powered security | ✅ Live |
-|  **Responsive Design** | Mobile-first approach | ✅ Live |
-| 📊 **Analytics Dashboard** | Comprehensive insights | ✅ Live |
-| 💬 **Admin Management** | Complete control panel | ✅ Live |
+| 📱 **Responsive Design** | Mobile-first approach | ✅ Live |
+| 📊 **Admin Dashboard** | User and data management panel | ✅ Live |
 
 ### ⚡ Technical Features
 
@@ -97,10 +92,9 @@
 | 🔑 **Firebase Auth** | User authentication | ✅ Live |
 | 🔥 **Firestore DB** | Real-time database | ✅ Live |
 | 📅 **Cal.com Integration** | Advanced booking system | ✅ Live |
-| 🔗 **Proxy Server** | CORS-free API access | ✅ Live |
 | ⚡ **Real-time Updates** | Live data synchronization | ✅ Live |
 | 🧑‍💻 **React + TypeScript** | Modern frontend stack | ✅ Live |
-| 🎨 **CSS Variables** | Consistent design system with mentor branding | ✅ Live |
+| 🎨 **CSS Variables** | Consistent design system | ✅ Live |
 
 ### 🆕 Recent Enhancements
 
@@ -110,9 +104,9 @@
 | 📊 **Filter Tabs** | Relevant mentorship categories with count bubbles | ✅ Live |
 | 👤 **Profile Modals** | Clickable mentor cards with full profile display | ✅ Live |
 | 📅 **Availability Integration** | Real-time availability pulling from Cal.com and bookings | ✅ Live |
-| 🛠️ **Data Generation** | Comprehensive testing tools for profiles, availability, and bookings | ✅ Live |
+| 🛠️ **Data Generation** | Comprehensive testing tools for profiles and availability | ✅ Live |
 | 🗑️ **Smart Cleanup** | Cascading deletes and bulk data management | ✅ Live |
-| 🎨 **Mentor Styling** | Coral-like color scheme integration for mentor elements | ✅ Live |
+| 🎨 **Enhanced UI** | Improved styling and user experience | ✅ Live |
 
 </details>
 
@@ -126,17 +120,15 @@
 graph TD
     A[🎨 Frontend] --> B[⚛️ React + TypeScript]
     A --> C[⚡ Vite]
-    A --> D[🎨 CSS Variables & Mentor Styling]
+    A --> D[🎨 CSS Variables]
     E[🔧 Backend Services] --> F[🔥 Firebase]
     F --> G[🔐 Authentication]
     F --> H[🗄️ Firestore]
     F --> I[📦 Storage]
-    J[📊 Analytics] --> K[📈 Google Analytics]
     L[📅 Booking System] --> M[🌐 Cal.com API]
     L --> N[📅 Availability Management]
-    L --> O[🔗 Proxy Server]
-    L --> P[📋 Event Types]
-    L --> Q[📊 Bookings Management]
+    L --> O[📋 Event Types]
+    L --> P[📊 Bookings Management]
     R[🛠️ Admin Tools] --> S[👥 Profile Generation]
     R --> T[📅 Availability Generation]
     R --> U[🗑️ Data Cleanup]
@@ -148,7 +140,7 @@ graph TD
     style R fill:#FF9800
 ```
 
-**Our platform leverages cutting-edge technologies for optimal performance and user experience, with enhanced mentor functionality and intelligent data management.**
+**Our platform leverages cutting-edge technologies for optimal performance and user experience.**
 
 </div>
 
@@ -159,9 +151,6 @@ graph TD
 <div align="center">
 
 **Get up and running in under 5 minutes! 🚀**
-
-Requires local instance of Cal.com server running in the background.  
-See in Calcom-Server [repo](https://github.com/YakMan101/B8-Calcom-Server)
 
 </div>
 
@@ -272,7 +261,6 @@ npm run preview
 | 🚀 **Vercel** | Connect GitHub repo | ✅ Supported |
 | ☁️ **Netlify** | Drag & drop build folder | ✅ Supported |
 | 🔥 **Firebase Hosting** | `firebase deploy` | ✅ Supported |
-| 🐳 **Docker** | Use provided Dockerfile | 🔄 Coming Soon |
 
 </details>
 
@@ -358,52 +346,6 @@ bash release.sh [OPTIONS]
 
 ---
 
-## 🧪 Testing
-
-<div align="center">
-
-**Comprehensive testing suite for quality assurance**
-
-</div>
-
-<details>
-<summary><strong>🧪 Testing Commands</strong></summary>
-
-```bash
-# Run unit tests
-npm run test
-
-# Run end-to-end tests
-npm run test:e2e
-
-# Run tests in CI environment
-npm run test:ci
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-### Test Coverage Goals
-
-| Type | Coverage Target | Current Status |
-|------|----------------|:--------------:|
-| 🧪 **Unit Tests** | 80%+ | 🔄 In Progress |
-| 🔄 **Integration Tests** | 70%+ | 🔄 In Progress |
-| 🎯 **E2E Tests** | 60%+ | 🔄 In Progress |
-
-### 🆕 Testing Tools
-
-| Tool | Purpose | Status |
-|------|---------|:------:|
-| 🎲 **Profile Generator** | Generate realistic test mentor profiles | ✅ Live |
-| 📅 **Availability Generator** | Create test availability data | ✅ Live |
-| 📊 **Booking Generator** | Generate sample booking data | ✅ Live |
-| 🗑️ **Data Cleanup** | Bulk deletion and cleanup tools | ✅ Live |
-
-</details>
-
----
-
 ## 📁 Project Structure
 
 <details>
@@ -427,14 +369,14 @@ bgr8/
 │   │           └── 🔗 CalCom/        # Cal.com integration
 │   ├── 📄 pages/              # Page components
 │   │   ├── 👨‍💼 adminPages/      # Admin pages
-│   │   ├── � authPages/       # Authentication pages
-│   │   ├── �💼 businessPages/   # Business pages
+│   │   ├── 🔐 authPages/       # Authentication pages
+│   │   ├── 💼 businessPages/   # Business pages
 │   │   └── 🛠️ utilPages/        # Utility pages
 │   ├── 🎨 styles/             # CSS stylesheets
-│   │   ├── �‍💼 adminStyles/    # Admin-specific styles
+│   │   ├── 👨‍💼 adminStyles/    # Admin-specific styles
 │   │   ├── 💼 businessStyles/  # Business-specific styles
 │   │   ├── 🧩 components/      # Component-specific styles
-│   │   └── � payment/         # Payment-related styles
+│   │   └── 💳 payment/         # Payment-related styles
 │   ├── 🪝 hooks/              # Custom React hooks
 │   ├── 🔄 contexts/           # React context providers
 │   ├── 🛠️ utils/              # Utility functions
@@ -492,7 +434,6 @@ bgr8/
 - ✅ Follow TypeScript best practices
 - 🎨 Maintain consistent code style using CSS variables
 - 📝 Write meaningful commit messages
-- 🧪 Add tests for new features
 - 📚 Update documentation as needed
 - 🔍 Ensure proper contrast for UI elements
 - 📱 Test responsive design across devices
@@ -562,7 +503,6 @@ If you discover a security vulnerability, please:
 | 👨‍💻 **Developer** | Humza (Hum2a) |
 | 🐛 **Issues** | [GitHub Issues](https://github.com/Hum2a/bgr8/issues) |
 | 📧 **Email** | [Contact Us](mailto:contact@bgr8.com) |
-| 💬 **Discord** | [Join our community](https://discord.gg/bgr8) |
 
 ---
 
@@ -612,7 +552,7 @@ If you discover a security vulnerability, please:
 
 - ⚛️ **React** - UI framework
 - 🔥 **Firebase** - Backend services
--  **Cal.com** - Calendar & booking system
+- 📅 **Cal.com** - Calendar & booking system
 - ⚡ **Vite** - Build tool
 - 🎨 **CSS3** - Styling with CSS variables
 - 🔍 **Search Algorithms** - Intelligent filtering and discovery
