@@ -161,6 +161,11 @@ export default function MentorPage() {
   };
 
   const handleAvailabilityManage = () => {
+    // Only mentors can manage availability
+    if (currentUserProfile?.type !== 'MENTOR') {
+      console.warn('Only mentors can manage availability');
+      return;
+    }
     setShowAvailabilityModal(true);
   };
 
@@ -525,13 +530,15 @@ export default function MentorPage() {
                 >
                   {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
                 </button>
-                <button 
-                  className="availability-manage-btn"
-                  onClick={handleAvailabilityManage}
-                  data-tooltip="Manage your availability schedule"
-                >
-                  Manage Availability
-                </button>
+                {currentUserProfile?.type === 'MENTOR' && (
+                  <button 
+                    className="availability-manage-btn"
+                    onClick={handleAvailabilityManage}
+                    data-tooltip="Manage your availability schedule"
+                  >
+                    Manage Availability
+                  </button>
+                )}
               </div>
             </div>
           )}
