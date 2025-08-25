@@ -46,6 +46,7 @@ export default function MentorPage() {
     error,
     setError,
     mentorAvailability,
+    mentorBookings,
     hasProfile,
     currentUserProfile,
     bestMatches,
@@ -645,6 +646,88 @@ export default function MentorPage() {
                 onBooking={handleBooking}
                 onCalCom={handleCalCom}
               />
+            </div>
+          )}
+
+          {/* Bookings Widget - Only show for mentors */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' && (
+            <div className="bookings-widget-section">
+              <div className="bookings-widget-header">
+                <h2>Your Bookings</h2>
+                <p>Manage and view all your scheduled sessions</p>
+              </div>
+              
+              <div className="bookings-widget-content">
+                <div className="bookings-summary">
+                  <div className="booking-stat">
+                    <span className="stat-number">
+                      {Object.values(mentorBookings).flat().length}
+                    </span>
+                    <span className="stat-label">Total Bookings</span>
+                  </div>
+                  <div className="booking-stat">
+                    <span className="stat-number">
+                      {Object.values(mentorBookings).flat().filter(booking => 
+                        new Date(booking.sessionDate) > new Date()
+                      ).length}
+                    </span>
+                    <span className="stat-label">Upcoming</span>
+                  </div>
+                  <div className="booking-stat">
+                    <span className="stat-number">
+                      {Object.values(mentorBookings).flat().filter(booking => 
+                        new Date(booking.sessionDate) <= new Date()
+                      ).length}
+                    </span>
+                    <span className="stat-label">Completed</span>
+                  </div>
+                </div>
+                
+                <div className="bookings-list">
+                  {Object.values(mentorBookings).flat().length > 0 ? (
+                    Object.values(mentorBookings)
+                      .flat()
+                      .sort((a, b) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime())
+                      .slice(0, 5)
+                      .map((booking, index) => (
+                        <div key={index} className="booking-item">
+                          <div className="booking-info">
+                            <div className="booking-header">
+                              <h4>{booking.menteeName || 'Mentee'}</h4>
+                              <span className={`booking-status ${booking.status || 'pending'}`}>
+                                {booking.status || 'Pending'}
+                              </span>
+                            </div>
+                            <div className="booking-details">
+                              <span className="booking-date">
+                                {new Date(booking.sessionDate).toLocaleDateString()}
+                              </span>
+                              <span className="booking-time">
+                                {booking.startTime || 'Time TBD'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="booking-actions">
+                            <button className="booking-action-btn view">View Details</button>
+                            {booking.status === 'pending' && (
+                              <button className="booking-action-btn accept">Accept</button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="no-bookings">
+                      <p>No bookings yet. Your scheduled sessions will appear here.</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="bookings-widget-footer">
+                  <button className="view-all-bookings-btn">
+                    View All Bookings
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
