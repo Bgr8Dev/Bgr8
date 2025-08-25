@@ -239,52 +239,65 @@ export default function MentorManagement() {
 
       // Fetch Cal.com bookings from all mentors
       try {
-        const mentorsSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
-        const mentorPromises = mentorsSnapshot.docs
-          .filter(doc => doc.data().isMentor)
-          .map(async (mentorDoc) => {
-            const mentorData = mentorDoc.data();
-            try {
-              const calComBookings = await CalComService.getBookings(mentorDoc.id);
-              return calComBookings.map((calBooking: CalComBookingResponse) => {
-                const startDate = new Date(calBooking.startTime);
-                const endDate = new Date(calBooking.endTime);
-                
-                // Find mentor and mentee from attendees
-                const mentor = calBooking.attendees.find(attendee => 
-                  attendee.email === mentorData.email
-                );
-                const mentee = calBooking.attendees.find(attendee => 
-                  attendee.email !== mentorData.email
-                );
-                
-                return {
-                  id: `calcom-${calBooking.id}`,
-                  mentorId: mentorDoc.id,
-                  menteeId: mentee?.email || 'unknown',
-                  mentorName: mentor?.name || mentorData.name || 'Unknown Mentor',
-                  menteeName: mentee?.name || 'Unknown Mentee',
-                  mentorEmail: mentor?.email || mentorData.email || '',
-                  menteeEmail: mentee?.email || '',
-                  sessionDate: startDate,
-                  startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                  endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                  status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
-                          calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
-                  createdAt: new Date(),
-                  duration: (calBooking.eventType as { length?: number; price?: number })?.length || 60,
-                  revenue: (calBooking.eventType as { length?: number; price?: number })?.price || 0,
-                  isCalComBooking: true,
-                  calComBookingId: calBooking.id,
-                  calComEventType: calBooking.eventType,
-                  calComAttendees: calBooking.attendees
-                } as Booking;
-              });
-            } catch (error) {
-              console.error(`Error fetching Cal.com bookings for mentor ${mentorDoc.id}:`, error);
-              return [];
+        // Get all users and check their mentorProgram subcollections for mentors
+        const usersSnapshot = await getDocs(collection(firestore, 'users'));
+        const mentorPromises: Promise<Booking[]>[] = [];
+        
+        for (const userDoc of usersSnapshot.docs) {
+          try {
+            const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+            if (mentorProgramDoc.exists()) {
+              const mentorData = mentorProgramDoc.data();
+              if (mentorData.isMentor) {
+                const mentorPromise = (async () => {
+                  try {
+                    const calComBookings = await CalComService.getBookings(userDoc.id);
+                    return calComBookings.map((calBooking: CalComBookingResponse) => {
+                      const startDate = new Date(calBooking.startTime);
+                      const endDate = new Date(calBooking.endTime);
+                      
+                      // Find mentor and mentee from attendees
+                      const mentor = calBooking.attendees.find(attendee => 
+                        attendee.email === mentorData.email
+                      );
+                      const mentee = calBooking.attendees.find(attendee => 
+                        attendee.email !== mentorData.email
+                      );
+                      
+                      return {
+                        id: `calcom-${calBooking.id}`,
+                        mentorId: userDoc.id,
+                        menteeId: mentee?.email || 'unknown',
+                        mentorName: mentor?.name || mentorData.name || 'Unknown Mentor',
+                        menteeName: mentee?.name || 'Unknown Mentee',
+                        mentorEmail: mentor?.email || mentorData.email || '',
+                        menteeEmail: mentee?.email || '',
+                        sessionDate: startDate,
+                        startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                        endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                        status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
+                                calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
+                        createdAt: new Date(),
+                        duration: (calBooking.eventType as { length?: number; price?: number })?.length || 60,
+                        revenue: (calBooking.eventType as { length?: number; price?: number })?.price || 0,
+                        isCalComBooking: true,
+                        calComBookingId: calBooking.id,
+                        calComEventType: calBooking.eventType,
+                        calComAttendees: calBooking.attendees
+                      } as Booking;
+                    });
+                  } catch (error) {
+                    console.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, error);
+                    return [];
+                  }
+                })();
+                mentorPromises.push(mentorPromise);
+              }
             }
-          });
+          } catch (error) {
+            console.error(`Error checking mentor program for user ${userDoc.id}:`, error);
+          }
+        }
         
         const calComResults = await Promise.all(mentorPromises);
         const allCalComBookings = calComResults.flat();
@@ -308,12 +321,55 @@ export default function MentorManagement() {
     setLoadingAvailability(true);
     setAvailabilityError(null);
     try {
-      // Get all users from mentorProgram collection
-      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
-      const usersData = usersSnapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id
-      })) as MentorMenteeProfileWithId[];
+      // Get all users and check their mentorProgram subcollections (new structure)
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      const usersData: MentorMenteeProfileWithId[] = [];
+      
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            usersData.push({
+              ...userData,
+              id: userDoc.id,
+              isGenerated: false
+            } as MentorMenteeProfileWithId);
+          }
+        } catch (error) {
+          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+        }
+      }
+      
+      // Fetch generated mentors from "Generated Mentors" collection
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        generatedMentorsSnapshot.docs.forEach(doc => {
+          const mentorData = doc.data();
+          usersData.push({
+            ...mentorData,
+            id: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentors:', error);
+      }
+      
+      // Fetch generated mentees from "Generated Mentees" collection
+      try {
+        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        generatedMenteesSnapshot.docs.forEach(doc => {
+          const menteeData = doc.data();
+          usersData.push({
+            ...menteeData,
+            id: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentees:', error);
+      }
       
       // Fetch availability data from users/{uid}/availabilities subcollections
       const availabilityPromises = usersData.map(async (user) => {
@@ -340,10 +396,29 @@ export default function MentorManagement() {
       const enrichedData = await Promise.all(
         availabilityData.map(async (availability) => {
           try {
-            // Fetch mentor profile
-            const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', availability.mentorId));
-            if (mentorDoc.exists()) {
-              availability.mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+            // Fetch mentor profile from the new structure
+            let mentorProfile: MentorMenteeProfile | undefined;
+            
+            // Try to get from users/{uid}/mentorProgram/profile first
+            try {
+              const mentorDoc = await getDoc(doc(firestore, 'users', availability.mentorId, 'mentorProgram', 'profile'));
+              if (mentorDoc.exists()) {
+                mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+              }
+            } catch (error) {
+              // If that fails, try the old structure
+              try {
+                const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', availability.mentorId));
+                if (mentorDoc.exists()) {
+                  mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+                }
+              } catch (oldError) {
+                console.error(`Error fetching mentor profile for ${availability.mentorId}:`, oldError);
+              }
+            }
+            
+            if (mentorProfile) {
+              availability.mentorProfile = mentorProfile;
             }
             
             // Check if mentor has Cal.com integration
@@ -681,20 +756,27 @@ export default function MentorManagement() {
     }
     
     try {
-      // Get all users from mentorProgram collection to find mentors
-      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
+      // Get all users and check their mentorProgram subcollections to find mentors
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       let deletedCount = 0;
       
       // Delete availability from each mentor's subcollection
       for (const userDoc of usersSnapshot.docs) {
-        const userData = userDoc.data();
-        if (userData.isMentor) {
-          try {
-            await deleteDoc(doc(firestore, 'users', userDoc.id, 'availabilities', 'default'));
-            deletedCount++;
-          } catch (error) {
-            console.error(`Error deleting availability for user ${userDoc.id}:`, error);
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            if (userData.isMentor) {
+              try {
+                await deleteDoc(doc(firestore, 'users', userDoc.id, 'availabilities', 'default'));
+                deletedCount++;
+              } catch (error) {
+                console.error(`Error deleting availability for user ${userDoc.id}:`, error);
+              }
+            }
           }
+        } catch (error) {
+          console.error(`Error checking mentor program for user ${userDoc.id}:`, error);
         }
       }
       
