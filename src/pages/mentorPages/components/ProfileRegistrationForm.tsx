@@ -46,13 +46,19 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       lastName: 'Enter your legal last name as it appears on official documents',
       email: 'We\'ll use this to send you important updates and match notifications',
       phone: 'Your phone number helps mentors/mentees contact you for sessions',
-      age: `Mentees must be between 15-19 years old. Mentors must be 18 or older`,
-      degree: 'Tell us about your highest qualification or what you\'re currently studying',
-      educationLevel: 'Select the highest level of education you\'ve completed',
+      age: `Mentees must be between 16-19 years old. Mentors must be 18 or older`,
+      degree: selectedRole === MENTOR 
+        ? 'Tell us about your highest qualification or what you\'re currently studying'
+        : 'Tell us about your current education level and what you\'re studying',
+      educationLevel: selectedRole === MENTOR 
+        ? 'Select the highest level of education you\'ve completed'
+        : 'Select your current education level',
       county: 'Your location helps match you with nearby mentors/mentees',
-      profession: 'What do you currently do for work or study?',
-      pastProfessions: 'List your previous work experience to show your background',
-      linkedin: 'Your LinkedIn profile helps verify your professional experience',
+      profession: selectedRole === MENTOR 
+        ? 'What do you currently do for work? This helps mentees understand your expertise'
+        : 'What career path are you interested in pursuing? This helps mentors provide relevant guidance',
+      pastProfessions: 'List your previous work experience to show your background and expertise',
+      linkedin: 'Your LinkedIn profile helps verify your professional experience (optional for mentees)',
       calCom: 'Connect your Cal.com account to enable video call scheduling',
       skills: 'Select the skills you can teach (mentors) or want to learn (mentees)',
       industries: 'Choose the industries you work in or are interested in',
@@ -435,8 +441,8 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
                 value={profileForm.age}
                 onChange={onFormChange}
                 className={validationErrors.age ? 'error' : ''}
-                placeholder={selectedRole === MENTEE ? "15-19" : "18+"}
-                min={selectedRole === MENTEE ? 15 : 18}
+                placeholder={selectedRole === MENTEE ? "16-19" : "18+"}
+                min={selectedRole === MENTEE ? 16 : 18}
                 max={selectedRole === MENTEE ? 19 : 100}
                 data-tooltip={getFieldTooltip('age')}
               />
@@ -475,7 +481,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="degree" className="field-label">
-                Degree/Qualification *
+                {selectedRole === MENTOR ? 'Degree/Qualification' : 'Education/Studies'} *
                 <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('degree')} />
               </label>
               <input
@@ -485,7 +491,10 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
                 value={profileForm.degree}
                 onChange={onFormChange}
                 className={validationErrors.degree ? 'error' : ''}
-                placeholder={degreePlaceholders[profileForm.educationLevel] || "e.g., BSc Computer Science"}
+                placeholder={selectedRole === MENTOR 
+                  ? (degreePlaceholders[profileForm.educationLevel] || "e.g., BSc Computer Science")
+                  : "e.g., A-Levels, GCSEs, or what you're currently studying"
+                }
                 data-tooltip={getFieldTooltip('degree')}
               />
               {validationErrors.degree && (
@@ -494,7 +503,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
             <div className="input-group">
               <label htmlFor="educationLevel" className="field-label">
-                Education Level *
+                {selectedRole === MENTOR ? 'Education Level' : 'Current Education Level'} *
                 <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('educationLevel')} />
               </label>
               <select
@@ -519,7 +528,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
           <div className="prf-form-row">
             <div className="input-group">
               <label htmlFor="profession" className="field-label">
-                Current Profession *
+                {selectedRole === MENTOR ? 'Current Profession' : 'Desired Profession'} *
                 <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('profession')} />
               </label>
               <input
@@ -529,7 +538,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
                 value={profileForm.profession}
                 onChange={onFormChange}
                 className={validationErrors.profession ? 'error' : ''}
-                placeholder="e.g., Software Developer, Student, Teacher"
+                placeholder={selectedRole === MENTOR ? "e.g., Software Developer, Teacher" : "e.g., Software Developer, Doctor, Engineer"}
                 data-tooltip={getFieldTooltip('profession')}
               />
               {validationErrors.profession && (
@@ -538,7 +547,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
             <div className="input-group">
               <label htmlFor="linkedin" className="field-label">
-                LinkedIn Profile *
+                LinkedIn Profile
                 <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('linkedin')} />
               </label>
               <input
@@ -557,61 +566,65 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
             </div>
           </div>
 
-          <div className="prf-form-row">
-            <div className="input-group">
-              <label htmlFor="calCom" className="field-label">
-                Cal.com Username
-                <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('calCom')} />
-              </label>
-              <input
-                type="text"
-                id="calCom"
-                name="calCom"
-                value={profileForm.calCom}
-                onChange={onFormChange}
-                placeholder="yourusername"
-                data-tooltip={getFieldTooltip('calCom')}
-              />
-            </div>
-          </div>
-
-          {/* Past Professions */}
-          <div className="prf-past-professions-container">
-            <label className="field-label">
-              Past Professions *
-              <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
-            </label>
-            {profileForm.pastProfessions.map((profession, index) => (
-              <div key={index} className="prf-profession-input-row">
+          {selectedRole === MENTOR && (
+            <div className="prf-form-row">
+              <div className="input-group">
+                <label htmlFor="calCom" className="field-label">
+                  Cal.com Username
+                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('calCom')} />
+                </label>
                 <input
                   type="text"
-                  value={profession}
-                  onChange={(e) => onPastProfessionChange(index, e.target.value)}
-                  placeholder={`Past profession ${index + 1}`}
-                  data-tooltip={getFieldTooltip('pastProfessions')}
+                  id="calCom"
+                  name="calCom"
+                  value={profileForm.calCom}
+                  onChange={onFormChange}
+                  placeholder="yourusername"
+                  data-tooltip={getFieldTooltip('calCom')}
                 />
-                {profileForm.pastProfessions.length > 1 && (
-                  <button
-                    type="button"
-                    className="prf-remove-profession-btn"
-                    onClick={() => onRemovePastProfession(index)}
-                  >
-                    Remove
-                  </button>
-                )}
               </div>
-            ))}
-            <button
-              type="button"
-              className="prf-add-profession-btn"
-              onClick={onAddPastProfession}
-            >
-              + Add Another Profession
-            </button>
-            {validationErrors.pastProfessions && (
-              <div className="validation-error">{validationErrors.pastProfessions}</div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Past Professions - Only for Mentors */}
+          {selectedRole === MENTOR && (
+            <div className="prf-past-professions-container">
+              <label className="field-label">
+                Past Professions *
+                <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
+              </label>
+              {profileForm.pastProfessions.map((profession, index) => (
+                <div key={index} className="prf-profession-input-row">
+                  <input
+                    type="text"
+                    value={profession}
+                    onChange={(e) => onPastProfessionChange(index, e.target.value)}
+                    placeholder={`Past profession ${index + 1}`}
+                    data-tooltip={getFieldTooltip('pastProfessions')}
+                  />
+                  {profileForm.pastProfessions.length > 1 && (
+                    <button
+                      type="button"
+                      className="prf-remove-profession-btn"
+                      onClick={() => onRemovePastProfession(index)}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                className="prf-add-profession-btn"
+                onClick={onAddPastProfession}
+              >
+                + Add Another Profession
+              </button>
+              {validationErrors.pastProfessions && (
+                <div className="validation-error">{validationErrors.pastProfessions}</div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Skills & Interests Section */}
