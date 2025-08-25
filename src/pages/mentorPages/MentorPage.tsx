@@ -17,6 +17,7 @@ import {
 } from './types';
 
 import { ProfileViewModal } from './components/ProfileViewModal';
+import { ViewBookingsModal } from './components/ViewBookingsModal';
 import { default as BookingModal } from '../../components/widgets/MentorAlgorithm/booking/BookingModal';
 import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { default as MentorAvailability } from '../../components/widgets/MentorAlgorithm/MentorAvailability';
@@ -33,6 +34,7 @@ export default function MentorPage() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showCalComModal, setShowCalComModal] = useState(false);
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [showViewBookingsModal, setShowViewBookingsModal] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<MentorMenteeProfile | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -193,6 +195,25 @@ export default function MentorPage() {
     setShowAvailabilityModal(true);
   };
 
+  const handleViewAllBookings = () => {
+    setShowViewBookingsModal(true);
+  };
+
+  const handleAcceptBooking = (bookingId: string) => {
+    console.log('Accepting booking:', bookingId);
+    // TODO: Implement booking acceptance logic
+  };
+
+  const handleRejectBooking = (bookingId: string) => {
+    console.log('Rejecting booking:', bookingId);
+    // TODO: Implement booking rejection logic
+  };
+
+  const handleCancelBooking = (bookingId: string) => {
+    console.log('Cancelling booking:', bookingId);
+    // TODO: Implement booking cancellation logic
+  };
+
   // Helper function to close profile view modal
   const handleCloseProfileViewModal = () => {
     console.log('Closing profile view modal');
@@ -337,38 +358,49 @@ export default function MentorPage() {
 
   // Ensure only one modal is open at a time
   useEffect(() => {
-    const openModals = [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal].filter(Boolean);
+    const openModals = [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal].filter(Boolean);
     if (openModals.length > 1) {
       console.warn('Multiple modals detected as open, closing all except the last one');
       // Keep only the last opened modal
-      if (showAvailabilityModal) {
+      if (showViewBookingsModal) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowCalComModal(false);
         setShowProfileEdit(false);
+        setShowAvailabilityModal(false);
+      } else if (showAvailabilityModal) {
+        setShowProfileViewModal(false);
+        setShowBookingModal(false);
+        setShowCalComModal(false);
+        setShowProfileEdit(false);
+        setShowViewBookingsModal(false);
       } else if (showProfileEdit) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowCalComModal(false);
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       } else if (showCalComModal) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowProfileEdit(false);
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       } else if (showBookingModal) {
         setShowProfileViewModal(false);
         setShowCalComModal(false);
         setShowProfileEdit(false);
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       } else if (showProfileViewModal) {
         setShowBookingModal(false);
         setShowCalComModal(false);
         setShowProfileEdit(false);
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       }
     }
-  }, [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal]);
+  }, [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal]);
 
   // Debug: Check for duplicate mentors between arrays
   useEffect(() => {
@@ -723,7 +755,7 @@ export default function MentorPage() {
                 </div>
                 
                 <div className="bookings-widget-footer">
-                  <button className="view-all-bookings-btn">
+                  <button className="view-all-bookings-btn" onClick={handleViewAllBookings}>
                     View All Bookings
                   </button>
                 </div>
@@ -907,6 +939,18 @@ export default function MentorPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* View Bookings Modal */}
+      {showViewBookingsModal && (
+        <ViewBookingsModal
+          isOpen={showViewBookingsModal}
+          onClose={() => setShowViewBookingsModal(false)}
+          bookings={Object.values(mentorBookings).flat()}
+          onAcceptBooking={handleAcceptBooking}
+          onRejectBooking={handleRejectBooking}
+          onCancelBooking={handleCancelBooking}
+        />
       )}
     </div>
   );
