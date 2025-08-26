@@ -53,14 +53,14 @@ const educationLevelEncoding: { [level: string]: number } = {
 };
 
 const SCORE_WEIGHTINGS: { [feature: string]: number } = {
-  'skills': 9,
-  'industries': 5,
-  'profession': 4,
-  'educationLevel': 3,
-  'hobbies': 2,
-  'county': 2,
-  'age': 3,
-  'religion': 1
+  'profession': 20,
+  'skills': 15,
+  'industries': 10,
+  'educationLevel': 6,
+  'hobbies': 4,
+  'county': 4,
+  'age': 6,
+  'religion': 2
 };
 
 const ageReasonMenteeExpPref = {
