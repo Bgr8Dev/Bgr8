@@ -25,7 +25,6 @@ import Navbar from '../../components/ui/Navbar';
 
 // Import all CSS files to ensure styles are loaded
 import './styles/MentorPage.css';
-import './styles/MentorHeader.css';
 import './styles/MentorSidebar.css';
 import './styles/MentorForms.css';
 import './styles/MentorModals.css';
@@ -57,6 +56,8 @@ export default function MentorPage() {
   const [profilesPerPage] = useState(12);
   const [isBookingWidgetMinimized, setIsBookingWidgetMinimized] = useState(false);
   const [isMenteesSectionMinimized, setIsMenteesSectionMinimized] = useState(false);
+  const [isProfileCardExpanded, setIsProfileCardExpanded] = useState(false);
+  const [isAvailabilityCardExpanded, setIsAvailabilityCardExpanded] = useState(false);
 
   // Custom hooks for data management
   const {
@@ -569,69 +570,8 @@ export default function MentorPage() {
   // Main mentor page
   return (
     <div className="mentor-page">
-      {/* Hero Section */}
-      <div className="mentor-header">
-        <Navbar />
-        <div className="mentor-header-content">
-          <h1>
-            {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-              ? 'Find Your Perfect Mentor' 
-              : 'Find Mentees to Mentor'
-            }
-          </h1>
-          <p>
-            {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-              ? 'Connect with experienced professionals who can guide you on your journey to success'
-              : 'Find mentees who can benefit from your knowledge and experience'
-            }
-          </p>
-          
-          {/* Generated Profiles Info */}
-          <div className="generated-profiles-info">
-            <p className="info-text">
-              💡 <strong>Tip:</strong> This platform includes both real user profiles and generated test profiles 
-              (marked with 🎲) to help you explore the matching system and test features.
-            </p>
-            <p className="info-text" style={{ marginTop: '8px', fontSize: '0.9rem', opacity: '0.9' }}>
-              🎯 <strong>Smart Matching:</strong> Your matches are automatically calculated and ranked by compatibility percentage.
-            </p>
-          </div>
-          
-          {/* User Profile Summary */}
-          {currentUserProfile && (
-            <div className="user-profile-summary">
-              <div className="profile-info">
-                <div className={`profile-role ${typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : 'mentee'}`}>
-                  {typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'Mentor' : 'Mentee'}
-                </div>
-                <div className="profile-name">
-                  {currentUserProfile.firstName} {currentUserProfile.lastName}
-                </div>
-              </div>
-              
-              <div className="profile-actions">
-                <button 
-                  className="profile-edit-btn"
-                  onClick={handleProfileEdit}
-                  data-tooltip="Edit your profile information"
-                >
-                  Edit Profile
-                </button>
-                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' && (
-                  <button 
-                    className="availability-manage-btn"
-                    onClick={handleAvailabilityManage}
-                    data-tooltip="Manage your availability schedule"
-                  >
-                    Manage Availability
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
+      <Navbar />
+      
       {/* Main Content with Sidebar Layout */}
       <div className="mentor-page-content">
         {/* Left Sidebar */}
@@ -698,6 +638,153 @@ export default function MentorPage() {
 
         {/* Right Main Content */}
         <div className="mentor-main-content">
+          {/* Dashboard Header */}
+          <div className="dashboard-header">
+            <div className="dashboard-title">
+              <h1>
+                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
+                  ? 'Mentor Dashboard' 
+                  : 'Mentee Dashboard'
+                }
+              </h1>
+              <p>
+                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
+                  ? 'Connect with experienced professionals who can guide you on your journey to success'
+                  : 'Find mentees who can benefit from your knowledge and experience'
+                }
+              </p>
+            </div>
+            
+            {/* Generated Profiles Info */}
+            <div className="generated-profiles-info">
+              <p className="info-text">
+                💡 <strong>Tip:</strong> This platform includes both real user profiles and generated test profiles 
+                (marked with 🎲) to help you explore the matching system and test features.
+              </p>
+              <p className="info-text" style={{ marginTop: '8px', fontSize: '0.9rem', opacity: '0.9' }}>
+                🎯 <strong>Smart Matching:</strong> Your matches are automatically calculated and ranked by compatibility percentage.
+              </p>
+            </div>
+          </div>
+
+          {/* User Profile Summary Cards */}
+          {currentUserProfile && (
+            <div className="profile-summary-cards">
+              <div className="profile-card">
+                <div className="profile-card-header">
+                  <div className="profile-info">
+                    <div className={`profile-role ${typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : 'mentee'}`}>
+                      {typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'Mentor' : 'Mentee'}
+                    </div>
+                    <div className="profile-name">
+                      {currentUserProfile.firstName} {currentUserProfile.lastName}
+                    </div>
+                  </div>
+                  <div className="profile-card-actions">
+                    <button 
+                      className="profile-edit-btn"
+                      onClick={handleProfileEdit}
+                      data-tooltip="Edit your profile information"
+                    >
+                      Edit Profile
+                    </button>
+                    <button 
+                      className="expand-toggle-btn"
+                      onClick={() => setIsProfileCardExpanded(!isProfileCardExpanded)}
+                      title={isProfileCardExpanded ? "Collapse profile details" : "Expand profile details"}
+                    >
+                      {isProfileCardExpanded ? '▼' : '▶'}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Expandable Profile Content */}
+                {isProfileCardExpanded && (
+                  <div className="profile-card-content">
+                    <div className="profile-details">
+                      <div className="detail-item">
+                        <span className="detail-label">Email:</span>
+                        <span className="detail-value">{currentUserProfile.email || 'Not provided'}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Industry:</span>
+                        <span className="detail-value">{currentUserProfile.industry || 'Not specified'}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Experience:</span>
+                        <span className="detail-value">{currentUserProfile.yearsOfExperience || 'Not specified'} years</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Skills:</span>
+                        <span className="detail-value">
+                          {currentUserProfile.skills && currentUserProfile.skills.length > 0 
+                            ? currentUserProfile.skills.slice(0, 3).join(', ') + (currentUserProfile.skills.length > 3 ? '...' : '')
+                            : 'No skills listed'
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' && (
+                <div className="profile-card">
+                  <div className="profile-card-header">
+                    <div className="profile-info">
+                      <div className="profile-role mentor">Mentor</div>
+                      <div className="profile-name">Availability Management</div>
+                    </div>
+                    <div className="profile-card-actions">
+                      <button 
+                        className="availability-manage-btn"
+                        onClick={handleAvailabilityManage}
+                        data-tooltip="Manage your availability schedule"
+                      >
+                        Manage Availability
+                      </button>
+                      <button 
+                        className="expand-toggle-btn"
+                        onClick={() => setIsAvailabilityCardExpanded(!isAvailabilityCardExpanded)}
+                        title={isAvailabilityCardExpanded ? "Collapse availability details" : "Expand availability details"}
+                      >
+                        {isAvailabilityCardExpanded ? '▼' : '▶'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Expandable Availability Content */}
+                  {isAvailabilityCardExpanded && (
+                    <div className="profile-card-content">
+                      <div className="availability-summary">
+                        <div className="availability-stat">
+                          <span className="stat-number">
+                            {Object.keys(mentorAvailability).length}
+                          </span>
+                          <span className="stat-label">Available Days</span>
+                        </div>
+                        <div className="availability-stat">
+                          <span className="stat-number">
+                            {Object.values(mentorAvailability).flat().length}
+                          </span>
+                          <span className="stat-label">Time Slots</span>
+                        </div>
+                        <div className="availability-stat">
+                          <span className="stat-number">
+                            {Object.values(mentorBookings).flat().filter(booking => 
+                              new Date(booking.sessionDate) > new Date()
+                            ).length}
+                          </span>
+                          <span className="stat-label">Upcoming Sessions</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Matches Section - Moved from sidebar to main content */}
           {loadingMatches ? (
             <div className="main-matches-section">
