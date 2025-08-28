@@ -67,6 +67,7 @@ html, body {
   -webkit-backdrop-filter: blur(10px);
   border-right: 1px solid var(--gray-200);
   padding: 32px 0;
+  padding-top: 120px;
   overflow-y: auto;
   position: sticky;
   top: 0;
@@ -90,6 +91,7 @@ html, body {
 .mentor-main-content {
   flex: 1;
   padding: 32px 40px;
+  padding-top: 180px;
   overflow-y: auto;
   min-height: 100vh;
   transition: padding-left 0.3s ease;
@@ -443,8 +445,14 @@ html, body {
 
 /* Responsive Design for Profile Cards */
 @media (max-width: 768px) {
+  .mentor-sidebar {
+    padding-top: 60px;
+  }
+  
   .sidebar-toggle-btn {
     left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 36px;
     height: 36px;
     font-size: 14px;
@@ -499,8 +507,13 @@ html, body {
 }
 
 @media (max-width: 480px) {
+  .mentor-sidebar {
+    padding-top: 50px;
+  }
+  
   .mentor-main-content {
     padding: 20px;
+    padding-top: 140px;
   }
   
   .profile-card {
