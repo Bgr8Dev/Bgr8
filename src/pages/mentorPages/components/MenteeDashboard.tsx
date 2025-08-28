@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MentorMenteeProfile } from '../types';
+import { MenteeBookingHistoryModal } from './MenteeBookingHistoryModal';
 
 interface MenteeDashboardProps {
   currentUserProfile: MentorMenteeProfile;
@@ -12,7 +13,11 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
 }) => {
   const [isProfileCardExpanded, setIsProfileCardExpanded] = useState(false);
   const [isBookingCardExpanded, setIsBookingCardExpanded] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
+  const handleViewHistory = () => {
+    setShowHistoryModal(true);
+  };
 
   return (
     <>
@@ -111,21 +116,21 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
           )}
         </div>
 
-        {/* Mentee-specific booking card */}
+        {/* Mentee-specific booking history card */}
         <div className="profile-card">
           <div className="profile-card-header">
             <div className="profile-info">
               <div className="profile-role mentee">Mentee</div>
-              <div className="profile-name">Book a Session</div>
+                             <div className="profile-name">Session Bookings</div>
             </div>
             <div className="profile-card-actions">
-              <button 
-                className="profile-edit-btn"
-                onClick={() => setShowBookingModal(true)}
-                data-tooltip="Book a mentoring session"
-              >
-                Book Session
-              </button>
+                             <button 
+                 className="profile-edit-btn"
+                 onClick={handleViewHistory}
+                 data-tooltip="View your booking history"
+               >
+                 View History
+               </button>
               <button 
                 className="expand-toggle-btn"
                 onClick={() => setIsBookingCardExpanded(!isBookingCardExpanded)}
@@ -139,45 +144,54 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
           {/* Expandable Booking Content */}
           {isBookingCardExpanded && (
             <div className="profile-card-content">
-              <div className="booking-summary">
-                <div className="booking-stat">
-                  <span className="stat-number">
-                    {Array.isArray(currentUserProfile.goals) ? currentUserProfile.goals.length : 0}
-                  </span>
-                  <span className="stat-label">Learning Goals</span>
-                </div>
-                <div className="booking-stat">
-                  <span className="stat-number">
-                    {Array.isArray(currentUserProfile.learningAreas) ? currentUserProfile.learningAreas.length : 0}
-                  </span>
-                  <span className="stat-label">Areas of Interest</span>
-                </div>
-                <div className="booking-stat">
-                  <span className="stat-number">
-                    0
-                  </span>
-                  <span className="stat-label">Completed Sessions</span>
-                </div>
-              </div>
+                             <div className="booking-summary">
+                 <div className="booking-stat">
+                   <span className="stat-number">
+                     📚
+                   </span>
+                   <span className="stat-label">Total Bookings</span>
+                 </div>
+                 <div className="booking-stat">
+                   <span className="stat-number">
+                     ✅
+                   </span>
+                   <span className="stat-label">Confirmed</span>
+                 </div>
+                 <div className="booking-stat">
+                   <span className="stat-number">
+                     ⏳
+                   </span>
+                   <span className="stat-label">Pending</span>
+                 </div>
+               </div>
               
               <div className="booking-actions">
-                <button 
-                  className="booking-action-btn primary"
-                  onClick={() => setShowBookingModal(true)}
-                >
-                  📅 Book New Session
-                </button>
+                                 <button 
+                   className="booking-action-btn primary"
+                   onClick={handleViewHistory}
+                 >
+                   📊 View Full History
+                 </button>
                 <button 
                   className="booking-action-btn secondary"
-                  onClick={() => {/* TODO: View session history */}}
+                  onClick={() => {/* TODO: Export booking data */}}
                 >
-                  📊 View History
+                  📥 Export Data
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Booking History Modal */}
+      <MenteeBookingHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        currentUserProfile={currentUserProfile}
+      />
+      
+      
     </>
   );
 };
