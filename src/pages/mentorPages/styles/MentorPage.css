@@ -26,6 +26,39 @@ html, body {
   gap: 0;
 }
 
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--accent-dark);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-xl);
+}
+
+.sidebar-toggle-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
 .mentor-sidebar {
   width: 350px;
   min-width: 350px;
@@ -39,6 +72,15 @@ html, body {
   top: 0;
   height: 100vh;
   z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.mentor-sidebar.collapsed {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: none;
 }
 
 .mentor-main-content {
@@ -385,6 +427,13 @@ html, body {
 
 /* Responsive Design for Profile Cards */
 @media (max-width: 768px) {
+  .sidebar-toggle-btn {
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
   .profile-summary-cards {
     grid-template-columns: 1fr;
     gap: 20px;

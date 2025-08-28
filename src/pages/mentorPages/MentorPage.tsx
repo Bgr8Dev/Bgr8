@@ -45,6 +45,7 @@ export default function MentorPage() {
   const { currentUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   // Modal state management
   const [showProfileViewModal, setShowProfileViewModal] = useState(false);
@@ -222,6 +223,10 @@ export default function MentorPage() {
 
   const toggleMenteesSection = () => {
     setIsMenteesSectionMinimized(!isMenteesSectionMinimized);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   const handleAcceptBooking = (bookingId: string) => {
@@ -567,10 +572,19 @@ export default function MentorPage() {
     <div className="mentor-page">
       <Navbar />
       
-      {/* Main Content with Sidebar Layout */}
-      <div className="mentor-page-content">
-        {/* Left Sidebar */}
-        <div className="mentor-sidebar">
+             {/* Main Content with Sidebar Layout */}
+       <div className="mentor-page-content">
+         {/* Sidebar Toggle Button */}
+         <button 
+           className="sidebar-toggle-btn"
+           onClick={toggleSidebar}
+           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+         >
+           {isSidebarCollapsed ? '▶' : '◀'}
+         </button>
+         
+         {/* Left Sidebar */}
+         <div className={`mentor-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
           {/* Search Container - Only show for mentees */}
           {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
             <div className="search-container">
