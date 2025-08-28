@@ -571,64 +571,76 @@ export default function MentorPage() {
       <div className="mentor-page-content">
         {/* Left Sidebar */}
         <div className="mentor-sidebar">
-          {/* Search Container */}
-          <div className="search-container">
-            <div className="search-bar">
-              <div className="search-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder={
-                  typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-                    ? "Search for mentors by name, skills, industry, or education..."
-                    : "Search for mentees by name, skills, industry, or education..."
-                }
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onClick={(e) => e.stopPropagation()}
-              />
+          {/* Search Container - Only show for mentees */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+            <div className="search-container">
+              <div className="search-bar">
+               <div 
+                 className="search-icon"
+                 style={{
+                   display: typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'none' : 'block'
+                 }}
+               >
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </div>
+                             <input
+                 type="text"
+                 placeholder={
+                   typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
+                     ? "Search for mentors by name, skills, industry, or education..."
+                     : "Search for mentees by name, skills, industry, or education..."
+                 }
+                 value={searchTerm}
+                 onChange={handleSearchChange}
+                 onClick={(e) => e.stopPropagation()}
+                 style={{
+                   display: typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'none' : 'block'
+                 }}
+               />
               
-              {/* Search Suggestions Dropdown */}
-              {showSearchDropdown && searchSuggestions.length > 0 && (
-                <div className="search-suggestions-dropdown">
-                  {searchSuggestions.map((suggestion, index) => (
-                    <div
-                      key={index}
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      {suggestion}
-                    </div>
-                  ))}
-                </div>
-              )}
+                             {/* Search Suggestions Dropdown - Only show for mentees */}
+               {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && showSearchDropdown && searchSuggestions.length > 0 && (
+                 <div className="search-suggestions-dropdown">
+                   {searchSuggestions.map((suggestion, index) => (
+                     <div
+                       key={index}
+                       className="suggestion-item"
+                       onClick={() => handleSuggestionClick(suggestion)}
+                     >
+                       {suggestion}
+                     </div>
+                   ))}
+                 </div>
+               )}
             </div>
             
-            {/* Profile Type Legend */}
-            {searchFilteredMentors.some(m => m.isGenerated) && (
-              <div className="profile-legend">
-                <span className="legend-item">
-                  <span className="legend-icon real">👥</span>
-                  <span className="legend-text">Real Profiles</span>
-                </span>
-                <span className="legend-item">
-                  <span className="legend-icon generated">🎲</span>
-                  <span className="legend-text">Generated Profiles</span>
-                </span>
-              </div>
-            )}
-          </div>
+                         {/* Profile Type Legend - Only show for mentees */}
+             {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && searchFilteredMentors.some(m => m.isGenerated) && (
+               <div className="profile-legend">
+                 <span className="legend-item">
+                   <span className="legend-icon real">👥</span>
+                   <span className="legend-text">Real Profiles</span>
+                 </span>
+                 <span className="legend-item">
+                   <span className="legend-icon generated">🎲</span>
+                   <span className="legend-text">Generated Profiles</span>
+                 </span>
+               </div>
+             )}
+            </div>
+          )}
 
-          {/* Filters */}
-          <MentorFilters
-            selectedFilter={selectedFilter}
-            onFilterChange={setSelectedFilter}
-            getFilterCount={getFilterCount}
-            totalMentors={availableProfiles.length}
-          />
+          {/* Filters - Only show for mentees */}
+           {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+             <MentorFilters
+               selectedFilter={selectedFilter}
+               onFilterChange={setSelectedFilter}
+               getFilterCount={getFilterCount}
+               totalMentors={availableProfiles.length}
+             />
+           )}
         </div>
 
         {/* Right Main Content */}
@@ -655,136 +667,126 @@ export default function MentorPage() {
             )
           )}
 
-          {/* Matches Section - Moved from sidebar to main content */}
-          {loadingMatches ? (
-            <div className="main-matches-section">
-              <div className="ms-matches-header">
-                <h2>Finding Your Best Matches...</h2>
-                <p>We're analyzing profiles to find the perfect matches for you</p>
-              </div>
-              <div className="loading-spinner">
-                <div className="spinner"></div>
-                <p>Calculating matches...</p>
-              </div>
-            </div>
-          ) : bestMatches.length > 0 ? (
-            <div className="main-matches-section">
-              <MatchesSection
-                bestMatches={bestMatches}
-                currentUserProfile={currentUserProfile}
-                onProfileClick={handleProfileCardClick}
-                onBooking={handleBooking}
-                onCalCom={handleCalCom}
-              />
-            </div>
-          ) : null}
-
-          {/* Mentor Results */}
-          <div className={`mentor-results ${isMenteesSectionMinimized ? 'minimized' : ''}`}>
-            <div className="results-header" onClick={toggleMenteesSection}>
-              <div className="results-header-content">
-                <h2>
-                  {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-                    ? 'Available Mentors' 
-                    : 'Available Mentees'
-                  }
-                </h2>
-                <div className="results-summary">
-                  <p>
-                    Showing {searchFilteredMentors.length} {
-                      typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentors' : 'mentees'
-                    }
-                  </p>
-                  {searchFilteredMentors.length > 0 && (
-                    <div className="profile-breakdown">
-                      <span className="breakdown-item">
-                        <span className="breakdown-label">Real Profiles:</span>
-                        <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
-                      </span>
-                      <span className="breakdown-item">
-                        <span className="breakdown-label">Generated:</span>
-                        <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
-                      </span>
-                    </div>
-                  )}
+          {/* Matches Section - Only show for mentees */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+            loadingMatches ? (
+              <div className="main-matches-section">
+                <div className="ms-matches-header">
+                  <h2>Finding Your Best Matches...</h2>
+                  <p>We're analyzing profiles to find the perfect matches for you</p>
+                </div>
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <p>Calculating matches...</p>
                 </div>
               </div>
-              <button 
-                className="minimize-toggle-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMenteesSection();
-                }}
-                aria-label={isMenteesSectionMinimized ? 'Expand section' : 'Minimize section'}
-              >
-                {isMenteesSectionMinimized ? '▼' : '▲'}
-              </button>
-            </div>
+            ) : bestMatches.length > 0 ? (
+              <div className="main-matches-section">
+                <MatchesSection
+                  bestMatches={bestMatches}
+                  currentUserProfile={currentUserProfile}
+                  onProfileClick={handleProfileCardClick}
+                  onBooking={handleBooking}
+                  onCalCom={handleCalCom}
+                />
+              </div>
+            ) : null
+          )}
 
-            <div className="results-content">
-              {currentProfiles.length === 0 ? (
-                <div className="no-results">
-                  <h3>
-                    {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
-                      ? 'No mentors found' 
-                      : 'No mentees found'
-                    }
-                  </h3>
-                  <p>Try adjusting your search criteria or filters</p>
-                </div>
-              ) : (
-                <>
-                  <div className="profiles-grid">
-                    {currentProfiles.map((profile) => (
-                      <MentorCard
-                        key={profile.uid}
-                        mentor={profile}
-                        mentorAvailability={mentorAvailability}
-                        currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
-                        onProfileClick={handleProfileCardClick}
-                        onBooking={handleBooking}
-                        onCalCom={handleCalCom}
-                        matchScore={getMatchScore(profile)}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="pagination-container">
-                      <button
-                        className="pagination-btn prev"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                      >
-                        Previous
-                      </button>
-                      
-                      <div className="page-numbers">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <button
-                            key={page}
-                            className={`page-number ${page === currentPage ? 'active' : ''}`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        ))}
+          {/* Mentor Results - Only show for mentees */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+            <div className={`mentor-results ${isMenteesSectionMinimized ? 'minimized' : ''}`}>
+              <div className="results-header" onClick={toggleMenteesSection}>
+                <div className="results-header-content">
+                  <h2>Available Mentors</h2>
+                  <div className="results-summary">
+                    <p>Showing {searchFilteredMentors.length} mentors</p>
+                    {searchFilteredMentors.length > 0 && (
+                      <div className="profile-breakdown">
+                        <span className="breakdown-item">
+                          <span className="breakdown-label">Real Profiles:</span>
+                          <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
+                        </span>
+                        <span className="breakdown-item">
+                          <span className="breakdown-label">Generated:</span>
+                          <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
+                        </span>
                       </div>
-                      
-                      <button
-                        className="pagination-btn next"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                      >
-                        Next
-                      </button>
+                    )}
+                  </div>
+                </div>
+                <button 
+                  className="minimize-toggle-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMenteesSection();
+                  }}
+                  aria-label={isMenteesSectionMinimized ? 'Expand section' : 'Minimize section'}
+                >
+                  {isMenteesSectionMinimized ? '▼' : '▲'}
+                </button>
+              </div>
+
+              <div className="results-content">
+                {currentProfiles.length === 0 ? (
+                  <div className="no-results">
+                    <h3>No mentors found</h3>
+                    <p>Try adjusting your search criteria or filters</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="profiles-grid">
+                      {currentProfiles.map((profile) => (
+                        <MentorCard
+                          key={profile.uid}
+                          mentor={profile}
+                          mentorAvailability={mentorAvailability}
+                          currentUserRole="mentee"
+                          onProfileClick={handleProfileCardClick}
+                          onBooking={handleBooking}
+                          onCalCom={handleCalCom}
+                          matchScore={getMatchScore(profile)}
+                        />
+                      ))}
                     </div>
-                  )}
-                </>
-              )}
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="pagination-container">
+                        <button
+                          className="pagination-btn prev"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                        >
+                          Previous
+                        </button>
+                        
+                        <div className="page-numbers">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                              key={page}
+                              className={`page-number ${page === currentPage ? 'active' : ''}`}
+                              onClick={() => handlePageChange(page)}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <button
+                          className="pagination-btn next"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
