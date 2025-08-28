@@ -138,6 +138,7 @@ html, body {
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 24px;
   margin-bottom: 40px;
+  align-items: start;
 }
 
 .profile-card {
@@ -148,6 +149,8 @@ html, body {
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
+  height: fit-content;
+  align-self: start;
 }
 
 .profile-card::before {
