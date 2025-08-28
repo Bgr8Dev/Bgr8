@@ -399,6 +399,105 @@ html, body {
   gap: 20px;
 }
 
+/* Booking Summary for Mentee Dashboard */
+.booking-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.booking-stat {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--mentee), var(--accent));
+}
+
+.booking-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--mentee);
+}
+
+.booking-stat .stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--mentee);
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
+}
+
+.booking-stat .stat-label {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.booking-action-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.booking-action-btn.primary {
+  background: var(--mentee);
+  color: var(--white);
+}
+
+.booking-action-btn.primary:hover {
+  background: var(--mentee-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.booking-action-btn.secondary {
+  background: var(--white);
+  color: var(--mentee);
+  border: 2px solid var(--mentee);
+}
+
+.booking-action-btn.secondary:hover {
+  background: var(--mentee-light);
+  color: var(--mentee-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
 .learning-stat {
   text-align: center;
   padding: 20px;
@@ -495,6 +594,21 @@ html, body {
   .availability-summary {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+  
+  .booking-summary {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .booking-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .booking-action-btn {
+    min-width: auto;
+    width: 100%;
   }
   
   .dashboard-title h1 {
