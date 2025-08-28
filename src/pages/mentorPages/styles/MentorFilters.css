@@ -12,8 +12,9 @@
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
   position: relative;
 }
 
@@ -285,7 +286,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .mf-filters-container {
-    justify-content: center;
+    align-items: center;
     gap: 8px;
   }
   
