@@ -332,6 +332,57 @@ html, body {
   font-weight: 600;
 }
 
+/* Learning Summary for Mentee Dashboard */
+.learning-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.learning-stat {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.learning-stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--mentee), var(--accent));
+}
+
+.learning-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--mentee);
+}
+
+.learning-stat .stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--mentee);
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
+}
+
+.learning-stat .stat-label {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
 /* Responsive Design for Profile Cards */
 @media (max-width: 768px) {
   .profile-summary-cards {
