@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { Session } from '../../types/sessions';
 import { SessionsService } from '../../services/sessionsService';
-import FeedbackForm from '../feedback/FeedbackForm';
+import { FeedbackForm } from '../feedback/FeedbackForm';
 import './SessionsList.css';
 
 type TimestampType = Date | { toDate: () => Date } | string | number;
