@@ -1,5 +1,5 @@
 import React from 'react';
-import { SessionsList } from '../components/sessions/SessionsList';
+import SessionsList from '../components/sessions/SessionsList';
 import '../styles/sessions.css';
 
 export const SessionsPage: React.FC = () => {
