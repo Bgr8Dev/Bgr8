@@ -1,0 +1,190 @@
+/* SessionsList Component Styles */
+
+.sessions-list {
+  padding: 20px;
+  background: #181818;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sessions-title {
+  color: #ffb300;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sessions-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sessions-filter {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #3a0a0a;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+}
+
+.sessions-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(40, 0, 0, 0.25);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sessions-table th {
+  background: #2a0a0a;
+  color: #ffb300;
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #3a0a0a;
+}
+
+.sessions-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #3a0a0a;
+  color: #fff;
+}
+
+.sessions-table tr:hover {
+  background: rgba(255, 179, 0, 0.05);
+}
+
+.session-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.session-status.pending {
+  background: #ffb300;
+  color: #181818;
+}
+
+.session-status.confirmed {
+  background: #00e676;
+  color: #181818;
+}
+
+.session-status.cancelled {
+  background: #ff4444;
+  color: #fff;
+}
+
+.session-status.completed {
+  background: #00eaff;
+  color: #181818;
+}
+
+.session-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.session-action-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.session-action-btn.primary {
+  background: #00e676;
+  color: #181818;
+}
+
+.session-action-btn.primary:hover {
+  background: #00c853;
+}
+
+.session-action-btn.secondary {
+  background: #ffb300;
+  color: #181818;
+}
+
+.session-action-btn.secondary:hover {
+  background: #ff9800;
+}
+
+.session-action-btn.danger {
+  background: #ff4444;
+  color: #fff;
+}
+
+.session-action-btn.danger:hover {
+  background: #d32f2f;
+}
+
+.sessions-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: #888;
+  font-size: 16px;
+}
+
+.sessions-loading {
+  text-align: center;
+  padding: 48px 24px;
+  color: #ffb300;
+  font-size: 18px;
+}
+
+.sessions-error {
+  text-align: center;
+  padding: 48px 24px;
+  color: #ff4444;
+  font-size: 16px;
+  background: rgba(255, 68, 68, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sessions-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .sessions-controls {
+    justify-content: center;
+  }
+  
+  .sessions-table {
+    font-size: 14px;
+  }
+  
+  .sessions-table th,
+  .sessions-table td {
+    padding: 12px 8px;
+  }
+  
+  .session-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .session-action-btn {
+    width: 100%;
+    padding: 8px;
+  }
+}
