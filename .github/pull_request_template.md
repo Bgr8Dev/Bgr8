@@ -1,75 +1,160 @@
-## 📋 Pull Request Checklist
+# 🚀 Pull Request
 
-### 🎯 Type of Change
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Performance improvement
-- [ ] Refactoring (no functional changes)
+## 📋 Overview
 
-### 🏢 Business Unit
-- [ ] BGr8
-- [ ] bgr8 League
-- [ ] bgr8 Car Club
-- [ ] bgr8 Clothing
-- [ ] General Platform
-- [ ] Admin/Backend
+<!-- Provide a clear, concise description of the changes -->
 
-### 🧪 Testing
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Manual testing completed
-- [ ] Mobile responsiveness tested
-- [ ] Cross-browser compatibility verified
+---
 
-### 📱 Mobile Optimization
-- [ ] Responsive design implemented
-- [ ] Touch interactions optimized
-- [ ] Performance on mobile devices tested
-- [ ] Accessibility features maintained
+## 🎯 Change Classification
 
-### 🔒 Security
-- [ ] No security vulnerabilities introduced
-- [ ] Input validation implemented
-- [ ] Authentication/authorization maintained
-- [ ] Data protection measures in place
+### Type of Change
+- [ ] 🐛 **Bug Fix** - Resolves an existing issue
+- [ ] ✨ **New Feature** - Adds new functionality
+- [ ] 💥 **Breaking Change** - Changes existing behavior
+- [ ] 📚 **Documentation** - Updates docs or comments
+- [ ] ⚡ **Performance** - Improves speed or efficiency
+- [ ] 🔧 **Refactoring** - Code restructuring (no functional changes)
+- [ ] 🎨 **UI/UX** - Visual or interaction improvements
+- [ ] 🛡️ **Security** - Security enhancements or fixes
+- [ ] 🧪 **Testing** - Adds or improves tests
 
-### 📚 Documentation
-- [ ] Code comments added/updated
-- [ ] README updated if necessary
-- [ ] API documentation updated if applicable
-- [ ] User-facing documentation updated
+### Business Impact
+- [ ] 🌟 **BGr8 Community** - Community platform features
+- [ ] 🎓 **Mentor Program** - Mentorship system changes
+- [ ] 👨‍💼 **Admin Tools** - Admin dashboard or management
+- [ ] 🔐 **Authentication** - User auth or security
+- [ ] 📅 **Booking System** - Cal.com integration or scheduling
+- [ ] 🎨 **Platform UI** - General UI/UX improvements
+- [ ] 🛠️ **Infrastructure** - Build, config, or deployment
+- [ ] 📱 **Mobile Experience** - Mobile-specific improvements
 
-### 🚀 Deployment
-- [ ] Environment variables updated if needed
-- [ ] Database migrations handled
-- [ ] Build process tested
-- [ ] Deployment checklist completed
+---
 
-## 📝 Description
+## 🧪 Quality Assurance
 
-<!-- Provide a detailed description of the changes -->
+### Testing Status
+- [ ] ✅ **Unit Tests** - All tests pass locally
+- [ ] ✅ **Integration Tests** - End-to-end functionality verified
+- [ ] ✅ **Manual Testing** - Core features tested manually
+- [ ] ✅ **Cross-browser** - Tested on Chrome, Firefox, Safari
+- [ ] ✅ **Mobile Responsive** - Verified on mobile devices
+- [ ] ✅ **Accessibility** - WCAG guidelines maintained
 
-## 🔗 Related Issues
+### Code Quality
+- [ ] ✅ **Linting** - ESLint passes without errors
+- [ ] ✅ **TypeScript** - No type errors or warnings
+- [ ] ✅ **Security Scan** - Snyk security check passed
+- [ ] ✅ **Performance** - No performance regressions
+- [ ] ✅ **Bundle Size** - No significant size increases
 
-<!-- Link to any related issues -->
+---
+
+## 🔒 Security & Compliance
+
+### Security Checklist
+- [ ] ✅ **Input Validation** - All user inputs properly sanitized
+- [ ] ✅ **Authentication** - User permissions maintained
+- [ ] ✅ **Data Protection** - Sensitive data handled securely
+- [ ] ✅ **Rate Limiting** - API endpoints protected
+- [ ] ✅ **XSS Prevention** - No cross-site scripting vulnerabilities
+- [ ] ✅ **CSRF Protection** - Cross-site request forgery prevented
+
+---
+
+## 📚 Documentation
+
+### Documentation Updates
+- [ ] ✅ **Code Comments** - Complex logic documented
+- [ ] ✅ **README** - Updated if project structure changes
+- [ ] ✅ **API Docs** - Updated if endpoints change
+- [ ] ✅ **User Guides** - Updated if user-facing changes
+- [ ] ✅ **Changelog** - Entry added for user-facing changes
+
+---
+
+## 🚀 Deployment & Release
+
+### Pre-deployment Checklist
+- [ ] ✅ **Environment Variables** - All required vars documented
+- [ ] ✅ **Database Changes** - Migrations tested and documented
+- [ ] ✅ **Build Process** - Production build successful
+- [ ] ✅ **Dependencies** - No breaking dependency changes
+- [ ] ✅ **Version Bump** - Semantic versioning followed
+
+---
+
+## 📝 Detailed Description
+
+<!-- 
+Provide a comprehensive description of your changes:
+
+1. **What** - What does this PR accomplish?
+2. **Why** - Why is this change necessary?
+3. **How** - How does this implementation work?
+4. **Impact** - What is the user/business impact?
+-->
+
+## 🔗 Related Information
+
+### Issues & References
+- **Fixes:** <!-- Link to issues this PR resolves -->
+- **Related:** <!-- Link to related issues or discussions -->
+- **Dependencies:** <!-- Any dependent PRs or external changes -->
+
+### Breaking Changes
+<!-- 
+If this PR introduces breaking changes, document them here:
+- What changed?
+- How to migrate?
+- What to expect?
+-->
+
+---
 
 ## 🎯 Testing Instructions
 
-<!-- Provide step-by-step instructions for testing -->
+<!-- 
+Provide clear steps to test the changes:
 
-## 📸 Screenshots (if applicable)
+1. **Setup** - What environment is needed?
+2. **Steps** - Step-by-step testing procedure
+3. **Expected** - What should happen?
+4. **Edge Cases** - Any special scenarios to test?
+-->
 
-<!-- Add screenshots for UI changes -->
+## 📸 Visual Evidence
 
-## ✅ Checklist
+<!-- 
+Add screenshots, GIFs, or videos for UI changes:
+- Before/after comparisons
+- New features in action
+- Mobile responsiveness
+-->
 
-- [ ] My code follows the project's style guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules 
+---
+
+## ✅ Final Checklist
+
+- [ ] **Self Review** - I have reviewed my own code
+- [ ] **Style Guide** - Code follows project conventions
+- [ ] **Documentation** - All changes are documented
+- [ ] **Testing** - Changes are thoroughly tested
+- [ ] **Dependencies** - No unnecessary dependencies added
+- [ ] **Performance** - No performance regressions
+- [ ] **Security** - No security vulnerabilities introduced
+
+---
+
+## 🏷️ Labels
+
+<!-- 
+Add relevant labels for this PR:
+- `bug-fix`, `feature`, `documentation`, `security`, `performance`
+- `breaking-change`, `hotfix`, `release`
+- `bgr8`, `mentor-program`, `admin`, `ui-ux`
+-->
+
+---
+
+**Thank you for contributing to the bgr8 Platform! 🚀** 
