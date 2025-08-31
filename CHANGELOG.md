@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.5] - 2025-08-31
+
+### 🐛 Patch Release
+
+### 🔧 Changed
+- Enhanced release script with smart changelog generation using Python
+- Fixed changelog insertion order to show latest releases first
+- Improved Python script error handling and Windows compatibility
+- Added automatic git commit analysis for meaningful changelog entries
+
+### 🐛 Fixed
+- Resolved Unicode decoding errors in Python script on Windows
+- Fixed changelog entry placement (new entries now appear at top)
+- Improved error handling and fallback mechanisms
+
+### 🚀 Performance
+- Streamlined changelog generation process
+- Enhanced automation workflow reliability
+
+---
+
 ## [v0.6.4] - 2025-08-31
 
 ### 🐛 Patch Release
@@ -47,32 +68,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Streamlined documentation generation process
 - Improved automation workflow efficiency
 - Enhanced template generation with smart categorization
-
----
-
-## [v0.6.5] - 2025-08-31
-
-### 🐛 Patch Release
-### ✨ Added
-- [ ] New features and enhancements
-
-### 🔧 Changed
-- [ ] Modified functionality
-
-### 🐛 Fixed
-- [ ] Bug fixes and improvements
-
-### 🗑️ Removed
-- [ ] Deprecated features and cleanup
-
-### 📚 Documentation
-- [ ] Documentation updates
-
-### 🛡️ Security
-- [ ] Security improvements
-
-### 🚀 Performance
-- [ ] Performance optimizations
 
 ---
 

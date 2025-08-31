@@ -7,6 +7,7 @@ Automatically generates meaningful changelog entries from git commits
 import subprocess
 import re
 import sys
+import os
 from datetime import datetime
 from typing import List, Dict, Tuple
 from collections import defaultdict
@@ -30,38 +31,70 @@ COMMIT_TYPES = {
 }
 
 def run_git_command(command: List[str]) -> str:
-    """Run a git command and return the output"""
+    """Run a git command and return the output with proper encoding handling"""
     try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        return result.stdout.strip()
+        # Set environment variables for better encoding handling on Windows
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        
+        # Use text=True and encoding='utf-8' for better cross-platform compatibility
+        result = subprocess.run(
+            command, 
+            capture_output=True, 
+            text=True, 
+            encoding='utf-8',
+            env=env,
+            errors='replace'  # Replace problematic characters instead of failing
+        )
+        
+        if result.returncode != 0:
+            print(f"Warning: Git command returned non-zero exit code: {result.returncode}")
+            if result.stderr:
+                print(f"Git stderr: {result.stderr}")
+            return ""
+        
+        return result.stdout.strip() if result.stdout else ""
+        
     except subprocess.CalledProcessError as e:
         print(f"Error running git command: {e}")
+        return ""
+    except Exception as e:
+        print(f"Unexpected error running git command: {e}")
         return ""
 
 def get_commits_since_tag(tag: str) -> List[Dict]:
     """Get all commits since the specified tag with detailed information"""
-    if tag == "none":
-        # Get all commits if no previous tag
-        format_str = "%H|%s|%an|%ad|%b"
-        commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse'])
-    else:
-        format_str = "%H|%s|%an|%ad|%b"
-        commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', f'{tag}..HEAD'])
-    
-    commit_list = []
-    for commit in commits.split('\n'):
-        if commit.strip():
-            parts = commit.split('|', 4)
-            if len(parts) >= 5:
-                commit_list.append({
-                    'hash': parts[0],
-                    'message': parts[1],
-                    'author': parts[2],
-                    'date': parts[3],
-                    'body': parts[4] if len(parts) > 4 else ''
-                })
-    
-    return commit_list
+    try:
+        if tag == "none":
+            # Get all commits if no previous tag
+            format_str = "%H|%s|%an|%ad|%b"
+            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse'])
+        else:
+            format_str = "%H|%s|%an|%ad|%b"
+            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', f'{tag}..HEAD'])
+        
+        if not commits:
+            print(f"Warning: No git output received for tag range: {tag}")
+            return []
+        
+        commit_list = []
+        for commit in commits.split('\n'):
+            if commit.strip():
+                parts = commit.split('|', 4)
+                if len(parts) >= 5:
+                    commit_list.append({
+                        'hash': parts[0],
+                        'message': parts[1],
+                        'author': parts[2],
+                        'date': parts[3],
+                        'body': parts[4] if len(parts) > 4 else ''
+                    })
+        
+        return commit_list
+        
+    except Exception as e:
+        print(f"Error processing commits: {e}")
+        return []
 
 def categorize_commit(commit_data: Dict) -> Tuple[str, str, str]:
     """Categorize a commit message and return (type, emoji, description)"""
@@ -199,10 +232,13 @@ def main():
     
     # Write to file
     output_file = f"smart-changelog-{version}.md"
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(changelog)
-    
-    print(f"\n✅ Smart changelog generated: {output_file}")
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(changelog)
+        print(f"\n✅ Smart changelog generated: {output_file}")
+    except Exception as e:
+        print(f"❌ Error writing to file: {e}")
+        sys.exit(1)
     
     # Also print to console
     print("\n" + "="*60)

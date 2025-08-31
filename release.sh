@@ -221,27 +221,53 @@ EOF
         # Read the smart changelog content
         local smart_content=$(cat "$smart_changelog_file")
         
-        # Insert the smart changelog entry after the header (after the first "---" line)
-        local header_end=$(grep -n "^---$" "$changelog_file" | head -1 | cut -d: -f1)
+        # Insert the smart changelog entry at the top (after the header)
+        # Find the line after the header section (after the last line that starts with # or >)
+        local header_end=0
+        local line_num=0
         
-        if [[ -n "$header_end" ]]; then
-          # Create temporary file
-          local temp_file=$(mktemp)
-          
-          # Insert after the first "---" line
-          head -n "$header_end" "$changelog_file" > "$temp_file"
-          echo "$smart_content" >> "$temp_file"
-          tail -n +$((header_end + 1)) "$changelog_file" >> "$temp_file"
-          
-          # Replace original file
-          mv "$temp_file" "$changelog_file"
-          
-          # Clean up the temporary smart changelog file
-          rm -f "$smart_changelog_file"
-          
-          echo "✅ Updated CHANGELOG.md with smart changelog entry"
-          return 0
+        while IFS= read -r line; do
+          line_num=$((line_num + 1))
+          # Check if this line starts a new section (## [version] or ## [0.x.x])
+          if [[ "$line" =~ ^##\ \[ ]]; then
+            header_end=$((line_num - 1))
+            break
+          fi
+        done < "$changelog_file"
+        
+        # If no existing entries found, insert after the header description
+        if [[ $header_end -eq 0 ]]; then
+          # Find the last line of the header (after the description line)
+          header_end=$(grep -n "^>" "$changelog_file" | tail -1 | cut -d: -f1)
+          if [[ -n "$header_end" ]]; then
+            header_end=$((header_end + 1))
+          else
+            # If no description line, insert after the last header line
+            header_end=$(grep -n "^#" "$changelog_file" | tail -1 | cut -d: -f1)
+            if [[ -n "$header_end" ]]; then
+              header_end=$((header_end + 1))
+            else
+              header_end=1
+            fi
+          fi
         fi
+        
+        # Create temporary file
+        local temp_file=$(mktemp)
+        
+        # Insert at the top (after header)
+        head -n "$header_end" "$changelog_file" > "$temp_file"
+        echo "$smart_content" >> "$temp_file"
+        tail -n +$((header_end + 1)) "$changelog_file" >> "$temp_file"
+        
+        # Replace original file
+        mv "$temp_file" "$changelog_file"
+        
+        # Clean up the temporary smart changelog file
+        rm -f "$smart_changelog_file"
+        
+        echo "✅ Updated CHANGELOG.md with smart changelog entry at the top"
+        return 0
       fi
     fi
   fi
@@ -250,29 +276,50 @@ EOF
   echo "📝 Using fallback changelog template generation..."
   local new_entry=$(generate_fallback_changelog_entry "$version" "$date" "$name")
   
-  # Insert the new entry after the header (after the first "---" line)
+  # Insert the new entry at the top (after the header)
   if [[ -f "$changelog_file" ]]; then
     # Create temporary file
     local temp_file=$(mktemp)
     
-    # Copy header and insert new entry
-    local header_end=$(grep -n "^---$" "$changelog_file" | head -1 | cut -d: -f1)
+    # Find the line after the header section (after the last line that starts with # or >)
+    local header_end=0
+    local line_num=0
     
-    if [[ -n "$header_end" ]]; then
-      # Insert after the first "---" line
-      head -n "$header_end" "$changelog_file" > "$temp_file"
-      echo "$new_entry" >> "$temp_file"
-      tail -n +$((header_end + 1)) "$changelog_file" >> "$temp_file"
-    else
-      # No "---" found, append to end
-      cat "$changelog_file" > "$temp_file"
-      echo "$new_entry" >> "$temp_file"
+    while IFS= read -r line; do
+      line_num=$((line_num + 1))
+      # Check if this line starts a new section (## [version] or ## [0.x.x])
+      if [[ "$line" =~ ^##\ \[ ]]; then
+        header_end=$((line_num - 1))
+        break
+      fi
+    done < "$changelog_file"
+    
+    # If no existing entries found, insert after the header description
+    if [[ $header_end -eq 0 ]]; then
+      # Find the last line of the header (after the description line)
+      header_end=$(grep -n "^>" "$changelog_file" | tail -1 | cut -d: -f1)
+      if [[ -n "$header_end" ]]; then
+        header_end=$((header_end + 1))
+      else
+        # If no description line, insert after the last header line
+        header_end=$(grep -n "^#" "$changelog_file" | tail -1 | cut -d: -f1)
+        if [[ -n "$header_end" ]]; then
+          header_end=$((header_end + 1))
+        else
+          header_end=1
+        fi
+      fi
     fi
+    
+    # Insert at the top (after header)
+    head -n "$header_end" "$changelog_file" > "$temp_file"
+    echo "$new_entry" >> "$temp_file"
+    tail -n +$((header_end + 1)) "$changelog_file" >> "$temp_file"
     
     # Replace original file
     mv "$temp_file" "$changelog_file"
     
-    echo "✅ Updated CHANGELOG.md with fallback changelog entry"
+    echo "✅ Updated CHANGELOG.md with fallback changelog entry at the top"
   fi
 }
 
