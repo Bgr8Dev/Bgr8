@@ -50,6 +50,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.6.5] - 2025-08-31
+
+### 🐛 Patch Release
+### ✨ Added
+- [ ] New features and enhancements
+
+### 🔧 Changed
+- [ ] Modified functionality
+
+### 🐛 Fixed
+- [ ] Bug fixes and improvements
+
+### 🗑️ Removed
+- [ ] Deprecated features and cleanup
+
+### 📚 Documentation
+- [ ] Documentation updates
+
+### 🛡️ Security
+- [ ] Security improvements
+
+### 🚀 Performance
+- [ ] Performance optimizations
+
+---
+
 ## [0.4.0-Typhoon] - 2025-08-08
 
 ### 🧹 Dependency Cleanup
