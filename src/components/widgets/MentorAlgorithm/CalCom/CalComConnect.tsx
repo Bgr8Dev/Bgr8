@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaCalendarAlt, FaKey, FaUnlink, FaCheckCircle, FaExclamationTriangle, FaSpinner, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../../../hooks/useAuth';
 import { CalComTokenManager, CalComService, CalComUtils } from './calComService';
@@ -22,7 +22,7 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
     username: string;
   } | null>(null);
 
-  const checkConnectionStatus = async () => {
+  const checkConnectionStatus = useCallback(async () => {
     if (!currentUser) return;
     try {
       const hasApiKey = await CalComTokenManager.hasApiKey(currentUser.uid);
@@ -38,7 +38,7 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
     } catch (error) {
       console.error('Error checking connection status:', error);
     }
-  };
+  }, [currentUser]);
   
   useEffect(() => {
     if (open) {

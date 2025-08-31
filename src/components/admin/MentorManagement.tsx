@@ -47,6 +47,13 @@ function isFirestoreTimestamp(val: unknown): val is FirestoreTimestamp {
   return !!val && typeof val === 'object' && typeof (val as { toDate?: unknown }).toDate === 'function';
 }
 
+// Extend the Booking interface to include generated properties
+interface ExtendedBooking extends Booking {
+  isGeneratedMentor?: boolean;
+  isGeneratedMentee?: boolean;
+  bookingMethod?: string;
+}
+
 // Inline BookingAnalytics component
 const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
   const analytics = useMemo(() => {
@@ -536,7 +543,7 @@ export default function MentorManagement() {
        });
        
        const availabilityResults = await Promise.all(availabilityPromises);
-       let allAvailabilityData = availabilityResults.filter(Boolean) as MentorAvailabilityWithProfile[];
+       const allAvailabilityData = availabilityResults.filter(Boolean) as MentorAvailabilityWithProfile[];
        
        // Also fetch availability data from Generated Availability collection
        try {
@@ -567,7 +574,7 @@ export default function MentorManagement() {
               if (mentorDoc.exists()) {
                 mentorProfile = mentorDoc.data() as MentorMenteeProfile;
               }
-            } catch (error) {
+            } catch {
               // If that fails, try the old structure
               try {
                 const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', availability.mentorId));
@@ -835,16 +842,18 @@ export default function MentorManagement() {
   // Filter and sort bookings data
   const filteredBookings = useMemo(() => {
     return bookings.filter(booking => {
+      const extendedBooking = booking as ExtendedBooking;
+      
       // Filter by generated profile status
       if (bookingGeneratedFilter !== 'all') {
-        const hasGeneratedProfile = (booking as any).isGeneratedMentor || (booking as any).isGeneratedMentee;
+        const hasGeneratedProfile = extendedBooking.isGeneratedMentor || extendedBooking.isGeneratedMentee;
         if (bookingGeneratedFilter === 'generated' && !hasGeneratedProfile) return false;
         if (bookingGeneratedFilter === 'real' && hasGeneratedProfile) return false;
       }
       
       // Filter by booking method
       if (bookingMethodFilter !== 'all') {
-        const method = (booking as any).bookingMethod || 'internal';
+        const method = extendedBooking.bookingMethod || 'internal';
         if (method !== bookingMethodFilter) return false;
       }
       

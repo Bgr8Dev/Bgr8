@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaSearch, FaEdit, FaUserFriends, FaCog } from 'react-icons/fa';
-import { MentorMenteeProfile, UserType, MENTOR } from '../types/mentorTypes';
+import { MentorMenteeProfile, MENTOR } from '../types/mentorTypes';
 import '../styles/MentorHeader.css';
 
 interface MentorHeaderProps {

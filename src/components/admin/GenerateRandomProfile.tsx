@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { firestore } from '../../firebase/firebase';
-import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { Booking } from '../../types/bookings';
@@ -673,11 +673,13 @@ export default function GenerateRandomProfile() {
     
     // Create the base booking object
     const booking: Booking = {
+      id: `booking_${Math.random().toString(36).substr(2, 9)}`,
       mentorName: mentor.name,
       mentorEmail: mentor.email,
       menteeName: `Test Mentee ${Math.floor(Math.random() * 1000)}`,
       menteeEmail: `mentee${Math.floor(Math.random() * 1000)}@example.com`,
-      sessionDate: sessionDate.toISOString().split('T')[0],
+      day: sessionDate.toLocaleDateString('en-GB', { weekday: 'long' }),
+      sessionDate: Timestamp.fromDate(sessionDate),
       startTime,
       endTime,
       status,
@@ -685,7 +687,7 @@ export default function GenerateRandomProfile() {
       menteeId: `mentee_${Math.random().toString(36).substr(2, 9)}`,
       duration: 60, // 1 hour sessions
       revenue: Math.floor(Math.random() * 50) + 25, // £25-75 per session
-      createdAt: new Date()
+      createdAt: Timestamp.fromDate(new Date())
     };
     
     // Only add Cal.com specific fields if it's a Cal.com booking
@@ -960,7 +962,35 @@ export default function GenerateRandomProfile() {
   };
 
   // Helper function to safely map DocumentData to MentorMenteeProfile
-  const mapDocumentToMentorMenteeProfile = (data: Record<string, any>, id: string): MentorMenteeProfile => {
+  interface DocumentData {
+    uid?: string;
+    userRef?: string;
+    firstName?: string;
+    lastName?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    age?: string;
+    degree?: string;
+    educationLevel?: string;
+    county?: string;
+    profession?: string;
+    pastProfessions?: string[];
+    linkedin?: string;
+    calCom?: string;
+    hobbies?: string[];
+    ethnicity?: string;
+    religion?: string;
+    skills?: string[];
+    lookingFor?: string[];
+    industries?: string[];
+    isMentor?: boolean;
+    isMentee?: boolean;
+    type?: string;
+    isGenerated?: boolean;
+  }
+
+  const mapDocumentToMentorMenteeProfile = (data: DocumentData, id: string): MentorMenteeProfile => {
     return {
       uid: data.uid || id,
       userRef: data.userRef || `users/${id}`,

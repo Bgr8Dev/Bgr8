@@ -19,7 +19,6 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
   score,
   size = 60,
   strokeWidth = 6,
-  color = '#00ff00',
   bgColor = '#333',
   label = 'Match Strength',
   showTooltip = true,

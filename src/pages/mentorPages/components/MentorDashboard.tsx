@@ -2,23 +2,37 @@ import React, { useState } from 'react';
 import { MentorMenteeProfile } from '../types';
 import { ViewBookingsModal } from './ViewBookingsModal';
 
+interface MentorAvailability {
+  timeSlots: Array<{
+    day: string;
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+  }>;
+  lastUpdated: Date;
+}
+
+interface MentorBooking {
+  id: string;
+  menteeName: string;
+  sessionDate: string;
+  startTime: string;
+  status: string;
+}
+
+interface MentorBookings {
+  [key: string]: MentorBooking[];
+}
+
 interface MentorDashboardProps {
   currentUserProfile: MentorMenteeProfile;
-  mentorAvailability: any;
-  mentorBookings: any;
+  mentorAvailability: MentorAvailability;
+  mentorBookings: MentorBookings;
   onProfileEdit: () => void;
   onAvailabilityManage: () => void;
-  onViewAllBookings: () => void;
   onAcceptBooking: (bookingId: string) => void;
   onRejectBooking: (bookingId: string) => void;
   onCancelBooking: (bookingId: string) => void;
-}
-
-interface Booking {
-  sessionDate: string;
-  startTime?: string;
-  menteeName?: string;
-  status?: string;
 }
 
 export const MentorDashboard: React.FC<MentorDashboardProps> = ({
@@ -27,7 +41,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   mentorBookings,
   onProfileEdit,
   onAvailabilityManage,
-  onViewAllBookings,
   onAcceptBooking,
   onRejectBooking,
   onCancelBooking
@@ -43,6 +56,25 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
   const handleViewAllBookings = () => {
     setShowViewBookingsModal(true);
+  };
+
+  // Helper function to get all bookings from the object
+  const getAllBookings = (): MentorBooking[] => {
+    return Object.values(mentorBookings).flat();
+  };
+
+  // Helper function to get upcoming bookings
+  const getUpcomingBookings = (): MentorBooking[] => {
+    return getAllBookings().filter(booking => 
+      new Date(booking.sessionDate) > new Date()
+    );
+  };
+
+  // Helper function to get completed bookings
+  const getCompletedBookings = (): MentorBooking[] => {
+    return getAllBookings().filter(booking => 
+      new Date(booking.sessionDate) <= new Date()
+    );
   };
 
   return (
@@ -166,9 +198,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                 </div>
                 <div className="availability-stat">
                   <span className="stat-number">
-                    {Object.values(mentorBookings).flat().filter((booking: any) => 
-                      new Date(booking.sessionDate) > new Date()
-                    ).length}
+                    {getUpcomingBookings().length}
                   </span>
                   <span className="stat-label">Upcoming Sessions</span>
                 </div>
@@ -208,35 +238,30 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             <div className="bookings-summary">
                               <div className="booking-stat">
                   <span className="stat-number">
-                    {Object.values(mentorBookings).flat().length}
+                    {getAllBookings().length}
                   </span>
                   <span className="stat-label">Total Bookings</span>
                 </div>
                 <div className="booking-stat">
                   <span className="stat-number">
-                    {Object.values(mentorBookings).flat().filter((booking: any) => 
-                      new Date(booking.sessionDate) > new Date()
-                    ).length}
+                    {getUpcomingBookings().length}
                   </span>
                   <span className="stat-label">Upcoming</span>
                 </div>
                 <div className="booking-stat">
                   <span className="stat-number">
-                    {Object.values(mentorBookings).flat().filter((booking: any) => 
-                      new Date(booking.sessionDate) <= new Date()
-                    ).length}
+                    {getCompletedBookings().length}
                   </span>
                   <span className="stat-label">Completed</span>
                 </div>
             </div>
             
             <div className="bookings-list">
-              {Object.values(mentorBookings).flat().length > 0 ? (
-                Object.values(mentorBookings)
-                  .flat()
-                  .sort((a: any, b: any) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime())
+              {getAllBookings().length > 0 ? (
+                getAllBookings()
+                  .sort((a: MentorBooking, b: MentorBooking) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime())
                   .slice(0, 5)
-                  .map((booking: any, index) => (
+                  .map((booking: MentorBooking, index) => (
                     <div key={index} className="booking-item">
                       <div className="booking-info">
                         <div className="booking-header">
@@ -283,7 +308,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         <ViewBookingsModal
           isOpen={showViewBookingsModal}
           onClose={() => setShowViewBookingsModal(false)}
-          bookings={Object.values(mentorBookings).flat()}
+          bookings={getAllBookings()}
           onAcceptBooking={onAcceptBooking}
           onRejectBooking={onRejectBooking}
           onCancelBooking={onCancelBooking}
