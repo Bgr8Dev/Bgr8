@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Release Tag Manager with Automatic Changelog Updates
+# Release Tag Manager with Smart Changelog Generation
 # Creates and manages semantic versioning tags for releases
-# Automatically updates CHANGELOG.md with new release entries
+# Automatically generates intelligent changelog entries using Python script
 # Works on Windows (Git Bash), Linux, and macOS
 
 # Initialize variables
@@ -12,11 +12,12 @@ SET_TAG=""
 SHOW_CURRENT=false
 FORCE=false
 SKIP_CHANGELOG=false
+PYTHON_SCRIPT="scripts/smart-changelog.py"
 
 # Show help function
 show_help() {
   echo "Usage: $0 [OPTIONS]"
-  echo "Manage release tags with semantic versioning and automatic changelog updates"
+  echo "Manage release tags with semantic versioning and intelligent changelog generation"
   echo ""
   echo "Options:"
   echo "  --major           Increment major version (vX.0.0)"
@@ -37,13 +38,95 @@ show_help() {
   exit 0
 }
 
+# Function to check if Python script exists
+check_python_script() {
+  if [[ ! -f "$PYTHON_SCRIPT" ]]; then
+    echo "⚠️  Warning: Python script not found at $PYTHON_SCRIPT"
+    echo "   Smart changelog generation will be disabled"
+    echo "   Using fallback template generation instead"
+    return 1
+  fi
+  
+  # Check if Python is available
+  if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
+    echo "⚠️  Warning: Python not found in PATH"
+    echo "   Smart changelog generation will be disabled"
+    echo "   Using fallback template generation instead"
+    return 1
+  fi
+  
+  return 0
+}
+
 # Function to get current date in YYYY-MM-DD format
 get_current_date() {
   date +%Y-%m-%d
 }
 
-# Function to generate changelog entry
-generate_changelog_entry() {
+# Function to get previous tag for changelog generation
+get_previous_tag() {
+  local current_tag=$1
+  
+  if [[ -z "$current_tag" ]]; then
+    echo "none"
+    return
+  fi
+  
+  # Get all tags sorted by version
+  local all_tags=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -10)
+  
+  # Find the tag before the current one
+  local found_current=false
+  for tag in $all_tags; do
+    if [[ "$found_current" == true ]]; then
+      echo "$tag"
+      return
+    fi
+    if [[ "$tag" == "$current_tag" ]]; then
+      found_current=true
+    fi
+  done
+  
+  echo "none"
+}
+
+# Function to generate smart changelog using Python script
+generate_smart_changelog() {
+  local version=$1
+  local release_name=$2
+  local previous_tag=$3
+  
+  echo "🤖 Generating smart changelog using Python script..."
+  
+  # Determine Python command
+  local python_cmd=""
+  if command -v python3 &> /dev/null; then
+    python_cmd="python3"
+  elif command -v python &> /dev/null; then
+    python_cmd="python"
+  else
+    echo "❌ Error: Python not found"
+    return 1
+  fi
+  
+  # Run the Python script
+  if [[ -n "$release_name" ]]; then
+    $python_cmd "$PYTHON_SCRIPT" "$version" "$release_name" "$previous_tag"
+  else
+    $python_cmd "$PYTHON_SCRIPT" "$version" "" "$previous_tag"
+  fi
+  
+  if [[ $? -eq 0 ]]; then
+    echo "✅ Smart changelog generated successfully"
+    return 0
+  else
+    echo "❌ Error: Failed to generate smart changelog"
+    return 1
+  fi
+}
+
+# Function to generate fallback changelog entry
+generate_fallback_changelog_entry() {
   local version=$1
   local date=$2
   local name=$3
@@ -112,6 +195,7 @@ update_changelog() {
   local version=$1
   local date=$2
   local name=$3
+  local previous_tag=$4
   
   local changelog_file="CHANGELOG.md"
   
@@ -128,8 +212,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 EOF
   fi
   
-  # Generate the new changelog entry
-  local new_entry=$(generate_changelog_entry "$version" "$date" "$name")
+  # Try to generate smart changelog first
+  if check_python_script; then
+    if generate_smart_changelog "$version" "$name" "$previous_tag"; then
+      # The Python script generates its own file, so we need to integrate it
+      local smart_changelog_file="smart-changelog-${version}.md"
+      if [[ -f "$smart_changelog_file" ]]; then
+        # Read the smart changelog content
+        local smart_content=$(cat "$smart_changelog_file")
+        
+        # Insert the smart changelog entry after the header (after the first "---" line)
+        local header_end=$(grep -n "^---$" "$changelog_file" | head -1 | cut -d: -f1)
+        
+        if [[ -n "$header_end" ]]; then
+          # Create temporary file
+          local temp_file=$(mktemp)
+          
+          # Insert after the first "---" line
+          head -n "$header_end" "$changelog_file" > "$temp_file"
+          echo "$smart_content" >> "$temp_file"
+          tail -n +$((header_end + 1)) "$changelog_file" >> "$temp_file"
+          
+          # Replace original file
+          mv "$temp_file" "$changelog_file"
+          
+          # Clean up the temporary smart changelog file
+          rm -f "$smart_changelog_file"
+          
+          echo "✅ Updated CHANGELOG.md with smart changelog entry"
+          return 0
+        fi
+      fi
+    fi
+  fi
+  
+  # Fallback to template generation if smart changelog fails
+  echo "📝 Using fallback changelog template generation..."
+  local new_entry=$(generate_fallback_changelog_entry "$version" "$date" "$name")
   
   # Insert the new entry after the header (after the first "---" line)
   if [[ -f "$changelog_file" ]]; then
@@ -153,7 +272,7 @@ EOF
     # Replace original file
     mv "$temp_file" "$changelog_file"
     
-    echo "✅ Updated CHANGELOG.md with new release entry"
+    echo "✅ Updated CHANGELOG.md with fallback changelog entry"
   fi
 }
 
@@ -375,7 +494,9 @@ fi
 if [[ "$SKIP_CHANGELOG" == false ]]; then
   echo "Updating changelog..."
   CURRENT_DATE=$(get_current_date)
-  update_changelog "$NEW_TAG" "$CURRENT_DATE" "$NAME"
+  PREVIOUS_TAG=$(get_previous_tag "$LATEST_TAG")
+  echo "📝 Analyzing commits since: $PREVIOUS_TAG"
+  update_changelog "$NEW_TAG" "$CURRENT_DATE" "$NAME" "$PREVIOUS_TAG"
 else
   echo "Skipping changelog update (--skip-changelog flag used)"
 fi
@@ -404,9 +525,11 @@ if [[ $? -eq 0 ]]; then
     echo ""
     echo "📝 Next steps:"
     echo "1. Review the generated changelog entry in CHANGELOG.md"
-    echo "2. Update the changelog with actual changes made in this release"
-    echo "3. Commit and push the updated changelog"
+    echo "2. Update the changelog with any additional details if needed"
+    echo "3. Commit and push the final changelog if you made changes"
     echo "4. Create a GitHub release with the changelog content"
+    echo ""
+    echo "💡 Tip: The changelog was generated using git commit analysis for accuracy!"
   fi
 else
   echo "Error: Failed to create tag"
