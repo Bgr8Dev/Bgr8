@@ -7,28 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
-## [0.4.0-Typhoon] - 2025-08-08
-
-### 🧹 Dependency Cleanup
-- Removed unused Stripe packages (`@stripe/react-stripe-js`, `@stripe/stripe-js`, `stripe`)
-- Removed unused Google APIs packages (`google-auth-library`, `googleapis`)
-- Removed unused chart libraries (`chart.js`, `react-chartjs-2`)
-- Removed unused React Helmet packages (`react-helmet`, `@types/react-helmet`)
-- Removed unused server dependencies (`express`, `cors`, `dotenv`)
-- Cleaned up redundant development files (`import_section.txt`, `extracted_icons.txt`, `sorted_icons.txt`)
-
-### 📝 Documentation
-- Updated README.md to reflect actual dependencies
-- Removed Stripe-related setup instructions and environment variables
-- Simplified installation process
-- Updated tech stack documentation
-
-### ⚡ Performance
-- Reduced bundle size by removing unused dependencies
-- Streamlined package.json with only essential packages
-
----
-
 ## [v0.6.4] - 2025-08-31
 
 ### 🐛 Patch Release
@@ -52,6 +30,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Performance
 - [ ] Performance optimizations
+
+---
+
+## [0.4.0-Typhoon] - 2025-08-08
+
+### 🧹 Dependency Cleanup
+- Removed unused Stripe packages (`@stripe/react-stripe-js`, `@stripe/stripe-js`, `stripe`)
+- Removed unused Google APIs packages (`google-auth-library`, `googleapis`)
+- Removed unused chart libraries (`chart.js`, `react-chartjs-2`)
+- Removed unused React Helmet packages (`react-helmet`, `@types/react-helmet`)
+- Removed unused server dependencies (`express`, `cors`, `dotenv`)
+- Cleaned up redundant development files (`import_section.txt`, `extracted_icons.txt`, `sorted_icons.txt`)
+
+### 📝 Documentation
+- Updated README.md to reflect actual dependencies
+- Removed Stripe-related setup instructions and environment variables
+- Simplified installation process
+- Updated tech stack documentation
+
+### ⚡ Performance
+- Reduced bundle size by removing unused dependencies
+- Streamlined package.json with only essential packages
 
 ---
 
