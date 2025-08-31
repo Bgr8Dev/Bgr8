@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Booking } from '../../types/bookings';
 
+// Extend the Booking interface to include generated properties
+interface ExtendedBooking extends Booking {
+  isGeneratedMentor?: boolean;
+  isGeneratedMentee?: boolean;
+}
+
 interface BookingsGroupedProps {
-  bookings: Booking[];
+  bookings: ExtendedBooking[];
   groupBy: 'mentor' | 'mentee';
-  onView: (booking: Booking) => void;
+  onView: (booking: ExtendedBooking) => void;
 }
 
 export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsGroupedProps) {
@@ -14,7 +20,7 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
     if (!acc[key]) acc[key] = [];
     acc[key].push(booking);
     return acc;
-  }, {} as Record<string, Booking[]>);
+  }, {} as Record<string, ExtendedBooking[]>);
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
@@ -52,7 +58,7 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
                           {booking.isCalComBooking && (
                             <span style={{ background: '#00eaff', color: '#181818', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>Cal.com</span>
                           )}
-                          {(booking as any).isGeneratedMentor && (
+                          {booking.isGeneratedMentor && (
                             <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentor">🎲</span>
                           )}
                         </div>
@@ -62,7 +68,7 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span>{booking.menteeName}</span>
-                          {(booking as any).isGeneratedMentee && (
+                          {booking.isGeneratedMentee && (
                             <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentee">🎲</span>
                           )}
                         </div>

@@ -111,7 +111,7 @@ export default function FeedbackPage() {
                               attendee.email !== mentorData.email
                             );
 
-                            let createdAtTS = (
+                            const createdAtTS = (
                               matchingBooking.createdAt
                                 ? Timestamp.fromDate(new Date(matchingBooking.createdAt))
                                 : Timestamp.fromDate(new Date()));
@@ -365,12 +365,11 @@ export default function FeedbackPage() {
   }
 
   const otherPartyName = userRole === 'mentor' ? booking.menteeName : booking.mentorName;
-  const sessionDate =
-    booking.sessionDate
-      ? new Date(
+  const sessionDate = booking?.sessionDate
+    ? new Date(
         // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
-        typeof (booking.sessionDate as any).toDate === 'function'
-          ? (booking.sessionDate as any).toDate()
+        typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
+          ? (booking.sessionDate as { toDate: () => Date }).toDate()
           : booking.sessionDate
       ).toLocaleDateString('en-GB', {
         weekday: 'long',
@@ -378,7 +377,7 @@ export default function FeedbackPage() {
         month: 'long',
         day: 'numeric'
       })
-      : '';
+    : '';
 
   return (
     <div className="feedback-page">

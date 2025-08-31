@@ -364,7 +364,7 @@ export default function MentorPage() {
     if (hasProfile && currentUserProfile) {
       setFormData(currentUserProfile);
     }
-  }, [hasProfile, currentUserProfile]);
+  }, [hasProfile, currentUserProfile, setFormData]);
 
   useEffect(() => {
     setFilteredMentors(searchFilteredMentors);
