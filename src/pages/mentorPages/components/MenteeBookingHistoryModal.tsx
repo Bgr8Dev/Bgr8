@@ -84,7 +84,7 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
   };
 
   // Helper function to format time
-  const formatTime = (startTime: string, endTime: string) => {
+  const formatTimeRange = (startTime: string, endTime: string) => {
     return `${startTime} - ${endTime}`;
   };
 
