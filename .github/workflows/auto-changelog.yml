@@ -1,0 +1,212 @@
+name: 🚀 Auto Changelog Update
+
+on:
+  release:
+    types: [published, created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.2.3)'
+        required: true
+        type: string
+      release_name:
+        description: 'Release name (optional)'
+        required: false
+        type: string
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: 🚀 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 📦 Install dependencies
+        run: |
+          pip install PyGithub
+          pip install python-dateutil
+      
+      - name: 🔍 Get release information
+        id: release_info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "release_name=${{ github.event.inputs.release_name }}" >> $GITHUB_OUTPUT
+            echo "tag_name=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "release_date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+            echo "release_name=${{ github.event.release.name }}" >> $GITHUB_OUTPUT
+            echo "tag_name=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+            echo "release_date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 📝 Generate changelog entry
+        id: changelog
+        run: |
+          python -c "
+          import re
+          from datetime import datetime
+          
+          version = '${{ steps.release_info.outputs.version }}'
+          release_name = '${{ steps.release_info.outputs.release_name }}'
+          release_date = '${{ steps.release_info.outputs.release_date }}'
+          
+          # Determine release type and emoji
+          if re.match(r'^v[0-9]+\.[0-9]+\.[0-9]+$', version):
+              if re.match(r'^v[0-9]+\.0\.0$', version):
+                  release_type = 'Major Release'
+                  emoji = '🚀'
+              elif re.match(r'^v[0-9]+\.[0-9]+\.0$', version):
+                  release_type = 'Minor Release'
+                  emoji = '✨'
+              else:
+                  release_type = 'Patch Release'
+                  emoji = '🐛'
+          else:
+              release_type = 'Pre-release'
+              emoji = '🔧'
+          
+          # Generate changelog entry
+          entry = f'''
+          ## [{version}] - {release_date}
+          
+          ### {emoji} {release_type}
+          '''
+          
+          if release_name:
+              entry += f'**Release Name:** {release_name}\n\n'
+          
+          entry += '''### ✨ Added
+          - [ ] New features and enhancements
+          
+          ### 🔧 Changed
+          - [ ] Modified functionality
+          
+          ### 🐛 Fixed
+          - [ ] Bug fixes and improvements
+          
+          ### 🗑️ Removed
+          - [ ] Deprecated features and cleanup
+          
+          ### 📚 Documentation
+          - [ ] Documentation updates
+          
+          ### 🛡️ Security
+          - [ ] Security improvements
+          
+          ### 🚀 Performance
+          - [ ] Performance optimizations
+          
+          ---
+          '''
+          
+          print(entry)
+          "
+          > changelog_entry.txt
+      
+      - name: 📋 Update CHANGELOG.md
+        run: |
+          # Read the generated entry
+          changelog_entry=$(cat changelog_entry.txt)
+          
+          # Update CHANGELOG.md
+          if [ -f "CHANGELOG.md" ]; then
+            # Insert after the first "---" line (after header)
+            awk -v entry="$changelog_entry" '
+            /^---$/ && !found {
+              print
+              print entry
+              found = 1
+              next
+            }
+            { print }
+            ' CHANGELOG.md > CHANGELOG.md.tmp
+            mv CHANGELOG.md.tmp CHANGELOG.md
+          else
+            # Create new changelog file
+            cat > CHANGELOG.md << 'EOF'
+          # 📝 Changelog
+          
+          All notable changes to this project will be documented in this file.
+          
+          The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+          and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+          
+          ---
+          EOF
+            echo "$changelog_entry" >> CHANGELOG.md
+          fi
+          
+          echo "✅ Updated CHANGELOG.md with new release entry"
+      
+      - name: 🔍 Get commit range
+        id: commit_range
+        run: |
+          # Get the previous tag
+          previous_tag=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          if [ -n "$previous_tag" ]; then
+            echo "range=${previous_tag}..HEAD" >> $GITHUB_OUTPUT
+            echo "previous_tag=${previous_tag}" >> $GITHUB_OUTPUT
+          else
+            echo "range=HEAD" >> $GITHUB_OUTPUT
+            echo "previous_tag=none" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 📊 Generate commit summary
+        id: commit_summary
+        run: |
+          if [ "${{ steps.commit_range.outputs.previous_tag }}" != "none" ]; then
+            # Get commits since last release
+            commits=$(git log --oneline --pretty=format:"- %s" ${{ steps.commit_range.outputs.range }})
+            echo "commits<<EOF" >> $GITHUB_OUTPUT
+            echo "$commits" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "commits=Initial release" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 🔄 Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add CHANGELOG.md
+          git commit -m "📝 Auto-update changelog for ${{ steps.release_info.outputs.version }}"
+          
+          git push origin HEAD:${{ github.ref_name }}
+          
+          echo "✅ Committed and pushed changelog updates"
+      
+      - name: 📝 Create summary
+        run: |
+          echo "## 🎉 Changelog Updated Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release:** ${{ steps.release_info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** ${{ steps.release_info.outputs.release_date }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.release_info.outputs.release_name }}" != "" ]; then
+            echo "**Name:** ${{ steps.release_info.outputs.release_name }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Changes Made:**" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Added new changelog entry" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Updated CHANGELOG.md file" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Committed and pushed changes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review the generated changelog entry" >> $GITHUB_STEP_SUMMARY
+          echo "2. Update with actual changes made in this release" >> $GITHUB_STEP_SUMMARY
+          echo "3. Commit and push the final changelog" >> $GITHUB_STEP_SUMMARY
