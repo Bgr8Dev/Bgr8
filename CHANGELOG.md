@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.6] - 2025-08-31
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Implement changelog automation and enhance release script
+
+### 📚 Documentation Documentation updates
+- 📝 Update changelog for v0.6.4
+- Update CHANGELOG.md to include details for v0.4.0-Typhoon release, highlighting dependency cleanup, documentation updates, and performance improvements.
+- 📝 Update changelog for v0.6.5
+- 📝 Update CHANGELOG.md for v0.6.5 and enhance release script
+
+**Total Changes:** 5 commits
+
+---
 ## [v0.6.5] - 2025-08-31
 
 ### 🐛 Patch Release
