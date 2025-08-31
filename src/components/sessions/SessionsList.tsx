@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Session } from '../../types/sessions';
-import SessionsService from '../../services/SessionsService';
+import { SessionsService } from '../../services/sessionsService';
 import FeedbackForm from '../feedback/FeedbackForm';
 import './SessionsList.css';
 
