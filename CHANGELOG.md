@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.8] - 2025-08-31
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Add SessionsList component styles
+
+### 🐛 Fixed Bug fixes and improvements
+- Merge pull request #11 from Bgr8Dev:lint-fixing
+- Merge pull request #12 from Bgr8Dev:lint-fixing
+
+### 📚 Documentation Documentation updates
+- 📝 Update changelog for v0.6.6
+- 📝 Update changelog for v0.6.7
+- Update version to 0.6.7 and remove the changelog generation script
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor Booking interface to ExtendedBooking across components
+
+**Total Changes:** 7 commits
+
+---
 ## [v0.6.7] - 2025-08-31
 
 ### 🐛 Patch Release
