@@ -1178,6 +1178,8 @@ html, body {
   animation: shimmer 3s ease-in-out infinite;
 }
 
+
+
 .results-header-content {
   flex: 1;
 }
@@ -1246,11 +1248,24 @@ html, body {
 .results-content {
   padding: 32px;
   background: var(--white);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease;
+  opacity: 0;
+}
+
+/* Expanded State */
+.mentor-results:not(.minimized) .results-content {
+  max-height: 2000px;
+  opacity: 1;
+  padding: 32px;
 }
 
 /* Minimized State */
 .mentor-results.minimized .results-content {
-  display: none;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 32px;
 }
 
 .mentor-results.minimized {
@@ -1938,6 +1953,8 @@ html, body {
   0%, 100% { transform: translateX(-100%); }
   50% { transform: translateX(100%); }
 }
+
+
 
 .bookings-widget-title {
   display: flex;
