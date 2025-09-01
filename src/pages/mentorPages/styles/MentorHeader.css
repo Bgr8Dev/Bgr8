@@ -1,7 +1,7 @@
 /* MentorHeader.css - Header Section Styles */
 
 /* Header Section */
-.mentor-header {
+.mheader-mentor-header {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: var(--white);
   padding: 60px 0 60px 0;
@@ -10,7 +10,7 @@
   z-index: 2;
 }
 
-.mentor-header-content {
+.mheader-mentor-header-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px 20px;
@@ -20,7 +20,7 @@
   gap: 20px;
 }
 
-.mentor-header h1 {
+.mheader-mentor-header h1 {
   font-size: 3rem;
   font-weight: 700;
   margin-bottom: 16px;
@@ -28,7 +28,7 @@
   margin-top: 0;
 }
 
-.mentor-header p {
+.mheader-mentor-header p {
   font-size: 1.25rem;
   margin-bottom: 0;
   opacity: 0.9;
@@ -38,7 +38,7 @@
   text-align: center;
 }
 
-.generated-profiles-info {
+.mheader-generated-profiles-info {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 16px 24px;
@@ -49,7 +49,7 @@
   margin-right: auto;
 }
 
-.generated-profiles-info .info-text {
+.mheader-generated-profiles-info .mheader-info-text {
   margin: 0;
   font-size: 0.95rem;
   opacity: 0.95;
@@ -57,7 +57,7 @@
 }
 
 /* User Profile Summary */
-.user-profile-summary {
+.mheader-user-profile-summary {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 24px;
@@ -67,14 +67,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.profile-info {
+.mheader-profile-info {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.profile-role {
+.mheader-profile-role {
   background: var(--white);
   color: var(--accent);
   padding: 8px 16px;
@@ -85,25 +85,25 @@
   letter-spacing: 0.5px;
 }
 
-.profile-role.mentor {
+.mheader-profile-role.mheader-mentor {
   background: var(--mentor-light);
   color: var(--mentor-dark);
   border: 1px solid var(--mentor);
 }
 
-.profile-role.mentee {
+.mheader-profile-role.mheader-mentee {
   background: var(--mentee-light);
   color: var(--mentee-dark);
   border: 1px solid var(--mentee);
 }
 
-.profile-name {
+.mheader-profile-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--white);
 }
 
-.profile-actions {
+.mheader-profile-actions {
   display: flex;
   gap: 16px;
   justify-content: center;
@@ -112,8 +112,8 @@
 }
 
 /* Enhanced Button Styles with Unique Effects */
-.profile-edit-btn,
-.find-matches-btn {
+.mheader-profile-edit-btn,
+.mheader-find-matches-btn {
   position: relative;
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.9) 0%, 
@@ -141,8 +141,8 @@
 }
 
 /* Animated gradient border effect */
-.profile-edit-btn::before,
-.find-matches-btn::before {
+.mheader-profile-edit-btn::before,
+.mheader-find-matches-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -167,8 +167,8 @@
 }
 
 /* Floating particles effect */
-.profile-edit-btn::after,
-.find-matches-btn::after {
+.mheader-profile-edit-btn::after,
+.mheader-find-matches-btn::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -183,7 +183,7 @@
 }
 
 /* Profile Edit Button - Unique Style */
-.profile-edit-btn {
+.mheader-profile-edit-btn {
   background: linear-gradient(135deg, 
     rgba(224, 106, 92, 0.1) 0%, 
     rgba(255, 255, 255, 0.9) 50%,
@@ -195,7 +195,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-.profile-edit-btn::before {
+.mheader-profile-edit-btn::before {
   background: linear-gradient(45deg, 
     var(--mentor) 0%, 
     var(--mentor-light) 25%, 
@@ -205,7 +205,7 @@
 }
 
 /* Find Matches Button - Unique Style */
-.find-matches-btn {
+.mheader-find-matches-btn {
   background: linear-gradient(135deg, 
     rgba(29, 213, 209, 0.1) 0%, 
     rgba(255, 255, 255, 0.9) 50%,
@@ -217,7 +217,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-.find-matches-btn::before {
+.mheader-find-matches-btn::before {
   background: linear-gradient(45deg, 
     var(--mentee) 0%, 
     var(--mentee-light) 25%, 
@@ -227,8 +227,8 @@
 }
 
 /* Hover Effects */
-.profile-edit-btn:hover,
-.find-matches-btn:hover {
+.mheader-profile-edit-btn:hover,
+.mheader-find-matches-btn:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 
     0 20px 40px rgba(59, 167, 242, 0.25),
@@ -239,14 +239,14 @@
     rgba(255, 255, 255, 0.85) 100%);
 }
 
-.profile-edit-btn:hover {
+.mheader-profile-edit-btn:hover {
   box-shadow: 
     0 20px 40px rgba(224, 106, 92, 0.3),
     0 8px 24px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-.find-matches-btn:hover {
+.mheader-find-matches-btn:hover {
   box-shadow: 
     0 20px 40px rgba(29, 213, 209, 0.3),
     0 8px 24px rgba(0, 0, 0, 0.15),
@@ -254,31 +254,31 @@
 }
 
 /* Particle explosion on hover */
-.profile-edit-btn:hover::after,
-.find-matches-btn:hover::after {
+.mheader-profile-edit-btn:hover::after,
+.mheader-find-matches-btn:hover::after {
   width: 200px;
   height: 200px;
   background: radial-gradient(circle, rgba(59, 167, 242, 0.1) 0%, transparent 70%);
 }
 
-.profile-edit-btn:hover::after {
+.mheader-profile-edit-btn:hover::after {
   background: radial-gradient(circle, rgba(224, 106, 92, 0.1) 0%, transparent 70%);
 }
 
-.find-matches-btn:hover::after {
+.mheader-find-matches-btn:hover::after {
   background: radial-gradient(circle, rgba(29, 213, 209, 0.1) 0%, transparent 70%);
 }
 
 /* Active/Pressed State */
-.profile-edit-btn:active,
-.find-matches-btn:active {
+.mheader-profile-edit-btn:active,
+.mheader-find-matches-btn:active {
   transform: translateY(-1px) scale(1.02);
   transition: all 0.1s ease;
 }
 
 /* Focus State for Accessibility */
-.profile-edit-btn:focus,
-.find-matches-btn:focus {
+.mheader-profile-edit-btn:focus,
+.mheader-find-matches-btn:focus {
   outline: none;
   box-shadow: 
     0 8px 32px rgba(59, 167, 242, 0.15),
@@ -301,20 +301,20 @@
 }
 
 /* Icon Enhancement */
-.profile-edit-btn svg,
-.find-matches-btn svg {
+.mheader-profile-edit-btn svg,
+.mheader-find-matches-btn svg {
   transition: all 0.3s ease;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-.profile-edit-btn:hover svg,
-.find-matches-btn:hover svg {
+.mheader-profile-edit-btn:hover svg,
+.mheader-find-matches-btn:hover svg {
   transform: rotate(5deg) scale(1.1);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 /* Disabled State - Maintains beauty while being clearly disabled */
-.find-matches-btn:disabled {
+.mheader-find-matches-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   transform: none;
@@ -329,7 +329,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.find-matches-btn:disabled::before {
+.mheader-find-matches-btn:disabled::before {
   background: linear-gradient(45deg, 
     var(--gray-400) 0%, 
     var(--gray-300) 25%, 
@@ -339,7 +339,7 @@
   animation: none;
 }
 
-.find-matches-btn:disabled:hover {
+.mheader-find-matches-btn:disabled:hover {
   transform: none;
   box-shadow: 
     0 4px 16px rgba(107, 114, 128, 0.1),
@@ -347,13 +347,13 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.find-matches-btn:disabled:hover::after {
+.mheader-find-matches-btn:disabled:hover::after {
   width: 0;
   height: 0;
 }
 
 /* Main Content Header Adjustments */
-.mentor-main-content .mentor-header {
+.mentor-main-content .mheader-mentor-header {
   background: transparent;
   padding: 0 0 32px 0;
   margin: 0;
@@ -362,19 +362,19 @@
   z-index: 1;
 }
 
-.mentor-main-content .mentor-header-content {
+.mentor-main-content .mheader-mentor-header-content {
   padding: 0;
   align-items: flex-start;
   gap: 16px;
 }
 
-.mentor-main-content .mentor-header h1 {
+.mentor-main-content .mheader-mentor-header h1 {
   font-size: 2.5rem;
   margin-bottom: 12px;
   margin-top: 0;
 }
 
-.mentor-main-content .mentor-header p {
+.mentor-main-content .mheader-mentor-header p {
   font-size: 1.1rem;
   margin-bottom: 0;
   text-align: left;
@@ -383,7 +383,7 @@
   margin-right: 0;
 }
 
-.mentor-main-content .generated-profiles-info {
+.mentor-main-content .mheader-generated-profiles-info {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 12px 16px;
@@ -394,7 +394,7 @@
   margin-right: 0;
 }
 
-.mentor-main-content .user-profile-summary {
+.mentor-main-content .mheader-user-profile-summary {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 20px;
@@ -404,26 +404,26 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.mentor-main-content .profile-actions {
+.mentor-main-content .mheader-profile-actions {
   justify-content: flex-start;
   gap: 12px;
 }
 
-.mentor-main-content .profile-edit-btn,
-.mentor-main-content .find-matches-btn,
-.mentor-main-content .availability-manage-btn {
+.mentor-main-content .mheader-profile-edit-btn,
+.mentor-main-content .mheader-find-matches-btn,
+.mentor-main-content .mheader-availability-manage-btn {
   padding: 10px 20px;
   font-size: 0.9rem;
 }
 
 /* Search Container */
-.search-container {
+.mheader-search-container {
   max-width: 600px;
   margin: 0 auto;
   margin-bottom: 20px;
 }
 
-.search-bar {
+.mheader-search-bar {
   position: relative;
   background: var(--white);
   border-radius: 12px;
@@ -437,18 +437,18 @@
   cursor: text;
 }
 
-.search-bar:hover {
+.mheader-search-bar:hover {
   box-shadow: var(--shadow-2xl);
   transform: translateY(-1px);
 }
 
-.search-bar:focus-within {
+.mheader-search-bar:focus-within {
   border-color: var(--mentor);
   box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.1);
   transform: translateY(-1px);
 }
 
-.search-icon {
+.mheader-search-icon {
   position: absolute;
   left: 20px;
   top: 24px;
@@ -461,7 +461,7 @@
   height: 24px;
 }
 
-.search-bar input {
+.mheader-search-bar input {
   width: 100%;
   padding: 0 0 0 48px;
   border: none;
@@ -476,13 +476,13 @@
   align-items: center;
 }
 
-.search-bar input::placeholder {
+.mheader-search-bar input::placeholder {
   color: var(--gray-500);
   font-weight: 400;
 }
 
 /* Search Suggestions Dropdown */
-.search-suggestions-dropdown {
+.mheader-search-suggestions-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -497,7 +497,7 @@
   margin-top: 4px;
 }
 
-.suggestion-item {
+.mheader-suggestion-item {
   padding: 12px 20px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -506,25 +506,25 @@
   color: var(--text);
 }
 
-.suggestion-item:last-child {
+.mheader-suggestion-item:last-child {
   border-bottom: none;
 }
 
-.suggestion-item:hover {
+.mheader-suggestion-item:hover {
   background: var(--mentor-light);
   color: var(--mentor-dark);
 }
 
-.suggestion-item:first-child {
+.mheader-suggestion-item:first-child {
   border-radius: 8px 8px 0 0;
 }
 
-.suggestion-item:last-child {
+.mheader-suggestion-item:last-child {
   border-radius: 0 0 8px 8px;
 }
 
 /* Availability Management Button */
-.availability-manage-btn {
+.mheader-availability-manage-btn {
   background: var(--button-mentor-bg);
   color: var(--button-mentor-text);
   border: 1px solid var(--button-mentor-border);
@@ -540,7 +540,7 @@
   gap: 8px;
 }
 
-.availability-manage-btn:hover {
+.mheader-availability-manage-btn:hover {
   background: var(--button-mentor-hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(224, 106, 92, 0.3);
@@ -548,31 +548,31 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .mentor-header {
+  .mheader-mentor-header {
     padding: 60px 0 40px 0;
     margin-bottom: 30px;
   }
   
-  .mentor-header h1 {
+  .mheader-mentor-header h1 {
     font-size: 2rem;
   }
   
-  .mentor-header p {
+  .mheader-mentor-header p {
     font-size: 1.1rem;
   }
   
-  .mentor-main-content .mentor-header h1 {
+  .mentor-main-content .mheader-mentor-header h1 {
     font-size: 2rem;
   }
   
-  .mentor-main-content .profile-actions {
+  .mentor-main-content .mheader-profile-actions {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .mentor-main-content .profile-edit-btn,
-  .mentor-main-content .find-matches-btn,
-  .mentor-main-content .availability-manage-btn {
+  .mentor-main-content .mheader-profile-edit-btn,
+  .mentor-main-content .mheader-find-matches-btn,
+  .mentor-main-content .mheader-availability-manage-btn {
     width: 100%;
     justify-content: center;
     padding: 12px 24px;
@@ -580,23 +580,23 @@
   }
   
   /* Reduce animation intensity on mobile for better performance */
-  .profile-edit-btn::before,
-  .find-matches-btn::before {
+  .mheader-profile-edit-btn::before,
+  .mheader-find-matches-btn::before {
     animation-duration: 4s;
   }
   
-  .profile-edit-btn:hover,
-  .find-matches-btn:hover {
+  .mheader-profile-edit-btn:hover,
+  .mheader-find-matches-btn:hover {
     transform: translateY(-2px) scale(1.03);
   }
 }
 
 @media (max-width: 480px) {
-  .mentor-header h1 {
+  .mheader-mentor-header h1 {
     font-size: 1.75rem;
   }
   
-  .mentor-header p {
+  .mheader-mentor-header p {
     font-size: 1rem;
   }
 }

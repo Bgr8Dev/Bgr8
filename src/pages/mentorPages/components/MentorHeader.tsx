@@ -29,29 +29,29 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
   loadingMatches
 }) => {
   return (
-    <div className="mentor-header">
-      <div className="mentor-header-content">
+    <div className="mheader-mentor-header">
+      <div className="mheader-mentor-header-content">
         <h1>Find mentors who can guide your journey</h1>
         <p>Connect with experienced professionals who share your interests and goals</p>
         
         {/* User Profile Summary */}
         {currentUserProfile && (
-          <div className="user-profile-summary">
-            <div className="profile-info">
-              <span className={`profile-role ${currentUserProfile.type === MENTOR ? 'mentor' : 'mentee'}`}>
+          <div className="mheader-user-profile-summary">
+            <div className="mheader-profile-info">
+              <span className={`mheader-profile-role ${currentUserProfile.type === MENTOR ? 'mheader-mentor' : 'mheader-mentee'}`}>
                 {currentUserProfile.type === MENTOR ? 'Mentor' : 'Mentee'}
               </span>
-              <span className="profile-name">{currentUserProfile.name}</span>
+              <span className="mheader-profile-name">{currentUserProfile.name}</span>
             </div>
-            <div className="profile-actions">
-              <button onClick={onProfileEdit} className="profile-edit-btn" title="Edit your profile information" data-tooltip="Edit your profile information">
+            <div className="mheader-profile-actions">
+              <button onClick={onProfileEdit} className="mheader-profile-edit-btn" title="Edit your profile information" data-tooltip="Edit your profile information">
                 <FaEdit /> Edit Profile
               </button>
-              <button onClick={onFindMatches} className="find-matches-btn" disabled={loadingMatches} title="Find mentors/mentees that match your profile" data-tooltip="Find mentors/mentees that match your profile">
+              <button onClick={onFindMatches} className="mheader-find-matches-btn" disabled={loadingMatches} title="Find mentors/mentees that match your profile" data-tooltip="Find mentors/mentees that match your profile">
                 <FaUserFriends /> {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
               </button>
               {currentUserProfile.type === MENTOR && (
-                <button onClick={onAvailabilityManage} className="availability-manage-btn" title="Manage your availability schedule for mentee bookings" data-tooltip="Manage your availability schedule for mentee bookings">
+                <button onClick={onAvailabilityManage} className="mheader-availability-manage-btn" title="Manage your availability schedule for mentee bookings" data-tooltip="Manage your availability schedule for mentee bookings">
                   <FaCog /> Manage Availability
                 </button>
               )}
@@ -60,9 +60,9 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
         )}
         
         {/* Search Bar */}
-        <div className="search-container">
-          <div className="search-bar">
-            <FaSearch className="search-icon" />
+        <div className="mheader-search-container">
+          <div className="mheader-search-bar">
+            <FaSearch className="mheader-search-icon" />
             <input
               type="text"
               placeholder="What are you looking to learn?"
@@ -71,11 +71,11 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
               onFocus={() => onSearchChange({ target: { value: searchTerm } } as React.ChangeEvent<HTMLInputElement>)}
             />
             {showSearchDropdown && (
-              <div className="search-suggestions-dropdown">
+              <div className="mheader-search-suggestions-dropdown">
                 {searchSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="suggestion-item"
+                    className="mheader-suggestion-item"
                     onClick={() => onSuggestionClick(suggestion)}
                   >
                     {suggestion}
