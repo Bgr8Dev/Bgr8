@@ -1,7 +1,9 @@
 /**
- * Modal Animation Utilities
- * Provides functions to create button-to-modal animations
+ * Modal Animation Utilities (Performance Optimized)
+ * Provides functions to create button-to-modal animations with minimal memory usage
  */
+
+import { batchDOMOperations, optimizeForAnimation } from './performanceOptimization';
 
 export interface ButtonPosition {
   x: number;
@@ -53,60 +55,68 @@ export const calculateModalTransformOrigin = (
 };
 
 /**
- * Apply button-emerge animation to a modal
+ * Apply button-emerge animation to a modal (Performance Optimized)
  */
 export const applyButtonEmergeAnimation = (
   modal: HTMLElement,
   button: HTMLElement
 ): void => {
-  console.log('🎯 Applying button-emerge animation');
-  console.log('Modal:', modal);
-  console.log('Button:', button);
+  // Optimize modal for animation
+  optimizeForAnimation(modal);
   
-  const buttonPos = getButtonPosition(button);
-  const modalRect = modal.getBoundingClientRect();
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  
-  console.log('Button position:', buttonPos);
-  console.log('Modal rect:', modalRect);
-  console.log('Viewport:', { width: viewportWidth, height: viewportHeight });
-  
-  const transformOrigin = calculateModalTransformOrigin(
-    buttonPos,
-    modalRect.width,
-    modalRect.height,
-    viewportWidth,
-    viewportHeight
-  );
-  
-  console.log('Transform origin:', transformOrigin);
-  
-  // Set the transform origin
-  modal.style.transformOrigin = `${transformOrigin.x}% ${transformOrigin.y}%`;
-  
-  // Add the emerging-from-button class
-  modal.classList.add('emerging-from-button');
-  console.log('Added emerging-from-button class');
-  
-  // Handle loading states for button-emerge animation
-  const loadingElements = modal.querySelectorAll('.pem-modal-loading, .modal-loading');
-  console.log('Found loading elements:', loadingElements.length);
-  loadingElements.forEach(element => {
-    element.classList.add('emerging');
-  });
-  
-  // Remove the class and show content after animation completes
-  setTimeout(() => {
-    console.log('🎯 Button-emerge animation completed, showing content');
-    modal.classList.remove('emerging-from-button');
-    
-    // Show loading content after button-emerge animation completes
-    loadingElements.forEach(element => {
-      element.classList.remove('emerging');
-      element.classList.add('ready');
-    });
-  }, 1000); // Match animation duration
+  // Batch all DOM operations for better performance
+  batchDOMOperations([
+    () => {
+      // Cache DOM queries to avoid repeated lookups
+      const buttonRect = button.getBoundingClientRect();
+      const modalRect = modal.getBoundingClientRect();
+      
+      // Calculate transform origin efficiently
+      const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+      const modalCenterX = window.innerWidth / 2;
+      const modalCenterY = window.innerHeight / 2;
+      
+      const offsetX = buttonCenterX - modalCenterX;
+      const offsetY = buttonCenterY - modalCenterY;
+      
+      // Convert to percentage with bounds checking
+      const originX = Math.max(10, Math.min(90, 50 + (offsetX / modalRect.width) * 100));
+      const originY = Math.max(10, Math.min(90, 50 + (offsetY / modalRect.height) * 100));
+      
+      // Set transform origin and animation class
+      modal.style.transformOrigin = `${originX}% ${originY}%`;
+      modal.classList.add('emerging-from-button');
+      
+      // Cache loading elements to avoid repeated queries
+      const loadingElements = modal.querySelectorAll('.pem-modal-loading, .modal-loading');
+      
+      // Batch loading element operations
+      if (loadingElements.length > 0) {
+        loadingElements.forEach(element => {
+          element.classList.add('emerging');
+        });
+        
+        // Use a single timeout for all operations
+        setTimeout(() => {
+          batchDOMOperations([
+            () => modal.classList.remove('emerging-from-button'),
+            () => {
+              loadingElements.forEach(element => {
+                element.classList.remove('emerging');
+                element.classList.add('ready');
+              });
+            }
+          ]);
+        }, 1000);
+      } else {
+        // Fallback if no loading elements
+        setTimeout(() => {
+          modal.classList.remove('emerging-from-button');
+        }, 1000);
+      }
+    }
+  ]);
 };
 
 /**

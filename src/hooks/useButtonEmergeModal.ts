@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { applyButtonEmergeAnimation, initializeModalForButtonEmerge } from '../utils/modalAnimation';
 
 interface UseButtonEmergeModalOptions {
@@ -7,8 +7,8 @@ interface UseButtonEmergeModalOptions {
 }
 
 /**
- * Custom hook for managing button-emerge modal animations
- * Handles loading states and ensures smooth animations
+ * Custom hook for managing button-emerge modal animations (Performance Optimized)
+ * Handles loading states and ensures smooth animations with minimal memory usage
  */
 export const useButtonEmergeModal = ({ 
   modalSelector, 
@@ -16,24 +16,51 @@ export const useButtonEmergeModal = ({
 }: UseButtonEmergeModalOptions) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  // Use refs to avoid recreating functions and reduce memory usage
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const buttonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize modal when it opens
+  // Initialize modal when it opens (memoized)
   useEffect(() => {
     if (isModalOpen) {
-      const modal = document.querySelector(modalSelector) as HTMLElement;
-      if (modal) {
-        initializeModalForButtonEmerge(modal);
-      }
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        const modal = document.querySelector(modalSelector) as HTMLElement;
+        if (modal) {
+          initializeModalForButtonEmerge(modal);
+        }
+      });
     }
   }, [isModalOpen, modalSelector]);
 
-  // Create button click handler with animation
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+      if (buttonTimeoutRef.current) {
+        clearTimeout(buttonTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Create button click handler with animation (optimized)
   const openModalWithAnimation = useCallback((event: React.MouseEvent<HTMLElement>) => {
     const button = event.currentTarget;
     
+    // Clear any existing timeouts
+    if (buttonTimeoutRef.current) {
+      clearTimeout(buttonTimeoutRef.current);
+    }
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+    
     // Add button highlight effect
     button.classList.add('pem-button-emerging');
-    setTimeout(() => {
+    buttonTimeoutRef.current = setTimeout(() => {
       button.classList.remove('pem-button-emerging');
     }, 800);
 
@@ -43,22 +70,30 @@ export const useButtonEmergeModal = ({
     // Open modal
     setIsModalOpen(true);
 
-    // Apply emerge animation after modal is rendered
-    setTimeout(() => {
+    // Apply emerge animation after modal is rendered (optimized timing)
+    requestAnimationFrame(() => {
       const modal = document.querySelector(modalSelector) as HTMLElement;
       if (modal) {
         applyButtonEmergeAnimation(modal, button);
         
         // Reset animating state after animation completes
-        setTimeout(() => {
+        animationTimeoutRef.current = setTimeout(() => {
           setIsAnimating(false);
         }, animationDuration);
       }
-    }, 10);
+    });
   }, [modalSelector, animationDuration]);
 
-  // Close modal
+  // Close modal (optimized)
   const closeModal = useCallback(() => {
+    // Clear timeouts
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+    if (buttonTimeoutRef.current) {
+      clearTimeout(buttonTimeoutRef.current);
+    }
+    
     setIsModalOpen(false);
     setIsAnimating(false);
   }, []);
