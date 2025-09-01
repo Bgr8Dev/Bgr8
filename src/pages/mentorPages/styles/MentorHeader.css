@@ -111,33 +111,245 @@
   margin-bottom: 20px;
 }
 
+/* Enhanced Button Styles with Unique Effects */
 .profile-edit-btn,
 .find-matches-btn {
-  background: var(--white);
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(255, 255, 255, 0.7) 100%);
   color: var(--accent);
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  border: 2px solid transparent;
+  padding: 14px 28px;
+  border-radius: 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(59, 167, 242, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Animated gradient border effect */
+.profile-edit-btn::before,
+.find-matches-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    var(--accent) 0%, 
+    var(--mentor) 25%, 
+    var(--mentee) 50%, 
+    var(--accent) 75%, 
+    var(--accent) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 3s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  z-index: -1;
+}
+
+/* Floating particles effect */
+.profile-edit-btn::after,
+.find-matches-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
+}
+
+/* Profile Edit Button - Unique Style */
+.profile-edit-btn {
+  background: linear-gradient(135deg, 
+    rgba(224, 106, 92, 0.1) 0%, 
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(224, 106, 92, 0.1) 100%);
+  color: var(--mentor-dark);
+  box-shadow: 
+    0 8px 32px rgba(224, 106, 92, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.profile-edit-btn::before {
+  background: linear-gradient(45deg, 
+    var(--mentor) 0%, 
+    var(--mentor-light) 25%, 
+    var(--mentor-dark) 50%, 
+    var(--mentor) 75%, 
+    var(--mentor) 100%);
+}
+
+/* Find Matches Button - Unique Style */
+.find-matches-btn {
+  background: linear-gradient(135deg, 
+    rgba(29, 213, 209, 0.1) 0%, 
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(29, 213, 209, 0.1) 100%);
+  color: var(--mentee-dark);
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.find-matches-btn::before {
+  background: linear-gradient(45deg, 
+    var(--mentee) 0%, 
+    var(--mentee-light) 25%, 
+    var(--mentee-dark) 50%, 
+    var(--mentee) 75%, 
+    var(--mentee) 100%);
+}
+
+/* Hover Effects */
 .profile-edit-btn:hover,
 .find-matches-btn:hover {
-  background: var(--gray-50);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(59, 167, 242, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.85) 100%);
 }
 
+.profile-edit-btn:hover {
+  box-shadow: 
+    0 20px 40px rgba(224, 106, 92, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.find-matches-btn:hover {
+  box-shadow: 
+    0 20px 40px rgba(29, 213, 209, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Particle explosion on hover */
+.profile-edit-btn:hover::after,
+.find-matches-btn:hover::after {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.1) 0%, transparent 70%);
+}
+
+.profile-edit-btn:hover::after {
+  background: radial-gradient(circle, rgba(224, 106, 92, 0.1) 0%, transparent 70%);
+}
+
+.find-matches-btn:hover::after {
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.1) 0%, transparent 70%);
+}
+
+/* Active/Pressed State */
+.profile-edit-btn:active,
+.find-matches-btn:active {
+  transform: translateY(-1px) scale(1.02);
+  transition: all 0.1s ease;
+}
+
+/* Focus State for Accessibility */
+.profile-edit-btn:focus,
+.find-matches-btn:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 32px rgba(59, 167, 242, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 0 4px rgba(59, 167, 242, 0.3);
+}
+
+/* Gradient Animation Keyframes */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Icon Enhancement */
+.profile-edit-btn svg,
+.find-matches-btn svg {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.profile-edit-btn:hover svg,
+.find-matches-btn:hover svg {
+  transform: rotate(5deg) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Disabled State - Maintains beauty while being clearly disabled */
 .find-matches-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+  background: linear-gradient(135deg, 
+    rgba(107, 114, 128, 0.1) 0%, 
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(107, 114, 128, 0.1) 100%);
+  color: var(--gray-500);
+  box-shadow: 
+    0 4px 16px rgba(107, 114, 128, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.find-matches-btn:disabled::before {
+  background: linear-gradient(45deg, 
+    var(--gray-400) 0%, 
+    var(--gray-300) 25%, 
+    var(--gray-500) 50%, 
+    var(--gray-400) 75%, 
+    var(--gray-400) 100%);
+  animation: none;
+}
+
+.find-matches-btn:disabled:hover {
+  transform: none;
+  box-shadow: 
+    0 4px 16px rgba(107, 114, 128, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.find-matches-btn:disabled:hover::after {
+  width: 0;
+  height: 0;
 }
 
 /* Main Content Header Adjustments */
@@ -187,8 +399,8 @@
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 32px;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -363,6 +575,19 @@
   .mentor-main-content .availability-manage-btn {
     width: 100%;
     justify-content: center;
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+  
+  /* Reduce animation intensity on mobile for better performance */
+  .profile-edit-btn::before,
+  .find-matches-btn::before {
+    animation-duration: 4s;
+  }
+  
+  .profile-edit-btn:hover,
+  .find-matches-btn:hover {
+    transform: translateY(-2px) scale(1.03);
   }
 }
 
