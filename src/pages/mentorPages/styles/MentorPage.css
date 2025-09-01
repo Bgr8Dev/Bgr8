@@ -63,8 +63,8 @@ html, body {
   width: 350px;
   min-width: 350px;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-right: 1px solid var(--gray-200);
   padding: 32px 0;
   padding-top: 120px;
@@ -132,8 +132,8 @@ html, body {
   border-radius: 12px;
   padding: 16px 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   text-align: center;
   max-width: 800px;
   margin-left: auto;
@@ -206,31 +206,101 @@ html, body {
   gap: 12px;
 }
 
+/* 🎯 ENHANCED EXPAND TOGGLE BUTTON - FLOATING ORB STYLE 🎯 */
 .expand-toggle-btn {
-  background: var(--gray-100);
-  color: var(--gray-600);
-  border: 1px solid var(--gray-300);
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(59, 167, 242, 0.1) 0%, 
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(59, 167, 242, 0.1) 100%);
+  color: var(--accent);
+  border: 2px solid transparent;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(59, 167, 242, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Floating particles around the button */
+.expand-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
+}
+
+/* Rotating gradient border */
+.expand-toggle-btn::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--accent) 0deg,
+    var(--mentor) 90deg,
+    var(--mentee) 180deg,
+    var(--accent) 270deg,
+    var(--accent) 360deg
+  );
+  animation: rotateBorder 3s linear infinite;
+  z-index: -1;
 }
 
 .expand-toggle-btn:hover {
-  background: var(--gray-200);
-  color: var(--gray-700);
-  border-color: var(--gray-400);
-  transform: scale(1.05);
+  background: linear-gradient(135deg, 
+    rgba(59, 167, 242, 0.2) 0%, 
+    rgba(255, 255, 255, 1) 50%,
+    rgba(59, 167, 242, 0.2) 100%);
+  color: var(--accent-dark);
+  transform: scale(1.15) rotate(180deg);
+  box-shadow: 
+    0 12px 40px rgba(59, 167, 242, 0.3),
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.expand-toggle-btn:hover::before {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.1) 0%, transparent 70%);
 }
 
 .expand-toggle-btn:active {
-  transform: scale(0.95);
+  transform: scale(1.05) rotate(180deg);
+  transition: all 0.1s ease;
+}
+
+/* Rotating border animation */
+@keyframes rotateBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .profile-role {
@@ -260,38 +330,205 @@ html, body {
   margin: 0;
 }
 
+/* 🚀 ENHANCED MENTEE DASHBOARD BUTTONS - ULTRA PREMIUM STYLES 🚀 */
+
 .profile-edit-btn,
 .availability-manage-btn {
-  padding: 10px 20px;
+  position: relative;
+  padding: 14px 28px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   white-space: nowrap;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
+/* ✨ Profile Edit Button - Neon Cyber Style */
 .profile-edit-btn {
-  background: var(--accent);
+  background: linear-gradient(135deg, 
+    rgba(29, 213, 209, 0.9) 0%, 
+    rgba(29, 213, 209, 0.7) 50%,
+    rgba(29, 213, 209, 0.9) 100%);
   color: var(--white);
+  border: 2px solid transparent;
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(29, 213, 209, 0.4);
+}
+
+/* Animated neon border effect */
+.profile-edit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    #00ffff 0%, 
+    #ff00ff 25%, 
+    #ffff00 50%, 
+    #00ff00 75%, 
+    #00ffff 100%);
+  background-size: 400% 400%;
+  animation: neonPulse 2s ease-in-out infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  z-index: -1;
+}
+
+/* Glowing particle effect */
+.profile-edit-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
 }
 
 .profile-edit-btn:hover {
-  background: var(--accent-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 
+    0 20px 40px rgba(29, 213, 209, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 30px rgba(29, 213, 209, 0.6);
+  background: linear-gradient(135deg, 
+    rgba(29, 213, 209, 1) 0%, 
+    rgba(29, 213, 209, 0.8) 50%,
+    rgba(29, 213, 209, 1) 100%);
 }
 
+.profile-edit-btn:hover::after {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.2) 0%, transparent 70%);
+}
+
+/* ✨ Availability Manage Button - Holographic Style */
 .availability-manage-btn {
-  background: var(--success);
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.9) 0%, 
+    rgba(16, 185, 129, 0.7) 50%,
+    rgba(16, 185, 129, 0.9) 100%);
   color: var(--white);
+  border: 2px solid transparent;
+  box-shadow: 
+    0 8px 32px rgba(16, 185, 129, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Holographic shimmer effect */
+.availability-manage-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    transparent 100%);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.availability-manage-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
 }
 
 .availability-manage-btn:hover {
-  background: var(--success-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 
+    0 20px 40px rgba(16, 185, 129, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 30px rgba(16, 185, 129, 0.6);
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 1) 0%, 
+    rgba(16, 185, 129, 0.8) 50%,
+    rgba(16, 185, 129, 1) 100%);
+}
+
+.availability-manage-btn:hover::before {
+  left: 100%;
+}
+
+.availability-manage-btn:hover::after {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+}
+
+/* Active states */
+.profile-edit-btn:active,
+.availability-manage-btn:active {
+  transform: translateY(-2px) scale(1.04);
+  transition: all 0.1s ease;
+}
+
+/* Focus states for accessibility */
+.profile-edit-btn:focus,
+.availability-manage-btn:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(29, 213, 209, 0.4),
+    0 0 0 4px rgba(29, 213, 209, 0.3);
+}
+
+/* Neon pulse animation */
+@keyframes neonPulse {
+  0%, 100% {
+    background-position: 0% 50%;
+    opacity: 1;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.8;
+  }
 }
 
 /* Profile Card Content */
@@ -458,44 +695,204 @@ html, body {
   flex-wrap: wrap;
 }
 
+/* 🎨 ENHANCED BOOKING ACTION BUTTONS - PREMIUM INTERACTIVE STYLES 🎨 */
+
 .booking-action-btn {
-  padding: 12px 24px;
+  position: relative;
+  padding: 16px 32px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 140px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-width: 160px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
+/* 🌟 Primary Booking Button - Liquid Metal Style */
 .booking-action-btn.primary {
-  background: var(--mentee);
+  background: linear-gradient(135deg, 
+    rgba(29, 213, 209, 0.9) 0%, 
+    rgba(29, 213, 209, 0.7) 50%,
+    rgba(29, 213, 209, 0.9) 100%);
   color: var(--white);
+  border: 2px solid transparent;
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(29, 213, 209, 0.4);
+}
+
+/* Liquid metal flowing effect */
+.booking-action-btn.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+  transition: left 0.8s ease;
+  z-index: 1;
+}
+
+/* Ripple effect */
+.booking-action-btn.primary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
 }
 
 .booking-action-btn.primary:hover {
-  background: var(--mentee-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, 
+    rgba(29, 213, 209, 1) 0%, 
+    rgba(29, 213, 209, 0.8) 50%,
+    rgba(29, 213, 209, 1) 100%);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(29, 213, 209, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 30px rgba(29, 213, 209, 0.6);
 }
 
+.booking-action-btn.primary:hover::before {
+  left: 100%;
+}
+
+.booking-action-btn.primary:hover::after {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.2) 0%, transparent 70%);
+}
+
+/* 💎 Secondary Booking Button - Crystal Glass Style */
 .booking-action-btn.secondary {
-  background: var(--white);
-  color: var(--mentee);
-  border: 2px solid var(--mentee);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.9) 100%);
+  color: var(--mentee-dark);
+  border: 2px solid transparent;
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Crystal refraction effect */
+.booking-action-btn.secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    var(--mentee) 0%, 
+    var(--mentee-light) 25%, 
+    var(--mentee-dark) 50%, 
+    var(--mentee) 75%, 
+    var(--mentee) 100%);
+  background-size: 300% 300%;
+  animation: crystalShimmer 3s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  z-index: -1;
+}
+
+/* Sparkle effect */
+.booking-action-btn.secondary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
 }
 
 .booking-action-btn.secondary:hover {
-  background: var(--mentee-light);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 1) 0%, 
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 1) 100%);
   color: var(--mentee-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(29, 213, 209, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.booking-action-btn.secondary:hover::after {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.15) 0%, transparent 70%);
+}
+
+/* Active states */
+.booking-action-btn:active {
+  transform: translateY(-2px) scale(1.02);
+  transition: all 0.1s ease;
+}
+
+/* Focus states for accessibility */
+.booking-action-btn:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(29, 213, 209, 0.4),
+    0 0 0 4px rgba(29, 213, 209, 0.3);
+}
+
+/* Crystal shimmer animation */
+@keyframes crystalShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .learning-stat {
@@ -578,12 +975,33 @@ html, body {
   .availability-manage-btn {
     flex: 1;
     justify-content: center;
+    padding: 12px 20px;
+    font-size: 0.8rem;
   }
   
   .expand-toggle-btn {
     width: 40px;
     height: 40px;
     font-size: 16px;
+  }
+  
+  /* Reduce animation intensity on mobile for better performance */
+  .profile-edit-btn::before,
+  .availability-manage-btn::before,
+  .expand-toggle-btn::after,
+  .booking-action-btn.primary::before,
+  .booking-action-btn.secondary::before {
+    animation-duration: 4s;
+  }
+  
+  .profile-edit-btn:hover,
+  .availability-manage-btn:hover,
+  .booking-action-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+  }
+  
+  .expand-toggle-btn:hover {
+    transform: scale(1.1) rotate(180deg);
   }
   
   .profile-details {
@@ -1812,8 +2230,8 @@ html, body {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   z-index: 10000;
   display: flex;
   align-items: center;
