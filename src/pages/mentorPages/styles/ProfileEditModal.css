@@ -157,9 +157,9 @@
   }
 }
 
-/* Content animation classes */
+/* Content animation classes - removed for immediate appearance */
 .pem-modal-content-animated {
-  animation: contentFadeIn 0.4s ease-out 0.6s both;
+  /* Removed delayed animation for immediate content appearance */
 }
 
 /* Loading state during animation */
@@ -171,7 +171,7 @@
 .pem-modal-loading.ready {
   opacity: 1;
   pointer-events: auto;
-  animation: contentFadeIn 0.4s ease-out 0.6s both;
+  /* Removed fade-in animation for immediate content appearance */
 }
 
 /* Button-emerge specific loading states */
@@ -184,7 +184,7 @@
 .pem-modal-loading.emerging.ready {
   opacity: 1;
   pointer-events: auto;
-  animation: contentFadeIn 0.4s ease-out 1.0s both; /* Delay until button-emerge completes */
+  /* Removed fade-in animation for immediate content appearance */
 }
 
 /* 🍎 Mac-like Modal Exit Animation - Shrink and Fade */
@@ -238,8 +238,7 @@
   /* Custom scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--gray-100);
-  /* Content animation - starts after modal animation */
-  animation: contentFadeIn 0.4s ease-out 0.7s both;
+  /* Removed delayed content animation for immediate appearance */
 }
 
 .pem-modal-left-sidebar::-webkit-scrollbar {
@@ -283,8 +282,7 @@
   padding: 24px;
   overflow-y: auto;
   max-height: 95vh;
-  /* Content animation - starts after modal animation */
-  animation: contentFadeIn 0.4s ease-out 0.8s both;
+  /* Removed delayed content animation for immediate appearance */
 }
 
 .pem-profile-edit-modal-content {
