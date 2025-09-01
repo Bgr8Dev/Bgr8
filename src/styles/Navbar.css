@@ -100,7 +100,7 @@
 .nav {
   display: flex;
   gap: 1rem;
-  margin-left: -4rem; /* Move nav buttons further to the left */
+  margin-left: -8rem; /* Move nav buttons further to the left */
 }
 
 .nav a {
