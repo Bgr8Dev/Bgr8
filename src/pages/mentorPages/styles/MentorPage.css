@@ -358,22 +358,31 @@ html, body {
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-/* ✨ Profile Edit Button - Neon Cyber Style */
+/* ✨ Profile Edit Button - Black & White Elegant Style */
 .profile-edit-btn {
   background: linear-gradient(135deg, 
-    rgba(29, 213, 209, 0.9) 0%, 
-    rgba(29, 213, 209, 0.7) 50%,
-    rgba(29, 213, 209, 0.9) 100%);
+    rgba(0, 0, 0, 0.9) 0%, 
+    rgba(0, 0, 0, 0.7) 50%,
+    rgba(0, 0, 0, 0.9) 100%);
   color: var(--white);
   border: 2px solid transparent;
   box-shadow: 
-    0 8px 32px rgba(29, 213, 209, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.3),
     0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(29, 213, 209, 0.4);
+    0 0 20px rgba(0, 0, 0, 0.4);
+  /* Text outline for better readability */
+  text-shadow: 
+    1px 1px 0 rgba(0, 0, 0, 0.8),
+    -1px -1px 0 rgba(0, 0, 0, 0.8),
+    1px -1px 0 rgba(0, 0, 0, 0.8),
+    -1px 1px 0 rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(0, 0, 0, 0.6);
+  /* Counter-pulse animation for text */
+  animation: textCounterPulse 2s ease-in-out infinite;
 }
 
-/* Animated neon border effect */
+/* Animated black & white border effect */
 .profile-edit-btn::before {
   content: '';
   position: absolute;
@@ -384,13 +393,13 @@ html, body {
   border-radius: 20px;
   padding: 2px;
   background: linear-gradient(45deg, 
-    #00ffff 0%, 
-    #ff00ff 25%, 
-    #ffff00 50%, 
-    #00ff00 75%, 
-    #00ffff 100%);
+    #000000 0%, 
+    #ffffff 25%, 
+    #000000 50%, 
+    #ffffff 75%, 
+    #000000 100%);
   background-size: 400% 400%;
-  animation: neonPulse 2s ease-in-out infinite;
+  animation: blackWhitePulse 2s ease-in-out infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -398,7 +407,7 @@ html, body {
   z-index: -1;
 }
 
-/* Glowing particle effect */
+/* Elegant particle effect */
 .profile-edit-btn::after {
   content: '';
   position: absolute;
@@ -406,7 +415,7 @@ html, body {
   left: 50%;
   width: 0;
   height: 0;
-  background: radial-gradient(circle, rgba(29, 213, 209, 0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.6s ease;
@@ -416,35 +425,44 @@ html, body {
 .profile-edit-btn:hover {
   transform: translateY(-4px) scale(1.08);
   box-shadow: 
-    0 20px 40px rgba(29, 213, 209, 0.4),
+    0 20px 40px rgba(0, 0, 0, 0.4),
     0 8px 24px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 30px rgba(29, 213, 209, 0.6);
+    0 0 30px rgba(255, 255, 255, 0.6);
   background: linear-gradient(135deg, 
-    rgba(29, 213, 209, 1) 0%, 
-    rgba(29, 213, 209, 0.8) 50%,
-    rgba(29, 213, 209, 1) 100%);
+    rgba(0, 0, 0, 1) 0%, 
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 1) 100%);
 }
 
 .profile-edit-btn:hover::after {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(29, 213, 209, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
 }
 
-/* ✨ Availability Manage Button - Holographic Style */
+/* ✨ Availability Manage Button - Black & White Elegant Style */
 .availability-manage-btn {
   background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.9) 0%, 
-    rgba(16, 185, 129, 0.7) 50%,
-    rgba(16, 185, 129, 0.9) 100%);
-  color: var(--white);
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.9) 100%);
+  color: var(--black);
   border: 2px solid transparent;
   box-shadow: 
-    0 8px 32px rgba(16, 185, 129, 0.3),
+    0 8px 32px rgba(255, 255, 255, 0.3),
     0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(16, 185, 129, 0.4);
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.4);
+  /* Text outline for better readability */
+  text-shadow: 
+    1px 1px 0 rgba(255, 255, 255, 0.8),
+    -1px -1px 0 rgba(255, 255, 255, 0.8),
+    1px -1px 0 rgba(255, 255, 255, 0.8),
+    -1px 1px 0 rgba(255, 255, 255, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.6);
+  /* Counter-pulse animation for text */
+  animation: textCounterPulseWhite 2s ease-in-out infinite;
 }
 
 /* Holographic shimmer effect */
@@ -457,7 +475,7 @@ html, body {
   height: 100%;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
+    rgba(0, 0, 0, 0.4) 50%, 
     transparent 100%);
   transition: left 0.6s ease;
   z-index: 1;
@@ -470,7 +488,7 @@ html, body {
   left: 50%;
   width: 0;
   height: 0;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.6s ease;
@@ -480,14 +498,14 @@ html, body {
 .availability-manage-btn:hover {
   transform: translateY(-4px) scale(1.08);
   box-shadow: 
-    0 20px 40px rgba(16, 185, 129, 0.4),
+    0 20px 40px rgba(255, 255, 255, 0.4),
     0 8px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 30px rgba(16, 185, 129, 0.6);
+    inset 0 1px 0 rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 0, 0, 0.6);
   background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 1) 0%, 
-    rgba(16, 185, 129, 0.8) 50%,
-    rgba(16, 185, 129, 1) 100%);
+    rgba(255, 255, 255, 1) 0%, 
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 1) 100%);
 }
 
 .availability-manage-btn:hover::before {
@@ -497,7 +515,7 @@ html, body {
 .availability-manage-btn:hover::after {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, transparent 70%);
 }
 
 /* Active states */
@@ -520,7 +538,7 @@ html, body {
 }
 
 /* Neon pulse animation */
-@keyframes neonPulse {
+@keyframes blackWhitePulse {
   0%, 100% {
     background-position: 0% 50%;
     opacity: 1;
@@ -528,6 +546,50 @@ html, body {
   50% {
     background-position: 100% 50%;
     opacity: 0.8;
+  }
+}
+
+/* Counter-pulse animation for text - opposite of border pulse (Black Button) */
+@keyframes textCounterPulse {
+  0%, 100% {
+    opacity: 0.8;
+    text-shadow: 
+      1px 1px 0 rgba(0, 0, 0, 0.6),
+      -1px -1px 0 rgba(0, 0, 0, 0.6),
+      1px -1px 0 rgba(0, 0, 0, 0.6),
+      -1px 1px 0 rgba(0, 0, 0, 0.6),
+      0 0 2px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 
+      1px 1px 0 rgba(0, 0, 0, 1),
+      -1px -1px 0 rgba(0, 0, 0, 1),
+      1px -1px 0 rgba(0, 0, 0, 1),
+      -1px 1px 0 rgba(0, 0, 0, 1),
+      0 0 6px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Counter-pulse animation for text - opposite of border pulse (White Button) */
+@keyframes textCounterPulseWhite {
+  0%, 100% {
+    opacity: 0.8;
+    text-shadow: 
+      1px 1px 0 rgba(255, 255, 255, 0.6),
+      -1px -1px 0 rgba(255, 255, 255, 0.6),
+      1px -1px 0 rgba(255, 255, 255, 0.6),
+      -1px 1px 0 rgba(255, 255, 255, 0.6),
+      0 0 2px rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 
+      1px 1px 0 rgba(255, 255, 255, 1),
+      -1px -1px 0 rgba(255, 255, 255, 1),
+      1px -1px 0 rgba(255, 255, 255, 1),
+      -1px 1px 0 rgba(255, 255, 255, 1),
+      0 0 6px rgba(255, 255, 255, 0.8);
   }
 }
 
