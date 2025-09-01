@@ -109,12 +109,12 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
   return (
     <div className="modal-overlay" onClick={onClose} style={{ display: 'flex' }}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ zIndex: 10001 }}>
-        <div className="modal-header">
+        <div className="modal-header modal-loading">
           <h2>📚 My Booking History</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
-        <div className="modal-body">
+        <div className="modal-body modal-loading">
           {/* Status Filter */}
           <div className="status-filter">
             <label htmlFor="status-filter">Filter by status:</label>
@@ -266,7 +266,7 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
           )}
         </div>
 
-        <div className="modal-footer">
+        <div className="modal-footer modal-loading">
           <button className="modal-btn secondary" onClick={onClose}>
             Close
           </button>

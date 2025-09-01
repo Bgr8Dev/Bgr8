@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { MentorMenteeProfile } from '../types';
 import { MenteeBookingHistoryModal } from './MenteeBookingHistoryModal';
+import { useButtonEmergeModal } from '../../../hooks/useButtonEmergeModal';
 
 interface MenteeDashboardProps {
   currentUserProfile: MentorMenteeProfile;
-  onProfileEdit: () => void;
+  onProfileEdit: (event?: React.MouseEvent<HTMLElement>) => void;
 }
 
 export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
@@ -13,11 +14,16 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
 }) => {
   const [isProfileCardExpanded, setIsProfileCardExpanded] = useState(false);
   const [isBookingCardExpanded, setIsBookingCardExpanded] = useState(false);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-
-  const handleViewHistory = () => {
-    setShowHistoryModal(true);
-  };
+  
+  // Use button-emerge modal hook for booking history
+  const { 
+    isModalOpen: showHistoryModal, 
+    isAnimating, 
+    openModalWithAnimation: openHistoryModal, 
+    closeModal: closeHistoryModal 
+  } = useButtonEmergeModal({ 
+    modalSelector: '.modal-content' 
+  });
 
   return (
     <>
@@ -53,7 +59,7 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
             <div className="profile-card-actions">
               <button 
                 className="profile-edit-btn"
-                onClick={onProfileEdit}
+                onClick={(e) => onProfileEdit(e)}
                 data-tooltip="Edit your profile information"
               >
                 Edit Profile
@@ -126,10 +132,11 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
             <div className="profile-card-actions">
                              <button 
                  className="profile-edit-btn"
-                 onClick={handleViewHistory}
+                 onClick={openHistoryModal}
+                 disabled={isAnimating}
                  data-tooltip="View your booking history"
                >
-                 View History
+                 {isAnimating ? 'Opening...' : 'View History'}
                </button>
               <button 
                 className="expand-toggle-btn"
@@ -168,9 +175,10 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
               <div className="booking-actions">
                                  <button 
                    className="booking-action-btn primary"
-                   onClick={handleViewHistory}
+                   onClick={openHistoryModal}
+                   disabled={isAnimating}
                  >
-                   📊 View Full History
+                   📊 {isAnimating ? 'Opening...' : 'View Full History'}
                  </button>
                 <button 
                   className="booking-action-btn secondary"
@@ -187,7 +195,7 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
       {/* Booking History Modal */}
       <MenteeBookingHistoryModal
         isOpen={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
+        onClose={closeHistoryModal}
         currentUserProfile={currentUserProfile}
       />
       

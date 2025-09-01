@@ -28,7 +28,7 @@ interface MentorDashboardProps {
   currentUserProfile: MentorMenteeProfile;
   mentorAvailability: MentorAvailability;
   mentorBookings: MentorBookings;
-  onProfileEdit: () => void;
+  onProfileEdit: (event?: React.MouseEvent<HTMLElement>) => void;
   onAvailabilityManage: () => void;
   onAcceptBooking: (bookingId: string) => void;
   onRejectBooking: (bookingId: string) => void;
@@ -111,7 +111,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             <div className="profile-card-actions">
               <button 
                 className="profile-edit-btn"
-                onClick={onProfileEdit}
+                onClick={(e) => onProfileEdit(e)}
                 data-tooltip="Edit your profile information"
               >
                 Edit Profile

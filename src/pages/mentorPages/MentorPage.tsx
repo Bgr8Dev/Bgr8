@@ -39,13 +39,22 @@ import './styles/ViewBookingsModal.css';
 import './styles/RoleSelection.css';
 import './styles/ProfileRegistrationForm.css';
 import './styles/ProfileEditModal.css';
+import { useButtonEmergeModal } from '../../hooks/useButtonEmergeModal';
 import './styles/MentorFilters.css';
 
 export default function MentorPage() {
   const { currentUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
-  const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
+  // Use button-emerge modal hook for profile edit
+  const { 
+    isModalOpen: showProfileEdit, 
+    openModalWithAnimation: openProfileEditModal, 
+    closeModal: closeProfileEditModal 
+  } = useButtonEmergeModal({ 
+    modalSelector: '.pem-profile-edit-modal' 
+  });
   
   // Modal state management
   const [showProfileViewModal, setShowProfileViewModal] = useState(false);
@@ -175,12 +184,22 @@ export default function MentorPage() {
     }
   };
 
-  const handleProfileEdit = () => {
+  const handleProfileEdit = (event?: React.MouseEvent<HTMLElement>) => {
     console.log('handleProfileEdit called');
     console.log('currentUserProfile:', currentUserProfile);
     if (currentUserProfile) {
       setFormData(currentUserProfile);
-      setShowProfileEdit(true);
+      if (event) {
+        openProfileEditModal(event);
+      } else {
+        // Fallback for programmatic calls
+        const fakeEvent = {
+          currentTarget: document.createElement('button'),
+          preventDefault: () => {},
+          stopPropagation: () => {}
+        } as unknown as React.MouseEvent<HTMLElement>;
+        openProfileEditModal(fakeEvent);
+      }
       console.log('showProfileEdit set to true');
     }
   };
@@ -195,7 +214,7 @@ export default function MentorPage() {
     
     const success = await updateProfile(updatedProfile);
     if (success) {
-      setShowProfileEdit(false);
+      closeProfileEditModal();
     }
     return success;
   };
@@ -203,7 +222,7 @@ export default function MentorPage() {
   const handleProfileDelete = async () => {
     const success = await deleteProfile();
     if (success) {
-      setShowProfileEdit(false);
+      closeProfileEditModal();
     }
     return success;
   };
@@ -402,13 +421,13 @@ export default function MentorPage() {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
       } else if (showAvailabilityModal) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowViewBookingsModal(false);
       } else if (showProfileEdit) {
         setShowProfileViewModal(false);
@@ -419,24 +438,24 @@ export default function MentorPage() {
       } else if (showCalComModal) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
         setShowViewBookingsModal(false);
       } else if (showBookingModal) {
         setShowProfileViewModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
         setShowViewBookingsModal(false);
       } else if (showProfileViewModal) {
         setShowBookingModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
         setShowViewBookingsModal(false);
       }
     }
-  }, [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal]);
+  }, [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal, closeProfileEditModal]);
 
   // Debug: Check for duplicate mentors between arrays
   useEffect(() => {
@@ -811,7 +830,7 @@ export default function MentorPage() {
             <ProfileEditModal
               isOpen={showProfileEdit}
               profile={currentUserProfile}
-              onClose={() => setShowProfileEdit(false)}
+              onClose={closeProfileEditModal}
               onSave={handleProfileSave}
               onDelete={handleProfileDelete}
               validationErrors={validationErrors}

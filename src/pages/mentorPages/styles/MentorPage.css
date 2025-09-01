@@ -2237,6 +2237,11 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+.modal-overlay.exiting {
+  animation: overlayFadeOut 0.4s ease-in forwards;
 }
 
 .modal-content {
@@ -2247,17 +2252,237 @@ html, body {
   max-height: 90vh;
   overflow: hidden;
   box-shadow: var(--shadow-xl);
-  animation: modalSlideIn 0.3s ease-out;
+  animation: modalSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-@keyframes modalSlideIn {
-  from {
+.modal-content.exiting {
+  animation: modalSlideOut 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+/* Button-emerge animation class */
+.modal-content.emerging-from-button {
+  animation: modalEmergeFromButton 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+}
+
+/* Button highlight effect during modal opening */
+.button-emerging {
+  position: relative;
+  overflow: hidden;
+}
+
+.button-emerging::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.3) 0%, transparent 70%);
+  animation: buttonPulse 0.8s ease-out;
+  z-index: 1;
+}
+
+@keyframes buttonPulse {
+  0% {
+    transform: scale(0.8);
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
   }
-  to {
+  50% {
+    transform: scale(1.2);
     opacity: 1;
-    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* 🍎 Mac-like Modal Animation - Emerge from Button */
+@keyframes modalSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.1, 0.1) translateY(0);
+    border-radius: 50px;
+    filter: blur(15px);
+  }
+  15% {
+    opacity: 0.2;
+    transform: scale(0.2, 0.15) translateY(-10px);
+    border-radius: 40px;
+    filter: blur(10px);
+  }
+  30% {
+    opacity: 0.4;
+    transform: scale(0.4, 0.3) translateY(-20px);
+    border-radius: 35px;
+    filter: blur(7px);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.6, 0.5) translateY(-30px);
+    border-radius: 30px;
+    filter: blur(4px);
+  }
+  70% {
+    opacity: 0.8;
+    transform: scale(0.8, 0.7) translateY(-20px);
+    border-radius: 25px;
+    filter: blur(2px);
+  }
+  85% {
+    opacity: 0.95;
+    transform: scale(0.95, 0.9) translateY(-5px);
+    border-radius: 22px;
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: 20px;
+    filter: blur(0);
+  }
+}
+
+/* 🎯 Button-to-Modal Animation - Emerge from Trigger */
+@keyframes modalEmergeFromButton {
+  0% {
+    opacity: 0;
+    transform: scale(0.05, 0.05) translateY(0);
+    border-radius: 50px;
+    filter: blur(20px);
+  }
+  20% {
+    opacity: 0.3;
+    transform: scale(0.15, 0.1) translateY(-15px);
+    border-radius: 45px;
+    filter: blur(12px);
+  }
+  40% {
+    opacity: 0.5;
+    transform: scale(0.3, 0.2) translateY(-25px);
+    border-radius: 35px;
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 0.7;
+    transform: scale(0.5, 0.4) translateY(-30px);
+    border-radius: 28px;
+    filter: blur(4px);
+  }
+  80% {
+    opacity: 0.9;
+    transform: scale(0.8, 0.7) translateY(-15px);
+    border-radius: 24px;
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: 20px;
+    filter: blur(0);
+  }
+}
+
+/* Content fade-in animation that starts after modal animation */
+@keyframes contentFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state during animation */
+.modal-loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-loading.ready {
+  opacity: 1;
+  pointer-events: auto;
+  animation: contentFadeIn 0.4s ease-out 0.6s both;
+}
+
+/* Button-emerge specific loading states */
+.modal-loading.emerging {
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+.modal-loading.emerging.ready {
+  opacity: 1;
+  pointer-events: auto;
+  animation: contentFadeIn 0.4s ease-out 1.0s both; /* Delay until button-emerge completes */
+}
+
+/* 🍎 Mac-like Modal Exit Animation - Shrink and Fade */
+@keyframes modalSlideOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: 20px;
+    filter: blur(0);
+  }
+  25% {
+    opacity: 0.9;
+    transform: scale(0.95, 0.9) translateY(-2px);
+    border-radius: 22px;
+    filter: blur(0.5px);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.85, 0.7) translateY(-10px);
+    border-radius: 25px;
+    filter: blur(2px);
+  }
+  75% {
+    opacity: 0.3;
+    transform: scale(0.6, 0.3) translateY(-30px);
+    border-radius: 30px;
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3, 0.1) translateY(-50px);
+    border-radius: 50px;
+    filter: blur(10px);
+  }
+}
+
+/* Overlay animations */
+@keyframes overlayFadeIn {
+  0% {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes overlayFadeOut {
+  0% {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  100% {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
   }
 }
 
@@ -2269,6 +2494,8 @@ html, body {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  /* Content animation - starts after modal animation */
+  animation: contentFadeIn 0.4s ease-out 0.6s both;
 }
 
 .modal-header h2 {
@@ -2302,6 +2529,8 @@ html, body {
   padding: 28px;
   overflow-y: auto;
   max-height: calc(90vh - 140px);
+  /* Content animation - starts after modal animation */
+  animation: contentFadeIn 0.4s ease-out 0.7s both;
 }
 
 .modal-footer {
