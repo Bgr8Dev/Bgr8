@@ -36,7 +36,31 @@
   gap: 20px;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 95vh;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--gray-100);
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
 }
 
 .pem-modal-left-sidebar::before {
@@ -524,6 +548,8 @@
   -webkit-tap-highlight-color: transparent;
   /* Ensure focus states work properly */
   outline: none;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .pem-developer-mode-toggle:focus {
@@ -715,6 +741,8 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .pem-close-button::before {
@@ -966,6 +994,7 @@
   border-radius: 16px;
   padding: 24px;
   margin-top: auto;
+  margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
@@ -974,6 +1003,7 @@
   transform-origin: top center;
   /* Ensure smooth exit animation */
   will-change: transform, opacity, max-height;
+  flex-shrink: 0;
 }
 
 .pem-developer-mode-section.exiting {
@@ -1303,6 +1333,31 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--gray-100);
+}
+
+.pem-section-status::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pem-section-status::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 2px;
+}
+
+.pem-section-status::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.pem-section-status::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
 }
 
 .pem-section-status:hover {
@@ -2190,8 +2245,8 @@
   /* Ensure mobile tabs don't interfere with scrolling */
   .pem-mobile-tabs-nav {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
   
   /* Optimize mobile input focus states */
