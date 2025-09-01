@@ -379,7 +379,7 @@ html, body {
     -1px 1px 0 rgba(0, 0, 0, 0.8),
     0 0 4px rgba(0, 0, 0, 0.6);
   /* Counter-pulse animation for text */
-  animation: textCounterPulse 2s ease-in-out infinite;
+  animation: textCounterPulse 6s ease-in-out infinite;
 }
 
 /* Animated black & white border effect */
@@ -399,7 +399,7 @@ html, body {
     #ffffff 75%, 
     #000000 100%);
   background-size: 400% 400%;
-  animation: blackWhitePulse 2s ease-in-out infinite;
+  animation: blackWhitePulse 6s ease-in-out infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -462,7 +462,7 @@ html, body {
     -1px 1px 0 rgba(255, 255, 255, 0.8),
     0 0 4px rgba(255, 255, 255, 0.6);
   /* Counter-pulse animation for text */
-  animation: textCounterPulseWhite 2s ease-in-out infinite;
+  animation: textCounterPulseWhite 6s ease-in-out infinite;
 }
 
 /* Holographic shimmer effect */
