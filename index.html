@@ -1,17 +1,42 @@
 <!doctype html>
 <html lang="en" dir="ltr">
   <head>
+    <!-- =========================================== -->
+    <!-- BASIC HTML META TAGS -->
+    <!-- =========================================== -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- =========================================== -->
+    <!-- THEME & COLOR SCHEME -->
+    <!-- =========================================== -->
+    <meta name="theme-color" content="#3ba7f2" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="msapplication-navbutton-color" content="#3ba7f2" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     
-    <!-- Security Headers -->
+    <!-- =========================================== -->
+    <!-- SECURITY HEADERS -->
+    <!-- =========================================== -->
+    
     <!-- Generate nonce for inline scripts -->
     <script nonce="csp-nonce-12345">
       window.cspNonce = 'csp-nonce-12345';
+      window.DEV_MODE = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname.includes('dev');
+      
+      if (window.DEV_MODE) {
+        console.log('🚀 Bgr8 Development Mode Active');
+      }
     </script>
+    
+    <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-csp-nonce-12345'
@@ -74,6 +99,8 @@
       frame-ancestors 'none';
       upgrade-insecure-requests;"
     />
+    
+    <!-- Additional Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
@@ -81,6 +108,10 @@
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none" />
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
     <meta http-equiv="Cross-Origin-Resource-Policy" content="cross-origin" />
+    <meta http-equiv="Trusted-Types" content="'none'" />
+    <meta http-equiv="Expect-CT" content="max-age=86400, enforce" />
+    
+    <!-- Permissions Policy -->
     <meta http-equiv="Permissions-Policy" content="
       accelerometer=(),
       ambient-light-sensor=(),
@@ -110,76 +141,64 @@
       web-share=(),
       xr-spatial-tracking=()
     " />
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     
-    <!-- Performance optimization -->
-    <meta name="format-detection" content="telephone=no" />
+    <!-- Referrer Policy -->
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- =========================================== -->
+    <!-- PERFORMANCE OPTIMIZATION -->
+    <!-- =========================================== -->
+    
+    <!-- Resource Hints & Preloading -->
     <link rel="preload" href="/src/main.tsx" as="script" type="module" crossorigin="anonymous" />
     <link rel="preload" href="/fonts/main-font.woff2" as="font" crossorigin="anonymous" />
-    <link rel="modulepreload" href="/src/App.tsx" />
+    <link rel="prefetch" href="/src/pages/mentorPages/MentorPage.tsx" />
+    <link rel="prefetch" href="/src/components/ui/Navbar.tsx" />
+    
+    <!-- Critical Resource Hints -->
     <link rel="dns-prefetch" href="https://firebaseapp.com" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    
-    <!-- Primary Meta Tags -->
-    <title>Bgr8</title>
-    <meta name="title" content="Bgr8" />
-    <meta name="description" content="Bgr8 is a platform for businesses and individuals to connect and grow." />
-    <meta name="keywords" content="Bgr8, Bgr8 Network, Bgr8 League, Bgr8 World, Bgr8 Car Club, Bgr8 Clothing, BGr8" />
-    <meta name="author" content="Bgr8" />
-    <meta name="application-name" content="Bgr8" />
-    <meta name="robots" content="index, follow" />
-    <meta name="googlebot" content="index, follow" />
-    <meta name="rating" content="general" />
-    <meta name="copyright" content="Copyright © 2023 Bgr8" />
-    <meta name="revisit-after" content="7 days" />
-    <meta name="language" content="English" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://bgr8network.co.uk/" />
-    <meta property="og:title" content="Bgr8" />
-    <meta property="og:description" content="Bgr8 is a platform for businesses and individuals to connect and grow." />
-    <meta property="og:image" content="https://bgr8network.co.uk/og-image.jpg" />
-    <meta property="og:image:alt" content="Bgr8 Logo and Branding" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:locale" content="en_GB" />
-    <meta property="og:site_name" content="Bgr8" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://bgr8network.co.uk/" />
-    <meta property="twitter:title" content="Bgr8" />
-    <meta property="twitter:description" content="Bgr8 is a platform for businesses and individuals to connect and grow." />
-    <meta property="twitter:image" content="https://bgr8network.co.uk/og-image.jpg" />
-    <meta property="twitter:creator" content="@bgr8Network" />
-    <meta property="twitter:site" content="@bgr8Network" />
-    
-    <!-- LinkedIn -->
-    <meta property="linkedin:card" content="summary_large_image" />
-    <meta property="linkedin:title" content="Bgr8" />
-    <meta property="linkedin:description" content="Bgr8 is a platform for businesses and individuals to connect and grow." />
-    <meta property="linkedin:image" content="https://bgr8network.co.uk/og-image.jpg" />
-    
-    <!-- Preconnect to important domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://firebaseapp.com" />
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="preconnect" href="https://www.google-analytics.com" />
+    <link rel="modulepreload" href="/src/App.tsx" />
+    <link rel="modulepreload" href="/src/main.tsx" />
     
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://bgr8network.co.uk/" />
+    <!-- =========================================== -->
+    <!-- PWA & MOBILE OPTIMIZATION -->
+    <!-- =========================================== -->
     
-    <!-- Alternative Languages -->
-    <link rel="alternate" href="https://bgr8network.co.uk/" hreflang="en-gb" />
-    <link rel="alternate" href="https://bgr8network.co.uk/" hreflang="x-default" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
     
-    <!-- Icons -->
+    <!-- Mobile Web App Meta -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Bgr8" />
+    <meta name="application-name" content="Bgr8" />
+    <meta name="touch-action" content="manipulation" />
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/splash-iphone.png" media="(device-width: 320px)" />
+    <link rel="apple-touch-startup-image" href="/splash-ipad.png" media="(device-width: 768px)" />
+    
+    <!-- =========================================== -->
+    <!-- ICONS & FAVICONS -->
+    <!-- =========================================== -->
+    
+    <!-- Standard Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    
+    <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png" />
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png" />
@@ -189,25 +208,95 @@
     <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png" />
+    
+    <!-- Windows Tiles -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-TileImage" content="/mstile-144x144.png" />
     <meta name="msapplication-config" content="/browserconfig.xml" />
     
-    <!-- Manifest for PWA -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- =========================================== -->
+    <!-- SEO & META TAGS -->
+    <!-- =========================================== -->
     
-    <!-- SEO verification -->
+    <!-- Primary Meta Tags -->
+    <title>Bgr8 - Mentoring Platform</title>
+    <meta name="title" content="Bgr8 - Mentoring Platform" />
+    <meta name="description" content="Connect with mentors and mentees on Bgr8's professional mentoring platform. Book sessions, share knowledge, and grow together." />
+    <meta name="keywords" content="mentoring, mentors, mentees, professional development, career growth, Bgr8, online mentoring, video calls, session booking" />
+    <meta name="author" content="Bgr8" />
+    <meta name="application-name" content="Bgr8" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="rating" content="general" />
+    <meta name="copyright" content="Copyright © 2024 Bgr8" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="language" content="en-GB" />
+    <meta name="geo.region" content="GB" />
+    <meta name="geo.country" content="United Kingdom" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://bgr8network.co.uk/" />
+    
+    <!-- Alternative Languages -->
+    <link rel="alternate" href="https://bgr8network.co.uk/" hreflang="en" />
+    <link rel="alternate" href="https://bgr8network.co.uk/" hreflang="en-GB" />
+    <link rel="alternate" href="https://bgr8network.co.uk/" hreflang="x-default" />
+    
+    <!-- =========================================== -->
+    <!-- SOCIAL MEDIA META TAGS -->
+    <!-- =========================================== -->
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bgr8network.co.uk/" />
+    <meta property="og:title" content="Bgr8 - Mentoring Platform" />
+    <meta property="og:description" content="Connect with mentors and mentees on Bgr8's professional mentoring platform. Book sessions, share knowledge, and grow together." />
+    <meta property="og:image" content="https://bgr8network.co.uk/og-image.jpg" />
+    <meta property="og:image:alt" content="Bgr8 Mentoring Platform" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:site_name" content="Bgr8" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://bgr8network.co.uk/" />
+    <meta property="twitter:title" content="Bgr8 - Mentoring Platform" />
+    <meta property="twitter:description" content="Connect with mentors and mentees on Bgr8's professional mentoring platform. Book sessions, share knowledge, and grow together." />
+    <meta property="twitter:image" content="https://bgr8network.co.uk/og-image.jpg" />
+    <meta property="twitter:creator" content="@bgr8Network" />
+    <meta property="twitter:site" content="@bgr8Network" />
+    
+    <!-- LinkedIn -->
+    <meta property="linkedin:card" content="summary_large_image" />
+    <meta property="linkedin:title" content="Bgr8 - Mentoring Platform" />
+    <meta property="linkedin:description" content="Connect with mentors and mentees on Bgr8's professional mentoring platform. Book sessions, share knowledge, and grow together." />
+    <meta property="linkedin:image" content="https://bgr8network.co.uk/og-image.jpg" />
+    
+    <!-- =========================================== -->
+    <!-- VERIFICATION TAGS -->
+    <!-- =========================================== -->
+    
+    <!-- SEO Verification -->
     <meta name="google-site-verification" content="your-verification-code" />
     <meta name="norton-safeweb-site-verification" content="your-norton-verification-code" />
     <meta name="facebook-domain-verification" content="your-facebook-verification-code" />
     <meta name="yandex-verification" content="your-yandex-verification-code" />
     <meta name="bing-verification" content="your-bing-verification-code" />
     
-    <!-- Fonts -->
+    <!-- =========================================== -->
+    <!-- FONTS & STYLESHEETS -->
+    <!-- =========================================== -->
+    
+    <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
     
-    <!-- Structured Data - Organization -->
+    <!-- =========================================== -->
+    <!-- STRUCTURED DATA -->
+    <!-- =========================================== -->
+    
+    <!-- Organization Schema -->
     <script type="application/ld+json" nonce="csp-nonce-12345">
       {
         "@context": "https://schema.org",
@@ -238,18 +327,43 @@
           "postalCode": "W1 1AA",
           "addressCountry": "GB"
         },
-        "description": "Bgr8 is a platform for businesses and individuals to connect and grow."
+        "description": "Bgr8 is a professional mentoring platform connecting mentors and mentees for career growth and knowledge sharing."
       }
     </script>
     
-    <!-- Structured Data - Website -->
+    <!-- Web Application Schema -->
+    <script type="application/ld+json" nonce="csp-nonce-12345">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Bgr8 Mentoring Platform",
+        "url": "https://bgr8network.co.uk",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "GBP"
+        },
+        "featureList": [
+          "Mentor Matching",
+          "Video Calls",
+          "Session Booking",
+          "Profile Management",
+          "Real-time Chat",
+          "Progress Tracking"
+        ]
+      }
+    </script>
+    
+    <!-- Website Schema -->
     <script type="application/ld+json" nonce="csp-nonce-12345">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "url": "https://bgr8network.co.uk",
         "name": "Bgr8",
-        "description": "Bgr8 is a platform for businesses and individuals to connect and grow.",
+        "description": "Professional mentoring platform connecting mentors and mentees",
         "potentialAction": {
           "@type": "SearchAction",
           "target": "https://bgr8network.co.uk/search?q={search_term_string}",
@@ -258,7 +372,7 @@
       }
     </script>
     
-    <!-- Structured Data - BreadcrumbList -->
+    <!-- Breadcrumb Schema -->
     <script type="application/ld+json" nonce="csp-nonce-12345">
       {
         "@context": "https://schema.org",
@@ -269,10 +383,20 @@
             "position": 1,
             "name": "Home",
             "item": "https://bgr8network.co.uk"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Mentor Portal",
+            "item": "https://bgr8network.co.uk/mentor"
           }
         ]
       }
     </script>
+    
+    <!-- =========================================== -->
+    <!-- ANALYTICS & TRACKING -->
+    <!-- =========================================== -->
     
     <!-- Facebook Pixel Code -->
     <script nonce="csp-nonce-12345">
@@ -295,6 +419,95 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
     
+    <!-- =========================================== -->
+    <!-- PERFORMANCE MONITORING -->
+    <!-- =========================================== -->
+    
+    <!-- Web Vitals Monitoring -->
+    <script nonce="csp-nonce-12345">
+      // Web Vitals Monitoring
+      function sendToAnalytics(metric) {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', metric.name, {
+            event_category: 'Web Vitals',
+            event_label: metric.id,
+            value: Math.round(metric.value),
+            non_interaction: true,
+          });
+        }
+      }
+
+      // Core Web Vitals
+      import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+        getCLS(sendToAnalytics);
+        getFID(sendToAnalytics);
+        getFCP(sendToAnalytics);
+        getLCP(sendToAnalytics);
+        getTTFB(sendToAnalytics);
+      }).catch(() => {
+        // Web Vitals not available, continue without monitoring
+      });
+    </script>
+    
+    <!-- Error Tracking -->
+    <script nonce="csp-nonce-12345">
+      window.addEventListener('error', (event) => {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'exception', {
+            description: event.error?.message || 'Unknown error',
+            fatal: false
+          });
+        }
+      });
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'exception', {
+            description: event.reason?.message || 'Unhandled promise rejection',
+            fatal: false
+          });
+        }
+      });
+    </script>
+    
+    <!-- Development Performance Monitoring -->
+    <script nonce="csp-nonce-12345">
+      if (window.DEV_MODE) {
+        // Performance observer for development
+        const observer = new PerformanceObserver((list) => {
+          list.getEntries().forEach((entry) => {
+            if (entry.duration > 100) {
+              console.warn(`⚠️ Slow operation: ${entry.name} took ${entry.duration}ms`);
+            }
+          });
+        });
+        observer.observe({ entryTypes: ['measure', 'navigation'] });
+      }
+    </script>
+    
+    <!-- =========================================== -->
+    <!-- SERVICE WORKER & PWA -->
+    <!-- =========================================== -->
+    
+    <!-- Service Worker Registration -->
+    <script nonce="csp-nonce-12345">
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('SW registered:', registration);
+            })
+            .catch(error => {
+              console.log('SW registration failed:', error);
+            });
+        });
+      }
+    </script>
+    
+    <!-- =========================================== -->
+    <!-- COOKIE CONSENT & PRIVACY -->
+    <!-- =========================================== -->
+    
     <!-- Cookie Consent -->
     <script nonce="csp-nonce-12345">
       window.cookieConsent = {
@@ -306,18 +519,23 @@
       };
     </script>
     
-    <!-- Web Application Manifest Links -->
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Bgr8" />
-    <meta name="application-name" content="Bgr8" />
+    <!-- =========================================== -->
+    <!-- ACCESSIBILITY -->
+    <!-- =========================================== -->
     
-    <!-- Accessibility -->
-    <meta name="color-scheme" content="light dark" />
+    <!-- Reduced Motion Support -->
+    <script nonce="csp-nonce-12345">
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.style.setProperty('--animation-duration', '0.01ms');
+      }
+    </script>
     
-    <!-- Critical CSS -->
+    <!-- =========================================== -->
+    <!-- CRITICAL CSS -->
+    <!-- =========================================== -->
+    
     <style>
+      /* Critical above-the-fold styles */
       html, body {
         height: 100%;
         margin: 0;
@@ -326,49 +544,95 @@
         background-color: #ffffff;
         color: #333333;
       }
+      
       @media (prefers-color-scheme: dark) {
         html, body {
           background-color: #121212;
           color: #ffffff;
         }
       }
+      
       #root {
         height: 100%;
         display: flex;
         flex-direction: column;
       }
+      
       .loading-screen {
         display: flex;
         align-items: center;
         justify-content: center;
         height: 100vh;
         width: 100%;
-        background-color: #ffffff;
+        background: linear-gradient(135deg, #3ba7f2 0%, #2988d4 100%);
+        color: white;
       }
+      
       .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid rgba(0, 0, 0, 0.1);
+        border: 4px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
-        border-top-color: #000000;
+        border-top-color: #ffffff;
         animation: spin 1s linear infinite;
       }
+      
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
+      
+      /* Dark mode support */
       @media (prefers-color-scheme: dark) {
         .loading-screen {
-          background-color: #121212;
+          background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         }
         .loading-spinner {
-          border: 4px solid rgba(255, 255, 255, 0.1);
+          border: 4px solid rgba(255, 255, 255, 0.3);
           border-top-color: #ffffff;
         }
+      }
+      
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        
+        .loading-spinner {
+          animation: none;
+        }
+      }
+      
+      /* Skip links for accessibility */
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+      
+      .skip-link:focus {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: 8px 16px;
+        background: #3ba7f2;
+        color: white;
+        text-decoration: none;
+        z-index: 9999;
       }
     </style>
   </head>
 
   <body>
+    <!-- =========================================== -->
+    <!-- ANALYTICS NOSCRIPT FALLBACKS -->
+    <!-- =========================================== -->
+    
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -378,21 +642,41 @@
       src="https://www.facebook.com/tr?id=YOUR-PIXEL-ID&ev=PageView&noscript=1"
     /></noscript>
     
+    <!-- =========================================== -->
+    <!-- ACCESSIBILITY -->
+    <!-- =========================================== -->
+    
     <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link" style="position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;">Skip to main content</a>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#navigation" class="skip-link">Skip to navigation</a>
+    
+    <!-- =========================================== -->
+    <!-- JAVASCRIPT DISABLED FALLBACK -->
+    <!-- =========================================== -->
     
     <noscript>
       <div style="padding: 20px; text-align: center; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+        <h2>JavaScript Required</h2>
         <p>You need to enable JavaScript to run this app. Bgr8 requires JavaScript to provide its interactive features and functionality.</p>
+        <p>Please enable JavaScript in your browser settings and refresh the page.</p>
       </div>
     </noscript>
+    
+    <!-- =========================================== -->
+    <!-- MAIN APPLICATION -->
+    <!-- =========================================== -->
     
     <div id="root">
       <!-- Initial loading state -->
       <div class="loading-screen" role="status" aria-label="Loading Bgr8">
-        <div class="loading-spinner"></div>
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <span class="sr-only">Loading Bgr8 application...</span>
       </div>
     </div>
+    
+    <!-- =========================================== -->
+    <!-- MAIN APPLICATION SCRIPT -->
+    <!-- =========================================== -->
     
     <script type="module" src="/src/main.tsx" nonce="csp-nonce-12345"></script>
   </body>
