@@ -142,6 +142,94 @@ def clean_commit_message(message: str) -> str:
     
     return message
 
+def get_repository_info() -> Tuple[str, str]:
+    """Get repository owner and name from git remote"""
+    try:
+        # Get the remote URL
+        remote_url = run_git_command(['git', 'remote', 'get-url', 'origin'])
+        if not remote_url:
+            return "Hum2a", "Bgr8"  # Default fallback
+        
+        # Extract owner and repo from URL
+        # Handle both HTTPS and SSH formats
+        if 'github.com' in remote_url:
+            # Extract from https://github.com/owner/repo.git or git@github.com:owner/repo.git
+            match = re.search(r'github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?$', remote_url)
+            if match:
+                owner, repo = match.groups()
+                return owner, repo
+        
+        return "Hum2a", "Bgr8"  # Default fallback
+    except Exception as e:
+        print(f"Warning: Could not determine repository info: {e}")
+        return "Hum2a", "Bgr8"  # Default fallback
+
+def update_release_links(changelog_file: str, version: str) -> bool:
+    """Update the release links section with the new version"""
+    try:
+        if not os.path.exists(changelog_file):
+            print(f"Warning: Changelog file {changelog_file} not found")
+            return False
+        
+        # Read the current changelog
+        with open(changelog_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Get repository info
+        owner, repo = get_repository_info()
+        
+        # Create the new release link
+        new_link = f"[{version}]: https://github.com/{owner}/{repo}/releases/tag/{version}"
+        
+        # Check if the release links section exists
+        if "## 📋 Release Links" in content:
+            # Find the release links section
+            lines = content.split('\n')
+            release_links_start = -1
+            release_links_end = -1
+            
+            for i, line in enumerate(lines):
+                if line.strip() == "## 📋 Release Links":
+                    release_links_start = i
+                elif release_links_start != -1 and line.strip().startswith("## ") and i > release_links_start:
+                    release_links_end = i
+                    break
+            
+            if release_links_start != -1:
+                # Find where to insert the new link (should be at the top of the links)
+                insert_pos = release_links_start + 2  # After the header and empty line
+                
+                # Check if this version already exists
+                version_exists = False
+                for i in range(release_links_start, len(lines)):
+                    if f"[{version}]:" in lines[i]:
+                        version_exists = True
+                        break
+                
+                if not version_exists:
+                    # Insert the new link at the top
+                    lines.insert(insert_pos, new_link)
+                    
+                    # Write back to file
+                    with open(changelog_file, 'w', encoding='utf-8') as f:
+                        f.write('\n'.join(lines))
+                    
+                    print(f"✅ Added release link: {new_link}")
+                    return True
+                else:
+                    print(f"ℹ️  Release link for {version} already exists")
+                    return True
+            else:
+                print("Warning: Could not find release links section")
+                return False
+        else:
+            print("Warning: No release links section found in changelog")
+            return False
+            
+    except Exception as e:
+        print(f"Error updating release links: {e}")
+        return False
+
 def generate_smart_changelog_entry(version: str, release_name: str = "", commits: List[Dict] = None) -> str:
     """Generate a complete changelog entry with actual commit information"""
     current_date = datetime.now().strftime('%Y-%m-%d')
@@ -239,6 +327,14 @@ def main():
     except Exception as e:
         print(f"❌ Error writing to file: {e}")
         sys.exit(1)
+    
+    # Update release links in the main changelog
+    print(f"\n🔗 Updating release links for {version}...")
+    changelog_file = "CHANGELOG.md"
+    if update_release_links(changelog_file, version):
+        print("✅ Release links updated successfully")
+    else:
+        print("⚠️  Warning: Could not update release links")
     
     # Also print to console
     print("\n" + "="*60)

@@ -118,9 +118,55 @@ generate_smart_changelog() {
   
   if [[ $? -eq 0 ]]; then
     echo "✅ Smart changelog generated successfully"
+    echo "✅ Release links updated automatically"
     return 0
   else
     echo "❌ Error: Failed to generate smart changelog"
+    return 1
+  fi
+}
+
+# Function to update release links in changelog
+update_release_links_fallback() {
+  local version=$1
+  local changelog_file="CHANGELOG.md"
+  
+  if [[ ! -f "$changelog_file" ]]; then
+    echo "Warning: CHANGELOG.md not found"
+    return 1
+  fi
+  
+  # Get repository info from git remote
+  local remote_url=$(git remote get-url origin 2>/dev/null || echo "")
+  local owner="Hum2a"
+  local repo="Bgr8"
+  
+  if [[ -n "$remote_url" && "$remote_url" == *"github.com"* ]]; then
+    # Extract owner and repo from URL
+    if [[ "$remote_url" =~ github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?$ ]]; then
+      owner="${BASH_REMATCH[1]}"
+      repo="${BASH_REMATCH[2]}"
+    fi
+  fi
+  
+  # Create the new release link
+  local new_link="[$version]: https://github.com/$owner/$repo/releases/tag/$version"
+  
+  # Check if the release links section exists and if this version already exists
+  if grep -q "## 📋 Release Links" "$changelog_file" && ! grep -q "\[$version\]:" "$changelog_file"; then
+    # Find the line number after "## 📋 Release Links"
+    local insert_line=$(grep -n "## 📋 Release Links" "$changelog_file" | cut -d: -f1)
+    insert_line=$((insert_line + 2))  # After header and empty line
+    
+    # Insert the new link
+    sed -i "${insert_line}i\\$new_link" "$changelog_file"
+    echo "✅ Added release link: $new_link"
+    return 0
+  elif grep -q "\[$version\]:" "$changelog_file"; then
+    echo "ℹ️  Release link for $version already exists"
+    return 0
+  else
+    echo "Warning: Could not find release links section or update failed"
     return 1
   fi
 }
@@ -320,6 +366,14 @@ EOF
     mv "$temp_file" "$changelog_file"
     
     echo "✅ Updated CHANGELOG.md with fallback changelog entry at the top"
+    
+    # Update release links in fallback mode
+    echo "🔗 Updating release links for $version..."
+    if update_release_links_fallback "$version"; then
+      echo "✅ Release links updated successfully"
+    else
+      echo "⚠️  Warning: Could not update release links"
+    fi
   fi
 }
 
