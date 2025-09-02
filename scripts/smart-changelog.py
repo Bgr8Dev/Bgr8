@@ -62,16 +62,34 @@ def run_git_command(command: List[str]) -> str:
         print(f"Unexpected error running git command: {e}")
         return ""
 
+def verify_tag_exists(tag: str) -> bool:
+    """Verify that a git tag exists"""
+    if tag == "none":
+        return True
+    
+    try:
+        result = run_git_command(['git', 'rev-parse', '--verify', f'{tag}^{{commit}}'])
+        return bool(result.strip())
+    except:
+        return False
+
 def get_commits_since_tag(tag: str) -> List[Dict]:
     """Get all commits since the specified tag with detailed information"""
     try:
+        # Verify the tag exists if it's not "none"
+        if tag != "none" and not verify_tag_exists(tag):
+            print(f"⚠️  Warning: Tag '{tag}' does not exist. Using all commits instead.")
+            tag = "none"
+        
         if tag == "none":
             # Get all commits if no previous tag
             format_str = "%H|%s|%an|%ad|%b"
             commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse'])
         else:
+            # Use more specific git log command to ensure we only get commits after the tag
             format_str = "%H|%s|%an|%ad|%b"
-            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', f'{tag}..HEAD'])
+            # Use --no-merges to exclude merge commits and be more specific about the range
+            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', '--no-merges', f'{tag}..HEAD'])
         
         if not commits:
             print(f"Warning: No git output received for tag range: {tag}")
@@ -90,7 +108,19 @@ def get_commits_since_tag(tag: str) -> List[Dict]:
                         'body': parts[4] if len(parts) > 4 else ''
                     })
         
-        return commit_list
+        # Additional filtering to remove changelog-related commits that might be duplicates
+        filtered_commits = []
+        for commit in commit_list:
+            message = commit['message'].lower()
+            # Skip commits that are just changelog updates or version bumps
+            if not any(skip_word in message for skip_word in [
+                'update changelog', 'changelog', 'version', 'release', 
+                'bump version', 'update version', '📝 update changelog'
+            ]):
+                filtered_commits.append(commit)
+        
+        print(f"📊 Filtered {len(commit_list) - len(filtered_commits)} changelog/version commits")
+        return filtered_commits
         
     except Exception as e:
         print(f"Error processing commits: {e}")
@@ -299,6 +329,7 @@ def main():
     previous_tag = sys.argv[3] if len(sys.argv) > 3 else "none"
     
     print(f"Generating smart changelog for version {version}...")
+    print(f"🔍 Looking for commits since: {previous_tag if previous_tag != 'none' else 'beginning of repository'}")
     
     # Get commits since the previous tag
     commits = get_commits_since_tag(previous_tag)
@@ -312,8 +343,18 @@ def main():
             print(f"  {i+1}. {commit['message']}")
         if len(commits) > 5:
             print(f"  ... and {len(commits) - 5} more")
+        
+        # Show commit date range
+        if len(commits) > 0:
+            first_commit_date = commits[0]['date']
+            last_commit_date = commits[-1]['date']
+            print(f"\n📅 Commit date range: {first_commit_date} to {last_commit_date}")
     else:
         print("⚠️  No commits found")
+        print("💡 This might mean:")
+        print("   - No new commits since the previous release")
+        print("   - The previous tag doesn't exist")
+        print("   - All commits were filtered out (changelog/version commits)")
     
     # Generate the changelog entry
     changelog = generate_smart_changelog_entry(version, release_name, commits)

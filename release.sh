@@ -72,8 +72,8 @@ get_previous_tag() {
     return
   fi
   
-  # Get all tags sorted by version
-  local all_tags=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -10)
+  # Get all tags sorted by version, including pre-releases
+  local all_tags=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -20)
   
   # Find the tag before the current one
   local found_current=false
@@ -86,6 +86,14 @@ get_previous_tag() {
       found_current=true
     fi
   done
+  
+  # If we didn't find the current tag in the list, it might be a new tag
+  # In that case, get the most recent tag
+  local latest_tag=$(echo "$all_tags" | head -1)
+  if [[ -n "$latest_tag" && "$latest_tag" != "$current_tag" ]]; then
+    echo "$latest_tag"
+    return
+  fi
   
   echo "none"
 }
