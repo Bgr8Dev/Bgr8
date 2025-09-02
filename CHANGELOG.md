@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.11-changelog] - 2025-09-02
+
+### 🔧 Pre-release
+**Release Name:** changelog
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor Web Vitals monitoring in index.html for improved performance tracking
+
+### 🚀 Performance Performance improvements
+- Enhance index.html with improved meta tags, security headers, and performance optimizations
+
+**Total Changes:** 2 commits
+
+---
 ## [v0.6.10-changelog] - 2025-09-02
 
 ### 🔧 Pre-release
@@ -350,6 +364,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.6.11-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.11-changelog
 [v0.6.10-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.10-changelog
 **bgr8 Platform Changelog**
 
