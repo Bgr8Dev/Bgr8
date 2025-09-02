@@ -80,7 +80,6 @@ export default function MentorPage() {
     hasProfile,
     currentUserProfile,
     bestMatches,
-    loadingMatches,
     fetchEnhancedAvailability,
     fetchMentorBookings,
     createProfile,
@@ -534,8 +533,15 @@ export default function MentorPage() {
       <div className="mentor-page mentor-page-loading">
         <Navbar />
         <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading mentor program...</p>
+          <div className="pl">
+            <svg className="pl__ring" viewBox="0 0 128 128" width="128" height="128">
+              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+            </svg>
+            <svg className="pl__worm" viewBox="0 0 128 128" width="128" height="128">
+              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+            </svg>
+          </div>
+          <p className="loading-text">Loading...</p>
         </div>
       </div>
     );
@@ -701,29 +707,16 @@ export default function MentorPage() {
           )}
 
           {/* Matches Section - Only show for mentees */}
-          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
-            loadingMatches ? (
-              <div className="main-matches-section">
-                <div className="ms-matches-header">
-                  <h2>Finding Your Best Matches...</h2>
-                  <p>We're analyzing profiles to find the perfect matches for you</p>
-                </div>
-                <div className="loading-spinner">
-                  <div className="spinner"></div>
-                  <p>Calculating matches...</p>
-                </div>
-              </div>
-            ) : bestMatches.length > 0 ? (
-              <div className="main-matches-section">
-                <MatchesSection
-                  bestMatches={bestMatches}
-                  currentUserProfile={currentUserProfile}
-                  onProfileClick={handleProfileCardClick}
-                  onBooking={handleBooking}
-                  onCalCom={handleCalCom}
-                />
-              </div>
-            ) : null
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && bestMatches.length > 0 && (
+            <div className="main-matches-section">
+              <MatchesSection
+                bestMatches={bestMatches}
+                currentUserProfile={currentUserProfile}
+                onProfileClick={handleProfileCardClick}
+                onBooking={handleBooking}
+                onCalCom={handleCalCom}
+              />
+            </div>
           )}
 
           {/* Mentor Results - Only show for mentees */}

@@ -13,7 +13,6 @@ interface MentorHeaderProps {
   onProfileEdit: () => void;
   onFindMatches: () => void;
   onAvailabilityManage: () => void;
-  loadingMatches: boolean;
 }
 
 export const MentorHeader: React.FC<MentorHeaderProps> = ({
@@ -25,8 +24,7 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
   onSuggestionClick,
   onProfileEdit,
   onFindMatches,
-  onAvailabilityManage,
-  loadingMatches
+  onAvailabilityManage
 }) => {
   return (
     <div className="mheader-mentor-header">
@@ -47,8 +45,8 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
               <button onClick={onProfileEdit} className="mheader-profile-edit-btn" title="Edit your profile information" data-tooltip="Edit your profile information">
                 <FaEdit /> Edit Profile
               </button>
-              <button onClick={onFindMatches} className="mheader-find-matches-btn" disabled={loadingMatches} title="Find mentors/mentees that match your profile" data-tooltip="Find mentors/mentees that match your profile">
-                <FaUserFriends /> {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
+              <button onClick={onFindMatches} className="mheader-find-matches-btn" title="Find mentors/mentees that match your profile" data-tooltip="Find mentors/mentees that match your profile">
+                <FaUserFriends /> Find Matches
               </button>
               {currentUserProfile.type === MENTOR && (
                 <button onClick={onAvailabilityManage} className="mheader-availability-manage-btn" title="Manage your availability schedule for mentee bookings" data-tooltip="Manage your availability schedule for mentee bookings">

@@ -32,7 +32,6 @@ export const useMentorData = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
   const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
-  const [loadingMatches, setLoadingMatches] = useState(false);
 
   // Function to calculate match score for a single profile
   const calculateProfileMatch = async (profile: MentorMenteeProfile): Promise<ProfileWithMatchData> => {
@@ -53,7 +52,7 @@ export const useMentorData = () => {
           percentage: matchResult.percentage,
           reasons: matchResult.reasons
         }
-      };
+      } as ProfileWithMatchData;
     } catch (error) {
       console.error('Error calculating match score for profile:', profile.uid, error);
       return profile as ProfileWithMatchData;
@@ -298,7 +297,7 @@ export const useMentorData = () => {
     if (!currentUser || !currentUserProfile) return;
 
     try {
-      setLoadingMatches(true);
+      // Don't set loading state - load matches silently in background
       console.log('Finding matches for user:', currentUser.uid);
       console.log('Current user profile:', currentUserProfile);
       
@@ -306,12 +305,10 @@ export const useMentorData = () => {
       console.log('Algorithm found matches:', matches);
       
       setBestMatches(matches);
-      setLoadingMatches(false);
       return matches;
     } catch (err) {
       console.error('Error finding matches:', err);
       setError('Failed to find matches');
-      setLoadingMatches(false);
       return [];
     }
   };
@@ -428,7 +425,6 @@ export const useMentorData = () => {
     currentUserProfile,
     setCurrentUserProfile,
     bestMatches,
-    loadingMatches,
     checkUserProfile,
     fetchProfiles,
     fetchEnhancedAvailability,

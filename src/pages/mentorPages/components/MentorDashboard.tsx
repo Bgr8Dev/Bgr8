@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
-import { MentorMenteeProfile } from '../types';
+import { MentorMenteeProfile, MentorAvailability } from '../types';
 import { ViewBookingsModal } from './ViewBookingsModal';
-
-interface MentorAvailability {
-  timeSlots: Array<{
-    day: string;
-    startTime: string;
-    endTime: string;
-    isAvailable: boolean;
-  }>;
-  lastUpdated: Date;
-}
 
 interface MentorBooking {
   id: string;
@@ -30,6 +20,7 @@ interface MentorDashboardProps {
   mentorBookings: MentorBookings;
   onProfileEdit: (event?: React.MouseEvent<HTMLElement>) => void;
   onAvailabilityManage: () => void;
+  onViewAllBookings: () => void;
   onAcceptBooking: (bookingId: string) => void;
   onRejectBooking: (bookingId: string) => void;
   onCancelBooking: (bookingId: string) => void;
@@ -41,6 +32,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   mentorBookings,
   onProfileEdit,
   onAvailabilityManage,
+  onViewAllBookings,
   onAcceptBooking,
   onRejectBooking,
   onCancelBooking
@@ -55,7 +47,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   };
 
   const handleViewAllBookings = () => {
-    setShowViewBookingsModal(true);
+    onViewAllBookings();
   };
 
   // Helper function to get all bookings from the object

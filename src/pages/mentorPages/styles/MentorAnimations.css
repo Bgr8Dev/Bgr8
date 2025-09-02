@@ -6,18 +6,58 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 20px;
   text-align: center;
 }
 
+/* Worm Loading Animation */
+.pl {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+}
+
+.pl__ring,
+.pl__worm {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pl__ring {
+  stroke: var(--gray-300);
+  transition: stroke 0.3s;
+}
+
+.pl__worm {
+  stroke: var(--accent);
+  animation: worm 3s cubic-bezier(0.42, 0.17, 0.75, 0.83) infinite;
+}
+
+@keyframes worm {
+  from {
+    stroke-dashoffset: 10;
+  }
+  25% {
+    stroke-dashoffset: 295;
+  }
+  to {
+    stroke-dashoffset: 1165;
+  }
+}
+
+/* Fallback spinner for other components */
 .spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid var(--gray-200);
-  border-top: 4px solid var(--accent);
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--gray-300);
+  border-top: 2px solid var(--gray-600);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 @keyframes spin {
