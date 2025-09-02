@@ -423,31 +423,57 @@
     <!-- PERFORMANCE MONITORING -->
     <!-- =========================================== -->
     
-    <!-- Web Vitals Monitoring -->
-    <script nonce="csp-nonce-12345">
-      // Web Vitals Monitoring
-      function sendToAnalytics(metric) {
-        if (typeof gtag !== 'undefined') {
-          gtag('event', metric.name, {
-            event_category: 'Web Vitals',
-            event_label: metric.id,
-            value: Math.round(metric.value),
-            non_interaction: true,
-          });
-        }
-      }
+         <!-- Web Vitals Monitoring -->
+     <script nonce="csp-nonce-12345">
+       // Web Vitals Monitoring (simplified version)
+       function sendToAnalytics(metric) {
+         if (typeof gtag !== 'undefined') {
+           gtag('event', metric.name, {
+             event_category: 'Web Vitals',
+             event_label: metric.id,
+             value: Math.round(metric.value),
+             non_interaction: true,
+           });
+         }
+       }
 
-      // Core Web Vitals
-      import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-        getCLS(sendToAnalytics);
-        getFID(sendToAnalytics);
-        getFCP(sendToAnalytics);
-        getLCP(sendToAnalytics);
-        getTTFB(sendToAnalytics);
-      }).catch(() => {
-        // Web Vitals not available, continue without monitoring
-      });
-    </script>
+       // Basic performance monitoring without external dependencies
+       if (window.performance && window.performance.getEntriesByType) {
+         // Monitor navigation timing
+         window.addEventListener('load', () => {
+           const navigation = performance.getEntriesByType('navigation')[0];
+           if (navigation) {
+             const loadTime = navigation.loadEventEnd - navigation.loadEventStart;
+             if (loadTime > 0) {
+               sendToAnalytics({
+                 name: 'load_time',
+                 id: 'navigation',
+                 value: loadTime
+               });
+             }
+           }
+         });
+
+         // Monitor resource loading
+         const observer = new PerformanceObserver((list) => {
+           list.getEntries().forEach((entry) => {
+             if (entry.duration > 1000) { // Only track slow resources
+               sendToAnalytics({
+                 name: 'slow_resource',
+                 id: entry.name,
+                 value: entry.duration
+               });
+             }
+           });
+         });
+         
+         try {
+           observer.observe({ entryTypes: ['resource'] });
+         } catch (e) {
+           // Performance Observer not supported
+         }
+       }
+     </script>
     
     <!-- Error Tracking -->
     <script nonce="csp-nonce-12345">
