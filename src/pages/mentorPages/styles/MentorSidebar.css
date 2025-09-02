@@ -5,10 +5,10 @@
   margin: 0 0 24px 0;
   padding: 0;
   position: relative;
-  z-index: 5;
+  z-index: 100;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .mentor-sidebar .search-bar {
@@ -22,7 +22,7 @@
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
   position: relative;
-  z-index: 5;
+  z-index: 101;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -72,7 +72,7 @@
   border: 1px solid var(--gray-200);
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
-  z-index: 1000;
+  z-index: 9999;
   max-height: 200px;
   overflow-y: auto;
   margin-top: 4px;
