@@ -179,7 +179,6 @@ html, body {
 }
 
 .profile-card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
   border-color: var(--accent);
 }
@@ -1146,7 +1145,6 @@ html, body {
 }
 
 .mentor-results:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-xl);
 }
 
@@ -1828,7 +1826,6 @@ html, body {
 .ms-match-card:hover {
   border-color: var(--accent);
   box-shadow: var(--shadow-xl);
-  transform: translateY(-6px);
 }
 
 .ms-match-header {
@@ -1961,7 +1958,6 @@ html, body {
 }
 
 .bookings-widget-section:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-xl);
 }
 
@@ -2120,7 +2116,6 @@ html, body {
 }
 
 .booking-item:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
   border-color: var(--accent);
 }

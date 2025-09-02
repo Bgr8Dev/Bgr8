@@ -10,7 +10,6 @@
 }
 
 .mc-mentor-card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
   border-color: var(--mentor);
 }

@@ -336,8 +336,8 @@
 
 .tags-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
 }
 
 .skill-tag-selectable,
@@ -345,19 +345,22 @@
   background: var(--white);
   border: 2px solid var(--gray-300);
   border-radius: var(--radius-full);
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--gray-700);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
-  min-height: 44px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   outline: none;
   border: 2px solid var(--gray-300);
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .skill-tag-selectable:hover:not(.selected),
@@ -365,7 +368,6 @@
   border-color: var(--accent);
   background: var(--accent-light);
   color: var(--accent-dark);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
@@ -375,7 +377,6 @@
   background: var(--accent-light);
   color: var(--accent-dark);
   box-shadow: 0 0 0 3px rgba(59, 167, 242, 0.1);
-  transform: translateY(-2px);
 }
 
 .skill-tag-selectable.selected,
