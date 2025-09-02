@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.10-changelog] - 2025-09-02
+
+### 🔧 Pre-release
+**Release Name:** changelog
+
+### ✨ Added New features and enhancements
+- Enhance MentorPage styles with new button designs and effects
+- Add button-emerge modal functionality and example component
+- Implement collapsible results content in MentorPage.css for improved user experience
+- Comment out Navbar navigation for future implementation
+- Implement local form state management in ProfileEditModal for improved editing experience
+- Enhance mentor data handling with new match finding and availability update features
+- Implement comprehensive settings page with enhanced state management and styling
+- Enhance changelog management by adding automatic release link updates
+
+### 📚 Documentation Documentation updates
+- 📝 Update changelog for v0.6.8
+- 📝 Update changelog for v0.6.9
+
+### 🎨 Changed Code style and formatting changes
+- Enhance button styles in MentorHeader.css for improved aesthetics and interactivity
+- Refactor MentorHeader component styles for consistency and clarity
+- Enhance ProfileEditModal styles with improved scrollbar and layout adjustments
+- Optimize button-emerge modal functionality and styles for performance
+- Revamp button styles in MentorPage.css to a black and white elegant theme
+- Enhance MentorCard button styles and layout for improved user experience
+- Enhance Navbar styles with sophisticated animations and improved hover effects
+- Refactor hover effects and adjust grid styles across mentor-related CSS files
+- Update Footer component and styles for mentoring focus
+- Update CSS styles for MentorPage and MentorSidebar
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor import statement for SessionsService in SessionsList component
+- Refactor import statements in SessionsList component for improved clarity and organization
+- Refactor import statement for SessionsList in SessionsPage component for consistency and clarity
+- Refactor loading indicators and match display logic in MentorPage
+- Refactor form progress and section status handling in MentorPage
+- Refactor Web Vitals monitoring in index.html for improved performance tracking
+
+### 🚀 Performance Performance improvements
+- Enhance mentor search functionality and performance optimization
+- Enhance security and performance in index.html and update package version
+- Enhance index.html with improved meta tags, security headers, and performance optimizations
+
+### 🔧 Changed Maintenance tasks and chores
+- Update animation durations in MentorPage.css for smoother visual effects
+- Adjust Navbar margin for improved layout consistency
+- Enhance profile form validation and state management in useProfileForm
+- Merge branch 'master' of https://github.com/Hum2a/B8
+
+### 🛡️ Security Security improvements
+- Merge pull request #13 from Bgr8Dev:security
+
+### 🗑️ Removed Removed features and cleanup
+- Remove fade-in animations from MentorPage and ProfileEditModal for immediate content appearance
+
+**Total Changes:** 35 commits
+
+---
 ## [v0.6.9] - 2025-09-02
 
 ### 🐛 Patch Release
@@ -291,6 +350,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.6.10-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.10-changelog
 **bgr8 Platform Changelog**
 
 [0.4.0-Typhoon]: https://github.com/Hum2a/Bgr8/releases/tag/v0.4.0-Typhoon
