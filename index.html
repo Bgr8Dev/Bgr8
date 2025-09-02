@@ -8,50 +8,79 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
     <!-- Security Headers -->
-    <!-- Content Security Policy temporarily disabled for testing
+    <!-- Generate nonce for inline scripts -->
+    <script nonce="csp-nonce-12345">
+      window.cspNonce = 'csp-nonce-12345';
+    </script>
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-csp-nonce-12345'
         https://*.stripe.com 
         https://*.googleapis.com 
         https://*.gstatic.com 
         https://*.google-analytics.com 
-        https://connect.facebook.net;
+        https://www.googletagmanager.com
+        https://connect.facebook.net
+        https://apis.google.com;
       style-src 'self' 'unsafe-inline' 
+        https://fonts.googleapis.com 
         https://*.googleapis.com 
         https://*.gstatic.com;
-      img-src 'self' data: 
+      img-src 'self' data: blob: 
         https://*.stripe.com 
         https://*.googleapis.com 
         https://*.gstatic.com 
-        https://*.google-analytics.com;
+        https://*.google-analytics.com
+        https://www.google-analytics.com
+        https://region1.google-analytics.com
+        https://www.googletagmanager.com
+        https://*.firebaseapp.com
+        https://*.firebaseio.com;
       font-src 'self' 
+        https://fonts.gstatic.com 
         https://*.googleapis.com 
         https://*.gstatic.com;
-      frame-src 'self' 
-        https://*.stripe.com;
       connect-src 'self' 
         https://*.firebaseapp.com 
+        https://*.firebaseio.com
         https://*.googleapis.com 
+        https://*.google-analytics.com
+        https://www.google-analytics.com
+        https://region1.google-analytics.com
+        https://www.googletagmanager.com
+        https://firestore.googleapis.com
+        https://identitytoolkit.googleapis.com
+        https://securetoken.googleapis.com
         https://*.stripe.com 
         https://r.stripe.com
-        https://*.stripe.com
+        https://connect.facebook.net
+        https://*.facebook.com
         https://unpkg.com
-        https://*.google-analytics.com
-        https://region1.google-analytics.com
         http://localhost:3001
+        http://localhost:5000
+        http://localhost:8080
+        http://localhost:9099
         data:
         wss://*.firebaseio.com;
+      frame-src 'self' 
+        https://*.stripe.com
+        https://*.firebaseapp.com
+        https://*.google.com
+        https://www.googletagmanager.com;
+      media-src 'self' data: blob:;
       object-src 'none';
       base-uri 'self';
       form-action 'self';
-      frame-ancestors 'self';
+      frame-ancestors 'none';
       upgrade-insecure-requests;"
     />
-    -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload" />
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none" />
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
+    <meta http-equiv="Cross-Origin-Resource-Policy" content="cross-origin" />
     <meta http-equiv="Permissions-Policy" content="
       accelerometer=(),
       ambient-light-sensor=(),
@@ -72,7 +101,7 @@
       microphone=(),
       midi=(),
       navigation-override=(),
-      payment=(),
+      payment=(self),
       picture-in-picture=(),
       publickey-credentials-get=(),
       screen-wake-lock=(),
@@ -82,7 +111,7 @@
       xr-spatial-tracking=()
     " />
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
-    <meta name="robots" content="noindex, nofollow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     
     <!-- Performance optimization -->
     <meta name="format-detection" content="telephone=no" />
@@ -179,7 +208,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
     
     <!-- Structured Data - Organization -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="csp-nonce-12345">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -214,7 +243,7 @@
     </script>
     
     <!-- Structured Data - Website -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="csp-nonce-12345">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -230,7 +259,7 @@
     </script>
     
     <!-- Structured Data - BreadcrumbList -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="csp-nonce-12345">
       {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -246,7 +275,7 @@
     </script>
     
     <!-- Facebook Pixel Code -->
-    <script>
+    <script nonce="csp-nonce-12345">
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -260,14 +289,14 @@
     </script>
     
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    <script nonce="csp-nonce-12345">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
     
     <!-- Cookie Consent -->
-    <script>
+    <script nonce="csp-nonce-12345">
       window.cookieConsent = {
         necessary: true,
         preferences: false,
@@ -365,6 +394,6 @@
       </div>
     </div>
     
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx" nonce="csp-nonce-12345"></script>
   </body>
 </html>
