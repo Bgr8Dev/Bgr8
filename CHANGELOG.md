@@ -366,19 +366,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v0.6.11-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.11-changelog
 [v0.6.10-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.10-changelog
-**bgr8 Platform Changelog**
-
-[0.4.0-Typhoon]: https://github.com/Hum2a/Bgr8/releases/tag/v0.4.0-Typhoon
-[0.3.1]: https://github.com/Hum2a/Bgr8/releases/tag/v0.3.1
-[0.3.0-Avalanche]: https://github.com/Hum2a/Bgr8/releases/tag/v0.3.0-Avalanche
-[0.2.2]: https://github.com/Hum2a/Bgr8/releases/tag/v0.2.2
-[0.2.1]: https://github.com/Hum2a/Bgr8/releases/tag/v0.2.1-Blizzard
-[0.2.0-Blizzard]: https://github.com/Hum2a/Bgr8/releases/tag/v0.2.0-Blizzard
-[0.1.5]: https://github.com/Hum2a/Bgr8/releases/tag/v0.1.5-tsunami
-[0.1.4]: https://github.com/Hum2a/Bgr8/releases/tag/v0.1.4-tsunami
-[0.1.3]: https://github.com/Hum2a/Bgr8/releases/tag/v0.1.3-tsunami
-[0.1.2-tsunami]: https://github.com/Hum2a/Bgr8/releases/tag/v0.1.2-tsunami
-[0.1.1]: https://github.com/Hum2a/Bgr8/releases/tag/v0.1.1
+[v0.6.9]: https://github.com/Hum2a/B8/releases/tag/v0.6.9
+[v0.6.8]: https://github.com/Hum2a/B8/releases/tag/v0.6.8
+[v0.6.7]: https://github.com/Hum2a/B8/releases/tag/v0.6.7
+[v0.6.6]: https://github.com/Hum2a/B8/releases/tag/v0.6.6
+[v0.6.5]: https://github.com/Hum2a/B8/releases/tag/v0.6.5
+[v0.6.4]: https://github.com/Hum2a/B8/releases/tag/v0.6.4
+[v0.6.3]: https://github.com/Hum2a/B8/releases/tag/v0.6.3
+[v0.6.2]: https://github.com/Hum2a/B8/releases/tag/v0.6.2
+[v0.6.1]: https://github.com/Hum2a/B8/releases/tag/v0.6.1
+[v0.6.0]: https://github.com/Hum2a/B8/releases/tag/v0.6.0
+[v0.5.2]: https://github.com/Hum2a/B8/releases/tag/v0.5.2
+[v0.5.1-database-schema-overhaul]: https://github.com/Hum2a/B8/releases/tag/v0.5.1-database-schema-overhaul
+[v0.5.0]: https://github.com/Hum2a/B8/releases/tag/v0.5.0
+[v0.4.0-Typhoon]: https://github.com/Hum2a/B8/releases/tag/v0.4.0-Typhoon
+[v0.3.0-Avalanche]: https://github.com/Hum2a/B8/releases/tag/v0.3.0-Avalanche
+[v0.2.2]: https://github.com/Hum2a/B8/releases/tag/v0.2.2
+[v0.2.1-Blizzard]: https://github.com/Hum2a/B8/releases/tag/v0.2.1-Blizzard
+[v0.2.0-Blizzard]: https://github.com/Hum2a/B8/releases/tag/v0.2.0-Blizzard
+[v0.1.5-tsunami]: https://github.com/Hum2a/B8/releases/tag/v0.1.5-tsunami
+[v0.1.4-tsunami]: https://github.com/Hum2a/B8/releases/tag/v0.1.4-tsunami
+[v0.1.3-tsunami]: https://github.com/Hum2a/B8/releases/tag/v0.1.3-tsunami
+[v0.1.2-tsunami]: https://github.com/Hum2a/B8/releases/tag/v0.1.2-tsunami
+[v0.1.1]: https://github.com/Hum2a/B8/releases/tag/v0.1.1
+[v0.1.0-tsunami]: https://github.com/Hum2a/B8/releases/tag/v0.1.0-tsunami
+[v0.1.0]: https://github.com/Hum2a/B8/releases/tag/v0.1.0
+[v0.0.2]: https://github.com/Hum2a/B8/releases/tag/v0.0.2
+[v0.0.1]: https://github.com/Hum2a/B8/releases/tag/v0.0.1
 
 [![Releases](https://img.shields.io/github/v/release/Hum2a/Bgr8)](https://github.com/Hum2a/Bgr8/releases)
-[![Commits](https://img.shields.io/github/commit-activity/m/Hum2a/Bgr8)](https://github.com/Hum2a/Bgr8/commits) 
+[![Commits](https://img.shields.io/github/commit-activity/m/Hum2a/Bgr8)](https://github.com/Hum2a/Bgr8/commits)
