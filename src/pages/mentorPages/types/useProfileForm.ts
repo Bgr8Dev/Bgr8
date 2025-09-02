@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { UserType, MENTOR, MENTEE, ProfileFormData, ValidationErrors, SectionStatus, FormProgress } from '../types/mentorTypes';
 // import ukEducationLevels from '../../../constants/ukEducationLevels';
 
@@ -25,8 +25,65 @@ export const useProfileForm = (selectedRole: UserType | null) => {
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const validateProfileFormSync = useCallback((): ValidationErrors => {
+    console.log('validateProfileForm called for role:', selectedRole);
+    console.log('Profile form data:', profileForm);
+    
+    const errors: ValidationErrors = {};
+    
+    // Personal Information
+    if (!profileForm.firstName.trim()) errors.firstName = 'First name is required';
+    if (!profileForm.lastName.trim()) errors.lastName = 'Last name is required';
+    if (!profileForm.email.trim()) errors.email = 'Email is required';
+    if (!profileForm.phone.trim()) errors.phone = 'Phone number is required';
+    if (!profileForm.age.trim()) errors.age = 'Age is required';
+    if (!profileForm.county.trim()) errors.county = 'County is required';
+    
+    // Education & Career
+    if (!profileForm.degree.trim()) errors.degree = 'Degree/Qualification is required';
+    if (!profileForm.educationLevel.trim()) errors.educationLevel = 'Education level is required';
+    if (!profileForm.profession.trim()) errors.profession = 'Profession is required';
+    
+    // LinkedIn is only required for mentors
+    if (selectedRole === MENTOR && !profileForm.linkedin.trim()) {
+      errors.linkedin = 'LinkedIn profile is required for mentors';
+    }
+    
+    // Skills & Interests
+    if (profileForm.skills.length === 0) errors.skills = 'At least one skill is required';
+    if (profileForm.industries.length === 0) errors.industries = 'At least one industry is required';
+    if (profileForm.hobbies.length === 0) errors.hobbies = 'At least one hobby is required';
+    
+    // Additional Information
+    if (!profileForm.ethnicity.trim()) errors.ethnicity = 'Ethnicity is required';
+    if (!profileForm.religion.trim()) errors.religion = 'Religion is required';
+    
+    // Past Professions are now optional for mentors, so no validation required
+    
+    // Looking For (for mentees)
+    if (selectedRole === MENTEE && profileForm.lookingFor.length === 0) {
+      errors.lookingFor = 'At least one learning goal is required';
+    }
+    
+    console.log('Validation errors found:', errors);
+    return errors;
+  }, [profileForm, selectedRole]);
+
+  // Debounced validation function to prevent excessive validation calls
+  const debouncedValidate = useCallback(() => {
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current);
+    }
+    
+    validationTimeoutRef.current = setTimeout(() => {
+      const errors = validateProfileFormSync();
+      setValidationErrors(errors);
+    }, 300); // 300ms debounce
+  }, [validateProfileFormSync]);
+
+  const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProfileForm(prev => ({ ...prev, [name]: value }));
     
@@ -38,9 +95,12 @@ export const useProfileForm = (selectedRole: UserType | null) => {
         return newErrors;
       });
     }
-  };
+    
+    // Trigger debounced validation
+    debouncedValidate();
+  }, [validationErrors, debouncedValidate]);
 
-  const handleArrayChange = (field: keyof ProfileFormData, value: string[]) => {
+  const handleArrayChange = useCallback((field: keyof ProfileFormData, value: string[]) => {
     setProfileForm(prev => ({ ...prev, [field]: value }));
     
     // Clear validation error for this field when user makes changes
@@ -51,26 +111,29 @@ export const useProfileForm = (selectedRole: UserType | null) => {
         return newErrors;
       });
     }
-  };
+    
+    // Trigger debounced validation
+    debouncedValidate();
+  }, [validationErrors, debouncedValidate]);
 
-  const handlePastProfessionChange = (index: number, value: string) => {
+  const handlePastProfessionChange = useCallback((index: number, value: string) => {
     const newPastProfessions = [...profileForm.pastProfessions];
     newPastProfessions[index] = value;
     handleArrayChange('pastProfessions', newPastProfessions);
-  };
+  }, [profileForm.pastProfessions, handleArrayChange]);
 
-  const addPastProfession = () => {
+  const addPastProfession = useCallback(() => {
     handleArrayChange('pastProfessions', [...profileForm.pastProfessions, '']);
-  };
+  }, [profileForm.pastProfessions, handleArrayChange]);
 
-  const removePastProfession = (index: number) => {
+  const removePastProfession = useCallback((index: number) => {
     if (profileForm.pastProfessions.length > 1) {
       const newPastProfessions = profileForm.pastProfessions.filter((_, i) => i !== index);
       handleArrayChange('pastProfessions', newPastProfessions);
     }
-  };
+  }, [profileForm.pastProfessions, handleArrayChange]);
 
-  const calculateFormProgress = (): FormProgress => {
+  const calculateFormProgress = useMemo((): FormProgress => {
     let completedFields = 0;
     let totalFields = 0;
     
@@ -115,9 +178,9 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     }
     
     return { completedFields, totalFields };
-  };
+  }, [profileForm, selectedRole]);
 
-  const getMissingFields = (): string[] => {
+  const getMissingFields = useMemo((): string[] => {
     const missingFields: string[] = [];
     
     if (!profileForm.firstName.trim()) missingFields.push('First Name');
@@ -150,9 +213,9 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     }
     
     return missingFields;
-  };
+  }, [profileForm, selectedRole]);
 
-  const getSectionStatus = (): SectionStatus => {
+  const getSectionStatus = useMemo((): SectionStatus => {
     const sections: SectionStatus = {
       'Personal Information': {
         completed: Boolean(profileForm.firstName.trim() && profileForm.lastName.trim() && 
@@ -196,51 +259,11 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     }
     
     return sections;
-  };
+  }, [profileForm, selectedRole]);
 
-  const validateProfileForm = (): ValidationErrors => {
-    console.log('validateProfileForm called for role:', selectedRole);
-    console.log('Profile form data:', profileForm);
-    
-    const errors: ValidationErrors = {};
-    
-    // Personal Information
-    if (!profileForm.firstName.trim()) errors.firstName = 'First name is required';
-    if (!profileForm.lastName.trim()) errors.lastName = 'Last name is required';
-    if (!profileForm.email.trim()) errors.email = 'Email is required';
-    if (!profileForm.phone.trim()) errors.phone = 'Phone number is required';
-    if (!profileForm.age.trim()) errors.age = 'Age is required';
-    if (!profileForm.county.trim()) errors.county = 'County is required';
-    
-    // Education & Career
-    if (!profileForm.degree.trim()) errors.degree = 'Degree/Qualification is required';
-    if (!profileForm.educationLevel.trim()) errors.educationLevel = 'Education level is required';
-    if (!profileForm.profession.trim()) errors.profession = 'Profession is required';
-    
-    // LinkedIn is only required for mentors
-    if (selectedRole === MENTOR && !profileForm.linkedin.trim()) {
-      errors.linkedin = 'LinkedIn profile is required for mentors';
-    }
-    
-    // Skills & Interests
-    if (profileForm.skills.length === 0) errors.skills = 'At least one skill is required';
-    if (profileForm.industries.length === 0) errors.industries = 'At least one industry is required';
-    if (profileForm.hobbies.length === 0) errors.hobbies = 'At least one hobby is required';
-    
-    // Additional Information
-    if (!profileForm.ethnicity.trim()) errors.ethnicity = 'Ethnicity is required';
-    if (!profileForm.religion.trim()) errors.religion = 'Religion is required';
-    
-    // Past Professions are now optional for mentors, so no validation required
-    
-    // Looking For (for mentees)
-    if (selectedRole === MENTEE && profileForm.lookingFor.length === 0) {
-      errors.lookingFor = 'At least one learning goal is required';
-    }
-    
-    console.log('Validation errors found:', errors);
-    return errors;
-  };
+  const validateProfileForm = useCallback((): ValidationErrors => {
+    return validateProfileFormSync();
+  }, [validateProfileFormSync]);
 
   const resetForm = () => {
     setProfileForm({
@@ -266,9 +289,18 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     setValidationErrors({});
   };
 
-  const setFormData = (data: Partial<ProfileFormData>) => {
+  const setFormData = useCallback((data: Partial<ProfileFormData>) => {
     setProfileForm(prev => ({ ...prev, ...data }));
-  };
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     profileForm,
