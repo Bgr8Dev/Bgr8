@@ -171,8 +171,15 @@ export const useMentorSearch = (
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as Element;
+      
+      // Don't interfere with navigation links
+      if (target.closest('a[href]') || target.closest('button[type="button"]')) {
+        return;
+      }
+      
       const searchContainer = document.querySelector('.search-container');
-      if (searchContainer && !searchContainer.contains(event.target as Node)) {
+      if (searchContainer && !searchContainer.contains(target)) {
         setShowSearchDropdown(false);
       }
     };

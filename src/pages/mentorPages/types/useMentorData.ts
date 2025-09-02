@@ -32,6 +32,7 @@ export const useMentorData = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
   const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
+  const [profilesLoaded, setProfilesLoaded] = useState(false);
 
   // Function to calculate match score for a single profile
   const calculateProfileMatch = async (profile: MentorMenteeProfile): Promise<ProfileWithMatchData> => {
@@ -82,6 +83,26 @@ export const useMentorData = () => {
     return profilesWithMatches;
   };
 
+  const findMatches = async () => {
+    if (!currentUser || !currentUserProfile) return;
+
+    try {
+      // Don't set loading state - load matches silently in background
+      console.log('Finding matches for user:', currentUser.uid);
+      console.log('Current user profile:', currentUserProfile);
+      
+      const matches = await getBestMatchesForUser(currentUser.uid);
+      console.log('Algorithm found matches:', matches);
+      
+      setBestMatches(matches);
+      return matches;
+    } catch (err) {
+      console.error('Error finding matches:', err);
+      setError('Failed to find matches');
+      return [];
+    }
+  };
+
   const checkUserProfile = async () => {
     try {
       setLoading(true);
@@ -110,6 +131,17 @@ export const useMentorData = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateAllMentorAvailability = async () => {
+    const availabilityPromises = mentors.map(async (mentor) => {
+      const availability = await checkMentorAvailability(mentor);
+      return { [mentor.uid]: availability };
+    });
+    
+    const results = await Promise.all(availabilityPromises);
+    const newAvailability = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    setMentorAvailability(newAvailability as MentorAvailability);
   };
 
   const fetchProfiles = async (userType?: string) => {
@@ -238,17 +270,6 @@ export const useMentorData = () => {
     }
   };
 
-  const updateAllMentorAvailability = async () => {
-    const availabilityPromises = mentors.map(async (mentor) => {
-      const availability = await checkMentorAvailability(mentor);
-      return { [mentor.uid]: availability };
-    });
-    
-    const results = await Promise.all(availabilityPromises);
-    const newAvailability = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-    setMentorAvailability(newAvailability as MentorAvailability);
-  };
-
   const fetchEnhancedAvailability = async (mentorId: string) => {
     try {
       const availabilityDoc = await getDoc(doc(firestore, 'users', mentorId, 'availabilities', 'default'));
@@ -290,26 +311,6 @@ export const useMentorData = () => {
       }));
     } catch (error) {
       console.error('Error fetching mentor bookings:', error);
-    }
-  };
-
-  const findMatches = async () => {
-    if (!currentUser || !currentUserProfile) return;
-
-    try {
-      // Don't set loading state - load matches silently in background
-      console.log('Finding matches for user:', currentUser.uid);
-      console.log('Current user profile:', currentUserProfile);
-      
-      const matches = await getBestMatchesForUser(currentUser.uid);
-      console.log('Algorithm found matches:', matches);
-      
-      setBestMatches(matches);
-      return matches;
-    } catch (err) {
-      console.error('Error finding matches:', err);
-      setError('Failed to find matches');
-      return [];
     }
   };
 
@@ -401,14 +402,19 @@ export const useMentorData = () => {
 
   useEffect(() => {
     console.log('useMentorData: Component mounted, checking profile...');
+    setProfilesLoaded(false); // Reset when user changes
     checkUserProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   useEffect(() => {
-    if (hasProfile && currentUser && currentUserProfile?.type && typeof currentUserProfile.type === 'string') {
+    if (hasProfile && currentUser && currentUserProfile?.type && typeof currentUserProfile.type === 'string' && !profilesLoaded) {
+      console.log('useMentorData: Fetching profiles for user type:', currentUserProfile.type);
       fetchProfiles(currentUserProfile.type);
+      setProfilesLoaded(true);
     }
-  }, [hasProfile, currentUser, currentUserProfile?.type]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasProfile, currentUser, currentUserProfile?.type, profilesLoaded]);
 
   return {
     mentors,
