@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MentorMenteeProfile, MentorAvailability } from './mentorTypes';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import industriesList from '../../../constants/industries';
@@ -74,7 +74,7 @@ export const useMentorSearch = (
     setShowSearchDropdown(suggestionsArray.length > 0);
   };
 
-  const filterMentors = () => {
+  const filterMentors = useCallback(() => {
     let filtered = mentors;
 
     if (searchTerm) {
@@ -125,7 +125,7 @@ export const useMentorSearch = (
     }
 
     setFilteredMentors(filtered);
-  };
+  }, [mentors, searchTerm, selectedFilter, mentorAvailability]);
 
   const getFilterCount = (filterType: string) => {
     if (!filterType) return mentors.length;
@@ -167,7 +167,7 @@ export const useMentorSearch = (
 
   useEffect(() => {
     filterMentors();
-  }, [mentors, searchTerm, selectedFilter]);
+  }, [filterMentors]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
