@@ -578,8 +578,8 @@ export default function MentorPage() {
           selectedRole={selectedRole}
           profileForm={profileForm}
           validationErrors={validationErrors}
-          formProgress={calculateFormProgress()}
-          sectionStatus={getSectionStatus()}
+          formProgress={calculateFormProgress}
+          sectionStatus={getSectionStatus}
           onBack={handleBack}
           onFormChange={handleFormChange}
           onArrayChange={handleArrayChange}
@@ -827,8 +827,8 @@ export default function MentorPage() {
               onSave={handleProfileSave}
               onDelete={handleProfileDelete}
               validationErrors={validationErrors}
-              formProgress={calculateFormProgress()}
-              sectionStatus={getSectionStatus()}
+              formProgress={calculateFormProgress}
+              sectionStatus={getSectionStatus}
               onFormChange={handleFormChange}
               onArrayChange={handleArrayChange}
               onPastProfessionChange={handlePastProfessionChange}

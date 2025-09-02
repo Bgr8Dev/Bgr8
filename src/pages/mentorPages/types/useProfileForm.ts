@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { UserType, MENTOR, MENTEE, ProfileFormData, ValidationErrors, SectionStatus, FormProgress } from '../types/mentorTypes';
 // import ukEducationLevels from '../../../constants/ukEducationLevels';
 
@@ -25,7 +25,6 @@ export const useProfileForm = (selectedRole: UserType | null) => {
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const validateProfileFormSync = useCallback((): ValidationErrors => {
     console.log('validateProfileForm called for role:', selectedRole);
@@ -71,17 +70,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     return errors;
   }, [profileForm, selectedRole]);
 
-  // Debounced validation function to prevent excessive validation calls
-  const debouncedValidate = useCallback(() => {
-    if (validationTimeoutRef.current) {
-      clearTimeout(validationTimeoutRef.current);
-    }
-    
-    validationTimeoutRef.current = setTimeout(() => {
-      const errors = validateProfileFormSync();
-      setValidationErrors(errors);
-    }, 300); // 300ms debounce
-  }, [validateProfileFormSync]);
+
 
   const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -95,10 +84,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
         return newErrors;
       });
     }
-    
-    // Trigger debounced validation
-    debouncedValidate();
-  }, [validationErrors, debouncedValidate]);
+  }, [validationErrors]);
 
   const handleArrayChange = useCallback((field: keyof ProfileFormData, value: string[]) => {
     setProfileForm(prev => ({ ...prev, [field]: value }));
@@ -111,10 +97,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
         return newErrors;
       });
     }
-    
-    // Trigger debounced validation
-    debouncedValidate();
-  }, [validationErrors, debouncedValidate]);
+  }, [validationErrors]);
 
   const handlePastProfessionChange = useCallback((index: number, value: string) => {
     const newPastProfessions = [...profileForm.pastProfessions];
@@ -293,14 +276,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     setProfileForm(prev => ({ ...prev, ...data }));
   }, []);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (validationTimeoutRef.current) {
-        clearTimeout(validationTimeoutRef.current);
-      }
-    };
-  }, []);
+
 
   return {
     profileForm,
