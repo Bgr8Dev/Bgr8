@@ -32,7 +32,7 @@ export default function Navbar() {
       </h1>
 
       {/* <nav className="nav" role="navigation" aria-label="Main navigation">
-        <Link to="/mentors" className="nav-link">Find Mentors</Link>
+        <Link to="/dashboard" className="nav-link">Find Mentors</Link>
         {currentUser && (
           <Link to="/sessions" className="nav-link">My Sessions</Link>
         )}

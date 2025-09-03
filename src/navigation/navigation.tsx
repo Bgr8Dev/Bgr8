@@ -29,7 +29,7 @@ export default function Navigation() {
       <Route path="/" element={<BGr8 />} />
       <Route path="/bgr8" element={<BGr8 />} />
       <Route 
-        path="/mentors" 
+        path="/dashboard" 
         element={
           <AuthLock fallbackMessage="You need to be signed in to access the mentor dashboard.">
             <MentorPage />
