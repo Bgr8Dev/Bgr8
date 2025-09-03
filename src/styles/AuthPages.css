@@ -186,6 +186,57 @@
   margin: 0;
 }
 
+/* Auth Mode Toggle */
+.auth-mode-toggle {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.auth-mode-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--gray-600);
+}
+
+.auth-mode-btn.active {
+  background: var(--white);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-mode-btn:hover:not(.active) {
+  color: var(--text);
+}
+
+/* Auth Link Button */
+.auth-link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  padding: 0;
+  font-size: inherit;
+}
+
+.auth-link-btn:hover {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
 /* Legacy styles for backward compatibility */
 .auth-page {
   min-height: 100vh;
@@ -302,13 +353,16 @@
 }
 
 .auth-select {
-  padding: 0.75rem;
-  border: 1px solid var(--input-border, var(--gray-300));
+  padding: 14px 16px;
+  border: 2px solid var(--input-border, var(--gray-300));
   border-radius: var(--radius-md, 8px);
   background-color: var(--input-bg, var(--white));
   color: var(--input-text, var(--text));
   transition: all 0.3s ease;
   appearance: none;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a3745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
@@ -318,7 +372,14 @@
 .auth-select:focus {
   outline: none;
   border-color: var(--input-focus-border, var(--accent));
-  box-shadow: var(--input-focus-ring, 0 0 0 2px rgba(59, 167, 242, 0.2));
+  box-shadow: var(--input-focus-ring, 0 0 0 3px rgba(59, 167, 242, 0.1));
+  transform: translateY(-1px);
+}
+
+.auth-select:disabled {
+  background-color: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
 }
 
 .auth-select option {
@@ -559,11 +620,15 @@
 }
 
 .form-group {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
   width: 100%;
 }
 
-.form-group input {
-  flex: 1;
+@media (max-width: 480px) {
+  .form-group {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
 } 
