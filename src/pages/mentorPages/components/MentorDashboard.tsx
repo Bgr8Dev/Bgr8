@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MentorMenteeProfile, MentorAvailability } from '../types';
 import { ViewBookingsModal } from './ViewBookingsModal';
+import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
   id: string;
@@ -102,7 +103,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             </div>
             <div className="profile-card-actions">
               <button 
-                className="profile-edit-btn"
+                className="mentor-profile-edit-btn"
                 onClick={(e) => onProfileEdit(e)}
                 data-tooltip="Edit your profile information"
               >
@@ -156,7 +157,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             </div>
             <div className="profile-card-actions">
               <button 
-                className="availability-manage-btn"
+                className="mentor-availability-manage-btn"
                 onClick={onAvailabilityManage}
                 data-tooltip="Manage your availability schedule"
               >

@@ -1,8 +1,8 @@
 /* MentorPage.css - Core Layout Styles */
 
-/* Ensure full page background coverage */
+/* Ensure full page background coverage with coral theme */
 html, body {
-  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  background: linear-gradient(135deg, #fef7f6 0%, #f8c5c1 50%, #e06a5c 100%);
   background-attachment: fixed;
   background-size: cover;
   min-height: 100%;
@@ -12,7 +12,7 @@ html, body {
 
 .mentor-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  background: linear-gradient(135deg, #fef7f6 0%, #f8c5c1 50%, #e06a5c 100%);
   background-attachment: fixed;
   background-size: cover;
   position: relative;
@@ -26,14 +26,14 @@ html, body {
   gap: 0;
 }
 
-/* Sidebar Toggle Button */
+/* Sidebar Toggle Button with coral theme */
 .sidebar-toggle-btn {
   position: fixed;
   left: 20px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1000;
-  background: var(--accent);
+  background: #e06a5c;
   color: var(--white);
   border: none;
   width: 40px;
@@ -41,7 +41,7 @@ html, body {
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 16px rgba(224, 106, 92, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,9 +50,9 @@ html, body {
 }
 
 .sidebar-toggle-btn:hover {
-  background: var(--accent-dark);
+  background: #c55a4e;
   transform: translateY(-50%) scale(1.1);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 6px 20px rgba(224, 106, 92, 0.4);
 }
 
 .sidebar-toggle-btn:active {
@@ -1962,6 +1962,12 @@ html, body {
   box-shadow: var(--shadow-xl);
 }
 
+/* Override for mentor dashboard with coral theme */
+.mentor-page .bookings-widget-section:hover {
+  box-shadow: 0 12px 40px rgba(224, 106, 92, 0.15);
+  border-color: #e06a5c;
+}
+
 .bookings-widget-header {
   padding: 24px 28px;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
@@ -1973,6 +1979,11 @@ html, body {
 
 .bookings-widget-header:hover {
   background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+}
+
+/* Override for mentor dashboard with coral theme */
+.mentor-page .bookings-widget-header:hover {
+  background: linear-gradient(135deg, #c55a4e 0%, #e06a5c 100%);
 }
 
 .bookings-widget-header::before {
