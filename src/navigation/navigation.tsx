@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import BGr8 from '../pages/businessPages/BGr8';
 import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
-import RegisterPage from '../pages/authPages/RegisterPage';
 import ForgotPasswordPage from '../pages/authPages/ForgotPasswordPage';
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/animations/LoadingSpinner';
@@ -68,7 +67,6 @@ export default function Navigation() {
         } 
       />
       <Route path="/signin" element={<SignInPage />} />
-      <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route 
         path="/profile" 
