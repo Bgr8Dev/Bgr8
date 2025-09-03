@@ -342,15 +342,16 @@ export default function SignInPage() {
                     </p>
                   </div>
                   
-                  {error && <div className="auth-error">{error}</div>}
-                  {isBlocked && (
-                    <div className="auth-warning">
-                      Account temporarily blocked due to too many login attempts.
-                      Please try again later or reset your password.
-                    </div>
-                  )}
-                  
-                  <form onSubmit={handleSubmit} className="auth-form">
+                  <div className="signin-form-content">
+                    {error && <div className="auth-error">{error}</div>}
+                    {isBlocked && (
+                      <div className="auth-warning">
+                        Account temporarily blocked due to too many login attempts.
+                        Please try again later or reset your password.
+                      </div>
+                    )}
+                    
+                    <form onSubmit={handleSubmit} className="auth-form">
                     {!isSignIn && (
                       <div className="form-group">
                         <div className="auth-input-group">
@@ -528,6 +529,7 @@ export default function SignInPage() {
                         {isSignIn ? 'Register' : 'Sign In'}
                       </button>
                     </p>
+                  </div>
                   </div>
                 </div>
               </div>
