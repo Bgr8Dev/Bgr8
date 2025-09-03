@@ -78,12 +78,12 @@ export const AuthLock: React.FC<AuthLockProps> = ({
 };
 
 // Helper function to check permissions
-function hasPermission(userProfile: any, permission: string): boolean {
+function hasPermission(userProfile: { admin?: boolean } | null, permission: string): boolean {
   if (!userProfile) return false;
 
   switch (permission) {
     case 'admin':
-      return userProfile.admin;
+      return userProfile.admin === true;
     default:
       return false;
   }
