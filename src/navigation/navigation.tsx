@@ -1,5 +1,5 @@
 // src/Navigation.tsx
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import BGr8 from '../pages/businessPages/BGr8';
 import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
@@ -13,38 +13,9 @@ import AdminPortal from '../pages/AdminPortal';
 import MentorPage from '../pages/mentorPages/MentorPage';
 import { SessionsPage } from '../pages/SessionsPage';
 import React from 'react';
-import { UserProfile } from '../utils/userProfile';
 import Success from '../pages/Success';
 import Cancel from '../pages/Cancel';
-
-// Check if the user has the required permission
-function hasPermission(userProfile: UserProfile | null, permission: string) {
-  if (!userProfile) return false;
-
-  switch (permission) {
-    case 'admin':
-      return userProfile.admin;
-    default:
-      return false;
-  }
-}
-
-// Protected route component
-function ProtectedRoute({ children, permission }: { children: React.ReactNode, permission?: string }) {
-  const { currentUser, userProfile } = useAuth();
-
-  // If a permission is specified, check if the user has it
-  if (permission && !hasPermission(userProfile, permission)) {
-    return <Navigate to="/403" />;
-  }
-
-  // If the user is not logged in, redirect to login
-  if (!currentUser) {
-    return <Navigate to="/signin" />;
-  }
-
-  return <>{children}</>;
-}
+import { AuthLock } from '../components/auth/AuthLock';
 
 export default function Navigation() {
   const { loading } = useAuth();
@@ -57,13 +28,20 @@ export default function Navigation() {
     <Routes>
       <Route path="/" element={<BGr8 />} />
       <Route path="/bgr8" element={<BGr8 />} />
-      <Route path="/mentors" element={<MentorPage />} />
+      <Route 
+        path="/mentors" 
+        element={
+          <AuthLock fallbackMessage="You need to be signed in to access the mentor dashboard.">
+            <MentorPage />
+          </AuthLock>
+        } 
+      />
       <Route 
         path="/sessions" 
         element={
-          <ProtectedRoute>
+          <AuthLock fallbackMessage="You need to be signed in to view your sessions.">
             <SessionsPage />
-          </ProtectedRoute>
+          </AuthLock>
         } 
       />
       <Route path="/signin" element={<SignInPage />} />
@@ -71,33 +49,36 @@ export default function Navigation() {
       <Route 
         path="/profile" 
         element={
-          <ProtectedRoute>
+          <AuthLock fallbackMessage="You need to be signed in to view your profile.">
             <Profile />
-          </ProtectedRoute>
+          </AuthLock>
         } 
       />
       <Route 
         path="/settings" 
         element={
-          <ProtectedRoute>
+          <AuthLock fallbackMessage="You need to be signed in to access settings.">
             <Settings />
-          </ProtectedRoute>
+          </AuthLock>
         } 
       />
       <Route 
         path="/feedback/:bookingId" 
         element={
-          <ProtectedRoute>
+          <AuthLock fallbackMessage="You need to be signed in to provide feedback.">
             <FeedbackPage />
-          </ProtectedRoute>
+          </AuthLock>
         } 
       />
       <Route 
         path="/admin-portal" 
         element={
-          <ProtectedRoute permission="admin">
+          <AuthLock 
+            requiredPermission="admin"
+            fallbackMessage="Admin privileges are required to access this page."
+          >
             <AdminPortal />
-          </ProtectedRoute>
+          </AuthLock>
         } 
       />
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}

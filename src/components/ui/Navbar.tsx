@@ -1,6 +1,6 @@
 // src/components/Navbar.tsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,11 +10,14 @@ import logo from '../../assets/Bgr8_logo.png';
 export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { currentUser, userProfile } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
       setShowUserMenu(false);
+      // Redirect to home page after successful sign out
+      navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
     }
