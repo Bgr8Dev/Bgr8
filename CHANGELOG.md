@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.12] - 2025-09-03
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Add coral-themed styles to MentorDashboard and update button classes
+- Add AuthLock component for enhanced authentication handling
+
+### 🐛 Fixed Bug fixes and improvements
+- Fix Navbar links to correct routing for authentication
+
+### 🎨 Changed Code style and formatting changes
+- Revamp SignInPage layout and styles for improved user experience
+- Refactor SignInPage layout and styles for improved usability
+- Enhance SignInPage styles and functionality for improved user experience
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor SignInPage to remove ethnicity and nationality fields for streamlined user experience
+- Refactor hasPermission function in AuthLock component for stricter type checking
+
+### 🔧 Changed Maintenance tasks and chores
+- Enhance SignInPage with improved password validation and layout adjustments
+- Update navigation links from "mentors" to "dashboard" across components
+
+### 🛡️ Security Security improvements
+- Update Navbar and SignInPage for improved authentication flow
+
+### 🗑️ Removed Removed features and cleanup
+- Remove RegisterPage component and integrate registration functionality into SignInPage
+
+**Total Changes:** 12 commits
+
+---
 ## [v0.6.11-changelog] - 2025-09-02
 
 ### 🔧 Pre-release
@@ -364,6 +396,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.6.12]: https://github.com/Hum2a/B8/releases/tag/v0.6.12
 [v0.6.11-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.11-changelog
 [v0.6.10-changelog]: https://github.com/Hum2a/B8/releases/tag/v0.6.10-changelog
 [v0.6.9]: https://github.com/Hum2a/B8/releases/tag/v0.6.9
