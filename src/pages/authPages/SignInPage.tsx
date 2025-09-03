@@ -112,7 +112,7 @@ export default function SignInPage() {
       { label: 'Contains uppercase letter', met: /[A-Z]/.test(password) },
       { label: 'Contains lowercase letter', met: /[a-z]/.test(password) },
       { label: 'Contains number', met: /\d/.test(password) },
-      { label: 'Contains special character (@$!%*?&)', met: /[@$!%*?&]/.test(password) }
+      { label: 'Contains special character (@$!%*?&#^~`|\\/<>:";=+_-)', met: /[@$!%*?&#^~`|\\/<>:";=+_-]/.test(password) }
     ]);
   };
 
@@ -399,6 +399,39 @@ export default function SignInPage() {
                     {!isSignIn && (
                       <>
                         <div className="auth-input-group">
+                          <label htmlFor="password">Password</label>
+                          <input
+                            id="password"
+                            type="password"
+                            placeholder="Create a password"
+                            value={formData.password}
+                            onChange={handlePasswordChange}
+                            required
+                            disabled={isBlocked}
+                          />
+                          <div className="password-requirements">
+                            {passwordRequirements.map((req, index) => (
+                              <div key={index} className={`requirement ${req.met ? 'met' : ''}`}>
+                                {req.met ? '✓' : '○'} {req.label}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="auth-input-group">
+                          <label htmlFor="confirmPassword">Confirm Password</label>
+                          <input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Confirm your password"
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                            required
+                            disabled={isBlocked}
+                          />
+                        </div>
+                        
+                        <div className="auth-input-group">
                           <label htmlFor="ethnicity">Ethnicity</label>
                           <select
                             id="ethnicity"
@@ -455,80 +488,54 @@ export default function SignInPage() {
                       </>
                     )}
                     
-                    <div className="auth-input-group">
-                      <label htmlFor="password">Password</label>
-                      <input
-                        id="password"
-                        type="password"
-                        placeholder={isSignIn ? "Enter your password" : "Create a password"}
-                        value={formData.password}
-                        onChange={isSignIn ? (e) => setFormData({...formData, password: e.target.value}) : handlePasswordChange}
-                        required
-                        disabled={isBlocked}
-                      />
-                    </div>
-
-                    {!isSignIn && (
-                      <>
-                        <div className="password-section">
-                          <div className="password-requirements">
-                            {passwordRequirements.map((req, index) => (
-                              <div key={index} className={`requirement ${req.met ? 'met' : ''}`}>
-                                {req.met ? '✓' : '○'} {req.label}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div className="auth-input-group">
-                          <label htmlFor="confirmPassword">Confirm Password</label>
-                          <input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="Confirm your password"
-                            value={formData.confirmPassword}
-                            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                            required
-                            disabled={isBlocked}
-                          />
-                        </div>
-                      </>
+                    {isSignIn && (
+                      <div className="auth-input-group">
+                        <label htmlFor="password">Password</label>
+                        <input
+                          id="password"
+                          type="password"
+                          placeholder="Enter your password"
+                          value={formData.password}
+                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          required
+                          disabled={isBlocked}
+                        />
+                      </div>
                     )}
                     
                     <button type="submit" disabled={isBlocked} className="signin-submit-btn">
                       {isSignIn ? 'Sign In' : 'Create Account'}
                     </button>
-                  </form>
 
-                  <div className="auth-divider">
-                    <span>or</span>
-                  </div>
-                  
-                  <button 
-                    type="button" 
-                    onClick={handleGoogleSignIn} 
-                    className="google-sign-in"
-                    disabled={isBlocked}
-                  >
-                    <FcGoogle size={20} />
-                    {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
-                  </button>
+                    <div className="auth-divider">
+                      <span>or</span>
+                    </div>
+                    
+                    <button 
+                      type="button" 
+                      onClick={handleGoogleSignIn} 
+                      className="google-sign-in"
+                      disabled={isBlocked}
+                    >
+                      <FcGoogle size={20} />
+                      {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
+                    </button>
+                  </form>
                   
                   <div className="auth-links">
                     {isSignIn && <Link to="/forgot-password">Forgot Password?</Link>}
-                    <p>
-                      {isSignIn 
-                        ? "Don't have an account? " 
-                        : "Already have an account? "
-                      }
-                      <button 
-                        type="button" 
-                        className="auth-link-btn"
-                        onClick={() => setIsSignIn(!isSignIn)}
-                      >
-                        {isSignIn ? 'Register' : 'Sign In'}
-                      </button>
-                    </p>
+                    {isSignIn && (
+                      <p>
+                        Don't have an account? 
+                        <button 
+                          type="button" 
+                          className="auth-link-btn"
+                          onClick={() => setIsSignIn(false)}
+                        >
+                          Register
+                        </button>
+                      </p>
+                    )}
                   </div>
                   </div>
                 </div>

@@ -5,7 +5,7 @@ export const validatePassword = (password: string): boolean => {
     hasUpperCase: /[A-Z]/,
     hasLowerCase: /[a-z]/,
     hasNumbers: /\d/,
-    hasSpecialChar: /[@$!%*?&]/
+    hasSpecialChar: /[@$!%*?&#^~`|\\/<>:";=+_-]/
   };
 
   return (

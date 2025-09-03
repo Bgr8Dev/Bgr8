@@ -361,6 +361,7 @@
   padding-bottom: 20px;
   flex: 1;
   min-height: 0;
+  overflow: visible;
 }
 
 .auth-input-group {
@@ -485,8 +486,7 @@
 }
 
 .auth-links {
-  margin-top: auto;
-  padding-top: 1.5rem;
+  margin-top: 1.5rem;
   text-align: center;
   flex-shrink: 0;
 }
@@ -633,7 +633,8 @@
   text-align: center;
   border-bottom: 1px solid var(--gray-300);
   line-height: 0.1em;
-  margin: 20px 0;
+  margin: 1.5rem 0 0 0;
+  flex-shrink: 0;
 }
 
 .auth-divider span {
@@ -657,6 +658,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin-top: 1.5rem;
 }
 
 .google-sign-in:hover {
@@ -671,17 +673,15 @@
   padding: 2px;
 }
 
-.password-section {
-  width: 100%;
-  margin-bottom: 1rem;
-}
+
 
 .password-requirements {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
   border-radius: var(--radius-sm, 4px);
   background-color: var(--gray-50);
   font-size: 0.85rem;
+  border: 1px solid var(--gray-200);
 }
 
 .requirement {
