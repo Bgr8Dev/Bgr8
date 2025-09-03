@@ -319,7 +319,7 @@ export default function SignInPage() {
               <div className="signin-form-container">
                 <div className="signin-form-card">
                   <div className="signin-form-header">
-                    <div className="auth-mode-toggle">
+                    <div className={`auth-mode-toggle ${!isSignIn ? 'register-active' : ''}`}>
                       <button 
                         className={`auth-mode-btn ${isSignIn ? 'active' : ''}`}
                         onClick={() => setIsSignIn(true)}
@@ -342,7 +342,7 @@ export default function SignInPage() {
                     </p>
                   </div>
                   
-                  <div className="signin-form-content">
+                  <div className="signin-form-content" key={isSignIn ? 'signin' : 'register'}>
                     {error && <div className="auth-error">{error}</div>}
                     {isBlocked && (
                       <div className="auth-warning">

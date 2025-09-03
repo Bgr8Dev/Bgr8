@@ -166,9 +166,12 @@
   max-width: 450px;
   width: 100%;
   border: 1px solid var(--gray-200);
+  height: 80vh;
+  min-height: 600px;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .signin-form-header {
@@ -182,6 +185,22 @@
   overflow-y: auto;
   padding-right: 8px;
   margin-right: -8px;
+  transition: opacity 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Custom scrollbar styling */
@@ -223,7 +242,26 @@
   border-radius: var(--radius-md);
   padding: 4px;
   margin-bottom: 20px;
-  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-mode-toggle::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1;
+}
+
+.auth-mode-toggle.register-active::before {
+  transform: translateX(100%);
 }
 
 .auth-mode-btn {
@@ -237,12 +275,21 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: var(--gray-600);
+  position: relative;
+  z-index: 2;
+  transform: scale(1);
+}
+
+.auth-mode-btn:hover {
+  transform: scale(1.02);
+}
+
+.auth-mode-btn:active {
+  transform: scale(0.98);
 }
 
 .auth-mode-btn.active {
-  background: var(--white);
   color: var(--accent);
-  box-shadow: var(--shadow-sm);
 }
 
 .auth-mode-btn:hover:not(.active) {
@@ -312,6 +359,8 @@
   flex-direction: column;
   gap: 1.5rem;
   padding-bottom: 20px;
+  flex: 1;
+  min-height: 0;
 }
 
 .auth-input-group {
@@ -436,7 +485,8 @@
 }
 
 .auth-links {
-  margin-top: 1.5rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
   text-align: center;
   flex-shrink: 0;
 }
@@ -491,6 +541,8 @@
 
   .signin-form-card {
     padding: 30px 20px;
+    height: 85vh;
+    min-height: 500px;
     max-height: 85vh;
   }
 
@@ -536,6 +588,8 @@
 
   .signin-form-card {
     padding: 25px 15px;
+    height: 90vh;
+    min-height: 450px;
     max-height: 90vh;
   }
 
@@ -664,5 +718,20 @@
   .form-group {
     grid-template-columns: 1fr;
     gap: 0.5rem;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .auth-mode-toggle::before,
+  .auth-mode-btn,
+  .signin-form-content {
+    transition: none;
+    animation: none;
+  }
+  
+  .auth-mode-btn:hover,
+  .auth-mode-btn:active {
+    transform: none;
   }
 } 
