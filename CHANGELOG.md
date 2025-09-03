@@ -11,29 +11,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Patch Release
 ### ✨ Added New features and enhancements
+
 - Add coral-themed styles to MentorDashboard and update button classes
 - Add AuthLock component for enhanced authentication handling
 
 ### 🐛 Fixed Bug fixes and improvements
+
 - Fix Navbar links to correct routing for authentication
 
 ### 🎨 Changed Code style and formatting changes
+
 - Revamp SignInPage layout and styles for improved user experience
 - Refactor SignInPage layout and styles for improved usability
 - Enhance SignInPage styles and functionality for improved user experience
 
 ### 🔧 Changed Code refactoring and restructuring
+
 - Refactor SignInPage to remove ethnicity and nationality fields for streamlined user experience
 - Refactor hasPermission function in AuthLock component for stricter type checking
 
 ### 🔧 Changed Maintenance tasks and chores
+
 - Enhance SignInPage with improved password validation and layout adjustments
 - Update navigation links from "mentors" to "dashboard" across components
 
 ### 🛡️ Security Security improvements
+
 - Update Navbar and SignInPage for improved authentication flow
 
 ### 🗑️ Removed Removed features and cleanup
+
 - Remove RegisterPage component and integrate registration functionality into SignInPage
 
 **Total Changes:** 12 commits
@@ -42,12 +49,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.6.11-changelog] - 2025-09-02
 
 ### 🔧 Pre-release
+
 **Release Name:** changelog
 
 ### 🔧 Changed Code refactoring and restructuring
+
 - Refactor Web Vitals monitoring in index.html for improved performance tracking
 
 ### 🚀 Performance Performance improvements
+
 - Enhance index.html with improved meta tags, security headers, and performance optimizations
 
 **Total Changes:** 2 commits
@@ -56,9 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.6.10-changelog] - 2025-09-02
 
 ### 🔧 Pre-release
+
 **Release Name:** changelog
 
 ### ✨ Added New features and enhancements
+
 - Enhance MentorPage styles with new button designs and effects
 - Add button-emerge modal functionality and example component
 - Implement collapsible results content in MentorPage.css for improved user experience
@@ -69,10 +81,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance changelog management by adding automatic release link updates
 
 ### 📚 Documentation Documentation updates
+
 - 📝 Update changelog for v0.6.8
 - 📝 Update changelog for v0.6.9
 
 ### 🎨 Changed Code style and formatting changes
+
 - Enhance button styles in MentorHeader.css for improved aesthetics and interactivity
 - Refactor MentorHeader component styles for consistency and clarity
 - Enhance ProfileEditModal styles with improved scrollbar and layout adjustments
@@ -85,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update CSS styles for MentorPage and MentorSidebar
 
 ### 🔧 Changed Code refactoring and restructuring
+
 - Refactor import statement for SessionsService in SessionsList component
 - Refactor import statements in SessionsList component for improved clarity and organization
 - Refactor import statement for SessionsList in SessionsPage component for consistency and clarity
@@ -93,20 +108,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor Web Vitals monitoring in index.html for improved performance tracking
 
 ### 🚀 Performance Performance improvements
+
 - Enhance mentor search functionality and performance optimization
 - Enhance security and performance in index.html and update package version
 - Enhance index.html with improved meta tags, security headers, and performance optimizations
 
 ### 🔧 Changed Maintenance tasks and chores
+
 - Update animation durations in MentorPage.css for smoother visual effects
 - Adjust Navbar margin for improved layout consistency
 - Enhance profile form validation and state management in useProfileForm
 - Merge branch 'master' of https://github.com/Hum2a/B8
 
 ### 🛡️ Security Security improvements
+
 - Merge pull request #13 from Bgr8Dev:security
 
 ### 🗑️ Removed Removed features and cleanup
+
 - Remove fade-in animations from MentorPage and ProfileEditModal for immediate content appearance
 
 **Total Changes:** 35 commits
@@ -115,7 +134,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.6.9] - 2025-09-02
 
 ### 🐛 Patch Release
+
 ### ✨ Added New features and enhancements
+
 - Add SessionsList component styles
 - Enhance MentorPage styles with new button designs and effects
 - Add button-emerge modal functionality and example component
@@ -126,15 +147,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement comprehensive settings page with enhanced state management and styling
 
 ### 🐛 Fixed Bug fixes and improvements
+
 - Merge pull request #11 from Bgr8Dev:lint-fixing
 - Merge pull request #12 from Bgr8Dev:lint-fixing
 
 ### 📚 Documentation Documentation updates
+
 - 📝 Update changelog for v0.6.7
 - Update version to 0.6.7 and remove the changelog generation script
 - 📝 Update changelog for v0.6.8
 
 ### 🎨 Changed Code style and formatting changes
+
 - Enhance button styles in MentorHeader.css for improved aesthetics and interactivity
 - Refactor MentorHeader component styles for consistency and clarity
 - Enhance ProfileEditModal styles with improved scrollbar and layout adjustments
@@ -147,6 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update CSS styles for MentorPage and MentorSidebar
 
 ### 🔧 Changed Code refactoring and restructuring
+
 - Refactor import statement for SessionsService in SessionsList component
 - Refactor import statements in SessionsList component for improved clarity and organization
 - Refactor import statement for SessionsList in SessionsPage component for consistency and clarity
@@ -154,14 +179,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor form progress and section status handling in MentorPage
 
 ### 🚀 Performance Performance improvements
+
 - Enhance mentor search functionality and performance optimization
 
 ### 🔧 Changed Maintenance tasks and chores
+
 - Update animation durations in MentorPage.css for smoother visual effects
 - Adjust Navbar margin for improved layout consistency
 - Enhance profile form validation and state management in useProfileForm
 
 ### 🗑️ Removed Removed features and cleanup
+
 - Remove fade-in animations from MentorPage and ProfileEditModal for immediate content appearance
 
 **Total Changes:** 33 commits
@@ -171,18 +199,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Patch Release
 ### ✨ Added New features and enhancements
+
 - Add SessionsList component styles
 
 ### 🐛 Fixed Bug fixes and improvements
+
 - Merge pull request #11 from Bgr8Dev:lint-fixing
 - Merge pull request #12 from Bgr8Dev:lint-fixing
 
 ### 📚 Documentation Documentation updates
+
 - 📝 Update changelog for v0.6.6
 - 📝 Update changelog for v0.6.7
 - Update version to 0.6.7 and remove the changelog generation script
 
 ### 🔧 Changed Code refactoring and restructuring
+
 - Refactor Booking interface to ExtendedBooking across components
 
 **Total Changes:** 7 commits
@@ -191,12 +223,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.6.7] - 2025-08-31
 
 ### 🐛 Patch Release
+
 ### 📚 Documentation Documentation updates
+
 - 📝 Update changelog for v0.6.5
 - 📝 Update CHANGELOG.md for v0.6.5 and enhance release script
 - 📝 Update changelog for v0.6.6
 
 ### 🔧 Changed Code refactoring and restructuring
+
 - Refactor Booking interface to ExtendedBooking across components
 
 **Total Changes:** 4 commits
