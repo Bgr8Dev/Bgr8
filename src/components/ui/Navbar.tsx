@@ -82,7 +82,7 @@ export default function Navbar() {
             <Link to="/signin" className="auth-button signin">
               Sign In
             </Link>
-            <Link to="/signin" className="auth-button register">
+            <Link to="/signin?mode=register" className="auth-button register">
               Register
             </Link>
           </div>

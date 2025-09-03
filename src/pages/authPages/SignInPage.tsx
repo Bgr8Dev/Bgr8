@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, firestore } from '../../firebase/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -26,6 +26,7 @@ interface PasswordRequirement {
 
 export default function SignInPage() {
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
   const [isSignIn, setIsSignIn] = useState(true); // Toggle between sign-in and register
   const [formData, setFormData] = useState({
     firstName: '',
@@ -44,6 +45,16 @@ export default function SignInPage() {
     { label: 'Contains special character (@$!%*?&)', met: false }
   ]);
   const navigate = useNavigate();
+
+  // Handle URL parameters to set initial tab
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'register') {
+      setIsSignIn(false);
+    } else {
+      setIsSignIn(true);
+    }
+  }, [searchParams]);
 
   const updatePasswordRequirements = (password: string) => {
     setPasswordRequirements([
