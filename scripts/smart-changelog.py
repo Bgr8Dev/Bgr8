@@ -74,7 +74,7 @@ def verify_tag_exists(tag: str) -> bool:
         return False
 
 def get_commits_since_tag(tag: str) -> List[Dict]:
-    """Get all commits since the specified tag with detailed information"""
+    """Get all commits since the specified tag with detailed information including insertions and deletions"""
     try:
         # Verify the tag exists if it's not "none"
         if tag != "none" and not verify_tag_exists(tag):
@@ -84,29 +84,58 @@ def get_commits_since_tag(tag: str) -> List[Dict]:
         if tag == "none":
             # Get all commits if no previous tag
             format_str = "%H|%s|%an|%ad|%b"
-            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse'])
+            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', '--numstat'])
         else:
             # Use more specific git log command to ensure we only get commits after the tag
             format_str = "%H|%s|%an|%ad|%b"
             # Use --no-merges to exclude merge commits and be more specific about the range
-            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', '--no-merges', f'{tag}..HEAD'])
+            commits = run_git_command(['git', 'log', '--pretty=format:' + format_str, '--reverse', '--no-merges', '--numstat', f'{tag}..HEAD'])
         
         if not commits:
             print(f"Warning: No git output received for tag range: {tag}")
             return []
         
         commit_list = []
-        for commit in commits.split('\n'):
-            if commit.strip():
-                parts = commit.split('|', 4)
-                if len(parts) >= 5:
-                    commit_list.append({
-                        'hash': parts[0],
-                        'message': parts[1],
-                        'author': parts[2],
-                        'date': parts[3],
-                        'body': parts[4] if len(parts) > 4 else ''
-                    })
+        current_commit = None
+        total_insertions = 0
+        total_deletions = 0
+        
+        for line in commits.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Check if this is a commit line (starts with commit hash)
+            if '|' in line and len(line.split('|')) >= 5:
+                # Save previous commit if exists
+                if current_commit is not None:
+                    current_commit['insertions'] = total_insertions
+                    current_commit['deletions'] = total_deletions
+                    commit_list.append(current_commit)
+                
+                # Start new commit
+                parts = line.split('|', 4)
+                current_commit = {
+                    'hash': parts[0],
+                    'message': parts[1],
+                    'author': parts[2],
+                    'date': parts[3],
+                    'body': parts[4] if len(parts) > 4 else ''
+                }
+                total_insertions = 0
+                total_deletions = 0
+            else:
+                # This is a file stat line (insertions deletions filename)
+                parts = line.split('\t')
+                if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                    total_insertions += int(parts[0])
+                    total_deletions += int(parts[1])
+        
+        # Don't forget the last commit
+        if current_commit is not None:
+            current_commit['insertions'] = total_insertions
+            current_commit['deletions'] = total_deletions
+            commit_list.append(current_commit)
         
         # Additional filtering to remove changelog-related commits that might be duplicates
         filtered_commits = []
@@ -305,9 +334,13 @@ def generate_smart_changelog_entry(version: str, release_name: str = "", commits
                     entry += f"- {clean_msg}\n"
                 entry += "\n"
         
-        # Add summary
+        # Add summary with insertions and deletions
         total_commits = len(commits)
-        entry += f"**Total Changes:** {total_commits} commits\n\n"
+        total_insertions = sum(commit.get('insertions', 0) for commit in commits)
+        total_deletions = sum(commit.get('deletions', 0) for commit in commits)
+        
+        entry += f"**Total Changes:** {total_commits} commits\n"
+        entry += f"**Code Changes:** +{total_insertions:,} insertions, -{total_deletions:,} deletions\n\n"
     else:
         # Fallback template if no commits provided
         for emoji, description in COMMIT_TYPES.values():
@@ -335,12 +368,18 @@ def main():
     commits = get_commits_since_tag(previous_tag)
     
     if commits:
+        total_insertions = sum(commit.get('insertions', 0) for commit in commits)
+        total_deletions = sum(commit.get('deletions', 0) for commit in commits)
+        
         print(f"📝 Found {len(commits)} commits since {previous_tag if previous_tag != 'none' else 'beginning'}")
+        print(f"📊 Code changes: +{total_insertions:,} insertions, -{total_deletions:,} deletions")
         
         # Show some sample commits
         print("\n📋 Sample commits:")
         for i, commit in enumerate(commits[:5]):
-            print(f"  {i+1}. {commit['message']}")
+            insertions = commit.get('insertions', 0)
+            deletions = commit.get('deletions', 0)
+            print(f"  {i+1}. {commit['message']} (+{insertions}, -{deletions})")
         if len(commits) > 5:
             print(f"  ... and {len(commits) - 5} more")
         
