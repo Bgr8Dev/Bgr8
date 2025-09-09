@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.6.13] - 2025-09-09
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- 📝 Update LICENSE file to reflect new ownership and add additional terms
+- 📝 Add Professionalization Roadmap for Bgr8 Platform
+- Add coral-themed styles to MentorDashboard and update button classes
+- Add AuthLock component for enhanced authentication handling
+- Add MobileSignInPage component for improved mobile authentication experience
+- Add MobileAuthPages.css for mobile sign-in page styling
+- Update package.json to include new dependencies for enhanced development and styling
+- Implement MobileProfileEditModal for enhanced mobile profile editing experience
+- Add MobileAdminPortal component for enhanced mobile admin experience
+- Implement MobileMentorManagement component for enhanced mentor management on mobile
+
+### 🐛 Fixed Bug fixes and improvements
+- Fix Navbar links to correct routing for authentication
+
+### 🎨 Changed Code style and formatting changes
+- Revamp SignInPage layout and styles for improved user experience
+- Refactor SignInPage layout and styles for improved usability
+- Enhance SignInPage styles and functionality for improved user experience
+- Enhance mobile responsiveness in MentorDashboard and MentorPage styles
+- Refactor MobileAdminPortal and MobileMentorManagement components to remove unused close buttons and associated styles
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor SignInPage to remove ethnicity and nationality fields for streamlined user experience
+- Refactor hasPermission function in AuthLock component for stricter type checking
+- Refactor MobileAdminPortal to replace unused FaTimes alias with FaTimes icon
+
+### 🔧 Changed Maintenance tasks and chores
+- Enhance SignInPage with improved password validation and layout adjustments
+- Update navigation links from "mentors" to "dashboard" across components
+- Enhance index.html and BGr8.css with image preloads and background gradient updates
+- Hide sidebar and toggle button on mobile view in MentorResponsive.css for improved mobile experience.
+- Update theme colors in index.html for improved dark and light mode support
+
+### 🛡️ Security Security improvements
+- 🛡️ Update SECURITY.md for Bgr8 Platform
+- Update Navbar and SignInPage for improved authentication flow
+
+### 🗑️ Removed Removed features and cleanup
+- Remove RegisterPage component and integrate registration functionality into SignInPage
+- Remove unused dependencies from package.json to streamline project setup
+
+**Total Changes:** 28 commits
+**Code Changes:** +8,509 insertions, -828 deletions
+
+---
 ## [v0.6.12] - 2025-09-03
 
 ### 🐛 Patch Release
@@ -431,6 +480,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.6.13]: https://github.com/Hum2a/B8/releases/tag/v0.6.13
 [v0.6.12]: https://github.com/Bgr8Dev/Bgr8/releases/tag/v0.6.12
 [v0.6.11-changelog]: https://github.com/Bgr8Dev/Bgr8/releases/tag/v0.6.11-changelog
 [v0.6.10-changelog]: https://github.com/Bgr8Dev/Bgr8/releases/tag/v0.6.10-changelog
