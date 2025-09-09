@@ -6,7 +6,6 @@ import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchU
 import { CalComAvailability } from '../widgets/MentorAlgorithm/CalCom/calComService';
 import { Booking } from '../../types/bookings';
 import { 
-  FaTimes, 
   FaChevronLeft,
   FaChevronRight,
   FaSearch,
@@ -906,14 +905,6 @@ export const MobileMentorManagement: React.FC<MobileMentorManagementProps> = ({
           <div className="mmm-header">
             <div className="mmm-header-content">
               <div className="mmm-header-left">
-                <button
-                  className="mmm-close-btn"
-                  onClick={onClose}
-                  title="Close mentor management"
-                  aria-label="Close mentor management"
-                >
-                  <FaTimes />
-                </button>
                 <div className="mmm-title-section">
                   <h2 className="mmm-title">Mentor Management</h2>
                   <p className="mmm-progress-text">

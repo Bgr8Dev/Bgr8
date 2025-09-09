@@ -319,14 +319,6 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-header">
             <div className="map-header-content">
               <div className="map-header-left">
-                <button
-                  className="map-close-btn"
-                  onClick={onClose}
-                  title="Close admin portal"
-                  aria-label="Close admin portal"
-                >
-                  <FaTimes />
-                </button>
                 <div className="map-title-section">
                   <h2 className="map-title">Admin Portal</h2>
                   <p className="map-progress-text">
