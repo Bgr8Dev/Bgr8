@@ -6,16 +6,9 @@ import { firestore } from '../../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { 
   FaTimes, 
-  FaUsers, 
-  FaChartBar, 
-  FaCog, 
   FaUserEdit, 
   FaCheck, 
   FaTimes as FaX, 
-  FaEnvelope, 
-  FaChalkboardTeacher, 
-  FaComments, 
-  FaCalendarAlt,
   FaChevronLeft,
   FaChevronRight,
   FaSearch,
@@ -26,7 +19,7 @@ import '../../styles/adminStyles/MobileAdminPortal.css';
 import { AdminSettings } from '../../pages/adminPages/AdminSettings';
 import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
 import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
-import MentorManagement from './MentorManagement';
+import { MobileMentorManagement } from './MobileMentorManagement';
 import FeedbackAnalytics from './FeedbackAnalytics';
 import { SessionsManagement } from './SessionsManagement';
 
@@ -61,6 +54,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     admins: 0,
     newThisMonth: 0
   });
+  const [showMobileMentorManagement, setShowMobileMentorManagement] = useState(false);
 
   // Define sections for mobile navigation
   const sections = [
@@ -259,7 +253,19 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Mentor Management</h3>
             <div className="map-form-fields">
-              <MentorManagement />
+              <div className="map-mentor-management-card">
+                <div className="map-mentor-icon">👨‍🏫</div>
+                <div className="map-mentor-content">
+                  <h4>Mentor Program Management</h4>
+                  <p>Manage mentors, mentees, bookings, availability, and analytics</p>
+                  <button
+                    className="map-mentor-open-btn"
+                    onClick={() => setShowMobileMentorManagement(true)}
+                  >
+                    Open Mentor Management
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -390,6 +396,12 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile Mentor Management Modal */}
+      <MobileMentorManagement
+        isOpen={showMobileMentorManagement}
+        onClose={() => setShowMobileMentorManagement(false)}
+      />
     </>
   );
 
