@@ -20,10 +20,12 @@ import { ProfileViewModal } from './components/ProfileViewModal';
 import { ViewBookingsModal } from './components/ViewBookingsModal';
 import { MentorDashboard } from './components/MentorDashboard';
 import { MenteeDashboard } from './components/MenteeDashboard';
+import { MobileProfileEditModal } from './components/MobileProfileEditModal';
 import { default as BookingModal } from '../../components/widgets/MentorAlgorithm/booking/BookingModal';
 import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { default as MentorAvailability } from '../../components/widgets/MentorAlgorithm/MentorAvailability';
 import Navbar from '../../components/ui/Navbar';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // Import all CSS files to ensure styles are loaded
 import './styles/MentorPage.css';
@@ -46,6 +48,7 @@ export default function MentorPage() {
   const { currentUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
   
   // Use button-emerge modal hook for profile edit
   const { 
@@ -818,9 +821,9 @@ export default function MentorPage() {
 
       {/* Profile Edit Modal */}
       {showProfileEdit && currentUserProfile && (
-        <div className="profile-edit-modal-overlay">
-          <div className="profile-edit-modal">
-            <ProfileEditModal
+        <>
+          {isMobile ? (
+            <MobileProfileEditModal
               isOpen={showProfileEdit}
               profile={currentUserProfile}
               onClose={closeProfileEditModal}
@@ -828,15 +831,34 @@ export default function MentorPage() {
               onDelete={handleProfileDelete}
               validationErrors={validationErrors}
               formProgress={calculateFormProgress}
-              sectionStatus={getSectionStatus}
               onFormChange={handleFormChange}
               onArrayChange={handleArrayChange}
               onPastProfessionChange={handlePastProfessionChange}
               onAddPastProfession={addPastProfession}
               onRemovePastProfession={removePastProfession}
             />
-          </div>
-        </div>
+          ) : (
+            <div className="profile-edit-modal-overlay">
+              <div className="profile-edit-modal">
+                <ProfileEditModal
+                  isOpen={showProfileEdit}
+                  profile={currentUserProfile}
+                  onClose={closeProfileEditModal}
+                  onSave={handleProfileSave}
+                  onDelete={handleProfileDelete}
+                  validationErrors={validationErrors}
+                  formProgress={calculateFormProgress}
+                  sectionStatus={getSectionStatus}
+                  onFormChange={handleFormChange}
+                  onArrayChange={handleArrayChange}
+                  onPastProfessionChange={handlePastProfessionChange}
+                  onAddPastProfession={addPastProfession}
+                  onRemovePastProfession={removePastProfession}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Profile View Modal */}
