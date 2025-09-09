@@ -11,6 +11,7 @@ import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput } from '../../utils/security';
+import MobileSignInPage from './MobileSignInPage';
 
 // Define FirebaseErrorWithCode type to handle Firebase errors
 interface FirebaseErrorWithCode extends Error {
@@ -55,6 +56,11 @@ export default function SignInPage() {
       setIsSignIn(true);
     }
   }, [searchParams]);
+
+  // Render mobile version if on mobile device
+  if (isMobile) {
+    return <MobileSignInPage />;
+  }
 
   const updatePasswordRequirements = (password: string) => {
     setPasswordRequirements([
