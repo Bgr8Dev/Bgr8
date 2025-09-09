@@ -1,46 +1,123 @@
-# B8 Network Website Robots.txt
-# This file provides instructions to web crawlers about which parts of the site to crawl
+# Bgr8 Network Website Robots.txt
+# Professional mentoring platform connecting mentors and mentees
+# Last updated: 2024-12-19
 
-# Allow all crawlers to access the site
+# Allow all crawlers to access the main site
 User-agent: *
 Allow: /
+Allow: /bgr8
+Allow: /signin
+Allow: /forgot-password
 
-# Disallow access to admin pages
-Disallow: /admin/
-Disallow: /admin-portal/
-Disallow: /signin/
-Disallow: /register/
-Disallow: /forgot-password/
+# Disallow access to protected user areas (require authentication)
 Disallow: /dashboard/
+Disallow: /sessions/
 Disallow: /profile/
 Disallow: /settings/
+Disallow: /feedback/
+Disallow: /admin-portal/
 
-# Disallow access to API endpoints
+# Disallow access to API endpoints and internal resources
 Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+Disallow: /src/
+
+# Disallow access to development/staging environments
+Disallow: /dev/
+Disallow: /staging/
+Disallow: /test/
+
+# Disallow access to temporary and cache files
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /*.txt$
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.env
+
+# Allow access to important static resources
+Allow: /favicon.ico
+Allow: /robots.txt
+Allow: /sitemap.xml
+Allow: /manifest.json
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp
+Allow: /*.ico
 
 # Sitemap location
-Sitemap: https://b8network.co.uk/sitemap.xml
+Sitemap: https://bgr8network.co.uk/sitemap.xml
 
 # Crawl delay to prevent server overload (in seconds)
-Crawl-delay: 3
+Crawl-delay: 2
 
-# Specific instructions for major bots
+# Specific instructions for major search engines
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 2
+Allow: /bgr8
+Allow: /signin
+Disallow: /dashboard/
+Disallow: /sessions/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /feedback/
+Disallow: /admin-portal/
+Crawl-delay: 1
+
+User-agent: Googlebot-Mobile
+Allow: /
+Allow: /bgr8
+Allow: /signin
+Disallow: /dashboard/
+Disallow: /sessions/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /feedback/
+Disallow: /admin-portal/
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Allow: /bgr8
+Allow: /signin
+Disallow: /dashboard/
+Disallow: /sessions/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /feedback/
+Disallow: /admin-portal/
 Crawl-delay: 2
 
 User-agent: Slurp
 Allow: /
+Allow: /bgr8
+Allow: /signin
+Disallow: /dashboard/
+Disallow: /sessions/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /feedback/
+Disallow: /admin-portal/
 Crawl-delay: 2
 
-# Allow Google to index JavaScript
-User-agent: Googlebot-Mobile
-Allow: /
+# Block problematic bots
+User-agent: AhrefsBot
+Disallow: /
 
-# Prevent access to development/staging environments
-Disallow: /dev/
-Disallow: /staging/ 
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: / 
