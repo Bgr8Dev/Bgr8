@@ -651,6 +651,27 @@
     gap: 15px;
     text-align: center;
   }
+
+  /* Add more spacing for second donation section on mobile */
+  .bgr8-second-donation {
+    padding-top: 120px;
+    padding-bottom: 60px;
+    min-height: auto;
+  }
+
+  .bgr8-second-donation-content {
+    gap: 30px;
+  }
+
+  .bgr8-second-donation-text h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  /* Hide the large text on mobile to prevent overlap */
+  .bgr8-second-donation-text {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
