@@ -170,6 +170,15 @@
     padding: 20px 24px;
   }
   
+  /* Hide sidebar completely on mobile */
+  .mentor-sidebar {
+    display: none !important;
+  }
+  
+  .sidebar-toggle-btn {
+    display: none !important;
+  }
+  
   .mentor-sidebar .search-container {
     margin: 0 24px 20px 24px;
   }
@@ -293,6 +302,15 @@
   
   .mentor-main-content {
     padding: 16px 20px;
+  }
+  
+  /* Hide sidebar completely on mobile */
+  .mentor-sidebar {
+    display: none !important;
+  }
+  
+  .sidebar-toggle-btn {
+    display: none !important;
   }
   
   .mentor-sidebar .search-container {
@@ -448,6 +466,15 @@
   
   .mentor-main-content {
     padding: 12px 16px;
+  }
+  
+  /* Hide sidebar completely on mobile */
+  .mentor-sidebar {
+    display: none !important;
+  }
+  
+  .sidebar-toggle-btn {
+    display: none !important;
   }
   
   .mentor-sidebar .search-container {
