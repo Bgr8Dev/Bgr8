@@ -8,7 +8,6 @@ import {
   FaTimes, 
   FaUserEdit, 
   FaCheck, 
-  FaTimes as FaX, 
   FaChevronLeft,
   FaChevronRight,
   FaSearch,
@@ -209,7 +208,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
                       </div>
                       <div className="map-user-actions">
                         <div className={`map-admin-badge ${user.admin ? 'admin' : 'user'}`}>
-                          {user.admin ? <FaCheck /> : <FaX />}
+                          {user.admin ? <FaCheck /> : <FaTimes />}
                           {user.admin ? 'Admin' : 'User'}
                         </div>
                         <button
