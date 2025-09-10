@@ -1,210 +1,369 @@
-import React, { useState, useEffect } from 'react';
-import { FaUser, FaCrown, FaCode, FaUsers, FaShieldAlt, FaBullhorn, FaUserCheck, FaSave, FaTimes } from 'react-icons/fa';
-import { UserProfile, hasRole, hasAnyRole, getUserRoles } from '../../utils/userProfile';
-import { doc, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useState, useCallback } from 'react';
 import { firestore } from '../../firebase/firebase';
+import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { 
+  FaUsers, 
+  FaChartBar, 
+  FaSearch, 
+  FaFilter,
+  FaCode,
+  FaUserTie,
+  FaShieldAlt,
+  FaBullhorn,
+  FaUserCheck,
+  FaCrown
+} from 'react-icons/fa';
 import './RoleManagement.css';
 
-interface RoleManagementProps {
-  userProfile: UserProfile;
-  onClose: () => void;
+interface UserData {
+  uid: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: {
+    admin: boolean;
+    developer: boolean;
+    committee: boolean;
+    audit: boolean;
+    marketing: boolean;
+    'vetting-officer': boolean;
+  };
+  dateCreated: Timestamp;
+  lastLogin?: Date;
+  [key: string]: unknown;
 }
 
-const roleConfig = {
-  admin: {
-    name: 'Administrator',
-    description: 'Full system access and management capabilities',
-    icon: FaCrown,
-    color: '#e74c3c',
-    level: 5
+interface RoleInfo {
+  key: keyof UserData['roles'];
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+const ROLES: RoleInfo[] = [
+  {
+    key: 'admin',
+    name: 'Admin',
+    description: 'Full system access and user management',
+    icon: <FaCrown />,
+    color: '#e53e3e'
   },
-  developer: {
+  {
+    key: 'developer',
     name: 'Developer',
-    description: 'Access to development tools and testing features',
-    icon: FaCode,
-    color: '#f39c12',
-    level: 4
+    description: 'Access to developer tools and testing features',
+    icon: <FaCode />,
+    color: '#3182ce'
   },
-  committee: {
-    name: 'Committee Member',
-    description: 'Strategic decision making and oversight',
-    icon: FaUsers,
-    color: '#9b59b6',
-    level: 3
+  {
+    key: 'committee',
+    name: 'Committee',
+    description: 'Committee member with special privileges',
+    icon: <FaUserTie />,
+    color: '#805ad5'
   },
-  'vetting-officer': {
+  {
+    key: 'audit',
+    name: 'Audit',
+    description: 'Access to audit logs and compliance features',
+    icon: <FaShieldAlt />,
+    color: '#d69e2e'
+  },
+  {
+    key: 'marketing',
+    name: 'Marketing',
+    description: 'Access to marketing tools and analytics',
+    icon: <FaBullhorn />,
+    color: '#38a169'
+  },
+  {
+    key: 'vetting-officer',
     name: 'Vetting Officer',
-    description: 'Responsible for mentor verification and background checks',
-    icon: FaUserCheck,
-    color: '#3498db',
-    level: 3
-  },
-  audit: {
-    name: 'Audit Officer',
-    description: 'Access to audit logs and compliance monitoring',
-    icon: FaShieldAlt,
-    color: '#2ecc71',
-    level: 2
-  },
-  marketing: {
-    name: 'Marketing Officer',
-    description: 'Access to marketing tools and campaign management',
-    icon: FaBullhorn,
-    color: '#e67e22',
-    level: 2
+    description: 'Can review and approve mentor applications',
+    icon: <FaUserCheck />,
+    color: '#dd6b20'
   }
-};
+];
 
-export const RoleManagement: React.FC<RoleManagementProps> = ({ userProfile, onClose }) => {
-  const [roles, setRoles] = useState(userProfile.roles);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function RoleManagement() {
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [userStats, setUserStats] = useState({
+    total: 0,
+    admins: 0,
+    developers: 0,
+    committee: 0,
+    audit: 0,
+    marketing: 0,
+    'vetting-officer': 0,
+    newThisMonth: 0
+  });
 
-  const handleRoleChange = (roleKey: keyof UserProfile['roles'], value: boolean) => {
-    setRoles(prev => ({
-      ...prev,
-      [roleKey]: value
-    }));
-  };
-
-  const handleSave = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
-      setSaving(true);
-      setError(null);
+      setLoading(true);
+      const usersRef = collection(firestore, 'users');
+      const q = query(usersRef, orderBy('dateCreated', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      const userData: UserData[] = [];
+      const stats = {
+        total: 0,
+        admins: 0,
+        developers: 0,
+        committee: 0,
+        audit: 0,
+        marketing: 0,
+        'vetting-officer': 0,
+        newThisMonth: 0
+      };
 
-      const userRef = doc(firestore, 'users', userProfile.uid);
-      await updateDoc(userRef, {
-        roles: roles,
-        lastUpdated: new Date()
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      querySnapshot.forEach((doc) => {
+        const user = doc.data() as UserData;
+        
+        // Ensure roles object exists with default values
+        if (!user.roles) {
+          user.roles = {
+            admin: false,
+            developer: false,
+            committee: false,
+            audit: false,
+            marketing: false,
+            'vetting-officer': false
+          };
+        }
+
+        userData.push(user);
+        stats.total++;
+        
+        // Count roles
+        if (user.roles.admin === true) stats.admins++;
+        if (user.roles.developer === true) stats.developers++;
+        if (user.roles.committee === true) stats.committee++;
+        if (user.roles.audit === true) stats.audit++;
+        if (user.roles.marketing === true) stats.marketing++;
+        if (user.roles['vetting-officer'] === true) stats['vetting-officer']++;
+        
+        if (user.dateCreated?.toDate() > thirtyDaysAgo) stats.newThisMonth++;
       });
 
-      // Update the userProfile in the parent component
-      // This would typically be done through a callback or context update
-      onClose();
-    } catch (err) {
-      setError('Failed to update user roles. Please try again.');
-      console.error('Error updating roles:', err);
+      
+      setUsers(userData);
+      setUserStats(stats);
+    } catch (error) {
+      console.error('Error fetching users:', error);
     } finally {
-      setSaving(false);
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const toggleUserRole = async (uid: string, role: keyof UserData['roles'], currentStatus: boolean) => {
+    try {
+      const userRef = doc(firestore, 'users', uid);
+      await updateDoc(userRef, {
+        [`roles.${role}`]: !currentStatus,
+        lastUpdated: Timestamp.now()
+      });
+      
+      // Update local state
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.uid === uid 
+            ? { ...user, roles: { ...user.roles, [role]: !currentStatus } }
+            : user
+        )
+      );
+      
+      // Update stats
+      setUserStats(prevStats => {
+        const newStats = { ...prevStats };
+        const currentCount = newStats[role as keyof typeof newStats] as number;
+        newStats[role as keyof typeof newStats] = currentStatus ? currentCount - 1 : currentCount + 1;
+        return newStats;
+      });
+    } catch (error) {
+      console.error('Error updating user role:', error);
     }
   };
 
-  const handleCancel = () => {
-    setRoles(userProfile.roles);
-    onClose();
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = 
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (roleFilter === 'all') return matchesSearch;
+    
+    return matchesSearch && user.roles[roleFilter as keyof UserData['roles']];
+  });
+
+  const getUserRoles = (user: UserData) => {
+    return ROLES.filter(role => user.roles[role.key]);
   };
 
-  const currentRoles = getUserRoles({ ...userProfile, roles });
-  const hasChanges = JSON.stringify(roles) !== JSON.stringify(userProfile.roles);
+  if (loading) {
+    return (
+      <div className="role-management-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading users...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="role-management-overlay">
-      <div className="role-management-modal">
-        <div className="role-management-header">
-          <div className="role-management-title">
-            <FaUser className="title-icon" />
-            <h2>Manage Roles for {userProfile.firstName} {userProfile.lastName}</h2>
+    <div className="role-management">
+      <div className="role-management-header">
+        <h2>Role Management</h2>
+        <p>Manage user roles and permissions across the platform</p>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="role-stats">
+        <div className="stat-card total">
+          <div className="stat-icon">
+            <FaUsers />
           </div>
-          <button 
-            className="role-management-close" 
-            onClick={handleCancel}
-            title="Close role management"
-          >
-            <FaTimes />
-          </button>
+          <div className="stat-content">
+            <h3>Total Users</h3>
+            <p>{userStats.total}</p>
+          </div>
+        </div>
+        
+        <div className="stat-card new">
+          <div className="stat-icon">
+            <FaChartBar />
+          </div>
+          <div className="stat-content">
+            <h3>New This Month</h3>
+            <p>{userStats.newThisMonth}</p>
+          </div>
         </div>
 
-        <div className="role-management-content">
-          <div className="current-roles">
-            <h3>Current Roles</h3>
-            <div className="current-roles-list">
-              {currentRoles.length > 0 ? (
-                currentRoles.map(roleKey => {
-                  const role = roleConfig[roleKey];
-                  const Icon = role.icon;
-                  return (
-                    <div key={roleKey} className="current-role-item">
-                      <Icon style={{ color: role.color }} />
-                      <span>{role.name}</span>
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="no-roles">No roles assigned</p>
-              )}
+        {ROLES.map(role => (
+          <div key={role.key} className="stat-card" style={{ borderLeftColor: role.color }}>
+            <div className="stat-icon" style={{ color: role.color }}>
+              {role.icon}
+            </div>
+            <div className="stat-content">
+              <h3>{role.name}</h3>
+              <p>{userStats[role.key as keyof typeof userStats] || 0}</p>
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className="role-assignment">
-            <h3>Assign Roles</h3>
-            <div className="roles-grid">
-              {Object.entries(roleConfig).map(([roleKey, role]) => {
-                const Icon = role.icon;
-                const isAssigned = roles[roleKey as keyof UserProfile['roles']];
-                
-                return (
-                  <div 
-                    key={roleKey} 
-                    className={`role-card ${isAssigned ? 'assigned' : ''}`}
-                    style={{ borderColor: role.color }}
-                  >
-                    <div className="role-card-header">
-                      <Icon style={{ color: role.color }} />
-                      <h4>{role.name}</h4>
-                      <div className="role-level">Level {role.level}</div>
-                    </div>
-                    <p className="role-description">{role.description}</p>
-                    <label className="role-toggle">
-                      <input
-                        type="checkbox"
-                        checked={isAssigned}
-                        onChange={(e) => handleRoleChange(roleKey as keyof UserProfile['roles'], e.target.checked)}
-                      />
-                      <span className="toggle-slider"></span>
-                      <span className="toggle-label">
-                        {isAssigned ? 'Assigned' : 'Not Assigned'}
-                      </span>
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {error && (
-            <div className="role-management-error">
-              {error}
-            </div>
-          )}
+      {/* Search and Filter Controls */}
+      <div className="role-controls">
+        <div className="search-container">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search users by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
         </div>
 
-        <div className="role-management-footer">
-          <button 
-            className="role-cancel-btn" 
-            onClick={handleCancel}
-            disabled={saving}
+        <div className="filter-container">
+          <FaFilter className="filter-icon" />
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="role-filter"
           >
-            Cancel
-          </button>
-          <button 
-            className="role-save-btn" 
-            onClick={handleSave}
-            disabled={saving || !hasChanges}
-          >
-            {saving ? (
-              <>
-                <div className="spinner"></div>
-                Saving...
-              </>
-            ) : (
-              <>
-                <FaSave />
-                Save Changes
-              </>
-            )}
-          </button>
+            <option value="all">All Roles</option>
+            {ROLES.map(role => (
+              <option key={role.key} value={role.key}>
+                {role.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
+
+      {/* Users Table */}
+      <div className="users-table-container">
+        <table className="users-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Roles</th>
+              <th>Date Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr key={user.uid}>
+                <td className="user-info">
+                  <div className="user-name">
+                    {user.firstName} {user.lastName}
+                  </div>
+                </td>
+                <td className="user-email">{user.email}</td>
+                <td className="user-roles">
+                  <div className="role-badges">
+                    {getUserRoles(user).map(role => (
+                      <span
+                        key={role.key}
+                        className="role-badge"
+                        style={{ backgroundColor: role.color }}
+                        title={role.description}
+                      >
+                        {role.icon}
+                        {role.name}
+                      </span>
+                    ))}
+                    {getUserRoles(user).length === 0 && (
+                      <span className="no-roles">No roles assigned</span>
+                    )}
+                  </div>
+                </td>
+                <td className="user-date">
+                  {user.dateCreated?.toDate().toLocaleDateString()}
+                </td>
+                <td className="user-actions">
+                  <div className="role-toggles">
+                    {ROLES.map(role => (
+                      <label key={role.key} className="role-toggle">
+                        <input
+                          type="checkbox"
+                          checked={user.roles[role.key]}
+                          onChange={() => toggleUserRole(user.uid, role.key, user.roles[role.key])}
+                        />
+                        <span className="toggle-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
+                          <span className="toggle-icon">{role.icon}</span>
+                        </span>
+                        <span className="toggle-label">{role.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {filteredUsers.length === 0 && (
+        <div className="no-users">
+          <FaUsers className="no-users-icon" />
+          <h3>No users found</h3>
+          <p>Try adjusting your search or filter criteria</p>
+        </div>
+      )}
     </div>
   );
-};
+}

@@ -3,15 +3,9 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { hasRole } from '../../utils/userProfile';
-import { firestore } from '../../firebase/firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { 
-  FaTimes, 
-  FaUserEdit, 
-  FaCheck, 
-  FaChevronLeft,
-  FaChevronRight,
-  FaSearch,
+  FaChevronLeft, 
+  FaChevronRight, 
   FaArrowLeft
 } from 'react-icons/fa';
 import '../../styles/adminStyles/MobileAdminPortal.css';
@@ -23,17 +17,8 @@ import { AdminMentorVerification } from '../../pages/adminPages/AdminMentorVerif
 import { MobileMentorManagement } from './MobileMentorManagement';
 import FeedbackAnalytics from './FeedbackAnalytics';
 import { SessionsManagement } from './SessionsManagement';
+import RoleManagement from './RoleManagement';
 
-interface UserData {
-  uid: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  admin: boolean;
-  dateCreated: Timestamp;
-  lastLogin?: Date;
-  [key: string]: unknown;
-}
 
 interface MobileAdminPortalProps {
   isOpen: boolean;
@@ -46,20 +31,12 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [userStats, setUserStats] = useState({
-    total: 0,
-    admins: 0,
-    newThisMonth: 0
-  });
   const [showMobileMentorManagement, setShowMobileMentorManagement] = useState(false);
 
   // Define sections for mobile navigation
   const sections = [
-    { id: 'users', name: 'Users', icon: '👥' },
+    { id: 'users', name: 'Roles', icon: '👥' },
     { id: 'analytics', name: 'Analytics', icon: '📊' },
     { id: 'enquiries', name: 'Enquiries', icon: '📧' },
     { id: 'mentors', name: 'Mentors', icon: '👨‍🏫' },
@@ -74,60 +51,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
       navigate('/');
       return;
     }
-
-    fetchUsers();
   }, [userProfile, navigate]);
-
-  const fetchUsers = async () => {
-    try {
-      const usersRef = collection(firestore, 'users');
-      const q = query(usersRef, orderBy('dateCreated', 'desc'));
-      const querySnapshot = await getDocs(q);
-      
-      const userData: UserData[] = [];
-      let adminCount = 0;
-      let newThisMonth = 0;
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      querySnapshot.forEach((doc) => {
-        const user = doc.data() as UserData;
-        userData.push(user);
-        
-        if (user.admin) adminCount++;
-        if (user.dateCreated?.toDate() > thirtyDaysAgo) newThisMonth++;
-      });
-
-      setUsers(userData);
-      setUserStats({
-        total: userData.length,
-        admins: adminCount,
-        newThisMonth
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setLoading(false);
-    }
-  };
-
-  const toggleUserAdmin = async (uid: string, currentAdminStatus: boolean) => {
-    try {
-      const userRef = doc(firestore, 'users', uid);
-      await updateDoc(userRef, {
-        admin: !currentAdminStatus
-      });
-      await fetchUsers(); // Refresh user list
-    } catch (error) {
-      console.error('Error updating user admin status:', error);
-    }
-  };
-
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   if (!isOpen || !hasRole(userProfile, 'admin')) return null;
 
@@ -148,84 +72,9 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
       case 0: // Users
         return (
           <div className="map-section">
-            <h3 className="map-section-title">User Management</h3>
+            <h3 className="map-section-title">Role Management</h3>
             <div className="map-form-fields">
-              {/* User Stats */}
-              <div className="map-stats-grid">
-                <div className="map-stat-card">
-                  <div className="map-stat-icon">👥</div>
-                  <div className="map-stat-content">
-                    <h4>Total Users</h4>
-                    <p>{userStats.total}</p>
-                  </div>
-                </div>
-                <div className="map-stat-card">
-                  <div className="map-stat-icon">👑</div>
-                  <div className="map-stat-content">
-                    <h4>Admins</h4>
-                    <p>{userStats.admins}</p>
-                  </div>
-                </div>
-                <div className="map-stat-card">
-                  <div className="map-stat-icon">🆕</div>
-                  <div className="map-stat-content">
-                    <h4>New This Month</h4>
-                    <p>{userStats.newThisMonth}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div className="map-input-group">
-                <label htmlFor="userSearch" className="map-field-label">
-                  Search Users
-                </label>
-                <div className="map-search-container">
-                  <FaSearch className="map-search-icon" />
-                  <input
-                    id="userSearch"
-                    type="text"
-                    placeholder="Search by name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="map-search-input"
-                  />
-                </div>
-              </div>
-
-              {/* Users List */}
-              <div className="map-users-list">
-                {loading ? (
-                  <div className="map-loading">Loading users...</div>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <div key={user.uid} className="map-user-card">
-                      <div className="map-user-info">
-                        <div className="map-user-name">
-                          {user.firstName} {user.lastName}
-                        </div>
-                        <div className="map-user-email">{user.email}</div>
-                        <div className="map-user-date">
-                          Joined: {user.dateCreated?.toDate().toLocaleDateString()}
-                        </div>
-                      </div>
-                      <div className="map-user-actions">
-                        <div className={`map-admin-badge ${user.admin ? 'admin' : 'user'}`}>
-                          {user.admin ? <FaCheck /> : <FaTimes />}
-                          {user.admin ? 'Admin' : 'User'}
-                        </div>
-                        <button
-                          className={`map-toggle-admin-btn ${user.admin ? 'remove' : 'add'}`}
-                          onClick={() => toggleUserAdmin(user.uid, user.admin)}
-                        >
-                          <FaUserEdit />
-                          {user.admin ? 'Remove Admin' : 'Make Admin'}
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              <RoleManagement />
             </div>
           </div>
         );
