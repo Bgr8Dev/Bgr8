@@ -22,6 +22,7 @@ export type FeedbackCategory =
 
 export interface FeedbackTicket {
   id: string;
+  sequentialId: number;
   title: string;
   description: string;
   category: FeedbackCategory;

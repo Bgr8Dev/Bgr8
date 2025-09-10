@@ -364,6 +364,25 @@
   color: #6b7280;
 }
 
+.ticket-title-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ticket-id {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
 .ticket-card__title h3 {
   margin: 0;
   font-size: 1.1rem;
@@ -373,7 +392,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
 }
 
 

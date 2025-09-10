@@ -11,7 +11,8 @@ import {
   orderBy,
   serverTimestamp,
   writeBatch,
-  FieldValue
+  FieldValue,
+  setDoc
 } from 'firebase/firestore';
 import {
   ref,
@@ -33,8 +34,33 @@ import {
 const FEEDBACK_COLLECTION = 'feedbackTickets';
 const COMMENTS_COLLECTION = 'feedbackComments';
 const STORAGE_BASE_PATH = 'feedback-attachments';
+const COUNTER_COLLECTION = 'counters';
 
 export class FeedbackService {
+  /**
+   * Get the next sequential ticket ID
+   */
+  static async getNextTicketId(): Promise<number> {
+    try {
+      const counterRef = doc(firestore, COUNTER_COLLECTION, 'ticketId');
+      const counterDoc = await getDoc(counterRef);
+      
+      if (counterDoc.exists()) {
+        const currentId = counterDoc.data().count || 0;
+        const newId = currentId + 1;
+        await updateDoc(counterRef, { count: newId });
+        return newId;
+      } else {
+        // First ticket, start with ID 1
+        await setDoc(counterRef, { count: 1 });
+        return 1;
+      }
+    } catch (error) {
+      console.error('Error getting next ticket ID:', error);
+      throw new Error('Failed to generate ticket ID');
+    }
+  }
+
   /**
    * Upload files to Firebase Storage
    */
@@ -103,8 +129,14 @@ export class FeedbackService {
     reporterEmail: string
   ): Promise<string> {
     try {
-      // First create the ticket to get the ID
-      const ticketRef = await addDoc(collection(firestore, FEEDBACK_COLLECTION), {
+      // Get the next sequential ID
+      const sequentialId = await this.getNextTicketId();
+      const documentId = `Ticket_${sequentialId}`;
+      
+      // Create the ticket with the custom document ID
+      const ticketRef = doc(firestore, FEEDBACK_COLLECTION, documentId);
+      await setDoc(ticketRef, {
+        id: sequentialId,
         title: ticketData.title,
         description: ticketData.description,
         category: ticketData.category,
@@ -123,7 +155,7 @@ export class FeedbackService {
         downvoters: []
       });
 
-      const ticketId = ticketRef.id;
+      const ticketId = documentId;
 
       // Upload files if any
       if (ticketData.attachments && ticketData.attachments.length > 0) {
@@ -183,6 +215,7 @@ export class FeedbackService {
         const data = docSnap.data();
         const ticket: FeedbackTicket = {
           id: docSnap.id,
+          sequentialId: data.id || 0,
           title: data.title,
           description: data.description,
           category: data.category,
@@ -254,6 +287,7 @@ export class FeedbackService {
       const data = ticketDoc.data();
       return {
         id: ticketDoc.id,
+        sequentialId: data.id || 0,
         title: data.title,
         description: data.description,
         category: data.category,

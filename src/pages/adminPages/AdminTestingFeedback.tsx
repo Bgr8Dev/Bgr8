@@ -270,6 +270,7 @@ export default function AdminTestingFeedback() {
     // Create optimistic ticket
     const optimisticTicket: FeedbackTicket = {
       id: `temp-${Date.now()}`,
+      sequentialId: 0, // Will be updated when real ticket is created
       title: newTicket.title.trim(),
       description: newTicket.description.trim(),
       category: newTicket.category,
@@ -858,7 +859,10 @@ export default function AdminTestingFeedback() {
               <div className="ticket-card__header">
                 <div className="ticket-card__title">
                   <CategoryIcon className="category-icon" />
-                  <h3>{ticket.title}</h3>
+                  <div className="ticket-title-content">
+                    <div className="ticket-id">#{ticket.sequentialId}</div>
+                    <h3>{ticket.title}</h3>
+                  </div>
                 </div>
               </div>
               
