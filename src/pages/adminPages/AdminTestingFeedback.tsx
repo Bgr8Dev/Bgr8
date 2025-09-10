@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaBug, FaPlus, FaSearch, FaSort, FaEye, FaEdit, FaTrash, FaThumbsUp, FaThumbsDown, FaTag, FaUser, FaCalendar, FaClock, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaPause, FaCopy, FaTimes } from 'react-icons/fa';
+import { FaBug, FaPlus, FaSearch, FaSort, FaEye, FaEdit, FaTrash, FaThumbsUp, FaThumbsDown, FaTag, FaUser, FaCalendar, FaClock, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaPause, FaCopy, FaTimes, FaComments } from 'react-icons/fa';
 import { FeedbackService } from '../../services/feedbackService';
 import { FeedbackTicket, FeedbackStats, FeedbackFilters, FeedbackStatus, FeedbackPriority, FeedbackCategory } from '../../types/feedback';
 import { useAuth } from '../../hooks/useAuth';
@@ -54,12 +54,34 @@ export default function AdminTestingFeedback() {
     priority: 'medium' as FeedbackPriority,
     tags: [] as string[],
     tagInput: '',
-    attachments: [] as File[]
+    attachments: [] as File[],
+    // Testing-specific fields
+    urlToPage: '',
+    browser: '',
+    browserVersion: '',
+    operatingSystem: '',
+    deviceType: 'desktop' as 'desktop' | 'mobile' | 'tablet',
+    screenResolution: '',
+    stepsToReproduce: '',
+    expectedBehavior: '',
+    actualBehavior: '',
+    severity: 'minor' as 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker',
+    environment: 'production' as 'development' | 'staging' | 'production',
+    testCaseId: '',
+    regression: false,
+    workaround: ''
   });
   const [filters, setFilters] = useState<FeedbackFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'priority' | 'votes'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showCommentsSidebar, setShowCommentsSidebar] = useState(false);
+  const [selectedTicketForComments, setSelectedTicketForComments] = useState<FeedbackTicket | null>(null);
+  const [newComment, setNewComment] = useState({
+    content: '',
+    isInternal: false,
+    attachments: [] as File[]
+  });
 
   const loadTickets = useCallback(async () => {
     try {
@@ -170,7 +192,22 @@ export default function AdminTestingFeedback() {
           category: newTicket.category,
           priority: newTicket.priority,
           tags: newTicket.tags,
-          attachments: newTicket.attachments
+          attachments: newTicket.attachments,
+          // Testing-specific fields
+          urlToPage: newTicket.urlToPage.trim() || undefined,
+          browser: newTicket.browser.trim() || undefined,
+          browserVersion: newTicket.browserVersion.trim() || undefined,
+          operatingSystem: newTicket.operatingSystem.trim() || undefined,
+          deviceType: newTicket.deviceType,
+          screenResolution: newTicket.screenResolution.trim() || undefined,
+          stepsToReproduce: newTicket.stepsToReproduce.trim() || undefined,
+          expectedBehavior: newTicket.expectedBehavior.trim() || undefined,
+          actualBehavior: newTicket.actualBehavior.trim() || undefined,
+          severity: newTicket.severity,
+          environment: newTicket.environment,
+          testCaseId: newTicket.testCaseId.trim() || undefined,
+          regression: newTicket.regression,
+          workaround: newTicket.workaround.trim() || undefined
         },
         userProfile?.uid || '',
         userProfile?.displayName || 'Unknown User',
@@ -185,7 +222,22 @@ export default function AdminTestingFeedback() {
         priority: 'medium',
         tags: [],
         tagInput: '',
-        attachments: []
+        attachments: [],
+        // Testing-specific fields
+        urlToPage: '',
+        browser: '',
+        browserVersion: '',
+        operatingSystem: '',
+        deviceType: 'desktop',
+        screenResolution: '',
+        stepsToReproduce: '',
+        expectedBehavior: '',
+        actualBehavior: '',
+        severity: 'minor',
+        environment: 'production',
+        testCaseId: '',
+        regression: false,
+        workaround: ''
       });
       await loadTickets();
     } catch (err) {
@@ -288,6 +340,60 @@ export default function AdminTestingFeedback() {
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setDeletingTicket(null);
+  };
+
+  const handleOpenComments = (ticket: FeedbackTicket) => {
+    setSelectedTicketForComments(ticket);
+    setShowCommentsSidebar(true);
+  };
+
+  const handleCloseComments = () => {
+    setShowCommentsSidebar(false);
+    setSelectedTicketForComments(null);
+    setNewComment({
+      content: '',
+      isInternal: false,
+      attachments: []
+    });
+  };
+
+  const handleAddComment = async () => {
+    if (!selectedTicketForComments || !newComment.content.trim()) return;
+
+    try {
+      await FeedbackService.addComment(selectedTicketForComments.id, {
+        content: newComment.content.trim(),
+        isInternal: newComment.isInternal,
+        attachments: newComment.attachments
+      }, userProfile?.uid || '', userProfile?.displayName || 'Unknown User');
+      
+      setNewComment({
+        content: '',
+        isInternal: false,
+        attachments: []
+      });
+      
+      // Reload tickets to get updated comments
+      await loadTickets();
+    } catch (err) {
+      console.error('Error adding comment:', err);
+      setError('Failed to add comment');
+    }
+  };
+
+  const handleCommentFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setNewComment(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, ...files]
+    }));
+  };
+
+  const handleRemoveCommentFile = (indexToRemove: number) => {
+    setNewComment(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   const formatDate = (date: Date) => {
@@ -489,6 +595,14 @@ export default function AdminTestingFeedback() {
                     aria-label="View ticket details"
                   >
                     <FaEye />
+                  </button>
+                  <button
+                    className="action-btn comments"
+                    onClick={() => handleOpenComments(ticket)}
+                    title="View Comments"
+                    aria-label="View ticket comments"
+                  >
+                    <FaComments />
                   </button>
                   <button
                     className="action-btn edit"
@@ -752,6 +866,206 @@ export default function AdminTestingFeedback() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Testing-Specific Fields */}
+              <div className="form-section-divider">
+                <h4>Testing Information</h4>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-url">URL to Page</label>
+                <input
+                  id="ticket-url"
+                  type="url"
+                  value={newTicket.urlToPage}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, urlToPage: e.target.value }))}
+                  placeholder="https://example.com/page"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="ticket-browser">Browser</label>
+                  <select
+                    id="ticket-browser"
+                    value={newTicket.browser}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, browser: e.target.value }))}
+                    className="form-select"
+                  >
+                    <option value="">Select Browser</option>
+                    <option value="Chrome">Chrome</option>
+                    <option value="Firefox">Firefox</option>
+                    <option value="Safari">Safari</option>
+                    <option value="Edge">Edge</option>
+                    <option value="Opera">Opera</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="ticket-browser-version">Browser Version</label>
+                  <input
+                    id="ticket-browser-version"
+                    type="text"
+                    value={newTicket.browserVersion}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, browserVersion: e.target.value }))}
+                    placeholder="e.g., 120.0.6099.109"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="ticket-os">Operating System</label>
+                  <select
+                    id="ticket-os"
+                    value={newTicket.operatingSystem}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, operatingSystem: e.target.value }))}
+                    className="form-select"
+                  >
+                    <option value="">Select OS</option>
+                    <option value="Windows 11">Windows 11</option>
+                    <option value="Windows 10">Windows 10</option>
+                    <option value="macOS">macOS</option>
+                    <option value="Linux">Linux</option>
+                    <option value="iOS">iOS</option>
+                    <option value="Android">Android</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="ticket-device">Device Type</label>
+                  <select
+                    id="ticket-device"
+                    value={newTicket.deviceType}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, deviceType: e.target.value as 'desktop' | 'mobile' | 'tablet' }))}
+                    className="form-select"
+                  >
+                    <option value="desktop">Desktop</option>
+                    <option value="mobile">Mobile</option>
+                    <option value="tablet">Tablet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-resolution">Screen Resolution</label>
+                <input
+                  id="ticket-resolution"
+                  type="text"
+                  value={newTicket.screenResolution}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, screenResolution: e.target.value }))}
+                  placeholder="e.g., 1920x1080"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-steps">Steps to Reproduce</label>
+                <textarea
+                  id="ticket-steps"
+                  value={newTicket.stepsToReproduce}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, stepsToReproduce: e.target.value }))}
+                  placeholder="1. Go to the page...&#10;2. Click on the button...&#10;3. Observe the issue..."
+                  className="form-textarea"
+                  rows={3}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-expected">Expected Behavior</label>
+                <textarea
+                  id="ticket-expected"
+                  value={newTicket.expectedBehavior}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, expectedBehavior: e.target.value }))}
+                  placeholder="What should happen when following the steps?"
+                  className="form-textarea"
+                  rows={2}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-actual">Actual Behavior</label>
+                <textarea
+                  id="ticket-actual"
+                  value={newTicket.actualBehavior}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, actualBehavior: e.target.value }))}
+                  placeholder="What actually happens instead?"
+                  className="form-textarea"
+                  rows={2}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="ticket-severity">Severity</label>
+                  <select
+                    id="ticket-severity"
+                    value={newTicket.severity}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, severity: e.target.value as 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker' }))}
+                    className="form-select"
+                  >
+                    <option value="cosmetic">Cosmetic</option>
+                    <option value="minor">Minor</option>
+                    <option value="major">Major</option>
+                    <option value="critical">Critical</option>
+                    <option value="blocker">Blocker</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="ticket-environment">Environment</label>
+                  <select
+                    id="ticket-environment"
+                    value={newTicket.environment}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, environment: e.target.value as 'development' | 'staging' | 'production' }))}
+                    className="form-select"
+                  >
+                    <option value="development">Development</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Production</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-testcase">Test Case ID</label>
+                <input
+                  id="ticket-testcase"
+                  type="text"
+                  value={newTicket.testCaseId}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, testCaseId: e.target.value }))}
+                  placeholder="e.g., TC-001, Test-123"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={newTicket.regression}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, regression: e.target.checked }))}
+                    className="checkbox-input"
+                  />
+                  <span className="checkbox-text">This is a regression bug</span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-workaround">Workaround</label>
+                <textarea
+                  id="ticket-workaround"
+                  value={newTicket.workaround}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, workaround: e.target.value }))}
+                  placeholder="Any temporary workaround or solution?"
+                  className="form-textarea"
+                  rows={2}
+                />
               </div>
             </div>
             
@@ -1095,6 +1409,130 @@ export default function AdminTestingFeedback() {
               >
                 <FaTrash /> Delete Permanently
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comments Sidebar */}
+      {showCommentsSidebar && selectedTicketForComments && (
+        <div className="comments-sidebar-overlay" onClick={handleCloseComments}>
+          <div className="comments-sidebar" onClick={(e) => e.stopPropagation()}>
+            <div className="comments-header">
+              <h3>Comments - {selectedTicketForComments.title}</h3>
+              <button 
+                className="comments-close"
+                onClick={handleCloseComments}
+                title="Close comments"
+                aria-label="Close comments"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="comments-content">
+              <div className="comments-list">
+                {selectedTicketForComments.comments.map(comment => (
+                  <div key={comment.id} className={`comment ${comment.isInternal ? 'internal' : 'public'}`}>
+                    <div className="comment-header">
+                      <div className="comment-author">
+                        <FaUser className="comment-author-icon" />
+                        <span className="comment-author-name">{comment.authorName}</span>
+                        {comment.isInternal && (
+                          <span className="comment-internal-badge">Internal</span>
+                        )}
+                      </div>
+                      <span className="comment-date">{formatDate(comment.createdAt)}</span>
+                    </div>
+                    <div className="comment-body">
+                      <p>{comment.content}</p>
+                      {comment.attachments && comment.attachments.length > 0 && (
+                        <div className="comment-attachments">
+                          {comment.attachments.map(attachment => (
+                            <a
+                              key={attachment.id}
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="comment-attachment"
+                            >
+                              <FaTag /> {attachment.name}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {selectedTicketForComments.comments.length === 0 && (
+                  <div className="comments-empty">
+                    <FaComments className="comments-empty-icon" />
+                    <p>No comments yet. Be the first to comment!</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="comments-form">
+                <div className="comment-form-header">
+                  <h4>Add Comment</h4>
+                  <label className="comment-internal-toggle">
+                    <input
+                      type="checkbox"
+                      checked={newComment.isInternal}
+                      onChange={(e) => setNewComment(prev => ({ ...prev, isInternal: e.target.checked }))}
+                      className="checkbox-input"
+                    />
+                    <span className="checkbox-text">Internal comment</span>
+                  </label>
+                </div>
+                
+                <textarea
+                  value={newComment.content}
+                  onChange={(e) => setNewComment(prev => ({ ...prev, content: e.target.value }))}
+                  placeholder="Write your comment here..."
+                  className="comment-textarea"
+                  rows={4}
+                />
+                
+                <div className="comment-file-input">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleCommentFileSelect}
+                    className="file-input"
+                    accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip"
+                  />
+                  <label className="file-input-label">
+                    <FaPlus /> Attach Files
+                  </label>
+                </div>
+                
+                {newComment.attachments.length > 0 && (
+                  <div className="comment-file-list">
+                    {newComment.attachments.map((file, index) => (
+                      <div key={index} className="comment-file-item">
+                        <span className="comment-file-name">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCommentFile(index)}
+                          className="comment-file-remove"
+                          title="Remove file"
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <button
+                  className="btn btn-primary comment-submit"
+                  onClick={handleAddComment}
+                  disabled={!newComment.content.trim()}
+                >
+                  <FaComments /> Add Comment
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -9,10 +9,7 @@ import {
   query,
   where,
   orderBy,
-  limit,
-  startAfter,
   serverTimestamp,
-  Timestamp,
   writeBatch
 } from 'firebase/firestore';
 import {
@@ -24,15 +21,12 @@ import {
 import { firestore, storage } from '../firebase/firebase';
 import {
   FeedbackTicket,
-  FeedbackComment,
   FeedbackStats,
   FeedbackFilters,
   CreateFeedbackTicketData,
   UpdateFeedbackTicketData,
   CreateFeedbackCommentData,
-  FeedbackStatus,
-  FeedbackPriority,
-  FeedbackCategory
+  FeedbackAttachment
 } from '../types/feedback';
 
 const FEEDBACK_COLLECTION = 'feedbackTickets';
@@ -114,7 +108,7 @@ export class FeedbackService {
         description: ticketData.description,
         category: ticketData.category,
         priority: ticketData.priority,
-        status: 'open' as FeedbackStatus,
+        status: 'open',
         reporterId,
         reporterName,
         reporterEmail,
@@ -361,6 +355,7 @@ export class FeedbackService {
     authorName: string
   ): Promise<string> {
     try {
+      // Create the comment first
       const commentRef = await addDoc(collection(firestore, COMMENTS_COLLECTION), {
         ticketId,
         authorId,
@@ -371,6 +366,17 @@ export class FeedbackService {
         updatedAt: serverTimestamp(),
         attachments: []
       });
+
+      // Upload attachments if any
+      let uploadedAttachments: FeedbackAttachment[] = [];
+      if (commentData.attachments && commentData.attachments.length > 0) {
+        uploadedAttachments = await this.uploadFiles(commentData.attachments, commentRef.id);
+        
+        // Update the comment with attachment URLs
+        await updateDoc(commentRef, {
+          attachments: uploadedAttachments
+        });
+      }
 
       // Update the ticket's updatedAt timestamp
       await updateDoc(doc(firestore, FEEDBACK_COLLECTION, ticketId), {

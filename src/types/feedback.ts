@@ -43,6 +43,21 @@ export interface FeedbackTicket {
   downvoters: string[];
   duplicateOf?: string;
   relatedTickets?: string[];
+  // Testing-specific fields
+  urlToPage?: string;
+  browser?: string;
+  browserVersion?: string;
+  operatingSystem?: string;
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+  screenResolution?: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  actualBehavior?: string;
+  severity?: 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker';
+  environment?: 'development' | 'staging' | 'production';
+  testCaseId?: string;
+  regression?: boolean;
+  workaround?: string;
 }
 
 export interface FeedbackAttachment {
@@ -105,6 +120,21 @@ export interface CreateFeedbackTicketData {
   priority: FeedbackPriority;
   tags?: string[];
   attachments?: File[];
+  // Testing-specific fields
+  urlToPage?: string;
+  browser?: string;
+  browserVersion?: string;
+  operatingSystem?: string;
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+  screenResolution?: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  actualBehavior?: string;
+  severity?: 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker';
+  environment?: 'development' | 'staging' | 'production';
+  testCaseId?: string;
+  regression?: boolean;
+  workaround?: string;
 }
 
 export interface UpdateFeedbackTicketData {
@@ -115,6 +145,21 @@ export interface UpdateFeedbackTicketData {
   status?: FeedbackStatus;
   assignedTo?: string;
   tags?: string[];
+  // Testing-specific fields
+  urlToPage?: string;
+  browser?: string;
+  browserVersion?: string;
+  operatingSystem?: string;
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+  screenResolution?: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  actualBehavior?: string;
+  severity?: 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker';
+  environment?: 'development' | 'staging' | 'production';
+  testCaseId?: string;
+  regression?: boolean;
+  workaround?: string;
 }
 
 export interface CreateFeedbackCommentData {
