@@ -713,6 +713,26 @@ export default function AdminTestingFeedback() {
               <p>{stats.resolved}</p>
             </div>
           </div>
+          
+          <div className="stat-card closed">
+            <div className="stat-icon">
+              <FaTimesCircle />
+            </div>
+            <div className="stat-content">
+              <h3>Closed</h3>
+              <p>{stats.closed}</p>
+            </div>
+          </div>
+          
+          <div className="stat-card duplicate">
+            <div className="stat-icon">
+              <FaCopy />
+            </div>
+            <div className="stat-content">
+              <h3>Duplicate</h3>
+              <p>{stats.duplicate}</p>
+            </div>
+          </div>
         </div>
       )}
 

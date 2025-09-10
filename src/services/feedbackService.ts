@@ -10,7 +10,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  writeBatch
+  writeBatch,
+  FieldValue
 } from 'firebase/firestore';
 import {
   ref,
@@ -290,7 +291,7 @@ export class FeedbackService {
   ): Promise<void> {
     try {
       const ticketRef = doc(firestore, FEEDBACK_COLLECTION, ticketId);
-      const updateFields: any = {
+      const updateFields: Record<string, FieldValue | string | number | boolean | string[] | undefined> = {
         ...updateData,
         updatedAt: serverTimestamp()
       };
@@ -482,6 +483,13 @@ export class FeedbackService {
         stats.byCategory[ticket.category]++;
         stats.byPriority[ticket.priority]++;
       });
+
+      // Populate individual status counts for backward compatibility
+      stats.open = stats.byStatus.open;
+      stats.inProgress = stats.byStatus.in_progress;
+      stats.resolved = stats.byStatus.resolved;
+      stats.closed = stats.byStatus.closed;
+      stats.duplicate = stats.byStatus.duplicate;
 
       // Calculate average resolution time
       const resolvedTickets = tickets.filter(t => t.resolvedAt);

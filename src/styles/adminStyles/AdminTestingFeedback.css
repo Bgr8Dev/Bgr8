@@ -131,6 +131,14 @@
   border-left: 4px solid #8b5cf6;
 }
 
+.stat-card.closed {
+  border-left: 4px solid #6b7280;
+}
+
+.stat-card.duplicate {
+  border-left: 4px solid #ef4444;
+}
+
 .stat-icon {
   font-size: 2rem;
   color: #64748b;
@@ -150,6 +158,14 @@
 
 .stat-card.resolved .stat-icon {
   color: #8b5cf6;
+}
+
+.stat-card.closed .stat-icon {
+  color: #6b7280;
+}
+
+.stat-card.duplicate .stat-icon {
+  color: #ef4444;
 }
 
 .stat-content h3 {
