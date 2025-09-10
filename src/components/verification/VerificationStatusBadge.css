@@ -68,6 +68,7 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .verification-status-badge {
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
   }
 }
