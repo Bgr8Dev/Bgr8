@@ -95,19 +95,37 @@ export interface UserProfile {
   };
 }
 
+// Legacy user profile type for backward compatibility
+interface LegacyUserProfile {
+  admin?: boolean;
+  developer?: boolean;
+}
+
 // Role checking utility functions
 export const hasRole = (userProfile: UserProfile | null, role: keyof UserProfile['roles']): boolean => {
-  return userProfile?.roles?.[role] === true;
+  if (!userProfile) return false;
+  
+  // Check new roles object first
+  if (userProfile.roles?.[role] === true) return true;
+  
+  // Backward compatibility: check old admin/developer fields
+  const legacyProfile = userProfile as UserProfile & LegacyUserProfile;
+  if (role === 'admin' && legacyProfile.admin === true) return true;
+  if (role === 'developer' && legacyProfile.developer === true) return true;
+  
+  return false;
 };
 
 export const hasAnyRole = (userProfile: UserProfile | null, roles: (keyof UserProfile['roles'])[]): boolean => {
-  if (!userProfile?.roles) return false;
-  return roles.some(role => userProfile.roles[role] === true);
+  if (!userProfile) return false;
+  
+  // Check if any of the requested roles are present
+  return roles.some(role => hasRole(userProfile, role));
 };
 
 export const hasAllRoles = (userProfile: UserProfile | null, roles: (keyof UserProfile['roles'])[]): boolean => {
-  if (!userProfile?.roles) return false;
-  return roles.every(role => userProfile.roles[role] === true);
+  if (!userProfile) return false;
+  return roles.every(role => hasRole(userProfile, role));
 };
 
 export const getUserRoles = (userProfile: UserProfile | null): (keyof UserProfile['roles'])[] => {
