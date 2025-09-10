@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Booking } from '../../types/bookings';
+import { Booking, ExtendedBooking } from '../../types/bookings';
 
 interface BookingsTableProps {
-  bookings: Booking[];
+  bookings: ExtendedBooking[];
   onView: (booking: Booking) => void;
 }
 
@@ -11,7 +11,8 @@ function isFirestoreTimestamp(obj: unknown): obj is { toDate: () => Date } {
   return typeof obj === 'object' && obj !== null && 'toDate' in obj && typeof (obj as { toDate?: () => Date }).toDate === 'function';
 }
 
-function exportToCSV(bookings: Booking[]) {
+function exportToCSV(bookings: 
+  Booking[]) {
   const header = ['Mentor Name', 'Mentor Email', 'Mentee Name', 'Mentee Email', 'Date', 'Time', 'Status'];
   const rows = bookings.map(b => [
     b.mentorName,

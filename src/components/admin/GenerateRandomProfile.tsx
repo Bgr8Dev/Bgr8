@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { firestore } from '../../firebase/firebase';
 import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
-import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { getName, MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { Booking } from '../../types/bookings';
 import ukCounties from '../../constants/ukCounties';
 import industriesList from '../../constants/industries';
@@ -673,7 +673,12 @@ export default function GenerateRandomProfile() {
     
     // Create the base booking object
     const booking: Booking = {
+<<<<<<< Updated upstream
       mentorName: mentor.name,
+=======
+      id: `booking_${Math.random().toString(36).substr(2, 9)}`,
+      mentorName: getName(mentor),
+>>>>>>> Stashed changes
       mentorEmail: mentor.email,
       menteeName: `Test Mentee ${Math.floor(Math.random() * 1000)}`,
       menteeEmail: `mentee${Math.floor(Math.random() * 1000)}@example.com`,
@@ -1118,8 +1123,8 @@ export default function GenerateRandomProfile() {
   };
 
   const filteredMentors = availableMentors.filter(mentor =>
-    mentor && mentor.name && mentor.email && mentorSearch &&
-    mentor.name.toLowerCase().includes(mentorSearch.toLowerCase()) ||
+    mentor && mentor.firstName && mentor.lastName && mentor.email && mentorSearch &&
+    getName(mentor).toLowerCase().includes(mentorSearch.toLowerCase()) ||
     mentor.email.toLowerCase().includes(mentorSearch.toLowerCase())
   );
 
@@ -1650,15 +1655,15 @@ export default function GenerateRandomProfile() {
 
                 <div className="mentors-list">
                   {filteredMentors.map(mentor => (
-                    <label key={mentor.id} className="mentor-item">
+                    <label key={String(mentor.id)} className="mentor-item">
                       <input
                         type="checkbox"
-                        checked={selectedMentors.includes(mentor.id)}
-                        onChange={() => toggleMentorSelection(mentor.id)}
+                        checked={selectedMentors.includes(String(mentor.id))}
+                        onChange={() => toggleMentorSelection(String(mentor.id))}
                         className="mentor-checkbox"
                       />
                       <div className="mentor-info">
-                        <span className="mentor-name">{mentor.name}</span>
+                        <span className="mentor-name">{getName(mentor)}</span>
                         <span className="mentor-email">{mentor.email}</span>
                       </div>
                     </label>

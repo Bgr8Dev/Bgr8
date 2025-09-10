@@ -38,6 +38,10 @@ export interface MatchResult {
   reasons: string[];
 }
 
+export function getName(profile: MentorMenteeProfile): string {
+  return `${profile.firstName} ${profile.lastName}`;
+}
+
 const educationLevelEncoding: { [level: string]: number } = {
   'GCSEs': 0,
   'A-Levels': 1,

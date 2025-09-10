@@ -365,6 +365,7 @@ export default function FeedbackPage() {
   }
 
   const otherPartyName = userRole === 'mentor' ? booking.menteeName : booking.mentorName;
+<<<<<<< Updated upstream
   const sessionDate =
     booking.sessionDate
       ? new Date(
@@ -372,6 +373,14 @@ export default function FeedbackPage() {
         typeof (booking.sessionDate as any).toDate === 'function'
           ? (booking.sessionDate as any).toDate()
           : booking.sessionDate
+=======
+  const sessionDate = booking?.sessionDate
+    ? (
+        // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
+        typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
+          ? (booking.sessionDate as { toDate: () => Date }).toDate()
+          : (booking.sessionDate.toDate())
+>>>>>>> Stashed changes
       ).toLocaleDateString('en-GB', {
         weekday: 'long',
         year: 'numeric',
