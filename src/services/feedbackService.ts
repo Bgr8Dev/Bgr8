@@ -23,6 +23,7 @@ import {
 import { firestore, storage } from '../firebase/firebase';
 import {
   FeedbackTicket,
+  FeedbackComment,
   FeedbackStats,
   FeedbackFilters,
   CreateFeedbackTicketData,
@@ -422,6 +423,42 @@ export class FeedbackService {
     } catch (error) {
       console.error('Error adding comment:', error);
       throw new Error('Failed to add comment');
+    }
+  }
+
+  /**
+   * Get comments for a specific ticket
+   */
+  static async getCommentsForTicket(ticketId: string): Promise<FeedbackComment[]> {
+    try {
+      const commentsQuery = query(
+        collection(firestore, COMMENTS_COLLECTION),
+        where('ticketId', '==', ticketId),
+        orderBy('createdAt', 'asc')
+      );
+
+      const snapshot = await getDocs(commentsQuery);
+      const comments: FeedbackComment[] = [];
+
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        comments.push({
+          id: docSnap.id,
+          ticketId: data.ticketId,
+          authorId: data.authorId,
+          authorName: data.authorName,
+          content: data.content,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          isInternal: data.isInternal || false,
+          attachments: data.attachments || []
+        });
+      }
+
+      return comments;
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      throw new Error('Failed to fetch comments');
     }
   }
 
