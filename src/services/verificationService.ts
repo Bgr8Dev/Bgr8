@@ -102,6 +102,54 @@ export class VerificationService {
 
     const profileData = profileDoc.data();
     const currentVerification = profileData.verification as VerificationData;
+    
+    // Ensure currentVerification exists and has required fields
+    if (!currentVerification) {
+      throw new Error('No verification data found for mentor');
+    }
+    
+    // Handle the existing data structure and ensure required fields exist with defaults
+    // For existing data that might be missing some fields, we'll create a complete structure
+    const convertTimestamp = (timestamp: unknown): Date => {
+      if (!timestamp) return new Date();
+      if (typeof timestamp === 'object' && timestamp !== null && 'toDate' in timestamp && typeof (timestamp as { toDate: () => Date }).toDate === 'function') {
+        return (timestamp as { toDate: () => Date }).toDate();
+      }
+      if (timestamp instanceof Date) {
+        return timestamp;
+      }
+      if (typeof timestamp === 'string' || typeof timestamp === 'number') {
+        return new Date(timestamp);
+      }
+      return new Date();
+    };
+
+    const safeVerification = {
+      status: currentVerification.status || 'pending',
+      currentStep: currentVerification.currentStep || 'profile_submitted',
+      submittedAt: currentVerification.submittedAt ? 
+        convertTimestamp(currentVerification.submittedAt) :
+        (currentVerification.history && currentVerification.history.length > 0 ? 
+          convertTimestamp(currentVerification.history[0].timestamp) : new Date()),
+      lastUpdated: currentVerification.lastUpdated ? 
+        convertTimestamp(currentVerification.lastUpdated) :
+        new Date(),
+      history: (currentVerification.history || []).map(entry => ({
+        ...entry,
+        timestamp: convertTimestamp(entry.timestamp)
+      })),
+      adminNotes: currentVerification.adminNotes || '',
+      rejectionReason: currentVerification.rejectionReason || '',
+      documents: currentVerification.documents || null,
+      nextReviewDate: currentVerification.nextReviewDate ? 
+        convertTimestamp(currentVerification.nextReviewDate) :
+        null
+    };
+
+    console.log('Original verification data:', currentVerification);
+    console.log('Safe verification data:', safeVerification);
+    console.log('Safe verification keys:', Object.keys(safeVerification));
+    console.log('Safe verification values:', Object.values(safeVerification));
 
     // Create new history entry
     const historyEntry: VerificationHistory = {
@@ -114,21 +162,74 @@ export class VerificationService {
       reason
     };
 
-    // Update verification data
-    const updatedVerification: VerificationData = {
-      ...currentVerification,
+    // Create a clean verification object with only defined values
+    const updatedVerification: Partial<VerificationData> = {
       status: newStatus,
       currentStep: newStep,
+      submittedAt: safeVerification.submittedAt,
       lastUpdated: new Date(),
-      history: [...currentVerification.history, historyEntry],
-      adminNotes: notes ? `${currentVerification.adminNotes || ''}\n${new Date().toISOString()}: ${notes}`.trim() : currentVerification.adminNotes,
-      rejectionReason: reason || currentVerification.rejectionReason
+      history: [...safeVerification.history, historyEntry]
     };
 
-    await updateDoc(profileRef, {
-      verification: updatedVerification,
+    // Only add optional fields if they have values
+    if (safeVerification.adminNotes || notes) {
+      updatedVerification.adminNotes = notes ? 
+        `${safeVerification.adminNotes}\n${new Date().toISOString()}: ${notes}`.trim() : 
+        safeVerification.adminNotes;
+    }
+
+    if (reason || safeVerification.rejectionReason) {
+      updatedVerification.rejectionReason = reason || safeVerification.rejectionReason;
+    }
+
+    if (safeVerification.documents && Object.keys(safeVerification.documents).length > 0) {
+      updatedVerification.documents = safeVerification.documents;
+    }
+
+    if (safeVerification.nextReviewDate) {
+      updatedVerification.nextReviewDate = safeVerification.nextReviewDate;
+    }
+
+    // Deep clean the updatedVerification object to remove any undefined values
+    const cleanVerification = (obj: unknown): unknown => {
+      if (obj === null || obj === undefined) return null;
+      if (Array.isArray(obj)) {
+        return obj.map(cleanVerification).filter(item => item !== undefined);
+      }
+      if (typeof obj === 'object') {
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(obj)) {
+          if (value !== undefined) {
+            cleaned[key] = cleanVerification(value);
+          }
+        }
+        return cleaned;
+      }
+      return obj;
+    };
+
+    const cleanedVerification = cleanVerification(updatedVerification);
+    console.log('Cleaned verification object:', cleanedVerification);
+
+    // Prepare update data, ensuring no undefined values
+    const updateData: Record<string, unknown> = {
+      verification: cleanedVerification,
       updatedAt: serverTimestamp()
+    };
+
+    // Final check to remove any undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
     });
+
+    console.log('Updated verification object:', updatedVerification);
+    console.log('Updated verification keys:', Object.keys(updatedVerification));
+    console.log('Updated verification values:', Object.values(updatedVerification));
+    console.log('Updating verification with data:', updateData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await updateDoc(profileRef, updateData as { [x: string]: any });
   }
 
   /**
