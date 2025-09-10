@@ -68,6 +68,11 @@ export default function AdminPortal() {
   return (
     <div className="admin-portal">
       <div className="admin-sidebar">
+        <div className="admin-sidebar-header">
+          <h1 className="admin-sidebar-title">Admin Portal</h1>
+          <p className="admin-sidebar-subtitle">Manage your platform</p>
+        </div>
+
         <button 
           className="back-button"
           onClick={() => navigate(-1)}
