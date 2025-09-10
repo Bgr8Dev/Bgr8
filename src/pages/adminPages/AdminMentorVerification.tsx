@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   FaCheck, 
   FaTimes, 
-  FaPause, 
   FaEye, 
   FaSearch, 
   FaFilter,
   FaDownload,
-  FaRefresh,
+  FaSync,
   FaClock,
   FaUserCheck,
   FaExclamationTriangle,
   FaChartBar
 } from 'react-icons/fa';
-import { 
-  VerificationService,
-  getVerificationStats,
-  getPendingMentors,
-  getOverdueReviews
-} from '../../services/verificationService';
+import { VerificationService } from '../../services/verificationService';
 import { VerificationStatus, VerificationStep } from '../../types/verification';
 import { VerificationStatusBadge, VerificationProgress } from '../../components/verification';
 import '../../styles/adminStyles/AdminMentorVerification.css';
@@ -73,37 +67,7 @@ export const AdminMentorVerification: React.FC = () => {
   const [showOverdue, setShowOverdue] = useState(false);
   const [overdueMentors, setOverdueMentors] = useState<MentorProfile[]>([]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    filterMentors();
-  }, [mentors, searchTerm, statusFilter]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [mentorsData, statsData, overdueData] = await Promise.all([
-        getPendingMentors(),
-        getVerificationStats(),
-        getOverdueReviews(7) // 7 days overdue
-      ]);
-      
-      setMentors(mentorsData);
-      setStats(statsData);
-      setOverdueMentors(overdueData);
-    } catch (err) {
-      setError('Failed to load verification data');
-      console.error('Error loading verification data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterMentors = () => {
+  const filterMentors = useCallback(() => {
     let filtered = mentors;
 
     // Filter by search term
@@ -123,6 +87,36 @@ export const AdminMentorVerification: React.FC = () => {
     }
 
     setFilteredMentors(filtered);
+  }, [mentors, searchTerm, statusFilter]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    filterMentors();
+  }, [filterMentors]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [mentorsData, statsData, overdueData] = await Promise.all([
+        VerificationService.getPendingMentors(),
+        VerificationService.getVerificationStats(),
+        VerificationService.getOverdueReviews(7) // 7 days overdue
+      ]);
+      
+      setMentors(mentorsData);
+      setStats(statsData);
+      setOverdueMentors(overdueData);
+    } catch (err) {
+      setError('Failed to load verification data');
+      console.error('Error loading verification data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerificationAction = async (
@@ -203,7 +197,7 @@ export const AdminMentorVerification: React.FC = () => {
     return (
       <div className="admin-mentor-verification">
         <div className="admin-mentor-verification__loading">
-          <FaRefresh className="spinning" />
+          <FaSync className="spinning" />
           <span>Loading verification data...</span>
         </div>
       </div>
@@ -230,7 +224,7 @@ export const AdminMentorVerification: React.FC = () => {
             onClick={loadData}
             disabled={loading}
           >
-            <FaRefresh className={loading ? 'spinning' : ''} />
+            <FaSync className={loading ? 'spinning' : ''} />
             Refresh
           </button>
         </div>
@@ -330,6 +324,8 @@ export const AdminMentorVerification: React.FC = () => {
                 <button
                   className="admin-mentor-verification__overdue-action-btn"
                   onClick={() => setSelectedMentor(mentor)}
+                  title="View Details"
+                  aria-label="View mentor details"
                 >
                   <FaEye />
                 </button>

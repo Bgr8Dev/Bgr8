@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   FaCheck, 
   FaTimes, 
-  FaPause, 
   FaEye, 
   FaSearch, 
   FaFilter,
-  FaDownload,
-  FaRefresh
+  FaSync
 } from 'react-icons/fa';
-import { 
-  VerificationService,
-  getVerificationStats,
-  getPendingMentors,
-  getOverdueReviews
-} from '../../services/verificationService';
+import { VerificationService } from '../../services/verificationService';
 import { VerificationStatus, VerificationStep } from '../../types/verification';
 import { VerificationStatusBadge } from '../verification';
 import './MentorVerificationPanel.css';
@@ -54,35 +47,7 @@ export const MentorVerificationPanel: React.FC = () => {
   const [selectedMentor, setSelectedMentor] = useState<MentorProfile | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    filterMentors();
-  }, [mentors, searchTerm, statusFilter]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [mentorsData, statsData] = await Promise.all([
-        getPendingMentors(),
-        getVerificationStats()
-      ]);
-      
-      setMentors(mentorsData);
-      setStats(statsData);
-    } catch (err) {
-      setError('Failed to load verification data');
-      console.error('Error loading verification data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterMentors = () => {
+  const filterMentors = useCallback(() => {
     let filtered = mentors;
 
     // Filter by search term
@@ -102,6 +67,34 @@ export const MentorVerificationPanel: React.FC = () => {
     }
 
     setFilteredMentors(filtered);
+  }, [mentors, searchTerm, statusFilter]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    filterMentors();
+  }, [filterMentors]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [mentorsData, statsData] = await Promise.all([
+        VerificationService.getPendingMentors(),
+        VerificationService.getVerificationStats()
+      ]);
+      
+      setMentors(mentorsData);
+      setStats(statsData);
+    } catch (err) {
+      setError('Failed to load verification data');
+      console.error('Error loading verification data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerificationAction = async (
@@ -157,10 +150,10 @@ export const MentorVerificationPanel: React.FC = () => {
   if (loading) {
     return (
       <div className="mentor-verification-panel">
-        <div className="mentor-verification-panel__loading">
-          <FaRefresh className="spinning" />
-          <span>Loading verification data...</span>
-        </div>
+      <div className="mentor-verification-panel__loading">
+        <FaSync className="spinning" />
+        <span>Loading verification data...</span>
+      </div>
       </div>
     );
   }
@@ -174,7 +167,7 @@ export const MentorVerificationPanel: React.FC = () => {
           onClick={loadData}
           disabled={loading}
         >
-          <FaRefresh className={loading ? 'spinning' : ''} />
+          <FaSync className={loading ? 'spinning' : ''} />
           Refresh
         </button>
       </div>

@@ -115,7 +115,7 @@ export default function AdminPortal() {
   }
 
   // Show mobile admin portal on mobile devices
-  if (isMobile) {
+  if (isMobile && window.innerWidth <= 768) {
     return (
       <MobileAdminPortal
         isOpen={showMobileAdmin}

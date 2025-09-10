@@ -10,17 +10,13 @@
 
 import { 
   doc, 
-  setDoc, 
   updateDoc, 
   getDoc, 
   collection, 
   query, 
   where, 
   getDocs, 
-  orderBy, 
-  limit,
-  serverTimestamp,
-  Timestamp
+  serverTimestamp
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { 
@@ -28,12 +24,36 @@ import {
   VerificationStatus, 
   VerificationStep, 
   VerificationHistory,
-  getVerificationStatusDisplay,
-  canAccessPlatform,
-  isUnderReview,
-  isRejected,
-  isSuspended
+  canAccessPlatform
 } from '../types/verification';
+
+export interface MentorProfile {
+  uid: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  profession: string;
+  linkedin: string;
+  calCom: string;
+  skills: string[];
+  industries: string[];
+  verification: {
+    status: VerificationStatus;
+    currentStep: VerificationStep;
+    submittedAt: Date;
+    lastUpdated: Date;
+    history: Array<{
+      id: string;
+      status: VerificationStatus;
+      step: VerificationStep;
+      timestamp: Date;
+      reviewedBy?: string;
+      notes?: string;
+      reason?: string;
+    }>;
+  };
+}
 
 export class VerificationService {
   /**
@@ -185,7 +205,7 @@ export class VerificationService {
     };
 
     for (const status of statuses) {
-      const mentors = await this.getMentorsByVerificationStatus(status);
+      const mentors = await VerificationService.getMentorsByVerificationStatus(status);
       const count = mentors.length;
       
       stats.total += count;
@@ -217,7 +237,7 @@ export class VerificationService {
    * Checks if a mentor can access the platform
    */
   static async canMentorAccessPlatform(mentorUid: string): Promise<boolean> {
-    const verificationData = await this.getVerificationData(mentorUid);
+    const verificationData = await VerificationService.getVerificationData(mentorUid);
     if (!verificationData) {
       return false; // No verification data means not a mentor or not submitted
     }
@@ -232,7 +252,7 @@ export class VerificationService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - maxDays);
     
-    const pendingMentors = await this.getPendingMentors();
+    const pendingMentors = await VerificationService.getPendingMentors();
     
     return pendingMentors.filter(mentor => {
       const verification = mentor.mentorProgram?.profile?.verification;
@@ -254,7 +274,7 @@ export class VerificationService {
     reviewedBy: string, 
     notes?: string
   ): Promise<void> {
-    await this.updateVerificationStatus(
+    await VerificationService.updateVerificationStatus(
       mentorUid,
       'approved',
       'approved',
@@ -272,7 +292,7 @@ export class VerificationService {
     reason: string, 
     notes?: string
   ): Promise<void> {
-    await this.updateVerificationStatus(
+    await VerificationService.updateVerificationStatus(
       mentorUid,
       'rejected',
       'rejected',
@@ -291,7 +311,7 @@ export class VerificationService {
     reason: string, 
     notes?: string
   ): Promise<void> {
-    await this.updateVerificationStatus(
+    await VerificationService.updateVerificationStatus(
       mentorUid,
       'suspended',
       'rejected', // Use rejected step for suspension
@@ -310,7 +330,7 @@ export class VerificationService {
     reason: string, 
     notes?: string
   ): Promise<void> {
-    await this.updateVerificationStatus(
+    await VerificationService.updateVerificationStatus(
       mentorUid,
       'revoked',
       'rejected', // Use rejected step for revocation
@@ -329,7 +349,7 @@ export class VerificationService {
     step: VerificationStep = 'document_review',
     notes?: string
   ): Promise<void> {
-    await this.updateVerificationStatus(
+    await VerificationService.updateVerificationStatus(
       mentorUid,
       'under_review',
       step,
@@ -342,7 +362,7 @@ export class VerificationService {
    * Gets verification history for a mentor
    */
   static async getVerificationHistory(mentorUid: string): Promise<VerificationHistory[]> {
-    const verificationData = await this.getVerificationData(mentorUid);
+    const verificationData = await VerificationService.getVerificationData(mentorUid);
     return verificationData?.history || [];
   }
 
