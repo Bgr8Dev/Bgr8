@@ -1,5 +1,6 @@
 import { firestore } from '../../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { VerificationData } from '../../../types/verification';
 
 export type UserType = 'mentor' | 'mentee';
 export const MENTOR = 'mentor';
@@ -29,7 +30,11 @@ export interface MentorMenteeProfile {
   isMentor: boolean;
   isMentee: boolean;
   isGenerated?: boolean; // Flag to identify generated profiles
-  [key: string]: string | string[] | boolean | undefined;
+  
+  // Verification data (only for mentors)
+  verification?: VerificationData;
+  
+  [key: string]: string | string[] | boolean | VerificationData | undefined;
 }
 
 export interface MatchResult {
