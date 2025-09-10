@@ -521,13 +521,14 @@
 }
 
 .admin-mentor-verification__modal-content {
-  background: white;
+  background: #1f2937;
+  border: 1px solid #374151;
   border-radius: 0.75rem;
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
 }
 
 .admin-mentor-verification__modal-header {
@@ -535,21 +536,23 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #374151;
+  background: #111827;
+  border-radius: 0.75rem 0.75rem 0 0;
 }
 
 .admin-mentor-verification__modal-header h3 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #111827;
+  color: #f9fafb;
 }
 
 .admin-mentor-verification__modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #6b7280;
+  color: #9ca3af;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 0.25rem;
@@ -557,8 +560,8 @@
 }
 
 .admin-mentor-verification__modal-close:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: #374151;
+  color: #f9fafb;
 }
 
 .admin-mentor-verification__modal-body {
@@ -573,7 +576,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: #f9fafb;
 }
 
 .admin-mentor-verification__modal-details {
@@ -584,22 +587,24 @@
 
 .admin-mentor-verification__modal-details div {
   font-size: 0.875rem;
-  color: #374151;
+  color: #d1d5db;
   line-height: 1.5;
 }
 
 .admin-mentor-verification__modal-details strong {
-  color: #111827;
+  color: #f9fafb;
   font-weight: 600;
 }
 
 .admin-mentor-verification__modal-details a {
-  color: #3b82f6;
+  color: #60a5fa;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .admin-mentor-verification__modal-details a:hover {
   text-decoration: underline;
+  color: #93c5fd;
 }
 
 .admin-mentor-verification__modal-actions {

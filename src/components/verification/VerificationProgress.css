@@ -1,9 +1,9 @@
 .verification-progress {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #1f2937;
+  border: 1px solid #374151;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .verification-progress__header {
@@ -12,19 +12,19 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #374151;
 }
 
 .verification-progress__title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: #f9fafb;
 }
 
 .verification-progress__status {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .verification-progress__timeline {
@@ -62,8 +62,8 @@
 }
 
 .verification-progress__step--pending {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background-color: #374151;
+  border: 1px solid #4b5563;
 }
 
 .verification-progress__step--rejected {
@@ -94,8 +94,9 @@
 }
 
 .verification-progress__step--pending .verification-progress__step-icon {
-  background-color: #d1d5db;
-  color: #6b7280;
+  background-color: #4b5563;
+  color: #9ca3af;
+  border: 2px solid #6b7280;
 }
 
 .verification-progress__step--rejected .verification-progress__step-icon {
@@ -110,13 +111,13 @@
 
 .verification-progress__step-label {
   font-weight: 500;
-  color: #111827;
+  color: #f9fafb;
   margin-bottom: 0.25rem;
 }
 
 .verification-progress__step-note {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #9ca3af;
   font-style: italic;
 }
 
@@ -126,7 +127,7 @@
   top: 2.25rem;
   width: 2px;
   height: 1rem;
-  background-color: #e5e7eb;
+  background-color: #4b5563;
 }
 
 .verification-progress__connector--completed {
@@ -179,9 +180,9 @@
   gap: 2rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #374151;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .verification-progress__date {
@@ -191,7 +192,7 @@
 }
 
 .verification-progress__date strong {
-  color: #111827;
+  color: #f9fafb;
 }
 
 @keyframes pulse {
