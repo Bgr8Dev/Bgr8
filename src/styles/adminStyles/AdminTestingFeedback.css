@@ -73,7 +73,7 @@
 
 .admin-testing-feedback__loading p {
   font-size: 1.1rem;
-  color: #64748b;
+  color: #374151;
   margin: 0;
 }
 
@@ -156,7 +156,7 @@
   margin: 0 0 0.25rem 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #64748b;
+  color: #4b5563;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -188,7 +188,7 @@
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: #6b7280;
   font-size: 0.875rem;
 }
 
@@ -198,6 +198,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   font-size: 0.95rem;
+  color: #1e293b;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
 }
@@ -220,6 +221,7 @@
   border-radius: 12px;
   font-size: 0.95rem;
   background: white;
+  color: #1e293b;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 120px;
@@ -243,6 +245,7 @@
   border-radius: 12px;
   font-size: 0.95rem;
   background: white;
+  color: #1e293b;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -262,6 +265,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   background: white;
+  color: #4b5563;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -313,7 +317,7 @@
 
 .ticket-card__title .category-icon {
   font-size: 1.25rem;
-  color: #64748b;
+  color: #6b7280;
 }
 
 .ticket-card__title h3 {
@@ -384,7 +388,7 @@
 
 .ticket-description {
   margin: 0 0 1rem 0;
-  color: #64748b;
+  color: #4b5563;
   line-height: 1.6;
   font-size: 0.95rem;
 }
@@ -401,7 +405,7 @@
   gap: 0.25rem;
   padding: 0.25rem 0.75rem;
   background: #f1f5f9;
-  color: #475569;
+  color: #374151;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
@@ -503,7 +507,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: #4b5563;
 }
 
 /* Empty State */
@@ -534,7 +538,7 @@
 
 .admin-testing-feedback__empty p {
   margin: 0;
-  color: #64748b;
+  color: #4b5563;
   font-size: 1rem;
 }
 
@@ -605,7 +609,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #64748b;
+  color: #4b5563;
 }
 
 .modal-close:hover {
@@ -643,6 +647,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.95rem;
+  color: #1e293b;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
 }
@@ -677,7 +682,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #64748b;
+  color: #4b5563;
 }
 
 .tag-add-btn:hover {
@@ -715,7 +720,7 @@
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #64748b;
+  color: #4b5563;
   font-size: 0.7rem;
   margin-left: 0.25rem;
 }
@@ -749,7 +754,7 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
-  color: #64748b;
+  color: #4b5563;
   justify-content: center;
 }
 
@@ -763,7 +768,7 @@
   display: block;
   margin-top: 0.5rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: #4b5563;
   text-align: center;
 }
 
@@ -806,7 +811,7 @@
 
 .file-size {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #4b5563;
 }
 
 .file-remove {
@@ -820,7 +825,7 @@
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #64748b;
+  color: #4b5563;
   font-size: 0.7rem;
   margin-left: 0.5rem;
 }
@@ -853,7 +858,7 @@
 
 .btn-secondary {
   background: #f1f5f9;
-  color: #64748b;
+  color: #4b5563;
   border: 2px solid #e2e8f0;
 }
 
