@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { usePagePermissions } from '../hooks/usePagePermissions';
 import { hasRole } from '../utils/userProfile';
-import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
 import { AdminMentorVerification } from './adminPages/AdminMentorVerification';
+import AdminTestingFeedback from './adminPages/AdminTestingFeedback';
 import MentorManagement from '../components/admin/MentorManagement';
 import FeedbackAnalytics from '../components/admin/FeedbackAnalytics';
 import { SessionsManagement } from '../components/admin/SessionsManagement';
@@ -92,6 +93,7 @@ export default function AdminPortal() {
                 'mentors': FaChalkboardTeacher,
                 'verification': FaUserCheck,
                 'feedback': FaComments,
+                'testing-feedback': FaBug,
                 'sessions': FaCalendarAlt,
                 'settings': FaCog
               };
@@ -120,6 +122,7 @@ export default function AdminPortal() {
         {canAccessPage('mentors') && activeSection === 'mentors' && <MentorManagement />}
         {canAccessPage('verification') && activeSection === 'verification' && <AdminMentorVerification />}
         {canAccessPage('feedback') && activeSection === 'feedback' && <FeedbackAnalytics />}
+        {canAccessPage('testing-feedback') && activeSection === 'testing-feedback' && <AdminTestingFeedback />}
         {canAccessPage('sessions') && activeSection === 'sessions' && <SessionsManagement />}
         {canAccessPage('settings') && activeSection === 'settings' && <AdminSettings />}
       </div>

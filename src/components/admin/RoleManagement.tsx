@@ -14,7 +14,8 @@ import {
   FaCrown,
   FaShareAlt,
   FaHandshake,
-  FaCalendar
+  FaCalendar,
+  FaBug
 } from 'react-icons/fa';
 import RoleManagementModal from './RoleManagementModal';
 import './RoleManagement.css';
@@ -34,6 +35,7 @@ interface UserData {
     'social-media': boolean;
     outreach: boolean;
     events: boolean;
+    tester: boolean;
   };
   dateCreated: Timestamp;
   lastLogin?: Date;
@@ -111,6 +113,13 @@ const ROLES: RoleInfo[] = [
     description: 'Organizes and manages events and workshops',
     icon: <FaCalendar />,
     color: '#ff9800'
+  },
+  {
+    key: 'tester',
+    name: 'Tester',
+    description: 'Can submit feedback and bug reports',
+    icon: <FaBug />,
+    color: '#f56565'
   }
 ];
 
@@ -130,6 +139,7 @@ export default function RoleManagement() {
     'social-media': 0,
     outreach: 0,
     events: 0,
+    tester: 0,
     newThisMonth: 0
   });
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -144,19 +154,20 @@ export default function RoleManagement() {
       const querySnapshot = await getDocs(q);
       
       const userData: UserData[] = [];
-      const stats = {
-        total: 0,
-        admins: 0,
-        developers: 0,
-        committee: 0,
-        audit: 0,
-        marketing: 0,
-        'vetting-officer': 0,
-        'social-media': 0,
-        outreach: 0,
-        events: 0,
-        newThisMonth: 0
-      };
+        const stats = {
+          total: 0,
+          admins: 0,
+          developers: 0,
+          committee: 0,
+          audit: 0,
+          marketing: 0,
+          'vetting-officer': 0,
+          'social-media': 0,
+          outreach: 0,
+          events: 0,
+          tester: 0,
+          newThisMonth: 0
+        };
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -176,7 +187,8 @@ export default function RoleManagement() {
             'vetting-officer': false,
             'social-media': false,
             outreach: false,
-            events: false
+            events: false,
+            tester: false
           };
         }
 
@@ -193,6 +205,7 @@ export default function RoleManagement() {
         if (user.roles['social-media'] === true) stats['social-media']++;
         if (user.roles.outreach === true) stats.outreach++;
         if (user.roles.events === true) stats.events++;
+        if (user.roles.tester === true) stats.tester++;
         
         if (user.dateCreated?.toDate() > thirtyDaysAgo) stats.newThisMonth++;
       });
@@ -311,6 +324,7 @@ export default function RoleManagement() {
       case 'social-media': return userStats['social-media'];
       case 'outreach': return userStats.outreach;
       case 'events': return userStats.events;
+      case 'tester': return userStats.tester;
       default: return 0;
     }
   };
@@ -506,14 +520,14 @@ export default function RoleManagement() {
       )}
 
       {/* Role Management Modal */}
-      <RoleManagementModal
-        isOpen={showRoleModal}
-        onClose={() => setShowRoleModal(false)}
-        selectedUser={selectedUser}
-        onToggleRole={toggleUserRole}
-        pulsingRole={pulsingRole}
-        roles={ROLES}
-      />
+        <RoleManagementModal
+          isOpen={showRoleModal}
+          onClose={() => setShowRoleModal(false)}
+          selectedUser={selectedUser}
+          onToggleRole={toggleUserRole}
+          pulsingRole={pulsingRole}
+          roles={ROLES}
+        />
     </div>
   );
 }

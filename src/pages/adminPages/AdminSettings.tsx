@@ -1,10 +1,27 @@
 import { useState } from 'react';
-import { FaCog, FaShieldAlt } from 'react-icons/fa';
+import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle } from 'react-icons/fa';
 import PagePermissionsManager from '../../components/admin/PagePermissionsManager';
+import { PagePermissionsService } from '../../services/pagePermissionsService';
 import '../../styles/adminStyles/AdminSettings.css';
 
 export function AdminSettings() {
   const [activeTab, setActiveTab] = useState<'permissions' | 'general'>('permissions');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+
+  const handleForceUpdatePermissions = async () => {
+    try {
+      setIsUpdating(true);
+      setUpdateMessage(null);
+      await PagePermissionsService.forceUpdatePermissions();
+      setUpdateMessage('Page permissions updated successfully! All new pages have been added to Firebase.');
+    } catch (error) {
+      console.error('Error updating permissions:', error);
+      setUpdateMessage('Failed to update page permissions. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <div className="admin-settings">
@@ -30,20 +47,45 @@ export function AdminSettings() {
         </button>
       </div>
 
-      <div className="admin-settings-content">
-        {activeTab === 'permissions' && (
-          <PagePermissionsManager />
-        )}
-        
-        {activeTab === 'general' && (
-          <div className="admin-settings-general">
-            <div className="settings-section">
-              <h3>General Settings</h3>
-              <p>General system configuration options will be available here.</p>
+            <div className="admin-settings-content">
+              {activeTab === 'permissions' && (
+                <div>
+                  <div className="permissions-update-section">
+                    <div className="permissions-update-header">
+                      <FaExclamationTriangle className="warning-icon" />
+                      <h3>Page Permissions Update</h3>
+                    </div>
+                    <p>
+                      If you're seeing missing pages in the admin portal, click the button below to 
+                      update the page permissions in Firebase with all available pages.
+                    </p>
+                    <button
+                      className="permissions-update-btn"
+                      onClick={handleForceUpdatePermissions}
+                      disabled={isUpdating}
+                    >
+                      {isUpdating ? <FaSync className="spinner" /> : <FaSync />}
+                      {isUpdating ? 'Updating...' : 'Update Page Permissions'}
+                    </button>
+                    {updateMessage && (
+                      <div className={`update-message ${updateMessage.includes('successfully') ? 'success' : 'error'}`}>
+                        {updateMessage}
+                      </div>
+                    )}
+                  </div>
+                  <PagePermissionsManager />
+                </div>
+              )}
+
+              {activeTab === 'general' && (
+                <div className="admin-settings-general">
+                  <div className="settings-section">
+                    <h3>General Settings</h3>
+                    <p>General system configuration options will be available here.</p>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 } 

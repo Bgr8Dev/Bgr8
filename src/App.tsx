@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import Navigation from './navigation/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './utils/updatePermissions'; // Import to make updatePagePermissions available globally
 
 function App() {
   return (

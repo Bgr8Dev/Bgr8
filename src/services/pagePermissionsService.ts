@@ -5,15 +5,11 @@
  * It allows admins to dynamically configure which roles can access which pages.
  */
 
-import { 
-  doc, 
+import {
+  doc,
   getDoc, 
   setDoc, 
-  updateDoc,
-  collection,
-  getDocs,
-  query,
-  where
+  updateDoc
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 
@@ -90,6 +86,14 @@ export class PagePermissionsService {
       isEnabled: true
     },
     {
+      pageId: 'testing-feedback',
+      pageName: 'Testing Feedback',
+      description: 'Manage testing feedback tickets and bug reports',
+      icon: 'FaBug',
+      allowedRoles: ['admin', 'tester', 'developer'],
+      isEnabled: true
+    },
+    {
       pageId: 'sessions',
       pageName: 'Sessions',
       description: 'Manage mentoring sessions and scheduling',
@@ -108,6 +112,37 @@ export class PagePermissionsService {
   ];
 
   /**
+   * Merge existing permissions with default permissions to ensure all pages are present
+   */
+  private static mergePermissions(existing: PagePermission[], defaults: PagePermission[]): PagePermission[] {
+    const merged: PagePermission[] = [];
+    
+    // Add all default permissions
+    defaults.forEach(defaultPage => {
+      const existingPage = existing.find(p => p.pageId === defaultPage.pageId);
+      if (existingPage) {
+        // Use existing page with default values as fallback
+        merged.push({
+          ...defaultPage,
+          ...existingPage
+        });
+      } else {
+        // Add new page from defaults
+        merged.push(defaultPage);
+      }
+    });
+    
+    // Add any custom pages that exist in Firestore but not in defaults
+    existing.forEach(existingPage => {
+      if (!defaults.some(p => p.pageId === existingPage.pageId)) {
+        merged.push(existingPage);
+      }
+    });
+    
+    return merged;
+  }
+
+  /**
    * Get the current page permissions configuration
    */
   static async getPagePermissions(): Promise<PagePermissionsConfig> {
@@ -117,9 +152,20 @@ export class PagePermissionsService {
       
       if (configDoc.exists()) {
         const data = configDoc.data();
+        const existingPermissions = data.permissions || [];
+        
+        // Merge with default permissions to ensure all pages are present and new ones are added
+        const mergedPermissions = this.mergePermissions(existingPermissions, this.DEFAULT_PERMISSIONS);
+        
+        // If there are new permissions, update the database
+        if (mergedPermissions.length !== existingPermissions.length) {
+          console.log('New pages detected, updating permissions in Firebase...');
+          await this.updatePagePermissions(mergedPermissions, 'system');
+        }
+        
         return {
           id: configDoc.id,
-          permissions: data.permissions || this.DEFAULT_PERMISSIONS,
+          permissions: mergedPermissions,
           lastUpdated: data.lastUpdated?.toDate() || new Date(),
           updatedBy: data.updatedBy || 'system'
         };
@@ -222,7 +268,23 @@ export class PagePermissionsService {
       'vetting-officer',
       'social-media',
       'outreach',
-      'events'
+      'events',
+      'tester'
     ];
+  }
+
+  /**
+   * Force update page permissions with all default pages
+   * This can be called manually to ensure all pages are added to Firebase
+   */
+  static async forceUpdatePermissions(): Promise<void> {
+    try {
+      console.log('Force updating page permissions with all default pages...');
+      await this.updatePagePermissions(this.DEFAULT_PERMISSIONS, 'admin');
+      console.log('Page permissions updated successfully!');
+    } catch (error) {
+      console.error('Error force updating page permissions:', error);
+      throw new Error('Failed to force update page permissions');
+    }
   }
 }

@@ -18,6 +18,7 @@ interface UserData {
     'social-media': boolean;
     outreach: boolean;
     events: boolean;
+    tester: boolean;
   };
   dateCreated?: any;
 }

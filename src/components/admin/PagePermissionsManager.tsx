@@ -6,6 +6,7 @@ import {
   FaChalkboardTeacher, 
   FaUserCheck, 
   FaComments, 
+  FaBug,
   FaCalendarAlt, 
   FaCog,
   FaSave,
@@ -20,15 +21,16 @@ interface PagePermissionsManagerProps {
   onPermissionsChange?: (permissions: PagePermission[]) => void;
 }
 
-const iconMap: Record<string, React.ComponentType> = {
-  FaUsers,
-  FaChartBar,
-  FaEnvelope,
-  FaChalkboardTeacher,
-  FaUserCheck,
-  FaComments,
-  FaCalendarAlt,
-  FaCog
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'users': FaUsers,
+  'analytics': FaChartBar,
+  'enquiries': FaEnvelope,
+  'mentors': FaChalkboardTeacher,
+  'verification': FaUserCheck,
+  'feedback': FaComments,
+  'testing-feedback': FaBug,
+  'sessions': FaCalendarAlt,
+  'settings': FaCog
 };
 
 export const PagePermissionsManager: React.FC<PagePermissionsManagerProps> = ({ 
@@ -64,7 +66,7 @@ export const PagePermissionsManager: React.FC<PagePermissionsManagerProps> = ({
     }
   };
 
-  const handlePermissionChange = (pageId: string, field: keyof PagePermission, value: any) => {
+  const handlePermissionChange = (pageId: string, field: keyof PagePermission, value: boolean | string[]) => {
     setPermissions(prev => {
       const updated = prev.map(permission => 
         permission.pageId === pageId 
@@ -181,7 +183,7 @@ export const PagePermissionsManager: React.FC<PagePermissionsManagerProps> = ({
           </div>
           
           {permissions.map((permission) => {
-            const IconComponent = iconMap[permission.icon];
+            const IconComponent = iconMap[permission.pageId];
             
             return (
               <div key={permission.pageId} className="page-permissions-table-row">
