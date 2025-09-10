@@ -50,3 +50,10 @@ export interface Booking {
   feedbackSubmittedAt_mentor?: Timestamp;
   feedbackSubmittedAt_mentee?: Timestamp;
 }
+
+// Extend the Booking interface to include generated properties
+export interface ExtendedBooking extends Booking {
+  isGeneratedMentor?: boolean;
+  isGeneratedMentee?: boolean;
+  bookingMethod?: string;
+}

@@ -366,11 +366,11 @@ export default function FeedbackPage() {
 
   const otherPartyName = userRole === 'mentor' ? booking.menteeName : booking.mentorName;
   const sessionDate = booking?.sessionDate
-    ? new Date(
+    ? (
         // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
         typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
           ? (booking.sessionDate as { toDate: () => Date }).toDate()
-          : booking.sessionDate
+          : (booking.sessionDate.toDate())
       ).toLocaleDateString('en-GB', {
         weekday: 'long',
         year: 'numeric',
