@@ -333,7 +333,7 @@ export const useMentorData = () => {
       
       // If this is a mentor profile, create initial verification data
       if (profileData.isMentor && profileData.type === 'mentor') {
-        const { createInitialVerification } = await import('../../services/verificationService');
+        const { createInitialVerification } = await import('../../../services/verificationService');
         await createInitialVerification(user.uid);
       }
       
