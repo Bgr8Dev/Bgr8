@@ -131,6 +131,8 @@ export default function RoleManagement() {
     events: 0,
     newThisMonth: 0
   });
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [showRoleModal, setShowRoleModal] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -337,7 +339,13 @@ export default function RoleManagement() {
         </div>
 
         {ROLES.map(role => (
-          <div key={role.key} className="stat-card" style={{ borderLeftColor: role.color }}>
+          <div 
+            key={role.key} 
+            className={`stat-card ${roleFilter === role.key ? 'active' : ''}`} 
+            style={{ borderLeftColor: role.color, cursor: 'pointer' }}
+            onClick={() => setRoleFilter(roleFilter === role.key ? 'all' : role.key)}
+            title={`Click to filter by ${role.name}`}
+          >
             <div className="stat-icon" style={{ color: role.color }}>
               {role.icon}
             </div>
@@ -372,12 +380,30 @@ export default function RoleManagement() {
             <option value="all">All Roles</option>
             {ROLES.map(role => (
               <option key={role.key} value={role.key}>
-                {role.name}
+                {role.name} ({getRoleCount(role.key)})
               </option>
             ))}
           </select>
+          {roleFilter !== 'all' && (
+            <button
+              className="clear-filter-btn"
+              onClick={() => setRoleFilter('all')}
+              title="Clear filter"
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Filter Status */}
+      {roleFilter !== 'all' && (
+        <div className="filter-status">
+          <span className="filter-status-text">
+            Showing {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} with {ROLES.find(r => r.key === roleFilter)?.name} role
+          </span>
+        </div>
+      )}
 
       {/* Users Table */}
       <div className="users-table-container">
@@ -422,20 +448,32 @@ export default function RoleManagement() {
                   {user.dateCreated?.toDate().toLocaleDateString()}
                 </td>
                 <td className="user-actions">
-                  <div className="role-toggles">
-                    {ROLES.map(role => (
-                      <label key={role.key} className="role-toggle">
-                        <input
-                          type="checkbox"
-                          checked={user.roles[role.key]}
-                          onChange={() => toggleUserRole(user.uid, role.key, user.roles[role.key])}
-                        />
-                        <span className="toggle-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
-                          <span className="toggle-icon">{role.icon}</span>
+                  <div className="role-management-container">
+                    <div className="role-badges-display">
+                      {getUserRoles(user).map(role => (
+                        <span
+                          key={role.key}
+                          className="role-badge-small"
+                          style={{ backgroundColor: role.color }}
+                          title={role.description}
+                        >
+                          {role.icon}
+                          {role.name}
                         </span>
-                        <span className="toggle-label">{role.name}</span>
-                      </label>
-                    ))}
+                      ))}
+                      {getUserRoles(user).length === 0 && (
+                        <span className="no-roles-small">No roles</span>
+                      )}
+                    </div>
+                    <button
+                      className="manage-roles-btn"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setShowRoleModal(true);
+                      }}
+                    >
+                      Manage Roles
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -449,6 +487,52 @@ export default function RoleManagement() {
           <FaUsers className="no-users-icon" />
           <h3>No users found</h3>
           <p>Try adjusting your search or filter criteria</p>
+        </div>
+      )}
+
+      {/* Role Management Modal */}
+      {showRoleModal && selectedUser && (
+        <div className="role-modal-overlay" onClick={() => setShowRoleModal(false)}>
+          <div className="role-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="role-modal-header">
+              <h3>Manage Roles for {selectedUser.firstName} {selectedUser.lastName}</h3>
+              <button 
+                className="role-modal-close"
+                onClick={() => setShowRoleModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="role-modal-content">
+              <p className="role-modal-email">{selectedUser.email}</p>
+              <div className="role-modal-roles">
+                {ROLES.map(role => (
+                  <label key={role.key} className="role-modal-toggle">
+                    <input
+                      type="checkbox"
+                      checked={selectedUser.roles[role.key]}
+                      onChange={() => toggleUserRole(selectedUser.uid, role.key, selectedUser.roles[role.key])}
+                    />
+                    <span className="role-modal-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
+                      <span className="role-modal-icon">{role.icon}</span>
+                    </span>
+                    <div className="role-modal-info">
+                      <span className="role-modal-name">{role.name}</span>
+                      <span className="role-modal-description">{role.description}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="role-modal-footer">
+              <button 
+                className="role-modal-save"
+                onClick={() => setShowRoleModal(false)}
+              >
+                Done
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
