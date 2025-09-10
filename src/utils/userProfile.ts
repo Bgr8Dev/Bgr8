@@ -12,7 +12,15 @@ export interface UserProfile {
   phoneNumber?: string;
   dateCreated: Date;
   lastUpdated: Date;
-  admin: boolean;
+  // Role-based access control
+  roles: {
+    admin: boolean;
+    developer: boolean;
+    committee: boolean;
+    audit: boolean;
+    marketing: boolean;
+    'vetting-officer': boolean;
+  };
 
   // Mentor/Mentee Profile References
   mentorProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
@@ -84,6 +92,28 @@ export interface UserProfile {
   };
 }
 
+// Role checking utility functions
+export const hasRole = (userProfile: UserProfile | null, role: keyof UserProfile['roles']): boolean => {
+  return userProfile?.roles?.[role] === true;
+};
+
+export const hasAnyRole = (userProfile: UserProfile | null, roles: (keyof UserProfile['roles'])[]): boolean => {
+  if (!userProfile?.roles) return false;
+  return roles.some(role => userProfile.roles[role] === true);
+};
+
+export const hasAllRoles = (userProfile: UserProfile | null, roles: (keyof UserProfile['roles'])[]): boolean => {
+  if (!userProfile?.roles) return false;
+  return roles.every(role => userProfile.roles[role] === true);
+};
+
+export const getUserRoles = (userProfile: UserProfile | null): (keyof UserProfile['roles'])[] => {
+  if (!userProfile?.roles) return [];
+  return Object.entries(userProfile.roles)
+    .filter(([, hasRole]) => hasRole)
+    .map(([role]) => role as keyof UserProfile['roles']);
+};
+
 export const createUserProfile = async (
   uid: string,
   email: string,
@@ -101,7 +131,14 @@ export const createUserProfile = async (
     displayName: `${firstName} ${lastName}`,
     dateCreated: new Date(),
     lastUpdated: new Date(),
-    admin: false,
+    roles: {
+      admin: false,
+      developer: false,
+      committee: false,
+      audit: false,
+      marketing: false,
+      'vetting-officer': false
+    },
     ethnicity: 'N/A',
     nationality: 'N/A',
     activityLog: {

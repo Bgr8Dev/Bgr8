@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { firestore } from '../firebase/firebase';
+import { hasRole } from '../utils/userProfile';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
@@ -43,7 +44,7 @@ export default function AdminPortal() {
   const [showMobileAdmin, setShowMobileAdmin] = useState(false);
 
   useEffect(() => {
-    if (!userProfile?.admin) {
+    if (!hasRole(userProfile, 'admin')) {
       navigate('/');
       return;
     }
@@ -52,7 +53,7 @@ export default function AdminPortal() {
   }, [userProfile, navigate]);
 
   useEffect(() => {
-    if (isMobile && userProfile?.admin) {
+    if (isMobile && hasRole(userProfile, 'admin')) {
       setShowMobileAdmin(true);
     } else {
       setShowMobileAdmin(false);
@@ -110,7 +111,7 @@ export default function AdminPortal() {
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!userProfile?.admin) {
+  if (!hasRole(userProfile, 'admin')) {
     return null;
   }
 

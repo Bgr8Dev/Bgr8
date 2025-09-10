@@ -13,7 +13,43 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true;
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
+    }
+    
+    function isDeveloper() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.developer == true;
+    }
+    
+    function isCommittee() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.committee == true;
+    }
+    
+    function isAudit() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.audit == true;
+    }
+    
+    function isMarketing() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.marketing == true;
+    }
+    
+    function isVettingOfficer() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles['vetting-officer'] == true;
+    }
+    
+    function hasAnyRole(roles) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             roles.hasAny(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles);
     }
     
     function isMentor(userId) {

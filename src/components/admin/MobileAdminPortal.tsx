@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { hasRole } from '../../utils/userProfile';
 import { firestore } from '../../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { 
@@ -69,7 +70,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
   ];
 
   useEffect(() => {
-    if (!userProfile?.admin) {
+    if (!hasRole(userProfile, 'admin')) {
       navigate('/');
       return;
     }
@@ -128,7 +129,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!isOpen || !userProfile?.admin) return null;
+  if (!isOpen || !hasRole(userProfile, 'admin')) return null;
 
   const nextSection = () => {
     if (currentSection < sections.length - 1) {

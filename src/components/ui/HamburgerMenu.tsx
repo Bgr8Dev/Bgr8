@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../hooks/useAuth';
+import { hasRole } from '../../utils/userProfile';
 import '../../styles/HamburgerMenu.css';
 import logo from '../../assets/bgr8-logo-transparent.png';
 
@@ -67,7 +68,7 @@ export default function HamburgerMenu() {
               <div className="mobile-user-actions">
                 <Link to="/profile" onClick={closeMenu}>Profile</Link>
                 <Link to="/settings" onClick={closeMenu}>Settings</Link>
-                {userProfile?.admin && (
+                {hasRole(userProfile, 'admin') && (
                   <Link to="/admin-portal" onClick={closeMenu} className="mobile-admin-link">Admin Portal</Link>
                 )}
                 <button onClick={handleSignOut}>Sign Out</button>
