@@ -293,6 +293,30 @@
   border: 1px solid #e2e8f0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ticket-card.optimistic {
+  opacity: 0.7;
+  transform: scale(0.98);
+  animation: optimisticPulse 0.6s ease-in-out;
+}
+
+@keyframes optimisticPulse {
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.02); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.7; }
 }
 
 .ticket-card:hover {
@@ -304,8 +328,10 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1.5rem 1.5rem 1rem;
+  padding: 1.25rem 1.25rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
+  gap: 0.75rem;
+  min-height: 0;
 }
 
 .ticket-card__title {
@@ -313,6 +339,8 @@
   align-items: center;
   gap: 0.75rem;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .ticket-card__title .category-icon {
@@ -326,13 +354,21 @@
   font-weight: 600;
   color: #1e293b;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .ticket-card__actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 120px;
+  flex-shrink: 0;
 }
 
 .ticket-card:hover .ticket-card__actions {
@@ -343,13 +379,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.875rem;
+  font-size: 0.7rem;
+  flex-shrink: 0;
 }
 
 .action-btn.view {
@@ -383,44 +420,44 @@
 }
 
 .ticket-card__content {
-  padding: 0 1.5rem 1rem;
+  padding: 0.75rem 1.25rem 1rem;
 }
 
 .ticket-description {
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   color: #4b5563;
-  line-height: 1.6;
-  font-size: 0.95rem;
+  line-height: 1.5;
+  font-size: 0.9rem;
 }
 
 .ticket-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .tag {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.75rem;
+  gap: 0.2rem;
+  padding: 0.2rem 0.6rem;
   background: #f1f5f9;
   color: #374151;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
 .ticket-card__footer {
-  padding: 1rem 1.5rem 1.5rem;
+  padding: 0.75rem 1.25rem 1rem;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
 }
 
 .ticket-meta {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -443,27 +480,27 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .ticket-votes {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .vote-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: white;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 
 .vote-btn:hover:not(:disabled) {
@@ -474,6 +511,27 @@
 .vote-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.vote-btn.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.vote-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .vote-btn.up:not(:disabled):hover {
@@ -506,7 +564,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #4b5563;
 }
 
@@ -581,6 +639,7 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-header {
@@ -933,13 +992,7 @@
   background: #6b7280;
 }
 
-.ticket-detail-badge.priority {
-  /* Color set inline via style prop */
-}
-
-.ticket-detail-badge.status {
-  /* Color set inline via style prop */
-}
+/* Priority and status badge colors are set inline via style prop */
 
 .ticket-detail-tags {
   display: flex;
@@ -1211,6 +1264,7 @@
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .comments-header {
@@ -1272,6 +1326,18 @@
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: commentSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes commentSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .comment.internal {
@@ -1554,6 +1620,25 @@
   .ticket-card__actions {
     opacity: 1;
     justify-content: flex-end;
+    gap: 0.2rem;
+    max-width: 100px;
+  }
+  
+  .action-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+  }
+  
+  .ticket-card__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .ticket-card__actions {
+    justify-content: center;
+    flex-wrap: wrap;
   }
   
   .ticket-info {
@@ -1660,5 +1745,31 @@
   
   .comment-internal-toggle {
     align-self: flex-end;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .ticket-card__actions {
+    gap: 0.15rem;
+    max-width: 90px;
+  }
+  
+  .action-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 0.6rem;
+  }
+  
+  .ticket-card__header {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+  
+  .ticket-card__content {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+  
+  .ticket-card__footer {
+    padding: 0.5rem 0.75rem 0.75rem;
   }
 }

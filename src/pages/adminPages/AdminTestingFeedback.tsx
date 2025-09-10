@@ -82,6 +82,7 @@ export default function AdminTestingFeedback() {
     isInternal: false,
     attachments: [] as File[]
   });
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
   const loadTickets = useCallback(async () => {
     try {
@@ -168,12 +169,77 @@ export default function AdminTestingFeedback() {
   // };
 
   const handleVote = async (ticketId: string, voteType: 'up' | 'down') => {
+    const userId = userProfile?.uid || '';
+    const actionKey = `vote-${ticketId}-${voteType}`;
+    
+    // Set loading state
+    setActionLoading(prev => ({ ...prev, [actionKey]: true }));
+    
+    // Optimistic update
+    setTickets(prevTickets => 
+      prevTickets.map(ticket => {
+        if (ticket.id === ticketId) {
+          const isUpvoting = voteType === 'up';
+          const wasUpvoted = ticket.upvoters.includes(userId);
+          const wasDownvoted = ticket.downvoters.includes(userId);
+          
+          let newUpvoters = [...ticket.upvoters];
+          let newDownvoters = [...ticket.downvoters];
+          let newVotes = ticket.votes;
+          
+          if (isUpvoting) {
+            if (wasUpvoted) {
+              // Remove upvote
+              newUpvoters = newUpvoters.filter(id => id !== userId);
+              newVotes -= 1;
+            } else {
+              // Add upvote, remove downvote if exists
+              if (wasDownvoted) {
+                newDownvoters = newDownvoters.filter(id => id !== userId);
+                newVotes += 2; // +1 for upvote, +1 for removing downvote
+              } else {
+                newVotes += 1;
+              }
+              newUpvoters.push(userId);
+            }
+          } else {
+            if (wasDownvoted) {
+              // Remove downvote
+              newDownvoters = newDownvoters.filter(id => id !== userId);
+              newVotes += 1;
+            } else {
+              // Add downvote, remove upvote if exists
+              if (wasUpvoted) {
+                newUpvoters = newUpvoters.filter(id => id !== userId);
+                newVotes -= 2; // -1 for downvote, -1 for removing upvote
+              } else {
+                newVotes -= 1;
+              }
+              newDownvoters.push(userId);
+            }
+          }
+          
+          return {
+            ...ticket,
+            votes: newVotes,
+            upvoters: newUpvoters,
+            downvoters: newDownvoters
+          };
+        }
+        return ticket;
+      })
+    );
+
     try {
-      await FeedbackService.voteTicket(ticketId, userProfile?.uid || '', voteType);
-      await loadTickets();
+      await FeedbackService.voteTicket(ticketId, userId, voteType);
     } catch (err) {
       console.error('Error voting on ticket:', err);
       setError('Failed to vote on ticket');
+      // Revert optimistic update
+      await loadTickets();
+    } finally {
+      // Clear loading state
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }));
     }
   };
 
@@ -184,8 +250,74 @@ export default function AdminTestingFeedback() {
       return;
     }
 
+    // Create optimistic ticket
+    const optimisticTicket: FeedbackTicket = {
+      id: `temp-${Date.now()}`,
+      title: newTicket.title.trim(),
+      description: newTicket.description.trim(),
+      category: newTicket.category,
+      priority: newTicket.priority,
+      status: 'open',
+      reporterId: userProfile?.uid || '',
+      reporterName: userProfile?.displayName || 'Unknown User',
+      reporterEmail: userProfile?.email || '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tags: newTicket.tags,
+      attachments: [],
+      comments: [],
+      votes: 0,
+      upvoters: [],
+      downvoters: [],
+      // Testing-specific fields
+      urlToPage: newTicket.urlToPage.trim() || undefined,
+      browser: newTicket.browser.trim() || undefined,
+      browserVersion: newTicket.browserVersion.trim() || undefined,
+      operatingSystem: newTicket.operatingSystem.trim() || undefined,
+      deviceType: newTicket.deviceType,
+      screenResolution: newTicket.screenResolution.trim() || undefined,
+      stepsToReproduce: newTicket.stepsToReproduce.trim() || undefined,
+      expectedBehavior: newTicket.expectedBehavior.trim() || undefined,
+      actualBehavior: newTicket.actualBehavior.trim() || undefined,
+      severity: newTicket.severity,
+      environment: newTicket.environment,
+      testCaseId: newTicket.testCaseId.trim() || undefined,
+      regression: newTicket.regression,
+      workaround: newTicket.workaround.trim() || undefined
+    };
+
+    // Add optimistic ticket to the list
+    setTickets(prevTickets => [optimisticTicket, ...prevTickets]);
+
+    // Close modal and reset form immediately
+    setShowCreateModal(false);
+    setNewTicket({
+      title: '',
+      description: '',
+      category: 'bug',
+      priority: 'medium',
+      tags: [],
+      tagInput: '',
+      attachments: [],
+      // Testing-specific fields
+      urlToPage: '',
+      browser: '',
+      browserVersion: '',
+      operatingSystem: '',
+      deviceType: 'desktop',
+      screenResolution: '',
+      stepsToReproduce: '',
+      expectedBehavior: '',
+      actualBehavior: '',
+      severity: 'minor',
+      environment: 'production',
+      testCaseId: '',
+      regression: false,
+      workaround: ''
+    });
+
     try {
-      await FeedbackService.createTicket(
+      const ticketId = await FeedbackService.createTicket(
         {
           title: newTicket.title.trim(),
           description: newTicket.description.trim(),
@@ -213,36 +345,22 @@ export default function AdminTestingFeedback() {
         userProfile?.displayName || 'Unknown User',
         userProfile?.email || ''
       );
-      
-      setShowCreateModal(false);
-      setNewTicket({
-        title: '',
-        description: '',
-        category: 'bug',
-        priority: 'medium',
-        tags: [],
-        tagInput: '',
-        attachments: [],
-        // Testing-specific fields
-        urlToPage: '',
-        browser: '',
-        browserVersion: '',
-        operatingSystem: '',
-        deviceType: 'desktop',
-        screenResolution: '',
-        stepsToReproduce: '',
-        expectedBehavior: '',
-        actualBehavior: '',
-        severity: 'minor',
-        environment: 'production',
-        testCaseId: '',
-        regression: false,
-        workaround: ''
-      });
-      await loadTickets();
+
+      // Replace optimistic ticket with real one
+      setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === optimisticTicket.id 
+            ? { ...ticket, id: ticketId }
+            : ticket
+        )
+      );
     } catch (err) {
       console.error('Error creating ticket:', err);
       setError('Failed to create ticket');
+      // Remove optimistic ticket on error
+      setTickets(prevTickets => 
+        prevTickets.filter(ticket => ticket.id !== optimisticTicket.id)
+      );
     }
   };
 
@@ -300,6 +418,22 @@ export default function AdminTestingFeedback() {
   const handleUpdateTicket = async () => {
     if (!editingTicket) return;
 
+    const originalTicket = tickets.find(t => t.id === editingTicket.id);
+    if (!originalTicket) return;
+
+    // Optimistic update
+    setTickets(prevTickets => 
+      prevTickets.map(ticket => 
+        ticket.id === editingTicket.id 
+          ? { ...ticket, ...editingTicket, updatedAt: new Date() }
+          : ticket
+      )
+    );
+
+    // Close modal immediately
+    setShowEditModal(false);
+    setEditingTicket(null);
+
     try {
       await FeedbackService.updateTicket(editingTicket.id, {
         title: editingTicket.title,
@@ -308,13 +442,15 @@ export default function AdminTestingFeedback() {
         priority: editingTicket.priority,
         tags: editingTicket.tags
       });
-      
-      setShowEditModal(false);
-      setEditingTicket(null);
-      await loadTickets();
     } catch (err) {
       console.error('Error updating ticket:', err);
       setError('Failed to update ticket');
+      // Revert optimistic update on error
+      setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === editingTicket.id ? originalTicket : ticket
+        )
+      );
     }
   };
 
@@ -326,14 +462,24 @@ export default function AdminTestingFeedback() {
   const handleConfirmDelete = async () => {
     if (!deletingTicket) return;
 
+    const ticketToDelete = deletingTicket;
+    
+    // Optimistic update - remove ticket from list immediately
+    setTickets(prevTickets => 
+      prevTickets.filter(ticket => ticket.id !== ticketToDelete.id)
+    );
+
+    // Close modal immediately
+    setShowDeleteModal(false);
+    setDeletingTicket(null);
+
     try {
-      await FeedbackService.deleteTicket(deletingTicket.id);
-      setShowDeleteModal(false);
-      setDeletingTicket(null);
-      await loadTickets();
+      await FeedbackService.deleteTicket(ticketToDelete.id);
     } catch (err) {
       console.error('Error deleting ticket:', err);
       setError('Failed to delete ticket');
+      // Revert optimistic update on error
+      setTickets(prevTickets => [ticketToDelete, ...prevTickets]);
     }
   };
 
@@ -360,24 +506,100 @@ export default function AdminTestingFeedback() {
   const handleAddComment = async () => {
     if (!selectedTicketForComments || !newComment.content.trim()) return;
 
+    const optimisticComment = {
+      id: `temp-${Date.now()}`,
+      ticketId: selectedTicketForComments.id,
+      authorId: userProfile?.uid || '',
+      authorName: userProfile?.displayName || 'Unknown User',
+      content: newComment.content.trim(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isInternal: newComment.isInternal,
+      attachments: []
+    };
+
+    // Optimistic update - add comment to the selected ticket
+    setSelectedTicketForComments(prev => 
+      prev ? {
+        ...prev,
+        comments: [...prev.comments, optimisticComment],
+        updatedAt: new Date()
+      } : null
+    );
+
+    // Update the main tickets list as well
+    setTickets(prevTickets => 
+      prevTickets.map(ticket => 
+        ticket.id === selectedTicketForComments.id 
+          ? {
+              ...ticket,
+              comments: [...ticket.comments, optimisticComment],
+              updatedAt: new Date()
+            }
+          : ticket
+      )
+    );
+
+    // Clear comment form immediately
+    setNewComment({
+      content: '',
+      isInternal: false,
+      attachments: []
+    });
+
     try {
-      await FeedbackService.addComment(selectedTicketForComments.id, {
+      const commentId = await FeedbackService.addComment(selectedTicketForComments.id, {
         content: newComment.content.trim(),
         isInternal: newComment.isInternal,
         attachments: newComment.attachments
       }, userProfile?.uid || '', userProfile?.displayName || 'Unknown User');
-      
-      setNewComment({
-        content: '',
-        isInternal: false,
-        attachments: []
-      });
-      
-      // Reload tickets to get updated comments
-      await loadTickets();
+
+      // Replace optimistic comment with real one
+      setSelectedTicketForComments(prev => 
+        prev ? {
+          ...prev,
+          comments: prev.comments.map(comment => 
+            comment.id === optimisticComment.id 
+              ? { ...comment, id: commentId }
+              : comment
+          )
+        } : null
+      );
+
+      setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === selectedTicketForComments.id 
+            ? {
+                ...ticket,
+                comments: ticket.comments.map(comment => 
+                  comment.id === optimisticComment.id 
+                    ? { ...comment, id: commentId }
+                    : comment
+                )
+              }
+            : ticket
+        )
+      );
     } catch (err) {
       console.error('Error adding comment:', err);
       setError('Failed to add comment');
+      // Revert optimistic update on error
+      setSelectedTicketForComments(prev => 
+        prev ? {
+          ...prev,
+          comments: prev.comments.filter(comment => comment.id !== optimisticComment.id)
+        } : null
+      );
+      setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === selectedTicketForComments.id 
+            ? {
+                ...ticket,
+                comments: ticket.comments.filter(comment => comment.id !== optimisticComment.id)
+              }
+            : ticket
+        )
+      );
     }
   };
 
@@ -581,7 +803,7 @@ export default function AdminTestingFeedback() {
           const CategoryIcon = CATEGORY_ICONS[ticket.category] as React.ComponentType<{ className?: string }>;
           
           return (
-            <div key={ticket.id} className="ticket-card">
+            <div key={ticket.id} className={`ticket-card ${ticket.id.startsWith('temp-') ? 'optimistic' : ''}`}>
               <div className="ticket-card__header">
                 <div className="ticket-card__title">
                   <CategoryIcon className="category-icon" />
@@ -665,9 +887,9 @@ export default function AdminTestingFeedback() {
                 <div className="ticket-info">
                   <div className="ticket-votes">
                     <button
-                      className="vote-btn up"
+                      className={`vote-btn up ${actionLoading[`vote-${ticket.id}-up`] ? 'loading' : ''}`}
                       onClick={() => handleVote(ticket.id, 'up')}
-                      disabled={ticket.upvoters.includes(userProfile?.uid || '')}
+                      disabled={ticket.upvoters.includes(userProfile?.uid || '') || actionLoading[`vote-${ticket.id}-up`]}
                       title="Upvote this ticket"
                       aria-label="Upvote this ticket"
                     >
@@ -675,9 +897,9 @@ export default function AdminTestingFeedback() {
                     </button>
                     <span className="vote-count">{ticket.votes}</span>
                     <button
-                      className="vote-btn down"
+                      className={`vote-btn down ${actionLoading[`vote-${ticket.id}-down`] ? 'loading' : ''}`}
                       onClick={() => handleVote(ticket.id, 'down')}
-                      disabled={ticket.downvoters.includes(userProfile?.uid || '')}
+                      disabled={ticket.downvoters.includes(userProfile?.uid || '') || actionLoading[`vote-${ticket.id}-down`]}
                       title="Downvote this ticket"
                       aria-label="Downvote this ticket"
                     >
