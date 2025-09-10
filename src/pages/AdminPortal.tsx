@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { usePagePermissions } from '../hooks/usePagePermissions';
 import { hasRole } from '../utils/userProfile';
 import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
@@ -19,6 +20,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function AdminPortal() {
   const { userProfile } = useAuth();
+  const { getAccessiblePages, canAccessPage, loading: permissionsLoading } = usePagePermissions();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState('users');
@@ -38,6 +40,16 @@ export default function AdminPortal() {
       setShowMobileAdmin(false);
     }
   }, [isMobile, userProfile]);
+
+  // Set default active section to first accessible page
+  useEffect(() => {
+    if (!permissionsLoading) {
+      const accessiblePages = getAccessiblePages();
+      if (accessiblePages.length > 0 && !canAccessPage(activeSection)) {
+        setActiveSection(accessiblePages[0].pageId);
+      }
+    }
+  }, [permissionsLoading, activeSection, getAccessiblePages, canAccessPage]);
 
   if (!hasRole(userProfile, 'admin')) {
     return null;
@@ -64,74 +76,47 @@ export default function AdminPortal() {
         </button>
 
         <div className="admin-nav">
-          <button 
-            className={`admin-nav-item ${activeSection === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveSection('users')}
-          >
-            <FaUsers /> Users
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveSection('analytics')}
-          >
-            <FaChartBar /> Analytics
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'enquiries' ? 'active' : ''}`}
-            onClick={() => setActiveSection('enquiries')}
-          >
-            <FaEnvelope /> Enquiries
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'mentors' ? 'active' : ''}`}
-            onClick={() => setActiveSection('mentors')}
-          >
-            <FaChalkboardTeacher /> Mentors
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'verification' ? 'active' : ''}`}
-            onClick={() => setActiveSection('verification')}
-          >
-            <FaUserCheck /> Verification
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'feedback' ? 'active' : ''}`}
-            onClick={() => setActiveSection('feedback')}
-          >
-            <FaComments /> Feedback
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'sessions' ? 'active' : ''}`}
-            onClick={() => setActiveSection('sessions')}
-          >
-            <FaCalendarAlt /> Sessions
-          </button>
-          
-          <button 
-            className={`admin-nav-item ${activeSection === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveSection('settings')}
-          >
-            <FaCog /> Settings
-          </button>
+          {permissionsLoading ? (
+            <div className="admin-nav-loading">Loading navigation...</div>
+          ) : (
+            getAccessiblePages().map((page) => {
+              const iconMap: Record<string, React.ComponentType> = {
+                'users': FaUsers,
+                'analytics': FaChartBar,
+                'enquiries': FaEnvelope,
+                'mentors': FaChalkboardTeacher,
+                'verification': FaUserCheck,
+                'feedback': FaComments,
+                'sessions': FaCalendarAlt,
+                'settings': FaCog
+              };
+              
+              const IconComponent = iconMap[page.pageId];
+              
+              return (
+                <button 
+                  key={page.pageId}
+                  className={`admin-nav-item ${activeSection === page.pageId ? 'active' : ''}`}
+                  onClick={() => setActiveSection(page.pageId)}
+                  title={page.description}
+                >
+                  {IconComponent && <IconComponent />} {page.pageName}
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
 
       <div className="admin-content">
-        {activeSection === 'users' && <RoleManagement />}
-
-        {activeSection === 'analytics' && <AdminAnalytics />}
-        {activeSection === 'enquiries' && <AdminEnquiries />}
-        {activeSection === 'mentors' && <MentorManagement />}
-        {activeSection === 'verification' && <AdminMentorVerification />}
-        {activeSection === 'feedback' && <FeedbackAnalytics />}
-        {activeSection === 'sessions' && <SessionsManagement />}
-        {activeSection === 'settings' && <AdminSettings />}
+        {canAccessPage('users') && activeSection === 'users' && <RoleManagement />}
+        {canAccessPage('analytics') && activeSection === 'analytics' && <AdminAnalytics />}
+        {canAccessPage('enquiries') && activeSection === 'enquiries' && <AdminEnquiries />}
+        {canAccessPage('mentors') && activeSection === 'mentors' && <MentorManagement />}
+        {canAccessPage('verification') && activeSection === 'verification' && <AdminMentorVerification />}
+        {canAccessPage('feedback') && activeSection === 'feedback' && <FeedbackAnalytics />}
+        {canAccessPage('sessions') && activeSection === 'sessions' && <SessionsManagement />}
+        {canAccessPage('settings') && activeSection === 'settings' && <AdminSettings />}
       </div>
     </div>
   );

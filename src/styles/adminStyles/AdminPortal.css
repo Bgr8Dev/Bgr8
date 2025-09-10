@@ -756,4 +756,11 @@ th {
   .stat-card {
     min-height: 80px;
   }
+}
+
+.admin-nav-loading {
+  padding: 1rem;
+  text-align: center;
+  color: var(--gray-600);
+  font-style: italic;
 } 
