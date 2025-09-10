@@ -10,6 +10,8 @@ import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
+import { useAuth } from '../../../hooks/useAuth';
+import { hasRole } from '../../../utils/userProfile';
 import '../styles/MobileProfileEditModal.css';
 
 interface MobileProfileEditModalProps {
@@ -41,11 +43,15 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
   onAddPastProfession,
   onRemovePastProfession
 }) => {
+  const { userProfile } = useAuth();
   const [currentSection, setCurrentSection] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [devMode, setDevMode] = useState(false);
+  
+  // Check if user has developer role
+  const isDeveloper = hasRole(userProfile, 'developer');
   
   // Local form state for editing
   const [localFormData, setLocalFormData] = useState<ProfileFormData>(profile);
@@ -758,13 +764,16 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                className={`mpem-dev-toggle ${devMode ? 'active' : ''}`}
-                onClick={() => setDevMode(!devMode)}
-              >
-                <FaEdit />
-                {devMode ? 'Dev ON' : 'Dev'}
-              </button>
+              {/* Dev Mode Toggle - Only visible to developers */}
+              {isDeveloper && (
+                <button
+                  className={`mpem-dev-toggle ${devMode ? 'active' : ''}`}
+                  onClick={() => setDevMode(!devMode)}
+                >
+                  <FaEdit />
+                  {devMode ? 'Dev ON' : 'Dev'}
+                </button>
+              )}
             </div>
 
             {/* Progress Bar */}
@@ -839,8 +848,8 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
               </button>
             </div>
 
-            {/* Developer Mode Section */}
-            {devMode && (
+            {/* Developer Mode Section - Only visible to developers */}
+            {isDeveloper && devMode && (
               <div className="mpem-dev-section">
                 <div className="mpem-dev-header">
                   <FaExclamationTriangle />
