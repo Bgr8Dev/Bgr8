@@ -44,6 +44,8 @@ export default function AdminTestingFeedback() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingTicket, setEditingTicket] = useState<FeedbackTicket | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingTicket, setDeletingTicket] = useState<FeedbackTicket | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTicket, setNewTicket] = useState({
     title: '',
@@ -153,17 +155,6 @@ export default function AdminTestingFeedback() {
     }
   };
 
-  const handleDeleteTicket = async (ticketId: string) => {
-    if (!window.confirm('Are you sure you want to delete this ticket?')) return;
-    
-    try {
-      await FeedbackService.deleteTicket(ticketId);
-      await loadTickets();
-    } catch (err) {
-      console.error('Error deleting ticket:', err);
-      setError('Failed to delete ticket');
-    }
-  };
 
   const handleCreateTicket = async () => {
     if (!newTicket.title.trim() || !newTicket.description.trim()) {
@@ -273,6 +264,30 @@ export default function AdminTestingFeedback() {
       console.error('Error updating ticket:', err);
       setError('Failed to update ticket');
     }
+  };
+
+  const handleDeleteClick = (ticket: FeedbackTicket) => {
+    setDeletingTicket(ticket);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingTicket) return;
+
+    try {
+      await FeedbackService.deleteTicket(deletingTicket.id);
+      setShowDeleteModal(false);
+      setDeletingTicket(null);
+      await loadTickets();
+    } catch (err) {
+      console.error('Error deleting ticket:', err);
+      setError('Failed to delete ticket');
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeletingTicket(null);
   };
 
   const formatDate = (date: Date) => {
@@ -485,7 +500,7 @@ export default function AdminTestingFeedback() {
                   </button>
                   <button
                     className="action-btn delete"
-                    onClick={() => handleDeleteTicket(ticket.id)}
+                    onClick={() => handleDeleteClick(ticket)}
                     title="Delete Ticket"
                     aria-label="Delete ticket"
                   >
@@ -1000,6 +1015,85 @@ export default function AdminTestingFeedback() {
                 onClick={handleUpdateTicket}
               >
                 <FaEdit /> Update Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && deletingTicket && (
+        <div className="modal-overlay" onClick={handleCancelDelete}>
+          <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Ticket</h3>
+              <button 
+                className="modal-close"
+                onClick={handleCancelDelete}
+                title="Close modal"
+                aria-label="Close modal"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="delete-warning">
+                <FaExclamationTriangle className="warning-icon" />
+                <h4>Are you sure you want to delete this ticket?</h4>
+                <p>This action cannot be undone. The following ticket will be permanently deleted:</p>
+              </div>
+              
+              <div className="ticket-to-delete">
+                <div className="ticket-preview">
+                  <div className="ticket-preview-header">
+                    <span className="ticket-category">
+                      {deletingTicket.category.replace('_', ' ').toUpperCase()}
+                    </span>
+                    <span 
+                      className="ticket-priority"
+                      style={{ backgroundColor: PRIORITY_COLORS[deletingTicket.priority] }}
+                    >
+                      {deletingTicket.priority.toUpperCase()}
+                    </span>
+                  </div>
+                  <h4 className="ticket-title">{deletingTicket.title}</h4>
+                  <p className="ticket-description">
+                    {deletingTicket.description.length > 100 
+                      ? `${deletingTicket.description.substring(0, 100)}...` 
+                      : deletingTicket.description
+                    }
+                  </p>
+                  <div className="ticket-meta">
+                    <span className="ticket-reporter">by {deletingTicket.reporterName}</span>
+                    <span className="ticket-date">{formatDate(deletingTicket.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="delete-consequences">
+                <h5>This will also delete:</h5>
+                <ul>
+                  <li>All comments on this ticket</li>
+                  <li>All file attachments</li>
+                  <li>Vote history</li>
+                  <li>All related data</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={handleCancelDelete}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={handleConfirmDelete}
+              >
+                <FaTrash /> Delete Permanently
               </button>
             </div>
           </div>
