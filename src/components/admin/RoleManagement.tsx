@@ -11,7 +11,10 @@ import {
   FaShieldAlt,
   FaBullhorn,
   FaUserCheck,
-  FaCrown
+  FaCrown,
+  FaShareAlt,
+  FaHandshake,
+  FaCalendar
 } from 'react-icons/fa';
 import './RoleManagement.css';
 
@@ -27,6 +30,9 @@ interface UserData {
     audit: boolean;
     marketing: boolean;
     'vetting-officer': boolean;
+    'social-media': boolean;
+    outreach: boolean;
+    events: boolean;
   };
   dateCreated: Timestamp;
   lastLogin?: Date;
@@ -83,6 +89,27 @@ const ROLES: RoleInfo[] = [
     description: 'Can review and approve mentor applications',
     icon: <FaUserCheck />,
     color: '#dd6b20'
+  },
+  {
+    key: 'social-media',
+    name: 'Social Media',
+    description: 'Manages social media accounts and content',
+    icon: <FaShareAlt />,
+    color: '#e91e63'
+  },
+  {
+    key: 'outreach',
+    name: 'Outreach',
+    description: 'Handles community outreach and partnerships',
+    icon: <FaHandshake />,
+    color: '#9c27b0'
+  },
+  {
+    key: 'events',
+    name: 'Events',
+    description: 'Organizes and manages events and workshops',
+    icon: <FaCalendar />,
+    color: '#ff9800'
   }
 ];
 
@@ -99,6 +126,9 @@ export default function RoleManagement() {
     audit: 0,
     marketing: 0,
     'vetting-officer': 0,
+    'social-media': 0,
+    outreach: 0,
+    events: 0,
     newThisMonth: 0
   });
 
@@ -118,6 +148,9 @@ export default function RoleManagement() {
         audit: 0,
         marketing: 0,
         'vetting-officer': 0,
+        'social-media': 0,
+        outreach: 0,
+        events: 0,
         newThisMonth: 0
       };
 
@@ -136,9 +169,11 @@ export default function RoleManagement() {
             committee: false,
             audit: false,
             marketing: false,
-            'vetting-officer': false
+            'vetting-officer': false,
+            'social-media': false,
+            outreach: false,
+            events: false
           };
-          console.log(`Created default roles for ${user.email}`);
         }
 
         userData.push(user);
@@ -151,6 +186,9 @@ export default function RoleManagement() {
         if (user.roles.audit === true) stats.audit++;
         if (user.roles.marketing === true) stats.marketing++;
         if (user.roles['vetting-officer'] === true) stats['vetting-officer']++;
+        if (user.roles['social-media'] === true) stats['social-media']++;
+        if (user.roles.outreach === true) stats.outreach++;
+        if (user.roles.events === true) stats.events++;
         
         if (user.dateCreated?.toDate() > thirtyDaysAgo) stats.newThisMonth++;
       });
@@ -211,6 +249,15 @@ export default function RoleManagement() {
           case 'vetting-officer':
             newStats['vetting-officer'] = currentStatus ? newStats['vetting-officer'] - 1 : newStats['vetting-officer'] + 1;
             break;
+          case 'social-media':
+            newStats['social-media'] = currentStatus ? newStats['social-media'] - 1 : newStats['social-media'] + 1;
+            break;
+          case 'outreach':
+            newStats.outreach = currentStatus ? newStats.outreach - 1 : newStats.outreach + 1;
+            break;
+          case 'events':
+            newStats.events = currentStatus ? newStats.events - 1 : newStats.events + 1;
+            break;
         }
         
         
@@ -244,6 +291,9 @@ export default function RoleManagement() {
       case 'audit': return userStats.audit;
       case 'marketing': return userStats.marketing;
       case 'vetting-officer': return userStats['vetting-officer'];
+      case 'social-media': return userStats['social-media'];
+      case 'outreach': return userStats.outreach;
+      case 'events': return userStats.events;
       default: return 0;
     }
   };

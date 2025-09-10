@@ -20,6 +20,9 @@ export interface UserProfile {
     audit: boolean;
     marketing: boolean;
     'vetting-officer': boolean;
+    'social-media': boolean;
+    outreach: boolean;
+    events: boolean;
   };
 
   // Mentor/Mentee Profile References
@@ -137,7 +140,10 @@ export const createUserProfile = async (
       committee: false,
       audit: false,
       marketing: false,
-      'vetting-officer': false
+      'vetting-officer': false,
+      'social-media': false,
+      outreach: false,
+      events: false
     },
     ethnicity: 'N/A',
     nationality: 'N/A',

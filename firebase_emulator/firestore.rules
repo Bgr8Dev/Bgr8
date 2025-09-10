@@ -46,6 +46,24 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles['vetting-officer'] == true;
     }
     
+    function isSocialMedia() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles['social-media'] == true;
+    }
+    
+    function isOutreach() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.outreach == true;
+    }
+    
+    function isEvents() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.events == true;
+    }
+    
     function hasAnyRole(roles) {
       return isAuthenticated() && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
