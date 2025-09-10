@@ -23,6 +23,6 @@ export const updatePagePermissions = async (): Promise<void> => {
 
 // Make it available globally for console access
 if (typeof window !== 'undefined') {
-  (window as any).updatePagePermissions = updatePagePermissions;
+  (window as unknown as { updatePagePermissions: typeof updatePagePermissions }).updatePagePermissions = updatePagePermissions;
   console.log('💡 To update page permissions, run: updatePagePermissions()');
 }

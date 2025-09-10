@@ -20,7 +20,7 @@ interface UserData {
     events: boolean;
     tester: boolean;
   };
-  dateCreated?: any;
+  dateCreated?: Date | string;
 }
 
 interface Role {
