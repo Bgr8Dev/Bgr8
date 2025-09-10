@@ -127,6 +127,7 @@ export default function RoleManagement() {
       querySnapshot.forEach((doc) => {
         const user = doc.data() as UserData;
         
+        
         // Ensure roles object exists with default values
         if (!user.roles) {
           user.roles = {
@@ -137,6 +138,7 @@ export default function RoleManagement() {
             marketing: false,
             'vetting-officer': false
           };
+          console.log(`Created default roles for ${user.email}`);
         }
 
         userData.push(user);
@@ -153,6 +155,7 @@ export default function RoleManagement() {
         if (user.dateCreated?.toDate() > thirtyDaysAgo) stats.newThisMonth++;
       });
 
+      
       
       setUsers(userData);
       setUserStats(stats);
@@ -187,8 +190,30 @@ export default function RoleManagement() {
       // Update stats
       setUserStats(prevStats => {
         const newStats = { ...prevStats };
-        const currentCount = newStats[role as keyof typeof newStats] as number;
-        newStats[role as keyof typeof newStats] = currentStatus ? currentCount - 1 : currentCount + 1;
+        
+        // Update the specific role count
+        switch (role) {
+          case 'admin':
+            newStats.admins = currentStatus ? newStats.admins - 1 : newStats.admins + 1;
+            break;
+          case 'developer':
+            newStats.developers = currentStatus ? newStats.developers - 1 : newStats.developers + 1;
+            break;
+          case 'committee':
+            newStats.committee = currentStatus ? newStats.committee - 1 : newStats.committee + 1;
+            break;
+          case 'audit':
+            newStats.audit = currentStatus ? newStats.audit - 1 : newStats.audit + 1;
+            break;
+          case 'marketing':
+            newStats.marketing = currentStatus ? newStats.marketing - 1 : newStats.marketing + 1;
+            break;
+          case 'vetting-officer':
+            newStats['vetting-officer'] = currentStatus ? newStats['vetting-officer'] - 1 : newStats['vetting-officer'] + 1;
+            break;
+        }
+        
+        
         return newStats;
       });
     } catch (error) {
@@ -209,6 +234,18 @@ export default function RoleManagement() {
 
   const getUserRoles = (user: UserData) => {
     return ROLES.filter(role => user.roles[role.key]);
+  };
+
+  const getRoleCount = (roleKey: keyof UserData['roles']): number => {
+    switch (roleKey) {
+      case 'admin': return userStats.admins;
+      case 'developer': return userStats.developers;
+      case 'committee': return userStats.committee;
+      case 'audit': return userStats.audit;
+      case 'marketing': return userStats.marketing;
+      case 'vetting-officer': return userStats['vetting-officer'];
+      default: return 0;
+    }
   };
 
   if (loading) {
@@ -256,7 +293,7 @@ export default function RoleManagement() {
             </div>
             <div className="stat-content">
               <h3>{role.name}</h3>
-              <p>{userStats[role.key as keyof typeof userStats] || 0}</p>
+              <p>{getRoleCount(role.key)}</p>
             </div>
           </div>
         ))}
