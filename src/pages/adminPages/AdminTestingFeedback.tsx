@@ -40,8 +40,10 @@ export default function AdminTestingFeedback() {
   const [stats, setStats] = useState<FeedbackStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [selectedTicket, setSelectedTicket] = useState<FeedbackTicket | null>(null);
-  // const [showTicketModal, setShowTicketModal] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<FeedbackTicket | null>(null);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingTicket, setEditingTicket] = useState<FeedbackTicket | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTicket, setNewTicket] = useState({
     title: '',
@@ -242,6 +244,37 @@ export default function AdminTestingFeedback() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleViewTicket = (ticket: FeedbackTicket) => {
+    setSelectedTicket(ticket);
+    setShowTicketModal(true);
+  };
+
+  const handleEditTicket = (ticket: FeedbackTicket) => {
+    setEditingTicket(ticket);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateTicket = async () => {
+    if (!editingTicket) return;
+
+    try {
+      await FeedbackService.updateTicket(editingTicket.id, {
+        title: editingTicket.title,
+        description: editingTicket.description,
+        category: editingTicket.category,
+        priority: editingTicket.priority,
+        tags: editingTicket.tags
+      });
+      
+      setShowEditModal(false);
+      setEditingTicket(null);
+      await loadTickets();
+    } catch (err) {
+      console.error('Error updating ticket:', err);
+      setError('Failed to update ticket');
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -436,10 +469,7 @@ export default function AdminTestingFeedback() {
                 <div className="ticket-card__actions">
                   <button
                     className="action-btn view"
-                    onClick={() => {
-                      // TODO: Implement view ticket modal
-                      console.log('View ticket:', ticket.id);
-                    }}
+                    onClick={() => handleViewTicket(ticket)}
                     title="View Details"
                     aria-label="View ticket details"
                   >
@@ -447,10 +477,7 @@ export default function AdminTestingFeedback() {
                   </button>
                   <button
                     className="action-btn edit"
-                    onClick={() => {
-                      // TODO: Implement edit ticket modal
-                      console.log('Edit ticket:', ticket.id);
-                    }}
+                    onClick={() => handleEditTicket(ticket)}
                     title="Edit Ticket"
                     aria-label="Edit ticket"
                   >
@@ -725,6 +752,254 @@ export default function AdminTestingFeedback() {
                 onClick={handleCreateTicket}
               >
                 <FaPlus /> Create Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Ticket Modal */}
+      {showTicketModal && selectedTicket && (
+        <div className="modal-overlay" onClick={() => setShowTicketModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Ticket Details</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowTicketModal(false)}
+                title="Close modal"
+                aria-label="Close modal"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="ticket-detail-section">
+                <h4>Title</h4>
+                <p className="ticket-detail-value">{selectedTicket.title}</p>
+              </div>
+              
+              <div className="ticket-detail-section">
+                <h4>Description</h4>
+                <p className="ticket-detail-value">{selectedTicket.description}</p>
+              </div>
+              
+              <div className="ticket-detail-row">
+                <div className="ticket-detail-section">
+                  <h4>Category</h4>
+                  <span className="ticket-detail-badge category">
+                    {selectedTicket.category.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
+                
+                <div className="ticket-detail-section">
+                  <h4>Priority</h4>
+                  <span 
+                    className="ticket-detail-badge priority"
+                    style={{ backgroundColor: PRIORITY_COLORS[selectedTicket.priority] }}
+                  >
+                    {selectedTicket.priority.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="ticket-detail-section">
+                <h4>Status</h4>
+                <span 
+                  className="ticket-detail-badge status"
+                  style={{ backgroundColor: STATUS_COLORS[selectedTicket.status] }}
+                >
+                  {getStatusIcon(selectedTicket.status)}
+                  {selectedTicket.status.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+              
+              {selectedTicket.tags.length > 0 && (
+                <div className="ticket-detail-section">
+                  <h4>Tags</h4>
+                  <div className="ticket-detail-tags">
+                    {selectedTicket.tags.map(tag => (
+                      <span key={tag} className="ticket-detail-tag">
+                        <FaTag /> {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
+                <div className="ticket-detail-section">
+                  <h4>Attachments</h4>
+                  <div className="ticket-detail-attachments">
+                    {selectedTicket.attachments.map(attachment => (
+                      <div key={attachment.id} className="ticket-detail-attachment">
+                        <span className="attachment-name">{attachment.name}</span>
+                        <span className="attachment-size">{formatFileSize(attachment.size)}</span>
+                        <a 
+                          href={attachment.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="attachment-link"
+                        >
+                          View
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="ticket-detail-row">
+                <div className="ticket-detail-section">
+                  <h4>Created</h4>
+                  <p className="ticket-detail-value">
+                    {formatDate(selectedTicket.createdAt)} by {selectedTicket.reporterName}
+                  </p>
+                </div>
+                
+                <div className="ticket-detail-section">
+                  <h4>Last Updated</h4>
+                  <p className="ticket-detail-value">
+                    {formatDate(selectedTicket.updatedAt)}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="ticket-detail-section">
+                <h4>Votes</h4>
+                <div className="ticket-detail-votes">
+                  <span className="vote-count">{selectedTicket.votes}</span>
+                  <span className="vote-label">votes</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowTicketModal(false)}
+              >
+                Close
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowTicketModal(false);
+                  handleEditTicket(selectedTicket);
+                }}
+              >
+                <FaEdit /> Edit Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Ticket Modal */}
+      {showEditModal && editingTicket && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Ticket</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowEditModal(false)}
+                title="Close modal"
+                aria-label="Close modal"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-group">
+                <label htmlFor="edit-ticket-title">Title *</label>
+                <input
+                  id="edit-ticket-title"
+                  type="text"
+                  value={editingTicket.title}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, title: e.target.value } : null)}
+                  placeholder="Brief description of the issue"
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="edit-ticket-description">Description *</label>
+                <textarea
+                  id="edit-ticket-description"
+                  value={editingTicket.description}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, description: e.target.value } : null)}
+                  placeholder="Detailed description of the issue or feature request"
+                  className="form-textarea"
+                  rows={4}
+                />
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-category">Category</label>
+                  <select
+                    id="edit-ticket-category"
+                    value={editingTicket.category}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, category: e.target.value as FeedbackCategory } : null)}
+                    className="form-select"
+                  >
+                    {CATEGORY_OPTIONS.map(category => (
+                      <option key={category} value={category}>
+                        {category.replace('_', ' ').toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-priority">Priority</label>
+                  <select
+                    id="edit-ticket-priority"
+                    value={editingTicket.priority}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, priority: e.target.value as FeedbackPriority } : null)}
+                    className="form-select"
+                  >
+                    {PRIORITY_OPTIONS.map(priority => (
+                      <option key={priority} value={priority}>
+                        {priority.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="edit-ticket-status">Status</label>
+                <select
+                  id="edit-ticket-status"
+                  value={editingTicket.status}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, status: e.target.value as FeedbackStatus } : null)}
+                  className="form-select"
+                >
+                  {STATUS_OPTIONS.map(status => (
+                    <option key={status} value={status}>
+                      {status.replace('_', ' ').toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowEditModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleUpdateTicket}
+              >
+                <FaEdit /> Update Ticket
               </button>
             </div>
           </div>
