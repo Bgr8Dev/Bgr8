@@ -18,6 +18,7 @@ import '../../styles/adminStyles/MobileAdminPortal.css';
 import { AdminSettings } from '../../pages/adminPages/AdminSettings';
 import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
 import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
+import { AdminMentorVerification } from '../../pages/adminPages/AdminMentorVerification';
 import { MobileMentorManagement } from './MobileMentorManagement';
 import FeedbackAnalytics from './FeedbackAnalytics';
 import { SessionsManagement } from './SessionsManagement';
@@ -61,6 +62,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     { id: 'analytics', name: 'Analytics', icon: '📊' },
     { id: 'enquiries', name: 'Enquiries', icon: '📧' },
     { id: 'mentors', name: 'Mentors', icon: '👨‍🏫' },
+    { id: 'verification', name: 'Verification', icon: '✅' },
     { id: 'feedback', name: 'Feedback', icon: '💬' },
     { id: 'sessions', name: 'Sessions', icon: '📅' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
@@ -269,7 +271,17 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 4: // Feedback
+      case 4: // Verification
+        return (
+          <div className="map-section">
+            <h3 className="map-section-title">Mentor Verification</h3>
+            <div className="map-form-fields">
+              <AdminMentorVerification />
+            </div>
+          </div>
+        );
+
+      case 5: // Feedback
         return (
           <div className="map-section">
             <h3 className="map-section-title">Feedback Analytics</h3>
@@ -279,7 +291,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 5: // Sessions
+      case 6: // Sessions
         return (
           <div className="map-section">
             <h3 className="map-section-title">Sessions Management</h3>
@@ -289,7 +301,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 6: // Settings
+      case 7: // Settings
         return (
           <div className="map-section">
             <h3 className="map-section-title">Admin Settings</h3>

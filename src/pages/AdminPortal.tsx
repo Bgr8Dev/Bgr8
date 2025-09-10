@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { firestore } from '../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaUserEdit, FaCheck, FaTimes, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminSettings } from './adminPages/AdminSettings';
 import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
+import { AdminMentorVerification } from './adminPages/AdminMentorVerification';
 import MentorManagement from '../components/admin/MentorManagement';
 import FeedbackAnalytics from '../components/admin/FeedbackAnalytics';
 import { SessionsManagement } from '../components/admin/SessionsManagement';
@@ -163,6 +164,13 @@ export default function AdminPortal() {
           </button>
           
           <button 
+            className={`admin-nav-item ${activeSection === 'verification' ? 'active' : ''}`}
+            onClick={() => setActiveSection('verification')}
+          >
+            <FaUserCheck /> Verification
+          </button>
+          
+          <button 
             className={`admin-nav-item ${activeSection === 'feedback' ? 'active' : ''}`}
             onClick={() => setActiveSection('feedback')}
           >
@@ -256,6 +264,7 @@ export default function AdminPortal() {
         {activeSection === 'analytics' && <AdminAnalytics />}
         {activeSection === 'enquiries' && <AdminEnquiries />}
         {activeSection === 'mentors' && <MentorManagement />}
+        {activeSection === 'verification' && <AdminMentorVerification />}
         {activeSection === 'feedback' && <FeedbackAnalytics />}
         {activeSection === 'sessions' && <SessionsManagement />}
         {activeSection === 'settings' && <AdminSettings />}
