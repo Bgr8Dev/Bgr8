@@ -15,7 +15,13 @@ import {
   Timestamp,
   writeBatch
 } from 'firebase/firestore';
-import { firestore } from '../firebase/firebase';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from 'firebase/storage';
+import { firestore, storage } from '../firebase/firebase';
 import {
   FeedbackTicket,
   FeedbackComment,
@@ -31,8 +37,67 @@ import {
 
 const FEEDBACK_COLLECTION = 'feedbackTickets';
 const COMMENTS_COLLECTION = 'feedbackComments';
+const STORAGE_BASE_PATH = 'feedback-attachments';
 
 export class FeedbackService {
+  /**
+   * Upload files to Firebase Storage
+   */
+  static async uploadFiles(files: File[], ticketId: string): Promise<FeedbackAttachment[]> {
+    try {
+      const uploadPromises = files.map(async (file) => {
+        const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const fileName = `${fileId}-${file.name}`;
+        const storageRef = ref(storage, `${STORAGE_BASE_PATH}/${ticketId}/${fileName}`);
+        
+        // Upload file
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        // Determine file type
+        let fileType: 'image' | 'video' | 'document' | 'other' = 'other';
+        if (file.type.startsWith('image/')) {
+          fileType = 'image';
+        } else if (file.type.startsWith('video/')) {
+          fileType = 'video';
+        } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text')) {
+          fileType = 'document';
+        }
+        
+        return {
+          id: fileId,
+          name: file.name,
+          url: downloadURL,
+          type: fileType,
+          size: file.size,
+          uploadedAt: new Date()
+        };
+      });
+      
+      return await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      throw new Error('Failed to upload files');
+    }
+  }
+
+  /**
+   * Delete files from Firebase Storage
+   */
+  static async deleteFiles(attachments: FeedbackAttachment[]): Promise<void> {
+    try {
+      const deletePromises = attachments.map(async (attachment) => {
+        const fileRef = ref(storage, attachment.url);
+        await deleteObject(fileRef);
+      });
+      
+      await Promise.all(deletePromises);
+    } catch (error) {
+      console.error('Error deleting files:', error);
+      // Don't throw error here as files might already be deleted
+    }
+  }
+
   /**
    * Create a new feedback ticket
    */
@@ -43,6 +108,7 @@ export class FeedbackService {
     reporterEmail: string
   ): Promise<string> {
     try {
+      // First create the ticket to get the ID
       const ticketRef = await addDoc(collection(firestore, FEEDBACK_COLLECTION), {
         title: ticketData.title,
         description: ticketData.description,
@@ -55,13 +121,33 @@ export class FeedbackService {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         tags: ticketData.tags || [],
+        attachments: [],
         comments: [],
         votes: 0,
         upvoters: [],
         downvoters: []
       });
 
-      return ticketRef.id;
+      const ticketId = ticketRef.id;
+
+      // Upload files if any
+      if (ticketData.attachments && ticketData.attachments.length > 0) {
+        try {
+          const uploadedAttachments = await this.uploadFiles(ticketData.attachments, ticketId);
+          
+          // Update the ticket with attachment URLs
+          await updateDoc(ticketRef, {
+            attachments: uploadedAttachments,
+            updatedAt: serverTimestamp()
+          });
+        } catch (uploadError) {
+          console.error('Error uploading attachments:', uploadError);
+          // Don't fail the entire operation if file upload fails
+          // The ticket is already created, just without attachments
+        }
+      }
+
+      return ticketId;
     } catch (error) {
       console.error('Error creating feedback ticket:', error);
       throw new Error('Failed to create feedback ticket');
@@ -232,6 +318,18 @@ export class FeedbackService {
    */
   static async deleteTicket(ticketId: string): Promise<void> {
     try {
+      // Get the ticket first to access attachments
+      const ticketDoc = await getDoc(doc(firestore, FEEDBACK_COLLECTION, ticketId));
+      
+      if (ticketDoc.exists()) {
+        const ticketData = ticketDoc.data();
+        
+        // Delete associated files
+        if (ticketData.attachments && ticketData.attachments.length > 0) {
+          await this.deleteFiles(ticketData.attachments);
+        }
+      }
+      
       // Delete the ticket
       await deleteDoc(doc(firestore, FEEDBACK_COLLECTION, ticketId));
       

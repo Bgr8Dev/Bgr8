@@ -49,7 +49,8 @@ export default function AdminTestingFeedback() {
     category: 'bug' as FeedbackCategory,
     priority: 'medium' as FeedbackPriority,
     tags: [] as string[],
-    tagInput: ''
+    tagInput: '',
+    attachments: [] as File[]
   });
   const [filters, setFilters] = useState<FeedbackFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
@@ -175,7 +176,8 @@ export default function AdminTestingFeedback() {
           description: newTicket.description.trim(),
           category: newTicket.category,
           priority: newTicket.priority,
-          tags: newTicket.tags
+          tags: newTicket.tags,
+          attachments: newTicket.attachments
         },
         userProfile?.uid || '',
         userProfile?.displayName || 'Unknown User',
@@ -189,7 +191,8 @@ export default function AdminTestingFeedback() {
         category: 'bug',
         priority: 'medium',
         tags: [],
-        tagInput: ''
+        tagInput: '',
+        attachments: []
       });
       await loadTickets();
     } catch (err) {
@@ -214,6 +217,29 @@ export default function AdminTestingFeedback() {
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setNewTicket(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, ...files]
+    }));
+  };
+
+  const handleRemoveFile = (indexToRemove: number) => {
+    setNewTicket(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, index) => index !== indexToRemove)
+    }));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const formatDate = (date: Date) => {
@@ -640,6 +666,47 @@ export default function AdminTestingFeedback() {
                           <FaTimes />
                         </button>
                       </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="ticket-attachments">Attachments</label>
+                <div className="file-input-container">
+                  <input
+                    id="ticket-attachments"
+                    type="file"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="file-input"
+                    accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip"
+                  />
+                  <label htmlFor="ticket-attachments" className="file-input-label">
+                    <FaPlus /> Choose Files
+                  </label>
+                  <span className="file-input-hint">
+                    Images, videos, documents (max 10MB each)
+                  </span>
+                </div>
+                {newTicket.attachments.length > 0 && (
+                  <div className="file-list">
+                    {newTicket.attachments.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <div className="file-info">
+                          <span className="file-name">{file.name}</span>
+                          <span className="file-size">{formatFileSize(file.size)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFile(index)}
+                          className="file-remove"
+                          title="Remove file"
+                          aria-label={`Remove ${file.name}`}
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
