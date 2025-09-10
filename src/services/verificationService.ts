@@ -13,8 +13,6 @@ import {
   updateDoc, 
   getDoc, 
   collection, 
-  query, 
-  where, 
   getDocs, 
   serverTimestamp
 } from 'firebase/firestore';
@@ -151,36 +149,183 @@ export class VerificationService {
   /**
    * Gets all mentors with a specific verification status
    */
-  static async getMentorsByVerificationStatus(status: VerificationStatus): Promise<any[]> {
-    const profilesRef = collection(firestore, 'users');
-    const q = query(
-      profilesRef,
-      where('mentorProgram.profile.verification.status', '==', status)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }));
+  static async getMentorsByVerificationStatus(status: VerificationStatus): Promise<MentorProfile[]> {
+    try {
+      // Get all users first
+      const usersRef = collection(firestore, 'users');
+      const usersSnapshot = await getDocs(usersRef);
+      
+      const mentors: MentorProfile[] = [];
+      
+      // Check each user for mentor profiles with the specific status
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProfileRef = doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile');
+          const mentorProfileDoc = await getDoc(mentorProfileRef);
+          
+          if (mentorProfileDoc.exists()) {
+            const profileData = mentorProfileDoc.data();
+            
+            // Check if this is a mentor profile with the specific verification status
+            if ((profileData.type === 'mentor' || profileData.isMentor === true) && 
+                profileData.verification?.status === status) {
+              mentors.push({
+                uid: userDoc.id,
+                firstName: profileData.firstName || '',
+                lastName: profileData.lastName || '',
+                email: profileData.email || '',
+                phone: profileData.phone || '',
+                profession: profileData.profession || '',
+                linkedin: profileData.linkedin || '',
+                calCom: profileData.calCom || '',
+                skills: profileData.skills || [],
+                industries: profileData.industries || [],
+                verification: {
+                  status: profileData.verification?.status || 'pending' as VerificationStatus,
+                  currentStep: profileData.verification?.currentStep || 'profile_submitted' as VerificationStep,
+                  submittedAt: profileData.verification?.submittedAt?.toDate ? 
+                    profileData.verification.submittedAt.toDate() : 
+                    new Date(profileData.verification?.submittedAt || new Date()),
+                  lastUpdated: profileData.verification?.lastUpdated?.toDate ? 
+                    profileData.verification.lastUpdated.toDate() : 
+                    new Date(profileData.verification?.lastUpdated || new Date()),
+                  history: profileData.verification?.history || []
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          // Continue with other users
+        }
+      }
+      
+      return mentors;
+    } catch (error) {
+      console.error('Error fetching mentors by verification status:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Gets all mentors regardless of verification status
+   */
+  static async getAllMentors(): Promise<MentorProfile[]> {
+    try {
+      // Get all users first
+      const usersRef = collection(firestore, 'users');
+      const usersSnapshot = await getDocs(usersRef);
+      
+      const mentors: MentorProfile[] = [];
+      
+      // Check each user for mentor profiles
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProfileRef = doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile');
+          const mentorProfileDoc = await getDoc(mentorProfileRef);
+          
+          if (mentorProfileDoc.exists()) {
+            const profileData = mentorProfileDoc.data();
+            
+            // Check if this is a mentor profile
+            if (profileData.type === 'mentor' || profileData.isMentor === true) {
+              mentors.push({
+                uid: userDoc.id,
+                firstName: profileData.firstName || '',
+                lastName: profileData.lastName || '',
+                email: profileData.email || '',
+                phone: profileData.phone || '',
+                profession: profileData.profession || '',
+                linkedin: profileData.linkedin || '',
+                calCom: profileData.calCom || '',
+                skills: profileData.skills || [],
+                industries: profileData.industries || [],
+                verification: {
+                  status: profileData.verification?.status || 'pending' as VerificationStatus,
+                  currentStep: profileData.verification?.currentStep || 'profile_submitted' as VerificationStep,
+                  submittedAt: profileData.verification?.submittedAt?.toDate ? 
+                    profileData.verification.submittedAt.toDate() : 
+                    new Date(profileData.verification?.submittedAt || new Date()),
+                  lastUpdated: profileData.verification?.lastUpdated?.toDate ? 
+                    profileData.verification.lastUpdated.toDate() : 
+                    new Date(profileData.verification?.lastUpdated || new Date()),
+                  history: profileData.verification?.history || []
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          // Continue with other users
+        }
+      }
+      
+      return mentors;
+    } catch (error) {
+      console.error('Error fetching all mentors:', error);
+      return [];
+    }
   }
 
   /**
    * Gets all pending mentors that need review
    */
-  static async getPendingMentors(): Promise<any[]> {
-    const profilesRef = collection(firestore, 'users');
-    const q = query(
-      profilesRef,
-      where('mentorProgram.profile.isMentor', '==', true),
-      where('mentorProgram.profile.verification.status', 'in', ['pending', 'under_review'])
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }));
+  static async getPendingMentors(): Promise<MentorProfile[]> {
+    try {
+      // Get all users first
+      const usersRef = collection(firestore, 'users');
+      const usersSnapshot = await getDocs(usersRef);
+      
+      const mentors: MentorProfile[] = [];
+      
+      // Check each user for mentor profiles that are pending or under review
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProfileRef = doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile');
+          const mentorProfileDoc = await getDoc(mentorProfileRef);
+          
+          if (mentorProfileDoc.exists()) {
+            const profileData = mentorProfileDoc.data();
+            
+            // Check if this is a mentor profile with pending or under_review status
+            if ((profileData.type === 'mentor' || profileData.isMentor === true) && 
+                (profileData.verification?.status === 'pending' || profileData.verification?.status === 'under_review')) {
+              mentors.push({
+                uid: userDoc.id,
+                firstName: profileData.firstName || '',
+                lastName: profileData.lastName || '',
+                email: profileData.email || '',
+                phone: profileData.phone || '',
+                profession: profileData.profession || '',
+                linkedin: profileData.linkedin || '',
+                calCom: profileData.calCom || '',
+                skills: profileData.skills || [],
+                industries: profileData.industries || [],
+                verification: {
+                  status: profileData.verification?.status || 'pending' as VerificationStatus,
+                  currentStep: profileData.verification?.currentStep || 'profile_submitted' as VerificationStep,
+                  submittedAt: profileData.verification?.submittedAt?.toDate ? 
+                    profileData.verification.submittedAt.toDate() : 
+                    new Date(profileData.verification?.submittedAt || new Date()),
+                  lastUpdated: profileData.verification?.lastUpdated?.toDate ? 
+                    profileData.verification.lastUpdated.toDate() : 
+                    new Date(profileData.verification?.lastUpdated || new Date()),
+                  history: profileData.verification?.history || []
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          // Continue with other users
+        }
+      }
+      
+      return mentors;
+    } catch (error) {
+      console.error('Error fetching pending mentors:', error);
+      return [];
+    }
   }
 
   /**
@@ -194,43 +339,54 @@ export class VerificationService {
     rejected: number;
     suspended: number;
   }> {
-    const statuses: VerificationStatus[] = ['pending', 'under_review', 'approved', 'rejected', 'suspended', 'revoked'];
-    const stats = {
-      total: 0,
-      pending: 0,
-      underReview: 0,
-      approved: 0,
-      rejected: 0,
-      suspended: 0
-    };
+    try {
+      // Get all mentors once and count by status
+      const allMentors = await VerificationService.getAllMentors();
+      
+      const stats = {
+        total: allMentors.length,
+        pending: 0,
+        underReview: 0,
+        approved: 0,
+        rejected: 0,
+        suspended: 0
+      };
 
-    for (const status of statuses) {
-      const mentors = await VerificationService.getMentorsByVerificationStatus(status);
-      const count = mentors.length;
-      
-      stats.total += count;
-      
-      switch (status) {
-        case 'pending':
-          stats.pending = count;
-          break;
-        case 'under_review':
-          stats.underReview = count;
-          break;
-        case 'approved':
-          stats.approved = count;
-          break;
-        case 'rejected':
-        case 'revoked':
-          stats.rejected += count;
-          break;
-        case 'suspended':
-          stats.suspended = count;
-          break;
-      }
+      // Count mentors by verification status
+      allMentors.forEach(mentor => {
+        const status = mentor.verification?.status || 'pending';
+        switch (status) {
+          case 'pending':
+            stats.pending++;
+            break;
+          case 'under_review':
+            stats.underReview++;
+            break;
+          case 'approved':
+            stats.approved++;
+            break;
+          case 'rejected':
+          case 'revoked':
+            stats.rejected++;
+            break;
+          case 'suspended':
+            stats.suspended++;
+            break;
+        }
+      });
+
+      return stats;
+    } catch (error) {
+      console.error('Error calculating verification stats:', error);
+      return {
+        total: 0,
+        pending: 0,
+        underReview: 0,
+        approved: 0,
+        rejected: 0,
+        suspended: 0
+      };
     }
-
-    return stats;
   }
 
   /**
@@ -248,18 +404,18 @@ export class VerificationService {
   /**
    * Gets mentors that need immediate attention (overdue reviews)
    */
-  static async getOverdueReviews(maxDays: number = 7): Promise<any[]> {
+  static async getOverdueReviews(maxDays: number = 7): Promise<MentorProfile[]> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - maxDays);
     
     const pendingMentors = await VerificationService.getPendingMentors();
     
     return pendingMentors.filter(mentor => {
-      const verification = mentor.mentorProgram?.profile?.verification;
+      const verification = mentor.verification;
       if (!verification) return false;
       
-      const submittedAt = verification.submittedAt?.toDate ? 
-        verification.submittedAt.toDate() : 
+      const submittedAt = verification.submittedAt instanceof Date ? 
+        verification.submittedAt : 
         new Date(verification.submittedAt);
       
       return submittedAt < cutoffDate;
@@ -410,6 +566,7 @@ export const {
   updateVerificationStatus,
   getVerificationData,
   getMentorsByVerificationStatus,
+  getAllMentors,
   getPendingMentors,
   getVerificationStats,
   canMentorAccessPlatform,

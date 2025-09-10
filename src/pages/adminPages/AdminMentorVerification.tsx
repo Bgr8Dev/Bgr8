@@ -103,7 +103,7 @@ export const AdminMentorVerification: React.FC = () => {
       setError(null);
       
       const [mentorsData, statsData, overdueData] = await Promise.all([
-        VerificationService.getPendingMentors(),
+        VerificationService.getAllMentors(),
         VerificationService.getVerificationStats(),
         VerificationService.getOverdueReviews(7) // 7 days overdue
       ]);
@@ -236,6 +236,34 @@ export const AdminMentorVerification: React.FC = () => {
           {error}
         </div>
       )}
+
+      {/* Verification Process Guide */}
+      <div className="admin-mentor-verification__guide">
+        <h3>Verification Process Guide</h3>
+        <div className="admin-mentor-verification__process-steps">
+          <div className="admin-mentor-verification__step">
+            <div className="admin-mentor-verification__step-number">1</div>
+            <div className="admin-mentor-verification__step-content">
+              <strong>Pending Review</strong>
+              <p>Mentor submits application → Click "Start Review" to begin verification</p>
+            </div>
+          </div>
+          <div className="admin-mentor-verification__step">
+            <div className="admin-mentor-verification__step-number">2</div>
+            <div className="admin-mentor-verification__step-content">
+              <strong>Under Review</strong>
+              <p>Review mentor's profile, skills, and qualifications → Click "Approve" or "Reject"</p>
+            </div>
+          </div>
+          <div className="admin-mentor-verification__step">
+            <div className="admin-mentor-verification__step-number">3</div>
+            <div className="admin-mentor-verification__step-content">
+              <strong>Approved</strong>
+              <p>Mentor gains full access to the platform and can start mentoring</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Stats Overview */}
       {stats && (
@@ -389,19 +417,29 @@ export const AdminMentorVerification: React.FC = () => {
                 
                 <div className="admin-mentor-verification__mentor-details">
                   <div className="admin-mentor-verification__mentor-detail">
-                    <strong>Email:</strong> {mentor.email}
+                    <strong>Email:</strong> {mentor.email || 'Not provided'}
                   </div>
                   <div className="admin-mentor-verification__mentor-detail">
-                    <strong>Profession:</strong> {mentor.profession}
+                    <strong>Profession:</strong> {mentor.profession || 'Not specified'}
                   </div>
                   <div className="admin-mentor-verification__mentor-detail">
-                    <strong>Skills:</strong> {mentor.skills.slice(0, 3).join(', ')}
-                    {mentor.skills.length > 3 && ` +${mentor.skills.length - 3} more`}
+                    <strong>Skills:</strong> {mentor.skills && mentor.skills.length > 0 ? 
+                      `${mentor.skills.slice(0, 3).join(', ')}${mentor.skills.length > 3 ? ` +${mentor.skills.length - 3} more` : ''}` : 
+                      'None specified'}
                   </div>
                   <div className="admin-mentor-verification__mentor-detail">
-                    <strong>Industries:</strong> {mentor.industries.slice(0, 2).join(', ')}
-                    {mentor.industries.length > 2 && ` +${mentor.industries.length - 2} more`}
+                    <strong>Industries:</strong> {mentor.industries && mentor.industries.length > 0 ? 
+                      `${mentor.industries.slice(0, 2).join(', ')}${mentor.industries.length > 2 ? ` +${mentor.industries.length - 2} more` : ''}` : 
+                      'None specified'}
                   </div>
+                  {mentor.linkedin && (
+                    <div className="admin-mentor-verification__mentor-detail">
+                      <strong>LinkedIn:</strong> 
+                      <a href={mentor.linkedin} target="_blank" rel="noopener noreferrer" className="admin-mentor-verification__link">
+                        View Profile
+                      </a>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="admin-mentor-verification__mentor-dates">
@@ -414,10 +452,11 @@ export const AdminMentorVerification: React.FC = () => {
                 <button
                   className="admin-mentor-verification__action-btn admin-mentor-verification__action-btn--view"
                   onClick={() => setSelectedMentor(mentor)}
-                  title="View Details"
+                  title="View Full Details"
                   aria-label="View mentor details"
                 >
                   <FaEye />
+                  <span>View</span>
                 </button>
                 
                 {mentor.verification.status === 'pending' && (
@@ -425,10 +464,11 @@ export const AdminMentorVerification: React.FC = () => {
                     className="admin-mentor-verification__action-btn admin-mentor-verification__action-btn--review"
                     onClick={() => handleVerificationAction(mentor.uid, 'move_to_review')}
                     disabled={actionLoading === mentor.uid}
-                    title="Move to Review"
+                    title="Start Review Process"
                     aria-label="Move mentor to review status"
                   >
                     <FaEye />
+                    <span>Start Review</span>
                   </button>
                 )}
                 
@@ -438,21 +478,37 @@ export const AdminMentorVerification: React.FC = () => {
                       className="admin-mentor-verification__action-btn admin-mentor-verification__action-btn--approve"
                       onClick={() => handleVerificationAction(mentor.uid, 'approve')}
                       disabled={actionLoading === mentor.uid}
-                      title="Approve"
+                      title="Approve Mentor"
                       aria-label="Approve mentor verification"
                     >
                       <FaCheck />
+                      <span>Approve</span>
                     </button>
                     <button
                       className="admin-mentor-verification__action-btn admin-mentor-verification__action-btn--reject"
                       onClick={() => handleVerificationAction(mentor.uid, 'reject', undefined, 'Insufficient qualifications')}
                       disabled={actionLoading === mentor.uid}
-                      title="Reject"
+                      title="Reject Application"
                       aria-label="Reject mentor verification"
                     >
                       <FaTimes />
+                      <span>Reject</span>
                     </button>
                   </>
+                )}
+
+                {mentor.verification.status === 'approved' && (
+                  <div className="admin-mentor-verification__status-message">
+                    <FaCheck className="admin-mentor-verification__status-icon" />
+                    <span>Verified & Active</span>
+                  </div>
+                )}
+
+                {mentor.verification.status === 'rejected' && (
+                  <div className="admin-mentor-verification__status-message admin-mentor-verification__status-message--rejected">
+                    <FaTimes className="admin-mentor-verification__status-icon" />
+                    <span>Application Rejected</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -548,3 +604,4 @@ export const AdminMentorVerification: React.FC = () => {
 };
 
 export default AdminMentorVerification;
+

@@ -83,7 +83,7 @@ export const MentorVerificationPanel: React.FC = () => {
       setError(null);
       
       const [mentorsData, statsData] = await Promise.all([
-        VerificationService.getPendingMentors(),
+        VerificationService.getAllMentors(),
         VerificationService.getVerificationStats()
       ]);
       
