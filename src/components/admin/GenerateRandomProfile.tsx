@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { firestore } from '../../firebase/firebase';
-import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 import { getName, MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { Booking } from '../../types/bookings';
@@ -673,34 +673,20 @@ export default function GenerateRandomProfile() {
     
     // Create the base booking object
     const booking: Booking = {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-      mentorName: mentor.name,
-=======
       id: `booking_${Math.random().toString(36).substr(2, 9)}`,
       mentorName: getName(mentor),
->>>>>>> Stashed changes
-=======
-      id: `booking_${Math.random().toString(36).substr(2, 9)}`,
-      mentorName: getName(mentor),
->>>>>>> Stashed changes
-=======
-      id: `booking_${Math.random().toString(36).substr(2, 9)}`,
-      mentorName: getName(mentor),
->>>>>>> Stashed changes
       mentorEmail: mentor.email,
       menteeName: `Test Mentee ${Math.floor(Math.random() * 1000)}`,
       menteeEmail: `mentee${Math.floor(Math.random() * 1000)}@example.com`,
-      sessionDate: sessionDate.toISOString().split('T')[0],
       startTime,
       endTime,
       status,
       mentorId,
       menteeId: `mentee_${Math.random().toString(36).substr(2, 9)}`,
       duration: 60, // 1 hour sessions
-      revenue: Math.floor(Math.random() * 50) + 25, // £25-75 per session
-      createdAt: new Date()
+      revenue: Math.floor(Math.random() * 50) + 25,
+      day: '',
+      createdAt: Timestamp.fromDate(new Date())
     };
     
     // Only add Cal.com specific fields if it's a Cal.com booking
