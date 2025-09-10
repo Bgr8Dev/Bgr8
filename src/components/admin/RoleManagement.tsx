@@ -16,6 +16,7 @@ import {
   FaHandshake,
   FaCalendar
 } from 'react-icons/fa';
+import RoleManagementModal from './RoleManagementModal';
 import './RoleManagement.css';
 
 interface UserData {
@@ -133,6 +134,7 @@ export default function RoleManagement() {
   });
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [pulsingRole, setPulsingRole] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -212,6 +214,10 @@ export default function RoleManagement() {
 
   const toggleUserRole = async (uid: string, role: keyof UserData['roles'], currentStatus: boolean) => {
     try {
+      // Add pulse animation
+      setPulsingRole(role);
+      setTimeout(() => setPulsingRole(null), 600);
+      
       const userRef = doc(firestore, 'users', uid);
       await updateDoc(userRef, {
         [`roles.${role}`]: !currentStatus,
@@ -226,6 +232,15 @@ export default function RoleManagement() {
             : user
         )
       );
+      
+      // Update selectedUser if it's the same user
+      if (selectedUser && selectedUser.uid === uid) {
+        const updatedUser: UserData = { 
+          ...selectedUser, 
+          roles: { ...selectedUser.roles, [role]: !currentStatus } 
+        };
+        setSelectedUser(updatedUser);
+      }
       
       // Update stats
       setUserStats(prevStats => {
@@ -491,50 +506,14 @@ export default function RoleManagement() {
       )}
 
       {/* Role Management Modal */}
-      {showRoleModal && selectedUser && (
-        <div className="role-modal-overlay" onClick={() => setShowRoleModal(false)}>
-          <div className="role-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="role-modal-header">
-              <h3>Manage Roles for {selectedUser.firstName} {selectedUser.lastName}</h3>
-              <button 
-                className="role-modal-close"
-                onClick={() => setShowRoleModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="role-modal-content">
-              <p className="role-modal-email">{selectedUser.email}</p>
-              <div className="role-modal-roles">
-                {ROLES.map(role => (
-                  <label key={role.key} className="role-modal-toggle">
-                    <input
-                      type="checkbox"
-                      checked={selectedUser.roles[role.key]}
-                      onChange={() => toggleUserRole(selectedUser.uid, role.key, selectedUser.roles[role.key])}
-                    />
-                    <span className="role-modal-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
-                      <span className="role-modal-icon">{role.icon}</span>
-                    </span>
-                    <div className="role-modal-info">
-                      <span className="role-modal-name">{role.name}</span>
-                      <span className="role-modal-description">{role.description}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="role-modal-footer">
-              <button 
-                className="role-modal-save"
-                onClick={() => setShowRoleModal(false)}
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RoleManagementModal
+        isOpen={showRoleModal}
+        onClose={() => setShowRoleModal(false)}
+        selectedUser={selectedUser}
+        onToggleRole={toggleUserRole}
+        pulsingRole={pulsingRole}
+        roles={ROLES}
+      />
     </div>
   );
 }

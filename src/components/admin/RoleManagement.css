@@ -324,6 +324,24 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.role-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .no-roles {
@@ -407,6 +425,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .role-modal {
@@ -419,6 +438,29 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+/* Modal animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .role-modal-header {
@@ -485,12 +527,36 @@
   padding: 16px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.role-modal-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
 }
 
 .role-modal-toggle:hover {
   border-color: #cbd5e0;
   background: #f7fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.role-modal-toggle:hover::before {
+  left: 100%;
+}
+
+.role-modal-toggle:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
 }
 
 .role-modal-toggle input[type="checkbox"] {
@@ -503,11 +569,12 @@
   height: 28px;
   background: #e2e8f0;
   border-radius: 28px;
-  transition: background-color 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .role-modal-slider::before {
@@ -517,16 +584,43 @@
   height: 22px;
   background: white;
   border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  left: 3px;
+}
+
+.role-modal-slider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  pointer-events: none;
 }
 
 .role-modal-toggle input[type="checkbox"]:checked + .role-modal-slider {
   background: var(--role-color, #4299e1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(66, 153, 225, 0.2);
 }
 
 .role-modal-toggle input[type="checkbox"]:checked + .role-modal-slider::before {
   transform: translateX(22px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.role-modal-toggle input[type="checkbox"]:checked + .role-modal-slider::after {
+  width: 40px;
+  height: 40px;
+  animation: ripple 0.6s ease-out;
+}
+
+.role-modal-toggle input[type="checkbox"]:checked + .role-modal-slider:hover {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(66, 153, 225, 0.3);
 }
 
 .role-modal-icon {
@@ -540,6 +634,49 @@
 
 .role-modal-toggle input[type="checkbox"]:checked + .role-modal-slider .role-modal-icon {
   opacity: 1;
+}
+
+/* Ripple animation for toggle switch */
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 40px;
+    height: 40px;
+    opacity: 0;
+  }
+}
+
+/* Active state for role items */
+.role-modal-toggle.active {
+  border-color: var(--role-color, #4299e1);
+  background: rgba(66, 153, 225, 0.05);
+  transform: scale(1.02);
+}
+
+.role-modal-toggle.active .role-modal-name {
+  color: var(--role-color, #4299e1);
+  font-weight: 700;
+}
+
+/* Pulse animation for newly toggled items */
+.role-modal-toggle.pulse {
+  animation: pulse 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .role-modal-info {
