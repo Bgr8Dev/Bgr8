@@ -83,6 +83,23 @@ export default function AdminTestingFeedback() {
     attachments: [] as File[]
   });
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [hoveredTicket, setHoveredTicket] = useState<string | null>(null);
+  const [selectedCardRef, setSelectedCardRef] = useState<HTMLDivElement | null>(null);
+
+  // Close floating buttons when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (hoveredTicket && !(event.target as Element).closest('.floating-actions')) {
+        setHoveredTicket(null);
+        setSelectedCardRef(null);
+      }
+    };
+
+    if (hoveredTicket) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [hoveredTicket]);
 
   const loadTickets = useCallback(async () => {
     try {
@@ -440,6 +457,7 @@ export default function AdminTestingFeedback() {
         description: editingTicket.description,
         category: editingTicket.category,
         priority: editingTicket.priority,
+        status: editingTicket.status,
         tags: editingTicket.tags
       });
     } catch (err) {
@@ -823,45 +841,24 @@ export default function AdminTestingFeedback() {
           const CategoryIcon = CATEGORY_ICONS[ticket.category] as React.ComponentType<{ className?: string }>;
           
           return (
-            <div key={ticket.id} className={`ticket-card ${ticket.id.startsWith('temp-') ? 'optimistic' : ''}`}>
+            <div 
+              key={ticket.id} 
+              ref={(el) => {
+                if (hoveredTicket === ticket.id) {
+                  setSelectedCardRef(el);
+                }
+              }}
+              className={`ticket-card ${ticket.id.startsWith('temp-') ? 'optimistic' : ''}`}
+              onClick={(e) => {
+                setSelectedCardRef(e.currentTarget);
+                setHoveredTicket(hoveredTicket === ticket.id ? null : ticket.id);
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="ticket-card__header">
                 <div className="ticket-card__title">
                   <CategoryIcon className="category-icon" />
                   <h3>{ticket.title}</h3>
-                </div>
-                <div className="ticket-card__actions">
-                  <button
-                    className="action-btn view"
-                    onClick={() => handleViewTicket(ticket)}
-                    title="View Details"
-                    aria-label="View ticket details"
-                  >
-                    <FaEye />
-                  </button>
-                  <button
-                    className="action-btn comments"
-                    onClick={() => handleOpenComments(ticket)}
-                    title="View Comments"
-                    aria-label="View ticket comments"
-                  >
-                    <FaComments />
-                  </button>
-                  <button
-                    className="action-btn edit"
-                    onClick={() => handleEditTicket(ticket)}
-                    title="Edit Ticket"
-                    aria-label="Edit ticket"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    className="action-btn delete"
-                    onClick={() => handleDeleteClick(ticket)}
-                    title="Delete Ticket"
-                    aria-label="Delete ticket"
-                  >
-                    <FaTrash />
-                  </button>
                 </div>
               </div>
               
@@ -943,6 +940,82 @@ export default function AdminTestingFeedback() {
           );
         })}
       </div>
+
+      {/* Floating Action Buttons */}
+      {hoveredTicket && selectedCardRef && (
+        <div className="floating-actions">
+          <div 
+            className="floating-actions__container"
+            style={{
+              position: 'absolute',
+              top: selectedCardRef.getBoundingClientRect().top - 80,
+              left: selectedCardRef.getBoundingClientRect().left + (selectedCardRef.getBoundingClientRect().width / 2),
+              transform: 'translateX(-50%)'
+            }}
+          >
+            <button
+              className="floating-action-btn view"
+              onClick={(e) => {
+                e.stopPropagation();
+                const ticket = tickets.find(t => t.id === hoveredTicket);
+                if (ticket) handleViewTicket(ticket);
+              }}
+              title="View Details"
+              aria-label="View ticket details"
+            >
+              <FaEye />
+            </button>
+            <button
+              className="floating-action-btn comments"
+              onClick={(e) => {
+                e.stopPropagation();
+                const ticket = tickets.find(t => t.id === hoveredTicket);
+                if (ticket) handleOpenComments(ticket);
+              }}
+              title="View Comments"
+              aria-label="View ticket comments"
+            >
+              <FaComments />
+            </button>
+            <button
+              className="floating-action-btn edit"
+              onClick={(e) => {
+                e.stopPropagation();
+                const ticket = tickets.find(t => t.id === hoveredTicket);
+                if (ticket) handleEditTicket(ticket);
+              }}
+              title="Edit Ticket"
+              aria-label="Edit ticket"
+            >
+              <FaEdit />
+            </button>
+            <button
+              className="floating-action-btn delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                const ticket = tickets.find(t => t.id === hoveredTicket);
+                if (ticket) handleDeleteClick(ticket);
+              }}
+              title="Delete Ticket"
+              aria-label="Delete ticket"
+            >
+              <FaTrash />
+            </button>
+            <button
+              className="floating-action-btn close"
+              onClick={(e) => {
+                e.stopPropagation();
+                setHoveredTicket(null);
+                setSelectedCardRef(null);
+              }}
+              title="Close"
+              aria-label="Close floating actions"
+            >
+              <FaTimes />
+            </button>
+          </div>
+        </div>
+      )}
 
       {tickets.length === 0 && !loading && (
         <div className="admin-testing-feedback__empty">

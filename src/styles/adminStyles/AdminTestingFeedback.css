@@ -376,64 +376,6 @@
   flex: 1;
 }
 
-.ticket-card__actions {
-  display: flex;
-  gap: 0.25rem;
-  opacity: 0;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  max-width: 120px;
-  flex-shrink: 0;
-}
-
-.ticket-card:hover .ticket-card__actions {
-  opacity: 1;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.7rem;
-  flex-shrink: 0;
-}
-
-.action-btn.view {
-  background: #f0f9ff;
-  color: #0369a1;
-}
-
-.action-btn.view:hover {
-  background: #0ea5e9;
-  color: white;
-}
-
-.action-btn.edit {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.action-btn.edit:hover {
-  background: #f59e0b;
-  color: white;
-}
-
-.action-btn.delete {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-.action-btn.delete:hover {
-  background: #ef4444;
-  color: white;
-}
 
 .ticket-card__content {
   padding: 0.75rem 1.25rem 1rem;
@@ -1571,16 +1513,6 @@
   transform: none;
 }
 
-/* Action Button Styles */
-.action-btn.comments {
-  background: #f0f9ff;
-  color: #0369a1;
-}
-
-.action-btn.comments:hover {
-  background: #0ea5e9;
-  color: white;
-}
 
 /* Animations */
 @keyframes slideInRight {
@@ -1633,18 +1565,6 @@
     align-items: stretch;
   }
   
-  .ticket-card__actions {
-    opacity: 1;
-    justify-content: flex-end;
-    gap: 0.2rem;
-    max-width: 100px;
-  }
-  
-  .action-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 0.65rem;
-  }
   
   .ticket-card__header {
     flex-direction: column;
@@ -1652,10 +1572,6 @@
     gap: 0.75rem;
   }
   
-  .ticket-card__actions {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
   
   .ticket-info {
     flex-direction: column;
@@ -1764,28 +1680,122 @@
   }
 }
 
+/* Floating Action Buttons */
+.floating-actions {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.floating-actions__container {
+  display: flex;
+  gap: 1rem;
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: floatingActionsSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+}
+
+@keyframes floatingActionsSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.floating-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.floating-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.floating-action-btn.view {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.floating-action-btn.view:hover {
+  background: #e0f2fe;
+  color: #0277c7;
+}
+
+.floating-action-btn.comments {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.floating-action-btn.comments:hover {
+  background: #e0f2fe;
+  color: #0277c7;
+}
+
+.floating-action-btn.edit {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.floating-action-btn.edit:hover {
+  background: #fde68a;
+  color: #b45309;
+}
+
+.floating-action-btn.delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.floating-action-btn.delete:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
+
+.floating-action-btn.close {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.floating-action-btn.close:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
 /* Extra small screens */
 @media (max-width: 480px) {
-  .ticket-card__actions {
-    gap: 0.15rem;
-    max-width: 90px;
+  .floating-actions__container {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
   }
   
-  .action-btn {
-    width: 20px;
-    height: 20px;
-    font-size: 0.6rem;
-  }
-  
-  .ticket-card__header {
-    padding: 0.75rem 0.75rem 0.5rem;
-  }
-  
-  .ticket-card__content {
-    padding: 0.5rem 0.75rem 0.75rem;
-  }
-  
-  .ticket-card__footer {
-    padding: 0.5rem 0.75rem 0.75rem;
+  .floating-action-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
 }
