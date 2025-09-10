@@ -381,6 +381,9 @@ export default function FeedbackPage() {
           ? (booking.sessionDate as { toDate: () => Date }).toDate()
           : (booking.sessionDate.toDate())
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
