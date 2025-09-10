@@ -380,6 +380,9 @@ export default function FeedbackPage() {
         typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
           ? (booking.sessionDate as { toDate: () => Date }).toDate()
           : (booking.sessionDate.toDate())
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
       ).toLocaleDateString('en-GB', {
         weekday: 'long',

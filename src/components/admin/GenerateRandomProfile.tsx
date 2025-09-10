@@ -674,7 +674,12 @@ export default function GenerateRandomProfile() {
     // Create the base booking object
     const booking: Booking = {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       mentorName: mentor.name,
+=======
+      id: `booking_${Math.random().toString(36).substr(2, 9)}`,
+      mentorName: getName(mentor),
+>>>>>>> Stashed changes
 =======
       id: `booking_${Math.random().toString(36).substr(2, 9)}`,
       mentorName: getName(mentor),
