@@ -745,12 +745,12 @@
 
 /* Verification Process Guide */
 .admin-mentor-verification__guide {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
   color: white;
   padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
 }
 
 .admin-mentor-verification__guide h3 {
@@ -762,47 +762,52 @@
 
 .admin-mentor-verification__process-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .admin-mentor-verification__step {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.875rem;
   border-radius: 8px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  min-height: 80px;
 }
 
 .admin-mentor-verification__step-number {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-weight: 700;
+  font-size: 0.8rem;
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .admin-mentor-verification__step-content strong {
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.9rem;
   color: white;
+  font-weight: 700;
 }
 
 .admin-mentor-verification__step-content p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.4;
+  font-weight: 400;
 }
 
 /* Enhanced Action Buttons */
@@ -810,20 +815,23 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.875rem;
   border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   text-decoration: none;
-  min-width: 120px;
+  min-width: 100px;
   justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .admin-mentor-verification__action-btn span {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* Status Messages */
@@ -831,23 +839,27 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
   background: #d1fae5;
   color: #065f46;
-  font-size: 0.875rem;
-  font-weight: 500;
-  min-width: 140px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 120px;
   justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border: 1px solid #a7f3d0;
 }
 
 .admin-mentor-verification__status-message--rejected {
   background: #fee2e2;
   color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .admin-mentor-verification__status-icon {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 /* Enhanced Mentor Cards */
@@ -855,10 +867,11 @@
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.25rem;
   margin-bottom: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease-in-out;
+  max-width: 100%;
 }
 
 .admin-mentor-verification__mentor-card:hover {
@@ -868,20 +881,33 @@
 
 .admin-mentor-verification__mentor-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
   margin: 1rem 0;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .admin-mentor-verification__mentor-detail {
-  font-size: 0.875rem;
-  color: #374151;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
 }
 
 .admin-mentor-verification__mentor-detail strong {
-  color: #111827;
+  color: #1f2937;
   font-weight: 600;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .admin-mentor-verification__link {
@@ -895,22 +921,74 @@
   text-decoration: underline;
 }
 
+/* Mentor Card Header */
+.admin-mentor-verification__mentor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-mentor-verification__mentor-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* Mentor Card Actions */
+.admin-mentor-verification__mentor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Mentor Card Dates */
+.admin-mentor-verification__mentor-dates {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.admin-mentor-verification__mentor-dates span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-mentor-verification__mentor-dates span::before {
+  content: "📅";
+  font-size: 0.75rem;
+}
+
 /* Enhanced Stats Cards */
 .admin-mentor-verification__stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
 .admin-mentor-verification__stat {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: 10px;
+  padding: 1.25rem;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease-in-out;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .admin-mentor-verification__stat:hover {
@@ -919,27 +997,64 @@
 }
 
 .admin-mentor-verification__stat-number {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #111827;
   margin-bottom: 0.5rem;
+  line-height: 1;
 }
 
 .admin-mentor-verification__stat-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #6b7280;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  line-height: 1.2;
 }
 
 /* Mobile Responsive Updates */
 @media (max-width: 768px) {
   .admin-mentor-verification__process-steps {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .admin-mentor-verification__mentor-details {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .admin-mentor-verification__mentor-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .admin-mentor-verification__action-btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .admin-mentor-verification__mentor-dates {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .admin-mentor-verification__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .admin-mentor-verification__stat {
+    padding: 1rem;
+    min-height: 80px;
+  }
+
+  .admin-mentor-verification__stat-number {
+    font-size: 1.5rem;
+  }
+
+  .admin-mentor-verification__stat-label {
+    font-size: 0.75rem;
   }
 }
