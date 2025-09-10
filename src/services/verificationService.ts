@@ -14,7 +14,8 @@ import {
   getDoc, 
   collection, 
   getDocs, 
-  serverTimestamp
+  serverTimestamp,
+  Timestamp
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { 
@@ -163,12 +164,23 @@ export class VerificationService {
     };
 
     // Create a clean verification object with only defined values
-    const updatedVerification: Partial<VerificationData> = {
+    // Use serverTimestamp() for date fields to ensure proper Firestore Timestamp format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedVerification: Record<string, any> = {
       status: newStatus,
       currentStep: newStep,
-      submittedAt: safeVerification.submittedAt,
-      lastUpdated: new Date(),
-      history: [...safeVerification.history, historyEntry]
+      submittedAt: Timestamp.fromDate(safeVerification.submittedAt), // Convert Date back to Timestamp
+      lastUpdated: serverTimestamp(), // Use serverTimestamp for lastUpdated
+      history: [
+        ...safeVerification.history.map(entry => ({
+          ...entry,
+          timestamp: Timestamp.fromDate(entry.timestamp) // Convert existing history timestamps to Timestamp
+        })),
+        {
+          ...historyEntry,
+          timestamp: serverTimestamp() // Use serverTimestamp for new history entry
+        }
+      ]
     };
 
     // Only add optional fields if they have values
@@ -187,7 +199,7 @@ export class VerificationService {
     }
 
     if (safeVerification.nextReviewDate) {
-      updatedVerification.nextReviewDate = safeVerification.nextReviewDate;
+      updatedVerification.nextReviewDate = Timestamp.fromDate(safeVerification.nextReviewDate); // Convert to Timestamp
     }
 
     // Deep clean the updatedVerification object to remove any undefined values
