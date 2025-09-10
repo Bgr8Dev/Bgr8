@@ -66,6 +66,7 @@ export const AdminMentorVerification: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showOverdue, setShowOverdue] = useState(false);
   const [overdueMentors, setOverdueMentors] = useState<MentorProfile[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const filterMentors = useCallback(() => {
     let filtered = mentors;
@@ -130,27 +131,99 @@ export const AdminMentorVerification: React.FC = () => {
       
       const currentUser = 'admin'; // In real app, get from auth context
       
+      // Store the original mentor data for rollback if needed
+      const originalMentor = mentors.find(m => m.uid === mentorUid);
+      if (!originalMentor) {
+        throw new Error('Mentor not found');
+      }
+      
+      // Optimistically update the UI
+      const updateMentorInState = (updates: Partial<MentorProfile['verification']>) => {
+        setMentors(prevMentors => 
+          prevMentors.map(mentor => 
+            mentor.uid === mentorUid 
+              ? { ...mentor, verification: { ...mentor.verification, ...updates } }
+              : mentor
+          )
+        );
+        
+        // Add temporary animation class
+        const mentorCard = document.querySelector(`[data-mentor-uid="${mentorUid}"]`);
+        if (mentorCard) {
+          mentorCard.classList.add('status-updating');
+          setTimeout(() => {
+            mentorCard.classList.remove('status-updating');
+          }, 600);
+        }
+      };
+      
+      // Update stats optimistically
+      const updateStats = (statusChange: { from: VerificationStatus; to: VerificationStatus }) => {
+        setStats(prevStats => {
+          if (!prevStats) return prevStats;
+          
+          const statusToProperty: Record<VerificationStatus, keyof VerificationStats> = {
+            'pending': 'pending',
+            'under_review': 'underReview',
+            'approved': 'approved',
+            'rejected': 'rejected',
+            'suspended': 'suspended',
+            'revoked': 'rejected' // Map revoked to rejected for stats
+          };
+          
+          const fromProperty = statusToProperty[statusChange.from];
+          const toProperty = statusToProperty[statusChange.to];
+          
+          return {
+            ...prevStats,
+            [fromProperty]: Math.max(0, prevStats[fromProperty] - 1),
+            [toProperty]: prevStats[toProperty] + 1
+          };
+        });
+      };
+      
       switch (action) {
         case 'approve':
+          updateMentorInState({ status: 'approved', currentStep: 'approved' });
+          updateStats({ from: originalMentor.verification.status, to: 'approved' });
           await VerificationService.approveMentor(mentorUid, currentUser, notes);
           break;
         case 'reject':
           if (!reason) throw new Error('Rejection reason is required');
+          updateMentorInState({ status: 'rejected', currentStep: 'profile_submitted' });
+          updateStats({ from: originalMentor.verification.status, to: 'rejected' });
           await VerificationService.rejectMentor(mentorUid, currentUser, reason, notes);
           break;
         case 'suspend':
           if (!reason) throw new Error('Suspension reason is required');
+          updateMentorInState({ status: 'suspended', currentStep: 'profile_submitted' });
+          updateStats({ from: originalMentor.verification.status, to: 'suspended' });
           await VerificationService.suspendMentor(mentorUid, currentUser, reason, notes);
           break;
         case 'move_to_review':
+          updateMentorInState({ status: 'under_review', currentStep: 'document_review' });
+          updateStats({ from: originalMentor.verification.status, to: 'under_review' });
           await VerificationService.moveToUnderReview(mentorUid, currentUser, 'document_review', notes);
           break;
       }
       
-      // Reload data
-      await loadData();
+      // Close modal
       setSelectedMentor(null);
+      
+      // Show success message
+      const actionMessages = {
+        'approve': 'Mentor approved successfully!',
+        'reject': 'Mentor rejected successfully!',
+        'suspend': 'Mentor suspended successfully!',
+        'move_to_review': 'Mentor moved to review successfully!'
+      };
+      
+      setSuccessMessage(actionMessages[action]);
+      setTimeout(() => setSuccessMessage(null), 3000);
+      
     } catch (err) {
+      // Revert optimistic updates on error
+      await loadData();
       setError(`Failed to ${action} mentor: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setActionLoading(null);
@@ -234,6 +307,13 @@ export const AdminMentorVerification: React.FC = () => {
         <div className="admin-mentor-verification__error">
           <FaExclamationTriangle />
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="admin-mentor-verification__success">
+          <FaCheck />
+          {successMessage}
         </div>
       )}
 
@@ -403,7 +483,7 @@ export const AdminMentorVerification: React.FC = () => {
           </div>
         ) : (
           filteredMentors.map((mentor) => (
-            <div key={mentor.uid} className="admin-mentor-verification__mentor-card">
+            <div key={mentor.uid} className="admin-mentor-verification__mentor-card" data-mentor-uid={mentor.uid}>
               <div className="admin-mentor-verification__mentor-info">
                 <div className="admin-mentor-verification__mentor-header">
                   <h3 className="admin-mentor-verification__mentor-name">

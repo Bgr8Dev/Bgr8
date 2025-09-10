@@ -107,6 +107,32 @@
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
   font-weight: 500;
+  animation: slideInDown 0.3s ease-out;
+}
+
+.admin-mentor-verification__success {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-mentor-verification__stats {
@@ -875,8 +901,46 @@
   padding: 1.25rem;
   margin-bottom: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
   max-width: 100%;
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Status change animations */
+.admin-mentor-verification__mentor-card.status-updating {
+  animation: statusPulse 0.6s ease-in-out;
+}
+
+@keyframes statusPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Smooth status badge transitions */
+.verification-status-badge {
+  transition: all 0.3s ease-in-out;
+}
+
+.verification-status-badge.status-changing {
+  animation: statusChange 0.5s ease-in-out;
+}
+
+@keyframes statusChange {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .admin-mentor-verification__mentor-card:hover {
