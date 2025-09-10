@@ -1,7 +1,6 @@
 import {
   collection,
   doc,
-  addDoc,
   updateDoc,
   deleteDoc,
   getDoc,
@@ -10,9 +9,9 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  writeBatch,
   FieldValue,
-  setDoc
+  setDoc,
+  arrayUnion
 } from 'firebase/firestore';
 import {
   ref,
@@ -33,7 +32,6 @@ import {
 } from '../types/feedback';
 
 const FEEDBACK_COLLECTION = 'feedbackTickets';
-const COMMENTS_COLLECTION = 'feedbackComments';
 const STORAGE_BASE_PATH = 'feedback-attachments';
 const COUNTER_COLLECTION = 'counters';
 
@@ -360,21 +358,8 @@ export class FeedbackService {
         }
       }
       
-      // Delete the ticket
+      // Delete the ticket (comments are stored within the ticket, so they'll be deleted automatically)
       await deleteDoc(doc(firestore, FEEDBACK_COLLECTION, ticketId));
-      
-      // Delete associated comments
-      const commentsQuery = query(
-        collection(firestore, COMMENTS_COLLECTION),
-        where('ticketId', '==', ticketId)
-      );
-      const commentsSnapshot = await getDocs(commentsQuery);
-      
-      const batch = writeBatch(firestore);
-      commentsSnapshot.docs.forEach(commentDoc => {
-        batch.delete(commentDoc.ref);
-      });
-      await batch.commit();
     } catch (error) {
       console.error('Error deleting feedback ticket:', error);
       throw new Error('Failed to delete feedback ticket');
@@ -391,76 +376,38 @@ export class FeedbackService {
     authorName: string
   ): Promise<string> {
     try {
-      // Create the comment first
-      const commentRef = await addDoc(collection(firestore, COMMENTS_COLLECTION), {
+      // Create the comment object
+      const newComment: FeedbackComment = {
+        id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         ticketId,
         authorId,
         authorName,
         content: commentData.content,
         isInternal: commentData.isInternal || false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         attachments: []
-      });
+      };
 
       // Upload attachments if any
-      let uploadedAttachments: FeedbackAttachment[] = [];
       if (commentData.attachments && commentData.attachments.length > 0) {
-        uploadedAttachments = await this.uploadFiles(commentData.attachments, commentRef.id);
-        
-        // Update the comment with attachment URLs
-        await updateDoc(commentRef, {
-          attachments: uploadedAttachments
-        });
+        newComment.attachments = await this.uploadFiles(commentData.attachments, newComment.id);
       }
 
-      // Update the ticket's updatedAt timestamp
-      await updateDoc(doc(firestore, FEEDBACK_COLLECTION, ticketId), {
+      // Add the comment to the ticket's comments array
+      const ticketRef = doc(firestore, FEEDBACK_COLLECTION, ticketId);
+      await updateDoc(ticketRef, {
+        comments: arrayUnion(newComment),
         updatedAt: serverTimestamp()
       });
 
-      return commentRef.id;
+      return newComment.id;
     } catch (error) {
       console.error('Error adding comment:', error);
       throw new Error('Failed to add comment');
     }
   }
 
-  /**
-   * Get comments for a specific ticket
-   */
-  static async getCommentsForTicket(ticketId: string): Promise<FeedbackComment[]> {
-    try {
-      const commentsQuery = query(
-        collection(firestore, COMMENTS_COLLECTION),
-        where('ticketId', '==', ticketId),
-        orderBy('createdAt', 'asc')
-      );
-
-      const snapshot = await getDocs(commentsQuery);
-      const comments: FeedbackComment[] = [];
-
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        comments.push({
-          id: docSnap.id,
-          ticketId: data.ticketId,
-          authorId: data.authorId,
-          authorName: data.authorName,
-          content: data.content,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
-          isInternal: data.isInternal || false,
-          attachments: data.attachments || []
-        });
-      }
-
-      return comments;
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-      throw new Error('Failed to fetch comments');
-    }
-  }
 
   /**
    * Vote on a feedback ticket

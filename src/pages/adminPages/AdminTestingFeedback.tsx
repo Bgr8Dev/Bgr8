@@ -77,7 +77,6 @@ export default function AdminTestingFeedback() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showCommentsSidebar, setShowCommentsSidebar] = useState(false);
   const [selectedTicketForComments, setSelectedTicketForComments] = useState<FeedbackTicket | null>(null);
-  const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState({
     content: '',
     isInternal: false,
@@ -508,37 +507,9 @@ export default function AdminTestingFeedback() {
     setDeletingTicket(null);
   };
 
-  const handleOpenComments = async (ticket: FeedbackTicket) => {
+  const handleOpenComments = (ticket: FeedbackTicket) => {
     setSelectedTicketForComments(ticket);
     setShowCommentsSidebar(true);
-    setLoadingComments(true);
-    
-    try {
-      // Load comments from Firebase
-      const comments = await FeedbackService.getCommentsForTicket(ticket.id);
-      
-      // Update the ticket with loaded comments
-      const ticketWithComments = {
-        ...ticket,
-        comments: comments
-      };
-      
-      setSelectedTicketForComments(ticketWithComments);
-      
-      // Also update the main tickets list
-      setTickets(prevTickets => 
-        prevTickets.map(t => 
-          t.id === ticket.id 
-            ? ticketWithComments
-            : t
-        )
-      );
-    } catch (error) {
-      console.error('Error loading comments:', error);
-      setError('Failed to load comments');
-    } finally {
-      setLoadingComments(false);
-    }
   };
 
   const handleCloseComments = () => {
@@ -1780,14 +1751,7 @@ export default function AdminTestingFeedback() {
             
             <div className="comments-content">
               <div className="comments-list">
-                {loadingComments ? (
-                  <div className="comments-loading">
-                    <div className="loading-spinner"></div>
-                    <p>Loading comments...</p>
-                  </div>
-                ) : (
-                  <>
-                    {selectedTicketForComments.comments.map(comment => (
+                {selectedTicketForComments.comments.map(comment => (
                   <div key={comment.id} className={`comment ${comment.isInternal ? 'internal' : 'public'}`}>
                     <div className="comment-header">
                       <div className="comment-author">
@@ -1819,13 +1783,11 @@ export default function AdminTestingFeedback() {
                     </div>
                   </div>
                 ))}
-                    {selectedTicketForComments.comments.length === 0 && (
-                      <div className="comments-empty">
-                        <FaComments className="comments-empty-icon" />
-                        <p>No comments yet. Be the first to comment!</p>
-                      </div>
-                    )}
-                  </>
+                {selectedTicketForComments.comments.length === 0 && (
+                  <div className="comments-empty">
+                    <FaComments className="comments-empty-icon" />
+                    <p>No comments yet. Be the first to comment!</p>
+                  </div>
                 )}
               </div>
               
