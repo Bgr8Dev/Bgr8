@@ -5,10 +5,10 @@
 > **Empowering individuals through community and mentorship**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Version](https://img.shields.io/badge/version-0.1.4-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-11.3-FF6B35?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
@@ -108,6 +108,17 @@
 | 🗑️ **Smart Cleanup** | Cascading deletes and bulk data management | ✅ Live |
 | 🎨 **Enhanced UI** | Improved styling and user experience | ✅ Live |
 
+### 🔐 Security Features
+
+| Feature | Description | Status |
+|---------|-------------|:------:|
+| 🛡️ **Input Validation** | Comprehensive data sanitization | ✅ Live |
+| 🔒 **Rate Limiting** | API and authentication rate limiting | ✅ Live |
+| 🚫 **XSS Protection** | Cross-site scripting prevention | ✅ Live |
+| 🛡️ **CSRF Protection** | Cross-site request forgery prevention | ✅ Live |
+| 🔐 **Password Security** | Strong password requirements (12+ chars) | ✅ Live |
+| 🗑️ **Cascading Deletes** | Maintains database integrity | ✅ Live |
+
 </details>
 
 ---
@@ -119,9 +130,9 @@
 ```mermaid
 graph TD
     A[🎨 Frontend] --> B[⚛️ React + TypeScript]
-    A --> C[⚡ Vite]
+    A --> C[⚡ Vite 6.1]
     A --> D[🎨 CSS Variables]
-    E[🔧 Backend Services] --> F[🔥 Firebase]
+    E[🔧 Backend Services] --> F[🔥 Firebase 11.3]
     F --> G[🔐 Authentication]
     F --> H[🗄️ Firestore]
     F --> I[📦 Storage]
@@ -132,12 +143,16 @@ graph TD
     R[🛠️ Admin Tools] --> S[👥 Profile Generation]
     R --> T[📅 Availability Generation]
     R --> U[🗑️ Data Cleanup]
+    V[🛡️ Security] --> W[🔒 Rate Limiting]
+    V --> X[🛡️ Input Validation]
+    V --> Y[🔐 Password Security]
     
     style A fill:#61DAFB
     style E fill:#FFCA28
     style F fill:#FF6B35
     style L fill:#00E676
     style R fill:#FF9800
+    style V fill:#E91E63
 ```
 
 **Our platform leverages cutting-edge technologies for optimal performance and user experience.**
@@ -356,37 +371,62 @@ bgr8/
 ├── 📁 src/
 │   ├── 🧩 components/         # React components
 │   │   ├── 👨‍💼 admin/          # Admin-specific components
-│   │   │   ├── 📊 Analytics components
+│   │   │   ├── 📊 Analytics components (FeedbackAnalytics, BookingAnalytics)
 │   │   │   ├── 🎲 GenerateRandomProfile.tsx
 │   │   │   ├── 👥 MentorManagement.tsx
-│   │   │   └── 📋 Management components
-│   │   ├── 🎬 animations/      # Animation components
+│   │   │   ├── 📋 Bookings management (BookingsTable, BookingsGrouped)
+│   │   │   ├── 📅 SessionsManagement.tsx
+│   │   │   └── 🔧 Admin utilities (AdminMentorModal, BookingDetailsModal)
+│   │   ├── 🎬 animations/      # Animation components (LoadingSpinner)
 │   │   ├── 🎨 ui/              # UI components
+│   │   ├── 📝 feedback/        # Feedback components
+│   │   ├── 📅 sessions/        # Session-related components
 │   │   └── 🧠 widgets/         # Widget components
 │   │       └── 🎓 MentorAlgorithm/  # Mentor matching logic
 │   │           ├── 📅 availability/  # Availability management
 │   │           ├── 📅 booking/       # Booking system
-│   │           └── 🔗 CalCom/        # Cal.com integration
+│   │           ├── 🔗 CalCom/        # Cal.com integration
+│   │           └── 🧮 algorithm/     # Matching algorithm (matchUsers.ts)
 │   ├── 📄 pages/              # Page components
-│   │   ├── 👨‍💼 adminPages/      # Admin pages
-│   │   ├── 🔐 authPages/       # Authentication pages
-│   │   ├── 💼 businessPages/   # Business pages
-│   │   └── 🛠️ utilPages/        # Utility pages
+│   │   ├── 👨‍💼 adminPages/      # Admin pages (AdminPortal, AdminEnquiries, AdminSettings)
+│   │   ├── 🔐 authPages/       # Authentication pages (SignIn, Register, ForgotPassword)
+│   │   ├── 💼 businessPages/   # Business pages (BGr8)
+│   │   ├── 🎓 mentorPages/     # Mentor-related pages
+│   │   └── 🛠️ utilPages/        # Utility pages (Profile, Settings, Feedback)
 │   ├── 🎨 styles/             # CSS stylesheets
 │   │   ├── 👨‍💼 adminStyles/    # Admin-specific styles
 │   │   ├── 💼 businessStyles/  # Business-specific styles
 │   │   ├── 🧩 components/      # Component-specific styles
-│   │   └── 💳 payment/         # Payment-related styles
-│   ├── 🪝 hooks/              # Custom React hooks
-│   ├── 🔄 contexts/           # React context providers
+│   │   └── 💳 payment/         # Payment-related styles (Success, Cancel)
+│   ├── 🪝 hooks/              # Custom React hooks (useAuth, useIsMobile)
+│   ├── 🔄 contexts/           # React context providers (AuthContext)
 │   ├── 🛠️ utils/              # Utility functions
+│   │   ├── 🔐 security.ts      # Security utilities
+│   │   ├── 🛡️ securityMonitor.ts # Security monitoring
+│   │   ├── 👤 userProfile.ts   # User profile utilities
+│   │   └── 🎨 iconMapping.tsx  # Icon mapping utilities
 │   ├── 📝 types/              # TypeScript type definitions
+│   │   ├── 👤 user.ts          # User profile types
+│   │   ├── 📅 sessions.ts      # Session types
+│   │   ├── 📋 bookings.ts      # Booking types
+│   │   ├── 🏢 b8fc.ts          # Business types
+│   │   └── 👨‍💼 admin.ts         # Admin types
 │   ├── 🔥 firebase/           # Firebase configuration
+│   │   ├── 🔧 firebase.tsx     # Main Firebase config
+│   │   └── 🛠️ emulatorUtils.ts # Emulator utilities
 │   ├── 🛡️ middleware/         # Security middleware
-│   ├── 🧭 navigation/         # Navigation logic
+│   ├── 🧭 navigation/         # Navigation logic (navigation.tsx)
 │   ├── 📊 constants/          # Application constants
-│   ├── 🔧 config/             # Configuration files
-│   └── 🎨 assets/             # Static assets (images, etc.)
+│   │   ├── 🎓 skillsByCategory.ts
+│   │   ├── 🏛️ ukEducationLevels.ts
+│   │   ├── 🏢 industries.ts
+│   │   ├── 🎨 hobbiesByCategory.ts
+│   │   ├── 🏛️ religionOptions.ts
+│   │   ├── 🌍 ethnicityOptions.ts
+│   │   └── 🗺️ ukCounties.ts
+│   ├── 🔧 config/             # Configuration files (security.ts)
+│   ├── 🎨 assets/             # Static assets (images, etc.)
+│   └── 🔧 services/           # Service layer (sessionsService.ts)
 ├── 🌐 public/                 # Public static assets
 ├── 🔥 firebase_emulator/      # Firebase emulator configuration
 │   ├── 📄 README.md           # Emulator setup instructions
@@ -485,6 +525,17 @@ If you discover a security vulnerability, please:
 - 🚫 **XSS Protection** - Cross-site scripting prevention
 - 🛡️ **CSRF Protection** - Cross-site request forgery prevention
 - 🗑️ **Cascading Deletes** - Maintains database integrity
+- 🔒 **Rate Limiting** - API and authentication rate limiting
+- 🔐 **Password Security** - Strong password requirements (12+ characters)
+- 🛡️ **Security Headers** - Comprehensive security headers
+- 🔒 **Session Management** - Secure session handling
+
+### Security Tools
+
+- 🛡️ **ESLint Security** - Security-focused linting
+- 🔍 **Snyk** - Vulnerability scanning
+- 📊 **Security Monitoring** - Real-time security monitoring
+- 🔐 **Middleware Security** - Request validation and sanitization
 
 </details>
 
@@ -550,13 +601,14 @@ If you discover a security vulnerability, please:
 
 ### Technologies & Libraries
 
-- ⚛️ **React** - UI framework
-- 🔥 **Firebase** - Backend services
+- ⚛️ **React 18.2** - UI framework
+- 🔥 **Firebase 11.3** - Backend services
 - 📅 **Cal.com** - Calendar & booking system
-- ⚡ **Vite** - Build tool
+- ⚡ **Vite 6.1** - Build tool
 - 🎨 **CSS3** - Styling with CSS variables
 - 🔍 **Search Algorithms** - Intelligent filtering and discovery
 - 📊 **Data Management** - Comprehensive testing and cleanup tools
+- 🛡️ **Security Tools** - ESLint security, Snyk, custom security middleware
 
 ---
 

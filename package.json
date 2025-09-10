@@ -1,7 +1,7 @@
 {
   "name": "bgr8",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.6.13",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,11 +36,11 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "eslint-plugin-security": "^2.1.1",
+    "firebase-tools": "^14.12.0",
     "globals": "^15.14.0",
     "snyk": "^1.1250.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",
-    "vite": "^6.1.0",
-    "firebase-tools": "^14.12.0"
+    "vite": "^6.1.0"
   }
 }

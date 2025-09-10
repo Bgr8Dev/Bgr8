@@ -12,6 +12,8 @@ import { AdminEnquiries } from './adminPages/AdminEnquiries';
 import MentorManagement from '../components/admin/MentorManagement';
 import FeedbackAnalytics from '../components/admin/FeedbackAnalytics';
 import { SessionsManagement } from '../components/admin/SessionsManagement';
+import { MobileAdminPortal } from '../components/admin/MobileAdminPortal';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface UserData {
   uid: string;
@@ -27,6 +29,7 @@ interface UserData {
 export default function AdminPortal() {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [users, setUsers] = useState<UserData[]>([]);
   const [, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('users');
@@ -36,6 +39,7 @@ export default function AdminPortal() {
     admins: 0,
     newThisMonth: 0
   });
+  const [showMobileAdmin, setShowMobileAdmin] = useState(false);
 
   useEffect(() => {
     if (!userProfile?.admin) {
@@ -45,6 +49,14 @@ export default function AdminPortal() {
 
     fetchUsers();
   }, [userProfile, navigate]);
+
+  useEffect(() => {
+    if (isMobile && userProfile?.admin) {
+      setShowMobileAdmin(true);
+    } else {
+      setShowMobileAdmin(false);
+    }
+  }, [isMobile, userProfile]);
 
   const fetchUsers = async () => {
     try {
@@ -99,6 +111,16 @@ export default function AdminPortal() {
 
   if (!userProfile?.admin) {
     return null;
+  }
+
+  // Show mobile admin portal on mobile devices
+  if (isMobile) {
+    return (
+      <MobileAdminPortal
+        isOpen={showMobileAdmin}
+        onClose={() => setShowMobileAdmin(false)}
+      />
+    );
   }
 
   return (

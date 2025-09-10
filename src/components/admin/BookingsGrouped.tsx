@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Booking } from '../../types/bookings';
 
+// Extend the Booking interface to include generated properties
+interface ExtendedBooking extends Booking {
+  isGeneratedMentor?: boolean;
+  isGeneratedMentee?: boolean;
+}
+
 interface BookingsGroupedProps {
-  bookings: Booking[];
+  bookings: ExtendedBooking[];
   groupBy: 'mentor' | 'mentee';
-  onView: (booking: Booking) => void;
+  onView: (booking: ExtendedBooking) => void;
 }
 
 export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsGroupedProps) {
@@ -14,7 +20,7 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
     if (!acc[key]) acc[key] = [];
     acc[key].push(booking);
     return acc;
-  }, {} as Record<string, Booking[]>);
+  }, {} as Record<string, ExtendedBooking[]>);
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
@@ -52,10 +58,22 @@ export default function BookingsGrouped({ bookings, groupBy, onView }: BookingsG
                           {booking.isCalComBooking && (
                             <span style={{ background: '#00eaff', color: '#181818', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>Cal.com</span>
                           )}
+                          {booking.isGeneratedMentor && (
+                            <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentor">🎲</span>
+                          )}
                         </div>
                       </td>
                     )}
-                    {groupBy === 'mentee' ? null : <td>{booking.menteeName}</td>}
+                    {groupBy === 'mentee' ? null : (
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span>{booking.menteeName}</span>
+                          {booking.isGeneratedMentee && (
+                            <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentee">🎲</span>
+                          )}
+                        </div>
+                      </td>
+                    )}
                     <td>{booking.sessionDate ? (booking.sessionDate instanceof Date ? booking.sessionDate.toLocaleDateString('en-GB') : (typeof booking.sessionDate === 'string' ? new Date(booking.sessionDate).toLocaleDateString('en-GB') : booking.sessionDate.toDate().toLocaleDateString('en-GB'))) : '-'}</td>
                     <td>{booking.startTime} - {booking.endTime}</td>
                     <td>

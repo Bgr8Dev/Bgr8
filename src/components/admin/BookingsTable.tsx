@@ -111,10 +111,20 @@ export default function BookingsTable({ bookings, onView }: BookingsTableProps) 
                   {booking.isCalComBooking && (
                     <span style={{ background: '#00eaff', color: '#181818', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>Cal.com</span>
                   )}
+                  {booking.isGeneratedMentor && (
+                    <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentor">🎲</span>
+                  )}
                 </div>
               </td>
               <td>{booking.mentorEmail}</td>
-              <td>{booking.menteeName}</td>
+              <td>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{booking.menteeName}</span>
+                  {booking.isGeneratedMentee && (
+                    <span style={{ background: '#667eea', color: '#fff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }} title="Generated Mentee">🎲</span>
+                  )}
+                </div>
+              </td>
               <td>{booking.menteeEmail}</td>
               <td>{booking.sessionDate ? (typeof booking.sessionDate === 'object' && 'toDate' in booking.sessionDate ? (booking.sessionDate as { toDate: () => Date }).toDate().toLocaleDateString('en-GB') : new Date(booking.sessionDate).toLocaleDateString('en-GB')) : '-'}</td>
               <td>{booking.startTime} - {booking.endTime}</td>

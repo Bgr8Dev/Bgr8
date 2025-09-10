@@ -8,20 +8,216 @@
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
   display: flex;
-  animation: modalSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transform-origin: center center;
 }
 
+/* Exit animation class */
+.pem-profile-edit-modal.exiting {
+  animation: modalSlideOut 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+/* Button-emerge animation class (Performance Optimized) */
+.pem-profile-edit-modal.emerging-from-button {
+  animation: modalEmergeFromButton 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+  will-change: transform, opacity, border-radius;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Button highlight effect during modal opening (Performance Optimized) */
+.pem-button-emerging {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.pem-button-emerging::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.3) 0%, transparent 70%);
+  animation: buttonPulse 0.8s ease-out;
+  z-index: 1;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+@keyframes buttonPulse {
+  0% {
+    transform: scale3d(0.8, 0.8, 1) translateZ(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale3d(1.2, 1.2, 1) translateZ(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale3d(1.5, 1.5, 1) translateZ(0);
+    opacity: 0;
+  }
+}
+
+/* 🍎 Mac-like Modal Animation - Emerge from Button */
 @keyframes modalSlideIn {
   0% {
     opacity: 0;
-    transform: scale(0.95) translateY(20px);
+    transform: scale(0.1, 0.1) translateY(0);
+    border-radius: 50px;
+    filter: blur(15px);
+  }
+  15% {
+    opacity: 0.2;
+    transform: scale(0.2, 0.15) translateY(-10px);
+    border-radius: 40px;
+    filter: blur(10px);
+  }
+  30% {
+    opacity: 0.4;
+    transform: scale(0.4, 0.3) translateY(-20px);
+    border-radius: 35px;
+    filter: blur(7px);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.6, 0.5) translateY(-30px);
+    border-radius: 30px;
+    filter: blur(4px);
+  }
+  70% {
+    opacity: 0.8;
+    transform: scale(0.8, 0.7) translateY(-20px);
+    border-radius: 25px;
+    filter: blur(2px);
+  }
+  85% {
+    opacity: 0.95;
+    transform: scale(0.95, 0.9) translateY(-5px);
+    border-radius: 22px;
+    filter: blur(0.5px);
   }
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
+    border-radius: 20px;
+    filter: blur(0);
+  }
+}
+
+/* 🎯 Button-to-Modal Animation - Emerge from Trigger (Performance Optimized) */
+@keyframes modalEmergeFromButton {
+  0% {
+    opacity: 0;
+    transform: scale3d(0.05, 0.05, 1) translateZ(0);
+    border-radius: 50px;
+  }
+  25% {
+    opacity: 0.4;
+    transform: scale3d(0.3, 0.2, 1) translateZ(0);
+    border-radius: 35px;
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale3d(0.6, 0.5, 1) translateZ(0);
+    border-radius: 28px;
+  }
+  75% {
+    opacity: 0.9;
+    transform: scale3d(0.9, 0.8, 1) translateZ(0);
+    border-radius: 24px;
+  }
+  100% {
+    opacity: 1;
+    transform: scale3d(1, 1, 1) translateZ(0);
+    border-radius: 20px;
+  }
+}
+
+/* Content fade-in animation that starts after modal animation (Performance Optimized) */
+@keyframes contentFadeIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Content animation classes - removed for immediate appearance */
+.pem-modal-content-animated {
+  /* Removed delayed animation for immediate content appearance */
+}
+
+/* Loading state during animation */
+.pem-modal-loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pem-modal-loading.ready {
+  opacity: 1;
+  pointer-events: auto;
+  /* Removed fade-in animation for immediate content appearance */
+}
+
+/* Button-emerge specific loading states */
+.pem-modal-loading.emerging {
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+.pem-modal-loading.emerging.ready {
+  opacity: 1;
+  pointer-events: auto;
+  /* Removed fade-in animation for immediate content appearance */
+}
+
+/* 🍎 Mac-like Modal Exit Animation - Shrink and Fade */
+@keyframes modalSlideOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: 20px;
+    filter: blur(0);
+  }
+  25% {
+    opacity: 0.9;
+    transform: scale(0.95, 0.9) translateY(-2px);
+    border-radius: 22px;
+    filter: blur(0.5px);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.85, 0.7) translateY(-10px);
+    border-radius: 25px;
+    filter: blur(2px);
+  }
+  75% {
+    opacity: 0.3;
+    transform: scale(0.6, 0.3) translateY(-30px);
+    border-radius: 30px;
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3, 0.1) translateY(-50px);
+    border-radius: 50px;
+    filter: blur(10px);
   }
 }
 
@@ -36,7 +232,32 @@
   gap: 20px;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 95vh;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--gray-100);
+  /* Removed delayed content animation for immediate appearance */
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.pem-modal-left-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
 }
 
 .pem-modal-left-sidebar::before {
@@ -61,6 +282,7 @@
   padding: 24px;
   overflow-y: auto;
   max-height: 95vh;
+  /* Removed delayed content animation for immediate appearance */
 }
 
 .pem-profile-edit-modal-content {
@@ -524,6 +746,8 @@
   -webkit-tap-highlight-color: transparent;
   /* Ensure focus states work properly */
   outline: none;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .pem-developer-mode-toggle:focus {
@@ -715,6 +939,8 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .pem-close-button::before {
@@ -840,6 +1066,40 @@
   z-index: 1000;
   padding: 10px;
   box-sizing: border-box;
+  animation: overlayFadeIn 0.3s ease-out;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.pem-profile-edit-modal-overlay.exiting {
+  animation: overlayFadeOut 0.4s ease-in forwards;
+}
+
+/* Overlay animations */
+@keyframes overlayFadeIn {
+  0% {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes overlayFadeOut {
+  0% {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  100% {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
 }
 
 .pem-modal-header-content h3 {
@@ -966,6 +1226,7 @@
   border-radius: 16px;
   padding: 24px;
   margin-top: auto;
+  margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
@@ -974,6 +1235,7 @@
   transform-origin: top center;
   /* Ensure smooth exit animation */
   will-change: transform, opacity, max-height;
+  flex-shrink: 0;
 }
 
 .pem-developer-mode-section.exiting {
@@ -1058,6 +1320,9 @@
   justify-content: center;
   align-items: center;
   z-index: 1001;
+  animation: overlayFadeIn 0.3s ease-out;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .pem-delete-confirm-modal {
@@ -1067,6 +1332,15 @@
   max-width: 500px;
   width: 90%;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pem-delete-confirm-modal.exiting {
+  animation: modalSlideOut 0.4s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
 }
 
 .pem-delete-confirm-modal-header h3 {
@@ -1170,7 +1444,7 @@
 
 .pem-tags-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 8px;
   margin-bottom: 16px;
 }
@@ -1180,9 +1454,9 @@
   background: var(--gray-50);
   border: 2px solid var(--gray-200);
   border-radius: 20px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--gray-600);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1190,6 +1464,9 @@
   white-space: nowrap;
   position: relative;
   overflow: hidden;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .pem-skill-tag-selectable::before,
@@ -1214,7 +1491,6 @@
   background: var(--gray-100);
   border-color: var(--accent);
   color: var(--accent);
-  transform: translateY(-2px) scale(1.05);
   box-shadow: 0 8px 25px rgba(59, 167, 242, 0.2);
 }
 
@@ -1303,6 +1579,31 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--gray-100);
+}
+
+.pem-section-status::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pem-section-status::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 2px;
+}
+
+.pem-section-status::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.pem-section-status::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
 }
 
 .pem-section-status:hover {
@@ -2190,8 +2491,8 @@
   /* Ensure mobile tabs don't interfere with scrolling */
   .pem-mobile-tabs-nav {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
   
   /* Optimize mobile input focus states */

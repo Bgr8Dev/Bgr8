@@ -684,7 +684,6 @@ export default function GenerateRandomProfile() {
       mentorId,
       menteeId: `mentee_${Math.random().toString(36).substr(2, 9)}`,
       duration: 60, // 1 hour sessions
-      revenue: Math.floor(Math.random() * 50) + 25,
       day: '',
       createdAt: Timestamp.fromDate(new Date())
     };
@@ -961,7 +960,35 @@ export default function GenerateRandomProfile() {
   };
 
   // Helper function to safely map DocumentData to MentorMenteeProfile
-  const mapDocumentToMentorMenteeProfile = (data: Record<string, any>, id: string): MentorMenteeProfile => {
+  interface DocumentData {
+    uid?: string;
+    userRef?: string;
+    firstName?: string;
+    lastName?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    age?: string;
+    degree?: string;
+    educationLevel?: string;
+    county?: string;
+    profession?: string;
+    pastProfessions?: string[];
+    linkedin?: string;
+    calCom?: string;
+    hobbies?: string[];
+    ethnicity?: string;
+    religion?: string;
+    skills?: string[];
+    lookingFor?: string[];
+    industries?: string[];
+    isMentor?: boolean;
+    isMentee?: boolean;
+    type?: string;
+    isGenerated?: boolean;
+  }
+
+  const mapDocumentToMentorMenteeProfile = (data: DocumentData, id: string): MentorMenteeProfile => {
     return {
       uid: data.uid || id,
       userRef: data.userRef || `users/${id}`,

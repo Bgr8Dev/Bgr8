@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2024 B8 Network
+Copyright (c) 2024 Bgr8 Platform
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -18,4 +18,36 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. 
+SOFTWARE.
+
+ADDITIONAL TERMS AND CONDITIONS:
+
+1. TRADEMARK USAGE: The name "Bgr8", "Bgr8 Platform", and associated logos,
+   trademarks, and service marks are the exclusive property of Bgr8 Platform.
+   Licensees may not use these marks without explicit written permission.
+
+2. DATA PROTECTION: This software may process personal data. Users are
+   responsible for ensuring compliance with applicable data protection laws
+   including GDPR, CCPA, and other privacy regulations.
+
+3. THIRD-PARTY SERVICES: This software may integrate with third-party services
+   (Firebase, Google APIs, etc.). Users are responsible for obtaining appropriate
+   licenses and complying with terms of service for such integrations.
+
+4. SECURITY: Users are responsible for implementing appropriate security measures
+   when deploying this software, including but not limited to authentication,
+   authorization, and data encryption.
+
+5. SUPPORT: This software is provided without warranty or support. Bgr8 Platform
+   is not obligated to provide technical support, bug fixes, or updates.
+
+6. GOVERNING LAW: This license shall be governed by and construed in accordance
+   with the laws of the jurisdiction where Bgr8 Platform is established, without
+   regard to conflict of law principles.
+
+7. SEVERABILITY: If any provision of this license is held to be invalid or
+   unenforceable, the remaining provisions shall remain in full force and effect.
+
+8. ENTIRE AGREEMENT: This license constitutes the entire agreement between the
+   parties regarding the use of this software and supersedes all prior
+   negotiations, representations, or agreements. 

@@ -111,7 +111,7 @@ export default function FeedbackPage() {
                               attendee.email !== mentorData.email
                             );
 
-                            let createdAtTS = (
+                            const createdAtTS = (
                               matchingBooking.createdAt
                                 ? Timestamp.fromDate(new Date(matchingBooking.createdAt))
                                 : Timestamp.fromDate(new Date()));
@@ -377,7 +377,7 @@ export default function FeedbackPage() {
         month: 'long',
         day: 'numeric'
       })
-      : '';
+    : '';
 
   return (
     <div className="feedback-page">

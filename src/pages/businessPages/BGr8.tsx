@@ -19,7 +19,7 @@ export default function BGr8() {
   }, []);
 
   const navigateToMentors = () => {
-    navigate('/mentors');
+    navigate('/dashboard');
   };
 
   return (

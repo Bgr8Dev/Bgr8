@@ -26,10 +26,11 @@
   right: 0;
   bottom: 0;
   background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-              url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+              url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'),
+              linear-gradient(135deg, #3ba7f2 0%, #2988d4 100%);
+  background-size: cover, cover;
+  background-position: center, center;
+  background-attachment: fixed, fixed;
 }
 
 .bgr8-hero-overlay {
@@ -436,9 +437,10 @@
   right: 0;
   bottom: 0;
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-              url('https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-  background-size: cover;
-  background-position: center;
+              url('https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'),
+              linear-gradient(135deg, #3ba7f2 0%, #2988d4 100%);
+  background-size: cover, cover;
+  background-position: center, center;
 }
 
 .bgr8-second-donation-overlay {
@@ -648,6 +650,27 @@
     flex-direction: column;
     gap: 15px;
     text-align: center;
+  }
+
+  /* Add more spacing for second donation section on mobile */
+  .bgr8-second-donation {
+    padding-top: 120px;
+    padding-bottom: 60px;
+    min-height: auto;
+  }
+
+  .bgr8-second-donation-content {
+    gap: 30px;
+  }
+
+  .bgr8-second-donation-text h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  /* Hide the large text on mobile to prevent overlap */
+  .bgr8-second-donation-text {
+    display: none;
   }
 }
 

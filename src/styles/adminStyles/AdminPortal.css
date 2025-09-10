@@ -71,10 +71,13 @@
 }
 
 .stats-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
   gap: 1.5rem;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .stat-card {
@@ -85,6 +88,12 @@
   text-align: center;
   transition: box-shadow 0.3s;
   border: 1px solid var(--gray-200);
+  flex: 1;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .stat-card:nth-child(1) {
@@ -401,7 +410,12 @@ th {
   }
 
   .stats-cards {
-    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+    min-height: 120px;
   }
 
   .analytics-cards {
@@ -699,12 +713,12 @@ th {
     padding: 0.7rem 0.2rem;
   }
   .stats-cards {
-    grid-template-columns: 1fr;
     gap: 0.7rem;
   }
   .stat-card {
     padding: 1rem 0.7rem;
     font-size: 1rem;
+    min-height: 100px;
   }
   .users-table {
     overflow-x: auto;
@@ -729,5 +743,17 @@ th {
   .admin-section h2 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
+  }
+}
+
+/* Add specific breakpoint for very small screens where stats cards stack */
+@media (max-width: 400px) {
+  .stats-cards {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    min-height: 80px;
   }
 } 

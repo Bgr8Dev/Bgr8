@@ -1,25 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { SessionsService } from '../../services/sessionsService';
 import { Session } from '../../types/sessions';
+import { SessionsService } from '../../services/sessionsService';
 import { FeedbackForm } from '../feedback/FeedbackForm';
+import './SessionsList.css';
 
-export const SessionsList: React.FC = () => {
+type TimestampType = Date | { toDate: () => Date } | string | number;
+
+export default function SessionsList() {
   const { currentUser } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackType, setFeedbackType] = useState<'mentor' | 'mentee' | 'self'>('mentor');
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
-  useEffect(() => {
-    if (currentUser) {
-      loadSessions();
-    }
-  }, [currentUser]);
-
-  const loadSessions = async () => {
+  const loadSessions = useCallback(async () => {
     if (!currentUser) return;
     
     try {
@@ -31,7 +28,13 @@ export const SessionsList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadSessions();
+    }
+  }, [currentUser, loadSessions]);
 
   const handleFeedbackClick = (session: Session, type: 'mentor' | 'mentee' | 'self') => {
     setSelectedSession(session);
@@ -45,11 +48,11 @@ export const SessionsList: React.FC = () => {
     loadSessions(); // Refresh to update feedback status
   };
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: TimestampType) => {
     if (!timestamp) return 'N/A';
     
     let date: Date;
-    if (timestamp.toDate) {
+    if (typeof timestamp === 'object' && 'toDate' in timestamp) {
       date = timestamp.toDate();
     } else if (timestamp instanceof Date) {
       date = timestamp;
@@ -64,11 +67,11 @@ export const SessionsList: React.FC = () => {
     });
   };
 
-  const formatTime = (timestamp: any) => {
+  const formatTime = (timestamp: TimestampType) => {
     if (!timestamp) return 'N/A';
     
     let date: Date;
-    if (timestamp.toDate) {
+    if (typeof timestamp === 'object' && 'toDate' in timestamp) {
       date = timestamp.toDate();
     } else if (timestamp instanceof Date) {
       date = timestamp;

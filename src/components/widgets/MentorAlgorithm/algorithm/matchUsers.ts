@@ -35,6 +35,7 @@ export interface MentorMenteeProfile {
 export interface MatchResult {
   user: MentorMenteeProfile;
   score: number;
+  percentage: number; // Add percentage field
   reasons: string[];
 }
 
@@ -56,14 +57,14 @@ const educationLevelEncoding: { [level: string]: number } = {
 };
 
 const SCORE_WEIGHTINGS: { [feature: string]: number } = {
-  'skills': 9,
-  'industries': 5,
-  'profession': 4,
-  'educationLevel': 3,
-  'hobbies': 2,
-  'county': 2,
-  'age': 3,
-  'religion': 1
+  'profession': 20,
+  'skills': 15,
+  'industries': 10,
+  'educationLevel': 6,
+  'hobbies': 4,
+  'county': 4,
+  'age': 6,
+  'religion': 2
 };
 
 const ageReasonMenteeExpPref = {
@@ -218,10 +219,15 @@ function getProfessionalScore(
 
 // Main matching function
 export async function getBestMatchesForUser(uid: string, olderMentorPreferred: boolean = true): Promise<MatchResult[]> {
+  console.log('Algorithm: Starting matching process for user:', uid);
+  
   // Get current user's profile from subcollection
   const userDoc = await getDoc(doc(firestore, 'users', uid, 'mentorProgram', 'profile'));
   if (!userDoc.exists()) throw new Error('User profile not found');
   const currentUser = userDoc.data() as MentorMenteeProfile;
+  
+  console.log('Algorithm: Current user profile:', currentUser);
+  console.log('Algorithm: Current user isMentor:', currentUser.isMentor, 'isMentee:', currentUser.isMentee);
 
   // Get all users and check their mentorProgram subcollections
   const allUsersDocs = await getDocs(collection(firestore, 'users'));
@@ -241,55 +247,100 @@ export async function getBestMatchesForUser(uid: string, olderMentorPreferred: b
     }
   }
 
+  console.log('Algorithm: Found', allUsers.length, 'total users with profiles');
+
   // Determine who to match with
   const candidates = allUsers.filter(u => u.isMentor === !currentUser.isMentor);
+  
+  console.log('Algorithm: Found', candidates.length, 'candidates for matching');
+  console.log('Algorithm: Candidates:', candidates.map(c => ({ 
+    uid: c.uid, 
+    name: `${c.firstName} ${c.lastName}`, 
+    isMentor: c.isMentor, 
+    isMentee: c.isMentee 
+  })));
 
-  // Scoring
-  const results: MatchResult[] = candidates.map(candidate => {
-    let score = 0;
-    const reasons: string[] = [];
+  // Calculate match scores for all candidates
+  const results: MatchResult[] = [];
+  for (const candidate of candidates) {
+    const matchResult = await calculateMatchScore(currentUser, candidate, olderMentorPreferred);
+    results.push(matchResult);
+  }
 
-    // Education level
-    score += getEducationScore(currentUser, candidate, reasons);
+  // Sort by percentage descending (highest match first)
+  results.sort((a, b) => b.percentage - a.percentage);
+  
+  // Filter out very low matches (below 10%) to avoid showing irrelevant results
+  const filteredResults = results.filter(result => result.percentage >= 10);
+  
+  console.log('Algorithm: Final results with percentages:', filteredResults.map(r => ({ 
+    name: `${r.user.firstName} ${r.user.lastName}`, 
+    score: r.score,
+    percentage: r.percentage,
+    reasons: r.reasons 
+  })));
+  
+  return filteredResults;
+}
 
-    // County (location)
-    score += getSimpleScore(
-      'county', currentUser, candidate, reasons, `Same ${countyReasonIDs[0]}`);
+// Function to calculate match score for a single profile
+export async function calculateMatchScore(
+  currentUser: MentorMenteeProfile, 
+  candidate: MentorMenteeProfile, 
+  olderMentorPreferred: boolean = true
+): Promise<MatchResult> {
+  let score = 0;
+  const reasons: string[] = [];
 
-    // Profession / Professional History
-    score += getProfessionalScore(currentUser, candidate, reasons);
+  // Education level
+  score += getEducationScore(currentUser, candidate, reasons);
 
-    // Age
-    score += getAgeScore(currentUser, candidate, olderMentorPreferred, reasons);
+  // County (location)
+  score += getSimpleScore(
+    'county', currentUser, candidate, reasons, `Same ${countyReasonIDs[0]}`);
 
-    // Religion [HIDDEN]
-    if (currentUser.religion === candidate.religion)
-      score += SCORE_WEIGHTINGS['religion'];
+  // Profession / Professional History
+  score += getProfessionalScore(currentUser, candidate, reasons);
 
-    // Hobbies/interests
-    const hobbyMatches = lenIntersect(currentUser.hobbies, candidate.hobbies);
-    score += hobbyMatches * SCORE_WEIGHTINGS['hobbies'];
-    if (hobbyMatches > 0) reasons.push(`${hobbyMatches} ${hobbiesReasonIDs[0]}`);
+  // Age
+  score += getAgeScore(currentUser, candidate, olderMentorPreferred, reasons);
 
-    // Skills match
-    const skillMatches = currentUser.isMentor
-      ? lenIntersect(currentUser.skills, candidate.lookingFor)
-      : lenIntersect(currentUser.lookingFor, candidate.skills);
-    score += skillMatches * SCORE_WEIGHTINGS['skills'];
-    if (skillMatches > 0) reasons.push(`${skillMatches} ${skillsReasonIDs[0]}`);
+  // Religion [HIDDEN]
+  if (currentUser.religion === candidate.religion)
+    score += SCORE_WEIGHTINGS['religion'];
 
-    // Industries match
-    const industryMatches = lenIntersect(currentUser.industries, candidate.industries);
-    if (industryMatches == 1)
-      reasons.push(`1 ${industriesReasonIDs[0]}`);
-    else if (industryMatches > 1)
-      reasons.push(`${industryMatches} ${industriesReasonIDs[1]}`);
-    score += industryMatches * SCORE_WEIGHTINGS['industries'];
+  // Hobbies/interests
+  const hobbyMatches = lenIntersect(currentUser.hobbies, candidate.hobbies);
+  score += hobbyMatches * SCORE_WEIGHTINGS['hobbies'];
+  if (hobbyMatches > 0) reasons.push(`${hobbyMatches} ${hobbiesReasonIDs[0]}`);
 
-    return { user: candidate, score: score, reasons };
-  });
+  // Skills match
+  const skillMatches = currentUser.isMentor
+    ? lenIntersect(currentUser.skills, candidate.lookingFor)
+    : lenIntersect(currentUser.lookingFor, candidate.skills);
+  score += skillMatches * SCORE_WEIGHTINGS['skills'];
+  if (skillMatches > 0) reasons.push(`${skillMatches} ${skillsReasonIDs[0]}`);
 
-  // Sort by score descending
-  results.sort((a, b) => b.score - a.score);
-  return results;
+  // Industries match
+  const industryMatches = lenIntersect(currentUser.industries, candidate.industries);
+  if (industryMatches == 1)
+    reasons.push(`1 ${industriesReasonIDs[0]}`);
+  else if (industryMatches > 1)
+    reasons.push(`${industryMatches} ${industriesReasonIDs[1]}`);
+  score += industryMatches * SCORE_WEIGHTINGS['industries'];
+
+  console.log(`Algorithm: Candidate ${candidate.firstName} ${candidate.lastName} scored ${score} with reasons:`, reasons);
+
+  // Calculate maximum possible score for percentage calculation
+  const maxPossibleScore = Object.values(SCORE_WEIGHTINGS).reduce((sum, weight) => sum + weight, 0);
+  
+  // Calculate percentage
+  const percentage = Math.max(0, Math.min(100, Math.round((score / maxPossibleScore) * 100)));
+
+  return { 
+    user: candidate, 
+    score: score, 
+    percentage: percentage, 
+    reasons: reasons 
+  };
 } 

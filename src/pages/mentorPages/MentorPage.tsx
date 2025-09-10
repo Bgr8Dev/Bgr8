@@ -17,42 +17,74 @@ import {
 } from './types';
 
 import { ProfileViewModal } from './components/ProfileViewModal';
+import { ViewBookingsModal } from './components/ViewBookingsModal';
+import { MentorDashboard } from './components/MentorDashboard';
+import { MenteeDashboard } from './components/MenteeDashboard';
+import { MobileProfileEditModal } from './components/MobileProfileEditModal';
 import { default as BookingModal } from '../../components/widgets/MentorAlgorithm/booking/BookingModal';
 import { default as CalComModal } from '../../components/widgets/MentorAlgorithm/CalCom/CalComModal';
 import { default as MentorAvailability } from '../../components/widgets/MentorAlgorithm/MentorAvailability';
 import Navbar from '../../components/ui/Navbar';
+import { useIsMobile } from '../../hooks/useIsMobile';
+
+// Import all CSS files to ensure styles are loaded
 import './styles/MentorPage.css';
+import './styles/MentorSidebar.css';
+import './styles/MentorForms.css';
+import './styles/MentorModals.css';
+import './styles/MentorAnimations.css';
+import './styles/MentorResponsive.css';
+import './styles/MentorCard.css';
+import './styles/MatchesSection.css';
+import './styles/ProfileViewModal.css';
+import './styles/ViewBookingsModal.css';
+import './styles/RoleSelection.css';
+import './styles/ProfileRegistrationForm.css';
+import './styles/ProfileEditModal.css';
+import { useButtonEmergeModal } from '../../hooks/useButtonEmergeModal';
+import './styles/MentorFilters.css';
 
 export default function MentorPage() {
   const { currentUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
-  const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Use button-emerge modal hook for profile edit
+  const { 
+    isModalOpen: showProfileEdit, 
+    openModalWithAnimation: openProfileEditModal, 
+    closeModal: closeProfileEditModal 
+  } = useButtonEmergeModal({ 
+    modalSelector: '.pem-profile-edit-modal' 
+  });
   
   // Modal state management
   const [showProfileViewModal, setShowProfileViewModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showCalComModal, setShowCalComModal] = useState(false);
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [showViewBookingsModal, setShowViewBookingsModal] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<MentorMenteeProfile | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [mentorsPerPage] = useState(12);
+  const [profilesPerPage] = useState(12);
+  const [isMenteesSectionMinimized, setIsMenteesSectionMinimized] = useState(false);
 
   // Custom hooks for data management
   const {
-    mentors,
+    mentors: availableProfiles,
     setFilteredMentors,
     loading,
     error,
     setError,
     mentorAvailability,
+    mentorBookings,
     hasProfile,
     currentUserProfile,
     bestMatches,
-    loadingMatches,
     fetchEnhancedAvailability,
     fetchMentorBookings,
-    findMatches,
     createProfile,
     updateProfile,
     deleteProfile
@@ -69,7 +101,7 @@ export default function MentorPage() {
     handleSearchChange,
     handleSuggestionClick,
     getFilterCount
-  } = useMentorSearch(mentors, mentorAvailability);
+  } = useMentorSearch(availableProfiles, mentorAvailability);
 
   const {
     profileForm,
@@ -101,36 +133,75 @@ export default function MentorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('MentorPage handleSubmit called');
+    console.log('Profile form data:', profileForm);
+    console.log('Selected role:', selectedRole);
     
     const errors = validateProfileForm();
+    console.log('Validation errors:', errors);
+    
     if (Object.keys(errors).length > 0) {
+      console.log('Validation failed, setting errors');
       setValidationErrors(errors);
       return;
     }
 
-    if (!selectedRole) return;
+    if (!selectedRole) {
+      console.log('No selected role, returning');
+      return;
+    }
+
+    console.log('Creating profile with data:', {
+      ...profileForm,
+      type: selectedRole,
+      uid: currentUser?.uid || '',
+      userRef: currentUser?.uid || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isMentor: selectedRole.toLowerCase() === 'mentor',
+      isMentee: selectedRole.toLowerCase() === 'mentee'
+    });
 
     const profileData = {
       ...profileForm,
       type: selectedRole,
       uid: currentUser?.uid || '',
+      userRef: currentUser?.uid || '',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      isMentor: selectedRole.toLowerCase() === 'mentor',
+      isMentee: selectedRole.toLowerCase() === 'mentee'
     };
 
+    console.log('Calling createProfile...');
     const success = await createProfile(profileData);
+    console.log('createProfile result:', success);
+    
     if (success) {
+      console.log('Profile created successfully, resetting form');
       setSelectedRole(null);
       resetForm();
+    } else {
+      console.log('Profile creation failed');
     }
   };
 
-  const handleProfileEdit = () => {
+  const handleProfileEdit = (event?: React.MouseEvent<HTMLElement>) => {
     console.log('handleProfileEdit called');
     console.log('currentUserProfile:', currentUserProfile);
     if (currentUserProfile) {
       setFormData(currentUserProfile);
-      setShowProfileEdit(true);
+      if (event) {
+        openProfileEditModal(event);
+      } else {
+        // Fallback for programmatic calls
+        const fakeEvent = {
+          currentTarget: document.createElement('button'),
+          preventDefault: () => {},
+          stopPropagation: () => {}
+        } as unknown as React.MouseEvent<HTMLElement>;
+        openProfileEditModal(fakeEvent);
+      }
       console.log('showProfileEdit set to true');
     }
   };
@@ -138,12 +209,14 @@ export default function MentorPage() {
   const handleProfileSave = async (profileData: ProfileFormData) => {
     const updatedProfile = {
       ...profileData,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      isMentor: profileData.type?.toLowerCase() === 'mentor',
+      isMentee: profileData.type?.toLowerCase() === 'mentee'
     };
     
     const success = await updateProfile(updatedProfile);
     if (success) {
-      setShowProfileEdit(false);
+      closeProfileEditModal();
     }
     return success;
   };
@@ -151,22 +224,45 @@ export default function MentorPage() {
   const handleProfileDelete = async () => {
     const success = await deleteProfile();
     if (success) {
-      setShowProfileEdit(false);
+      closeProfileEditModal();
     }
     return success;
   };
 
-  const handleFindMatches = async () => {
-    await findMatches();
-  };
-
   const handleAvailabilityManage = () => {
     // Only mentors can manage availability
-    if (currentUserProfile?.type !== 'MENTOR') {
+    if (typeof currentUserProfile?.type !== 'string' || currentUserProfile.type.toLowerCase() !== 'mentor') {
       console.warn('Only mentors can manage availability');
       return;
     }
     setShowAvailabilityModal(true);
+  };
+
+  const handleViewAllBookings = () => {
+    setShowViewBookingsModal(true);
+  };
+
+  const toggleMenteesSection = () => {
+    setIsMenteesSectionMinimized(!isMenteesSectionMinimized);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
+  const handleAcceptBooking = (bookingId: string) => {
+    console.log('Accepting booking:', bookingId);
+    // TODO: Implement booking acceptance logic
+  };
+
+  const handleRejectBooking = (bookingId: string) => {
+    console.log('Rejecting booking:', bookingId);
+    // TODO: Implement booking rejection logic
+  };
+
+  const handleCancelBooking = (bookingId: string) => {
+    console.log('Cancelling booking:', bookingId);
+    // TODO: Implement booking cancellation logic
   };
 
   // Helper function to close profile view modal
@@ -267,23 +363,29 @@ export default function MentorPage() {
     console.log('Cal.com integration not yet implemented for:', mentor.firstName);
   };
 
+  // Helper function to extract match score from profile
+  const getMatchScore = (profile: MentorMenteeProfile): number | undefined => {
+    const profileWithMatch = profile as MentorMenteeProfile & { matchData?: { percentage: number } };
+    return profileWithMatch.matchData?.percentage;
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Pagination
-  const indexOfLastMentor = currentPage * mentorsPerPage;
-  const indexOfFirstMentor = indexOfLastMentor - mentorsPerPage;
-  const currentMentors = searchFilteredMentors.slice(indexOfFirstMentor, indexOfLastMentor);
-  const totalPages = Math.ceil(searchFilteredMentors.length / mentorsPerPage);
+  const indexOfLastProfile = currentPage * profilesPerPage;
+  const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
+  const currentProfiles = searchFilteredMentors.slice(indexOfFirstProfile, indexOfLastProfile);
+  const totalPages = Math.ceil(searchFilteredMentors.length / profilesPerPage);
 
   // Effects
   useEffect(() => {
     if (hasProfile && currentUserProfile) {
       setFormData(currentUserProfile);
     }
-  }, [hasProfile, currentUserProfile]);
+  }, [hasProfile, currentUserProfile, setFormData]);
 
   useEffect(() => {
     setFilteredMentors(searchFilteredMentors);
@@ -313,38 +415,49 @@ export default function MentorPage() {
 
   // Ensure only one modal is open at a time
   useEffect(() => {
-    const openModals = [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal].filter(Boolean);
+    const openModals = [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal].filter(Boolean);
     if (openModals.length > 1) {
       console.warn('Multiple modals detected as open, closing all except the last one');
       // Keep only the last opened modal
-      if (showAvailabilityModal) {
+      if (showViewBookingsModal) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
+        setShowAvailabilityModal(false);
+      } else if (showAvailabilityModal) {
+        setShowProfileViewModal(false);
+        setShowBookingModal(false);
+        setShowCalComModal(false);
+        closeProfileEditModal();
+        setShowViewBookingsModal(false);
       } else if (showProfileEdit) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
         setShowCalComModal(false);
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       } else if (showCalComModal) {
         setShowProfileViewModal(false);
         setShowBookingModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       } else if (showBookingModal) {
         setShowProfileViewModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       } else if (showProfileViewModal) {
         setShowBookingModal(false);
         setShowCalComModal(false);
-        setShowProfileEdit(false);
+        closeProfileEditModal();
         setShowAvailabilityModal(false);
+        setShowViewBookingsModal(false);
       }
     }
-  }, [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal]);
+  }, [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal, closeProfileEditModal]);
 
   // Debug: Check for duplicate mentors between arrays
   useEffect(() => {
@@ -423,8 +536,15 @@ export default function MentorPage() {
       <div className="mentor-page mentor-page-loading">
         <Navbar />
         <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading mentor program...</p>
+          <div className="pl">
+            <svg className="pl__ring" viewBox="0 0 128 128" width="128" height="128">
+              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+            </svg>
+            <svg className="pl__worm" viewBox="0 0 128 128" width="128" height="128">
+              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+            </svg>
+          </div>
+          <p className="loading-text">Loading...</p>
         </div>
       </div>
     );
@@ -434,6 +554,7 @@ export default function MentorPage() {
   if (error) {
     return (
       <div className="mentor-page error-state">
+        <Navbar />
         <h3>Something went wrong</h3>
         <p>{error}</p>
         <button onClick={() => setError(null)}>Try Again</button>
@@ -460,8 +581,8 @@ export default function MentorPage() {
           selectedRole={selectedRole}
           profileForm={profileForm}
           validationErrors={validationErrors}
-          formProgress={calculateFormProgress()}
-          sectionStatus={getSectionStatus()}
+          formProgress={calculateFormProgress}
+          sectionStatus={getSectionStatus}
           onBack={handleBack}
           onFormChange={handleFormChange}
           onArrayChange={handleArrayChange}
@@ -477,142 +598,119 @@ export default function MentorPage() {
   // Main mentor page
   return (
     <div className="mentor-page">
-      {/* Hero Section */}
-      <div className="mentor-header">
-        <Navbar />
-        <div className="mentor-header-content">
-          <h1>
-            {currentUserProfile?.type === 'mentee' 
-              ? 'Find Your Perfect Mentor' 
-              : 'Connect with Other Mentors'
-            }
-          </h1>
-          <p>
-            {currentUserProfile?.type === 'mentee'
-              ? 'Connect with experienced professionals who can guide you on your journey to success'
-              : 'Network and collaborate with fellow mentors to share knowledge and best practices'
-            }
-          </p>
-          
-          {/* Generated Profiles Info */}
-          <div className="generated-profiles-info">
-            <p className="info-text">
-              💡 <strong>Tip:</strong> This platform includes both real user profiles and generated test profiles 
-              (marked with 🎲) to help you explore the matching system and test features.
-            </p>
-          </div>
-          
-          {/* User Profile Summary */}
-          {currentUserProfile && (
-            <div className="user-profile-summary">
-              <div className="profile-info">
-                <div className={`profile-role ${currentUserProfile.type === 'MENTOR' ? 'mentor' : 'mentee'}`}>
-                  {currentUserProfile.type === 'MENTOR' ? 'Mentor' : 'Mentee'}
-                </div>
-                <div className="profile-name">
-                  {currentUserProfile.firstName} {currentUserProfile.lastName}
-                </div>
-              </div>
+      <Navbar />
+      
+             {/* Main Content with Sidebar Layout */}
+       <div className="mentor-page-content">
+         {/* Sidebar Toggle Button */}
+         <button 
+           className="sidebar-toggle-btn"
+           onClick={toggleSidebar}
+           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+         >
+           {isSidebarCollapsed ? '▶' : '◀'}
+         </button>
+         
+         {/* Left Sidebar */}
+         <div className={`mentor-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+          {/* Search Container - Only show for mentees */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+            <div className="search-container">
+              <div className="search-bar">
+               <div 
+                 className="search-icon"
+                 style={{
+                   display: typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'none' : 'block'
+                 }}
+               >
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </div>
+                             <input
+                 type="text"
+                 placeholder={
+                   typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
+                     ? "Search for mentors by name, skills, industry, or education..."
+                     : "Search for mentees by name, skills, industry, or education..."
+                 }
+                 value={searchTerm}
+                 onChange={handleSearchChange}
+                 onClick={(e) => e.stopPropagation()}
+                 style={{
+                   display: typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'none' : 'block'
+                 }}
+               />
               
-              <div className="profile-actions">
-                <button 
-                  className="profile-edit-btn"
-                  onClick={handleProfileEdit}
-                  data-tooltip="Edit your profile information"
-                >
-                  Edit Profile
-                </button>
-                <button 
-                  className="find-matches-btn"
-                  onClick={handleFindMatches}
-                  disabled={loadingMatches}
-                  data-tooltip="Find mentors/mentees that match your profile"
-                >
-                  {loadingMatches ? 'Finding Matches...' : 'Find Matches'}
-                </button>
-                {currentUserProfile?.type === 'MENTOR' && (
-                  <button 
-                    className="availability-manage-btn"
-                    onClick={handleAvailabilityManage}
-                    data-tooltip="Manage your availability schedule"
-                  >
-                    Manage Availability
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content with Sidebar Layout */}
-      <div className="mentor-page-content">
-        {/* Left Sidebar */}
-        <div className="mentor-sidebar">
-          {/* Search Container */}
-          <div className="search-container">
-            <div className="search-bar">
-              <div className="search-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder={
-                  currentUserProfile?.type === 'mentee'
-                    ? "Search for mentors by name, skills, industry, or education..."
-                    : "Search for other mentors by name, skills, industry, or education..."
-                }
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onClick={(e) => e.stopPropagation()}
-              />
-              
-              {/* Search Suggestions Dropdown */}
-              {showSearchDropdown && searchSuggestions.length > 0 && (
-                <div className="search-suggestions-dropdown">
-                  {searchSuggestions.map((suggestion, index) => (
-                    <div
-                      key={index}
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      {suggestion}
-                    </div>
-                  ))}
-                </div>
-              )}
+                             {/* Search Suggestions Dropdown - Only show for mentees */}
+               {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && showSearchDropdown && searchSuggestions.length > 0 && (
+                 <div className="search-suggestions-dropdown">
+                   {searchSuggestions.map((suggestion, index) => (
+                     <div
+                       key={index}
+                       className="suggestion-item"
+                       onClick={() => handleSuggestionClick(suggestion)}
+                     >
+                       {suggestion}
+                     </div>
+                   ))}
+                 </div>
+               )}
             </div>
             
-            {/* Profile Type Legend */}
-            {searchFilteredMentors.some(m => m.isGenerated) && (
-              <div className="profile-legend">
-                <span className="legend-item">
-                  <span className="legend-icon real">👥</span>
-                  <span className="legend-text">Real Profiles</span>
-                </span>
-                <span className="legend-item">
-                  <span className="legend-icon generated">🎲</span>
-                  <span className="legend-text">Generated Profiles</span>
-                </span>
-              </div>
-            )}
-          </div>
+                         {/* Profile Type Legend - Only show for mentees */}
+             {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && searchFilteredMentors.some(m => m.isGenerated) && (
+               <div className="profile-legend">
+                 <span className="legend-item">
+                   <span className="legend-icon real">👥</span>
+                   <span className="legend-text">Real Profiles</span>
+                 </span>
+                 <span className="legend-item">
+                   <span className="legend-icon generated">🎲</span>
+                   <span className="legend-text">Generated Profiles</span>
+                 </span>
+               </div>
+             )}
+            </div>
+          )}
 
-          {/* Filters */}
-          <MentorFilters
-            selectedFilter={selectedFilter}
-            onFilterChange={setSelectedFilter}
-            getFilterCount={getFilterCount}
-            totalMentors={mentors.length}
-          />
+          {/* Filters - Only show for mentees */}
+           {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+             <MentorFilters
+               selectedFilter={selectedFilter}
+               onFilterChange={setSelectedFilter}
+               getFilterCount={getFilterCount}
+               totalMentors={availableProfiles.length}
+             />
+           )}
         </div>
 
         {/* Right Main Content */}
         <div className="mentor-main-content">
-          {/* Matches Section - Moved from sidebar to main content */}
-          {bestMatches.length > 0 && (
+          {/* Render appropriate dashboard based on user type */}
+          {currentUserProfile && (
+            typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? (
+              <MentorDashboard
+                currentUserProfile={currentUserProfile}
+                mentorAvailability={mentorAvailability}
+                mentorBookings={mentorBookings}
+                onProfileEdit={handleProfileEdit}
+                onAvailabilityManage={handleAvailabilityManage}
+                onViewAllBookings={handleViewAllBookings}
+                onAcceptBooking={handleAcceptBooking}
+                onRejectBooking={handleRejectBooking}
+                onCancelBooking={handleCancelBooking}
+              />
+            ) : (
+              <MenteeDashboard
+                currentUserProfile={currentUserProfile}
+                onProfileEdit={handleProfileEdit}
+              />
+            )
+          )}
+
+          {/* Matches Section - Only show for mentees */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && bestMatches.length > 0 && (
             <div className="main-matches-section">
               <MatchesSection
                 bestMatches={bestMatches}
@@ -624,121 +722,143 @@ export default function MentorPage() {
             </div>
           )}
 
-          {/* Mentor Results */}
-          <div className="mentor-results">
-            <div className="results-header">
-              <h2>
-                {currentUserProfile?.type === 'mentee' 
-                  ? 'Available Mentors' 
-                  : 'Other Mentors'
-                }
-              </h2>
-              <div className="results-summary">
-                <p>
-                  Showing {searchFilteredMentors.length} {
-                    currentUserProfile?.type === 'mentee' ? 'mentors' : 'mentors'
-                  }
-                </p>
-                {searchFilteredMentors.length > 0 && (
-                  <div className="profile-breakdown">
-                    <span className="breakdown-item">
-                      <span className="breakdown-label">Real Profiles:</span>
-                      <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
-                    </span>
-                    <span className="breakdown-item">
-                      <span className="breakdown-label">Generated:</span>
-                      <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
-                    </span>
+          {/* Mentor Results - Only show for mentees */}
+          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+            <div className={`mentor-results ${isMenteesSectionMinimized ? 'minimized' : ''}`}>
+              <div className="results-header" onClick={toggleMenteesSection}>
+                <div className="results-header-content">
+                  <h2>Available Mentors</h2>
+                  <div className="results-summary">
+                    <p>Showing {searchFilteredMentors.length} mentors</p>
+                    {searchFilteredMentors.length > 0 && (
+                      <div className="profile-breakdown">
+                        <span className="breakdown-item">
+                          <span className="breakdown-label">Real Profiles:</span>
+                          <span className="breakdown-count">{searchFilteredMentors.filter(m => !m.isGenerated).length}</span>
+                        </span>
+                        <span className="breakdown-item">
+                          <span className="breakdown-label">Generated:</span>
+                          <span className="breakdown-count generated">{searchFilteredMentors.filter(m => m.isGenerated).length}</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
+                </div>
+                <button 
+                  className="minimize-toggle-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMenteesSection();
+                  }}
+                  aria-label={isMenteesSectionMinimized ? 'Expand section' : 'Minimize section'}
+                >
+                  {isMenteesSectionMinimized ? '▼' : '▲'}
+                </button>
+              </div>
+
+              <div className="results-content">
+                {currentProfiles.length === 0 ? (
+                  <div className="no-results">
+                    <h3>No mentors found</h3>
+                    <p>Try adjusting your search criteria or filters</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="profiles-grid">
+                      {currentProfiles.map((profile) => (
+                        <MentorCard
+                          key={profile.uid}
+                          mentor={profile}
+                          mentorAvailability={mentorAvailability}
+                          currentUserRole="mentee"
+                          onProfileClick={handleProfileCardClick}
+                          onBooking={handleBooking}
+                          onCalCom={handleCalCom}
+                          matchScore={getMatchScore(profile)}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="pagination-container">
+                        <button
+                          className="pagination-btn prev"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                        >
+                          Previous
+                        </button>
+                        
+                        <div className="page-numbers">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                              key={page}
+                              className={`page-number ${page === currentPage ? 'active' : ''}`}
+                              onClick={() => handlePageChange(page)}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <button
+                          className="pagination-btn next"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
-
-            {currentMentors.length === 0 ? (
-              <div className="no-results">
-                <h3>
-                  {currentUserProfile?.type === 'mentee' 
-                    ? 'No mentors found' 
-                    : 'No other mentors found'
-                  }
-                </h3>
-                <p>Try adjusting your search criteria or filters</p>
-              </div>
-            ) : (
-              <>
-                <div className="mentors-grid">
-                  {currentMentors.map((mentor) => (
-                    <MentorCard
-                      key={mentor.uid}
-                      mentor={mentor}
-                      mentorAvailability={mentorAvailability}
-                      currentUserRole={currentUserProfile?.type === 'mentor' || currentUserProfile?.type === 'mentee' ? currentUserProfile.type : undefined}
-                      onProfileClick={handleProfileCardClick}
-                      onBooking={handleBooking}
-                      onCalCom={handleCalCom}
-                    />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="pagination-container">
-                    <button
-                      className="pagination-btn prev"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </button>
-                    
-                    <div className="page-numbers">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          className={`page-number ${page === currentPage ? 'active' : ''}`}
-                          onClick={() => handlePageChange(page)}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <button
-                      className="pagination-btn next"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
       {/* Profile Edit Modal */}
       {showProfileEdit && currentUserProfile && (
-        <div className="profile-edit-modal-overlay">
-          <div className="profile-edit-modal">
-            <ProfileEditModal
+        <>
+          {isMobile ? (
+            <MobileProfileEditModal
               isOpen={showProfileEdit}
               profile={currentUserProfile}
-              onClose={() => setShowProfileEdit(false)}
+              onClose={closeProfileEditModal}
               onSave={handleProfileSave}
               onDelete={handleProfileDelete}
               validationErrors={validationErrors}
-              formProgress={calculateFormProgress()}
-              sectionStatus={getSectionStatus()}
+              formProgress={calculateFormProgress}
               onFormChange={handleFormChange}
               onArrayChange={handleArrayChange}
               onPastProfessionChange={handlePastProfessionChange}
               onAddPastProfession={addPastProfession}
               onRemovePastProfession={removePastProfession}
             />
-          </div>
-        </div>
+          ) : (
+            <div className="profile-edit-modal-overlay">
+              <div className="profile-edit-modal">
+                <ProfileEditModal
+                  isOpen={showProfileEdit}
+                  profile={currentUserProfile}
+                  onClose={closeProfileEditModal}
+                  onSave={handleProfileSave}
+                  onDelete={handleProfileDelete}
+                  validationErrors={validationErrors}
+                  formProgress={calculateFormProgress}
+                  sectionStatus={getSectionStatus}
+                  onFormChange={handleFormChange}
+                  onArrayChange={handleArrayChange}
+                  onPastProfessionChange={handlePastProfessionChange}
+                  onAddPastProfession={addPastProfession}
+                  onRemovePastProfession={removePastProfession}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Profile View Modal */}
@@ -749,7 +869,7 @@ export default function MentorPage() {
               isOpen={showProfileViewModal}
               profile={selectedMentor}
               onClose={handleCloseProfileViewModal}
-              currentUserRole={currentUserProfile?.type === 'mentor' || currentUserProfile?.type === 'mentee' ? currentUserProfile.type : undefined}
+              currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
             />
           </div>
         </div>
@@ -800,6 +920,18 @@ export default function MentorPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* View Bookings Modal */}
+      {showViewBookingsModal && (
+        <ViewBookingsModal
+          isOpen={showViewBookingsModal}
+          onClose={() => setShowViewBookingsModal(false)}
+          bookings={Object.values(mentorBookings).flat()}
+          onAcceptBooking={handleAcceptBooking}
+          onRejectBooking={handleRejectBooking}
+          onCancelBooking={handleCancelBooking}
+        />
       )}
     </div>
   );

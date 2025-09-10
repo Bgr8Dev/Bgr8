@@ -3,18 +3,22 @@ import { useAuth } from '../../../hooks/useAuth';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { CalComService } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
-import { getBestMatchesForUser } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { getBestMatchesForUser, MatchResult, calculateMatchScore } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { 
   MentorMenteeProfile, 
-  UserType, 
-  MENTOR, 
-  MENTEE,
-  ProfileFormData,
   MentorAvailability,
   EnhancedAvailability,
-  MentorBookings,
-  ValidationErrors
+  MentorBookings
 } from './mentorTypes';
+
+// Type for profiles with match data
+type ProfileWithMatchData = MentorMenteeProfile & {
+  matchData?: {
+    score: number;
+    percentage: number;
+    reasons: string[];
+  };
+};
 
 export const useMentorData = () => {
   const { currentUser } = useAuth();
@@ -27,8 +31,77 @@ export const useMentorData = () => {
   const [mentorBookings, setMentorBookings] = useState<MentorBookings>({});
   const [hasProfile, setHasProfile] = useState(false);
   const [currentUserProfile, setCurrentUserProfile] = useState<MentorMenteeProfile | null>(null);
-  const [bestMatches, setBestMatches] = useState<any[]>([]);
-  const [loadingMatches, setLoadingMatches] = useState(false);
+  const [bestMatches, setBestMatches] = useState<MatchResult[]>([]);
+  const [profilesLoaded, setProfilesLoaded] = useState(false);
+
+  // Function to calculate match score for a single profile
+  const calculateProfileMatch = async (profile: MentorMenteeProfile): Promise<ProfileWithMatchData> => {
+    if (!currentUserProfile || !currentUser) {
+      return profile as ProfileWithMatchData;
+    }
+
+    try {
+      // Use the algorithm's scoring logic to calculate match
+      const matchResult = await calculateMatchScore(currentUserProfile, profile);
+      
+      // Add match information to the profile
+      return {
+        ...profile,
+        // Store match data in a way that doesn't conflict with the base interface
+        matchData: {
+          score: matchResult.score,
+          percentage: matchResult.percentage,
+          reasons: matchResult.reasons
+        }
+      } as ProfileWithMatchData;
+    } catch (error) {
+      console.error('Error calculating match score for profile:', profile.uid, error);
+      return profile as ProfileWithMatchData;
+    }
+  };
+
+  // Function to calculate match scores for all profiles
+  const calculateAllProfileMatches = async (profiles: MentorMenteeProfile[]): Promise<MentorMenteeProfile[]> => {
+    if (!currentUserProfile) {
+      return profiles;
+    }
+
+    const profilesWithMatches: ProfileWithMatchData[] = [];
+    
+    for (const profile of profiles) {
+      const profileWithMatch = await calculateProfileMatch(profile);
+      profilesWithMatches.push(profileWithMatch);
+    }
+
+    // Sort profiles by match percentage (highest first)
+    profilesWithMatches.sort((a, b) => {
+      const aScore = a.matchData?.percentage || 0;
+      const bScore = b.matchData?.percentage || 0;
+      return bScore - aScore;
+    });
+
+    return profilesWithMatches;
+  };
+
+  const findMatches = async () => {
+    if (!currentUser || !currentUserProfile) return;
+
+    try {
+      // Don't set loading state - load matches silently in background
+      console.log('Finding matches for user:', currentUser.uid);
+      console.log('Current user profile:', currentUserProfile);
+      
+      const matches = await getBestMatchesForUser(currentUser.uid);
+      console.log('Algorithm found matches:', matches);
+      
+      setBestMatches(matches);
+      return matches;
+    } catch (err) {
+      console.error('Error finding matches:', err);
+      setError('Failed to find matches');
+      return [];
+    }
+  };
 
   const checkUserProfile = async () => {
     try {
@@ -45,6 +118,10 @@ export const useMentorData = () => {
         const profileData = mentorDoc.data() as MentorMenteeProfile;
         setCurrentUserProfile(profileData);
         setHasProfile(true);
+        
+        // Automatically find matches when profile is first loaded
+        console.log('MentorPage: Profile found, automatically finding matches...');
+        setTimeout(() => findMatches(), 1000); // Small delay to ensure state is set
       } else {
         setHasProfile(false);
       }
@@ -56,16 +133,40 @@ export const useMentorData = () => {
     }
   };
 
-  const fetchMentors = async () => {
+  const updateAllMentorAvailability = async () => {
+    const availabilityPromises = mentors.map(async (mentor) => {
+      const availability = await checkMentorAvailability(mentor);
+      return { [mentor.uid]: availability };
+    });
+    
+    const results = await Promise.all(availabilityPromises);
+    const newAvailability = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    setMentorAvailability(newAvailability as MentorAvailability);
+  };
+
+  const fetchProfiles = async (userType?: string) => {
     try {
-      console.log('MentorPage: Starting to fetch mentors...');
+      console.log('MentorPage: Starting to fetch profiles...');
+      console.log('MentorPage: Current user type:', userType || currentUserProfile?.type);
       setError(null);
       
       if (!firestore) {
         throw new Error('Firebase database not initialized');
       }
 
-      const mentorsData: MentorMenteeProfile[] = [];
+      // Use the passed userType parameter or fall back to currentUserProfile?.type
+      const targetType = userType || currentUserProfile?.type;
+      
+      if (!targetType) {
+        console.log('MentorPage: No user type available, skipping profile fetch');
+        return;
+      }
+
+      // Normalize the type to lowercase for consistent comparison
+      const normalizedTargetType = typeof targetType === 'string' ? targetType.toLowerCase() : targetType.toString().toLowerCase();
+      console.log('MentorPage: Normalized target type:', normalizedTargetType);
+
+      const profilesData: MentorMenteeProfile[] = [];
       
       // Fetch from traditional user profiles
       const usersQuery = query(collection(firestore, 'users'));
@@ -76,10 +177,14 @@ export const useMentorData = () => {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const mentorData = mentorProgramDoc.data() as MentorMenteeProfile;
-            // If current user is a mentee, show other mentees for networking
-            // If current user is a mentor, show other mentors for collaboration
-            if (currentUserProfile?.type === 'mentee' ? mentorData.type === 'mentee' : mentorData.type === 'mentor') {
-              mentorsData.push({
+            
+            // Normalize the profile type for comparison
+            const profileType = typeof mentorData.type === 'string' ? mentorData.type.toLowerCase() : '';
+            
+            // If current user is a mentee, show mentors to learn from
+            // If current user is a mentor, show mentees to mentor
+            if (normalizedTargetType === 'mentee' ? profileType === 'mentor' : profileType === 'mentee') {
+              profilesData.push({
                 ...mentorData,
                 id: userDoc.id,
                 uid: userDoc.id,
@@ -94,13 +199,14 @@ export const useMentorData = () => {
       
       // Fetch from appropriate generated collection based on current user's role
       try {
-        const collectionName = currentUserProfile?.type === 'mentee' ? 'Generated Mentees' : 'Generated Mentors';
+        const collectionName = normalizedTargetType === 'mentee' ? 'Generated Mentors' : 'Generated Mentees';
+        console.log('MentorPage: Fetching from collection:', collectionName);
         const generatedQuery = query(collection(firestore, collectionName));
         const generatedSnapshot = await getDocs(generatedQuery);
         
         generatedSnapshot.docs.forEach(doc => {
           const profileData = doc.data() as MentorMenteeProfile;
-          mentorsData.push({
+          profilesData.push({
             ...profileData,
             id: doc.id,
             uid: doc.id,
@@ -111,12 +217,18 @@ export const useMentorData = () => {
         console.error('Error fetching generated profiles:', error);
       }
       
-      console.log('MentorPage: Found profiles:', mentorsData.length, mentorsData);
+      console.log('MentorPage: Found profiles:', profilesData.length, profilesData);
       
-      setMentors(mentorsData);
-      setFilteredMentors(mentorsData);
+      setMentors(await calculateAllProfileMatches(profilesData));
+      setFilteredMentors(await calculateAllProfileMatches(profilesData));
       
       await updateAllMentorAvailability();
+      
+      // Automatically find matches after profiles are loaded
+      if (currentUser && currentUserProfile) {
+        console.log('MentorPage: Automatically finding matches after profile fetch...');
+        await findMatches();
+      }
     } catch (error) {
       console.error('MentorPage: Error fetching mentors:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch mentors');
@@ -156,17 +268,6 @@ export const useMentorData = () => {
       console.error('Error checking availability for mentor:', mentor.uid, error);
       return { available: false, nextSlot: 'Unable to check' };
     }
-  };
-
-  const updateAllMentorAvailability = async () => {
-    const availabilityPromises = mentors.map(async (mentor) => {
-      const availability = await checkMentorAvailability(mentor);
-      return { [mentor.uid]: availability };
-    });
-    
-    const results = await Promise.all(availabilityPromises);
-    const newAvailability = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-    setMentorAvailability(newAvailability as MentorAvailability);
   };
 
   const fetchEnhancedAvailability = async (mentorId: string) => {
@@ -213,51 +314,73 @@ export const useMentorData = () => {
     }
   };
 
-  const findMatches = async () => {
-    if (!currentUser || !currentUserProfile) return;
-
+  const createProfile = async (profileData: Partial<MentorMenteeProfile>) => {
     try {
-      setLoadingMatches(true);
-      const matches = await getBestMatchesForUser(currentUser.uid);
-      setBestMatches(matches);
-      setLoadingMatches(false);
-      return matches;
-    } catch (err) {
-      console.error('Error finding matches:', err);
-      setError('Failed to find matches');
-      setLoadingMatches(false);
-      return [];
-    }
-  };
+      setLoading(true);
+      const user = currentUser;
+      if (!user) throw new Error('No authenticated user');
 
-  const createProfile = async (profileData: any) => {
-    if (!currentUser) return false;
+      const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
+      const newProfile = {
+        ...profileData,
+        id: user.uid,
+        uid: user.uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    try {
-      await setDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
-      setHasProfile(true);
-      setCurrentUserProfile(profileData);
-      await fetchMentors();
+      await setDoc(profileRef, newProfile);
+      
+      // Refresh currentUserProfile from Firestore instead of setting locally
+      await checkUserProfile();
+      
+      // Refresh the profiles list to include the new profile
+      // Pass the user type to ensure we fetch the correct profiles
+      if (profileData.type && typeof profileData.type === 'string') {
+        await fetchProfiles(profileData.type);
+      }
       return true;
-    } catch (err) {
-      console.error('Error creating profile:', err);
+    } catch (error) {
+      console.error('Error creating profile:', error);
       setError('Failed to create profile');
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const updateProfile = async (profileData: any) => {
-    if (!currentUser) return false;
-
+  const updateProfile = async (profileData: Partial<MentorMenteeProfile>) => {
     try {
-      await updateDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
-      setCurrentUserProfile(profileData);
-      await fetchMentors();
+      setLoading(true);
+      const user = currentUser;
+      if (!user) throw new Error('No authenticated user');
+
+      const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
+      const updateData = {
+        ...profileData,
+        updatedAt: new Date().toISOString(),
+        // Ensure boolean fields are set based on type
+        isMentor: typeof profileData.type === 'string' ? profileData.type.toLowerCase() === 'mentor' : false,
+        isMentee: typeof profileData.type === 'string' ? profileData.type.toLowerCase() === 'mentee' : false
+      };
+
+      await updateDoc(profileRef, updateData);
+      
+      // Refresh currentUserProfile from Firestore instead of setting locally
+      await checkUserProfile();
+      
+      // Refresh the profiles list to get updated data
+      // Pass the user type to ensure we fetch the correct profiles
+      if (profileData.type && typeof profileData.type === 'string') {
+        await fetchProfiles(profileData.type);
+      }
       return true;
-    } catch (err) {
-      console.error('Error updating profile:', err);
+    } catch (error) {
+      console.error('Error updating profile:', error);
       setError('Failed to update profile');
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -279,14 +402,19 @@ export const useMentorData = () => {
 
   useEffect(() => {
     console.log('useMentorData: Component mounted, checking profile...');
+    setProfilesLoaded(false); // Reset when user changes
     checkUserProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   useEffect(() => {
-    if (hasProfile && currentUser) {
-      fetchMentors();
+    if (hasProfile && currentUser && currentUserProfile?.type && typeof currentUserProfile.type === 'string' && !profilesLoaded) {
+      console.log('useMentorData: Fetching profiles for user type:', currentUserProfile.type);
+      fetchProfiles(currentUserProfile.type);
+      setProfilesLoaded(true);
     }
-  }, [hasProfile, currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasProfile, currentUser, currentUserProfile?.type, profilesLoaded]);
 
   return {
     mentors,
@@ -303,9 +431,8 @@ export const useMentorData = () => {
     currentUserProfile,
     setCurrentUserProfile,
     bestMatches,
-    loadingMatches,
     checkUserProfile,
-    fetchMentors,
+    fetchProfiles,
     fetchEnhancedAvailability,
     fetchMentorBookings,
     findMatches,

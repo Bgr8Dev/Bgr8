@@ -7,6 +7,8 @@ interface MatchStrengthRingProps {
   color?: string; // CSS color
   bgColor?: string; // CSS color
   label?: string;
+  showTooltip?: boolean;
+  className?: string;
 }
 
 function clamp(val: number, min: number, max: number) {
@@ -17,9 +19,10 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
   score,
   size = 60,
   strokeWidth = 6,
-  color = '#00ff00',
   bgColor = '#333',
   label = 'Match Strength',
+  showTooltip = true,
+  className = ''
 }) => {
   const [hovered, setHovered] = useState(false);
   const [animatedOffset, setAnimatedOffset] = useState(0);
@@ -38,8 +41,20 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
     return () => clearTimeout(timeout);
   }, [circumference, offset]);
 
+  // Get color based on score
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return '#10b981'; // Green
+    if (score >= 80) return '#f59e0b'; // Amber
+    if (score >= 70) return '#3b82f6'; // Blue
+    if (score >= 50) return '#f97316'; // Orange
+    return '#ef4444'; // Red
+  };
+
+  const scoreColor = getScoreColor(score);
+
   return (
     <div
+      className={`match-strength-ring ${className}`}
       style={{
         display: 'inline-block',
         position: 'relative',
@@ -47,15 +62,15 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
         height: size,
         transition: 'transform 0.18s cubic-bezier(0.77,0,0.175,1), box-shadow 0.18s',
         transform: hovered ? 'scale(1.08)' : 'scale(1)',
-        boxShadow: hovered ? `0 0 16px 2px ${color}55, 0 2px 8px #0008` : 'none',
-        cursor: 'pointer',
+        boxShadow: hovered ? `0 0 16px 2px ${scoreColor}55, 0 2px 8px #0008` : 'none',
+        cursor: showTooltip ? 'pointer' : 'default',
       }}
       aria-label={tooltip}
-      tabIndex={0}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
+      tabIndex={showTooltip ? 0 : -1}
+      onMouseEnter={() => showTooltip && setHovered(true)}
+      onMouseLeave={() => showTooltip && setHovered(false)}
+      onFocus={() => showTooltip && setHovered(true)}
+      onBlur={() => showTooltip && setHovered(false)}
     >
       <svg width={size} height={size}>
         <circle
@@ -72,14 +87,14 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke={scoreColor}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={animatedOffset}
           strokeLinecap="round"
           style={{
             transition: 'stroke-dashoffset 0.9s cubic-bezier(0.77,0,0.175,1)',
-            filter: 'drop-shadow(0 0 6px ' + color + '55)',
+            filter: 'drop-shadow(0 0 6px ' + scoreColor + '55)',
           }}
         />
       </svg>
@@ -95,7 +110,7 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
           justifyContent: 'center',
           fontWeight: 800,
           fontSize: size * 0.32,
-          color: color,
+          color: scoreColor,
           textShadow: '0 1px 6px #000, 0 0 2px #fff8',
           pointerEvents: 'none',
           userSelect: 'none',
@@ -104,7 +119,7 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
       >
         {score}
       </span>
-      {hovered && (
+      {showTooltip && hovered && (
         <div
           style={{
             position: 'absolute',
@@ -118,7 +133,7 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
             borderRadius: 8,
             fontSize: '0.98rem',
             fontWeight: 500,
-            boxShadow: `0 4px 18px ${color}33, 0 2px 12px #000b` ,
+            boxShadow: `0 4px 18px ${scoreColor}33, 0 2px 12px #000b` ,
             whiteSpace: 'pre-line',
             zIndex: 100,
             pointerEvents: 'none',
@@ -143,7 +158,7 @@ const MatchStrengthRing: React.FC<MatchStrengthRingProps> = ({
               borderLeft: '8px solid transparent',
               borderRight: '8px solid transparent',
               borderTop: `8px solid rgba(24,24,24,0.98)`,
-              filter: `drop-shadow(0 2px 4px ${color}33)`,
+              filter: `drop-shadow(0 2px 4px ${scoreColor}33)`,
               zIndex: 101,
             }}
             aria-hidden="true"

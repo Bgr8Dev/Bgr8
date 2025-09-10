@@ -48,6 +48,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [devMode, setDevMode] = useState(false);
   const [isDevModeExiting, setIsDevModeExiting] = useState(false);
+  
+  // Local form state for editing
+  const [localFormData, setLocalFormData] = useState<ProfileFormData>(profile);
+
+  // Sync local form data with profile prop when it changes
+  useEffect(() => {
+    setLocalFormData(profile);
+  }, [profile]);
 
   // Handle dev mode exit animation
   useEffect(() => {
@@ -65,6 +73,12 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   }, [devMode, isDevModeExiting]);
 
   if (!isOpen) return null;
+
+  // Helper function to handle local array changes
+  const handleLocalArrayChange = (field: keyof ProfileFormData, value: string[]) => {
+    setLocalFormData(prev => ({ ...prev, [field]: value }));
+    onArrayChange(field, value);
+  };
 
   const scrollToSection = (sectionName: string) => {
     // Map section names to their actual IDs in the form
@@ -111,7 +125,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     setIsSaving(true);
     
     try {
-      const success = await onSave(profile as ProfileFormData);
+      const success = await onSave(localFormData);
       if (success) {
         onClose();
       }
@@ -189,14 +203,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   key={skill}
                   type="button"
                   className={`pem-skill-tag-selectable ${
-                    profile.skills?.includes(skill) ? 'selected' : ''
+                    localFormData.skills?.includes(skill) ? 'selected' : ''
                   }`}
                   onClick={() => {
-                    const currentSkills = profile.skills || [];
+                    const currentSkills = localFormData.skills || [];
                     const newSkills = currentSkills.includes(skill)
                       ? currentSkills.filter(s => s !== skill)
                       : [...currentSkills, skill];
-                    onArrayChange('skills', newSkills);
+                    handleLocalArrayChange('skills', newSkills);
                   }}
                 >
                   {skill}
@@ -206,19 +220,19 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           </div>
         ))}
       </div>
-      {profile.skills && profile.skills.length > 0 && (
+      {localFormData.skills && localFormData.skills.length > 0 && (
         <div className="pem-selected-skills-summary">
           <span className="pem-summary-label">Selected skills:</span>
           <div className="pem-selected-tags">
-            {profile.skills.map((skill, index) => (
+            {localFormData.skills.map((skill, index) => (
               <span key={index} className="pem-selected-tag">
                 {skill}
                 <button
                   type="button"
                   className="pem-remove-tag"
                   onClick={() => {
-                    const newSkills = profile.skills?.filter((_, i) => i !== index) || [];
-                    onArrayChange('skills', newSkills);
+                    const newSkills = localFormData.skills?.filter((_, i) => i !== index) || [];
+                    handleLocalArrayChange('skills', newSkills);
                   }}
                   title="Remove skill"
                 >
@@ -248,14 +262,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               key={industry}
               type="button"
               className={`pem-skill-tag-selectable ${
-                profile.industries?.includes(industry) ? 'selected' : ''
+                localFormData.industries?.includes(industry) ? 'selected' : ''
               }`}
               onClick={() => {
-                const currentIndustries = profile.industries || [];
+                const currentIndustries = localFormData.industries || [];
                 const newIndustries = currentIndustries.includes(industry)
                   ? currentIndustries.filter(i => i !== industry)
                   : [...currentIndustries, industry];
-                onArrayChange('industries', newIndustries);
+                handleLocalArrayChange('industries', newIndustries);
               }}
             >
               {industry}
@@ -263,19 +277,19 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           ))}
         </div>
       </div>
-      {profile.industries && profile.industries.length > 0 && (
+      {localFormData.industries && localFormData.industries.length > 0 && (
         <div className="pem-selected-skills-summary">
           <span className="pem-summary-label">Selected industries:</span>
           <div className="pem-selected-tags">
-            {profile.industries.map((industry, index) => (
+            {localFormData.industries.map((industry, index) => (
               <span key={index} className="pem-selected-tag">
                 {industry}
                 <button
                   type="button"
                   className="pem-remove-tag"
                   onClick={() => {
-                    const newIndustries = profile.industries?.filter((_, i) => i !== index) || [];
-                    onArrayChange('industries', newIndustries);
+                    const newIndustries = localFormData.industries?.filter((_, i) => i !== index) || [];
+                    handleLocalArrayChange('industries', newIndustries);
                   }}
                 >
                   ×
@@ -307,14 +321,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   key={hobby}
                   type="button"
                   className={`pem-hobby-tag-selectable ${
-                    profile.hobbies?.includes(hobby) ? 'selected' : ''
+                    localFormData.hobbies?.includes(hobby) ? 'selected' : ''
                   }`}
                   onClick={() => {
-                    const currentHobbies = profile.hobbies || [];
+                    const currentHobbies = localFormData.hobbies || [];
                     const newHobbies = currentHobbies.includes(hobby)
                       ? currentHobbies.filter(h => h !== hobby)
                       : [...currentHobbies, hobby];
-                    onArrayChange('hobbies', newHobbies);
+                    handleLocalArrayChange('hobbies', newHobbies);
                   }}
                 >
                   {hobby}
@@ -324,19 +338,19 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           </div>
         ))}
       </div>
-      {profile.hobbies && profile.hobbies.length > 0 && (
+      {localFormData.hobbies && localFormData.hobbies.length > 0 && (
         <div className="pem-selected-hobbies-summary">
           <span className="pem-summary-label">Selected hobbies:</span>
           <div className="pem-selected-tags">
-            {profile.hobbies.map((hobby, index) => (
+            {localFormData.hobbies.map((hobby, index) => (
               <span key={index} className="pem-selected-tag">
                 {hobby}
                 <button
                   type="button"
                   className="pem-remove-tag"
                   onClick={() => {
-                    const newHobbies = profile.hobbies?.filter((_, i) => i !== index) || [];
-                    onArrayChange('hobbies', newHobbies);
+                    const newHobbies = localFormData.hobbies?.filter((_, i) => i !== index) || [];
+                    handleLocalArrayChange('hobbies', newHobbies);
                   }}
                 >
                   ×
@@ -806,16 +820,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 <div className="pem-form-row">
                   <div className="pem-input-group">
                     <label htmlFor="edit-calCom" className="pem-field-label">
-                      Cal.com Username
+                      Cal.com Public Page Link
                       <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('calCom')} />
                     </label>
                     <input
-                      type="text"
+                      type="url"
                       id="edit-calCom"
                       name="calCom"
                       value={profile.calCom || ''}
                       onChange={onFormChange}
-                      placeholder="yourusername"
+                      placeholder="https://cal.com/yourusername"
                       data-tooltip={getFieldTooltip('calCom')}
                     />
                   </div>

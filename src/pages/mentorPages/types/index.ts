@@ -17,3 +17,6 @@ export { MentorCard } from '../components/MentorCard';
 export { ProfileRegistrationForm } from '../components/ProfileRegistrationForm';
 export { MatchesSection } from '../components/MatchesSection';
 export { ProfileEditModal } from '../components/ProfileEditModal';
+export { ProfileViewModal } from '../components/ProfileViewModal';
+export { ViewBookingsModal } from '../components/ViewBookingsModal';
+export { default as BookingModal } from '../../../components/widgets/MentorAlgorithm/booking/BookingModal';

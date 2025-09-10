@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MentorMenteeProfile, MentorAvailability } from './mentorTypes';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import industriesList from '../../../constants/industries';
@@ -74,7 +74,7 @@ export const useMentorSearch = (
     setShowSearchDropdown(suggestionsArray.length > 0);
   };
 
-  const filterMentors = () => {
+  const filterMentors = useCallback(() => {
     let filtered = mentors;
 
     if (searchTerm) {
@@ -125,7 +125,7 @@ export const useMentorSearch = (
     }
 
     setFilteredMentors(filtered);
-  };
+  }, [mentors, searchTerm, selectedFilter, mentorAvailability]);
 
   const getFilterCount = (filterType: string) => {
     if (!filterType) return mentors.length;
@@ -167,12 +167,19 @@ export const useMentorSearch = (
 
   useEffect(() => {
     filterMentors();
-  }, [mentors, searchTerm, selectedFilter]);
+  }, [filterMentors]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as Element;
+      
+      // Don't interfere with navigation links
+      if (target.closest('a[href]') || target.closest('button[type="button"]')) {
+        return;
+      }
+      
       const searchContainer = document.querySelector('.search-container');
-      if (searchContainer && !searchContainer.contains(event.target as Node)) {
+      if (searchContainer && !searchContainer.contains(target)) {
         setShowSearchDropdown(false);
       }
     };

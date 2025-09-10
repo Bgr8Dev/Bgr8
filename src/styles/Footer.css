@@ -85,14 +85,14 @@
 
 /* Links Sections */
 .footer-links nav,
-.footer-businesses nav {
+.footer-mentoring nav {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
 .footer-links a,
-.footer-businesses a {
+.footer-mentoring a {
   color: var(--gray-400);
   text-decoration: none;
   transition: color 0.2s ease, transform 0.2s ease;
@@ -101,7 +101,7 @@
 }
 
 .footer-links a::after,
-.footer-businesses a::after {
+.footer-mentoring a::after {
   content: '';
   position: absolute;
   width: 0;
@@ -113,13 +113,13 @@
 }
 
 .footer-links a:hover,
-.footer-businesses a:hover {
+.footer-mentoring a:hover {
   color: var(--white);
   transform: translateX(5px);
 }
 
 .footer-links a:hover::after,
-.footer-businesses a:hover::after {
+.footer-mentoring a:hover::after {
   width: 100%;
 }
 
@@ -205,7 +205,7 @@
   }
   
   .footer-links a:hover,
-  .footer-businesses a:hover {
+  .footer-mentoring a:hover {
     transform: none;
   }
   

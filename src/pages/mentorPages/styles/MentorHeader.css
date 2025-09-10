@@ -1,22 +1,26 @@
+/* MentorHeader.css - Header Section Styles */
+
 /* Header Section */
-.mentor-header {
+.mheader-mentor-header {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: var(--white);
-  padding: 60px 0;
+  padding: 60px 0 60px 0;
   text-align: center;
+  position: relative;
+  z-index: 2;
 }
 
-.mentor-header-content {
+.mheader-mentor-header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
 }
 
-.mentor-header h1 {
+.mheader-mentor-header h1 {
   font-size: 3rem;
   font-weight: 700;
   margin-bottom: 16px;
@@ -24,7 +28,7 @@
   margin-top: 0;
 }
 
-.mentor-header p {
+.mheader-mentor-header p {
   font-size: 1.25rem;
   margin-bottom: 0;
   opacity: 0.9;
@@ -34,8 +38,26 @@
   text-align: center;
 }
 
+.mheader-generated-profiles-info {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mheader-generated-profiles-info .mheader-info-text {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.95;
+  line-height: 1.4;
+}
+
 /* User Profile Summary */
-.user-profile-summary {
+.mheader-user-profile-summary {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 24px;
@@ -45,14 +67,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.profile-info {
+.mheader-profile-info {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.profile-role {
+.mheader-profile-role {
   background: var(--white);
   color: var(--accent);
   padding: 8px 16px;
@@ -63,25 +85,25 @@
   letter-spacing: 0.5px;
 }
 
-.profile-role.mentor {
+.mheader-profile-role.mheader-mentor {
   background: var(--mentor-light);
   color: var(--mentor-dark);
   border: 1px solid var(--mentor);
 }
 
-.profile-role.mentee {
+.mheader-profile-role.mheader-mentee {
   background: var(--mentee-light);
   color: var(--mentee-dark);
   border: 1px solid var(--mentee);
 }
 
-.profile-name {
+.mheader-profile-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--white);
 }
 
-.profile-actions {
+.mheader-profile-actions {
   display: flex;
   gap: 16px;
   justify-content: center;
@@ -89,43 +111,319 @@
   margin-bottom: 20px;
 }
 
-.profile-edit-btn,
-.find-matches-btn {
-  background: var(--white);
+/* Enhanced Button Styles with Unique Effects */
+.mheader-profile-edit-btn,
+.mheader-find-matches-btn {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(255, 255, 255, 0.7) 100%);
   color: var(--accent);
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  border: 2px solid transparent;
+  padding: 14px 28px;
+  border-radius: 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(59, 167, 242, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.profile-edit-btn:hover,
-.find-matches-btn:hover {
-  background: var(--gray-50);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+/* Animated gradient border effect */
+.mheader-profile-edit-btn::before,
+.mheader-find-matches-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    var(--accent) 0%, 
+    var(--mentor) 25%, 
+    var(--mentee) 50%, 
+    var(--accent) 75%, 
+    var(--accent) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 3s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  z-index: -1;
 }
 
-.find-matches-btn:disabled {
-  opacity: 0.6;
+/* Floating particles effect */
+.mheader-profile-edit-btn::after,
+.mheader-find-matches-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  z-index: -1;
+}
+
+/* Profile Edit Button - Unique Style */
+.mheader-profile-edit-btn {
+  background: linear-gradient(135deg, 
+    rgba(224, 106, 92, 0.1) 0%, 
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(224, 106, 92, 0.1) 100%);
+  color: var(--mentor-dark);
+  box-shadow: 
+    0 8px 32px rgba(224, 106, 92, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.mheader-profile-edit-btn::before {
+  background: linear-gradient(45deg, 
+    var(--mentor) 0%, 
+    var(--mentor-light) 25%, 
+    var(--mentor-dark) 50%, 
+    var(--mentor) 75%, 
+    var(--mentor) 100%);
+}
+
+/* Find Matches Button - Unique Style */
+.mheader-find-matches-btn {
+  background: linear-gradient(135deg, 
+    rgba(29, 213, 209, 0.1) 0%, 
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(29, 213, 209, 0.1) 100%);
+  color: var(--mentee-dark);
+  box-shadow: 
+    0 8px 32px rgba(29, 213, 209, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.mheader-find-matches-btn::before {
+  background: linear-gradient(45deg, 
+    var(--mentee) 0%, 
+    var(--mentee-light) 25%, 
+    var(--mentee-dark) 50%, 
+    var(--mentee) 75%, 
+    var(--mentee) 100%);
+}
+
+/* Hover Effects */
+.mheader-profile-edit-btn:hover,
+.mheader-find-matches-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(59, 167, 242, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.85) 100%);
+}
+
+.mheader-profile-edit-btn:hover {
+  box-shadow: 
+    0 20px 40px rgba(224, 106, 92, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.mheader-find-matches-btn:hover {
+  box-shadow: 
+    0 20px 40px rgba(29, 213, 209, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Particle explosion on hover */
+.mheader-profile-edit-btn:hover::after,
+.mheader-find-matches-btn:hover::after {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(59, 167, 242, 0.1) 0%, transparent 70%);
+}
+
+.mheader-profile-edit-btn:hover::after {
+  background: radial-gradient(circle, rgba(224, 106, 92, 0.1) 0%, transparent 70%);
+}
+
+.mheader-find-matches-btn:hover::after {
+  background: radial-gradient(circle, rgba(29, 213, 209, 0.1) 0%, transparent 70%);
+}
+
+/* Active/Pressed State */
+.mheader-profile-edit-btn:active,
+.mheader-find-matches-btn:active {
+  transform: translateY(-1px) scale(1.02);
+  transition: all 0.1s ease;
+}
+
+/* Focus State for Accessibility */
+.mheader-profile-edit-btn:focus,
+.mheader-find-matches-btn:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 32px rgba(59, 167, 242, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 0 4px rgba(59, 167, 242, 0.3);
+}
+
+/* Gradient Animation Keyframes */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Icon Enhancement */
+.mheader-profile-edit-btn svg,
+.mheader-find-matches-btn svg {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.mheader-profile-edit-btn:hover svg,
+.mheader-find-matches-btn:hover svg {
+  transform: rotate(5deg) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Disabled State - Maintains beauty while being clearly disabled */
+.mheader-find-matches-btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+  background: linear-gradient(135deg, 
+    rgba(107, 114, 128, 0.1) 0%, 
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(107, 114, 128, 0.1) 100%);
+  color: var(--gray-500);
+  box-shadow: 
+    0 4px 16px rgba(107, 114, 128, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.mheader-find-matches-btn:disabled::before {
+  background: linear-gradient(45deg, 
+    var(--gray-400) 0%, 
+    var(--gray-300) 25%, 
+    var(--gray-500) 50%, 
+    var(--gray-400) 75%, 
+    var(--gray-400) 100%);
+  animation: none;
+}
+
+.mheader-find-matches-btn:disabled:hover {
+  transform: none;
+  box-shadow: 
+    0 4px 16px rgba(107, 114, 128, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.mheader-find-matches-btn:disabled:hover::after {
+  width: 0;
+  height: 0;
+}
+
+/* Main Content Header Adjustments */
+.mentor-main-content .mheader-mentor-header {
+  background: transparent;
+  padding: 0 0 32px 0;
+  margin: 0;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
+
+.mentor-main-content .mheader-mentor-header-content {
+  padding: 0;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mentor-main-content .mheader-mentor-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.mentor-main-content .mheader-mentor-header p {
+  font-size: 1.1rem;
+  margin-bottom: 0;
+  text-align: left;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.mentor-main-content .mheader-generated-profiles-info {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.mentor-main-content .mheader-user-profile-summary {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mentor-main-content .mheader-profile-actions {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.mentor-main-content .mheader-profile-edit-btn,
+.mentor-main-content .mheader-find-matches-btn,
+.mentor-main-content .mheader-availability-manage-btn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
 }
 
 /* Search Container */
-.search-container {
+.mheader-search-container {
   max-width: 600px;
   margin: 0 auto;
   margin-bottom: 20px;
 }
 
-.search-bar {
+.mheader-search-bar {
   position: relative;
   background: var(--white);
   border-radius: 12px;
@@ -139,18 +437,18 @@
   cursor: text;
 }
 
-.search-bar:hover {
+.mheader-search-bar:hover {
   box-shadow: var(--shadow-2xl);
   transform: translateY(-1px);
 }
 
-.search-bar:focus-within {
+.mheader-search-bar:focus-within {
   border-color: var(--mentor);
   box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.1);
   transform: translateY(-1px);
 }
 
-.search-icon {
+.mheader-search-icon {
   position: absolute;
   left: 20px;
   top: 24px;
@@ -163,7 +461,7 @@
   height: 24px;
 }
 
-.search-bar input {
+.mheader-search-bar input {
   width: 100%;
   padding: 0 0 0 48px;
   border: none;
@@ -178,13 +476,13 @@
   align-items: center;
 }
 
-.search-bar input::placeholder {
+.mheader-search-bar input::placeholder {
   color: var(--gray-500);
   font-weight: 400;
 }
 
 /* Search Suggestions Dropdown */
-.search-suggestions-dropdown {
+.mheader-search-suggestions-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -199,7 +497,7 @@
   margin-top: 4px;
 }
 
-.suggestion-item {
+.mheader-suggestion-item {
   padding: 12px 20px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -208,25 +506,25 @@
   color: var(--text);
 }
 
-.suggestion-item:last-child {
+.mheader-suggestion-item:last-child {
   border-bottom: none;
 }
 
-.suggestion-item:hover {
+.mheader-suggestion-item:hover {
   background: var(--mentor-light);
   color: var(--mentor-dark);
 }
 
-.suggestion-item:first-child {
+.mheader-suggestion-item:first-child {
   border-radius: 8px 8px 0 0;
 }
 
-.suggestion-item:last-child {
+.mheader-suggestion-item:last-child {
   border-radius: 0 0 8px 8px;
 }
 
 /* Availability Management Button */
-.availability-manage-btn {
+.mheader-availability-manage-btn {
   background: var(--button-mentor-bg);
   color: var(--button-mentor-text);
   border: 1px solid var(--button-mentor-border);
@@ -242,7 +540,7 @@
   gap: 8px;
 }
 
-.availability-manage-btn:hover {
+.mheader-availability-manage-btn:hover {
   background: var(--button-mentor-hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(224, 106, 92, 0.3);
@@ -250,46 +548,55 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .mentor-header h1 {
+  .mheader-mentor-header {
+    padding: 60px 0 40px 0;
+    margin-bottom: 30px;
+  }
+  
+  .mheader-mentor-header h1 {
     font-size: 2rem;
   }
   
-  .mentor-header p {
+  .mheader-mentor-header p {
     font-size: 1.1rem;
   }
   
-  .search-container {
-    margin: 0 20px 20px 20px;
+  .mentor-main-content .mheader-mentor-header h1 {
+    font-size: 2rem;
   }
   
-  .search-bar {
-    padding: 14px 16px;
-    min-height: 52px;
-  }
-  
-  .search-icon {
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-  }
-  
-  .search-bar input {
-    padding-left: 44px;
-    font-size: 15px;
-  }
-
-  .profile-actions {
+  .mentor-main-content .mheader-profile-actions {
     flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mentor-main-content .mheader-profile-edit-btn,
+  .mentor-main-content .mheader-find-matches-btn,
+  .mentor-main-content .mheader-availability-manage-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+  
+  /* Reduce animation intensity on mobile for better performance */
+  .mheader-profile-edit-btn::before,
+  .mheader-find-matches-btn::before {
+    animation-duration: 4s;
+  }
+  
+  .mheader-profile-edit-btn:hover,
+  .mheader-find-matches-btn:hover {
+    transform: translateY(-2px) scale(1.03);
   }
 }
 
 @media (max-width: 480px) {
-  .mentor-header {
-    padding: 40px 0;
+  .mheader-mentor-header h1 {
+    font-size: 1.75rem;
   }
   
-  .mentor-header h1 {
-    font-size: 1.75rem;
+  .mheader-mentor-header p {
+    font-size: 1rem;
   }
 }

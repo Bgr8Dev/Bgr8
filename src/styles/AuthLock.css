@@ -1,0 +1,210 @@
+/* AuthLock.css - Authentication lock component styles */
+
+.auth-lock-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fef7f6 0%, #f8c5c1 50%, #e06a5c 100%);
+  background-attachment: fixed;
+  padding: 2rem;
+}
+
+.auth-lock-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(224, 106, 92, 0.2);
+  border: 1px solid rgba(224, 106, 92, 0.1);
+  max-width: 500px;
+  width: 100%;
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-lock-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.auth-lock-card h2 {
+  color: var(--coral-primary, #e06a5c);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(224, 106, 92, 0.1);
+}
+
+.auth-lock-card p {
+  color: var(--coral-text, #8b3a2f);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.auth-lock-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.auth-lock-btn {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+}
+
+.auth-lock-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.auth-lock-btn:hover::before {
+  left: 100%;
+}
+
+.auth-lock-btn.primary {
+  background: var(--coral-primary, #e06a5c);
+  color: var(--white);
+  border-color: var(--coral-primary, #e06a5c);
+  box-shadow: 0 4px 16px rgba(224, 106, 92, 0.3);
+}
+
+.auth-lock-btn.primary:hover {
+  background: var(--coral-dark, #c55a4e);
+  border-color: var(--coral-dark, #c55a4e);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(224, 106, 92, 0.4);
+}
+
+.auth-lock-btn.secondary {
+  background: var(--white);
+  color: var(--coral-primary, #e06a5c);
+  border-color: var(--coral-primary, #e06a5c);
+  box-shadow: 0 4px 16px rgba(224, 106, 92, 0.1);
+}
+
+.auth-lock-btn.secondary:hover {
+  background: var(--coral-light, #f4a5a0);
+  color: var(--white);
+  border-color: var(--coral-light, #f4a5a0);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(224, 106, 92, 0.2);
+}
+
+/* Loading state */
+.auth-lock-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fef7f6 0%, #f8c5c1 50%, #e06a5c 100%);
+  background-attachment: fixed;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(224, 106, 92, 0.2);
+  border-top: 4px solid var(--coral-primary, #e06a5c);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.auth-lock-loading p {
+  color: var(--coral-text, #8b3a2f);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .auth-lock-container {
+    padding: 1rem;
+  }
+  
+  .auth-lock-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .auth-lock-card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .auth-lock-card p {
+    font-size: 1rem;
+  }
+  
+  .auth-lock-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .auth-lock-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-lock-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .auth-lock-icon {
+    font-size: 3rem;
+  }
+  
+  .auth-lock-card h2 {
+    font-size: 1.3rem;
+  }
+  
+  .auth-lock-card p {
+    font-size: 0.9rem;
+  }
+}

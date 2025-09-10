@@ -47,6 +47,13 @@ function isFirestoreTimestamp(val: unknown): val is FirestoreTimestamp {
   return !!val && typeof val === 'object' && typeof (val as { toDate?: unknown }).toDate === 'function';
 }
 
+// Extend the Booking interface to include generated properties
+interface ExtendedBooking extends Booking {
+  isGeneratedMentor?: boolean;
+  isGeneratedMentee?: boolean;
+  bookingMethod?: string;
+}
+
 // Inline BookingAnalytics component
 const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
   const analytics = useMemo(() => {
@@ -113,6 +120,9 @@ export default function MentorManagement() {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedAvailability, setSelectedAvailability] = useState<MentorAvailabilityWithProfile | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  // Add new state for booking filters
+  const [bookingGeneratedFilter, setBookingGeneratedFilter] = useState<'all' | 'generated' | 'real'>('all');
+  const [bookingMethodFilter, setBookingMethodFilter] = useState<'all' | 'internal' | 'calcom'>('all');
   // Availability state
   const [availabilityData, setAvailabilityData] = useState<MentorAvailabilityWithProfile[]>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
@@ -148,16 +158,33 @@ export default function MentorManagement() {
       
       // Get all users and check their mentorProgram subcollections (original profiles)
       const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      console.log(`Found ${usersSnapshot.docs.length} users in users collection`);
       
       for (const userDoc of usersSnapshot.docs) {
         try {
           const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
           if (mentorProgramDoc.exists()) {
             const userData = mentorProgramDoc.data();
+            // Check if this profile has the isGenerated flag set to true
+            const isGenerated = userData.isGenerated === true;
+            
+            // Determine the user type - check both isMentor/isMentee and type fields
+            let userType = 'unknown';
+            if (userData.isMentor === true) {
+              userType = 'MENTOR';
+            } else if (userData.isMentee === true) {
+              userType = 'MENTEE';
+            } else if (userData.type) {
+              userType = userData.type.toUpperCase();
+            }
+            
+            console.log(`User ${userDoc.id} (${userData.name}): isGenerated = ${isGenerated}, isMentor = ${userData.isMentor}, isMentee = ${userData.isMentee}, type = ${userData.type}, resolved type = ${userType}`);
+            
             allUsers.push({
               ...userData,
               id: userDoc.id,
-              isGenerated: false // Mark as original profile
+              isGenerated: isGenerated, // Use the actual flag from the profile data
+              type: userType // Ensure we have the correct type
             } as MentorMenteeProfileWithId);
           }
         } catch (error) {
@@ -168,12 +195,20 @@ export default function MentorManagement() {
       // Fetch generated mentors from "Generated Mentors" collection
       try {
         const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        console.log(`Found ${generatedMentorsSnapshot.docs.length} generated mentors`);
         generatedMentorsSnapshot.docs.forEach(doc => {
           const mentorData = doc.data();
+          // Ensure generated mentors have the correct type
+          const userType = mentorData.isMentor === true ? 'MENTOR' : 
+                          mentorData.isMentee === true ? 'MENTEE' : 
+                          mentorData.type ? mentorData.type.toUpperCase() : 'MENTOR';
+          
+          console.log(`Generated Mentor ${doc.id}: ${mentorData.name}, type = ${userType}`);
           allUsers.push({
             ...mentorData,
             id: doc.id,
-            isGenerated: true // Mark as generated profile
+            isGenerated: true, // Mark as generated profile
+            type: userType // Ensure correct type
           } as MentorMenteeProfileWithId);
         });
       } catch (error) {
@@ -183,17 +218,33 @@ export default function MentorManagement() {
       // Fetch generated mentees from "Generated Mentees" collection
       try {
         const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        console.log(`Found ${generatedMenteesSnapshot.docs.length} generated mentees`);
         generatedMenteesSnapshot.docs.forEach(doc => {
           const menteeData = doc.data();
+          // Ensure generated mentees have the correct type
+          const userType = menteeData.isMentor === true ? 'MENTOR' : 
+                          menteeData.isMentee === true ? 'MENTEE' : 
+                          menteeData.type ? menteeData.type.toUpperCase() : 'MENTEE';
+          
+          console.log(`Generated Mentee ${doc.id}: ${menteeData.name}, type = ${userType}`);
           allUsers.push({
             ...menteeData,
             id: doc.id,
-            isGenerated: true // Mark as generated profile
+            isGenerated: true, // Mark as generated profile
+            type: userType // Ensure correct type
           } as MentorMenteeProfileWithId);
         });
       } catch (error) {
         console.error('Error fetching generated mentees:', error);
       }
+      
+      console.log(`Total users loaded: ${allUsers.length}`);
+      console.log(`Real users: ${allUsers.filter(u => !u.isGenerated).length}`);
+      console.log(`Generated users: ${allUsers.filter(u => u.isGenerated).length}`);
+      console.log(`Real mentors: ${allUsers.filter(u => !u.isGenerated && u.isMentor).length}`);
+      console.log(`Generated mentors: ${allUsers.filter(u => u.isGenerated && u.isMentor).length}`);
+      console.log(`Real mentees: ${allUsers.filter(u => !u.isGenerated && u.isMentee).length}`);
+      console.log(`Generated mentees: ${allUsers.filter(u => u.isGenerated && u.isMentee).length}`);
       
       setUsers(allUsers);
     } catch (error) {
@@ -232,59 +283,89 @@ export default function MentorManagement() {
           createdAt: data.createdAt,
           duration: data.duration || 60,
           revenue: data.revenue || 0,
-          isCalComBooking: false
+          isCalComBooking: data.isCalComBooking || false,
+          // Add new fields for enhanced booking data
+          day: data.day || '',
+          calComBookingId: data.calComBookingId || null,
+          calComEventType: data.calComEventType || null,
+          calComAttendees: data.calComAttendees || [],
+          bookingMethod: data.bookingMethod || 'internal',
+          // Add generated profile detection
+          isGeneratedMentor: false, // Will be set below
+          isGeneratedMentee: false, // Will be set below
         } as Booking;
       });
       results.push(...firestoreBookings);
 
       // Fetch Cal.com bookings from all mentors
       try {
-        const mentorsSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
-        const mentorPromises = mentorsSnapshot.docs
-          .filter(doc => doc.data().isMentor)
-          .map(async (mentorDoc) => {
-            const mentorData = mentorDoc.data();
-            try {
-              const calComBookings = await CalComService.getBookings(mentorDoc.id);
-              return calComBookings.map((calBooking: CalComBookingResponse) => {
-                const startDate = new Date(calBooking.startTime);
-                const endDate = new Date(calBooking.endTime);
-                
-                // Find mentor and mentee from attendees
-                const mentor = calBooking.attendees.find(attendee => 
-                  attendee.email === mentorData.email
-                );
-                const mentee = calBooking.attendees.find(attendee => 
-                  attendee.email !== mentorData.email
-                );
-                
-                return {
-                  id: `calcom-${calBooking.id}`,
-                  mentorId: mentorDoc.id,
-                  menteeId: mentee?.email || 'unknown',
-                  mentorName: mentor?.name || mentorData.name || 'Unknown Mentor',
-                  menteeName: mentee?.name || 'Unknown Mentee',
-                  mentorEmail: mentor?.email || mentorData.email || '',
-                  menteeEmail: mentee?.email || '',
-                  sessionDate: startDate,
-                  startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                  endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                  status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
-                          calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
-                  createdAt: new Date(),
-                  duration: (calBooking.eventType as { length?: number; price?: number })?.length || 60,
-                  revenue: (calBooking.eventType as { length?: number; price?: number })?.price || 0,
-                  isCalComBooking: true,
-                  calComBookingId: calBooking.id,
-                  calComEventType: calBooking.eventType,
-                  calComAttendees: calBooking.attendees
-                } as Booking;
-              });
-            } catch (error) {
-              console.error(`Error fetching Cal.com bookings for mentor ${mentorDoc.id}:`, error);
-              return [];
+        // Get all users and check their mentorProgram subcollections for mentors
+        const usersSnapshot = await getDocs(collection(firestore, 'users'));
+        const mentorPromises: Promise<Booking[]>[] = [];
+        
+        for (const userDoc of usersSnapshot.docs) {
+          try {
+            const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+            if (mentorProgramDoc.exists()) {
+              const mentorData = mentorProgramDoc.data();
+              if (mentorData.isMentor) {
+                const mentorPromise = (async () => {
+                  try {
+                    const calComBookings = await CalComService.getBookings(userDoc.id);
+                    return calComBookings.map((calBooking: CalComBookingResponse) => {
+                      const startDate = new Date(calBooking.startTime);
+                      const endDate = new Date(calBooking.endTime);
+                      
+                      // Find mentor and mentee from attendees
+                      const mentor = calBooking.attendees.find(attendee => 
+                        attendee.email === mentorData.email
+                      );
+                      const mentee = calBooking.attendees.find(attendee => 
+                        attendee.email !== mentorData.email
+                      );
+                      
+                      return {
+                        id: `calcom-${calBooking.id}`,
+                        mentorId: userDoc.id,
+                        menteeId: mentee?.email || 'unknown',
+                        mentorName: mentor?.name || mentorData.name || 'Unknown Mentor',
+                        menteeName: mentee?.name || 'Unknown Mentee',
+                        mentorEmail: mentor?.email || mentorData.email || '',
+                        menteeEmail: mentee?.email || '',
+                        sessionDate: startDate,
+                        startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                        endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                        status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
+                                calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
+                        createdAt: new Date(),
+                        duration: (calBooking.eventType as { length?: number; price?: number })?.length || 60,
+                        revenue: (calBooking.eventType as { length?: number; price?: number })?.price || 0,
+                        isCalComBooking: true,
+                        calComBookingId: calBooking.id,
+                        calComEventType: calBooking.eventType,
+                        calComAttendees: calBooking.attendees,
+                        // Add new fields for enhanced booking data
+                        day: '', // Cal.com doesn't have day field
+                        meetLink: '',
+                        eventId: calBooking.id,
+                        bookingMethod: 'calcom',
+                        // Add generated profile detection
+                        isGeneratedMentor: false, // Will be set below
+                        isGeneratedMentee: false, // Will be set below
+                      } as Booking;
+                    });
+                  } catch (error) {
+                    console.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, error);
+                    return [];
+                  }
+                })();
+                mentorPromises.push(mentorPromise);
+              }
             }
-          });
+          } catch (error) {
+            console.error(`Error checking mentor program for user ${userDoc.id}:`, error);
+          }
+        }
         
         const calComResults = await Promise.all(mentorPromises);
         const allCalComBookings = calComResults.flat();
@@ -294,7 +375,92 @@ export default function MentorManagement() {
         // Continue with Firestore bookings only
       }
 
-      setBookings(results);
+      // Now enrich all bookings with generated profile information
+      const enrichedBookings = await Promise.all(
+        results.map(async (booking) => {
+          try {
+            // Check if mentor is generated by looking at the actual profile data
+            let isGeneratedMentor = false;
+            try {
+              // First check if it's a generated mentor by looking in the Generated Mentors collection
+              const generatedMentorDoc = await getDoc(doc(firestore, 'Generated Mentors', booking.mentorId));
+              if (generatedMentorDoc.exists()) {
+                console.log(`Mentor ${booking.mentorId} found in Generated Mentors collection`);
+                isGeneratedMentor = true;
+              } else {
+                // If not in generated collection, check if it's a real user profile
+                const mentorProfileDoc = await getDoc(doc(firestore, 'users', booking.mentorId, 'mentorProgram', 'profile'));
+                if (mentorProfileDoc.exists()) {
+                  const mentorData = mentorProfileDoc.data();
+                  // Check if the profile has the isGenerated flag set to true
+                  isGeneratedMentor = mentorData.isGenerated === true;
+                  console.log(`Mentor ${booking.mentorId} profile data:`, { 
+                    isGenerated: mentorData.isGenerated, 
+                    name: mentorData.name,
+                    type: mentorData.type 
+                  });
+                } else {
+                  console.log(`Mentor ${booking.mentorId} not found in any collection`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error checking mentor profile for ${booking.mentorId}:`, error);
+              isGeneratedMentor = false;
+            }
+
+            // Check if mentee is generated by looking at the actual profile data
+            let isGeneratedMentee = false;
+            try {
+              // First check if it's a generated mentee by looking in the Generated Mentees collection
+              const generatedMenteeDoc = await getDoc(doc(firestore, 'Generated Mentees', booking.menteeId));
+              if (generatedMenteeDoc.exists()) {
+                console.log(`Mentee ${booking.menteeId} found in Generated Mentees collection`);
+                isGeneratedMentee = true;
+              } else {
+                // If not in generated collection, check if it's a real user profile
+                const menteeProfileDoc = await getDoc(doc(firestore, 'users', booking.menteeId, 'mentorProgram', 'profile'));
+                if (menteeProfileDoc.exists()) {
+                  const menteeData = menteeProfileDoc.data();
+                  // Check if the profile has the isGenerated flag set to true
+                  isGeneratedMentee = menteeData.isGenerated === true;
+                  console.log(`Mentee ${booking.menteeId} profile data:`, { 
+                    isGenerated: menteeData.isGenerated, 
+                    name: menteeData.name,
+                    type: menteeData.type 
+                  });
+                } else {
+                  console.log(`Mentee ${booking.menteeId} not found in any collection`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error checking mentee profile for ${booking.menteeId}:`, error);
+              isGeneratedMentee = false;
+            }
+
+            console.log(`Booking ${booking.id} enriched:`, { 
+              mentorId: booking.mentorId, 
+              menteeId: booking.menteeId,
+              isGeneratedMentor, 
+              isGeneratedMentee 
+            });
+
+            return {
+              ...booking,
+              isGeneratedMentor,
+              isGeneratedMentee,
+            };
+          } catch (error) {
+            console.error(`Error enriching booking ${booking.id}:`, error);
+            return {
+              ...booking,
+              isGeneratedMentor: false,
+              isGeneratedMentee: false,
+            };
+          }
+        })
+      );
+
+      setBookings(enrichedBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       setBookingsError('Failed to load bookings');
@@ -308,42 +474,120 @@ export default function MentorManagement() {
     setLoadingAvailability(true);
     setAvailabilityError(null);
     try {
-      // Get all users from mentorProgram collection
-      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
-      const usersData = usersSnapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id
-      })) as MentorMenteeProfileWithId[];
+      // Get all users and check their mentorProgram subcollections (new structure)
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      const usersData: MentorMenteeProfileWithId[] = [];
       
-      // Fetch availability data from users/{uid}/availabilities subcollections
-      const availabilityPromises = usersData.map(async (user) => {
+      for (const userDoc of usersSnapshot.docs) {
         try {
-          const availabilityDoc = await getDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'));
-          if (availabilityDoc.exists()) {
-            const availabilityData = availabilityDoc.data();
-            return {
-              ...availabilityData,
-              mentorId: user.id
-            } as MentorAvailabilityWithProfile;
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            usersData.push({
+              ...userData,
+              id: userDoc.id,
+              isGenerated: false
+            } as MentorMenteeProfileWithId);
           }
-          return null;
         } catch (error) {
-          console.error(`Error fetching availability for user ${user.id}:`, error);
-          return null;
+          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
         }
-      });
+      }
       
-      const availabilityResults = await Promise.all(availabilityPromises);
-      const availabilityData = availabilityResults.filter(Boolean) as MentorAvailabilityWithProfile[];
+      // Fetch generated mentors from "Generated Mentors" collection
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        generatedMentorsSnapshot.docs.forEach(doc => {
+          const mentorData = doc.data();
+          usersData.push({
+            ...mentorData,
+            id: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentors:', error);
+      }
       
-      // Fetch mentor profiles and Cal.com availability to enrich the data
-      const enrichedData = await Promise.all(
-        availabilityData.map(async (availability) => {
+      // Fetch generated mentees from "Generated Mentees" collection
+      try {
+        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        generatedMenteesSnapshot.docs.forEach(doc => {
+          const menteeData = doc.data();
+          usersData.push({
+            ...menteeData,
+            id: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentees:', error);
+      }
+      
+             // Fetch availability data from users/{uid}/availabilities subcollections
+       const availabilityPromises = usersData.map(async (user) => {
+         try {
+           const availabilityDoc = await getDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'));
+           if (availabilityDoc.exists()) {
+             const availabilityData = availabilityDoc.data();
+             return {
+               ...availabilityData,
+               mentorId: user.id
+             } as MentorAvailabilityWithProfile;
+           }
+           return null;
+         } catch (error) {
+           console.error(`Error fetching availability for user ${user.id}:`, error);
+           return null;
+         }
+       });
+       
+       const availabilityResults = await Promise.all(availabilityPromises);
+       const allAvailabilityData = availabilityResults.filter(Boolean) as MentorAvailabilityWithProfile[];
+       
+       // Also fetch availability data from Generated Availability collection
+       try {
+         const generatedAvailabilitySnapshot = await getDocs(collection(firestore, 'Generated Availability'));
+         generatedAvailabilitySnapshot.docs.forEach(doc => {
+           const generatedAvailabilityData = doc.data();
+           const generatedAvailability: MentorAvailabilityWithProfile = {
+             ...generatedAvailabilityData,
+             mentorId: doc.id,
+             mentorProfile: usersData.find(user => user.id === doc.id) || undefined
+           };
+           allAvailabilityData.push(generatedAvailability);
+         });
+       } catch (error) {
+         console.error('Error fetching generated availability:', error);
+       }
+       
+       // Fetch mentor profiles and Cal.com availability to enrich the data
+       const enrichedData = await Promise.all(
+         allAvailabilityData.map(async (availability) => {
           try {
-            // Fetch mentor profile
-            const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', availability.mentorId));
-            if (mentorDoc.exists()) {
-              availability.mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+            // Fetch mentor profile from the new structure
+            let mentorProfile: MentorMenteeProfile | undefined;
+            
+            // Try to get from users/{uid}/mentorProgram/profile first
+            try {
+              const mentorDoc = await getDoc(doc(firestore, 'users', availability.mentorId, 'mentorProgram', 'profile'));
+              if (mentorDoc.exists()) {
+                mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+              }
+            } catch {
+              // If that fails, try the old structure
+              try {
+                const mentorDoc = await getDoc(doc(firestore, 'mentorProgram', availability.mentorId));
+                if (mentorDoc.exists()) {
+                  mentorProfile = mentorDoc.data() as MentorMenteeProfile;
+                }
+              } catch (oldError) {
+                console.error(`Error fetching mentor profile for ${availability.mentorId}:`, oldError);
+              }
+            }
+            
+            if (mentorProfile) {
+              availability.mentorProfile = mentorProfile;
             }
             
             // Check if mentor has Cal.com integration
@@ -595,6 +839,28 @@ export default function MentorManagement() {
     });
   }, [availabilityData, availabilitySearch, availabilityStatusFilter, availabilityTypeFilter]);
 
+  // Filter and sort bookings data
+  const filteredBookings = useMemo(() => {
+    return bookings.filter(booking => {
+      const extendedBooking = booking as ExtendedBooking;
+      
+      // Filter by generated profile status
+      if (bookingGeneratedFilter !== 'all') {
+        const hasGeneratedProfile = extendedBooking.isGeneratedMentor || extendedBooking.isGeneratedMentee;
+        if (bookingGeneratedFilter === 'generated' && !hasGeneratedProfile) return false;
+        if (bookingGeneratedFilter === 'real' && hasGeneratedProfile) return false;
+      }
+      
+      // Filter by booking method
+      if (bookingMethodFilter !== 'all') {
+        const method = extendedBooking.bookingMethod || 'internal';
+        if (method !== bookingMethodFilter) return false;
+      }
+      
+      return true;
+    });
+  }, [bookings, bookingGeneratedFilter, bookingMethodFilter]);
+
   // Admin action handlers
   const handleDeleteBooking = async (booking: Booking) => {
     setActionLoading(true);
@@ -681,20 +947,27 @@ export default function MentorManagement() {
     }
     
     try {
-      // Get all users from mentorProgram collection to find mentors
-      const usersSnapshot = await getDocs(collection(firestore, 'mentorProgram'));
+      // Get all users and check their mentorProgram subcollections to find mentors
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
       let deletedCount = 0;
       
       // Delete availability from each mentor's subcollection
       for (const userDoc of usersSnapshot.docs) {
-        const userData = userDoc.data();
-        if (userData.isMentor) {
-          try {
-            await deleteDoc(doc(firestore, 'users', userDoc.id, 'availabilities', 'default'));
-            deletedCount++;
-          } catch (error) {
-            console.error(`Error deleting availability for user ${userDoc.id}:`, error);
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const userData = mentorProgramDoc.data();
+            if (userData.isMentor) {
+              try {
+                await deleteDoc(doc(firestore, 'users', userDoc.id, 'availabilities', 'default'));
+                deletedCount++;
+              } catch (error) {
+                console.error(`Error deleting availability for user ${userDoc.id}:`, error);
+              }
+            }
           }
+        } catch (error) {
+          console.error(`Error checking mentor program for user ${userDoc.id}:`, error);
         }
       }
       
@@ -705,6 +978,165 @@ export default function MentorManagement() {
     } catch (error) {
       console.error('Error wiping availability data:', error);
       alert('Error deleting availability data. Please check the console for details.');
+    }
+  };
+
+  // Function to generate availability for generated profiles only
+  const generateAvailabilityForGeneratedProfiles = async () => {
+    try {
+      setActionLoading(true);
+      
+      // Get all generated profiles
+      const generatedProfiles: MentorMenteeProfileWithId[] = [];
+      
+      // Fetch generated mentors
+      try {
+        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
+        generatedMentorsSnapshot.docs.forEach(doc => {
+          const mentorData = doc.data();
+          generatedProfiles.push({
+            ...mentorData,
+            id: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentors:', error);
+      }
+      
+      // Fetch generated mentees
+      try {
+        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
+        generatedMenteesSnapshot.docs.forEach(doc => {
+          const menteeData = doc.data();
+          generatedProfiles.push({
+            ...menteeData,
+            id: doc.id,
+            isGenerated: true
+          } as MentorMenteeProfileWithId);
+        });
+      } catch (error) {
+        console.error('Error fetching generated mentees:', error);
+      }
+      
+      // Filter only generated mentors (since only mentors need availability)
+      const generatedMentors = generatedProfiles.filter(profile => profile.isMentor);
+      
+      if (generatedMentors.length === 0) {
+        alert('No generated mentor profiles found to generate availability for.');
+        return;
+      }
+      
+      let generatedCount = 0;
+      
+      // Generate availability for each generated mentor
+      for (const mentor of generatedMentors) {
+        try {
+          // Create a unique ID for the generated profile
+          const mentorId = mentor.id || `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          
+          // Generate random availability data
+          const availabilityData = {
+            mentorId: mentorId,
+            timeSlots: generateRandomTimeSlots(mentorId),
+            lastUpdated: new Date()
+          };
+          
+          // Store availability in the generated profile's subcollection
+          // Since these are generated profiles, we'll store them in a special collection
+          await setDoc(doc(firestore, 'Generated Availability', mentorId), availabilityData);
+          
+          generatedCount++;
+        } catch (error) {
+          console.error(`Error generating availability for generated mentor ${mentor.id}:`, error);
+        }
+      }
+      
+      // Refresh availability data
+      await fetchAvailability();
+      
+      alert(`SUCCESS: Generated availability data for ${generatedCount} generated mentor profiles!`);
+    } catch (error) {
+      console.error('Error generating availability for generated profiles:', error);
+      alert('Error generating availability data. Please check the console for details.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Helper function to generate random time slots
+  const generateRandomTimeSlots = (mentorId: string) => {
+    const timeSlots: TimeSlot[] = [];
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    
+    // Generate recurring availability for weekdays
+    for (let i = 0; i < 5; i++) {
+      const day = days[i];
+      const startHour = 9 + Math.floor(Math.random() * 4); // 9 AM to 1 PM
+      const endHour = startHour + 2 + Math.floor(Math.random() * 4); // 2-6 hour slots
+      
+      timeSlots.push({
+        id: `${mentorId}-${day}-recurring`,
+        day: day,
+        startTime: `${startHour.toString().padStart(2, '0')}:00`,
+        endTime: `${endHour.toString().padStart(2, '0')}:00`,
+        isAvailable: Math.random() > 0.3, // 70% chance of being available
+        type: 'recurring'
+      });
+    }
+    
+    // Generate some specific date availability for the next 2 weeks
+    const today = new Date();
+    for (let i = 0; i < 10; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      
+      if (date.getDay() !== 0 && date.getDay() !== 6) { // Skip weekends
+        const startHour = 10 + Math.floor(Math.random() * 6); // 10 AM to 4 PM
+        const endHour = startHour + 1 + Math.floor(Math.random() * 3); // 1-4 hour slots
+        
+        timeSlots.push({
+          id: `${mentorId}-${date.toISOString().split('T')[0]}-specific`,
+          date: date.toISOString().split('T')[0],
+          startTime: `${startHour.toString().padStart(2, '0')}:00`,
+          endTime: `${endHour.toString().padStart(2, '0')}:00`,
+          isAvailable: Math.random() > 0.4, // 60% chance of being available
+          type: 'specific'
+        });
+      }
+    }
+    
+    return timeSlots;
+  };
+
+  // Function to clear availability for generated profiles only
+  const clearGeneratedProfileAvailability = async () => {
+    const confirmed = window.confirm(
+      'Clear Availability for Generated Profiles\n\n' +
+      'This will delete availability data for ALL generated profiles only.\n\n' +
+      'Real user profiles will not be affected.\n\n' +
+      'Are you sure you want to proceed?'
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      setActionLoading(true);
+      
+      // Delete all documents from the Generated Availability collection
+      const generatedAvailabilitySnapshot = await getDocs(collection(firestore, 'Generated Availability'));
+      const deletePromises = generatedAvailabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      
+      // Refresh availability data
+      await fetchAvailability();
+      
+      alert(`SUCCESS: Cleared availability data for ${generatedAvailabilitySnapshot.docs.length} generated profiles!`);
+    } catch (error) {
+      console.error('Error clearing generated profile availability:', error);
+      alert('Error clearing availability data. Please check the console for details.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -1117,6 +1549,32 @@ export default function MentorManagement() {
               </select>
             )}
           </div>
+          
+          {/* New Booking Filters */}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+            <select 
+              value={bookingGeneratedFilter} 
+              onChange={e => setBookingGeneratedFilter(e.target.value as 'all' | 'generated' | 'real')} 
+              style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
+            >
+              <option value="all">All Profiles</option>
+              <option value="real">Real Profiles Only</option>
+              <option value="generated">Generated Profiles Only</option>
+            </select>
+            <select 
+              value={bookingMethodFilter} 
+              onChange={e => setBookingMethodFilter(e.target.value as 'all' | 'internal' | 'calcom')} 
+              style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
+            >
+              <option value="all">All Methods</option>
+              <option value="internal">Internal Bookings</option>
+              <option value="calcom">Cal.com Bookings</option>
+            </select>
+            <div style={{ fontSize: '12px', color: '#888', marginLeft: '8px' }}>
+              🎲 = Generated Profile | 📅 = Cal.com
+            </div>
+          </div>
+          
           {/* Bookings Content */}
           {loadingBookings ? (
             <div className="mentor-management-loading">Loading bookings...</div>
@@ -1124,13 +1582,13 @@ export default function MentorManagement() {
             <div className="mentor-management-error">{bookingsError}</div>
           ) : bookingsView === 'table' ? (
             <div style={{ minHeight: 200, background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 24 }}>
-              <BookingsTable bookings={bookings} onView={booking => { setSelectedBooking(booking); setDetailsModalOpen(true); }} />
+              <BookingsTable bookings={filteredBookings} onView={booking => { setSelectedBooking(booking); setDetailsModalOpen(true); }} />
               <BookingDetailsModal booking={selectedBooking} open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} onDelete={handleDeleteBooking} onUpdateStatus={handleUpdateBookingStatus} />
               {actionLoading && <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ background: '#222', color: '#fff', padding: '2rem 3rem', borderRadius: 12, fontSize: 20 }}>Processing...</div></div>}
             </div>
           ) : (
             <div style={{ minHeight: 200, background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 24 }}>
-              <BookingsGrouped bookings={bookings} groupBy={groupBy} onView={booking => { setSelectedBooking(booking); setDetailsModalOpen(true); }} />
+              <BookingsGrouped bookings={filteredBookings} groupBy={groupBy} onView={booking => { setSelectedBooking(booking); setDetailsModalOpen(true); }} />
               <BookingDetailsModal booking={selectedBooking} open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)} onDelete={handleDeleteBooking} onUpdateStatus={handleUpdateBookingStatus} />
               {actionLoading && <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ background: '#222', color: '#fff', padding: '2rem 3rem', borderRadius: 12, fontSize: 20 }}>Processing...</div></div>}
             </div>
@@ -1176,14 +1634,30 @@ export default function MentorManagement() {
                 >
                   <FaSync className={loadingAvailability ? 'spinning' : ''} /> Refresh
                 </button>
-                <button
-                  className="refresh-button"
-                  onClick={handleWipeAllAvailability}
-                  disabled={loadingAvailability}
-                  style={{ background: '#ff2a2a', color: '#fff', border: '1.5px solid #ff2a2a' }}
-                >
-                  🗑️ Wipe All Availability
-                </button>
+                                 <button
+                   className="refresh-button"
+                   onClick={handleWipeAllAvailability}
+                   disabled={loadingAvailability}
+                   style={{ background: '#ff2a2a', color: '#fff', border: '1.5px solid #ff2a2a' }}
+                 >
+                   🗑️ Wipe All Availability
+                 </button>
+                 <button
+                   className="refresh-button"
+                   onClick={generateAvailabilityForGeneratedProfiles}
+                   disabled={loadingAvailability || actionLoading}
+                   style={{ background: '#00e676', color: '#181818', border: '1.5px solid #00e676' }}
+                 >
+                   🎲 Generate Generated Profile Availability
+                 </button>
+                 <button
+                   className="refresh-button"
+                   onClick={clearGeneratedProfileAvailability}
+                   disabled={loadingAvailability || actionLoading}
+                   style={{ background: '#ff6b35', color: '#fff', border: '1.5px solid #ff6b35' }}
+                 >
+                   🧹 Clear Generated Profile Availability
+                 </button>
               </div>
             </div>
           </div>
@@ -1412,7 +1886,7 @@ export default function MentorManagement() {
           ) : bookingsError ? (
             <div className="mentor-management-error">{bookingsError}</div>
           ) : (
-            <BookingAnalytics bookings={bookings} />
+            <BookingAnalytics bookings={filteredBookings} />
           )}
         </div>
       )}
