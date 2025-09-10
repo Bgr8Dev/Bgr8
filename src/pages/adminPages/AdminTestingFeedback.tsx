@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaBug, FaPlus, FaSearch, FaSort, FaEye, FaEdit, FaTrash, FaThumbsUp, FaThumbsDown, FaTag, FaUser, FaCalendar, FaClock, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaPause, FaCopy } from 'react-icons/fa';
+import { FaBug, FaPlus, FaSearch, FaSort, FaEye, FaEdit, FaTrash, FaThumbsUp, FaThumbsDown, FaTag, FaUser, FaCalendar, FaClock, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaPause, FaCopy, FaTimes } from 'react-icons/fa';
 import { FeedbackService } from '../../services/feedbackService';
 import { FeedbackTicket, FeedbackStats, FeedbackFilters, FeedbackStatus, FeedbackPriority, FeedbackCategory } from '../../types/feedback';
 import { useAuth } from '../../hooks/useAuth';
@@ -40,9 +40,17 @@ export default function AdminTestingFeedback() {
   const [stats, setStats] = useState<FeedbackStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTicket, setSelectedTicket] = useState<FeedbackTicket | null>(null);
-  const [showTicketModal, setShowTicketModal] = useState(false);
+  // const [selectedTicket, setSelectedTicket] = useState<FeedbackTicket | null>(null);
+  // const [showTicketModal, setShowTicketModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTicket, setNewTicket] = useState({
+    title: '',
+    description: '',
+    category: 'bug' as FeedbackCategory,
+    priority: 'medium' as FeedbackPriority,
+    tags: [] as string[],
+    tagInput: ''
+  });
   const [filters, setFilters] = useState<FeedbackFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'priority' | 'votes'>('createdAt');
@@ -152,6 +160,60 @@ export default function AdminTestingFeedback() {
       console.error('Error deleting ticket:', err);
       setError('Failed to delete ticket');
     }
+  };
+
+  const handleCreateTicket = async () => {
+    if (!newTicket.title.trim() || !newTicket.description.trim()) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      await FeedbackService.createTicket(
+        {
+          title: newTicket.title.trim(),
+          description: newTicket.description.trim(),
+          category: newTicket.category,
+          priority: newTicket.priority,
+          tags: newTicket.tags
+        },
+        userProfile?.uid || '',
+        userProfile?.displayName || 'Unknown User',
+        userProfile?.email || ''
+      );
+      
+      setShowCreateModal(false);
+      setNewTicket({
+        title: '',
+        description: '',
+        category: 'bug',
+        priority: 'medium',
+        tags: [],
+        tagInput: ''
+      });
+      await loadTickets();
+    } catch (err) {
+      console.error('Error creating ticket:', err);
+      setError('Failed to create ticket');
+    }
+  };
+
+  const handleAddTag = () => {
+    const tag = newTicket.tagInput.trim();
+    if (tag && !newTicket.tags.includes(tag)) {
+      setNewTicket(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag],
+        tagInput: ''
+      }));
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setNewTicket(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
   };
 
   const formatDate = (date: Date) => {
@@ -349,8 +411,8 @@ export default function AdminTestingFeedback() {
                   <button
                     className="action-btn view"
                     onClick={() => {
-                      setSelectedTicket(ticket);
-                      setShowTicketModal(true);
+                      // TODO: Implement view ticket modal
+                      console.log('View ticket:', ticket.id);
                     }}
                     title="View Details"
                     aria-label="View ticket details"
@@ -360,8 +422,8 @@ export default function AdminTestingFeedback() {
                   <button
                     className="action-btn edit"
                     onClick={() => {
-                      setSelectedTicket(ticket);
-                      setShowTicketModal(true);
+                      // TODO: Implement edit ticket modal
+                      console.log('Edit ticket:', ticket.id);
                     }}
                     title="Edit Ticket"
                     aria-label="Edit ticket"
@@ -463,6 +525,142 @@ export default function AdminTestingFeedback() {
           <FaBug className="empty-icon" />
           <h3>No feedback tickets found</h3>
           <p>No tickets match your current filters. Try adjusting your search criteria.</p>
+        </div>
+      )}
+
+      {/* Create Ticket Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Create New Ticket</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowCreateModal(false)}
+                title="Close modal"
+                aria-label="Close modal"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-group">
+                <label htmlFor="ticket-title">Title *</label>
+                <input
+                  id="ticket-title"
+                  type="text"
+                  value={newTicket.title}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Brief description of the issue"
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="ticket-description">Description *</label>
+                <textarea
+                  id="ticket-description"
+                  value={newTicket.description}
+                  onChange={(e) => setNewTicket(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Detailed description of the issue or feature request"
+                  className="form-textarea"
+                  rows={4}
+                />
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="ticket-category">Category</label>
+                  <select
+                    id="ticket-category"
+                    value={newTicket.category}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, category: e.target.value as FeedbackCategory }))}
+                    className="form-select"
+                  >
+                    {CATEGORY_OPTIONS.map(category => (
+                      <option key={category} value={category}>
+                        {category.replace('_', ' ').toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="ticket-priority">Priority</label>
+                  <select
+                    id="ticket-priority"
+                    value={newTicket.priority}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, priority: e.target.value as FeedbackPriority }))}
+                    className="form-select"
+                  >
+                    {PRIORITY_OPTIONS.map(priority => (
+                      <option key={priority} value={priority}>
+                        {priority.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="ticket-tags">Tags</label>
+                <div className="tag-input-container">
+                  <input
+                    id="ticket-tags"
+                    type="text"
+                    value={newTicket.tagInput}
+                    onChange={(e) => setNewTicket(prev => ({ ...prev, tagInput: e.target.value }))}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                    placeholder="Add a tag and press Enter"
+                    className="form-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddTag}
+                    className="tag-add-btn"
+                    title="Add tag"
+                    aria-label="Add tag"
+                  >
+                    <FaPlus />
+                  </button>
+                </div>
+                {newTicket.tags.length > 0 && (
+                  <div className="tag-list">
+                    {newTicket.tags.map(tag => (
+                      <span key={tag} className="tag">
+                        <FaTag /> {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="tag-remove"
+                          title="Remove tag"
+                          aria-label={`Remove ${tag} tag`}
+                        >
+                          <FaTimes />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowCreateModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleCreateTicket}
+              >
+                <FaPlus /> Create Ticket
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
