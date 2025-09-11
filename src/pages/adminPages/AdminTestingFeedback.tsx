@@ -117,6 +117,7 @@ export default function AdminTestingFeedback() {
   const [hoveredTicket, setHoveredTicket] = useState<string | null>(null);
   const [selectedCardRef, setSelectedCardRef] = useState<HTMLDivElement | null>(null);
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
+  const [activeStatusFilter, setActiveStatusFilter] = useState<FeedbackStatus | 'all'>('all');
 
   // Close floating buttons when clicking outside
   useEffect(() => {
@@ -159,72 +160,120 @@ export default function AdminTestingFeedback() {
     }
   }, [userProfiles]);
 
+  // Store all tickets without filtering for seamless filtering
+  const [allTickets, setAllTickets] = useState<FeedbackTicket[]>([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   const loadTickets = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const ticketFilters: FeedbackFilters = {
-        ...filters,
-        searchTerm: searchTerm || undefined
-      };
-      
+      // Only fetch from Firebase on initial load or when explicitly needed
       const [ticketsData, statsData] = await Promise.all([
-        FeedbackService.getTickets(ticketFilters),
+        FeedbackService.getTickets(), // Get all tickets without filters
         FeedbackService.getFeedbackStats()
       ]);
       
-      // Sort tickets
-      const sortedTickets = ticketsData.sort((a, b) => {
-        let aValue: number, bValue: number;
-        
-        switch (sortBy) {
-          case 'createdAt': {
-            aValue = a.createdAt.getTime();
-            bValue = b.createdAt.getTime();
-            break;
-          }
-          case 'updatedAt': {
-            aValue = a.updatedAt.getTime();
-            bValue = b.updatedAt.getTime();
-            break;
-          }
-          case 'priority': {
-            const priorityOrder: Record<FeedbackPriority, number> = { critical: 4, high: 3, medium: 2, low: 1 };
-            aValue = priorityOrder[a.priority];
-            bValue = priorityOrder[b.priority];
-            break;
-          }
-          case 'votes': {
-            aValue = a.votes;
-            bValue = b.votes;
-            break;
-          }
-          default: {
-            aValue = a.createdAt.getTime();
-            bValue = b.createdAt.getTime();
-          }
-        }
-        
-        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-      });
-      
-      setTickets(sortedTickets);
+      setAllTickets(ticketsData);
       setStats(statsData);
+      setIsInitialLoad(false);
       
       // Fetch user profiles for the tickets
-      await fetchUserProfiles(sortedTickets);
+      await fetchUserProfiles(ticketsData);
     } catch (err) {
       console.error('Error loading tickets:', err);
       setError('Failed to load feedback tickets');
     } finally {
       setLoading(false);
     }
-  }, [filters, searchTerm, sortBy, sortOrder, fetchUserProfiles]);
+  }, [fetchUserProfiles]);
+
+  // Apply filters to existing tickets without re-fetching
+  const applyFiltersToTickets = useCallback(() => {
+    if (allTickets.length === 0) return;
+
+    let filteredTickets = [...allTickets];
+
+    // Apply status filter
+    if (filters.status && filters.status.length > 0) {
+      filteredTickets = filteredTickets.filter(ticket => 
+        filters.status!.includes(ticket.status)
+      );
+    }
+
+    // Apply priority filter
+    if (filters.priority && filters.priority.length > 0) {
+      filteredTickets = filteredTickets.filter(ticket => 
+        filters.priority!.includes(ticket.priority)
+      );
+    }
+
+    // Apply category filter
+    if (filters.category && filters.category.length > 0) {
+      filteredTickets = filteredTickets.filter(ticket => 
+        filters.category!.includes(ticket.category)
+      );
+    }
+
+    // Apply search filter
+    if (searchTerm && searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filteredTickets = filteredTickets.filter(ticket =>
+        ticket.title.toLowerCase().includes(searchLower) ||
+        ticket.description.toLowerCase().includes(searchLower) ||
+        ticket.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Sort tickets
+    const sortedTickets = filteredTickets.sort((a, b) => {
+      let aValue: number, bValue: number;
+      
+      switch (sortBy) {
+        case 'createdAt': {
+          aValue = a.createdAt.getTime();
+          bValue = b.createdAt.getTime();
+          break;
+        }
+        case 'updatedAt': {
+          aValue = a.updatedAt.getTime();
+          bValue = b.updatedAt.getTime();
+          break;
+        }
+        case 'priority': {
+          const priorityOrder: Record<FeedbackPriority, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+          aValue = priorityOrder[a.priority];
+          bValue = priorityOrder[b.priority];
+          break;
+        }
+        case 'votes': {
+          aValue = a.votes;
+          bValue = b.votes;
+          break;
+        }
+        default: {
+          aValue = a.createdAt.getTime();
+          bValue = b.createdAt.getTime();
+        }
+      }
+      
+      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+
+    setTickets(sortedTickets);
+  }, [allTickets, filters, searchTerm, sortBy, sortOrder]);
 
   useEffect(() => {
     loadTickets();
   }, [loadTickets]);
+
+  // Apply filters whenever filter state changes (without re-fetching)
+  useEffect(() => {
+    if (!isInitialLoad) {
+      applyFiltersToTickets();
+    }
+  }, [applyFiltersToTickets, isInitialLoad]);
 
   const handleVote = async (ticketId: string, voteType: 'up' | 'down') => {
     const userId = userProfile?.uid || '';
@@ -233,9 +282,9 @@ export default function AdminTestingFeedback() {
     // Set loading state
     setActionLoading(prev => ({ ...prev, [actionKey]: true }));
     
-    // Optimistic update
-    setTickets(prevTickets => 
-      prevTickets.map(ticket => {
+    // Optimistic update for both lists
+    const updateVotes = (tickets: FeedbackTicket[]) => 
+      tickets.map(ticket => {
         if (ticket.id === ticketId) {
           const isUpvoting = voteType === 'up';
           const wasUpvoted = ticket.upvoters.includes(userId);
@@ -285,15 +334,17 @@ export default function AdminTestingFeedback() {
           };
         }
         return ticket;
-      })
-    );
+      });
+
+    setTickets(prevTickets => updateVotes(prevTickets));
+    setAllTickets(prevTickets => updateVotes(prevTickets));
 
     try {
       await FeedbackService.voteTicket(ticketId, userId, voteType);
     } catch (err) {
       console.error('Error voting on ticket:', err);
       setError('Failed to vote on ticket');
-      // Revert optimistic update
+      // Revert optimistic update - reload all tickets
       await loadTickets();
     } finally {
       // Clear loading state
@@ -360,8 +411,9 @@ export default function AdminTestingFeedback() {
       workaround: ticketData.workaround?.trim() || undefined
     };
 
-    // Add optimistic draft to the list
+    // Add optimistic draft to both lists
     setTickets(prevTickets => [optimisticDraft, ...prevTickets]);
+    setAllTickets(prevTickets => [optimisticDraft, ...prevTickets]);
 
     try {
       const draftId = await FeedbackService.createTicket(
@@ -376,8 +428,15 @@ export default function AdminTestingFeedback() {
         'draft' // Pass draft status
       );
 
-      // Replace optimistic draft with real one
+      // Replace optimistic draft with real one in both lists
       setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === optimisticDraft.id 
+            ? { ...ticket, id: draftId, status: 'draft' as FeedbackStatus }
+            : ticket
+        )
+      );
+      setAllTickets(prevTickets => 
         prevTickets.map(ticket => 
           ticket.id === optimisticDraft.id 
             ? { ...ticket, id: draftId, status: 'draft' as FeedbackStatus }
@@ -387,8 +446,11 @@ export default function AdminTestingFeedback() {
     } catch (err) {
       console.error('Error saving draft:', err);
       setError('Failed to save draft');
-      // Remove optimistic draft on error
+      // Remove optimistic draft on error from both lists
       setTickets(prevTickets => 
+        prevTickets.filter(ticket => ticket.id !== optimisticDraft.id)
+      );
+      setAllTickets(prevTickets => 
         prevTickets.filter(ticket => ticket.id !== optimisticDraft.id)
       );
       // Re-throw the error so the modal can handle it
@@ -455,8 +517,9 @@ export default function AdminTestingFeedback() {
       workaround: ticketData.workaround?.trim() || undefined
     };
 
-    // Add optimistic ticket to the list
+    // Add optimistic ticket to both lists
     setTickets(prevTickets => [optimisticTicket, ...prevTickets]);
+    setAllTickets(prevTickets => [optimisticTicket, ...prevTickets]);
 
     // Close modal immediately
     setShowCreateModal(false);
@@ -469,8 +532,15 @@ export default function AdminTestingFeedback() {
         userProfile?.email || ''
       );
 
-      // Replace optimistic ticket with real one
+      // Replace optimistic ticket with real one in both lists
       setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === optimisticTicket.id 
+            ? { ...ticket, id: ticketId }
+            : ticket
+        )
+      );
+      setAllTickets(prevTickets => 
         prevTickets.map(ticket => 
           ticket.id === optimisticTicket.id 
             ? { ...ticket, id: ticketId }
@@ -480,8 +550,11 @@ export default function AdminTestingFeedback() {
     } catch (err) {
       console.error('Error creating ticket:', err);
       setError('Failed to create ticket');
-      // Remove optimistic ticket on error
+      // Remove optimistic ticket on error from both lists
       setTickets(prevTickets => 
+        prevTickets.filter(ticket => ticket.id !== optimisticTicket.id)
+      );
+      setAllTickets(prevTickets => 
         prevTickets.filter(ticket => ticket.id !== optimisticTicket.id)
       );
       // Re-throw the error so the modal can handle it
@@ -507,8 +580,15 @@ export default function AdminTestingFeedback() {
 
     const updatedTicket = { ...editingTicket, ...ticketData };
 
-    // Optimistic update
+    // Optimistic update for both lists
     setTickets(prevTickets => 
+      prevTickets.map(ticket => 
+        ticket.id === editingTicket.id 
+          ? { ...ticket, ...updatedTicket, updatedAt: new Date() }
+          : ticket
+      )
+    );
+    setAllTickets(prevTickets => 
       prevTickets.map(ticket => 
         ticket.id === editingTicket.id 
           ? { ...ticket, ...updatedTicket, updatedAt: new Date() }
@@ -547,8 +627,13 @@ export default function AdminTestingFeedback() {
     } catch (err) {
       console.error('Error updating ticket:', err);
       setError('Failed to update ticket');
-      // Revert optimistic update on error
+      // Revert optimistic update on error for both lists
       setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === editingTicket.id ? originalTicket : ticket
+        )
+      );
+      setAllTickets(prevTickets => 
         prevTickets.map(ticket => 
           ticket.id === editingTicket.id ? originalTicket : ticket
         )
@@ -566,8 +651,11 @@ export default function AdminTestingFeedback() {
 
     const ticketToDelete = deletingTicket;
     
-    // Optimistic update - remove ticket from list immediately
+    // Optimistic update - remove ticket from both lists immediately
     setTickets(prevTickets => 
+      prevTickets.filter(ticket => ticket.id !== ticketToDelete.id)
+    );
+    setAllTickets(prevTickets => 
       prevTickets.filter(ticket => ticket.id !== ticketToDelete.id)
     );
 
@@ -580,8 +668,9 @@ export default function AdminTestingFeedback() {
     } catch (err) {
       console.error('Error deleting ticket:', err);
       setError('Failed to delete ticket');
-      // Revert optimistic update on error
+      // Revert optimistic update on error for both lists
       setTickets(prevTickets => [ticketToDelete, ...prevTickets]);
+      setAllTickets(prevTickets => [ticketToDelete, ...prevTickets]);
     }
   };
 
@@ -615,9 +704,9 @@ export default function AdminTestingFeedback() {
       } : null
     );
 
-    // Update the main tickets list as well
-    setTickets(prevTickets => 
-      prevTickets.map(ticket => 
+    // Update both ticket lists
+    const updateComments = (tickets: FeedbackTicket[]) => 
+      tickets.map(ticket => 
         ticket.id === selectedTicketForComments.id 
           ? {
               ...ticket,
@@ -625,8 +714,10 @@ export default function AdminTestingFeedback() {
               updatedAt: new Date()
             }
           : ticket
-      )
-    );
+      );
+
+    setTickets(prevTickets => updateComments(prevTickets));
+    setAllTickets(prevTickets => updateComments(prevTickets));
 
     try {
       const commentId = await FeedbackService.addComment(selectedTicketForComments.id, {
@@ -647,8 +738,8 @@ export default function AdminTestingFeedback() {
         } : null
       );
 
-      setTickets(prevTickets => 
-        prevTickets.map(ticket => 
+      const updateCommentId = (tickets: FeedbackTicket[]) => 
+        tickets.map(ticket => 
           ticket.id === selectedTicketForComments.id 
             ? {
                 ...ticket,
@@ -659,8 +750,10 @@ export default function AdminTestingFeedback() {
                 )
               }
             : ticket
-        )
-      );
+        );
+
+      setTickets(prevTickets => updateCommentId(prevTickets));
+      setAllTickets(prevTickets => updateCommentId(prevTickets));
     } catch (err) {
       console.error('Error adding comment:', err);
       setError('Failed to add comment');
@@ -671,16 +764,18 @@ export default function AdminTestingFeedback() {
           comments: prev.comments.filter(comment => comment.id !== optimisticComment.id)
         } : null
       );
-      setTickets(prevTickets => 
-        prevTickets.map(ticket => 
+      const removeComment = (tickets: FeedbackTicket[]) => 
+        tickets.map(ticket => 
           ticket.id === selectedTicketForComments.id 
             ? {
                 ...ticket,
                 comments: ticket.comments.filter(comment => comment.id !== optimisticComment.id)
               }
             : ticket
-        )
-      );
+        );
+
+      setTickets(prevTickets => removeComment(prevTickets));
+      setAllTickets(prevTickets => removeComment(prevTickets));
     }
   };
 
@@ -707,6 +802,17 @@ export default function AdminTestingFeedback() {
 
   const formatRoleName = (role: string) => {
     return role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const handleStatusTileClick = (status: FeedbackStatus | 'all') => {
+    setActiveStatusFilter(status);
+    setFilters(prev => ({
+      ...prev,
+      status: status === 'all' ? undefined : [status]
+    }));
+    
+    // Don't trigger a full reload - just update the filter state
+    // The existing tickets will be filtered by the new filter state
   };
 
   if (loading) {
@@ -742,7 +848,11 @@ export default function AdminTestingFeedback() {
       )}
 
       {/* Stats Cards */}
-      <StatsTiles stats={stats} />
+      <StatsTiles 
+        stats={stats} 
+        onStatusClick={handleStatusTileClick}
+        activeStatus={activeStatusFilter}
+      />
 
       {/* Filters and Search */}
       <div className="admin-testing-feedback__controls">
@@ -758,11 +868,11 @@ export default function AdminTestingFeedback() {
         
         <div className="admin-testing-feedback__filters">
           <select
-            value={filters.status?.[0] || 'all'}
-            onChange={(e) => setFilters(prev => ({
-              ...prev,
-              status: e.target.value === 'all' ? undefined : [e.target.value as FeedbackStatus]
-            }))}
+            value={activeStatusFilter}
+            onChange={(e) => {
+              const status = e.target.value as FeedbackStatus | 'all';
+              handleStatusTileClick(status);
+            }}
           >
             <option value="all">All Status</option>
             {STATUS_OPTIONS.map(status => (

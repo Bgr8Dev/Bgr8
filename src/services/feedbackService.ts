@@ -187,27 +187,11 @@ export class FeedbackService {
    */
   static async getTickets(filters?: FeedbackFilters): Promise<FeedbackTicket[]> {
     try {
-      let q = query(collection(firestore, FEEDBACK_COLLECTION));
-
-      // Apply filters
-      if (filters?.status && filters.status.length > 0) {
-        q = query(q, where('status', 'in', filters.status));
-      }
-      if (filters?.priority && filters.priority.length > 0) {
-        q = query(q, where('priority', 'in', filters.priority));
-      }
-      if (filters?.category && filters.category.length > 0) {
-        q = query(q, where('category', 'in', filters.category));
-      }
-      if (filters?.assignedTo && filters.assignedTo.length > 0) {
-        q = query(q, where('assignedTo', 'in', filters.assignedTo));
-      }
-      if (filters?.reporterId) {
-        q = query(q, where('reporterId', '==', filters.reporterId));
-      }
-
-      // Order by creation date (newest first)
-      q = query(q, orderBy('createdAt', 'desc'));
+      // First, get all tickets ordered by creation date
+      let q = query(
+        collection(firestore, FEEDBACK_COLLECTION),
+        orderBy('createdAt', 'desc')
+      );
 
       const snapshot = await getDocs(q);
       const tickets: FeedbackTicket[] = [];
@@ -237,13 +221,63 @@ export class FeedbackService {
           upvoters: data.upvoters || [],
           downvoters: data.downvoters || [],
           duplicateOf: data.duplicateOf,
-          relatedTickets: data.relatedTickets || []
+          relatedTickets: data.relatedTickets || [],
+          // Testing-specific fields
+          urlToPage: data.urlToPage,
+          browser: data.browser,
+          browserVersion: data.browserVersion,
+          operatingSystem: data.operatingSystem,
+          deviceType: data.deviceType || 'desktop',
+          screenResolution: data.screenResolution,
+          stepsToReproduce: data.stepsToReproduce,
+          expectedBehavior: data.expectedBehavior,
+          actualBehavior: data.actualBehavior,
+          severity: data.severity || 'minor',
+          environment: data.environment || 'production',
+          testCaseId: data.testCaseId,
+          regression: data.regression || false,
+          workaround: data.workaround
         };
         tickets.push(ticket);
       }
 
-      // Apply client-side filters
+      // Apply all filters client-side to avoid Firestore index requirements
       let filteredTickets = tickets;
+
+      // Apply status filter
+      if (filters?.status && filters.status.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          filters.status!.includes(ticket.status)
+        );
+      }
+
+      // Apply priority filter
+      if (filters?.priority && filters.priority.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          filters.priority!.includes(ticket.priority)
+        );
+      }
+
+      // Apply category filter
+      if (filters?.category && filters.category.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          filters.category!.includes(ticket.category)
+        );
+      }
+
+      // Apply assignedTo filter
+      if (filters?.assignedTo && filters.assignedTo.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          ticket.assignedTo && filters.assignedTo!.includes(ticket.assignedTo)
+        );
+      }
+
+      // Apply reporterId filter
+      if (filters?.reporterId) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          ticket.reporterId === filters.reporterId
+        );
+      }
 
       if (filters?.searchTerm) {
         const searchLower = filters.searchTerm.toLowerCase();
@@ -309,7 +343,22 @@ export class FeedbackService {
         upvoters: data.upvoters || [],
         downvoters: data.downvoters || [],
         duplicateOf: data.duplicateOf,
-        relatedTickets: data.relatedTickets || []
+        relatedTickets: data.relatedTickets || [],
+        // Testing-specific fields
+        urlToPage: data.urlToPage,
+        browser: data.browser,
+        browserVersion: data.browserVersion,
+        operatingSystem: data.operatingSystem,
+        deviceType: data.deviceType || 'desktop',
+        screenResolution: data.screenResolution,
+        stepsToReproduce: data.stepsToReproduce,
+        expectedBehavior: data.expectedBehavior,
+        actualBehavior: data.actualBehavior,
+        severity: data.severity || 'minor',
+        environment: data.environment || 'production',
+        testCaseId: data.testCaseId,
+        regression: data.regression || false,
+        workaround: data.workaround
       };
     } catch (error) {
       console.error('Error fetching feedback ticket:', error);

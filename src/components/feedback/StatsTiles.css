@@ -16,11 +16,54 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-width: 2px;
+}
+
+.stat-card.active.total {
+  border-color: #3b82f6;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+.stat-card.active.draft {
+  border-color: #eab308;
+  box-shadow: 0 8px 25px rgba(234, 179, 8, 0.2);
+}
+
+.stat-card.active.open {
+  border-color: #10b981;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.stat-card.active.in-progress {
+  border-color: #f59e0b;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+}
+
+.stat-card.active.resolved {
+  border-color: #8b5cf6;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+.stat-card.active.closed {
+  border-color: #6b7280;
+  box-shadow: 0 8px 25px rgba(107, 114, 128, 0.2);
+}
+
+.stat-card.active.duplicate {
+  border-color: #ef4444;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
 }
 
 .stat-card.total {
