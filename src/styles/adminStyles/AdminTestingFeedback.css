@@ -312,6 +312,42 @@
   animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Status-themed ticket cards */
+.ticket-card.status-open {
+  background: var(--status-background, #f8fafc);
+  border-color: var(--status-border, #3b82f6);
+  border-left: 4px solid var(--status-primary, #3b82f6);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.ticket-card.status-in_progress {
+  background: var(--status-background, #fffbeb);
+  border-color: var(--status-border, #f59e0b);
+  border-left: 4px solid var(--status-primary, #f59e0b);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.ticket-card.status-resolved {
+  background: var(--status-background, #f0fdf4);
+  border-color: var(--status-border, #10b981);
+  border-left: 4px solid var(--status-primary, #10b981);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.ticket-card.status-closed {
+  background: var(--status-background, #f9fafb);
+  border-color: var(--status-border, #6b7280);
+  border-left: 4px solid var(--status-primary, #6b7280);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.1);
+}
+
+.ticket-card.status-duplicate {
+  background: var(--status-background, #fef2f2);
+  border-color: var(--status-border, #ef4444);
+  border-left: 4px solid var(--status-primary, #ef4444);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -338,6 +374,32 @@
 .ticket-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced hover effects for status-themed cards */
+.ticket-card.status-open:hover {
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+  border-color: var(--status-primary, #3b82f6);
+}
+
+.ticket-card.status-in_progress:hover {
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+  border-color: var(--status-primary, #f59e0b);
+}
+
+.ticket-card.status-resolved:hover {
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+  border-color: var(--status-primary, #10b981);
+}
+
+.ticket-card.status-closed:hover {
+  box-shadow: 0 8px 25px rgba(107, 114, 128, 0.2);
+  border-color: var(--status-primary, #6b7280);
+}
+
+.ticket-card.status-duplicate:hover {
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+  border-color: var(--status-primary, #ef4444);
 }
 
 .ticket-card__header {
@@ -383,6 +445,32 @@
   align-self: flex-start;
 }
 
+/* Status-themed ticket ID colors */
+.ticket-card.status-open .ticket-id {
+  color: var(--status-dark, #1e40af);
+  background: var(--status-light, #dbeafe);
+}
+
+.ticket-card.status-in_progress .ticket-id {
+  color: var(--status-dark, #d97706);
+  background: var(--status-light, #fef3c7);
+}
+
+.ticket-card.status-resolved .ticket-id {
+  color: var(--status-dark, #059669);
+  background: var(--status-light, #d1fae5);
+}
+
+.ticket-card.status-closed .ticket-id {
+  color: var(--status-dark, #374151);
+  background: var(--status-light, #f3f4f6);
+}
+
+.ticket-card.status-duplicate .ticket-id {
+  color: var(--status-dark, #dc2626);
+  background: var(--status-light, #fee2e2);
+}
+
 .ticket-card__title h3 {
   margin: 0;
   font-size: 1.1rem;
@@ -392,6 +480,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Status-themed title colors */
+.ticket-card.status-open .ticket-card__title h3 {
+  color: var(--status-text, #1e40af);
+}
+
+.ticket-card.status-in_progress .ticket-card__title h3 {
+  color: var(--status-text, #d97706);
+}
+
+.ticket-card.status-resolved .ticket-card__title h3 {
+  color: var(--status-text, #059669);
+}
+
+.ticket-card.status-closed .ticket-card__title h3 {
+  color: var(--status-text, #374151);
+}
+
+.ticket-card.status-duplicate .ticket-card__title h3 {
+  color: var(--status-text, #dc2626);
 }
 
 

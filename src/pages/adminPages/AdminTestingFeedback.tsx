@@ -17,6 +17,49 @@ const STATUS_COLORS = {
   duplicate: '#ef4444'
 };
 
+const STATUS_THEMES = {
+  open: {
+    primary: '#3b82f6',
+    light: '#dbeafe',
+    dark: '#1e40af',
+    background: '#f8fafc',
+    border: '#3b82f6',
+    text: '#1e40af'
+  },
+  in_progress: {
+    primary: '#f59e0b',
+    light: '#fef3c7',
+    dark: '#d97706',
+    background: '#fffbeb',
+    border: '#f59e0b',
+    text: '#d97706'
+  },
+  resolved: {
+    primary: '#10b981',
+    light: '#d1fae5',
+    dark: '#059669',
+    background: '#f0fdf4',
+    border: '#10b981',
+    text: '#059669'
+  },
+  closed: {
+    primary: '#6b7280',
+    light: '#f3f4f6',
+    dark: '#374151',
+    background: '#f9fafb',
+    border: '#6b7280',
+    text: '#374151'
+  },
+  duplicate: {
+    primary: '#ef4444',
+    light: '#fee2e2',
+    dark: '#dc2626',
+    background: '#fef2f2',
+    border: '#ef4444',
+    text: '#dc2626'
+  }
+};
+
 const PRIORITY_COLORS = {
   low: '#10b981',
   medium: '#f59e0b',
@@ -849,12 +892,20 @@ export default function AdminTestingFeedback() {
                   setSelectedCardRef(el);
                 }
               }}
-              className={`ticket-card ${ticket.id.startsWith('temp-') ? 'optimistic' : ''}`}
+              className={`ticket-card ${ticket.id.startsWith('temp-') ? 'optimistic' : ''} status-${ticket.status}`}
               onClick={(e) => {
                 setSelectedCardRef(e.currentTarget);
                 setHoveredTicket(hoveredTicket === ticket.id ? null : ticket.id);
               }}
-              style={{ cursor: 'pointer' }}
+              style={{ 
+                cursor: 'pointer',
+                '--status-primary': STATUS_THEMES[ticket.status].primary,
+                '--status-light': STATUS_THEMES[ticket.status].light,
+                '--status-dark': STATUS_THEMES[ticket.status].dark,
+                '--status-background': STATUS_THEMES[ticket.status].background,
+                '--status-border': STATUS_THEMES[ticket.status].border,
+                '--status-text': STATUS_THEMES[ticket.status].text
+              } as React.CSSProperties}
             >
               <div className="ticket-card__header">
                 <div className="ticket-card__title">
