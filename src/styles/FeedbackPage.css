@@ -80,6 +80,34 @@
   margin: 0;
 }
 
+.developer-mode-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+}
+
+.dev-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  width: fit-content;
+}
+
+.dev-text {
+  color: #3b82f6;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 /* Success and Error Messages */
 .success-message,
 .error-message {

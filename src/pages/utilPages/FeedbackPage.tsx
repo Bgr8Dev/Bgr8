@@ -37,6 +37,54 @@ export default function FeedbackPage() {
     const fetchBooking = async () => {
       if (!bookingId || !currentUser) return;
 
+      // Check if this is a developer mode feedback request
+      if (bookingId.startsWith('dev-')) {
+        console.log('Developer mode feedback request detected:', bookingId);
+        try {
+          const developerData = sessionStorage.getItem('developerFeedbackData');
+          console.log('Developer data from sessionStorage:', developerData);
+          
+          if (developerData) {
+            const devData = JSON.parse(developerData);
+            console.log('Parsed developer data:', devData);
+            
+            const bookingData: Booking = {
+              id: bookingId,
+              mentorId: devData.mentorId,
+              menteeId: currentUser.uid,
+              mentorName: devData.mentorName,
+              menteeName: currentUser.displayName || 'Unknown Mentee',
+              mentorEmail: '',
+              menteeEmail: currentUser.email || '',
+              day: 'Developer Mode',
+              startTime: 'N/A',
+              endTime: 'N/A',
+              status: 'completed',
+              createdAt: new Date() as any,
+              sessionDate: devData.sessionDate as any,
+              isDeveloperMode: true
+            };
+
+            console.log('Created booking data:', bookingData);
+            setBooking(bookingData);
+            setUserRole('mentee');
+            setFeedbackType('mentor');
+            setLoading(false);
+            return;
+          } else {
+            console.error('No developer data found in sessionStorage');
+            setError('No developer mode data found. Please try selecting a mentor again.');
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing developer feedback data:', error);
+          setError('Invalid developer mode data');
+          setLoading(false);
+          return;
+        }
+      }
+
       try {
         // First, try to fetch from Firestore bookings
         const bookingDoc = await getDoc(doc(firestore, 'bookings', bookingId));
@@ -226,7 +274,9 @@ export default function FeedbackPage() {
         menteeId: booking.menteeId,
         mentorName: booking.mentorName,
         menteeName: booking.menteeName,
-        sessionDate: booking.sessionDate!.toDate(),
+        sessionDate: typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
+          ? (booking.sessionDate as { toDate: () => Date }).toDate()
+          : (booking.sessionDate as Date),
         feedbackType,
         submittedBy: currentUser.uid,
         submittedAt: new Date(),
@@ -243,11 +293,13 @@ export default function FeedbackPage() {
 
       const feedbackRef = await addDoc(collection(firestore, 'feedback'), feedbackData);
 
-      // Update booking status to indicate feedback was given
-      await updateDoc(doc(firestore, 'bookings', booking.id), {
-        [`feedbackSubmitted_${feedbackType}`]: true,
-        [`feedbackSubmittedAt_${feedbackType}`]: new Date()
-      });
+      // Update booking status to indicate feedback was given (skip for developer mode)
+      if (!booking.isDeveloperMode) {
+        await updateDoc(doc(firestore, 'bookings', booking.id), {
+          [`feedbackSubmitted_${feedbackType}`]: true,
+          [`feedbackSubmittedAt_${feedbackType}`]: new Date()
+        });
+      }
 
       // For Cal.com bookings, also store a reference in the feedback
       if (booking.isCalComBooking && booking.calComBookingId) {
@@ -255,6 +307,14 @@ export default function FeedbackPage() {
         await updateDoc(doc(firestore, 'feedback', feedbackRef.id), {
           calComBookingId: booking.calComBookingId,
           isCalComBooking: true
+        });
+      }
+
+      // For developer mode, mark the feedback as developer mode
+      if (booking.isDeveloperMode) {
+        await updateDoc(doc(firestore, 'feedback', feedbackRef.id), {
+          isDeveloperMode: true,
+          developerModeMentorId: booking.mentorId
         });
       }
 
@@ -370,7 +430,7 @@ export default function FeedbackPage() {
         // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
         typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
           ? (booking.sessionDate as { toDate: () => Date }).toDate()
-          : (booking.sessionDate.toDate())
+          : (booking.sessionDate as Date)
       ).toLocaleDateString('en-GB', {
         weekday: 'long',
         year: 'numeric',
@@ -390,6 +450,12 @@ export default function FeedbackPage() {
           <div className="session-info">
             <h2>Session with {otherPartyName}</h2>
             <p>{sessionDate} • {booking.startTime} - {booking.endTime}</p>
+            {booking.isDeveloperMode && (
+              <div className="developer-mode-indicator">
+                <span className="dev-badge">🔧 Developer Mode</span>
+                <span className="dev-text">Testing feedback system - no actual session required</span>
+              </div>
+            )}
           </div>
         </div>
 
