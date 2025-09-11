@@ -5,19 +5,22 @@ export function useIsMobile(): boolean {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      // Check if screen width is mobile-sized
+      // Primary check: screen width (most reliable for responsive design)
       const isMobileWidth = window.innerWidth <= 768;
       
-      // Check if user agent indicates mobile
-      const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      // Check if user agent indicates mobile device (excluding tablets in desktop mode)
+      const isMobileUserAgent = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
       );
       
-      // Check if device has touch capability (common on mobile)
-      const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      // Check if it's an iPad in desktop mode (should not be considered mobile)
+      const isIPadDesktop = /iPad/i.test(navigator.userAgent) && window.innerWidth > 1024;
       
-      // Consider mobile if any of these conditions are met
-      setIsMobile(isMobileWidth || isMobileUserAgent || hasTouchScreen);
+      // Consider mobile if screen width is small AND it's not an iPad in desktop mode
+      // OR if it's a mobile user agent (excluding iPad in desktop mode)
+      const shouldBeMobile = (isMobileWidth && !isIPadDesktop) || (isMobileUserAgent && !isIPadDesktop);
+      
+      setIsMobile(shouldBeMobile);
     };
 
     // Check initially

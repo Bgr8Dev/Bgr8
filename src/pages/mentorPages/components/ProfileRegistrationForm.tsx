@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaArrowLeft, FaInfoCircle, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
+import { FaArrowLeft, FaInfoCircle, FaExclamationTriangle, FaTimes, FaCode, FaRandom } from 'react-icons/fa';
 import { UserType, MENTOR, MENTEE, ProfileFormData, ValidationErrors, FormProgress, SectionStatus } from '../types/mentorTypes';
 import { degreePlaceholders } from '../types/mentorConstants';
 import skillsByCategory from '../../../constants/skillsByCategory';
@@ -9,6 +9,7 @@ import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
+import { UserProfile, hasRole } from '../../../utils/userProfile';
 import '../styles/ProfileRegistrationForm.css';
 
 interface ProfileRegistrationFormProps {
@@ -17,6 +18,7 @@ interface ProfileRegistrationFormProps {
   validationErrors: ValidationErrors;
   formProgress: FormProgress;
   sectionStatus: SectionStatus;
+  userProfile?: UserProfile | null;
   onBack: () => void;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onArrayChange: (field: keyof ProfileFormData, value: string[]) => void;
@@ -118,6 +120,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   validationErrors,
   formProgress,
   sectionStatus,
+  userProfile,
   onBack,
   onFormChange,
   onArrayChange,
@@ -128,6 +131,135 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
 }) => {
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Developer mode data generation
+  const generateRandomData = () => {
+    const firstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Quinn', 'Sage', 'River', 'Phoenix', 'Blake', 'Cameron', 'Drew', 'Emery', 'Finley', 'Hayden', 'Jamie', 'Kendall', 'Logan'];
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];
+    const professions = selectedRole === MENTOR 
+      ? ['Software Engineer', 'Data Scientist', 'Product Manager', 'UX Designer', 'Marketing Manager', 'Financial Analyst', 'Consultant', 'Project Manager', 'Business Analyst', 'Sales Director']
+      : ['Student', 'Aspiring Developer', 'Future Engineer', 'Business Student', 'Art Student', 'Science Student', 'Literature Student', 'History Student', 'Psychology Student', 'Economics Student'];
+    
+    const degrees = selectedRole === MENTOR
+      ? ['BSc Computer Science', 'MSc Data Science', 'MBA', 'BEng Software Engineering', 'MSc Artificial Intelligence', 'BSc Mathematics', 'MSc Business Analytics', 'BSc Economics', 'MSc Finance', 'BSc Psychology']
+      : ['A-Levels', 'GCSEs', 'BTEC Level 3', 'International Baccalaureate', 'Scottish Highers', 'Welsh Baccalaureate', 'Access to HE Diploma', 'T-Levels', 'Apprenticeship', 'Foundation Degree'];
+    
+    const educationLevels = selectedRole === MENTOR
+      ? ['Bachelor\'s Degree', 'Master\'s Degree', 'PhD', 'Professional Qualification', 'Postgraduate Diploma']
+      : ['GCSE', 'A-Level', 'BTEC Level 3', 'International Baccalaureate', 'Scottish Highers'];
+    
+    const skills = Object.values(skillsByCategory).flat();
+    const industries = industriesList;
+    const hobbies = Object.values(hobbiesByCategory).flat();
+    const counties = ukCounties;
+    const ethnicities = ethnicityOptions;
+    const religions = religionOptions;
+    
+    // Generate random selections
+    const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const randomProfession = professions[Math.floor(Math.random() * professions.length)];
+    const randomDegree = degrees[Math.floor(Math.random() * degrees.length)];
+    const randomEducationLevel = educationLevels[Math.floor(Math.random() * educationLevels.length)];
+    const randomCounty = counties[Math.floor(Math.random() * counties.length)];
+    const randomEthnicity = ethnicities[Math.floor(Math.random() * ethnicities.length)];
+    const randomReligion = religions[Math.floor(Math.random() * religions.length)];
+    
+    // Generate random skills (3-8 skills)
+    const numSkills = Math.floor(Math.random() * 6) + 3;
+    const randomSkills = skills.sort(() => 0.5 - Math.random()).slice(0, numSkills);
+    
+    // Generate random industries (2-5 industries)
+    const numIndustries = Math.floor(Math.random() * 4) + 2;
+    const randomIndustries = industries.sort(() => 0.5 - Math.random()).slice(0, numIndustries);
+    
+    // Generate random hobbies (3-6 hobbies)
+    const numHobbies = Math.floor(Math.random() * 4) + 3;
+    const randomHobbies = hobbies.sort(() => 0.5 - Math.random()).slice(0, numHobbies);
+    
+    // Generate random looking for (for mentees only)
+    const randomLookingFor = selectedRole === MENTEE 
+      ? skills.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 5) + 3)
+      : [];
+    
+    // Generate random past professions (for mentors only)
+    const randomPastProfessions = selectedRole === MENTOR 
+      ? Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => 
+          professions[Math.floor(Math.random() * professions.length)]
+        )
+      : [''];
+    
+    // Generate random age
+    const randomAge = selectedRole === MENTOR 
+      ? (Math.floor(Math.random() * 20) + 25).toString() // 25-44 for mentors
+      : (Math.floor(Math.random() * 4) + 16).toString(); // 16-19 for mentees
+    
+    // Generate random phone number
+    const randomPhone = `+44 ${Math.floor(Math.random() * 9000) + 1000} ${Math.floor(Math.random() * 900) + 100} ${Math.floor(Math.random() * 9000) + 1000}`;
+    
+    // Generate random email
+    const randomEmail = `${randomFirstName.toLowerCase()}.${randomLastName.toLowerCase()}@example.com`;
+    
+    // Generate random LinkedIn URL
+    const randomLinkedin = `https://linkedin.com/in/${randomFirstName.toLowerCase()}-${randomLastName.toLowerCase()}`;
+    
+    // Generate random Cal.com URL (for mentors only)
+    const randomCalCom = selectedRole === MENTOR 
+      ? `https://cal.com/${randomFirstName.toLowerCase()}-${randomLastName.toLowerCase()}`
+      : '';
+    
+    return {
+      firstName: randomFirstName,
+      lastName: randomLastName,
+      email: randomEmail,
+      phone: randomPhone,
+      age: randomAge,
+      degree: randomDegree,
+      educationLevel: randomEducationLevel,
+      county: randomCounty,
+      profession: randomProfession,
+      pastProfessions: randomPastProfessions,
+      linkedin: randomLinkedin,
+      calCom: randomCalCom,
+      skills: randomSkills,
+      industries: randomIndustries,
+      hobbies: randomHobbies,
+      lookingFor: randomLookingFor,
+      ethnicity: randomEthnicity,
+      religion: randomReligion
+    };
+  };
+
+  const handleDeveloperMode = () => {
+    const randomData = generateRandomData();
+    
+    // Update all form fields with random data
+    Object.entries(randomData).forEach(([key, value]) => {
+      if (key === 'pastProfessions' && Array.isArray(value)) {
+        // Handle past professions array
+        value.forEach((profession, index) => {
+          if (index === 0) {
+            onPastProfessionChange(0, profession);
+          } else {
+            onAddPastProfession();
+            onPastProfessionChange(index, profession);
+          }
+        });
+      } else if (Array.isArray(value)) {
+        // Handle array fields (skills, industries, hobbies, lookingFor)
+        onArrayChange(key as keyof ProfileFormData, value);
+      } else {
+        // Handle string fields
+        const syntheticEvent = {
+          target: {
+            name: key,
+            value: value
+          }
+        } as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>;
+        onFormChange(syntheticEvent);
+      }
+    });
+  };
 
   const getFieldTooltip = (fieldName: string) => {
     const tooltips: { [key: string]: string } = {
@@ -486,6 +618,17 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         <button onClick={onBack} className="prf-back-button">
           <FaArrowLeft /> Back to role selection
         </button>
+        
+        {/* Developer Mode Button - Only visible to developers */}
+        {hasRole(userProfile || null, 'developer') && (
+          <button 
+            onClick={handleDeveloperMode} 
+            className="prf-developer-mode-button"
+            title="Fill form with random test data"
+          >
+            <FaCode /> <FaRandom /> Developer Mode
+          </button>
+        )}
       </div>
       
       <div className="prf-registration-header">

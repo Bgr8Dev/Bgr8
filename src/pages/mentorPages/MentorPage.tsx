@@ -45,7 +45,7 @@ import { useButtonEmergeModal } from '../../hooks/useButtonEmergeModal';
 import './styles/MentorFilters.css';
 
 export default function MentorPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
@@ -583,6 +583,7 @@ export default function MentorPage() {
           validationErrors={validationErrors}
           formProgress={calculateFormProgress}
           sectionStatus={getSectionStatus}
+          userProfile={userProfile}
           onBack={handleBack}
           onFormChange={handleFormChange}
           onArrayChange={handleArrayChange}

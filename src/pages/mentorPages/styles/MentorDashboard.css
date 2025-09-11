@@ -746,3 +746,232 @@
   }
 }
 
+/* Verification Status Styles */
+.verification-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--coral-light);
+  border-top: 4px solid var(--coral-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.verification-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  margin: 2rem;
+}
+
+.verification-error h2 {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.verification-error button {
+  background: var(--coral-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.2s ease;
+}
+
+.verification-error button:hover {
+  background: var(--coral-dark);
+}
+
+.verification-status-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+.verification-status-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.verification-status-card h2 {
+  color: var(--coral-primary);
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.verification-status-badge {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verification-status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+  border: 2px solid #fbbf24;
+}
+
+.verification-status-badge.under_review {
+  background: #dbeafe;
+  color: #2563eb;
+  border: 2px solid #60a5fa;
+}
+
+.verification-status-badge.approved {
+  background: #d1fae5;
+  color: #059669;
+  border: 2px solid #34d399;
+}
+
+.verification-status-badge.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 2px solid #f87171;
+}
+
+.verification-status-badge.suspended {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 2px solid #9ca3af;
+}
+
+.verification-message {
+  text-align: left;
+  margin-top: 2rem;
+}
+
+.verification-message h3 {
+  color: var(--coral-primary);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.verification-message p {
+  color: var(--coral-text);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.verification-timeline {
+  margin-top: 2rem;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 32px;
+  width: 2px;
+  height: calc(100% + 1rem);
+  background: #e5e7eb;
+}
+
+.timeline-item.active::after {
+  background: var(--coral-primary);
+}
+
+.timeline-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-item.active .timeline-dot {
+  background: var(--coral-primary);
+  box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.2);
+}
+
+.timeline-content h4 {
+  color: var(--coral-primary);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-content p {
+  color: var(--coral-text);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.edit-profile-btn {
+  background: var(--coral-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.edit-profile-btn:hover {
+  background: var(--coral-dark);
+}
+
+/* Mobile responsiveness for verification status */
+@media (max-width: 768px) {
+  .verification-status-page {
+    padding: 1rem;
+  }
+  
+  .verification-status-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .verification-status-card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .verification-message h3 {
+    font-size: 1.25rem;
+  }
+}
+

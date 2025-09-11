@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { hasRole, UserProfile } from '../../utils/userProfile';
 import '../../styles/AuthLock.css';
 
 interface AuthLockProps {
@@ -50,7 +51,7 @@ export const AuthLock: React.FC<AuthLockProps> = ({
   }
 
   // If user is logged in but doesn't have required permission
-  if (requiredPermission && !hasPermission(userProfile, requiredPermission)) {
+  if (requiredPermission && !hasRole(userProfile, requiredPermission as keyof UserProfile['roles'])) {
     return (
       <div className="auth-lock-container">
         <div className="auth-lock-card">
@@ -77,14 +78,3 @@ export const AuthLock: React.FC<AuthLockProps> = ({
   return <>{children}</>;
 };
 
-// Helper function to check permissions
-function hasPermission(userProfile: { admin?: boolean } | null, permission: string): boolean {
-  if (!userProfile) return false;
-
-  switch (permission) {
-    case 'admin':
-      return userProfile.admin === true;
-    default:
-      return false;
-  }
-}

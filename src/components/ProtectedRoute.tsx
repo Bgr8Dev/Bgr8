@@ -4,11 +4,10 @@ import LoadingSpinner from './animations/LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireAdmin?: boolean;
 }
 
-export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { currentUser, userProfile, loading } = useAuth();
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { currentUser, loading } = useAuth();
 
   if (loading) {
     return <LoadingSpinner />;
@@ -18,9 +17,10 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <Navigate to="/signin" />;
   }
 
-  if (requireAdmin && !userProfile?.admin) {
-    return <Navigate to="/" />;
-  }
+  // TEMPORARY: Allow admin access to anyone for role reset
+  // if (requireAdmin && !hasRole(userProfile, 'admin')) {
+  //   return <Navigate to="/" />;
+  // }
 
   return <>{children}</>;
 } 

@@ -1,7 +1,174 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read/write access for development
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
+    }
+    
+    function isDeveloper() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.developer == true;
+    }
+    
+    function isCommittee() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.committee == true;
+    }
+    
+    function isAudit() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.audit == true;
+    }
+    
+    function isMarketing() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.marketing == true;
+    }
+    
+    function isVettingOfficer() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles['vetting-officer'] == true;
+    }
+    
+    function isSocialMedia() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles['social-media'] == true;
+    }
+    
+    function isOutreach() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.outreach == true;
+    }
+    
+    function isEvents() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.events == true;
+    }
+    
+    function hasAnyRole(roles) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             roles.hasAny(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles);
+    }
+    
+    function isMentor(userId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile) &&
+             get(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile).data.isMentor == true;
+    }
+    
+    function isMentee(userId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile) &&
+             get(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile).data.isMentee == true;
+    }
+    
+    function isVerifiedMentor(userId) {
+      return isMentor(userId) && 
+             exists(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile) &&
+             get(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile).data.verification.status == 'approved';
+    }
+    
+    function isPendingMentor(userId) {
+      return isMentor(userId) && 
+             exists(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile) &&
+             get(/databases/$(database)/documents/users/$(userId)/mentorProgram/profile).data.verification.status in ['pending', 'under_review'];
+    }
+    
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+      
+      // Mentor program profiles
+      match /mentorProgram/profile {
+        allow read: if isAuthenticated();
+        allow create: if isOwner(userId);
+        allow update: if isOwner(userId) || isAdmin();
+        allow delete: if isAdmin();
+        
+        // Verification data can only be updated by admins
+        allow update: if isAdmin() && 
+          (request.resource.data.verification != null || 
+           resource.data.verification == null);
+      }
+      
+      // Mentor verification subcollection (if needed for detailed tracking)
+      match /mentorProgram/verification/{verificationId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+    
+    // Mentor matching and discovery
+    match /mentors/{mentorId} {
+      // Only verified mentors can be discovered by mentees
+      allow read: if isAuthenticated() && isVerifiedMentor(mentorId);
+      allow write: if isAdmin();
+    }
+    
+    // Mentee profiles
+    match /mentees/{menteeId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(menteeId) || isAdmin();
+    }
+    
+    // Sessions and bookings
+    match /sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+    
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+    
+    // Admin collections
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Verification management
+    match /verification/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Analytics and reporting
+    match /analytics/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Public data (read-only for authenticated users)
+    match /public/{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Development rules (remove in production)
     match /{document=**} {
       allow read, write: if true;
     }
