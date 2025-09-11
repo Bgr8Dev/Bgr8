@@ -443,6 +443,126 @@
   font-size: 0.9rem;
 }
 
+.ticket-reporter {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.reporter-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.reporter-icon {
+  font-size: 1rem;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.reporter-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.reporter-name {
+  display: block;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.reporter-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border: 1px solid;
+}
+
+/* Specific role colors */
+.role-badge[data-role="admin"] {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.role-badge[data-role="developer"] {
+  background: #f0f9ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.role-badge[data-role="committee"] {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.role-badge[data-role="audit"] {
+  background: #fef3c7;
+  color: #d97706;
+  border-color: #fed7aa;
+}
+
+.role-badge[data-role="marketing"] {
+  background: #fdf2f8;
+  color: #db2777;
+  border-color: #fbcfe8;
+}
+
+.role-badge[data-role="vetting-officer"] {
+  background: #f3e8ff;
+  color: #9333ea;
+  border-color: #d8b4fe;
+}
+
+.role-badge[data-role="social-media"] {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.role-badge[data-role="outreach"] {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fed7aa;
+}
+
+.role-badge[data-role="events"] {
+  background: #fef7ff;
+  color: #c026d3;
+  border-color: #e9d5ff;
+}
+
+.role-badge[data-role="tester"] {
+  background: #ff6b35;
+  color: #ffffff;
+  border-color: #e55a2b;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+}
+
+/* Fallback for any unassigned roles */
+.role-badge:not([data-role]) {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
 .ticket-tags {
   display: flex;
   flex-wrap: wrap;
@@ -1661,6 +1781,16 @@
   
   .ticket-dates {
     align-items: flex-start;
+  }
+  
+  .reporter-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .reporter-roles {
+    align-self: flex-start;
   }
   
   .modal-content {

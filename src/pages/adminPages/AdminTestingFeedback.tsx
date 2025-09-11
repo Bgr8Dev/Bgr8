@@ -3,6 +3,7 @@ import { FaBug, FaPlus, FaSearch, FaSort, FaEye, FaEdit, FaTrash, FaThumbsUp, Fa
 import { FeedbackService } from '../../services/feedbackService';
 import { FeedbackTicket, FeedbackStats, FeedbackFilters, FeedbackStatus, FeedbackPriority, FeedbackCategory } from '../../types/feedback';
 import { useAuth } from '../../hooks/useAuth';
+import { getUserProfile, getUserRoles, UserProfile } from '../../utils/userProfile';
 import CreateTicketModal from '../../components/modals/CreateTicketModal';
 import EditTicketModal from '../../components/modals/EditTicketModal';
 import ViewTicketModal from '../../components/modals/ViewTicketModal';
@@ -115,6 +116,7 @@ export default function AdminTestingFeedback() {
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
   const [hoveredTicket, setHoveredTicket] = useState<string | null>(null);
   const [selectedCardRef, setSelectedCardRef] = useState<HTMLDivElement | null>(null);
+  const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
 
   // Close floating buttons when clicking outside
   useEffect(() => {
@@ -130,6 +132,32 @@ export default function AdminTestingFeedback() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [hoveredTicket]);
+
+  const fetchUserProfiles = useCallback(async (tickets: FeedbackTicket[]) => {
+    const uniqueUserIds = Array.from(new Set(tickets.map(ticket => ticket.reporterId)));
+    const profilesToFetch = uniqueUserIds.filter(id => !userProfiles[id]);
+    
+    if (profilesToFetch.length === 0) return;
+    
+    try {
+      const profilePromises = profilesToFetch.map(async (userId) => {
+        const profile = await getUserProfile(userId);
+        return { userId, profile };
+      });
+      
+      const results = await Promise.all(profilePromises);
+      const newProfiles = results.reduce((acc, { userId, profile }) => {
+        if (profile) {
+          acc[userId] = profile;
+        }
+        return acc;
+      }, {} as Record<string, UserProfile>);
+      
+      setUserProfiles(prev => ({ ...prev, ...newProfiles }));
+    } catch (error) {
+      console.error('Error fetching user profiles:', error);
+    }
+  }, [userProfiles]);
 
   const loadTickets = useCallback(async () => {
     try {
@@ -183,13 +211,16 @@ export default function AdminTestingFeedback() {
       
       setTickets(sortedTickets);
       setStats(statsData);
+      
+      // Fetch user profiles for the tickets
+      await fetchUserProfiles(sortedTickets);
     } catch (err) {
       console.error('Error loading tickets:', err);
       setError('Failed to load feedback tickets');
     } finally {
       setLoading(false);
     }
-  }, [filters, searchTerm, sortBy, sortOrder]);
+  }, [filters, searchTerm, sortBy, sortOrder, fetchUserProfiles]);
 
   useEffect(() => {
     loadTickets();
@@ -674,6 +705,10 @@ export default function AdminTestingFeedback() {
     }
   };
 
+  const formatRoleName = (role: string) => {
+    return role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   if (loading) {
     return (
       <div className="admin-testing-feedback">
@@ -794,6 +829,8 @@ export default function AdminTestingFeedback() {
       <div className="admin-testing-feedback__grid">
         {tickets.map(ticket => {
           const CategoryIcon = CATEGORY_ICONS[ticket.category] as React.ComponentType<{ className?: string }>;
+          const reporterProfile = userProfiles[ticket.reporterId];
+          const reporterRoles = reporterProfile ? getUserRoles(reporterProfile) : [];
           
           return (
             <div 
@@ -835,6 +872,27 @@ export default function AdminTestingFeedback() {
                     : ticket.description
                   }
                 </p>
+                
+                {/* Reporter Information */}
+                <div className="ticket-reporter">
+                  <div className="reporter-info">
+                    <FaUser className="reporter-icon" />
+                    <div className="reporter-details">
+                      <span className="reporter-name">
+                        {reporterProfile ? reporterProfile.displayName : ticket.reporterName}
+                      </span>
+                      {reporterRoles.length > 0 && (
+                        <div className="reporter-roles">
+                          {reporterRoles.map(role => (
+                            <span key={role} className="role-badge" data-role={role}>
+                              {formatRoleName(role)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 
                 <div className="ticket-tags">
                   {ticket.tags.map(tag => (

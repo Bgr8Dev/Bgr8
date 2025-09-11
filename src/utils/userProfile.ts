@@ -1,4 +1,4 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { firestore } from "../firebase/firebase";
 
 export interface UserProfile {
@@ -133,6 +133,22 @@ export const getUserRoles = (userProfile: UserProfile | null): (keyof UserProfil
   return Object.entries(userProfile.roles)
     .filter(([, hasRole]) => hasRole)
     .map(([role]) => role as keyof UserProfile['roles']);
+};
+
+export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
+  try {
+    const userRef = doc(firestore, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (userDoc.exists()) {
+      return userDoc.data() as UserProfile;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
 };
 
 export const createUserProfile = async (
