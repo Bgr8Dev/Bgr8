@@ -290,7 +290,7 @@ export default function AdminTestingFeedback() {
     testCaseId?: string;
     regression: boolean;
     workaround?: string;
-  }) => {
+  }): Promise<void> => {
     // Create optimistic draft ticket
     const optimisticDraft: FeedbackTicket = {
       id: `draft-${Date.now()}`,
@@ -359,6 +359,8 @@ export default function AdminTestingFeedback() {
       setTickets(prevTickets => 
         prevTickets.filter(ticket => ticket.id !== optimisticDraft.id)
       );
+      // Re-throw the error so the modal can handle it
+      throw err;
     }
   };
 
@@ -383,7 +385,7 @@ export default function AdminTestingFeedback() {
     testCaseId?: string;
     regression: boolean;
     workaround?: string;
-  }) => {
+  }): Promise<void> => {
     // Create optimistic ticket
     const optimisticTicket: FeedbackTicket = {
       id: `temp-${Date.now()}`,
@@ -450,6 +452,8 @@ export default function AdminTestingFeedback() {
       setTickets(prevTickets => 
         prevTickets.filter(ticket => ticket.id !== optimisticTicket.id)
       );
+      // Re-throw the error so the modal can handle it
+      throw err;
     }
   };
 

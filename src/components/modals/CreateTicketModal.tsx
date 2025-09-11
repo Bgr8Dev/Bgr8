@@ -7,8 +7,8 @@ import './CreateTicketModal.css';
 interface CreateTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (ticketData: CreateTicketData) => void;
-  onSaveDraft?: (ticketData: CreateTicketData) => void;
+  onSubmit: (ticketData: CreateTicketData) => Promise<void>;
+  onSaveDraft?: (ticketData: CreateTicketData) => Promise<void>;
 }
 
 interface CreateTicketData {
@@ -186,7 +186,39 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     }));
   };
 
-  const saveAsDraft = () => {
+  const autofillForm = () => {
+    const sampleData = {
+      title: 'Sample Bug Report: Login Button Not Working',
+      description: 'The login button on the homepage is not responding when clicked. This prevents users from accessing their accounts. The issue appears to be consistent across different browsers.',
+      category: 'bug' as FeedbackCategory,
+      priority: 'high' as FeedbackPriority,
+      tags: ['login', 'authentication', 'frontend', 'critical'],
+      urlToPage: 'https://example.com/login',
+      browser: 'Chrome',
+      browserVersion: '120.0.6099.109',
+      operatingSystem: 'Windows 11',
+      deviceType: 'desktop' as 'desktop' | 'mobile' | 'tablet',
+      screenResolution: '1920x1080',
+      stepsToReproduce: '1. Navigate to the homepage\n2. Click on the "Login" button\n3. Observe that nothing happens\n4. Check browser console for errors',
+      expectedBehavior: 'The login button should redirect to the login page or open a login modal.',
+      actualBehavior: 'The login button does nothing when clicked. No redirect occurs and no modal opens.',
+      severity: 'major' as 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker',
+      environment: 'production' as 'development' | 'staging' | 'production',
+      testCaseId: 'TC-001',
+      regression: true,
+      workaround: 'Users can access login by going directly to /login URL or using the mobile app.'
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      ...sampleData,
+      errors: {} // Clear any existing errors
+    }));
+    
+    console.log('Form autofilled with sample data for development');
+  };
+
+  const saveAsDraft = async () => {
     if (!onSaveDraft) return;
 
     // Extract only the fields needed for ticket creation
@@ -213,11 +245,16 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       workaround: formData.workaround
     };
 
-    onSaveDraft(ticketData);
-    setIsDraftSaved(true);
-    
-    // Show success message
-    console.log('Draft saved successfully');
+    try {
+      await onSaveDraft(ticketData);
+      setIsDraftSaved(true);
+      
+      // Show success message
+      console.log('Draft saved successfully');
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      // Don't reset form on error - user can try again
+    }
   };
 
   const hasFormContent = () => {
@@ -237,7 +274,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
            formData.attachments.length > 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const validationErrors = validateForm();
     
     if (Object.keys(validationErrors).length > 0) {
@@ -268,33 +305,42 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       regression: formData.regression,
       workaround: formData.workaround
     };
-    onSubmit(ticketData);
-    
-    // Reset form
-    setFormData({
-      title: '',
-      description: '',
-      category: 'bug',
-      priority: 'medium',
-      tags: [],
-      tagInput: '',
-      attachments: [],
-      urlToPage: '',
-      browser: '',
-      browserVersion: '',
-      operatingSystem: '',
-      deviceType: 'desktop',
-      screenResolution: '',
-      stepsToReproduce: '',
-      expectedBehavior: '',
-      actualBehavior: '',
-      severity: 'minor',
-      environment: 'production',
-      testCaseId: '',
-      regression: false,
-      workaround: '',
-      errors: {}
-    });
+
+    try {
+      await onSubmit(ticketData);
+      
+      // Only reset form after successful submission to Firebase
+      setFormData({
+        title: '',
+        description: '',
+        category: 'bug',
+        priority: 'medium',
+        tags: [],
+        tagInput: '',
+        attachments: [],
+        urlToPage: '',
+        browser: '',
+        browserVersion: '',
+        operatingSystem: '',
+        deviceType: 'desktop',
+        screenResolution: '',
+        stepsToReproduce: '',
+        expectedBehavior: '',
+        actualBehavior: '',
+        severity: 'minor',
+        environment: 'production',
+        testCaseId: '',
+        regression: false,
+        workaround: '',
+        errors: {}
+      });
+      
+      // Reset draft saved state
+      setIsDraftSaved(false);
+    } catch (error) {
+      console.error('Failed to create ticket:', error);
+      // Don't reset form on error - user can try again or save as draft
+    }
   };
 
   if (!isOpen) return null;
@@ -304,14 +350,24 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Create New Ticket</h3>
-          <button 
-            className="modal-close"
-            onClick={onClose}
-            title="Close modal"
-            aria-label="Close modal"
-          >
-            <FaTimes />
-          </button>
+          <div className="modal-header-actions">
+            <button 
+              className="autofill-btn"
+              onClick={autofillForm}
+              title="Autofill form with sample data (Development)"
+              aria-label="Autofill form with sample data"
+            >
+              Auto Fill
+            </button>
+            <button 
+              className="modal-close"
+              onClick={onClose}
+              title="Close modal"
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
+          </div>
         </div>
         
         <div className="modal-body">
