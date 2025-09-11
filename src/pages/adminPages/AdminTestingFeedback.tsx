@@ -8,6 +8,7 @@ import EditTicketModal from '../../components/modals/EditTicketModal';
 import ViewTicketModal from '../../components/modals/ViewTicketModal';
 import CommentsSidebar from '../../components/modals/CommentsSidebar';
 import DeleteTicketModal from '../../components/modals/DeleteTicketModal';
+import StatsTiles from '../../components/feedback/StatsTiles';
 import '../../styles/adminStyles/AdminTestingFeedback.css';
 
 const STATUS_OPTIONS: FeedbackStatus[] = ['draft', 'open', 'in_progress', 'resolved', 'closed', 'duplicate'];
@@ -706,69 +707,7 @@ export default function AdminTestingFeedback() {
       )}
 
       {/* Stats Cards */}
-      {stats && (
-        <div className="admin-testing-feedback__stats">
-          <div className="stat-card total">
-            <div className="stat-icon">
-              <FaBug />
-            </div>
-            <div className="stat-content">
-              <h3>Total Tickets</h3>
-              <p>{stats.total}</p>
-            </div>
-          </div>
-          
-          <div className="stat-card open">
-            <div className="stat-icon">
-              <FaCheckCircle />
-            </div>
-            <div className="stat-content">
-              <h3>Open</h3>
-              <p>{stats.open}</p>
-            </div>
-          </div>
-          
-          <div className="stat-card in-progress">
-            <div className="stat-icon">
-              <FaPause />
-            </div>
-            <div className="stat-content">
-              <h3>In Progress</h3>
-              <p>{stats.inProgress}</p>
-            </div>
-          </div>
-          
-          <div className="stat-card resolved">
-            <div className="stat-icon">
-              <FaCheckCircle />
-            </div>
-            <div className="stat-content">
-              <h3>Resolved</h3>
-              <p>{stats.resolved}</p>
-            </div>
-          </div>
-          
-          <div className="stat-card closed">
-            <div className="stat-icon">
-              <FaTimesCircle />
-            </div>
-            <div className="stat-content">
-              <h3>Closed</h3>
-              <p>{stats.closed}</p>
-            </div>
-          </div>
-          
-          <div className="stat-card duplicate">
-            <div className="stat-icon">
-              <FaCopy />
-            </div>
-            <div className="stat-content">
-              <h3>Duplicate</h3>
-              <p>{stats.duplicate}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      <StatsTiles stats={stats} />
 
       {/* Filters and Search */}
       <div className="admin-testing-feedback__controls">
