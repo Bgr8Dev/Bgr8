@@ -34,6 +34,11 @@ interface CreateTicketData {
 
 interface FormData extends CreateTicketData {
   tagInput: string;
+  errors: {
+    title?: string;
+    description?: string;
+    urlToPage?: string;
+  };
 }
 
 const CATEGORY_OPTIONS: FeedbackCategory[] = ['bug', 'feature_request', 'ui_issue', 'performance', 'security', 'accessibility', 'other'];
@@ -65,7 +70,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     environment: 'production',
     testCaseId: '',
     regression: false,
-    workaround: ''
+    workaround: '',
+    errors: {}
   });
 
   const handleAddTag = () => {
@@ -109,12 +115,76 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const validateForm = () => {
+    const errors: { title?: string; description?: string; urlToPage?: string } = {};
+
+    // Title validation
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required';
+    } else if (formData.title.trim().length < 5) {
+      errors.title = 'Title must be at least 5 characters long';
+    }
+
+    // Description validation
+    if (!formData.description.trim()) {
+      errors.description = 'Description is required';
+    } else if (formData.description.trim().length < 10) {
+      errors.description = 'Description must be at least 10 characters long';
+    }
+
+    // URL validation
+    if (formData.urlToPage && formData.urlToPage.trim()) {
+      try {
+        new URL(formData.urlToPage);
+      } catch {
+        errors.urlToPage = 'Please enter a valid URL (e.g., https://example.com)';
+      }
+    }
+
+    return errors;
+  };
+
+  const addStep = () => {
+    const currentSteps = formData.stepsToReproduce || '';
+    const stepNumber = (currentSteps.split('\n').filter(line => line.trim()).length) + 1;
+    const newStep = currentSteps ? `\n${stepNumber}. ` : `${stepNumber}. `;
+    setFormData(prev => ({
+      ...prev,
+      stepsToReproduce: prev.stepsToReproduce + newStep
+    }));
+  };
+
   const handleSubmit = () => {
-    if (!formData.title.trim() || !formData.description.trim()) {
+    const validationErrors = validateForm();
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setFormData(prev => ({ ...prev, errors: validationErrors }));
       return;
     }
 
-    const { tagInput, ...ticketData } = formData;
+    // Extract only the fields needed for ticket creation
+    const ticketData: CreateTicketData = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      priority: formData.priority,
+      tags: formData.tags,
+      attachments: formData.attachments,
+      urlToPage: formData.urlToPage,
+      browser: formData.browser,
+      browserVersion: formData.browserVersion,
+      operatingSystem: formData.operatingSystem,
+      deviceType: formData.deviceType,
+      screenResolution: formData.screenResolution,
+      stepsToReproduce: formData.stepsToReproduce,
+      expectedBehavior: formData.expectedBehavior,
+      actualBehavior: formData.actualBehavior,
+      severity: formData.severity,
+      environment: formData.environment,
+      testCaseId: formData.testCaseId,
+      regression: formData.regression,
+      workaround: formData.workaround
+    };
     onSubmit(ticketData);
     
     // Reset form
@@ -139,7 +209,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       environment: 'production',
       testCaseId: '',
       regression: false,
-      workaround: ''
+      workaround: '',
+      errors: {}
     });
   };
 
@@ -167,10 +238,17 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               id="ticket-title"
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                title: e.target.value,
+                errors: { ...prev.errors, title: undefined }
+              }))}
               placeholder="Brief description of the issue"
-              className="form-input"
+              className={`form-input ${formData.errors.title ? 'error' : ''}`}
             />
+            {formData.errors.title && (
+              <span className="error-message">{formData.errors.title}</span>
+            )}
           </div>
           
           <div className="form-group">
@@ -178,11 +256,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             <textarea
               id="ticket-description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                description: e.target.value,
+                errors: { ...prev.errors, description: undefined }
+              }))}
               placeholder="Detailed description of the issue or feature request"
-              className="form-textarea"
+              className={`form-textarea ${formData.errors.description ? 'error' : ''}`}
               rows={4}
             />
+            {formData.errors.description && (
+              <span className="error-message">{formData.errors.description}</span>
+            )}
           </div>
           
           <div className="form-row">
@@ -313,10 +398,17 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               id="ticket-url"
               type="url"
               value={formData.urlToPage}
-              onChange={(e) => setFormData(prev => ({ ...prev, urlToPage: e.target.value }))}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                urlToPage: e.target.value,
+                errors: { ...prev.errors, urlToPage: undefined }
+              }))}
               placeholder="https://example.com/page"
-              className="form-input"
+              className={`form-input ${formData.errors.urlToPage ? 'error' : ''}`}
             />
+            {formData.errors.urlToPage && (
+              <span className="error-message">{formData.errors.urlToPage}</span>
+            )}
           </div>
 
           <div className="form-row">
@@ -388,25 +480,47 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
 
           <div className="form-group">
             <label htmlFor="ticket-resolution">Screen Resolution</label>
-            <input
+            <select
               id="ticket-resolution"
-              type="text"
               value={formData.screenResolution}
               onChange={(e) => setFormData(prev => ({ ...prev, screenResolution: e.target.value }))}
-              placeholder="e.g., 1920x1080"
-              className="form-input"
-            />
+              className="form-select"
+            >
+              <option value="">Select Resolution</option>
+              <option value="1920x1080">1920x1080 (Full HD)</option>
+              <option value="2560x1440">2560x1440 (2K/QHD)</option>
+              <option value="3840x2160">3840x2160 (4K/UHD)</option>
+              <option value="1366x768">1366x768 (HD)</option>
+              <option value="1440x900">1440x900</option>
+              <option value="1600x900">1600x900</option>
+              <option value="1680x1050">1680x1050</option>
+              <option value="1280x720">1280x720 (HD)</option>
+              <option value="1024x768">1024x768</option>
+              <option value="800x600">800x600</option>
+              <option value="Other">Other (specify in steps)</option>
+            </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="ticket-steps">Steps to Reproduce</label>
+            <div className="form-group-header">
+              <label htmlFor="ticket-steps">Steps to Reproduce</label>
+              <button
+                type="button"
+                onClick={addStep}
+                className="add-step-btn"
+                title="Add step"
+                aria-label="Add step"
+              >
+                <FaPlus /> Add Step
+              </button>
+            </div>
             <textarea
               id="ticket-steps"
               value={formData.stepsToReproduce}
               onChange={(e) => setFormData(prev => ({ ...prev, stepsToReproduce: e.target.value }))}
               placeholder="1. Go to the page...&#10;2. Click on the button...&#10;3. Observe the issue..."
               className="form-textarea"
-              rows={3}
+              rows={4}
             />
           </div>
 
@@ -467,18 +581,6 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="ticket-testcase">Test Case ID</label>
-            <input
-              id="ticket-testcase"
-              type="text"
-              value={formData.testCaseId}
-              onChange={(e) => setFormData(prev => ({ ...prev, testCaseId: e.target.value }))}
-              placeholder="e.g., TC-001, Test-123"
-              className="form-input"
-            />
-          </div>
-
-          <div className="form-group">
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -486,7 +588,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
                 onChange={(e) => setFormData(prev => ({ ...prev, regression: e.target.checked }))}
                 className="checkbox-input"
               />
-              <span className="checkbox-text">This is a regression bug</span>
+              <span className="checkbox-text">
+                This is a regression bug (was working before, now broken)
+              </span>
             </label>
           </div>
 
