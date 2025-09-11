@@ -502,7 +502,22 @@ export default function AdminTestingFeedback() {
         category: editingTicket.category,
         priority: editingTicket.priority,
         status: editingTicket.status,
-        tags: editingTicket.tags
+        tags: editingTicket.tags,
+        // Testing-specific fields
+        urlToPage: editingTicket.urlToPage,
+        browser: editingTicket.browser,
+        browserVersion: editingTicket.browserVersion,
+        operatingSystem: editingTicket.operatingSystem,
+        deviceType: editingTicket.deviceType,
+        screenResolution: editingTicket.screenResolution,
+        stepsToReproduce: editingTicket.stepsToReproduce,
+        expectedBehavior: editingTicket.expectedBehavior,
+        actualBehavior: editingTicket.actualBehavior,
+        severity: editingTicket.severity,
+        environment: editingTicket.environment,
+        testCaseId: editingTicket.testCaseId,
+        regression: editingTicket.regression,
+        workaround: editingTicket.workaround
       });
     } catch (err) {
       console.error('Error updating ticket:', err);
@@ -1565,6 +1580,123 @@ export default function AdminTestingFeedback() {
                 </div>
               </div>
               
+              {/* Testing-Specific Fields */}
+              {selectedTicket.urlToPage && (
+                <div className="ticket-detail-section">
+                  <h4>URL to Page</h4>
+                  <p className="ticket-detail-value">
+                    <a href={selectedTicket.urlToPage} target="_blank" rel="noopener noreferrer" className="attachment-link">
+                      {selectedTicket.urlToPage}
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              {(selectedTicket.browser || selectedTicket.browserVersion || selectedTicket.operatingSystem) && (
+                <div className="ticket-detail-row">
+                  {selectedTicket.browser && (
+                    <div className="ticket-detail-section">
+                      <h4>Browser</h4>
+                      <p className="ticket-detail-value">{selectedTicket.browser}</p>
+                    </div>
+                  )}
+                  
+                  {selectedTicket.browserVersion && (
+                    <div className="ticket-detail-section">
+                      <h4>Browser Version</h4>
+                      <p className="ticket-detail-value">{selectedTicket.browserVersion}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(selectedTicket.operatingSystem || selectedTicket.deviceType || selectedTicket.screenResolution) && (
+                <div className="ticket-detail-row">
+                  {selectedTicket.operatingSystem && (
+                    <div className="ticket-detail-section">
+                      <h4>Operating System</h4>
+                      <p className="ticket-detail-value">{selectedTicket.operatingSystem}</p>
+                    </div>
+                  )}
+                  
+                  <div className="ticket-detail-section">
+                    <h4>Device Type</h4>
+                    <p className="ticket-detail-value">{selectedTicket.deviceType}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedTicket.screenResolution && (
+                <div className="ticket-detail-section">
+                  <h4>Screen Resolution</h4>
+                  <p className="ticket-detail-value">{selectedTicket.screenResolution}</p>
+                </div>
+              )}
+
+              {selectedTicket.stepsToReproduce && (
+                <div className="ticket-detail-section">
+                  <h4>Steps to Reproduce</h4>
+                  <p className="ticket-detail-value" style={{ whiteSpace: 'pre-wrap' }}>{selectedTicket.stepsToReproduce}</p>
+                </div>
+              )}
+
+              {selectedTicket.expectedBehavior && (
+                <div className="ticket-detail-section">
+                  <h4>Expected Behavior</h4>
+                  <p className="ticket-detail-value" style={{ whiteSpace: 'pre-wrap' }}>{selectedTicket.expectedBehavior}</p>
+                </div>
+              )}
+
+              {selectedTicket.actualBehavior && (
+                <div className="ticket-detail-section">
+                  <h4>Actual Behavior</h4>
+                  <p className="ticket-detail-value" style={{ whiteSpace: 'pre-wrap' }}>{selectedTicket.actualBehavior}</p>
+                </div>
+              )}
+
+              {(selectedTicket.severity || selectedTicket.environment) && (
+                <div className="ticket-detail-row">
+                  <div className="ticket-detail-section">
+                    <h4>Severity</h4>
+                    <span className="ticket-detail-badge" style={{ backgroundColor: PRIORITY_COLORS[selectedTicket.severity as FeedbackPriority] }}>
+                      {selectedTicket.severity?.toUpperCase()}
+                    </span>
+                  </div>
+                  
+                  <div className="ticket-detail-section">
+                    <h4>Environment</h4>
+                    <span className="ticket-detail-badge" style={{ backgroundColor: '#6b7280' }}>
+                      {selectedTicket.environment?.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {selectedTicket.testCaseId && (
+                <div className="ticket-detail-section">
+                  <h4>Test Case ID</h4>
+                  <p className="ticket-detail-value">{selectedTicket.testCaseId}</p>
+                </div>
+              )}
+
+              <div className="ticket-detail-section">
+                <h4>Regression Bug</h4>
+                <p className="ticket-detail-value">
+                  {selectedTicket.regression ? (
+                    <span style={{ color: '#dc2626', fontWeight: '600' }}>Yes</span>
+                  ) : (
+                    <span style={{ color: '#059669', fontWeight: '600' }}>No</span>
+                  )}
+                </p>
+              </div>
+
+              {selectedTicket.workaround && (
+                <div className="ticket-detail-section">
+                  <h4>Workaround</h4>
+                  <p className="ticket-detail-value" style={{ whiteSpace: 'pre-wrap' }}>{selectedTicket.workaround}</p>
+                </div>
+              )}
+              
               <div className="ticket-detail-section">
                 <h4>Votes</h4>
                 <div className="ticket-detail-votes">
@@ -1684,6 +1816,206 @@ export default function AdminTestingFeedback() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Testing-Specific Fields */}
+              <div className="form-section-divider">
+                <h4>Testing Information</h4>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-url">URL to Page</label>
+                <input
+                  id="edit-ticket-url"
+                  type="url"
+                  value={editingTicket.urlToPage || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, urlToPage: e.target.value } : null)}
+                  placeholder="https://example.com/page"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-browser">Browser</label>
+                  <select
+                    id="edit-ticket-browser"
+                    value={editingTicket.browser || ''}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, browser: e.target.value } : null)}
+                    className="form-select"
+                  >
+                    <option value="">Select Browser</option>
+                    <option value="Chrome">Chrome</option>
+                    <option value="Firefox">Firefox</option>
+                    <option value="Safari">Safari</option>
+                    <option value="Edge">Edge</option>
+                    <option value="Opera">Opera</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-browser-version">Browser Version</label>
+                  <input
+                    id="edit-ticket-browser-version"
+                    type="text"
+                    value={editingTicket.browserVersion || ''}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, browserVersion: e.target.value } : null)}
+                    placeholder="e.g., 120.0.6099.109"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-os">Operating System</label>
+                  <select
+                    id="edit-ticket-os"
+                    value={editingTicket.operatingSystem || ''}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, operatingSystem: e.target.value } : null)}
+                    className="form-select"
+                  >
+                    <option value="">Select OS</option>
+                    <option value="Windows 11">Windows 11</option>
+                    <option value="Windows 10">Windows 10</option>
+                    <option value="macOS">macOS</option>
+                    <option value="Linux">Linux</option>
+                    <option value="iOS">iOS</option>
+                    <option value="Android">Android</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-device">Device Type</label>
+                  <select
+                    id="edit-ticket-device"
+                    value={editingTicket.deviceType}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, deviceType: e.target.value as 'desktop' | 'mobile' | 'tablet' } : null)}
+                    className="form-select"
+                  >
+                    <option value="desktop">Desktop</option>
+                    <option value="mobile">Mobile</option>
+                    <option value="tablet">Tablet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-resolution">Screen Resolution</label>
+                <input
+                  id="edit-ticket-resolution"
+                  type="text"
+                  value={editingTicket.screenResolution || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, screenResolution: e.target.value } : null)}
+                  placeholder="e.g., 1920x1080"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-steps">Steps to Reproduce</label>
+                <textarea
+                  id="edit-ticket-steps"
+                  value={editingTicket.stepsToReproduce || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, stepsToReproduce: e.target.value } : null)}
+                  placeholder="1. Go to the page...&#10;2. Click on the button...&#10;3. Observe the issue..."
+                  className="form-textarea"
+                  rows={3}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-expected">Expected Behavior</label>
+                <textarea
+                  id="edit-ticket-expected"
+                  value={editingTicket.expectedBehavior || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, expectedBehavior: e.target.value } : null)}
+                  placeholder="What should happen when following the steps?"
+                  className="form-textarea"
+                  rows={2}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-actual">Actual Behavior</label>
+                <textarea
+                  id="edit-ticket-actual"
+                  value={editingTicket.actualBehavior || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, actualBehavior: e.target.value } : null)}
+                  placeholder="What actually happens instead?"
+                  className="form-textarea"
+                  rows={2}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-severity">Severity</label>
+                  <select
+                    id="edit-ticket-severity"
+                    value={editingTicket.severity}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, severity: e.target.value as 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker' } : null)}
+                    className="form-select"
+                  >
+                    <option value="cosmetic">Cosmetic</option>
+                    <option value="minor">Minor</option>
+                    <option value="major">Major</option>
+                    <option value="critical">Critical</option>
+                    <option value="blocker">Blocker</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="edit-ticket-environment">Environment</label>
+                  <select
+                    id="edit-ticket-environment"
+                    value={editingTicket.environment}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, environment: e.target.value as 'development' | 'staging' | 'production' } : null)}
+                    className="form-select"
+                  >
+                    <option value="development">Development</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Production</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-testcase">Test Case ID</label>
+                <input
+                  id="edit-ticket-testcase"
+                  type="text"
+                  value={editingTicket.testCaseId || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, testCaseId: e.target.value } : null)}
+                  placeholder="e.g., TC-001, Test-123"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={editingTicket.regression}
+                    onChange={(e) => setEditingTicket(prev => prev ? { ...prev, regression: e.target.checked } : null)}
+                    className="checkbox-input"
+                  />
+                  <span className="checkbox-text">This is a regression bug</span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-ticket-workaround">Workaround</label>
+                <textarea
+                  id="edit-ticket-workaround"
+                  value={editingTicket.workaround || ''}
+                  onChange={(e) => setEditingTicket(prev => prev ? { ...prev, workaround: e.target.value } : null)}
+                  placeholder="Any temporary workaround or solution?"
+                  className="form-textarea"
+                  rows={2}
+                />
               </div>
             </div>
             
