@@ -41,10 +41,7 @@ export default function FeedbackAnalytics() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [tooltipData, setTooltipData] = useState<{
-    feedback: SessionFeedback;
-    position: { x: number; y: number };
-  } | null>(null);
+  const [modalData, setModalData] = useState<SessionFeedback | null>(null);
 
   useEffect(() => {
     const fetchFeedbackData = async () => {
@@ -88,19 +85,19 @@ export default function FeedbackAnalytics() {
     fetchFeedbackData();
   }, []);
 
-  // Handle clicking outside tooltip to close it
+  // Handle ESC key to close modal
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (tooltipData && !(event.target as HTMLElement).closest('.feedback-tooltip')) {
-        handleCloseTooltip();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && modalData) {
+        handleCloseModal();
       }
     };
 
-    if (tooltipData) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+    if (modalData) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [tooltipData]);
+  }, [modalData]);
 
   // Enhanced filtering and sorting logic
   const filteredAndSortedFeedback = useMemo(() => {
@@ -229,28 +226,25 @@ export default function FeedbackAnalytics() {
 
 
   const handleCardClick = (feedback: SessionFeedback, event: React.MouseEvent) => {
-    // Don't show tooltip if clicking on selection checkbox or expand button
-    if ((event.target as HTMLElement).closest('.select-item-btn, .expand-btn')) {
+    // Don't show modal if clicking on selection checkbox
+    if ((event.target as HTMLElement).closest('.select-item-btn')) {
       return;
     }
 
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = rect.left + rect.width / 2; // Center horizontally
-    const y = rect.top - 10; // Position above the card
-
-    setTooltipData({
-      feedback,
-      position: { x, y }
-    });
+    setModalData(feedback);
   };
 
-  const handleCloseTooltip = () => {
-    setTooltipData(null);
+  const handleCloseModal = () => {
+    setModalData(null);
   };
 
-  const handleTooltipClick = (event: React.MouseEvent) => {
-    // Prevent tooltip from closing when clicking inside it
+  const handleModalClick = (event: React.MouseEvent) => {
+    // Prevent modal from closing when clicking inside it
     event.stopPropagation();
+  };
+
+  const handleOverlayClick = () => {
+    handleCloseModal();
   };
 
   const handleSort = (newSortBy: 'date' | 'rating' | 'mentor' | 'type') => {
@@ -719,7 +713,7 @@ export default function FeedbackAnalytics() {
           {paginatedFeedback.map(feedback => (
             <div 
               key={feedback.id} 
-              className={`feedback-item ${selectedItems.has(feedback.id) ? 'selected' : ''} ${tooltipData?.feedback.id === feedback.id ? 'tooltip-active' : ''}`}
+              className={`feedback-item ${selectedItems.has(feedback.id) ? 'selected' : ''} ${modalData?.id === feedback.id ? 'modal-active' : ''}`}
               onClick={(e) => handleCardClick(feedback, e)}
             >
               <div className="feedback-header">
@@ -751,7 +745,7 @@ export default function FeedbackAnalytics() {
                 
                 <div className="feedback-actions">
                   <div className="click-hint">
-                    Click for details
+                    Click to view details
                   </div>
                 </div>
               </div>
@@ -830,125 +824,120 @@ export default function FeedbackAnalytics() {
         Last updated: {lastRefresh.toLocaleString()}
       </div>
 
-      {/* Feedback Details Tooltip */}
-      {tooltipData && (
-        <div 
-          className="feedback-tooltip"
-          style={{
-            position: 'fixed',
-            left: tooltipData.position.x,
-            top: tooltipData.position.y,
-            transform: 'translateX(-50%) translateY(-100%)',
-            zIndex: 1000
-          }}
-          onClick={handleTooltipClick}
-        >
-          <div className="tooltip-content">
-            <div className="tooltip-header">
-              <h4>Feedback Details</h4>
+      {/* Feedback Details Modal */}
+      {modalData && (
+        <div className="feedback-modal-overlay" onClick={handleOverlayClick}>
+          <div className="feedback-modal" onClick={handleModalClick}>
+            <div className="modal-header">
+              <h3>Feedback Details</h3>
               <button 
-                className="tooltip-close"
-                onClick={handleCloseTooltip}
-                title="Close tooltip"
+                className="modal-close"
+                onClick={handleCloseModal}
+                title="Close modal"
               >
                 ×
               </button>
             </div>
             
-            <div className="tooltip-body">
-              <table className="tooltip-table">
+            <div className="modal-body">
+              <table className="feedback-details-table">
                 <tbody>
                   <tr>
-                    <td className="tooltip-label">Feedback Type</td>
-                    <td className="tooltip-value">
-                      <span className="feedback-type">{tooltipData.feedback.feedbackType}</span>
+                    <td className="table-label">Feedback Type</td>
+                    <td className="table-value">
+                      <span className="feedback-type">{modalData.feedbackType}</span>
                     </td>
                   </tr>
                   
                   <tr>
-                    <td className="tooltip-label">Overall Rating</td>
-                    <td className="tooltip-value">
-                      {renderStarRating(tooltipData.feedback.overallRating, false)}
-                      <span className="rating-number">{tooltipData.feedback.overallRating}/5</span>
+                    <td className="table-label">Overall Rating</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.overallRating, false)}
+                      <span className="rating-number">{modalData.overallRating}/5</span>
                     </td>
                   </tr>
                   
                   <tr>
-                    <td className="tooltip-label">Submitted</td>
-                    <td className="tooltip-value">
-                      {tooltipData.feedback.submittedAt.toLocaleDateString('en-GB')} at {tooltipData.feedback.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                    <td className="table-label">Submitted</td>
+                    <td className="table-value">
+                      {modalData.submittedAt.toLocaleDateString('en-GB')} at {modalData.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                     </td>
                   </tr>
                   
                   <tr>
-                    <td className="tooltip-label">Session Date</td>
-                    <td className="tooltip-value">
-                      {tooltipData.feedback.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}
+                    <td className="table-label">Session Date</td>
+                    <td className="table-value">
+                      {modalData.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}
                     </td>
                   </tr>
                   
                   <tr>
-                    <td className="tooltip-label">Mentor</td>
-                    <td className="tooltip-value">{tooltipData.feedback.mentorName}</td>
+                    <td className="table-label">Mentor</td>
+                    <td className="table-value">{modalData.mentorName}</td>
                   </tr>
                   
                   <tr>
-                    <td className="tooltip-label">Mentee</td>
-                    <td className="tooltip-value">{tooltipData.feedback.menteeName}</td>
+                    <td className="table-label">Mentee</td>
+                    <td className="table-value">{modalData.menteeName}</td>
                   </tr>
                   
-                  {tooltipData.feedback.isCalComBooking && (
+                  {modalData.isCalComBooking && (
                     <tr>
-                      <td className="tooltip-label">Booking Type</td>
-                      <td className="tooltip-value">
+                      <td className="table-label">Booking Type</td>
+                      <td className="table-value">
                         <span className="calcom-badge">Cal.com</span>
                       </td>
                     </tr>
                   )}
                   
-                  {tooltipData.feedback.strengths && (
+                  {modalData.strengths && (
                     <tr>
-                      <td className="tooltip-label">Strengths</td>
-                      <td className="tooltip-value tooltip-text">
-                        {tooltipData.feedback.strengths}
+                      <td className="table-label">Strengths</td>
+                      <td className="table-value table-text">
+                        {modalData.strengths}
                       </td>
                     </tr>
                   )}
                   
-                  {tooltipData.feedback.improvements && (
+                  {modalData.improvements && (
                     <tr>
-                      <td className="tooltip-label">Improvements</td>
-                      <td className="tooltip-value tooltip-text">
-                        {tooltipData.feedback.improvements}
+                      <td className="table-label">Improvements</td>
+                      <td className="table-value table-text">
+                        {modalData.improvements}
                       </td>
                     </tr>
                   )}
                   
-                  {tooltipData.feedback.learnings && (
+                  {modalData.learnings && (
                     <tr>
-                      <td className="tooltip-label">Learnings</td>
-                      <td className="tooltip-value tooltip-text">
-                        {tooltipData.feedback.learnings}
+                      <td className="table-label">Learnings</td>
+                      <td className="table-value table-text">
+                        {modalData.learnings}
                       </td>
                     </tr>
                   )}
                   
                   <tr>
-                    <td className="tooltip-label">Feedback ID</td>
-                    <td className="tooltip-value tooltip-id">{tooltipData.feedback.id}</td>
+                    <td className="table-label">Feedback ID</td>
+                    <td className="table-value table-id">{modalData.id}</td>
                   </tr>
                   
-                  {tooltipData.feedback.calComBookingId && (
+                  {modalData.calComBookingId && (
                     <tr>
-                      <td className="tooltip-label">Cal.com Booking ID</td>
-                      <td className="tooltip-value tooltip-id">{tooltipData.feedback.calComBookingId}</td>
+                      <td className="table-label">Cal.com Booking ID</td>
+                      <td className="table-value table-id">{modalData.calComBookingId}</td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
+            
+            <div className="modal-footer">
+              <button className="modal-close-btn" onClick={handleCloseModal}>
+                Close
+              </button>
+            </div>
           </div>
-          <div className="tooltip-arrow"></div>
         </div>
       )}
     </div>
