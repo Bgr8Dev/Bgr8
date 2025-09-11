@@ -3,6 +3,8 @@ import {
   query, 
   where, 
   getDocs, 
+  getDoc,
+  doc,
   orderBy,
   limit 
 } from 'firebase/firestore';
@@ -42,31 +44,36 @@ export class DeveloperFeedbackService {
 
       const usersSnapshot = await getDocs(usersQuery);
       const mentors: DeveloperMentor[] = [];
+      
+      console.log(`DeveloperFeedbackService: Found ${usersSnapshot.docs.length} users to check`);
 
       for (const userDoc of usersSnapshot.docs) {
         try {
-          // Check if user has a mentor program profile
-          const mentorProgramQuery = query(
-            collection(firestore, this.USERS_COLLECTION, userDoc.id, this.MENTOR_PROGRAM_COLLECTION),
-            where('isMentor', '==', true)
-          );
-
-          const mentorProgramSnapshot = await getDocs(mentorProgramQuery);
+          // Check if user has a mentor program profile (single document, not subcollection)
+          const mentorProgramDoc = await getDoc(doc(firestore, this.USERS_COLLECTION, userDoc.id, this.MENTOR_PROGRAM_COLLECTION, 'profile'));
           
-          if (!mentorProgramSnapshot.empty) {
-            const mentorData = mentorProgramSnapshot.docs[0].data();
+          if (mentorProgramDoc.exists()) {
+            const mentorData = mentorProgramDoc.data();
+            console.log(`DeveloperFeedbackService: Checking user ${userDoc.id}, profile type: ${mentorData.type}, isMentor: ${mentorData.isMentor}`);
             
-            // Only include active mentors
-            if (mentorData.isActive !== false) {
-              mentors.push({
-                mentorId: userDoc.id,
-                mentorName: `${mentorData.firstName || ''} ${mentorData.lastName || ''}`.trim() || 'Unknown Mentor',
-                mentorEmail: mentorData.email || '',
-                industry: mentorData.industry,
-                skills: mentorData.skills || [],
-                yearsOfExperience: mentorData.yearsOfExperience,
-                isActive: mentorData.isActive !== false
-              });
+            // Check if this is a mentor profile
+            if (mentorData.type === 'mentor' || mentorData.isMentor === true) {
+              // Only include active mentors (default to true if not specified)
+              const isActive = mentorData.isActive !== false;
+              
+              if (isActive) {
+                const mentorName = `${mentorData.firstName || ''} ${mentorData.lastName || ''}`.trim() || 'Unknown Mentor';
+                console.log(`DeveloperFeedbackService: Adding mentor: ${mentorName} (${userDoc.id})`);
+                mentors.push({
+                  mentorId: userDoc.id,
+                  mentorName: mentorName,
+                  mentorEmail: mentorData.email || '',
+                  industry: mentorData.industries?.[0] || mentorData.industry, // Check both possible field names
+                  skills: mentorData.skills || [],
+                  yearsOfExperience: mentorData.experience || mentorData.yearsOfExperience, // Check both possible field names
+                  isActive: true
+                });
+              }
             }
           }
         } catch (error) {
@@ -75,7 +82,33 @@ export class DeveloperFeedbackService {
         }
       }
 
+      // Also fetch generated mentors for testing
+      try {
+        const generatedMentorsQuery = query(collection(firestore, 'Generated Mentors'));
+        const generatedSnapshot = await getDocs(generatedMentorsQuery);
+        
+        console.log(`DeveloperFeedbackService: Found ${generatedSnapshot.docs.length} generated mentors`);
+        
+        generatedSnapshot.docs.forEach(doc => {
+          const mentorData = doc.data();
+          if (mentorData.type === 'mentor' || mentorData.isMentor === true) {
+            mentors.push({
+              mentorId: doc.id,
+              mentorName: `${mentorData.firstName || ''} ${mentorData.lastName || ''}`.trim() || 'Generated Mentor',
+              mentorEmail: mentorData.email || '',
+              industry: mentorData.industries?.[0] || mentorData.industry,
+              skills: mentorData.skills || [],
+              yearsOfExperience: mentorData.experience || mentorData.yearsOfExperience,
+              isActive: true
+            });
+          }
+        });
+      } catch (error) {
+        console.warn('Could not fetch generated mentors:', error);
+      }
+
       // Sort mentors by name
+      console.log(`DeveloperFeedbackService: Total mentors found: ${mentors.length}`);
       return mentors.sort((a, b) => a.mentorName.localeCompare(b.mentorName));
     } catch (error) {
       console.error('Error fetching active mentors for developer mode:', error);

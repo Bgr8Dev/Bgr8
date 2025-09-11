@@ -13,8 +13,10 @@ export const DeveloperFeedbackTest: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('Testing developer feedback service...');
       const mentorsData = await DeveloperFeedbackService.getMentorsForDeveloperMode(10);
       setMentors(mentorsData);
+      console.log('Developer Mentors found:', mentorsData.length);
       console.log('Developer Mentors:', mentorsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
