@@ -10,11 +10,12 @@ import CommentsSidebar from '../../components/modals/CommentsSidebar';
 import DeleteTicketModal from '../../components/modals/DeleteTicketModal';
 import '../../styles/adminStyles/AdminTestingFeedback.css';
 
-const STATUS_OPTIONS: FeedbackStatus[] = ['open', 'in_progress', 'resolved', 'closed', 'duplicate'];
+const STATUS_OPTIONS: FeedbackStatus[] = ['draft', 'open', 'in_progress', 'resolved', 'closed', 'duplicate'];
 const PRIORITY_OPTIONS: FeedbackPriority[] = ['low', 'medium', 'high', 'critical'];
 const CATEGORY_OPTIONS: FeedbackCategory[] = ['bug', 'feature_request', 'ui_issue', 'performance', 'security', 'accessibility', 'other'];
 
 const STATUS_COLORS = {
+  draft: '#eab308',
   open: '#3b82f6',
   in_progress: '#f59e0b',
   resolved: '#10b981',
@@ -23,6 +24,14 @@ const STATUS_COLORS = {
 };
 
 const STATUS_THEMES = {
+  draft: {
+    primary: '#eab308',
+    light: '#fef3c7',
+    dark: '#a16207',
+    background: '#fefce8',
+    border: '#eab308',
+    text: '#a16207'
+  },
   open: {
     primary: '#3b82f6',
     light: '#dbeafe',
@@ -257,6 +266,99 @@ export default function AdminTestingFeedback() {
     } finally {
       // Clear loading state
       setActionLoading(prev => ({ ...prev, [actionKey]: false }));
+    }
+  };
+
+  const handleSaveDraft = async (ticketData: {
+    title: string;
+    description: string;
+    category: FeedbackCategory;
+    priority: FeedbackPriority;
+    tags: string[];
+    attachments: File[];
+    urlToPage?: string;
+    browser?: string;
+    browserVersion?: string;
+    operatingSystem?: string;
+    deviceType: 'desktop' | 'mobile' | 'tablet';
+    screenResolution?: string;
+    stepsToReproduce?: string;
+    expectedBehavior?: string;
+    actualBehavior?: string;
+    severity: 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker';
+    environment: 'development' | 'staging' | 'production';
+    testCaseId?: string;
+    regression: boolean;
+    workaround?: string;
+  }) => {
+    // Create optimistic draft ticket
+    const optimisticDraft: FeedbackTicket = {
+      id: `draft-${Date.now()}`,
+      sequentialId: 0, // Will be updated when real draft is created
+      title: ticketData.title.trim() || 'Draft Ticket',
+      description: ticketData.description.trim() || 'This is a draft ticket',
+      category: ticketData.category,
+      priority: ticketData.priority,
+      status: 'draft', // Special status for drafts
+      reporterId: userProfile?.uid || '',
+      reporterName: userProfile?.displayName || 'Unknown User',
+      reporterEmail: userProfile?.email || '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tags: ticketData.tags,
+      attachments: [],
+      comments: [],
+      votes: 0,
+      upvoters: [],
+      downvoters: [],
+      // Testing-specific fields
+      urlToPage: ticketData.urlToPage?.trim() || undefined,
+      browser: ticketData.browser?.trim() || undefined,
+      browserVersion: ticketData.browserVersion?.trim() || undefined,
+      operatingSystem: ticketData.operatingSystem?.trim() || undefined,
+      deviceType: ticketData.deviceType,
+      screenResolution: ticketData.screenResolution?.trim() || undefined,
+      stepsToReproduce: ticketData.stepsToReproduce?.trim() || undefined,
+      expectedBehavior: ticketData.expectedBehavior?.trim() || undefined,
+      actualBehavior: ticketData.actualBehavior?.trim() || undefined,
+      severity: ticketData.severity,
+      environment: ticketData.environment,
+      testCaseId: ticketData.testCaseId?.trim() || undefined,
+      regression: ticketData.regression,
+      workaround: ticketData.workaround?.trim() || undefined
+    };
+
+    // Add optimistic draft to the list
+    setTickets(prevTickets => [optimisticDraft, ...prevTickets]);
+
+    try {
+      const draftId = await FeedbackService.createTicket(
+        {
+          ...ticketData,
+          title: ticketData.title.trim() || 'Draft Ticket',
+          description: ticketData.description.trim() || 'This is a draft ticket'
+        },
+        userProfile?.uid || '',
+        userProfile?.displayName || 'Unknown User',
+        userProfile?.email || '',
+        'draft' // Pass draft status
+      );
+
+      // Replace optimistic draft with real one
+      setTickets(prevTickets => 
+        prevTickets.map(ticket => 
+          ticket.id === optimisticDraft.id 
+            ? { ...ticket, id: draftId, status: 'draft' as FeedbackStatus }
+            : ticket
+        )
+      );
+    } catch (err) {
+      console.error('Error saving draft:', err);
+      setError('Failed to save draft');
+      // Remove optimistic draft on error
+      setTickets(prevTickets => 
+        prevTickets.filter(ticket => ticket.id !== optimisticDraft.id)
+      );
     }
   };
 
@@ -951,6 +1053,7 @@ export default function AdminTestingFeedback() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreateTicket}
+        onSaveDraft={handleSaveDraft}
       />
 
       <ViewTicketModal

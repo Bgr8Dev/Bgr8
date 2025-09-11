@@ -1,4 +1,5 @@
 export type FeedbackStatus = 
+  | 'draft'
   | 'open'
   | 'in_progress'
   | 'resolved'
@@ -84,6 +85,7 @@ export interface FeedbackComment {
 
 export interface FeedbackStats {
   total: number;
+  draft: number;
   open: number;
   inProgress: number;
   resolved: number;

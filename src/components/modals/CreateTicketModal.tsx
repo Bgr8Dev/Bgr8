@@ -8,6 +8,7 @@ interface CreateTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (ticketData: CreateTicketData) => void;
+  onSaveDraft?: (ticketData: CreateTicketData) => void;
 }
 
 interface CreateTicketData {
@@ -48,7 +49,8 @@ const PRIORITY_OPTIONS: FeedbackPriority[] = ['low', 'medium', 'high', 'critical
 export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   isOpen,
   onClose,
-  onSubmit
+  onSubmit,
+  onSaveDraft
 }) => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -74,6 +76,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     workaround: '',
     errors: {}
   });
+  
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
 
   const handleAddTag = () => {
     const tag = formData.tagInput.trim();
@@ -180,6 +184,57 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       ...prev,
       screenResolution: value
     }));
+  };
+
+  const saveAsDraft = () => {
+    if (!onSaveDraft) return;
+
+    // Extract only the fields needed for ticket creation
+    const ticketData: CreateTicketData = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      priority: formData.priority,
+      tags: formData.tags,
+      attachments: formData.attachments,
+      urlToPage: formData.urlToPage,
+      browser: formData.browser,
+      browserVersion: formData.browserVersion,
+      operatingSystem: formData.operatingSystem,
+      deviceType: formData.deviceType,
+      screenResolution: formData.screenResolution,
+      stepsToReproduce: formData.stepsToReproduce,
+      expectedBehavior: formData.expectedBehavior,
+      actualBehavior: formData.actualBehavior,
+      severity: formData.severity,
+      environment: formData.environment,
+      testCaseId: formData.testCaseId,
+      regression: formData.regression,
+      workaround: formData.workaround
+    };
+
+    onSaveDraft(ticketData);
+    setIsDraftSaved(true);
+    
+    // Show success message
+    console.log('Draft saved successfully');
+  };
+
+  const hasFormContent = () => {
+    return formData.title.trim() || 
+           formData.description.trim() || 
+           (formData.urlToPage && formData.urlToPage.trim()) || 
+           (formData.browser && formData.browser.trim()) || 
+           (formData.browserVersion && formData.browserVersion.trim()) || 
+           (formData.operatingSystem && formData.operatingSystem.trim()) || 
+           (formData.screenResolution && formData.screenResolution.trim()) || 
+           (formData.stepsToReproduce && formData.stepsToReproduce.trim()) || 
+           (formData.expectedBehavior && formData.expectedBehavior.trim()) || 
+           (formData.actualBehavior && formData.actualBehavior.trim()) || 
+           (formData.testCaseId && formData.testCaseId.trim()) || 
+           (formData.workaround && formData.workaround.trim()) || 
+           formData.tags.length > 0 || 
+           formData.attachments.length > 0;
   };
 
   const handleSubmit = () => {
@@ -668,6 +723,15 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           >
             <FaPlus /> Create Ticket
           </button>
+          {onSaveDraft && hasFormContent() && (
+            <button
+              className="btn btn-draft"
+              onClick={saveAsDraft}
+              disabled={isDraftSaved}
+            >
+              <FaPlus /> {isDraftSaved ? 'Draft Saved' : 'Save Draft'}
+            </button>
+          )}
         </div>
       </div>
     </div>

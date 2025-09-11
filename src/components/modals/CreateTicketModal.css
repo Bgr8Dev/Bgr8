@@ -334,6 +334,25 @@
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
+.btn-draft {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-draft:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.btn-draft:disabled {
+  background: #9ca3af;
+  color: #f9fafb;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Testing-Specific Form Styles */
 .form-section-divider {
   margin: 2rem 0 1.5rem 0;
@@ -486,6 +505,7 @@
   
   .modal-footer {
     flex-direction: column;
+    gap: 0.75rem;
   }
   
   .btn {

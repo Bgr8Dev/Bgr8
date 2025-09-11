@@ -23,6 +23,7 @@ import { firestore, storage } from '../firebase/firebase';
 import {
   FeedbackTicket,
   FeedbackComment,
+  FeedbackStatus,
   FeedbackStats,
   FeedbackFilters,
   CreateFeedbackTicketData,
@@ -125,7 +126,8 @@ export class FeedbackService {
     ticketData: CreateFeedbackTicketData,
     reporterId: string,
     reporterName: string,
-    reporterEmail: string
+    reporterEmail: string,
+    status: FeedbackStatus = 'open'
   ): Promise<string> {
     try {
       // Get the next sequential ID
@@ -140,7 +142,7 @@ export class FeedbackService {
         description: ticketData.description,
         category: ticketData.category,
         priority: ticketData.priority,
-        status: 'open',
+        status: status,
         reporterId,
         reporterName,
         reporterEmail,
@@ -464,6 +466,7 @@ export class FeedbackService {
       
       const stats: FeedbackStats = {
         total: tickets.length,
+        draft: 0,
         open: 0,
         inProgress: 0,
         resolved: 0,
@@ -485,6 +488,7 @@ export class FeedbackService {
           critical: 0
         },
         byStatus: {
+          draft: 0,
           open: 0,
           in_progress: 0,
           resolved: 0,
@@ -503,6 +507,7 @@ export class FeedbackService {
       });
 
       // Populate individual status counts for backward compatibility
+      stats.draft = stats.byStatus.draft;
       stats.open = stats.byStatus.open;
       stats.inProgress = stats.byStatus.in_progress;
       stats.resolved = stats.byStatus.resolved;

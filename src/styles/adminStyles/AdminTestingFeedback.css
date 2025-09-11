@@ -348,6 +348,13 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
 }
 
+.ticket-card.status-draft {
+  background: var(--status-background, #fefce8);
+  border-color: var(--status-border, #eab308);
+  border-left: 4px solid var(--status-primary, #eab308);
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.1);
+}
+
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -400,6 +407,11 @@
 .ticket-card.status-duplicate:hover {
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
   border-color: var(--status-primary, #ef4444);
+}
+
+.ticket-card.status-draft:hover {
+  box-shadow: 0 8px 25px rgba(234, 179, 8, 0.2);
+  border-color: var(--status-primary, #eab308);
 }
 
 .ticket-card__header {
@@ -471,6 +483,11 @@
   background: var(--status-light, #fee2e2);
 }
 
+.ticket-card.status-draft .ticket-id {
+  color: var(--status-dark, #a16207);
+  background: var(--status-light, #fef3c7);
+}
+
 .ticket-card__title h3 {
   margin: 0;
   font-size: 1.1rem;
@@ -501,6 +518,10 @@
 
 .ticket-card.status-duplicate .ticket-card__title h3 {
   color: var(--status-text, #dc2626);
+}
+
+.ticket-card.status-draft .ticket-card__title h3 {
+  color: var(--status-text, #a16207);
 }
 
 

@@ -15,7 +15,7 @@ interface EditTicketModalProps {
 
 const CATEGORY_OPTIONS: FeedbackCategory[] = ['bug', 'feature_request', 'ui_issue', 'performance', 'security', 'accessibility', 'other'];
 const PRIORITY_OPTIONS: FeedbackPriority[] = ['low', 'medium', 'high', 'critical'];
-const STATUS_OPTIONS: FeedbackStatus[] = ['open', 'in_progress', 'resolved', 'closed', 'duplicate'];
+const STATUS_OPTIONS: FeedbackStatus[] = ['draft', 'open', 'in_progress', 'resolved', 'closed', 'duplicate'];
 
 export const EditTicketModal: React.FC<EditTicketModalProps> = ({
   isOpen,
