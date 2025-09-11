@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTimes, FaComments } from 'react-icons/fa';
+import { FaEdit, FaTimes, FaComments, FaDesktop } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackCategory, FeedbackPriority, FeedbackStatus } from '../../types/feedback';
+import { detectScreenResolution } from '../../utils/screenResolution';
 import CommentsSidebar from './CommentsSidebar';
 import './EditTicketModal.css';
 
@@ -40,6 +41,25 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
       ...ticket,
       [field]: value
     });
+  };
+
+  const detectResolution = () => {
+    try {
+      const resolutionInfo = detectScreenResolution();
+      if (resolutionInfo.isDetected) {
+        // Set the exact detected resolution, not just the matching option
+        handleInputChange('screenResolution', resolutionInfo.formatted);
+        console.log(`Detected resolution: ${resolutionInfo.displayName}`);
+      } else {
+        console.warn('Failed to detect screen resolution');
+      }
+    } catch (error) {
+      console.error('Error detecting screen resolution:', error);
+    }
+  };
+
+  const handleResolutionSelect = (value: string) => {
+    handleInputChange('screenResolution', value);
   };
 
   return (
@@ -229,15 +249,46 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="edit-ticket-resolution">Screen Resolution</label>
-              <input
-                id="edit-ticket-resolution"
-                type="text"
-                value={ticket.screenResolution || ''}
-                onChange={(e) => handleInputChange('screenResolution', e.target.value)}
-                placeholder="e.g., 1920x1080"
-                className="form-input"
-              />
+              <div className="form-group-header">
+                <label htmlFor="edit-ticket-resolution">Screen Resolution</label>
+                <button
+                  type="button"
+                  onClick={detectResolution}
+                  className="detect-resolution-btn"
+                  title="Auto-detect screen resolution"
+                  aria-label="Auto-detect screen resolution"
+                >
+                  <FaDesktop /> Auto Detect
+                </button>
+              </div>
+              <div className="resolution-input-container">
+                <input
+                  id="edit-ticket-resolution"
+                  type="text"
+                  value={ticket.screenResolution || ''}
+                  onChange={(e) => handleInputChange('screenResolution', e.target.value)}
+                  placeholder="e.g., 1920x1080 or select from dropdown"
+                  className="form-input resolution-input"
+                />
+                <select
+                  value=""
+                  onChange={(e) => handleResolutionSelect(e.target.value)}
+                  className="resolution-dropdown"
+                  title="Quick select common resolution"
+                >
+                  <option value="">Quick Select</option>
+                  <option value="1920x1080">1920x1080 (Full HD)</option>
+                  <option value="2560x1440">2560x1440 (2K/QHD)</option>
+                  <option value="3840x2160">3840x2160 (4K/UHD)</option>
+                  <option value="1366x768">1366x768 (HD)</option>
+                  <option value="1440x900">1440x900</option>
+                  <option value="1600x900">1600x900</option>
+                  <option value="1680x1050">1680x1050</option>
+                  <option value="1280x720">1280x720 (HD)</option>
+                  <option value="1024x768">1024x768</option>
+                  <option value="800x600">800x600</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-group">

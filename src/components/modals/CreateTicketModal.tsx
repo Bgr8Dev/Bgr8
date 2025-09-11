@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTimes, FaTag } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaTag, FaDesktop } from 'react-icons/fa';
 import { FeedbackCategory, FeedbackPriority } from '../../types/feedback';
+import { detectScreenResolution } from '../../utils/screenResolution';
 import './CreateTicketModal.css';
 
 interface CreateTicketModalProps {
@@ -151,6 +152,33 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     setFormData(prev => ({
       ...prev,
       stepsToReproduce: prev.stepsToReproduce + newStep
+    }));
+  };
+
+  const detectResolution = () => {
+    try {
+      const resolutionInfo = detectScreenResolution();
+      if (resolutionInfo.isDetected) {
+        // Set the exact detected resolution, not just the matching option
+        setFormData(prev => ({
+          ...prev,
+          screenResolution: resolutionInfo.formatted
+        }));
+        
+        // Show a brief success message (you could enhance this with a toast notification)
+        console.log(`Detected resolution: ${resolutionInfo.displayName}`);
+      } else {
+        console.warn('Failed to detect screen resolution');
+      }
+    } catch (error) {
+      console.error('Error detecting screen resolution:', error);
+    }
+  };
+
+  const handleResolutionSelect = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      screenResolution: value
     }));
   };
 
@@ -479,26 +507,46 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="ticket-resolution">Screen Resolution</label>
-            <select
-              id="ticket-resolution"
-              value={formData.screenResolution}
-              onChange={(e) => setFormData(prev => ({ ...prev, screenResolution: e.target.value }))}
-              className="form-select"
-            >
-              <option value="">Select Resolution</option>
-              <option value="1920x1080">1920x1080 (Full HD)</option>
-              <option value="2560x1440">2560x1440 (2K/QHD)</option>
-              <option value="3840x2160">3840x2160 (4K/UHD)</option>
-              <option value="1366x768">1366x768 (HD)</option>
-              <option value="1440x900">1440x900</option>
-              <option value="1600x900">1600x900</option>
-              <option value="1680x1050">1680x1050</option>
-              <option value="1280x720">1280x720 (HD)</option>
-              <option value="1024x768">1024x768</option>
-              <option value="800x600">800x600</option>
-              <option value="Other">Other (specify in steps)</option>
-            </select>
+            <div className="form-group-header">
+              <label htmlFor="ticket-resolution">Screen Resolution</label>
+              <button
+                type="button"
+                onClick={detectResolution}
+                className="detect-resolution-btn"
+                title="Auto-detect screen resolution"
+                aria-label="Auto-detect screen resolution"
+              >
+                <FaDesktop /> Auto Detect
+              </button>
+            </div>
+            <div className="resolution-input-container">
+              <input
+                id="ticket-resolution"
+                type="text"
+                value={formData.screenResolution}
+                onChange={(e) => setFormData(prev => ({ ...prev, screenResolution: e.target.value }))}
+                placeholder="e.g., 1920x1080 or select from dropdown"
+                className="form-input resolution-input"
+              />
+              <select
+                value=""
+                onChange={(e) => handleResolutionSelect(e.target.value)}
+                className="resolution-dropdown"
+                title="Quick select common resolution"
+              >
+                <option value="">Quick Select</option>
+                <option value="1920x1080">1920x1080 (Full HD)</option>
+                <option value="2560x1440">2560x1440 (2K/QHD)</option>
+                <option value="3840x2160">3840x2160 (4K/UHD)</option>
+                <option value="1366x768">1366x768 (HD)</option>
+                <option value="1440x900">1440x900</option>
+                <option value="1600x900">1600x900</option>
+                <option value="1680x1050">1680x1050</option>
+                <option value="1280x720">1280x720 (HD)</option>
+                <option value="1024x768">1024x768</option>
+                <option value="800x600">800x600</option>
+              </select>
+            </div>
           </div>
 
           <div className="form-group">

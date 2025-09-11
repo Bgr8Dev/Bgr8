@@ -400,6 +400,62 @@
   background: #eff6ff;
 }
 
+.detect-resolution-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.detect-resolution-btn:hover {
+  border-color: #10b981;
+  color: #10b981;
+  background: #ecfdf5;
+}
+
+.resolution-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.resolution-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.resolution-dropdown {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resolution-dropdown:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.resolution-dropdown:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
 @keyframes modalSlideIn {
   from {
     opacity: 0;
@@ -450,5 +506,15 @@
   .file-remove {
     align-self: center;
     margin-left: 0;
+  }
+  
+  .resolution-input-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .resolution-dropdown {
+    min-width: auto;
+    width: 100%;
   }
 }
