@@ -260,7 +260,28 @@ export default function AdminTestingFeedback() {
     }
   };
 
-  const handleCreateTicket = async (ticketData: any) => {
+  const handleCreateTicket = async (ticketData: {
+    title: string;
+    description: string;
+    category: FeedbackCategory;
+    priority: FeedbackPriority;
+    tags: string[];
+    attachments: File[];
+    urlToPage?: string;
+    browser?: string;
+    browserVersion?: string;
+    operatingSystem?: string;
+    deviceType: 'desktop' | 'mobile' | 'tablet';
+    screenResolution?: string;
+    stepsToReproduce?: string;
+    expectedBehavior?: string;
+    actualBehavior?: string;
+    severity: 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker';
+    environment: 'development' | 'staging' | 'production';
+    testCaseId?: string;
+    regression: boolean;
+    workaround?: string;
+  }) => {
     // Create optimistic ticket
     const optimisticTicket: FeedbackTicket = {
       id: `temp-${Date.now()}`,
@@ -426,10 +447,6 @@ export default function AdminTestingFeedback() {
     }
   };
 
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setDeletingTicket(null);
-  };
 
   const handleOpenComments = (ticket: FeedbackTicket) => {
     setSelectedTicketForComments(ticket);
@@ -941,6 +958,7 @@ export default function AdminTestingFeedback() {
         ticket={viewingTicket}
         onClose={() => setShowViewModal(false)}
         onEdit={handleEditTicket}
+        onAddComment={handleAddComment}
       />
 
       <EditTicketModal
@@ -948,6 +966,7 @@ export default function AdminTestingFeedback() {
         ticket={editingTicket}
         onClose={() => setShowEditModal(false)}
         onUpdate={handleUpdateTicket}
+        onAddComment={handleAddComment}
       />
 
       <DeleteTicketModal

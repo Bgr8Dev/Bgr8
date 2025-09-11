@@ -1,6 +1,7 @@
-import React from 'react';
-import { FaEdit, FaTimes } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaEdit, FaTimes, FaComments } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackCategory, FeedbackPriority, FeedbackStatus } from '../../types/feedback';
+import CommentsSidebar from './CommentsSidebar';
 import './EditTicketModal.css';
 
 interface EditTicketModalProps {
@@ -8,6 +9,7 @@ interface EditTicketModalProps {
   ticket: FeedbackTicket | null;
   onClose: () => void;
   onUpdate: (ticketData: Partial<FeedbackTicket>) => void;
+  onAddComment?: (content: string, isInternal: boolean, attachments: File[]) => void;
 }
 
 const CATEGORY_OPTIONS: FeedbackCategory[] = ['bug', 'feature_request', 'ui_issue', 'performance', 'security', 'accessibility', 'other'];
@@ -18,8 +20,11 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
   isOpen,
   ticket,
   onClose,
-  onUpdate
+  onUpdate,
+  onAddComment
 }) => {
+  const [showComments, setShowComments] = useState(false);
+
   if (!isOpen || !ticket) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,7 +33,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
     onClose();
   };
 
-  const handleInputChange = (field: keyof FeedbackTicket, value: any) => {
+  const handleInputChange = (field: keyof FeedbackTicket, value: string | boolean | string[] | Date) => {
     if (!ticket) return;
     
     onUpdate({
@@ -42,14 +47,25 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Edit Ticket</h3>
-          <button 
-            className="modal-close"
-            onClick={onClose}
-            title="Close modal"
-            aria-label="Close modal"
-          >
-            <FaTimes />
-          </button>
+          <div className="modal-header-actions">
+            <button 
+              className="modal-action-btn comments-btn"
+              onClick={() => setShowComments(!showComments)}
+              title="Toggle comments"
+              aria-label="Toggle comments"
+            >
+              <FaComments />
+              <span>Comments</span>
+            </button>
+            <button 
+              className="modal-close"
+              onClick={onClose}
+              title="Close modal"
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
+          </div>
         </div>
         
         <form onSubmit={handleSubmit}>
@@ -346,6 +362,16 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
           </div>
         </form>
       </div>
+      
+      {/* Comments Sidebar */}
+      {showComments && onAddComment && (
+        <CommentsSidebar
+          isOpen={showComments}
+          ticket={ticket}
+          onClose={() => setShowComments(false)}
+          onAddComment={onAddComment}
+        />
+      )}
     </div>
   );
 };

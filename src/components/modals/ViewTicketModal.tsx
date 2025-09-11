@@ -1,6 +1,7 @@
-import React from 'react';
-import { FaTimes, FaTag, FaEdit, FaCheckCircle, FaPause, FaTimesCircle, FaCopy } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaTimes, FaTag, FaEdit, FaCheckCircle, FaPause, FaTimesCircle, FaCopy, FaComments } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackPriority } from '../../types/feedback';
+import CommentsSidebar from './CommentsSidebar';
 import './ViewTicketModal.css';
 
 interface ViewTicketModalProps {
@@ -8,6 +9,7 @@ interface ViewTicketModalProps {
   ticket: FeedbackTicket | null;
   onClose: () => void;
   onEdit: (ticket: FeedbackTicket) => void;
+  onAddComment?: (content: string, isInternal: boolean, attachments: File[]) => void;
 }
 
 const PRIORITY_COLORS = {
@@ -29,8 +31,11 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
   isOpen,
   ticket,
   onClose,
-  onEdit
+  onEdit,
+  onAddComment
 }) => {
+  const [showComments, setShowComments] = useState(false);
+
   if (!isOpen || !ticket) return null;
 
   const formatDate = (date: Date) => {
@@ -72,14 +77,25 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Ticket Details</h3>
-          <button 
-            className="modal-close"
-            onClick={onClose}
-            title="Close modal"
-            aria-label="Close modal"
-          >
-            <FaTimes />
-          </button>
+          <div className="modal-header-actions">
+            <button 
+              className="modal-action-btn comments-btn"
+              onClick={() => setShowComments(!showComments)}
+              title="Toggle comments"
+              aria-label="Toggle comments"
+            >
+              <FaComments />
+              <span>Comments</span>
+            </button>
+            <button 
+              className="modal-close"
+              onClick={onClose}
+              title="Close modal"
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
+          </div>
         </div>
         
         <div className="modal-body">
@@ -315,6 +331,16 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
           </button>
         </div>
       </div>
+      
+      {/* Comments Sidebar */}
+      {showComments && onAddComment && (
+        <CommentsSidebar
+          isOpen={showComments}
+          ticket={ticket}
+          onClose={() => setShowComments(false)}
+          onAddComment={onAddComment}
+        />
+      )}
     </div>
   );
 };
