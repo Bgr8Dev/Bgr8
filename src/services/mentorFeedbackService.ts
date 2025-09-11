@@ -5,9 +5,7 @@ import {
   getDocs, 
   getDoc,
   doc,
-  orderBy, 
-  limit,
-  Timestamp 
+  orderBy
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { Session } from '../types/sessions';

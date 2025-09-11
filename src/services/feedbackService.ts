@@ -6,7 +6,6 @@ import {
   getDoc,
   getDocs,
   query,
-  where,
   orderBy,
   serverTimestamp,
   FieldValue,
@@ -188,7 +187,7 @@ export class FeedbackService {
   static async getTickets(filters?: FeedbackFilters): Promise<FeedbackTicket[]> {
     try {
       // First, get all tickets ordered by creation date
-      let q = query(
+      const q = query(
         collection(firestore, FEEDBACK_COLLECTION),
         orderBy('createdAt', 'desc')
       );

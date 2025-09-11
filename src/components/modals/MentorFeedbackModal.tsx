@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { MentorFeedbackEligibility } from '../../services/mentorFeedbackService';
 import { FaStar, FaTimes, FaCheck, FaUser, FaCalendar } from 'react-icons/fa';
@@ -16,7 +15,6 @@ export const MentorFeedbackModal: React.FC<MentorFeedbackModalProps> = ({
   onClose,
   eligibleMentors
 }) => {
-  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [selectedMentor, setSelectedMentor] = useState<MentorFeedbackEligibility | null>(null);
 

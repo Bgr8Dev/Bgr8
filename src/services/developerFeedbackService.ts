@@ -1,12 +1,10 @@
 import { 
   collection, 
   query, 
-  where, 
   getDocs, 
   getDoc,
   doc,
-  orderBy,
-  limit 
+  orderBy
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 

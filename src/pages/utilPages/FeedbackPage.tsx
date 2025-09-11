@@ -60,8 +60,8 @@ export default function FeedbackPage() {
               startTime: 'N/A',
               endTime: 'N/A',
               status: 'completed',
-              createdAt: new Date() as any,
-              sessionDate: devData.sessionDate as any,
+              createdAt: Timestamp.fromDate(new Date()),
+              sessionDate: Timestamp.fromDate(devData.sessionDate),
               isDeveloperMode: true
             };
 
@@ -274,9 +274,7 @@ export default function FeedbackPage() {
         menteeId: booking.menteeId,
         mentorName: booking.mentorName,
         menteeName: booking.menteeName,
-        sessionDate: typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
-          ? (booking.sessionDate as { toDate: () => Date }).toDate()
-          : (booking.sessionDate as Date),
+        sessionDate: booking.sessionDate?.toDate() || new Date(),
         feedbackType,
         submittedBy: currentUser.uid,
         submittedAt: new Date(),
@@ -426,12 +424,7 @@ export default function FeedbackPage() {
 
   const otherPartyName = userRole === 'mentor' ? booking.menteeName : booking.mentorName;
   const sessionDate = booking?.sessionDate
-    ? (
-        // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
-        typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
-          ? (booking.sessionDate as { toDate: () => Date }).toDate()
-          : (booking.sessionDate as Date)
-      ).toLocaleDateString('en-GB', {
+    ? booking.sessionDate.toDate().toLocaleDateString('en-GB', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',

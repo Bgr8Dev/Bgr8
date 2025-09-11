@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { MentorFeedbackService, MenteeFeedbackSummary } from '../../services/mentorFeedbackService';
 
@@ -8,7 +8,7 @@ export const MentorFeedbackTest: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const testFeedbackService = async () => {
+  const testFeedbackService = useCallback(async () => {
     if (!currentUser) {
       setError('No current user');
       return;
@@ -26,13 +26,13 @@ export const MentorFeedbackTest: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
 
   useEffect(() => {
     if (currentUser) {
       testFeedbackService();
     }
-  }, [currentUser]);
+  }, [currentUser, testFeedbackService]);
 
   if (!currentUser) {
     return <div>Please log in to test the mentor feedback service.</div>;
@@ -111,7 +111,7 @@ export const MentorFeedbackTest: React.FC = () => {
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {feedbackSummary.eligibleForFeedback.map((mentor, index) => (
+              {feedbackSummary.eligibleForFeedback.map((mentor) => (
                 <div key={`${mentor.mentorId}-${mentor.sessionId}`} style={{
                   padding: '1rem',
                   background: mentor.feedbackAlreadySubmitted ? '#f0fdf4' : '#ffffff',
