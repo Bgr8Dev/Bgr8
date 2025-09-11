@@ -1,5 +1,5 @@
 /* Developer Feedback Modal Styles */
-.developer-feedback-modal-overlay {
+.dev-fb-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -15,7 +15,7 @@
   backdrop-filter: blur(4px);
 }
 
-.developer-feedback-modal {
+.dev-fb-modal {
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -23,11 +23,11 @@
   width: 100%;
   max-height: 85vh;
   overflow: hidden;
-  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: dev-fb-modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid #3b82f6;
 }
 
-@keyframes modalSlideIn {
+@keyframes dev-fb-modalSlideIn {
   from {
     opacity: 0;
     transform: translateY(-20px) scale(0.95);
@@ -38,7 +38,7 @@
   }
 }
 
-.modal-header {
+.dev-fb-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -47,32 +47,32 @@
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
 }
 
-.header-content {
+.dev-fb-header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
 }
 
-.header-title {
+.dev-fb-header-title {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.dev-icon {
+.dev-fb-dev-icon {
   color: #3b82f6;
   font-size: 1.5rem;
 }
 
-.modal-header h2 {
+.dev-fb-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
 }
 
-.developer-mode-toggle {
+.dev-fb-developer-mode-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -80,7 +80,7 @@
   color: #64748b;
 }
 
-.toggle-btn {
+.dev-fb-toggle-btn {
   background: none;
   border: none;
   color: #64748b;
@@ -91,15 +91,15 @@
   border-radius: 4px;
 }
 
-.toggle-btn:hover {
+.dev-fb-toggle-btn:hover {
   background: rgba(59, 130, 246, 0.1);
 }
 
-.toggle-btn.active {
+.dev-fb-toggle-btn.active {
   color: #3b82f6;
 }
 
-.close-btn {
+.dev-fb-close-btn {
   background: none;
   border: none;
   color: #64748b;
@@ -111,52 +111,52 @@
   margin-left: 1rem;
 }
 
-.close-btn:hover {
+.dev-fb-close-btn:hover {
   background: #f1f5f9;
   color: #475569;
 }
 
-.modal-content {
+.dev-fb-modal-content {
   padding: 0;
   max-height: calc(85vh - 80px);
   overflow-y: auto;
 }
 
 /* Mentor Selection Styles */
-.mentor-selection {
+.dev-fb-mentor-selection {
   padding: 2rem;
 }
 
-.selection-header {
+.dev-fb-selection-header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.selection-header h3 {
+.dev-fb-selection-header h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: #1e293b;
 }
 
-.selection-header p {
+.dev-fb-selection-header p {
   margin: 0;
   color: #64748b;
   font-size: 0.95rem;
 }
 
 /* Search Bar */
-.search-container {
+.dev-fb-search-container {
   margin-bottom: 2rem;
 }
 
-.search-input-wrapper {
+.dev-fb-search-input-wrapper {
   position: relative;
   max-width: 500px;
   margin: 0 auto;
 }
 
-.search-icon {
+.dev-fb-search-icon {
   position: absolute;
   left: 1rem;
   top: 50%;
@@ -165,7 +165,7 @@
   font-size: 1rem;
 }
 
-.search-input {
+.dev-fb-search-input {
   width: 100%;
   padding: 0.875rem 1rem 0.875rem 3rem;
   border: 2px solid #e2e8f0;
@@ -175,13 +175,13 @@
   transition: all 0.2s ease;
 }
 
-.search-input:focus {
+.dev-fb-search-input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.search-input::placeholder {
+.dev-fb-search-input::placeholder {
   color: #94a3b8;
 }
 
@@ -298,67 +298,148 @@
   font-weight: 600;
 }
 
-.mentor-card {
+.dev-fb-mentor-card {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: 2rem;
   background: #ffffff;
   border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 16px;
   transition: all 0.2s ease;
   cursor: pointer;
+  margin-bottom: 1.5rem;
+  min-height: 140px;
 }
 
-.mentor-card:hover {
+.dev-fb-mentor-card:hover {
   border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
 }
 
-.mentor-info {
+.dev-fb-mentor-info {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 1.5rem;
   flex: 1;
+  padding-right: 1rem;
 }
 
-.mentor-avatar {
-  width: 50px;
-  height: 50px;
+.dev-fb-mentor-avatar {
+  width: 70px;
+  height: 70px;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.25rem;
+  font-size: 1.75rem;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-.mentor-avatar.large {
+.dev-fb-mentor-avatar.large {
   width: 80px;
   height: 80px;
   font-size: 2rem;
   margin: 0 auto 1rem;
 }
 
-.mentor-details {
+.dev-fb-mentor-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.mentor-details h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+.dev-fb-mentor-details h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #1e293b;
+  line-height: 1.2;
 }
 
-.mentor-meta {
+.dev-fb-mentor-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.industry-tag {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.experience-tag {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.skills-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.skill-tag {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.more-skills {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+  font-style: italic;
+}
+.dev-fb-mentor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+}
+
+.provide-feedback-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.provide-feedback-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
 .industry-tag,
@@ -417,7 +498,7 @@
   padding: 2rem;
 }
 
-.back-btn {
+.dev-fb-back-btn {
   background: none;
   border: none;
   color: #3b82f6;
@@ -428,7 +509,7 @@
   transition: color 0.2s ease;
 }
 
-.back-btn:hover {
+.dev-fb-back-btn:hover {
   color: #1d4ed8;
 }
 
@@ -447,7 +528,7 @@
   color: #1e293b;
 }
 
-.mentor-details-extended {
+.dev-fb-mentor-details-extended {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -532,7 +613,7 @@
   border-color: #cbd5e1;
 }
 
-.start-feedback-btn {
+.dev-fb-start-feedback-btn {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
@@ -546,7 +627,7 @@
   gap: 0.5rem;
 }
 
-.start-feedback-btn:hover {
+.dev-fb-start-feedback-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
@@ -558,27 +639,27 @@
     max-height: 90vh;
   }
 
-  .modal-header {
+  .dev-fb-modal-header {
     padding: 1rem 1.5rem;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .header-content {
+  .dev-fb-header-content {
     flex-direction: column;
     gap: 1rem;
   }
 
-  .modal-header h2 {
+  .dev-fb-modal-header h2 {
     font-size: 1.25rem;
   }
 
-  .mentor-selection,
+  .dev-fb-mentor-selection,
   .feedback-confirmation {
     padding: 1.5rem;
   }
 
-  .mentor-card {
+  .dev-fb-mentor-card {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
@@ -601,7 +682,7 @@
   }
 
   .cancel-btn,
-  .start-feedback-btn {
+  .dev-fb-start-feedback-btn {
     width: 100%;
   }
 
@@ -617,30 +698,460 @@
     border-radius: 12px;
   }
 
-  .modal-header {
+  .dev-fb-modal-header {
     padding: 1rem;
   }
 
-  .mentor-selection,
+  .dev-fb-mentor-selection,
   .feedback-confirmation {
     padding: 1rem;
   }
 
-  .mentor-card {
+  .dev-fb-mentor-card {
+    padding: 1.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+  }
+  
+  .dev-fb-mentor-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .dev-fb-mentor-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .dev-fb-mentor-details h4 {
+    font-size: 1.2rem;
+  }
+  
+  .dev-fb-mentor-meta {
+    justify-content: center;
+  }
+  
+  .dev-fb-mentor-actions {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .provide-feedback-btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .dev-fb-search-input {
+    padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+  }
+}
+
+/* Feedback Form Styles */
+.dev-fb-feedback-form-view {
+  padding: 0;
+}
+
+.dev-fb-feedback-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.dev-fb-back-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dev-fb-back-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.dev-fb-feedback-header h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.dev-fb-session-info {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.dev-fb-session-info h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.dev-fb-session-info p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.dev-fb-developer-mode-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+}
+
+.dev-fb-dev-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  width: fit-content;
+}
+
+.dev-fb-dev-text {
+  color: #3b82f6;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.dev-fb-success-message,
+.dev-fb-error-message {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.dev-fb-success-message {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.dev-fb-error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.dev-fb-feedback-form {
+  padding: 0;
+}
+
+.dev-fb-form-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.dev-fb-form-section h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 0.75rem;
+}
+
+.dev-fb-section-description {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.dev-fb-rating-question {
+  margin-bottom: 2rem;
+}
+
+.dev-fb-rating-question label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.dev-fb-question-hint {
+  display: block;
+  font-size: 0.9rem;
+  color: #9ca3af;
+  font-weight: 400;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.dev-fb-star-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dev-fb-star {
+  background: none;
+  border: none;
+  color: #d1d5db;
+  font-size: 1.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.dev-fb-star:hover,
+.dev-fb-star.hover {
+  color: #fbbf24;
+  transform: scale(1.1);
+}
+
+.dev-fb-star.filled {
+  color: #fbbf24;
+}
+
+.dev-fb-rating-label {
+  margin-left: 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.dev-fb-text-question {
+  margin-bottom: 1.5rem;
+}
+
+.dev-fb-text-question label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.dev-fb-text-question textarea {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem;
+  color: #374151;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.dev-fb-text-question textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dev-fb-text-question textarea::placeholder {
+  color: #9ca3af;
+}
+
+.dev-fb-anonymous-option {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.dev-fb-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.dev-fb-checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.dev-fb-checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s ease;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dev-fb-checkbox-label input[type="checkbox"]:checked + .dev-fb-checkmark {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.dev-fb-checkbox-label input[type="checkbox"]:checked + .dev-fb-checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.dev-fb-checkbox-hint {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+  margin-left: 2.75rem;
+  line-height: 1.4;
+}
+
+.dev-fb-form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.dev-fb-btn-primary,
+.dev-fb-btn-secondary {
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 120px;
+}
+
+.dev-fb-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.dev-fb-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.dev-fb-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dev-fb-btn-secondary {
+  background: #f8fafc;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.dev-fb-btn-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.dev-fb-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile responsive adjustments for feedback form */
+@media (max-width: 768px) {
+  .dev-fb-modal {
+    max-width: 98vw;
+    max-height: 98vh;
+    margin: 0.5rem;
+  }
+  
+  .dev-fb-modal-content {
+    max-height: calc(98vh - 80px);
+    overflow-y: auto;
+  }
+  
+  .dev-fb-feedback-header {
+    padding: 0 1rem;
+  }
+  
+  .dev-fb-back-btn {
+    position: static;
+    margin-bottom: 1rem;
+    align-self: flex-start;
+  }
+  
+  .dev-fb-form-section {
     padding: 1rem;
   }
-
-  .mentor-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
+  
+  .dev-fb-star {
+    font-size: 1.5rem;
   }
-
-  .mentor-details h4 {
-    font-size: 1rem;
+  
+  .dev-fb-rating-label {
+    margin-left: 0.5rem;
+    min-width: 80px;
   }
-
-  .search-input {
-    padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+  
+  .dev-fb-form-actions {
+    flex-direction: column;
+  }
+  
+  .dev-fb-btn-primary,
+  .dev-fb-btn-secondary {
+    width: 100%;
+  }
+  
+  .dev-fb-mentor-selection {
+    padding: 1.5rem;
+    min-height: calc(98vh - 80px);
+  }
+  
+  .dev-fb-feedback-form-view {
+    padding: 1.5rem;
+    min-height: calc(98vh - 80px);
   }
 }

@@ -39,10 +39,15 @@ export default function FeedbackPage() {
 
       // Check if this is a developer mode feedback request
       if (bookingId.startsWith('dev-')) {
+        console.log('Developer mode feedback request detected:', bookingId);
         try {
           const developerData = sessionStorage.getItem('developerFeedbackData');
+          console.log('Developer data from sessionStorage:', developerData);
+          
           if (developerData) {
             const devData = JSON.parse(developerData);
+            console.log('Parsed developer data:', devData);
+            
             const bookingData: Booking = {
               id: bookingId,
               mentorId: devData.mentorId,
@@ -60,9 +65,15 @@ export default function FeedbackPage() {
               isDeveloperMode: true
             };
 
+            console.log('Created booking data:', bookingData);
             setBooking(bookingData);
             setUserRole('mentee');
             setFeedbackType('mentor');
+            setLoading(false);
+            return;
+          } else {
+            console.error('No developer data found in sessionStorage');
+            setError('No developer mode data found. Please try selecting a mentor again.');
             setLoading(false);
             return;
           }
@@ -263,7 +274,9 @@ export default function FeedbackPage() {
         menteeId: booking.menteeId,
         mentorName: booking.mentorName,
         menteeName: booking.menteeName,
-        sessionDate: booking.sessionDate!.toDate(),
+        sessionDate: typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
+          ? (booking.sessionDate as { toDate: () => Date }).toDate()
+          : (booking.sessionDate as Date),
         feedbackType,
         submittedBy: currentUser.uid,
         submittedAt: new Date(),
@@ -417,7 +430,7 @@ export default function FeedbackPage() {
         // If it's a Firestore Timestamp, use .toDate(), otherwise assume it's a Date
         typeof (booking.sessionDate as { toDate?: () => Date }).toDate === 'function'
           ? (booking.sessionDate as { toDate: () => Date }).toDate()
-          : (booking.sessionDate.toDate())
+          : (booking.sessionDate as Date)
       ).toLocaleDateString('en-GB', {
         weekday: 'long',
         year: 'numeric',
