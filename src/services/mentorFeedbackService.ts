@@ -72,7 +72,7 @@ export class MentorFeedbackService {
             const bookingData = bookingDoc.data() as Booking;
             mentorName = bookingData.mentorName;
           }
-        } catch (error) {
+        } catch {
           console.warn('Could not fetch mentor name for session:', sessionData.bookingId);
         }
 

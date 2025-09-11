@@ -22,8 +22,8 @@ export const detectScreenResolution = (): ScreenResolutionInfo => {
     const height = window.screen.height;
     
     // Get available screen area (excluding taskbars, etc.)
-    const availWidth = window.screen.availWidth;
-    const availHeight = window.screen.availHeight;
+    // Note: availWidth and availHeight are available but not currently used
+    // They could be used for future features like detecting available workspace
     
     // Format resolution string
     const formatted = `${width}x${height}`;
