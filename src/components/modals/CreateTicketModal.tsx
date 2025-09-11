@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaPlus, FaTimes, FaTag, FaDesktop } from 'react-icons/fa';
 import { FeedbackCategory, FeedbackPriority } from '../../types/feedback';
 import { detectScreenResolution } from '../../utils/screenResolution';
+import { getRandomAutofillData } from '../../data/autofillData';
 import './CreateTicketModal.css';
 
 interface CreateTicketModalProps {
@@ -187,35 +188,15 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   };
 
   const autofillForm = () => {
-    const sampleData = {
-      title: 'Sample Bug Report: Login Button Not Working',
-      description: 'The login button on the homepage is not responding when clicked. This prevents users from accessing their accounts. The issue appears to be consistent across different browsers.',
-      category: 'bug' as FeedbackCategory,
-      priority: 'high' as FeedbackPriority,
-      tags: ['login', 'authentication', 'frontend', 'critical'],
-      urlToPage: 'https://example.com/login',
-      browser: 'Chrome',
-      browserVersion: '120.0.6099.109',
-      operatingSystem: 'Windows 11',
-      deviceType: 'desktop' as 'desktop' | 'mobile' | 'tablet',
-      screenResolution: '1920x1080',
-      stepsToReproduce: '1. Navigate to the homepage\n2. Click on the "Login" button\n3. Observe that nothing happens\n4. Check browser console for errors',
-      expectedBehavior: 'The login button should redirect to the login page or open a login modal.',
-      actualBehavior: 'The login button does nothing when clicked. No redirect occurs and no modal opens.',
-      severity: 'major' as 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker',
-      environment: 'production' as 'development' | 'staging' | 'production',
-      testCaseId: 'TC-001',
-      regression: true,
-      workaround: 'Users can access login by going directly to /login URL or using the mobile app.'
-    };
-
+    const randomData = getRandomAutofillData();
+    
     setFormData(prev => ({
       ...prev,
-      ...sampleData,
+      ...randomData,
       errors: {} // Clear any existing errors
     }));
     
-    console.log('Form autofilled with sample data for development');
+    console.log('Form autofilled with random sample data for development');
   };
 
   const saveAsDraft = async () => {
