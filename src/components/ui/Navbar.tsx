@@ -66,7 +66,7 @@ export default function Navbar() {
               <div className="user-menu" role="menu">
                 <Link to="/profile" role="menuitem">Profile</Link>
                 <Link to="/settings" role="menuitem">Settings</Link>
-                {hasRole(userProfile, 'admin') && (
+                {hasRole(userProfile, 'committee') && (
                   <Link to="/admin-portal" className="admin-link" role="menuitem">
                     Admin Portal
                   </Link>
