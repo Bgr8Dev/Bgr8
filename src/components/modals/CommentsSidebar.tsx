@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { FaTimes, FaUser, FaComments, FaPlus } from 'react-icons/fa';
+import { FaTimes, FaComments, FaLock, FaGlobe, FaUser } from 'react-icons/fa';
 import { FeedbackTicket } from '../../types/feedback';
+import { useAuth } from '../../hooks/useAuth';
+import { hasRole } from '../../utils/userProfile';
 import './CommentsSidebar.css';
 
 interface CommentsSidebarProps {
@@ -16,10 +18,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
   onClose,
   onAddComment
 }) => {
+  const { userProfile } = useAuth();
+  const isDeveloper = hasRole(userProfile, 'developer');
+  
   const [newComment, setNewComment] = useState({
     content: '',
-    isInternal: false,
-    attachments: [] as File[]
+    isInternal: false
   });
 
   const formatDate = (date: Date) => {
@@ -35,30 +39,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
   const handleAddComment = () => {
     if (!newComment.content.trim()) return;
 
-    onAddComment(newComment.content.trim(), newComment.isInternal, newComment.attachments);
+    onAddComment(newComment.content.trim(), newComment.isInternal, []);
     
     // Reset form
     setNewComment({
       content: '',
-      isInternal: false,
-      attachments: []
+      isInternal: false
     });
   };
 
-  const handleCommentFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setNewComment(prev => ({
-      ...prev,
-      attachments: [...prev.attachments, ...files]
-    }));
-  };
-
-  const handleRemoveCommentFile = (indexToRemove: number) => {
-    setNewComment(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, index) => index !== indexToRemove)
-    }));
-  };
 
   if (!isOpen || !ticket) return null;
 
@@ -66,7 +55,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     <div className="comments-sidebar-overlay" onClick={onClose}>
       <div className="comments-sidebar" onClick={(e) => e.stopPropagation()}>
         <div className="comments-header">
-          <h3>Comments - {ticket.title}</h3>
+          <div className="comments-title">
+            <FaComments className="comments-icon" />
+            <h3>Comments</h3>
+            <span className="ticket-title">#{ticket.sequentialId} {ticket.title}</span>
+          </div>
           <button 
             className="comments-close"
             onClick={onClose}
@@ -79,106 +72,92 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         
         <div className="comments-content">
           <div className="comments-list">
-            {ticket.comments.map(comment => (
-              <div key={comment.id} className={`comment ${comment.isInternal ? 'internal' : 'public'}`}>
-                <div className="comment-header">
-                  <div className="comment-author">
-                    <FaUser className="comment-author-icon" />
-                    <span className="comment-author-name">{comment.authorName}</span>
+            {ticket.comments.map(comment => {
+              // Only show internal comments to developers
+              if (comment.isInternal && !isDeveloper) {
+                return null;
+              }
+              
+              return (
+                <div key={comment.id} className={`comment ${comment.isInternal ? 'internal' : 'public'}`}>
+                  <div className="comment-header">
+                    <span className="comment-author">{comment.authorName}</span>
                     {comment.isInternal && (
-                      <span className="comment-internal-badge">Internal</span>
+                      <span className="comment-type-badge">
+                        <FaLock /> Internal
+                      </span>
                     )}
+                    <span className="comment-date">{formatDate(comment.createdAt)}</span>
                   </div>
-                  <span className="comment-date">{formatDate(comment.createdAt)}</span>
+                  <div className="comment-body">
+                    {comment.content}
+                  </div>
                 </div>
-                <div className="comment-body">
-                  <p>{comment.content}</p>
-                  {comment.attachments && comment.attachments.length > 0 && (
-                    <div className="comment-attachments">
-                      {comment.attachments.map(attachment => (
-                        <a
-                          key={attachment.id}
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="comment-attachment"
-                        >
-                          <FaUser /> {attachment.name}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            {ticket.comments.length === 0 && (
+              );
+            })}
+            {ticket.comments.filter(comment => !comment.isInternal || isDeveloper).length === 0 && (
               <div className="comments-empty">
                 <FaComments className="comments-empty-icon" />
-                <p>No comments yet. Be the first to comment!</p>
+                <p>No comments yet</p>
+                <p className="empty-subtitle">Start the conversation below</p>
+                {!isDeveloper && ticket.comments.some(comment => comment.isInternal) && (
+                  <div className="internal-comments-notice">
+                    <FaLock className="notice-icon" />
+                    <p>Some internal comments are hidden (developer access required)</p>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Show notice if there are internal comments but no visible comments */}
+            {!isDeveloper && ticket.comments.some(comment => comment.isInternal) && ticket.comments.filter(comment => !comment.isInternal).length === 0 && ticket.comments.length > 0 && (
+              <div className="internal-comments-notice">
+                <FaLock className="notice-icon" />
+                <p>This ticket has internal comments that are only visible to developers.</p>
               </div>
             )}
           </div>
           
           <div className="comments-form">
             <div className="comment-form-header">
-              <h4>Add Comment</h4>
-              <label className="comment-internal-toggle">
-                <input
-                  type="checkbox"
-                  checked={newComment.isInternal}
-                  onChange={(e) => setNewComment(prev => ({ ...prev, isInternal: e.target.checked }))}
-                  className="checkbox-input"
-                />
-                <span className="checkbox-text">Internal comment</span>
-              </label>
-            </div>
-            
-            <textarea
-              value={newComment.content}
-              onChange={(e) => setNewComment(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Write your comment here..."
-              className="comment-textarea"
-              rows={4}
-            />
-            
-            <div className="comment-file-input">
-              <input
-                type="file"
-                multiple
-                onChange={handleCommentFileSelect}
-                className="file-input"
-                accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip"
-              />
-              <label className="file-input-label">
-                <FaPlus /> Attach Files
-              </label>
-            </div>
-            
-            {newComment.attachments.length > 0 && (
-              <div className="comment-file-list">
-                {newComment.attachments.map((file, index) => (
-                  <div key={index} className="comment-file-item">
-                    <span className="comment-file-name">{file.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCommentFile(index)}
-                      className="comment-file-remove"
-                      title="Remove file"
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                ))}
+              <div className="form-title">
+                <FaUser className="form-user-icon" />
+                <span>Add a comment</span>
               </div>
-            )}
+              {isDeveloper && (
+                <label className="comment-internal-toggle">
+                  <input
+                    type="checkbox"
+                    checked={newComment.isInternal}
+                    onChange={(e) => setNewComment(prev => ({ ...prev, isInternal: e.target.checked }))}
+                    className="checkbox-input"
+                  />
+                  <span className="checkbox-text">
+                    {newComment.isInternal ? <FaLock /> : <FaGlobe />}
+                    {newComment.isInternal ? ' Internal' : ' Public'}
+                  </span>
+                </label>
+              )}
+            </div>
             
-            <button
-              className="btn btn-primary comment-submit"
-              onClick={handleAddComment}
-              disabled={!newComment.content.trim()}
-            >
-              <FaComments /> Add Comment
-            </button>
+            <div className="comment-input-wrapper">
+              <textarea
+                value={newComment.content}
+                onChange={(e) => setNewComment(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Share your thoughts..."
+                className="comment-textarea"
+                rows={3}
+              />
+              <div className="comment-actions">
+                <button
+                  className="comment-submit-btn"
+                  onClick={handleAddComment}
+                  disabled={!newComment.content.trim()}
+                >
+                  <FaComments /> Comment
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
