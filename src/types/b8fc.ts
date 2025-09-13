@@ -65,6 +65,10 @@ export interface SessionFeedback {
   isAnonymous: boolean;
   status: 'submitted' | 'reviewed' | 'archived';
   
+  // Developer mode support
+  isDeveloperMode?: boolean;
+  developerModeMentorId?: string;
+  
   // Cal.com support
   isCalComBooking?: boolean;
   calComBookingId?: string;

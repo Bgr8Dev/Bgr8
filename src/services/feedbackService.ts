@@ -6,7 +6,6 @@ import {
   getDoc,
   getDocs,
   query,
-  where,
   orderBy,
   serverTimestamp,
   FieldValue,
@@ -23,6 +22,7 @@ import { firestore, storage } from '../firebase/firebase';
 import {
   FeedbackTicket,
   FeedbackComment,
+  FeedbackStatus,
   FeedbackStats,
   FeedbackFilters,
   CreateFeedbackTicketData,
@@ -65,6 +65,26 @@ export class FeedbackService {
    */
   static async uploadFiles(files: File[], ticketId: string): Promise<FeedbackAttachment[]> {
     try {
+      // Validate files before upload
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+        'video/mp4', 'video/webm', 'video/ogg',
+        'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain', 'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/zip', 'application/x-zip-compressed'
+      ];
+
+      for (const file of files) {
+        if (file.size > maxFileSize) {
+          throw new Error(`File "${file.name}" is too large. Maximum size is 10MB.`);
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error(`File type "${file.type}" is not allowed for "${file.name}".`);
+        }
+      }
+
       const uploadPromises = files.map(async (file) => {
         const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const fileName = `${fileId}-${file.name}`;
@@ -80,7 +100,7 @@ export class FeedbackService {
           fileType = 'image';
         } else if (file.type.startsWith('video/')) {
           fileType = 'video';
-        } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text')) {
+        } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text') || file.type.includes('sheet') || file.type.includes('zip')) {
           fileType = 'document';
         }
         
@@ -125,7 +145,8 @@ export class FeedbackService {
     ticketData: CreateFeedbackTicketData,
     reporterId: string,
     reporterName: string,
-    reporterEmail: string
+    reporterEmail: string,
+    status: FeedbackStatus = 'open'
   ): Promise<string> {
     try {
       // Get the next sequential ID
@@ -140,7 +161,7 @@ export class FeedbackService {
         description: ticketData.description,
         category: ticketData.category,
         priority: ticketData.priority,
-        status: 'open',
+        status: status,
         reporterId,
         reporterName,
         reporterEmail,
@@ -185,27 +206,11 @@ export class FeedbackService {
    */
   static async getTickets(filters?: FeedbackFilters): Promise<FeedbackTicket[]> {
     try {
-      let q = query(collection(firestore, FEEDBACK_COLLECTION));
-
-      // Apply filters
-      if (filters?.status && filters.status.length > 0) {
-        q = query(q, where('status', 'in', filters.status));
-      }
-      if (filters?.priority && filters.priority.length > 0) {
-        q = query(q, where('priority', 'in', filters.priority));
-      }
-      if (filters?.category && filters.category.length > 0) {
-        q = query(q, where('category', 'in', filters.category));
-      }
-      if (filters?.assignedTo && filters.assignedTo.length > 0) {
-        q = query(q, where('assignedTo', 'in', filters.assignedTo));
-      }
-      if (filters?.reporterId) {
-        q = query(q, where('reporterId', '==', filters.reporterId));
-      }
-
-      // Order by creation date (newest first)
-      q = query(q, orderBy('createdAt', 'desc'));
+      // First, get all tickets ordered by creation date
+      const q = query(
+        collection(firestore, FEEDBACK_COLLECTION),
+        orderBy('createdAt', 'desc')
+      );
 
       const snapshot = await getDocs(q);
       const tickets: FeedbackTicket[] = [];
@@ -235,13 +240,63 @@ export class FeedbackService {
           upvoters: data.upvoters || [],
           downvoters: data.downvoters || [],
           duplicateOf: data.duplicateOf,
-          relatedTickets: data.relatedTickets || []
+          relatedTickets: data.relatedTickets || [],
+          // Testing-specific fields
+          urlToPage: data.urlToPage,
+          browser: data.browser,
+          browserVersion: data.browserVersion,
+          operatingSystem: data.operatingSystem,
+          deviceType: data.deviceType || 'desktop',
+          screenResolution: data.screenResolution,
+          stepsToReproduce: data.stepsToReproduce,
+          expectedBehavior: data.expectedBehavior,
+          actualBehavior: data.actualBehavior,
+          severity: data.severity || 'minor',
+          environment: data.environment || 'production',
+          testCaseId: data.testCaseId,
+          regression: data.regression || false,
+          workaround: data.workaround
         };
         tickets.push(ticket);
       }
 
-      // Apply client-side filters
+      // Apply all filters client-side to avoid Firestore index requirements
       let filteredTickets = tickets;
+
+      // Apply status filter
+      if (filters?.status && filters.status.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          filters.status!.includes(ticket.status)
+        );
+      }
+
+      // Apply priority filter
+      if (filters?.priority && filters.priority.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          filters.priority!.includes(ticket.priority)
+        );
+      }
+
+      // Apply category filter
+      if (filters?.category && filters.category.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          filters.category!.includes(ticket.category)
+        );
+      }
+
+      // Apply assignedTo filter
+      if (filters?.assignedTo && filters.assignedTo.length > 0) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          ticket.assignedTo && filters.assignedTo!.includes(ticket.assignedTo)
+        );
+      }
+
+      // Apply reporterId filter
+      if (filters?.reporterId) {
+        filteredTickets = filteredTickets.filter(ticket => 
+          ticket.reporterId === filters.reporterId
+        );
+      }
 
       if (filters?.searchTerm) {
         const searchLower = filters.searchTerm.toLowerCase();
@@ -307,7 +362,22 @@ export class FeedbackService {
         upvoters: data.upvoters || [],
         downvoters: data.downvoters || [],
         duplicateOf: data.duplicateOf,
-        relatedTickets: data.relatedTickets || []
+        relatedTickets: data.relatedTickets || [],
+        // Testing-specific fields
+        urlToPage: data.urlToPage,
+        browser: data.browser,
+        browserVersion: data.browserVersion,
+        operatingSystem: data.operatingSystem,
+        deviceType: data.deviceType || 'desktop',
+        screenResolution: data.screenResolution,
+        stepsToReproduce: data.stepsToReproduce,
+        expectedBehavior: data.expectedBehavior,
+        actualBehavior: data.actualBehavior,
+        severity: data.severity || 'minor',
+        environment: data.environment || 'production',
+        testCaseId: data.testCaseId,
+        regression: data.regression || false,
+        workaround: data.workaround
       };
     } catch (error) {
       console.error('Error fetching feedback ticket:', error);
@@ -324,10 +394,37 @@ export class FeedbackService {
   ): Promise<void> {
     try {
       const ticketRef = doc(firestore, FEEDBACK_COLLECTION, ticketId);
-      const updateFields: Record<string, FieldValue | string | number | boolean | string[] | undefined> = {
-        ...updateData,
+      
+      // Get current ticket to handle attachment updates
+      const currentTicket = await this.getTicket(ticketId);
+      if (!currentTicket) {
+        throw new Error('Ticket not found');
+      }
+
+      const updateFields: Record<string, FieldValue | string | number | boolean | string[] | FeedbackAttachment[] | undefined> = {
         updatedAt: serverTimestamp()
       };
+
+      // Add non-attachment fields to updateFields
+      const { attachments, ...otherUpdateData } = updateData;
+      Object.assign(updateFields, otherUpdateData);
+      
+      // Handle new attachments if provided
+      if (attachments && attachments.length > 0) {
+        try {
+          // Upload new attachments
+          const uploadedAttachments = await this.uploadFiles(attachments, ticketId);
+          
+          // Combine with existing attachments
+          const existingAttachments = currentTicket.attachments || [];
+          updateFields.attachments = [...existingAttachments, ...uploadedAttachments];
+        } catch (uploadError) {
+          console.error('Error uploading new attachments:', uploadError);
+          // Don't fail the entire operation if file upload fails
+          // Remove attachments from update fields so they don't get overwritten
+          delete updateFields.attachments;
+        }
+      }
 
       // If status is being changed to resolved or closed, set resolvedAt
       if (updateData.status === 'resolved' || updateData.status === 'closed') {
@@ -464,6 +561,7 @@ export class FeedbackService {
       
       const stats: FeedbackStats = {
         total: tickets.length,
+        draft: 0,
         open: 0,
         inProgress: 0,
         resolved: 0,
@@ -485,6 +583,7 @@ export class FeedbackService {
           critical: 0
         },
         byStatus: {
+          draft: 0,
           open: 0,
           in_progress: 0,
           resolved: 0,
@@ -503,6 +602,7 @@ export class FeedbackService {
       });
 
       // Populate individual status counts for backward compatibility
+      stats.draft = stats.byStatus.draft;
       stats.open = stats.byStatus.open;
       stats.inProgress = stats.byStatus.in_progress;
       stats.resolved = stats.byStatus.resolved;

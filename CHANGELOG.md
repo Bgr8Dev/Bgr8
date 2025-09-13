@@ -7,6 +7,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.7.1] - 2025-09-13
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Add verification system types and integrate into user profiles
+- Add initial verification data creation for mentor profiles in useMentorData
+- Add VerificationService to manage mentor verification processes including creation, updates, querying, and statistics.
+- Add verification components including VerificationStatusBadge, VerificationProgress, and VerificationPendingNotice with associated styles. These components enhance the user experience by providing visual feedback on the verification process.
+- Add MentorVerificationPanel component for managing mentor verification processes, including data loading, filtering, and action handling. Enhance user experience with a detailed mentor list and status overview.
+- Add CSS styles for MentorVerificationPanel component to enhance layout, responsiveness, and user interaction. Includes styles for headers, buttons, loading states, error messages, and modal components, with dark mode support and mobile responsiveness adjustments.
+- Fix import path for createInitialVerification in useMentorData to ensure correct module resolution for mentor profile verification data.
+- Add Firestore security rules for user profiles, mentor programs, and admin access. Introduce helper functions for authentication and role verification, enhancing data protection and access control across various collections.
+- Add AdminMentorVerification component for managing mentor verification processes, including data loading, filtering, and action handling. Update MobileAdminPortal and AdminPortal to integrate verification functionality with navigation and display. Enhance styles for improved layout and responsiveness.
+- Implement role-based access control by refactoring user profile management. Introduce role-checking utility functions and update components to utilize these roles for access control. Add RoleManagement component for managing user roles with associated styles. Enhance Firestore security rules to support new role structure.
+- Refactor MobileAdminPortal and RoleManagement components to streamline user role management. Remove deprecated user data fetching logic and integrate role statistics display. Enhance styles for improved layout and responsiveness in role management features.
+- Enhance RoleManagement component by adding default role creation and refining role count updates. Introduce getRoleCount function for improved role statistics display. Add console logging for default role creation to aid in debugging.
+- Add new roles for social media, outreach, and events in RoleManagement component. Update Firestore rules to include role-checking functions for enhanced access control. Modify user profile interface and default role creation to accommodate new roles.
+- Enhance RoleManagement component with new role management modal and improved user role display. Add clear filter button and filter status indication for better user experience. Update styles for role badges, buttons, and modal to improve layout and responsiveness.
+- Implement Role Management Modal with enhanced animations and styles for user role management. Refactor RoleManagement component to utilize the new modal, adding pulsing effects for role toggles and improving overall user experience. Introduce CSS animations for modal transitions and toggle interactions.
+- Implement developer mode visibility in profile edit modals. Integrate role-checking functionality to conditionally display developer options, enhancing user experience for developers. Update styles and logic for developer mode toggle in both MobileProfileEditModal and ProfileEditModal components.
+- Implement verification status handling in MentorDashboard component. Add loading and error states for verification data fetching, and display appropriate messages based on verification status. Enhance styles for verification status display, including loading indicators and error messages, to improve user experience.
+- Refactor MentorVerificationPanel and AdminMentorVerification components to use getAllMentors for fetching mentor data, enhancing data retrieval efficiency. Add a Verification Process Guide to improve user understanding of the verification steps. Update styles for mentor details and action buttons for better user experience, including enhanced status messages for mentor verification outcomes.
+- Update AdminMentorVerification styles for improved UI consistency and responsiveness. Adjust background gradients, padding, and font sizes for various elements, including verification steps, action buttons, and mentor cards. Introduce new mentor card header and date sections, enhancing layout and user experience across devices.
+- Add success message handling and optimistic UI updates in AdminMentorVerification component
+- Add Page Permissions Management feature
+- Enhance Admin Portal UI with new sidebar header and improved styles
+- Implement Testing Feedback Management Feature
+- Implement Create Ticket Modal in AdminTestingFeedback Component
+- Enhance AdminTestingFeedback Component with File Attachment Features
+- Enhance AdminTestingFeedback Component with Ticket Viewing and Editing Features
+- Add Delete Ticket Functionality to AdminTestingFeedback Component
+- Enhance AdminTestingFeedback Component with Testing-Specific Features
+- Implement Optimistic UI Updates and Loading States in AdminTestingFeedback Component
+- Add Closed and Duplicate Status Cards to AdminTestingFeedback Component
+- Implement Floating Action Buttons in AdminTestingFeedback Component
+- Add Comments Loading State and Fetching Logic in AdminTestingFeedback Component
+- Add Status-Themed Ticket Cards in AdminTestingFeedback Component
+- Add Testing-Specific Fields to AdminTestingFeedback Component
+- Add Modals for Ticket Management in AdminTestingFeedback Component
+- Enhance CreateTicketModal with Validation and Error Handling
+- Add Screen Resolution Detection to Ticket Modals
+- Implement Draft Saving Functionality in CreateTicketModal
+- Enhance CreateTicketModal with Autofill Feature and Async Submission
+- Refactor CreateTicketModal to Use Random Autofill Data
+- Add StatsTiles Component for Feedback Statistics Display
+- Refactor CreateTicketModal CSS for Improved Checkbox Styling
+- Add Developer and Mentor Feedback Modals with Styling and Functionality
+- Enhance FeedbackAnalytics Component with Advanced Filtering and Sorting Features
+- Refactor FeedbackAnalytics Component to Implement Modal for Feedback Details
+- Implement Role-Based Access Control in Role Management
+- Implement Image Overlay and File Download Functionality in Ticket Modals
+
+### 🐛 Fixed Bug fixes and improvements
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Refactor Error Handling in MentorFeedbackService and Update Screen Resolution Comments
+
+### 📚 Documentation Documentation updates
+- Refactor AdminTestingFeedback Component to Simplify Comment Handling
+- Enhance CommentsSidebar Component with Modern Styles and Functionality
+- Enhance Edit and View Ticket Modals with Comments Functionality
+
+### 🎨 Changed Code style and formatting changes
+- Update styles for VerificationProgress and AdminMentorVerification components to enhance UI consistency. Change background colors, borders, and text colors for improved readability and aesthetics. Adjust box shadows and hover effects for better user interaction.
+- Refactor verification data handling in VerificationService to utilize Firestore Timestamps. Convert date fields to Timestamps for proper Firestore compatibility, ensuring accurate data representation. Update history entries to maintain consistent timestamp formats and enhance data integrity during updates.
+- Update AdminTestingFeedback styles for improved color consistency
+- Enhance Page Permissions Manager Styles for Improved Usability
+- Enhance Ticket Modals with File Attachment Validation and Improved UI
+- Refactor Modal Close Button Styles and Class Names for Consistency
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor MentorVerificationPanel and AdminMentorVerification components to utilize VerificationService for data fetching and streamline mentor filtering logic. Replace deprecated icons with FaSync for loading states and enhance mobile detection in AdminPortal for improved responsiveness.
+- Refactor AuthLock component to utilize hasRole utility for permission checks, enhancing role-based access control. Remove deprecated hasPermission function and improve user profile compatibility with legacy roles in userProfile utility.
+- Refactor ProtectedRoute and Update Type Definitions
+- Refactor DeveloperFeedbackModal and Enhance Feedback Form Functionality
+- Refactor MentorFeedbackModal and FeedbackPage for Improved Data Handling
+
+### 🚀 Performance Performance improvements
+- Enhance DeveloperFeedbackService with Logging and Mentor Retrieval Improvements
+- Enhance DeveloperFeedbackModal and MenteeDashboard with Role-Based Access Control
+
+### 🧪 Testing Test additions and improvements
+- Enhance AdminTestingFeedback with User Profile Integration
+- Enhance StatsTiles and AdminTestingFeedback for Improved Status Filtering
+
+### 🔧 Changed Maintenance tasks and chores
+- Update robots.txt for Bgr8 Network
+- Update sitemap.xml for Bgr8 Network
+- Enhance SEO and Meta Tags in index.html for Bgr8 Network
+- Update manifest.json for Bgr8 Network
+- Update main.tsx
+- Refine mobile detection logic in useIsMobile hook to improve accuracy. Update conditions to exclude iPads in desktop mode from being classified as mobile, ensuring a more reliable responsive design experience.
+- Enhance Feedback Ticket Management with Sequential IDs
+- Update Navbar to Change Admin Role Link to Committee Role
+- Enhance FeedbackAnalytics Component with Expanded Feedback Data and Improved Table Layout
+- Enhance EditTicketModal with Local State Management for Ticket Updates
+
+### 🗑️ Removed Removed features and cleanup
+- Delete generateUsers.ts
+
+**Total Changes:** 81 commits
+**Code Changes:** +28,697 insertions, -4,770 deletions
+
+---
 ## [v0.7.0-Eruption] - 2025-09-11
 
 ### 🔧 Pre-release
@@ -578,6 +684,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.7.1]: https://github.com/Hum2a/B8/releases/tag/v0.7.1
 [v0.7.0-Eruption]: https://github.com/Hum2a/B8/releases/tag/v0.7.0-Eruption
 [v0.6.13]: https://github.com/Hum2a/B8/releases/tag/v0.6.13
 [v0.6.12]: https://github.com/Bgr8Dev/Bgr8/releases/tag/v0.6.12

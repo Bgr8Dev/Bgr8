@@ -90,99 +90,6 @@
   font-weight: 500;
 }
 
-/* Stats Cards */
-.admin-testing-feedback__stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.stat-card.total {
-  border-left: 4px solid #3b82f6;
-}
-
-.stat-card.open {
-  border-left: 4px solid #10b981;
-}
-
-.stat-card.in-progress {
-  border-left: 4px solid #f59e0b;
-}
-
-.stat-card.resolved {
-  border-left: 4px solid #8b5cf6;
-}
-
-.stat-card.closed {
-  border-left: 4px solid #6b7280;
-}
-
-.stat-card.duplicate {
-  border-left: 4px solid #ef4444;
-}
-
-.stat-icon {
-  font-size: 2rem;
-  color: #64748b;
-}
-
-.stat-card.total .stat-icon {
-  color: #3b82f6;
-}
-
-.stat-card.open .stat-icon {
-  color: #10b981;
-}
-
-.stat-card.in-progress .stat-icon {
-  color: #f59e0b;
-}
-
-.stat-card.resolved .stat-icon {
-  color: #8b5cf6;
-}
-
-.stat-card.closed .stat-icon {
-  color: #6b7280;
-}
-
-.stat-card.duplicate .stat-icon {
-  color: #ef4444;
-}
-
-.stat-content h3 {
-  margin: 0 0 0.25rem 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #4b5563;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.stat-content p {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e293b;
-}
 
 /* Controls */
 .admin-testing-feedback__controls {
@@ -348,6 +255,13 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
 }
 
+.ticket-card.status-draft {
+  background: var(--status-background, #fefce8);
+  border-color: var(--status-border, #eab308);
+  border-left: 4px solid var(--status-primary, #eab308);
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.1);
+}
+
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -400,6 +314,11 @@
 .ticket-card.status-duplicate:hover {
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
   border-color: var(--status-primary, #ef4444);
+}
+
+.ticket-card.status-draft:hover {
+  box-shadow: 0 8px 25px rgba(234, 179, 8, 0.2);
+  border-color: var(--status-primary, #eab308);
 }
 
 .ticket-card__header {
@@ -471,6 +390,11 @@
   background: var(--status-light, #fee2e2);
 }
 
+.ticket-card.status-draft .ticket-id {
+  color: var(--status-dark, #a16207);
+  background: var(--status-light, #fef3c7);
+}
+
 .ticket-card__title h3 {
   margin: 0;
   font-size: 1.1rem;
@@ -503,6 +427,10 @@
   color: var(--status-text, #dc2626);
 }
 
+.ticket-card.status-draft .ticket-card__title h3 {
+  color: var(--status-text, #a16207);
+}
+
 
 .ticket-card__content {
   padding: 0.75rem 1.25rem 1rem;
@@ -513,6 +441,126 @@
   color: #4b5563;
   line-height: 1.5;
   font-size: 0.9rem;
+}
+
+.ticket-reporter {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.reporter-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.reporter-icon {
+  font-size: 1rem;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.reporter-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.reporter-name {
+  display: block;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.reporter-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border: 1px solid;
+}
+
+/* Specific role colors */
+.role-badge[data-role="admin"] {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.role-badge[data-role="developer"] {
+  background: #f0f9ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.role-badge[data-role="committee"] {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.role-badge[data-role="audit"] {
+  background: #fef3c7;
+  color: #d97706;
+  border-color: #fed7aa;
+}
+
+.role-badge[data-role="marketing"] {
+  background: #fdf2f8;
+  color: #db2777;
+  border-color: #fbcfe8;
+}
+
+.role-badge[data-role="vetting-officer"] {
+  background: #f3e8ff;
+  color: #9333ea;
+  border-color: #d8b4fe;
+}
+
+.role-badge[data-role="social-media"] {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.role-badge[data-role="outreach"] {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fed7aa;
+}
+
+.role-badge[data-role="events"] {
+  background: #fef7ff;
+  color: #c026d3;
+  border-color: #e9d5ff;
+}
+
+.role-badge[data-role="tester"] {
+  background: #ff6b35;
+  color: #ffffff;
+  border-color: #e55a2b;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+}
+
+/* Fallback for any unassigned roles */
+.role-badge:not([data-role]) {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
 }
 
 .ticket-tags {
@@ -742,23 +790,34 @@
   color: #1e293b;
 }
 
-.modal-close {
+.admin-testing-feedback .modal-close {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
-  background: #f1f5f9;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #4b5563;
+  color: #000000 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.modal-close:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+.admin-testing-feedback .modal-close:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.admin-testing-feedback .modal-close svg {
+  color: #000000 !important;
+}
+
+.admin-testing-feedback .modal-close:hover svg {
+  color: #111827 !important;
 }
 
 .modal-body {
@@ -1733,6 +1792,16 @@
   
   .ticket-dates {
     align-items: flex-start;
+  }
+  
+  .reporter-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .reporter-roles {
+    align-self: flex-start;
   }
   
   .modal-content {

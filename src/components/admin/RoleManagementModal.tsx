@@ -1,6 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaShieldAlt } from 'react-icons/fa';
+import { useAuth } from '../../hooks/useAuth';
+import { hasRole } from '../../utils/userProfile';
+import { Timestamp } from 'firebase/firestore';
 import './RoleManagementModal.css';
 
 interface UserData {
@@ -20,7 +23,9 @@ interface UserData {
     events: boolean;
     tester: boolean;
   };
-  dateCreated?: Date | string;
+  dateCreated: Timestamp;
+  lastLogin?: Date;
+  [key: string]: unknown;
 }
 
 interface Role {
@@ -48,7 +53,48 @@ export default function RoleManagementModal({
   pulsingRole,
   roles
 }: RoleManagementModalProps) {
+  const { userProfile } = useAuth();
+  
+  // Check if user has permission to manage roles
+  const canManageRoles = hasRole(userProfile, 'admin') || hasRole(userProfile, 'developer');
+  
   if (!isOpen || !selectedUser) return null;
+  
+  // Access control check
+  if (!canManageRoles) {
+    return createPortal(
+      <div className="role-modal-overlay" onClick={onClose}>
+        <div className="role-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="role-modal-header">
+            <h3>Access Denied</h3>
+            <button 
+              className="role-modal-close"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          <div className="role-modal-content">
+            <div className="access-denied-modal">
+              <div className="access-denied-icon">
+                <FaShieldAlt />
+              </div>
+              <h4>Insufficient Permissions</h4>
+              <p>You need administrator or developer privileges to manage user roles.</p>
+              <p>Please contact an administrator if you believe this is an error.</p>
+            </div>
+          </div>
+          <div className="role-modal-footer">
+            <button className="role-modal-btn" onClick={onClose}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
 
   return createPortal(
     <div className="role-modal-overlay" onClick={onClose}>

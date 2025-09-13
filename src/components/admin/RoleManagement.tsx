@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { firestore } from '../../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { useAuth } from '../../hooks/useAuth';
+import { hasRole } from '../../utils/userProfile';
 import { 
   FaUsers, 
   FaChartBar, 
@@ -124,6 +126,7 @@ const ROLES: RoleInfo[] = [
 ];
 
 export default function RoleManagement() {
+  const { userProfile } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -145,6 +148,9 @@ export default function RoleManagement() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [pulsingRole, setPulsingRole] = useState<string | null>(null);
+
+  // Check if user has permission to manage roles
+  const canManageRoles = hasRole(userProfile, 'admin') || hasRole(userProfile, 'developer');
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -334,6 +340,22 @@ export default function RoleManagement() {
       <div className="role-management-loading">
         <div className="loading-spinner"></div>
         <p>Loading users...</p>
+      </div>
+    );
+  }
+
+  // Access control check
+  if (!canManageRoles) {
+    return (
+      <div className="role-management-access-denied">
+        <div className="access-denied-content">
+          <div className="access-denied-icon">
+            <FaShieldAlt />
+          </div>
+          <h2>Access Denied</h2>
+          <p>You need administrator or developer privileges to access role management.</p>
+          <p>Please contact an administrator if you believe this is an error.</p>
+        </div>
       </div>
     );
   }
