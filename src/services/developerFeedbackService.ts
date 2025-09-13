@@ -7,6 +7,7 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
+import { UserProfile, hasRole } from '../utils/userProfile';
 
 export interface DeveloperMentor {
   mentorId: string;
@@ -140,7 +141,20 @@ export class DeveloperFeedbackService {
   }
 
   /**
-   * Check if developer mode is enabled (you can customize this logic)
+   * Check if developer mode is enabled for a specific user based on their role
+   */
+  static isDeveloperModeEnabledForUser(userProfile: UserProfile | null): boolean {
+    // Check if user has developer role
+    if (userProfile && hasRole(userProfile, 'developer')) {
+      return true;
+    }
+    
+    // Fallback to environment-based check for backward compatibility
+    return this.isDeveloperModeEnabled();
+  }
+
+  /**
+   * Check if developer mode is enabled (environment-based check for backward compatibility)
    */
   static isDeveloperModeEnabled(): boolean {
     // Check for environment variable, localStorage, or other indicators

@@ -18,7 +18,7 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
   currentUserProfile,
   onProfileEdit
 }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const [isProfileCardExpanded, setIsProfileCardExpanded] = useState(false);
   const [isBookingCardExpanded, setIsBookingCardExpanded] = useState(false);
   const [isFeedbackCardExpanded, setIsFeedbackCardExpanded] = useState(false);
@@ -57,13 +57,14 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
     };
 
     const checkDeveloperMode = () => {
-      const isDeveloperMode = DeveloperFeedbackService.isDeveloperModeEnabled();
+      // Check if user has developer role using the service method
+      const isDeveloperMode = DeveloperFeedbackService.isDeveloperModeEnabledForUser(userProfile);
       setDeveloperMode(isDeveloperMode);
     };
 
     loadFeedbackSummary();
     checkDeveloperMode();
-  }, [currentUser]);
+  }, [currentUser, userProfile]);
 
   return (
     <>

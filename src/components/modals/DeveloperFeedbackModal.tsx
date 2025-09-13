@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { DeveloperFeedbackService, DeveloperMentor } from '../../services/developerFeedbackService';
+import { hasRole } from '../../utils/userProfile';
 import { FaStar, FaTimes, FaUser, FaCode, FaSearch, FaToggleOn, FaToggleOff, FaCheck, FaArrowLeft } from 'react-icons/fa';
 import './DeveloperFeedbackModal.css';
 
@@ -13,7 +14,7 @@ export const DeveloperFeedbackModal: React.FC<DeveloperFeedbackModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const [mentors, setMentors] = useState<DeveloperMentor[]>([]);
   const [selectedMentor, setSelectedMentor] = useState<DeveloperMentor | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,9 +35,12 @@ export const DeveloperFeedbackModal: React.FC<DeveloperFeedbackModalProps> = ({
   const [learnings, setLearnings] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
 
+  // Check if user has developer role
+  const isDeveloper = hasRole(userProfile, 'developer');
+
   // Load mentors when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isDeveloper) {
       loadMentors();
     } else {
       // Reset state when modal closes
@@ -55,7 +59,7 @@ export const DeveloperFeedbackModal: React.FC<DeveloperFeedbackModalProps> = ({
       setLearnings('');
       setIsAnonymous(false);
     }
-  }, [isOpen]);
+  }, [isOpen, isDeveloper]);
 
   const loadMentors = async () => {
     try {
@@ -242,6 +246,38 @@ export const DeveloperFeedbackModal: React.FC<DeveloperFeedbackModalProps> = ({
   );
 
   if (!isOpen) return null;
+
+  // Check if user has developer role
+  if (!isDeveloper) {
+    return (
+      <div className="dev-fb-modal-overlay">
+        <div className="dev-fb-modal">
+          <div className="dev-fb-modal-header">
+            <div className="dev-fb-header-content">
+              <div className="dev-fb-header-title">
+                <FaCode className="dev-fb-header-icon" />
+                <h2>Developer Feedback</h2>
+              </div>
+              <button className="dev-fb-close-btn" onClick={onClose} title="Close modal">
+                <FaTimes />
+              </button>
+            </div>
+          </div>
+          <div className="dev-fb-modal-content">
+            <div className="dev-fb-access-denied">
+              <FaCode className="dev-fb-access-denied-icon" />
+              <h3>Access Denied</h3>
+              <p>You need developer privileges to access this feature.</p>
+              <p>Please contact an administrator if you believe this is an error.</p>
+              <button className="dev-fb-btn primary" onClick={onClose}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dev-fb-modal-overlay">
