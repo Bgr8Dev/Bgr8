@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { FaEdit, FaTimes, FaComments, FaDesktop, FaPlus, FaEye, FaDownload, FaTrash } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackCategory, FeedbackPriority, FeedbackStatus } from '../../types/feedback';
 import { detectScreenResolution } from '../../utils/screenResolution';
+import { downloadFile } from '../../utils/fileDownload';
 import CommentsSidebar from './CommentsSidebar';
+import ImageOverlay from './ImageOverlay';
 import './EditTicketModal.css';
 
 type TicketUpdateData = Omit<Partial<FeedbackTicket>, 'attachments'> & { attachments?: File[] };
@@ -28,6 +30,15 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [newAttachments, setNewAttachments] = useState<File[]>([]);
+  const [imageOverlay, setImageOverlay] = useState<{
+    isOpen: boolean;
+    imageUrl: string;
+    imageName: string;
+  }>({
+    isOpen: false,
+    imageUrl: '',
+    imageName: ''
+  });
 
   if (!isOpen || !ticket) return null;
 
@@ -136,6 +147,40 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
     // We can't directly update existing attachments in this modal
     // This would need to be handled by the parent component
     console.log('Remove attachment:', attachmentId, 'Updated attachments:', updatedAttachments);
+  };
+
+  const handleDownload = async (attachment: { url: string; name: string }) => {
+    try {
+      await downloadFile(attachment.url, attachment.name);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // The downloadFile function already handles fallback to opening in new tab
+    }
+  };
+
+  const handleView = (attachment: { url: string; name: string }) => {
+    const extension = attachment.name.split('.').pop()?.toLowerCase() || '';
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    
+    if (imageExtensions.includes(extension)) {
+      // Open image in overlay
+      setImageOverlay({
+        isOpen: true,
+        imageUrl: attachment.url,
+        imageName: attachment.name
+      });
+    } else {
+      // For non-image files, open in new tab
+      window.open(attachment.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const closeImageOverlay = () => {
+    setImageOverlay({
+      isOpen: false,
+      imageUrl: '',
+      imageName: ''
+    });
   };
 
   const detectResolution = () => {
@@ -514,23 +559,22 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                         </div>
                       </div>
                       <div className="attachment-actions">
-                        <a 
-                          href={attachment.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => handleView(attachment)}
                           className="attachment-link view"
-                          title="View/Download file"
+                          title="View file"
                         >
                           <FaEye />
-                        </a>
-                        <a 
-                          href={attachment.url} 
-                          download={attachment.name}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownload(attachment)}
                           className="attachment-link download"
                           title="Download file"
                         >
                           <FaDownload />
-                        </a>
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleRemoveExistingAttachment(attachment.id)}
@@ -619,6 +663,14 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
           onAddComment={onAddComment}
         />
       )}
+      
+      {/* Image Overlay */}
+      <ImageOverlay
+        isOpen={imageOverlay.isOpen}
+        imageUrl={imageOverlay.imageUrl}
+        imageName={imageOverlay.imageName}
+        onClose={closeImageOverlay}
+      />
     </div>
   );
 };

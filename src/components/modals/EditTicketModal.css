@@ -463,6 +463,16 @@
   background: #f0f9ff;
   color: #0369a1;
   border: 1px solid #bae6fd;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .attachment-link.view:hover {
@@ -476,6 +486,16 @@
   background: #f0fdf4;
   color: #16a34a;
   border: 1px solid #bbf7d0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .attachment-link.download:hover {

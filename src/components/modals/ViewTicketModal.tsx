@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { FaTimes, FaTag, FaEdit, FaCheckCircle, FaPause, FaTimesCircle, FaCopy, FaComments, FaEye, FaDownload } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackPriority } from '../../types/feedback';
+import { downloadFile } from '../../utils/fileDownload';
 import CommentsSidebar from './CommentsSidebar';
+import ImageOverlay from './ImageOverlay';
 import './ViewTicketModal.css';
 
 interface ViewTicketModalProps {
@@ -36,6 +38,15 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
   onAddComment
 }) => {
   const [showComments, setShowComments] = useState(false);
+  const [imageOverlay, setImageOverlay] = useState<{
+    isOpen: boolean;
+    imageUrl: string;
+    imageName: string;
+  }>({
+    isOpen: false,
+    imageUrl: '',
+    imageName: ''
+  });
 
   if (!isOpen || !ticket) return null;
 
@@ -71,6 +82,40 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
   const handleEdit = () => {
     onEdit(ticket);
     onClose();
+  };
+
+  const handleDownload = async (attachment: { url: string; name: string }) => {
+    try {
+      await downloadFile(attachment.url, attachment.name);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // The downloadFile function already handles fallback to opening in new tab
+    }
+  };
+
+  const handleView = (attachment: { url: string; name: string }) => {
+    const extension = attachment.name.split('.').pop()?.toLowerCase() || '';
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    
+    if (imageExtensions.includes(extension)) {
+      // Open image in overlay
+      setImageOverlay({
+        isOpen: true,
+        imageUrl: attachment.url,
+        imageName: attachment.name
+      });
+    } else {
+      // For non-image files, open in new tab
+      window.open(attachment.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const closeImageOverlay = () => {
+    setImageOverlay({
+      isOpen: false,
+      imageUrl: '',
+      imageName: ''
+    });
   };
 
   return (
@@ -176,23 +221,22 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
                       </div>
                     </div>
                     <div className="attachment-actions">
-                      <a 
-                        href={attachment.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => handleView(attachment)}
                         className="attachment-link view"
-                        title="View/Download file"
+                        title="View file"
                       >
                         <FaEye />
-                      </a>
-                      <a 
-                        href={attachment.url} 
-                        download={attachment.name}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(attachment)}
                         className="attachment-link download"
                         title="Download file"
                       >
                         <FaDownload />
-                      </a>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -367,6 +411,14 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
           onAddComment={onAddComment}
         />
       )}
+      
+      {/* Image Overlay */}
+      <ImageOverlay
+        isOpen={imageOverlay.isOpen}
+        imageUrl={imageOverlay.imageUrl}
+        imageName={imageOverlay.imageName}
+        onClose={closeImageOverlay}
+      />
     </div>
   );
 };
