@@ -296,7 +296,9 @@ export default function FeedbackAnalytics() {
   const exportToCSV = () => {
     const headers = [
       'ID', 'Feedback Type', 'Mentor Name', 'Mentee Name', 'Overall Rating',
-      'Strengths', 'Improvements', 'Learnings', 'Submitted At', 'Session Date',
+      'Helpfulness', 'Comfort', 'Support', 'Strengths', 'Improvements', 'Learnings',
+      'Submitted At', 'Session Date', 'Status', 'Is Anonymous', 'Is Developer Mode',
+      'Developer Mode Mentor ID', 'Booking ID', 'Mentor ID', 'Mentee ID', 'Submitted By',
       'Is Cal.com Booking', 'Cal.com Booking ID'
     ];
     
@@ -308,12 +310,23 @@ export default function FeedbackAnalytics() {
         feedback.mentorName || '',
         feedback.menteeName || '',
         feedback.overallRating,
+        feedback.helpfulness || '',
+        feedback.comfort || '',
+        feedback.support || '',
         `"${(feedback.strengths || '').replace(/"/g, '""')}"`,
         `"${(feedback.improvements || '').replace(/"/g, '""')}"`,
         `"${(feedback.learnings || '').replace(/"/g, '""')}"`,
         feedback.submittedAt.toISOString(),
         feedback.sessionDate?.toISOString() || '',
-        feedback.isCalComBooking,
+        feedback.status || '',
+        feedback.isAnonymous || false,
+        feedback.isDeveloperMode || false,
+        feedback.developerModeMentorId || '',
+        feedback.bookingId || '',
+        feedback.mentorId || '',
+        feedback.menteeId || '',
+        feedback.submittedBy || '',
+        feedback.isCalComBooking || false,
         feedback.calComBookingId || ''
       ].join(','))
     ].join('\n');
@@ -709,57 +722,139 @@ export default function FeedbackAnalytics() {
           </div>
         </div>
 
-        <div className="feedback-list">
-          {paginatedFeedback.map(feedback => (
-            <div 
-              key={feedback.id} 
-              className={`feedback-item ${selectedItems.has(feedback.id) ? 'selected' : ''} ${modalData?.id === feedback.id ? 'modal-active' : ''}`}
-              onClick={(e) => handleCardClick(feedback, e)}
-            >
-              <div className="feedback-header">
-                <div className="feedback-selection">
+        <div className="feedback-table-container">
+          <table className="feedback-table">
+            <thead>
+              <tr>
+                <th className="select-column">
                   <button 
-                    className="select-item-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectItem(feedback.id);
-                    }}
+                    className="select-all-btn"
+                    onClick={handleSelectAll}
+                    title={selectedItems.size === paginatedFeedback.length ? "Deselect All" : "Select All"}
                   >
-                    {selectedItems.has(feedback.id) ? <FaCheckSquare /> : <FaSquare />}
+                    {selectedItems.size === paginatedFeedback.length ? <FaCheckSquare /> : <FaSquare />}
                   </button>
-                </div>
-                
-                <div className="feedback-meta">
-                  <span className="feedback-type">{feedback.feedbackType}</span>
-                  <span className="feedback-date">
-                    {feedback.submittedAt.toLocaleDateString('en-GB')} at {feedback.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  {feedback.isCalComBooking && (
-                    <span className="calcom-badge">Cal.com</span>
-                  )}
-                </div>
-                
-                <div className="feedback-rating">
-                  {renderStarRating(feedback.overallRating, false)}
-                </div>
-                
-                <div className="feedback-actions">
-                  <div className="click-hint">
-                    Click to view details
-                  </div>
-                </div>
-              </div>
-              
-              <div className="feedback-summary">
-                <div className="session-info">
-                  <strong>Session:</strong> {feedback.mentorName} & {feedback.menteeName}
-                </div>
-                <div className="rating-display">
-                  {renderStarRating(feedback.overallRating)}
-                </div>
-              </div>
-            </div>
-          ))}
+                </th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Mentor</th>
+                <th>Mentee</th>
+                <th>Overall Rating</th>
+                <th>Helpfulness</th>
+                <th>Comfort</th>
+                <th>Support</th>
+                <th>Status</th>
+                <th>Anonymous</th>
+                <th>Dev Mode</th>
+                <th>Submitted</th>
+                <th>Session Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedFeedback.map(feedback => (
+                <tr 
+                  key={feedback.id} 
+                  className={`feedback-row ${selectedItems.has(feedback.id) ? 'selected' : ''} ${modalData?.id === feedback.id ? 'modal-active' : ''}`}
+                >
+                  <td className="select-column">
+                    <button 
+                      className="select-item-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectItem(feedback.id);
+                      }}
+                    >
+                      {selectedItems.has(feedback.id) ? <FaCheckSquare /> : <FaSquare />}
+                    </button>
+                  </td>
+                  <td className="id-cell">
+                    <span className="feedback-id" title={feedback.id}>
+                      {feedback.id.substring(0, 8)}...
+                    </span>
+                  </td>
+                  <td>
+                    <span className="feedback-type">{feedback.feedbackType}</span>
+                  </td>
+                  <td className="name-cell">
+                    <div className="name-info">
+                      <div className="name">{feedback.mentorName}</div>
+                      <div className="id-small">ID: {feedback.mentorId?.substring(0, 8)}...</div>
+                    </div>
+                  </td>
+                  <td className="name-cell">
+                    <div className="name-info">
+                      <div className="name">{feedback.menteeName}</div>
+                      <div className="id-small">ID: {feedback.menteeId?.substring(0, 8)}...</div>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.overallRating, false)}
+                      <span className="rating-number">{feedback.overallRating}</span>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.helpfulness || 0, false)}
+                      <span className="rating-number">{feedback.helpfulness || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.comfort || 0, false)}
+                      <span className="rating-number">{feedback.comfort || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.support || 0, false)}
+                      <span className="rating-number">{feedback.support || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${feedback.status}`}>
+                      {feedback.status || 'submitted'}
+                    </span>
+                  </td>
+                  <td className="boolean-cell">
+                    <span className={`boolean-badge ${feedback.isAnonymous ? 'true' : 'false'}`}>
+                      {feedback.isAnonymous ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td className="boolean-cell">
+                    <span className={`boolean-badge ${feedback.isDeveloperMode ? 'true' : 'false'}`}>
+                      {feedback.isDeveloperMode ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td className="date-cell">
+                    <div className="date-info">
+                      <div className="date">{feedback.submittedAt.toLocaleDateString('en-GB')}</div>
+                      <div className="time">{feedback.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                  </td>
+                  <td className="date-cell">
+                    <div className="date-info">
+                      <div className="date">{feedback.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}</div>
+                      <div className="time">{feedback.sessionDate?.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) || ''}</div>
+                    </div>
+                  </td>
+                  <td className="actions-cell">
+                    <button 
+                      className="view-details-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCardClick(feedback, e);
+                      }}
+                      title="View full details"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Pagination */}
@@ -843,9 +938,23 @@ export default function FeedbackAnalytics() {
               <table className="feedback-details-table">
                 <tbody>
                   <tr>
+                    <td className="table-label">Feedback ID</td>
+                    <td className="table-value table-id">{modalData.id}</td>
+                  </tr>
+                  
+                  <tr>
                     <td className="table-label">Feedback Type</td>
                     <td className="table-value">
                       <span className="feedback-type">{modalData.feedbackType}</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Status</td>
+                    <td className="table-value">
+                      <span className={`status-badge ${modalData.status}`}>
+                        {modalData.status || 'submitted'}
+                      </span>
                     </td>
                   </tr>
                   
@@ -858,7 +967,56 @@ export default function FeedbackAnalytics() {
                   </tr>
                   
                   <tr>
-                    <td className="table-label">Submitted</td>
+                    <td className="table-label">Helpfulness</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.helpfulness || 0, false)}
+                      <span className="rating-number">{modalData.helpfulness || 'N/A'}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Comfort</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.comfort || 0, false)}
+                      <span className="rating-number">{modalData.comfort || 'N/A'}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Support</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.support || 0, false)}
+                      <span className="rating-number">{modalData.support || 'N/A'}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentor Name</td>
+                    <td className="table-value">{modalData.mentorName}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentor ID</td>
+                    <td className="table-value table-id">{modalData.mentorId}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentee Name</td>
+                    <td className="table-value">{modalData.menteeName}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentee ID</td>
+                    <td className="table-value table-id">{modalData.menteeId}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Submitted By</td>
+                    <td className="table-value table-id">{modalData.submittedBy}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Submitted At</td>
                     <td className="table-value">
                       {modalData.submittedAt.toLocaleDateString('en-GB')} at {modalData.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                     </td>
@@ -867,26 +1025,54 @@ export default function FeedbackAnalytics() {
                   <tr>
                     <td className="table-label">Session Date</td>
                     <td className="table-value">
-                      {modalData.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}
+                      {modalData.sessionDate?.toLocaleDateString('en-GB') || 'N/A'} 
+                      {modalData.sessionDate && ` at ${modalData.sessionDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`}
                     </td>
                   </tr>
                   
                   <tr>
-                    <td className="table-label">Mentor</td>
-                    <td className="table-value">{modalData.mentorName}</td>
+                    <td className="table-label">Booking ID</td>
+                    <td className="table-value table-id">{modalData.bookingId || 'N/A'}</td>
                   </tr>
                   
                   <tr>
-                    <td className="table-label">Mentee</td>
-                    <td className="table-value">{modalData.menteeName}</td>
+                    <td className="table-label">Is Anonymous</td>
+                    <td className="table-value">
+                      <span className={`boolean-badge ${modalData.isAnonymous ? 'true' : 'false'}`}>
+                        {modalData.isAnonymous ? 'Yes' : 'No'}
+                      </span>
+                    </td>
                   </tr>
+                  
+                  <tr>
+                    <td className="table-label">Is Developer Mode</td>
+                    <td className="table-value">
+                      <span className={`boolean-badge ${modalData.isDeveloperMode ? 'true' : 'false'}`}>
+                        {modalData.isDeveloperMode ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                  </tr>
+                  
+                  {modalData.developerModeMentorId && (
+                    <tr>
+                      <td className="table-label">Developer Mode Mentor ID</td>
+                      <td className="table-value table-id">{modalData.developerModeMentorId}</td>
+                    </tr>
+                  )}
                   
                   {modalData.isCalComBooking && (
                     <tr>
-                      <td className="table-label">Booking Type</td>
+                      <td className="table-label">Is Cal.com Booking</td>
                       <td className="table-value">
-                        <span className="calcom-badge">Cal.com</span>
+                        <span className="calcom-badge">Yes</span>
                       </td>
+                    </tr>
+                  )}
+                  
+                  {modalData.calComBookingId && (
+                    <tr>
+                      <td className="table-label">Cal.com Booking ID</td>
+                      <td className="table-value table-id">{modalData.calComBookingId}</td>
                     </tr>
                   )}
                   
@@ -914,18 +1100,6 @@ export default function FeedbackAnalytics() {
                       <td className="table-value table-text">
                         {modalData.learnings}
                       </td>
-                    </tr>
-                  )}
-                  
-                  <tr>
-                    <td className="table-label">Feedback ID</td>
-                    <td className="table-value table-id">{modalData.id}</td>
-                  </tr>
-                  
-                  {modalData.calComBookingId && (
-                    <tr>
-                      <td className="table-label">Cal.com Booking ID</td>
-                      <td className="table-value table-id">{modalData.calComBookingId}</td>
                     </tr>
                   )}
                 </tbody>
