@@ -60,8 +60,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             <h3>Comments</h3>
             <span className="ticket-title">#{ticket.sequentialId} {ticket.title}</span>
           </div>
-          <button 
-            className="comments-close"
+          <button
+            className="comments-sidebar-close"
             onClick={onClose}
             title="Close comments"
             aria-label="Close comments"

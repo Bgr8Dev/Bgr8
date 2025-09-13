@@ -40,8 +40,8 @@ export const DeleteTicketModal: React.FC<DeleteTicketModalProps> = ({
       <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Delete Ticket</h3>
-          <button 
-            className="modal-close"
+          <button
+            className="delete-modal-close"
             onClick={onClose}
             title="Close modal"
             aria-label="Close modal"

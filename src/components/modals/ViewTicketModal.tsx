@@ -89,7 +89,7 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
               <span>Comments</span>
             </button>
             <button 
-              className="modal-close"
+              className="view-modal-close"
               onClick={onClose}
               title="Close modal"
               aria-label="Close modal"

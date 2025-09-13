@@ -380,7 +380,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               Auto Fill
             </button>
             <button 
-              className="modal-close"
+              className="create-modal-close"
               onClick={onClose}
               title="Close modal"
               aria-label="Close modal"

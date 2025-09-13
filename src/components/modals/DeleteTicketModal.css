@@ -44,23 +44,34 @@
   color: #1e293b;
 }
 
-.modal-close {
+.delete-modal-close {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
-  background: #f1f5f9;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #4b5563;
+  color: #000000 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.modal-close:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+.delete-modal-close:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.delete-modal-close svg {
+  color: #000000 !important;
+}
+
+.delete-modal-close:hover svg {
+  color: #111827 !important;
 }
 
 .modal-body {

@@ -173,7 +173,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <span>Comments</span>
             </button>
             <button 
-              className="modal-close"
+              className="edit-modal-close"
               onClick={onClose}
               title="Close modal"
               aria-label="Close modal"

@@ -63,26 +63,37 @@
   margin-left: auto;
 }
 
-.comments-close {
+.comments-sidebar-close {
   position: absolute;
   top: 20px;
   right: 20px;
   width: 36px;
   height: 36px;
-  border: none;
-  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #6b7280;
+  color: #000000 !important;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.comments-close:hover {
+.comments-sidebar-close:hover {
   background: #f3f4f6;
-  color: #374151;
+  border-color: #9ca3af;
+  color: #111827 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.comments-sidebar-close svg {
+  color: #000000 !important;
+}
+
+.comments-sidebar-close:hover svg {
+  color: #111827 !important;
 }
 
 /* Content Area */
