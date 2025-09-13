@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTimes, FaComments, FaDesktop, FaPlus, FaEye, FaDownload, FaTrash } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackCategory, FeedbackPriority, FeedbackStatus } from '../../types/feedback';
 import { detectScreenResolution } from '../../utils/screenResolution';
@@ -30,6 +30,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [newAttachments, setNewAttachments] = useState<File[]>([]);
+  const [localTicket, setLocalTicket] = useState<FeedbackTicket | null>(null);
   const [imageOverlay, setImageOverlay] = useState<{
     isOpen: boolean;
     imageUrl: string;
@@ -40,13 +41,22 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
     imageName: ''
   });
 
-  if (!isOpen || !ticket) return null;
+  // Update local ticket when prop changes
+  useEffect(() => {
+    if (ticket) {
+      setLocalTicket(ticket);
+    }
+  }, [ticket]);
+
+  if (!isOpen || !ticket || !localTicket) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!localTicket) return;
+    
     // Include new attachments in the update
-    const { attachments, ...ticketWithoutAttachments } = ticket;
+    const { attachments, ...ticketWithoutAttachments } = localTicket;
     void attachments; // Suppress unused variable warning
     const updateData: TicketUpdateData = {
       ...ticketWithoutAttachments
@@ -62,16 +72,12 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
   };
 
   const handleInputChange = (field: keyof FeedbackTicket, value: string | boolean | string[] | Date) => {
-    if (!ticket) return;
+    if (!localTicket) return;
     
-    const { attachments, ...ticketWithoutAttachments } = ticket;
-    void attachments; // Suppress unused variable warning
-    const updateData: TicketUpdateData = {
-      ...ticketWithoutAttachments,
+    setLocalTicket(prev => prev ? {
+      ...prev,
       [field]: value
-    };
-    
-    onUpdate(updateData);
+    } : null);
   };
 
   const formatFileSize = (bytes: number) => {
@@ -188,7 +194,10 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
       const resolutionInfo = detectScreenResolution();
       if (resolutionInfo.isDetected) {
         // Set the exact detected resolution, not just the matching option
-        handleInputChange('screenResolution', resolutionInfo.formatted);
+        setLocalTicket(prev => prev ? {
+          ...prev,
+          screenResolution: resolutionInfo.formatted
+        } : null);
         console.log(`Detected resolution: ${resolutionInfo.displayName}`);
       } else {
         console.warn('Failed to detect screen resolution');
@@ -199,7 +208,10 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
   };
 
   const handleResolutionSelect = (value: string) => {
-    handleInputChange('screenResolution', value);
+    setLocalTicket(prev => prev ? {
+      ...prev,
+      screenResolution: value
+    } : null);
   };
 
   return (
@@ -235,7 +247,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <input
                 id="edit-ticket-title"
                 type="text"
-                value={ticket.title}
+                value={localTicket.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="Brief description of the issue"
                 className="form-input"
@@ -246,7 +258,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label htmlFor="edit-ticket-description">Description *</label>
               <textarea
                 id="edit-ticket-description"
-                value={ticket.description}
+                value={localTicket.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Detailed description of the issue or feature request"
                 className="form-textarea"
@@ -259,7 +271,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-category">Category</label>
                 <select
                   id="edit-ticket-category"
-                  value={ticket.category}
+                  value={localTicket.category}
                   onChange={(e) => handleInputChange('category', e.target.value as FeedbackCategory)}
                   className="form-select"
                 >
@@ -275,7 +287,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-priority">Priority</label>
                 <select
                   id="edit-ticket-priority"
-                  value={ticket.priority}
+                  value={localTicket.priority}
                   onChange={(e) => handleInputChange('priority', e.target.value as FeedbackPriority)}
                   className="form-select"
                 >
@@ -292,7 +304,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label htmlFor="edit-ticket-status">Status</label>
               <select
                 id="edit-ticket-status"
-                value={ticket.status}
+                value={localTicket.status}
                 onChange={(e) => handleInputChange('status', e.target.value as FeedbackStatus)}
                 className="form-select"
               >
@@ -314,7 +326,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <input
                 id="edit-ticket-url"
                 type="url"
-                value={ticket.urlToPage || ''}
+                value={localTicket.urlToPage || ''}
                 onChange={(e) => handleInputChange('urlToPage', e.target.value)}
                 placeholder="https://example.com/page"
                 className="form-input"
@@ -326,7 +338,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-browser">Browser</label>
                 <select
                   id="edit-ticket-browser"
-                  value={ticket.browser || ''}
+                  value={localTicket.browser || ''}
                   onChange={(e) => handleInputChange('browser', e.target.value)}
                   className="form-select"
                 >
@@ -345,7 +357,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <input
                   id="edit-ticket-browser-version"
                   type="text"
-                  value={ticket.browserVersion || ''}
+                  value={localTicket.browserVersion || ''}
                   onChange={(e) => handleInputChange('browserVersion', e.target.value)}
                   placeholder="e.g., 120.0.6099.109"
                   className="form-input"
@@ -358,7 +370,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-os">Operating System</label>
                 <select
                   id="edit-ticket-os"
-                  value={ticket.operatingSystem || ''}
+                  value={localTicket.operatingSystem || ''}
                   onChange={(e) => handleInputChange('operatingSystem', e.target.value)}
                   className="form-select"
                 >
@@ -377,7 +389,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-device">Device Type</label>
                 <select
                   id="edit-ticket-device"
-                  value={ticket.deviceType}
+                  value={localTicket.deviceType}
                   onChange={(e) => handleInputChange('deviceType', e.target.value as 'desktop' | 'mobile' | 'tablet')}
                   className="form-select"
                 >
@@ -405,7 +417,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <input
                   id="edit-ticket-resolution"
                   type="text"
-                  value={ticket.screenResolution || ''}
+                  value={localTicket.screenResolution || ''}
                   onChange={(e) => handleInputChange('screenResolution', e.target.value)}
                   placeholder="e.g., 1920x1080 or select from dropdown"
                   className="form-input resolution-input"
@@ -435,7 +447,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label htmlFor="edit-ticket-steps">Steps to Reproduce</label>
               <textarea
                 id="edit-ticket-steps"
-                value={ticket.stepsToReproduce || ''}
+                value={localTicket.stepsToReproduce || ''}
                 onChange={(e) => handleInputChange('stepsToReproduce', e.target.value)}
                 placeholder="1. Go to the page...&#10;2. Click on the button...&#10;3. Observe the issue..."
                 className="form-textarea"
@@ -447,7 +459,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label htmlFor="edit-ticket-expected">Expected Behavior</label>
               <textarea
                 id="edit-ticket-expected"
-                value={ticket.expectedBehavior || ''}
+                value={localTicket.expectedBehavior || ''}
                 onChange={(e) => handleInputChange('expectedBehavior', e.target.value)}
                 placeholder="What should happen when following the steps?"
                 className="form-textarea"
@@ -459,7 +471,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label htmlFor="edit-ticket-actual">Actual Behavior</label>
               <textarea
                 id="edit-ticket-actual"
-                value={ticket.actualBehavior || ''}
+                value={localTicket.actualBehavior || ''}
                 onChange={(e) => handleInputChange('actualBehavior', e.target.value)}
                 placeholder="What actually happens instead?"
                 className="form-textarea"
@@ -472,7 +484,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-severity">Severity</label>
                 <select
                   id="edit-ticket-severity"
-                  value={ticket.severity}
+                  value={localTicket.severity}
                   onChange={(e) => handleInputChange('severity', e.target.value as 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker')}
                   className="form-select"
                 >
@@ -488,7 +500,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 <label htmlFor="edit-ticket-environment">Environment</label>
                 <select
                   id="edit-ticket-environment"
-                  value={ticket.environment}
+                  value={localTicket.environment}
                   onChange={(e) => handleInputChange('environment', e.target.value as 'development' | 'staging' | 'production')}
                   className="form-select"
                 >
@@ -504,7 +516,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <input
                 id="edit-ticket-testcase"
                 type="text"
-                value={ticket.testCaseId || ''}
+                value={localTicket.testCaseId || ''}
                 onChange={(e) => handleInputChange('testCaseId', e.target.value)}
                 placeholder="e.g., TC-001, Test-123"
                 className="form-input"
@@ -515,7 +527,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label className="checkbox-label">
                 <input
                   type="checkbox"
-                  checked={ticket.regression}
+                  checked={localTicket.regression}
                   onChange={(e) => handleInputChange('regression', e.target.checked)}
                   className="checkbox-input"
                 />
@@ -527,7 +539,7 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
               <label htmlFor="edit-ticket-workaround">Workaround</label>
               <textarea
                 id="edit-ticket-workaround"
-                value={ticket.workaround || ''}
+                value={localTicket.workaround || ''}
                 onChange={(e) => handleInputChange('workaround', e.target.value)}
                 placeholder="Any temporary workaround or solution?"
                 className="form-textarea"
@@ -536,11 +548,11 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
             </div>
 
             {/* Existing Attachments Section */}
-            {ticket.attachments && ticket.attachments.length > 0 && (
+            {localTicket.attachments && localTicket.attachments.length > 0 && (
               <div className="form-group">
-                <label>Existing Attachments ({ticket.attachments.length})</label>
+                <label>Existing Attachments ({localTicket.attachments.length})</label>
                 <div className="existing-attachments">
-                  {ticket.attachments.map(attachment => (
+                  {localTicket.attachments.map(attachment => (
                     <div key={attachment.id} className="existing-attachment">
                       <div className="attachment-info">
                         <div className="attachment-header">
