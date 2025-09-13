@@ -5,7 +5,7 @@
 > **Empowering individuals through community and mentorship**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.1.4-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.0-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -107,6 +107,28 @@
 | 🛠️ **Data Generation** | Comprehensive testing tools for profiles and availability | ✅ Live |
 | 🗑️ **Smart Cleanup** | Cascading deletes and bulk data management | ✅ Live |
 | 🎨 **Enhanced UI** | Improved styling and user experience | ✅ Live |
+| 🐛 **Advanced Feedback System** | Comprehensive testing feedback with file attachments | ✅ Live |
+| 🔐 **Role-Based Access Control** | Admin/Developer role management and permissions | ✅ Live |
+| 📎 **File Attachment System** | Firebase Storage integration for feedback tickets | ✅ Live |
+| 🖼️ **Image Overlay Viewer** | Full-screen image viewing with download capabilities | ✅ Live |
+| 📊 **Enhanced Analytics** | Detailed feedback analytics with CSV export | ✅ Live |
+
+### 🐛 Feedback & Testing System
+
+| Feature | Description | Status |
+|---------|-------------|:------:|
+| 🎫 **Ticket Management** | Create, edit, view, and delete feedback tickets | ✅ Live |
+| 📎 **File Attachments** | Upload images, videos, documents (max 10MB each) | ✅ Live |
+| 🏷️ **Smart Categorization** | Bug reports, feature requests, UI issues, performance | ✅ Live |
+| ⭐ **Priority System** | Low, Medium, High, Critical priority levels | ✅ Live |
+| 📊 **Status Tracking** | Draft, Open, In Progress, Resolved, Closed, Duplicate | ✅ Live |
+| 💬 **Comments System** | Internal and public comments with attachments | ✅ Live |
+| 👍 **Voting System** | Upvote/downvote tickets for prioritization | ✅ Live |
+| 🔍 **Advanced Search** | Search by title, description, tags, and metadata | ✅ Live |
+| 📈 **Analytics Dashboard** | Comprehensive feedback analytics with CSV export | ✅ Live |
+| 🖼️ **Image Viewer** | Full-screen image overlay with download functionality | ✅ Live |
+| 🎯 **Testing Fields** | Browser info, OS, device type, screen resolution | ✅ Live |
+| 🔄 **Auto-Detection** | Automatic screen resolution and browser detection | ✅ Live |
 
 ### 🔐 Security Features
 
@@ -118,6 +140,7 @@
 | 🛡️ **CSRF Protection** | Cross-site request forgery prevention | ✅ Live |
 | 🔐 **Password Security** | Strong password requirements (12+ chars) | ✅ Live |
 | 🗑️ **Cascading Deletes** | Maintains database integrity | ✅ Live |
+| 👥 **Role-Based Access** | Admin/Developer role management and permissions | ✅ Live |
 
 </details>
 
@@ -143,9 +166,14 @@ graph TD
     R[🛠️ Admin Tools] --> S[👥 Profile Generation]
     R --> T[📅 Availability Generation]
     R --> U[🗑️ Data Cleanup]
+    R --> Z[🐛 Feedback System]
     V[🛡️ Security] --> W[🔒 Rate Limiting]
     V --> X[🛡️ Input Validation]
     V --> Y[🔐 Password Security]
+    V --> AA[👥 Role-Based Access]
+    BB[📎 File Management] --> CC[🖼️ Image Overlay]
+    BB --> DD[📥 File Downloads]
+    BB --> EE[📦 Firebase Storage]
     
     style A fill:#61DAFB
     style E fill:#FFCA28
@@ -153,6 +181,7 @@ graph TD
     style L fill:#00E676
     style R fill:#FF9800
     style V fill:#E91E63
+    style BB fill:#9C27B0
 ```
 
 **Our platform leverages cutting-edge technologies for optimal performance and user experience.**
@@ -376,11 +405,17 @@ bgr8/
 │   │   │   ├── 👥 MentorManagement.tsx
 │   │   │   ├── 📋 Bookings management (BookingsTable, BookingsGrouped)
 │   │   │   ├── 📅 SessionsManagement.tsx
-│   │   │   └── 🔧 Admin utilities (AdminMentorModal, BookingDetailsModal)
+│   │   │   ├── 🔧 Admin utilities (AdminMentorModal, BookingDetailsModal)
+│   │   │   └── 🐛 Feedback system (RoleManagement, RoleManagementModal)
 │   │   ├── 🎬 animations/      # Animation components (LoadingSpinner)
 │   │   ├── 🎨 ui/              # UI components
-│   │   ├── 📝 feedback/        # Feedback components
+│   │   ├── 📝 feedback/        # Feedback components (StatsTiles)
 │   │   ├── 📅 sessions/        # Session-related components
+│   │   ├── 🧩 modals/          # Modal components
+│   │   │   ├── 🐛 Feedback modals (CreateTicketModal, ViewTicketModal, EditTicketModal)
+│   │   │   ├── 🖼️ ImageOverlay.tsx
+│   │   │   ├── 💬 CommentsSidebar.tsx
+│   │   │   └── 🗑️ DeleteTicketModal.tsx
 │   │   └── 🧠 widgets/         # Widget components
 │   │       └── 🎓 MentorAlgorithm/  # Mentor matching logic
 │   │           ├── 📅 availability/  # Availability management
@@ -404,13 +439,18 @@ bgr8/
 │   │   ├── 🔐 security.ts      # Security utilities
 │   │   ├── 🛡️ securityMonitor.ts # Security monitoring
 │   │   ├── 👤 userProfile.ts   # User profile utilities
-│   │   └── 🎨 iconMapping.tsx  # Icon mapping utilities
+│   │   ├── 🎨 iconMapping.tsx  # Icon mapping utilities
+│   │   ├── 📱 screenResolution.ts # Screen resolution detection
+│   │   ├── 📥 fileDownload.ts  # File download utilities
+│   │   └── 🔄 updatePermissions.ts # Permission management
 │   ├── 📝 types/              # TypeScript type definitions
 │   │   ├── 👤 user.ts          # User profile types
 │   │   ├── 📅 sessions.ts      # Session types
 │   │   ├── 📋 bookings.ts      # Booking types
 │   │   ├── 🏢 b8fc.ts          # Business types
-│   │   └── 👨‍💼 admin.ts         # Admin types
+│   │   ├── 👨‍💼 admin.ts         # Admin types
+│   │   ├── 🐛 feedback.ts      # Feedback system types
+│   │   └── 🔐 verification.ts  # Verification types
 │   ├── 🔥 firebase/           # Firebase configuration
 │   │   ├── 🔧 firebase.tsx     # Main Firebase config
 │   │   └── 🛠️ emulatorUtils.ts # Emulator utilities
@@ -424,9 +464,17 @@ bgr8/
 │   │   ├── 🏛️ religionOptions.ts
 │   │   ├── 🌍 ethnicityOptions.ts
 │   │   └── 🗺️ ukCounties.ts
+│   ├── 📊 data/              # Sample data and autofill
+│   │   └── 🎲 autofillData.ts # Test data for development
 │   ├── 🔧 config/             # Configuration files (security.ts)
 │   ├── 🎨 assets/             # Static assets (images, etc.)
-│   └── 🔧 services/           # Service layer (sessionsService.ts)
+│   └── 🔧 services/           # Service layer
+│       ├── 📅 sessionsService.ts
+│       ├── 🐛 feedbackService.ts
+│       ├── 👨‍💻 developerFeedbackService.ts
+│       ├── 👥 mentorFeedbackService.ts
+│       ├── 🔐 verificationService.ts
+│       └── 📊 pagePermissionsService.ts
 ├── 🌐 public/                 # Public static assets
 ├── 🔥 firebase_emulator/      # Firebase emulator configuration
 │   ├── 📄 README.md           # Emulator setup instructions
