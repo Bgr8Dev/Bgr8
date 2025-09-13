@@ -49,6 +49,45 @@
   }
 }
 
+/* Access Denied Modal */
+.access-denied-modal {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.access-denied-modal .access-denied-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e53e3e;
+  font-size: 1.5rem;
+}
+
+.access-denied-modal h4 {
+  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.access-denied-modal p {
+  color: #718096;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.access-denied-modal p:last-child {
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: #a0aec0;
+}
+
 .role-modal-header {
   display: flex;
   align-items: center;

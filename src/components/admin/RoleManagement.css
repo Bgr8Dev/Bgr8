@@ -46,6 +46,58 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Access Denied State */
+.role-management-access-denied {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.access-denied-content {
+  text-align: center;
+  max-width: 500px;
+  padding: 3rem 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.access-denied-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 2rem;
+  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e53e3e;
+  font-size: 2rem;
+}
+
+.access-denied-content h2 {
+  color: #2d3748;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.access-denied-content p {
+  color: #718096;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.access-denied-content p:last-child {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: #a0aec0;
+}
+
 /* Statistics Cards */
 .role-stats {
   display: grid;
