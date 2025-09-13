@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaTimes, FaTag, FaEdit, FaCheckCircle, FaPause, FaTimesCircle, FaCopy, FaComments } from 'react-icons/fa';
+import { FaTimes, FaTag, FaEdit, FaCheckCircle, FaPause, FaTimesCircle, FaCopy, FaComments, FaEye, FaDownload } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackPriority } from '../../types/feedback';
 import CommentsSidebar from './CommentsSidebar';
 import './ViewTicketModal.css';
@@ -20,6 +20,7 @@ const PRIORITY_COLORS = {
 };
 
 const STATUS_COLORS = {
+  draft: '#eab308',
   open: '#3b82f6',
   in_progress: '#f59e0b',
   resolved: '#10b981',
@@ -154,20 +155,45 @@ export const ViewTicketModal: React.FC<ViewTicketModalProps> = ({
           
           {ticket.attachments && ticket.attachments.length > 0 && (
             <div className="ticket-detail-section">
-              <h4>Attachments</h4>
+              <h4>Attachments ({ticket.attachments.length})</h4>
               <div className="ticket-detail-attachments">
                 {ticket.attachments.map(attachment => (
                   <div key={attachment.id} className="ticket-detail-attachment">
-                    <span className="attachment-name">{attachment.name}</span>
-                    <span className="attachment-size">{formatFileSize(attachment.size)}</span>
-                    <a 
-                      href={attachment.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="attachment-link"
-                    >
-                      View
-                    </a>
+                    <div className="attachment-info">
+                      <div className="attachment-header">
+                        <span className="attachment-name" title={attachment.name}>
+                          {attachment.name}
+                        </span>
+                        <span className={`attachment-type-badge ${attachment.type}`}>
+                          {attachment.type.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="attachment-meta">
+                        <span className="attachment-size">{formatFileSize(attachment.size)}</span>
+                        <span className="attachment-date">
+                          {formatDate(attachment.uploadedAt)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="attachment-actions">
+                      <a 
+                        href={attachment.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="attachment-link view"
+                        title="View/Download file"
+                      >
+                        <FaEye />
+                      </a>
+                      <a 
+                        href={attachment.url} 
+                        download={attachment.name}
+                        className="attachment-link download"
+                        title="Download file"
+                      >
+                        <FaDownload />
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>

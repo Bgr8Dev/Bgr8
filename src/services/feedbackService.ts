@@ -65,6 +65,26 @@ export class FeedbackService {
    */
   static async uploadFiles(files: File[], ticketId: string): Promise<FeedbackAttachment[]> {
     try {
+      // Validate files before upload
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+        'video/mp4', 'video/webm', 'video/ogg',
+        'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain', 'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/zip', 'application/x-zip-compressed'
+      ];
+
+      for (const file of files) {
+        if (file.size > maxFileSize) {
+          throw new Error(`File "${file.name}" is too large. Maximum size is 10MB.`);
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error(`File type "${file.type}" is not allowed for "${file.name}".`);
+        }
+      }
+
       const uploadPromises = files.map(async (file) => {
         const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const fileName = `${fileId}-${file.name}`;
@@ -80,7 +100,7 @@ export class FeedbackService {
           fileType = 'image';
         } else if (file.type.startsWith('video/')) {
           fileType = 'video';
-        } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text')) {
+        } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text') || file.type.includes('sheet') || file.type.includes('zip')) {
           fileType = 'document';
         }
         
@@ -374,10 +394,37 @@ export class FeedbackService {
   ): Promise<void> {
     try {
       const ticketRef = doc(firestore, FEEDBACK_COLLECTION, ticketId);
-      const updateFields: Record<string, FieldValue | string | number | boolean | string[] | undefined> = {
-        ...updateData,
+      
+      // Get current ticket to handle attachment updates
+      const currentTicket = await this.getTicket(ticketId);
+      if (!currentTicket) {
+        throw new Error('Ticket not found');
+      }
+
+      const updateFields: Record<string, FieldValue | string | number | boolean | string[] | FeedbackAttachment[] | undefined> = {
         updatedAt: serverTimestamp()
       };
+
+      // Add non-attachment fields to updateFields
+      const { attachments, ...otherUpdateData } = updateData;
+      Object.assign(updateFields, otherUpdateData);
+      
+      // Handle new attachments if provided
+      if (attachments && attachments.length > 0) {
+        try {
+          // Upload new attachments
+          const uploadedAttachments = await this.uploadFiles(attachments, ticketId);
+          
+          // Combine with existing attachments
+          const existingAttachments = currentTicket.attachments || [];
+          updateFields.attachments = [...existingAttachments, ...uploadedAttachments];
+        } catch (uploadError) {
+          console.error('Error uploading new attachments:', uploadError);
+          // Don't fail the entire operation if file upload fails
+          // Remove attachments from update fields so they don't get overwritten
+          delete updateFields.attachments;
+        }
+      }
 
       // If status is being changed to resolved or closed, set resolvedAt
       if (updateData.status === 'resolved' || updateData.status === 'closed') {

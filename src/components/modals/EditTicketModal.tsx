@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTimes, FaComments, FaDesktop } from 'react-icons/fa';
+import { FaEdit, FaTimes, FaComments, FaDesktop, FaPlus, FaEye, FaDownload, FaTrash } from 'react-icons/fa';
 import { FeedbackTicket, FeedbackCategory, FeedbackPriority, FeedbackStatus } from '../../types/feedback';
 import { detectScreenResolution } from '../../utils/screenResolution';
 import CommentsSidebar from './CommentsSidebar';
 import './EditTicketModal.css';
 
+type TicketUpdateData = Omit<Partial<FeedbackTicket>, 'attachments'> & { attachments?: File[] };
+
 interface EditTicketModalProps {
   isOpen: boolean;
   ticket: FeedbackTicket | null;
   onClose: () => void;
-  onUpdate: (ticketData: Partial<FeedbackTicket>) => void;
+  onUpdate: (ticketData: TicketUpdateData) => void;
   onAddComment?: (content: string, isInternal: boolean, attachments: File[]) => void;
 }
 
@@ -25,22 +27,115 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
   onAddComment
 }) => {
   const [showComments, setShowComments] = useState(false);
+  const [newAttachments, setNewAttachments] = useState<File[]>([]);
 
   if (!isOpen || !ticket) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(ticket);
+    
+    // Include new attachments in the update
+    const { attachments, ...ticketWithoutAttachments } = ticket;
+    void attachments; // Suppress unused variable warning
+    const updateData: TicketUpdateData = {
+      ...ticketWithoutAttachments
+    };
+    
+    if (newAttachments.length > 0) {
+      updateData.attachments = newAttachments;
+    }
+    
+    onUpdate(updateData);
+    setNewAttachments([]); // Clear new attachments
     onClose();
   };
 
   const handleInputChange = (field: keyof FeedbackTicket, value: string | boolean | string[] | Date) => {
     if (!ticket) return;
     
-    onUpdate({
-      ...ticket,
+    const { attachments, ...ticketWithoutAttachments } = ticket;
+    void attachments; // Suppress unused variable warning
+    const updateData: TicketUpdateData = {
+      ...ticketWithoutAttachments,
       [field]: value
-    });
+    };
+    
+    onUpdate(updateData);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    
+    // Validate files
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+      'video/mp4', 'video/webm', 'video/ogg',
+      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain', 'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/zip', 'application/x-zip-compressed'
+    ];
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (const file of files) {
+      if (file.size > maxFileSize) {
+        errors.push(`File "${file.name}" is too large. Maximum size is 10MB.`);
+        continue;
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        errors.push(`File type "${file.type}" is not allowed for "${file.name}".`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    // Show validation errors
+    if (errors.length > 0) {
+      console.warn('File validation errors:', errors);
+    }
+
+    if (validFiles.length > 0) {
+      setNewAttachments(prev => [...prev, ...validFiles]);
+    }
+
+    // Clear the input
+    event.target.value = '';
+  };
+
+  const handleRemoveNewFile = (indexToRemove: number) => {
+    setNewAttachments(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleRemoveExistingAttachment = (attachmentId: string) => {
+    if (!ticket) return;
+    
+    const updatedAttachments = ticket.attachments?.filter(att => att.id !== attachmentId) || [];
+    
+    // We can't directly update existing attachments in this modal
+    // This would need to be handled by the parent component
+    console.log('Remove attachment:', attachmentId, 'Updated attachments:', updatedAttachments);
   };
 
   const detectResolution = () => {
@@ -393,6 +488,107 @@ export const EditTicketModal: React.FC<EditTicketModalProps> = ({
                 className="form-textarea"
                 rows={2}
               />
+            </div>
+
+            {/* Existing Attachments Section */}
+            {ticket.attachments && ticket.attachments.length > 0 && (
+              <div className="form-group">
+                <label>Existing Attachments ({ticket.attachments.length})</label>
+                <div className="existing-attachments">
+                  {ticket.attachments.map(attachment => (
+                    <div key={attachment.id} className="existing-attachment">
+                      <div className="attachment-info">
+                        <div className="attachment-header">
+                          <span className="attachment-name" title={attachment.name}>
+                            {attachment.name}
+                          </span>
+                          <span className={`attachment-type-badge ${attachment.type}`}>
+                            {attachment.type.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="attachment-meta">
+                          <span className="attachment-size">{formatFileSize(attachment.size)}</span>
+                          <span className="attachment-date">
+                            {formatDate(attachment.uploadedAt)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="attachment-actions">
+                        <a 
+                          href={attachment.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="attachment-link view"
+                          title="View/Download file"
+                        >
+                          <FaEye />
+                        </a>
+                        <a 
+                          href={attachment.url} 
+                          download={attachment.name}
+                          className="attachment-link download"
+                          title="Download file"
+                        >
+                          <FaDownload />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingAttachment(attachment.id)}
+                          className="attachment-link remove"
+                          title="Remove attachment"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Attachments Section */}
+            <div className="form-group">
+              <label htmlFor="edit-ticket-attachments">Add New Attachments</label>
+              <div className="file-input-container">
+                <input
+                  id="edit-ticket-attachments"
+                  type="file"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="file-input"
+                  accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip"
+                />
+                <label htmlFor="edit-ticket-attachments" className="file-input-label">
+                  <FaPlus /> Choose Files
+                </label>
+                <span className="file-input-hint">
+                  Images (JPEG, PNG, GIF, WebP), Videos (MP4, WebM, OGG), Documents (PDF, DOC, DOCX, TXT, CSV, XLSX), Archives (ZIP) - max 10MB each
+                </span>
+              </div>
+              {newAttachments.length > 0 && (
+                <div className="new-attachments">
+                  <h5>New Files to Upload ({newAttachments.length})</h5>
+                  <div className="file-list">
+                    {newAttachments.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <div className="file-info">
+                          <span className="file-name">{file.name}</span>
+                          <span className="file-size">{formatFileSize(file.size)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveNewFile(index)}
+                          className="file-remove"
+                          title="Remove file"
+                          aria-label={`Remove ${file.name}`}
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           

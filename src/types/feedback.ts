@@ -148,6 +148,7 @@ export interface UpdateFeedbackTicketData {
   status?: FeedbackStatus;
   assignedTo?: string;
   tags?: string[];
+  attachments?: File[];
   // Testing-specific fields
   urlToPage?: string;
   browser?: string;

@@ -100,10 +100,49 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setFormData(prev => ({
-      ...prev,
-      attachments: [...prev.attachments, ...files]
-    }));
+    
+    // Validate files
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+      'video/mp4', 'video/webm', 'video/ogg',
+      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain', 'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/zip', 'application/x-zip-compressed'
+    ];
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (const file of files) {
+      if (file.size > maxFileSize) {
+        errors.push(`File "${file.name}" is too large. Maximum size is 10MB.`);
+        continue;
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        errors.push(`File type "${file.type}" is not allowed for "${file.name}".`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    // Show validation errors
+    if (errors.length > 0) {
+      console.warn('File validation errors:', errors);
+      // You could show these errors in the UI if needed
+    }
+
+    if (validFiles.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...validFiles]
+      }));
+    }
+
+    // Clear the input so the same file can be selected again if needed
+    event.target.value = '';
   };
 
   const handleRemoveFile = (indexToRemove: number) => {
@@ -481,7 +520,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
                 <FaPlus /> Choose Files
               </label>
               <span className="file-input-hint">
-                Images, videos, documents (max 10MB each)
+                Images (JPEG, PNG, GIF, WebP), Videos (MP4, WebM, OGG), Documents (PDF, DOC, DOCX, TXT, CSV, XLSX), Archives (ZIP) - max 10MB each
               </span>
             </div>
             {formData.attachments.length > 0 && (
