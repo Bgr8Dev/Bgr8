@@ -102,6 +102,14 @@ export class PagePermissionsService {
       isEnabled: true
     },
     {
+      pageId: 'ambassadors',
+      pageName: 'Ambassadors',
+      description: 'Manage ambassador applications and onboarding',
+      icon: 'FaHandshake',
+      allowedRoles: ['admin', 'committee', 'marketing'],
+      isEnabled: true
+    },
+    {
       pageId: 'settings',
       pageName: 'Settings',
       description: 'Configure system settings and permissions',
