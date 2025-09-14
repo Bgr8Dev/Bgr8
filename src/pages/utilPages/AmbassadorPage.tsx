@@ -3,7 +3,7 @@ import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import { useState as useStateHook, useEffect, useCallback } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -41,6 +41,7 @@ export default function AmbassadorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [applicationId, setApplicationId] = useState<string>('');
+  const [ambassadorCount, setAmbassadorCount] = useState(0);
   const [modal, setModal] = useState<{
     show: boolean;
     type: 'info' | 'warning' | 'error' | 'success';
@@ -89,6 +90,30 @@ export default function AmbassadorPage() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
+
+  // Fetch ambassador count
+  useEffect(() => {
+    const fetchAmbassadorCount = async () => {
+      try {
+        const usersCollection = collection(firestore, 'users');
+        const usersSnapshot = await getDocs(usersCollection);
+        
+        let count = 0;
+        usersSnapshot.forEach((docSnapshot) => {
+          const userData = docSnapshot.data();
+          if (userData.roles && userData.roles.ambassador === true) {
+            count++;
+          }
+        });
+        
+        setAmbassadorCount(count);
+      } catch (error) {
+        console.error('Error fetching ambassador count:', error);
+      }
+    };
+
+    fetchAmbassadorCount();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -231,7 +256,7 @@ export default function AmbassadorPage() {
           <p>Join our global network of passionate advocates making a real difference in communities worldwide</p>
           <div className="ambassador-hero-stats">
             <div className="ambassador-hero-stat">
-              <span className="stat-number">500+</span>
+              <span className="stat-number">{ambassadorCount > 0 ? ambassadorCount : '500+'}</span>
               <span className="stat-label">Active Ambassadors</span>
             </div>
             <div className="ambassador-hero-stat">

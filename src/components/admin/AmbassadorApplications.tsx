@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
 import { 
   FaEye, 
@@ -55,6 +55,7 @@ const AmbassadorApplications: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [ambassadorCount, setAmbassadorCount] = useState(0);
   const [notificationModal, setNotificationModal] = useState<{
     show: boolean;
     type: 'info' | 'warning' | 'error' | 'success';
@@ -89,6 +90,32 @@ const AmbassadorApplications: React.FC = () => {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Fetch count of users with ambassador role
+  useEffect(() => {
+    const fetchAmbassadorCount = async () => {
+      try {
+        console.log('🔍 Fetching ambassador count...');
+        const usersCollection = collection(firestore, 'users');
+        const usersSnapshot = await getDocs(usersCollection);
+        
+        let count = 0;
+        usersSnapshot.forEach((docSnapshot) => {
+          const userData = docSnapshot.data();
+          if (userData.roles && userData.roles.ambassador === true) {
+            count++;
+          }
+        });
+        
+        console.log(`✅ Found ${count} users with ambassador role`);
+        setAmbassadorCount(count);
+      } catch (error) {
+        console.error('❌ Error fetching ambassador count:', error);
+      }
+    };
+
+    fetchAmbassadorCount();
   }, []);
 
   useEffect(() => {
@@ -167,6 +194,10 @@ const AmbassadorApplications: React.FC = () => {
         
         console.log(`✅ Successfully added ambassador role to user: ${email} (UID: ${uid})`);
         showNotificationModal('success', 'Role Added Successfully', `Ambassador role has been successfully added to ${email}!`);
+        
+        // Update ambassador count
+        setAmbassadorCount(prev => prev + 1);
+        
         return true;
       } else {
         console.warn(`❌ User document not found for UID: ${uid} (${email})`);
@@ -300,7 +331,11 @@ const AmbassadorApplications: React.FC = () => {
           <div className="admin-stats">
             <div className="stat-item">
               <span className="stat-number">{applications.length}</span>
-              <span className="stat-label">Total</span>
+              <span className="stat-label">Applications</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{ambassadorCount}</span>
+              <span className="stat-label">Active Ambassadors</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">{applications.filter(app => app.status === 'pending').length}</span>
