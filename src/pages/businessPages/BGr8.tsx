@@ -315,6 +315,58 @@ export default function BGr8() {
         </div>
       </section>
 
+      {/* Ambassador Section */}
+      <section className="bgr8-ambassador-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-ambassador-content">
+            <div className="bgr8-ambassador-text">
+              <h3>Become a BGr8 Ambassador</h3>
+              <p>
+                Join our network of passionate advocates who are making a real difference in their communities. 
+                As a BGr8 Ambassador, you'll help spread our mission, connect with like-minded individuals, 
+                and create lasting positive change.
+              </p>
+              <div className="bgr8-ambassador-benefits">
+                <div className="bgr8-benefit-item">
+                  <div className="bgr8-benefit-icon">🌟</div>
+                  <h4>Make an Impact</h4>
+                  <p>Be part of meaningful change in communities worldwide</p>
+                </div>
+                <div className="bgr8-benefit-item">
+                  <div className="bgr8-benefit-icon">🤝</div>
+                  <h4>Build Connections</h4>
+                  <p>Connect with mentors, mentees, and fellow ambassadors</p>
+                </div>
+                <div className="bgr8-benefit-item">
+                  <div className="bgr8-benefit-icon">📈</div>
+                  <h4>Grow Personally</h4>
+                  <p>Develop leadership skills and expand your network</p>
+                </div>
+              </div>
+            </div>
+            <div className="bgr8-ambassador-cta">
+              <div className="bgr8-ambassador-card">
+                <h4>Ready to Make a Difference?</h4>
+                <p>Join our ambassador program and help us create positive change in communities around the world.</p>
+                <button className="bgr8-ambassador-btn">
+                  Become an Ambassador
+                </button>
+                <div className="bgr8-ambassador-stats">
+                  <div className="bgr8-ambassador-stat">
+                    <span className="bgr8-stat-number">500+</span>
+                    <span className="bgr8-stat-label">Active Ambassadors</span>
+                  </div>
+                  <div className="bgr8-ambassador-stat">
+                    <span className="bgr8-stat-number">50+</span>
+                    <span className="bgr8-stat-label">Countries</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Instagram Section */}
       <section className="bgr8-instagram-section">
         <div className="bgr8-content-wrapper">
