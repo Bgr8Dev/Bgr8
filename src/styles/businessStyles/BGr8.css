@@ -47,9 +47,9 @@
 
 .bgr8-hero-content {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 500px;
   gap: 60px;
-  max-width: 1400px;
+  max-width: 1500px;
   width: 100%;
   padding: 0 40px;
   align-items: center;
@@ -81,21 +81,31 @@
 .bgr8-scroll-button-container {
   background: var(--white);
   border-radius: var(--radius-lg);
-  padding: 30px;
+  padding: 40px;
   box-shadow: var(--shadow-xl);
   z-index: 2;
-  max-width: 400px;
+  max-width: 500px;
   width: 100%;
   text-align: center;
+  animation: gentleFloat 4s ease-in-out infinite, containerPulse 3s ease-in-out infinite, morphingEntrance 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-origin: center;
+  transition: all 0.3s ease;
+}
+
+.bgr8-scroll-button-container:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(59, 167, 242, 0.2), var(--shadow-xl);
+  animation-play-state: paused;
 }
 
 .bgr8-scroll-to-mentor-btn {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, #2988d4 50%, var(--accent) 100%);
+  background-size: 200% 200%;
   color: var(--white);
   border: none;
   border-radius: var(--radius-md);
-  padding: 16px 24px;
-  font-size: 1.1rem;
+  padding: 20px 32px;
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -104,14 +114,34 @@
   justify-content: center;
   gap: 12px;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   box-shadow: var(--shadow-md);
+  animation: gradientShift 3s ease-in-out infinite, buttonGlow 2s ease-in-out infinite alternate, buttonEntrance 1.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s both;
+  position: relative;
+  overflow: hidden;
+}
+
+.bgr8-scroll-to-mentor-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.bgr8-scroll-to-mentor-btn:hover::before {
+  left: 100%;
 }
 
 .bgr8-scroll-to-mentor-btn:hover {
-  background: var(--accent-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--accent-dark) 0%, #1e5f8a 50%, var(--accent-dark) 100%);
+  background-size: 200% 200%;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(59, 167, 242, 0.4);
+  animation-play-state: paused;
 }
 
 .bgr8-scroll-to-mentor-btn:active {
@@ -119,7 +149,7 @@
 }
 
 .bgr8-scroll-btn-text {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -141,11 +171,101 @@
   }
 }
 
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes containerPulse {
+  0%, 100% {
+    box-shadow: var(--shadow-xl);
+  }
+  50% {
+    box-shadow: 0 25px 50px rgba(59, 167, 242, 0.15), var(--shadow-xl);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes buttonGlow {
+  0% {
+    box-shadow: var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 8px 25px rgba(59, 167, 242, 0.3), var(--shadow-md);
+  }
+}
+
+@keyframes morphingEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-180deg) translateY(100px);
+    border-radius: 50%;
+    filter: blur(10px) hue-rotate(180deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg) translateY(0px);
+    border-radius: var(--radius-lg);
+    filter: blur(0px) hue-rotate(0deg);
+  }
+}
+
+@keyframes textFade {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes buttonEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotateX(90deg) translateZ(-100px);
+    filter: brightness(0.3) saturate(2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateX(0deg) translateZ(0px);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes textEntrance {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px) skewX(-15deg) scaleY(0.5);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px) skewX(0deg) scaleY(1);
+    filter: blur(0px);
+  }
+}
+
 .bgr8-scroll-btn-description {
   color: var(--gray-600);
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin: 0;
+  animation: textFade 4s ease-in-out infinite, textEntrance 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.6s both;
 }
 
 /* Donation Form */
@@ -703,9 +823,41 @@
   .bgr8-donation-form,
   .bgr8-discover-card,
   .bgr8-donate-btn,
-  .bgr8-cta-bar {
+  .bgr8-cta-bar,
+  .bgr8-scroll-button-container,
+  .bgr8-scroll-to-mentor-btn,
+  .bgr8-scroll-btn-arrow,
+  .bgr8-scroll-btn-description {
     animation: none;
     transition: none;
+  }
+  
+  .bgr8-scroll-to-mentor-btn::before {
+    display: none;
+  }
+  
+  /* Simple fade-in fallback for reduced motion */
+  .bgr8-scroll-button-container {
+    animation: simpleFadeIn 0.5s ease-out;
+  }
+  
+  .bgr8-scroll-to-mentor-btn {
+    animation: simpleFadeIn 0.5s ease-out 0.2s both;
+  }
+  
+  .bgr8-scroll-btn-description {
+    animation: simpleFadeIn 0.5s ease-out 0.4s both;
+  }
+}
+
+@keyframes simpleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -714,7 +866,8 @@
 .bgr8-amount-btn:focus,
 .bgr8-donate-btn:focus,
 .bgr8-amount-input:focus,
-.bgr8-cta-bar:focus {
+.bgr8-cta-bar:focus,
+.bgr8-scroll-to-mentor-btn:focus {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
