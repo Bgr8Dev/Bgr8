@@ -5,17 +5,45 @@ import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
+import InstagramFeed from '../../components/social/InstagramFeed';
+import { collection, getDocs } from 'firebase/firestore';
+import { firestore } from '../../firebase/firebase';
 
 export default function BGr8() {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
+  const [ambassadorCount, setAmbassadorCount] = useState(0);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fetch ambassador count
+  useEffect(() => {
+    const fetchAmbassadorCount = async () => {
+      try {
+        const usersCollection = collection(firestore, 'users');
+        const usersSnapshot = await getDocs(usersCollection);
+        
+        let count = 0;
+        usersSnapshot.forEach((docSnapshot) => {
+          const userData = docSnapshot.data();
+          if (userData.roles && userData.roles.ambassador === true) {
+            count++;
+          }
+        });
+        
+        setAmbassadorCount(count);
+      } catch (error) {
+        console.error('Error fetching ambassador count:', error);
+      }
+    };
+
+    fetchAmbassadorCount();
   }, []);
 
   const navigateToMentors = () => {
@@ -32,7 +60,7 @@ export default function BGr8() {
           <div className="bgr8-hero-overlay">
             <div className="bgr8-hero-content">
               <div className="bgr8-hero-text">
-                <h1>BGr8</h1>
+                <h1>Bgr8</h1>
                 <p className="bgr8-hero-subtitle">
                   From mentorship to community development, to long-term empowerment - 
                   will you start a regular gift to support communities at every stage of their journey?
@@ -86,6 +114,39 @@ export default function BGr8() {
           <div className="bgr8-cta-bar">
             <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
             <span className="bgr8-arrow">→</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Video Section */}
+      <section className="bgr8-video-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-video-header">
+            <h3>See BGr8 in Action</h3>
+            <p>Watch how your support transforms communities and creates lasting positive change</p>
+          </div>
+          
+          <div className="bgr8-video-container">
+            <div className="bgr8-video-placeholder">
+              <div className="bgr8-video-overlay">
+                <div className="bgr8-play-button">
+                  <div className="bgr8-play-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                  <div className="bgr8-play-ripple"></div>
+                </div>
+                <div className="bgr8-video-title">
+                  <h4>BGr8 Community Impact</h4>
+                  <span className="bgr8-video-duration">3:42</span>
+                </div>
+              </div>
+              <div className="bgr8-video-thumbnail">
+                <div className="bgr8-video-gradient"></div>
+                <div className="bgr8-video-pattern"></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -199,6 +260,159 @@ export default function BGr8() {
         </div>
       </section>
 
+      {/* About Us Section */}
+      <section className="bgr8-about-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-about-header">
+            <h3>About BGr8</h3>
+            <p>Empowering communities through mentorship, education, and sustainable development</p>
+          </div>
+          
+          <div className="bgr8-about-content">
+            <div className="bgr8-about-text">
+              <div className="bgr8-about-story">
+                <h4>Our Story</h4>
+                <p>
+                  Founded with a vision to create lasting positive change, BGr8 has been at the forefront 
+                  of community development and mentorship programs. We believe that sustainable growth 
+                  comes from empowering individuals and communities to reach their full potential.
+                </p>
+                <p>
+                  Through our comprehensive approach that spans from crisis prevention to long-term 
+                  empowerment, we've helped thousands of people build better futures for themselves 
+                  and their communities.
+                </p>
+              </div>
+              
+              <div className="bgr8-about-mission">
+                <h4>Our Mission</h4>
+                <p>
+                  To provide critical support from the first sign of need to full community transformation, 
+                  ensuring that no one is left behind in the journey toward sustainable development and 
+                  lasting positive change.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bgr8-about-stats">
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">10,000+</div>
+                <div className="bgr8-stat-label">Lives Impacted</div>
+              </div>
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">50+</div>
+                <div className="bgr8-stat-label">Communities Served</div>
+              </div>
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">5</div>
+                <div className="bgr8-stat-label">Years of Service</div>
+              </div>
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">95%</div>
+                <div className="bgr8-stat-label">Success Rate</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bgr8-about-values">
+            <h4>Our Values</h4>
+            <div className="bgr8-values-grid">
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">🤝</div>
+                <h5>Community First</h5>
+                <p>We prioritize the needs and voices of the communities we serve, ensuring our programs are culturally sensitive and locally relevant.</p>
+              </div>
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">🌱</div>
+                <h5>Sustainable Impact</h5>
+                <p>We focus on creating long-term, sustainable solutions that continue to benefit communities long after our direct involvement.</p>
+              </div>
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">🎓</div>
+                <h5>Education & Mentorship</h5>
+                <p>We believe in the power of education and mentorship to unlock potential and create opportunities for growth.</p>
+              </div>
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">💙</div>
+                <h5>Transparency</h5>
+                <p>We maintain complete transparency in our operations, ensuring donors and partners can see exactly how their support makes a difference.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ambassador Section */}
+      <section className="bgr8-ambassador-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-ambassador-content">
+            <div className="bgr8-ambassador-text">
+              <h3>Become a BGr8 Ambassador</h3>
+              <p>
+                Join our network of passionate advocates who are making a real difference in their communities. 
+                As a BGr8 Ambassador, you'll help spread our mission, connect with like-minded individuals, 
+                and create lasting positive change.
+              </p>
+              <div className="bgr8-ambassador-benefits">
+                <div className="bgr8-benefit-item">
+                  <div className="bgr8-benefit-icon">🌟</div>
+                  <h4>Make an Impact</h4>
+                  <p>Be part of meaningful change in communities worldwide</p>
+                </div>
+                <div className="bgr8-benefit-item">
+                  <div className="bgr8-benefit-icon">🤝</div>
+                  <h4>Build Connections</h4>
+                  <p>Connect with mentors, mentees, and fellow ambassadors</p>
+                </div>
+                <div className="bgr8-benefit-item">
+                  <div className="bgr8-benefit-icon">📈</div>
+                  <h4>Grow Personally</h4>
+                  <p>Develop leadership skills and expand your network</p>
+                </div>
+              </div>
+            </div>
+            <div className="bgr8-ambassador-cta">
+              <div className="bgr8-ambassador-card">
+                <h4>Ready to Make a Difference?</h4>
+                <p>Join our ambassador program and help us create positive change in communities around the world.</p>
+                <button 
+                  className="bgr8-ambassador-btn"
+                  onClick={() => navigate('/ambassador')}
+                >
+                  Become an Ambassador
+                </button>
+                <div className="bgr8-ambassador-stats">
+                  <div className="bgr8-ambassador-stat">
+                    <span className="bgr8-stat-number">{ambassadorCount > 0 ? ambassadorCount : '500+'}</span>
+                    <span className="bgr8-stat-label">Active Ambassadors</span>
+                  </div>
+                  <div className="bgr8-ambassador-stat">
+                    <span className="bgr8-stat-number">50+</span>
+                    <span className="bgr8-stat-label">Countries</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Instagram Section */}
+      <section className="bgr8-instagram-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-instagram-header">
+            <h3>Follow Our Journey</h3>
+            <p>See the real impact of your support through our latest updates and community stories</p>
+          </div>
+          <InstagramFeed 
+            accessToken={import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN}
+            maxPosts={6}
+            showProfile={true}
+            className="bgr8-instagram-feed"
+          />
+        </div>
+      </section>
+
       {/* Discover More Section */}
       <section className="bgr8-discover-section">
         <div className="bgr8-content-wrapper">
@@ -219,7 +433,7 @@ export default function BGr8() {
       {/* Contact Section */}
       <section className="bgr8-contact-section">
         <div className="bgr8-content-wrapper">
-          <h3>Get in Touch</h3>
+          <h3>Contact us</h3>
           <p>
             Have questions about our programs or want to learn how you can support our mission? 
             We'd love to hear from you.

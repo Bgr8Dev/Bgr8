@@ -1,0 +1,228 @@
+/* Terms of Service Page Styles */
+.terms-of-service-page {
+  min-height: 100vh;
+  background-color: var(--white);
+  color: var(--text);
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.terms-of-service-main {
+  padding-top: 80px; /* Account for navbar */
+  padding-bottom: 40px;
+}
+
+.terms-of-service-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  line-height: 1.7;
+}
+
+.terms-of-service-container h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.last-updated {
+  text-align: center;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  margin-bottom: 40px;
+  font-style: italic;
+}
+
+.terms-of-service-content {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+.terms-of-service-content h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 40px 0 20px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent);
+}
+
+.terms-of-service-content h2:first-of-type {
+  margin-top: 0;
+}
+
+.terms-of-service-content h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 30px 0 15px 0;
+}
+
+.terms-of-service-content h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 25px 0 10px 0;
+}
+
+.terms-of-service-content p {
+  margin-bottom: 15px;
+  color: var(--gray-700);
+  line-height: 1.7;
+}
+
+.terms-of-service-content ul {
+  margin: 15px 0;
+  padding-left: 20px;
+}
+
+.terms-of-service-content li {
+  margin-bottom: 10px;
+  color: var(--gray-700);
+}
+
+.terms-of-service-content ul ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.terms-of-service-content strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.terms-of-service-content a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.terms-of-service-content a:hover {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
+/* Special styling for numbered sections */
+.terms-of-service-content h2 {
+  counter-increment: section;
+}
+
+.terms-of-service-content h3 {
+  counter-increment: subsection;
+}
+
+.terms-of-service-content {
+  counter-reset: section subsection;
+}
+
+/* Table of Contents Styling */
+.terms-of-service-content ul li {
+  position: relative;
+}
+
+.terms-of-service-content ul li::marker {
+  color: var(--accent);
+}
+
+/* Special styling for nested lists */
+.terms-of-service-content ul li p {
+  margin: 5px 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .terms-of-service-main {
+    padding-top: 60px;
+  }
+
+  .terms-of-service-container {
+    padding: 20px 15px;
+  }
+
+  .terms-of-service-container h1 {
+    font-size: 2rem;
+  }
+
+  .terms-of-service-content {
+    padding: 25px 20px;
+  }
+
+  .terms-of-service-content h2 {
+    font-size: 1.5rem;
+    margin: 30px 0 15px 0;
+  }
+
+  .terms-of-service-content h3 {
+    font-size: 1.2rem;
+    margin: 25px 0 10px 0;
+  }
+
+  .terms-of-service-content h4 {
+    font-size: 1.1rem;
+    margin: 20px 0 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .terms-of-service-container {
+    padding: 15px 10px;
+  }
+
+  .terms-of-service-container h1 {
+    font-size: 1.8rem;
+  }
+
+  .terms-of-service-content {
+    padding: 20px 15px;
+  }
+
+  .terms-of-service-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .terms-of-service-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .terms-of-service-content h4 {
+    font-size: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .terms-of-service-page {
+    background: white;
+  }
+
+  .terms-of-service-content {
+    box-shadow: none;
+    border: none;
+  }
+
+  .terms-of-service-content a {
+    color: var(--text);
+    text-decoration: underline;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .terms-of-service-content a {
+    transition: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.terms-of-service-content a:focus {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}

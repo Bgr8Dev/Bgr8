@@ -16,6 +16,9 @@ import React from 'react';
 import Success from '../pages/Success';
 import Cancel from '../pages/Cancel';
 import { AuthLock } from '../components/auth/AuthLock';
+import PrivacyPolicy from '../pages/utilPages/PrivacyPolicy';
+import TermsOfService from '../pages/utilPages/TermsOfService';
+import AmbassadorPage from '../pages/utilPages/AmbassadorPage';
 
 export default function Navigation() {
   const { loading } = useAuth();
@@ -84,6 +87,9 @@ export default function Navigation() {
       <Route path="*" element={<NotFound />} /> {/* Handles undefined routes */}
       <Route path="/success" element={<Success />} />
       <Route path="/cancel" element={<Cancel />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/ambassador" element={<AmbassadorPage />} />
     </Routes>
   );
 }

@@ -1,10 +1,36 @@
 // src/components/Footer.tsx
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 import '../../styles/Footer.css';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const isBgr8Page = location.pathname.includes('/bgr8') || location.pathname === '/';
+  
+  const handleSmartNavigation = (section: string) => {
+    if (isBgr8Page) {
+      // If we're on the BGr8 page, scroll to the section
+      let selector = '';
+      if (section === 'about') {
+        selector = '.bgr8-about-section';
+      } else if (section === 'contact') {
+        selector = '.bgr8-contact-section';
+      }
+      
+      const element = document.querySelector(selector);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    } else {
+      // If we're not on the BGr8 page, navigate to it with a hash
+      const hash = section === 'about' ? '#about-us' : '#contact-us';
+      window.location.href = `/${hash}`;
+    }
+  };
   
   return (
     <footer className="footer">
@@ -32,9 +58,19 @@ export default function Footer() {
           <h4>Quick Links</h4>
           <nav>
             <Link to="/">Home</Link>
-            <Link to="/about">About Us</Link>
+            <button 
+              onClick={() => handleSmartNavigation('about')}
+              className="footer-nav-button"
+            >
+              About Us
+            </button>
             <Link to="/mentor">Mentor Portal</Link>
-            <Link to="/contact">Contact</Link>
+            <button 
+              onClick={() => handleSmartNavigation('contact')}
+              className="footer-nav-button"
+            >
+              Contact
+            </button>
           </nav>
         </div>
         
@@ -48,15 +84,6 @@ export default function Footer() {
           </nav>
         </div>
         
-        <div className="footer-section footer-contact">
-          <h4>Contact Us</h4>
-          <address>
-            <p>Online Mentoring Platform</p>
-            <p>Global Community</p>
-            <p>Email: support@bgr8.com</p>
-            <p>Phone: +44 123 456 7890</p>
-          </address>
-        </div>
       </div>
       
       <div className="footer-bottom">
