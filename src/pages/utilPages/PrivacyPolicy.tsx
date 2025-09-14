@@ -3,7 +3,7 @@ import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import { useState, useEffect } from 'react';
-import './PrivacyPolicy.css';
+import '../../styles/PrivacyPolicy.css';
 
 export default function PrivacyPolicy() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

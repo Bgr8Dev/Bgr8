@@ -14,7 +14,7 @@ import {
   FaTiktok, 
   FaYoutube 
 } from 'react-icons/fa';
-import './AmbassadorPage.css';
+import '../../styles/AmbassadorPage.css';
 
 export default function AmbassadorPage() {
   const { currentUser, loading } = useAuth();
