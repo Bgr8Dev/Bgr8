@@ -5,6 +5,14 @@ import Footer from '../../components/ui/Footer';
 import { useState as useStateHook, useEffect } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
+import { 
+  FaInstagram, 
+  FaLinkedin, 
+  FaTwitter, 
+  FaFacebook, 
+  FaTiktok, 
+  FaYoutube 
+} from 'react-icons/fa';
 import './AmbassadorPage.css';
 
 export default function AmbassadorPage() {
@@ -18,7 +26,14 @@ export default function AmbassadorPage() {
     experience: '',
     motivation: '',
     availability: '',
-    socialMedia: '',
+    socialMedia: {
+      instagram: { enabled: false, handle: '' },
+      linkedin: { enabled: false, handle: '' },
+      twitter: { enabled: false, handle: '' },
+      facebook: { enabled: false, handle: '' },
+      tiktok: { enabled: false, handle: '' },
+      youtube: { enabled: false, handle: '' }
+    },
     referral: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,8 +54,72 @@ export default function AmbassadorPage() {
     }));
   };
 
+  const handleSocialMediaToggle = (platform: string) => {
+    setFormData(prev => ({
+      ...prev,
+      socialMedia: {
+        ...prev.socialMedia,
+        [platform]: {
+          ...prev.socialMedia[platform as keyof typeof prev.socialMedia],
+          enabled: !prev.socialMedia[platform as keyof typeof prev.socialMedia].enabled,
+          handle: !prev.socialMedia[platform as keyof typeof prev.socialMedia].enabled 
+            ? prev.socialMedia[platform as keyof typeof prev.socialMedia].handle 
+            : ''
+        }
+      }
+    }));
+  };
+
+  const handleSocialMediaHandleChange = (platform: string, handle: string) => {
+    setFormData(prev => ({
+      ...prev,
+      socialMedia: {
+        ...prev.socialMedia,
+        [platform]: {
+          ...prev.socialMedia[platform as keyof typeof prev.socialMedia],
+          handle: handle
+        }
+      }
+    }));
+  };
+
+  const isAtLeastOneSocialMediaSelected = () => {
+    return Object.values(formData.socialMedia).some(platform => platform.enabled);
+  };
+
+  const getSocialMediaIcon = (platform: string) => {
+    switch (platform) {
+      case 'instagram': return FaInstagram;
+      case 'linkedin': return FaLinkedin;
+      case 'twitter': return FaTwitter;
+      case 'facebook': return FaFacebook;
+      case 'tiktok': return FaTiktok;
+      case 'youtube': return FaYoutube;
+      default: return FaInstagram;
+    }
+  };
+
+  const getSocialMediaColor = (platform: string) => {
+    switch (platform) {
+      case 'instagram': return '#E4405F';
+      case 'linkedin': return '#0077B5';
+      case 'twitter': return '#1DA1F2';
+      case 'facebook': return '#1877F2';
+      case 'tiktok': return '#000000';
+      case 'youtube': return '#FF0000';
+      default: return '#6B7280';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that at least one social media platform is selected
+    if (!isAtLeastOneSocialMediaSelected()) {
+      alert('Please select at least one social media platform.');
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitStatus('idle');
     
@@ -72,7 +151,14 @@ export default function AmbassadorPage() {
         experience: '',
         motivation: '',
         availability: '',
-        socialMedia: '',
+        socialMedia: {
+          instagram: { enabled: false, handle: '' },
+          linkedin: { enabled: false, handle: '' },
+          twitter: { enabled: false, handle: '' },
+          facebook: { enabled: false, handle: '' },
+          tiktok: { enabled: false, handle: '' },
+          youtube: { enabled: false, handle: '' }
+        },
         referral: ''
       });
     } catch (error) {
@@ -327,15 +413,46 @@ export default function AmbassadorPage() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="socialMedia">Social Media Handles</label>
-                  <input
-                    type="text"
-                    id="socialMedia"
-                    name="socialMedia"
-                    value={formData.socialMedia}
-                    onChange={handleInputChange}
-                    placeholder="Instagram, LinkedIn, Twitter, etc."
-                  />
+                  <label>Social Media Presence *</label>
+                  <p className="social-media-description">Select the platforms you're active on and provide your handles:</p>
+                  
+                  <div className="social-media-grid">
+                    {Object.entries(formData.socialMedia).map(([platform, data]) => (
+                      <div key={platform} className={`social-media-platform ${data.enabled ? 'platform-selected' : ''}`}>
+                        <div className="platform-checkbox-container">
+                          <input
+                            type="checkbox"
+                            id={`social-${platform}`}
+                            checked={data.enabled}
+                            onChange={() => handleSocialMediaToggle(platform)}
+                            className="custom-checkbox"
+                          />
+                          <label htmlFor={`social-${platform}`} className="platform-label">
+                            <div className="platform-icon" style={{ color: getSocialMediaColor(platform) }}>
+                              {React.createElement(getSocialMediaIcon(platform))}
+                            </div>
+                            <span className="platform-name">{platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+                          </label>
+                        </div>
+                        
+                        {data.enabled && (
+                          <div className="platform-handle">
+                            <input
+                              type="text"
+                              placeholder={`@your${platform}handle`}
+                              value={data.handle}
+                              onChange={(e) => handleSocialMediaHandleChange(platform, e.target.value)}
+                              className="handle-input"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {!isAtLeastOneSocialMediaSelected() && (
+                    <p className="validation-message">⚠️ Please select at least one social media platform</p>
+                  )}
                 </div>
 
                 <div className="form-group">
