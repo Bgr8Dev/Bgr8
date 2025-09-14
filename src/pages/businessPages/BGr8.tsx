@@ -351,7 +351,7 @@ export default function BGr8() {
       {/* Contact Section */}
       <section className="bgr8-contact-section">
         <div className="bgr8-content-wrapper">
-          <h3>Get in Touch</h3>
+          <h3>Contact us</h3>
           <p>
             Have questions about our programs or want to learn how you can support our mission? 
             We'd love to hear from you.
