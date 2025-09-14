@@ -7,6 +7,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.7.2-Ambassadors] - 2025-09-14
+
+### 🔧 Pre-release
+**Release Name:** Ambassadors
+
+### ✨ Added New features and enhancements
+- Add Testing-Specific Fields to AdminTestingFeedback Component
+- Add Modals for Ticket Management in AdminTestingFeedback Component
+- Enhance CreateTicketModal with Validation and Error Handling
+- Add Screen Resolution Detection to Ticket Modals
+- Implement Draft Saving Functionality in CreateTicketModal
+- Enhance CreateTicketModal with Autofill Feature and Async Submission
+- Refactor CreateTicketModal to Use Random Autofill Data
+- Add StatsTiles Component for Feedback Statistics Display
+- Refactor CreateTicketModal CSS for Improved Checkbox Styling
+- Add Developer and Mentor Feedback Modals with Styling and Functionality
+- Enhance FeedbackAnalytics Component with Advanced Filtering and Sorting Features
+- Refactor FeedbackAnalytics Component to Implement Modal for Feedback Details
+- Implement Role-Based Access Control in Role Management
+- Implement Image Overlay and File Download Functionality in Ticket Modals
+- Add Instagram API Integration and Setup Documentation
+- Enhance BGr8 Page with New Sections and Instagram Feed Integration
+- Refactor Footer Component by Removing Contact Section and Adding useLocation Hook
+- Implement Smart Navigation in Footer Component
+- Add Privacy Policy Page and Navigation Route
+- Add Terms of Service Page and Update Navigation
+- Add Ambassador Section to BGr8 Page
+- Add Ambassador Page and Update Navigation
+- Add Social Media Integration to Ambassador Page
+- Add Ambassador Applications Management Component
+- Implement Ambassador Role Management and Update User Profiles
+- Add Tooltip Functionality and User ID Management in Ambassador Applications
+- Implement Notification Modal in Ambassador Components
+- Implement Ambassador Count Fetching Across Components
+- Refactor CSS Imports and Add New Styles for Landing, Privacy Policy, and Terms of Service Pages
+- Add Sessions Management Component with Enhanced Styling and Functionality
+- Add Instagram API Integration Setup Guide and Professionalization Roadmap
+- Add AdminTestingFeedback User Guide
+- Add Admin Portal Overview Documentation
+- Add Ambassador Program Section to README.md
+- Enhance Accessibility Features in Settings Component
+
+### 🐛 Fixed Bug fixes and improvements
+- Refactor Error Handling in MentorFeedbackService and Update Screen Resolution Comments
+- Fix header casing in BGr8 component from "BGr8" to "Bgr8" for consistency.
+
+### 📚 Documentation Documentation updates
+- Enhance CommentsSidebar Component with Modern Styles and Functionality
+- Enhance Edit and View Ticket Modals with Comments Functionality
+- Enhance Admin Portal Documentation with User Guide and API Integration Details
+
+### 🎨 Changed Code style and formatting changes
+- Enhance Ticket Modals with File Attachment Validation and Improved UI
+- Refactor Modal Close Button Styles and Class Names for Consistency
+- Enhance BGr8 CSS Styles with Improved Layout and Animation Effects
+- Refactor Settings Component and Styles for Consistency
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor DeveloperFeedbackModal and Enhance Feedback Form Functionality
+- Refactor MentorFeedbackModal and FeedbackPage for Improved Data Handling
+- Refactor Firebase Integration in Ambassador Page
+
+### 🚀 Performance Performance improvements
+- Enhance DeveloperFeedbackService with Logging and Mentor Retrieval Improvements
+- Enhance DeveloperFeedbackModal and MenteeDashboard with Role-Based Access Control
+
+### 🧪 Testing Test additions and improvements
+- Enhance AdminTestingFeedback with User Profile Integration
+- Enhance StatsTiles and AdminTestingFeedback for Improved Status Filtering
+
+### 🔧 Changed Maintenance tasks and chores
+- Update Navbar to Change Admin Role Link to Committee Role
+- Enhance FeedbackAnalytics Component with Expanded Feedback Data and Improved Table Layout
+- Enhance EditTicketModal with Local State Management for Ticket Updates
+- Update BGr8 Page Contact Section Heading for Clarity
+- Enhance Ambassador Applications Styling and Structure
+
+### 🛡️ Security Security improvements
+- Update Content Security Policy to Include Google User Content
+- Enhance Ambassador Page with Loading and Authentication States
+
+**Total Changes:** 58 commits
+**Code Changes:** +22,735 insertions, -3,445 deletions
+
+---
 ## [v0.7.1] - 2025-09-13
 
 ### 🐛 Patch Release
@@ -684,6 +769,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.7.2-Ambassadors]: https://github.com/Hum2a/B8/releases/tag/v0.7.2-Ambassadors
 [v0.7.1]: https://github.com/Hum2a/B8/releases/tag/v0.7.1
 [v0.7.0-Eruption]: https://github.com/Hum2a/B8/releases/tag/v0.7.0-Eruption
 [v0.6.13]: https://github.com/Hum2a/B8/releases/tag/v0.6.13
