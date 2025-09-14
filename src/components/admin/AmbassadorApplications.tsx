@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
 import { 
   FaEye, 
@@ -55,6 +55,22 @@ const AmbassadorApplications: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [notificationModal, setNotificationModal] = useState<{
+    show: boolean;
+    type: 'info' | 'warning' | 'error' | 'success';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+    confirmText?: string;
+    showCancel?: boolean;
+  }>({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'OK',
+    showCancel: false
+  });
 
   useEffect(() => {
     const q = query(
@@ -96,6 +112,29 @@ const AmbassadorApplications: React.FC = () => {
     setFilteredApplications(filtered);
   }, [applications, searchTerm, statusFilter]);
 
+  const showNotificationModal = (type: 'info' | 'warning' | 'error' | 'success', title: string, message: string, onConfirm?: () => void, confirmText = 'OK', showCancel = false) => {
+    setNotificationModal({
+      show: true,
+      type,
+      title,
+      message,
+      onConfirm,
+      confirmText,
+      showCancel
+    });
+  };
+
+  const hideNotificationModal = () => {
+    setNotificationModal(prev => ({ ...prev, show: false }));
+  };
+
+  const handleNotificationConfirm = () => {
+    if (notificationModal.onConfirm) {
+      notificationModal.onConfirm();
+    }
+    hideNotificationModal();
+  };
+
   const updateUserProfileWithAmbassadorRole = async (uid: string, email: string) => {
     try {
       console.log(`🔍 Updating user profile for UID: ${uid} (${email})`);
@@ -127,16 +166,16 @@ const AmbassadorApplications: React.FC = () => {
         });
         
         console.log(`✅ Successfully added ambassador role to user: ${email} (UID: ${uid})`);
-        alert(`✅ Ambassador role successfully added to ${email}!`);
+        showNotificationModal('success', 'Role Added Successfully', `Ambassador role has been successfully added to ${email}!`);
         return true;
       } else {
         console.warn(`❌ User document not found for UID: ${uid} (${email})`);
-        alert(`❌ User profile not found for ${email}. They may need to complete their profile setup.`);
+        showNotificationModal('warning', 'User Profile Not Found', `User profile not found for ${email}. They may need to complete their profile setup.`);
         return false;
       }
     } catch (error) {
       console.error('❌ Error updating user profile with ambassador role:', error);
-      alert(`❌ Error updating user profile: ${error}`);
+      showNotificationModal('error', 'Update Failed', `Error updating user profile: ${error}`);
       return false;
     }
   };
@@ -148,7 +187,7 @@ const AmbassadorApplications: React.FC = () => {
       // Find the application to get the email
       const application = applications.find(app => app.id === id);
       if (!application) {
-        alert('❌ Application not found!');
+        showNotificationModal('error', 'Application Not Found', 'The application could not be found. Please refresh the page and try again.');
         return;
       }
 
@@ -173,11 +212,11 @@ const AmbassadorApplications: React.FC = () => {
           console.warn(`⚠️ Application approved but failed to add ambassador role to ${application.email}`);
         }
       } else if (status === 'rejected') {
-        alert(`❌ Application rejected for ${application.email}`);
+        showNotificationModal('warning', 'Application Rejected', `Application has been rejected for ${application.email}.`);
       }
     } catch (error) {
       console.error('❌ Error updating application status:', error);
-      alert(`❌ Error updating application: ${error}`);
+      showNotificationModal('error', 'Update Failed', `Error updating application: ${error}`);
     }
   };
 
@@ -533,6 +572,49 @@ const AmbassadorApplications: React.FC = () => {
                 >
                   <FaTrash /> Delete
                   <span className="tooltip">Delete Forever</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Modal */}
+      {notificationModal.show && (
+        <div className="ambassador-modal-overlay" onClick={hideNotificationModal}>
+          <div className="ambassador-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className={`ambassador-modal-header ${notificationModal.type}`}>
+              <div className="modal-icon">
+                {notificationModal.type === 'success' && '✅'}
+                {notificationModal.type === 'error' && '❌'}
+                {notificationModal.type === 'warning' && '⚠️'}
+                {notificationModal.type === 'info' && 'ℹ️'}
+              </div>
+              <h3 className="modal-title">{notificationModal.title}</h3>
+              <button className="modal-close" onClick={hideNotificationModal}>
+                ×
+              </button>
+            </div>
+            
+            <div className="ambassador-modal-body">
+              <p className="modal-message">{notificationModal.message}</p>
+            </div>
+            
+            <div className="ambassador-modal-footer">
+              <div className="modal-actions">
+                {notificationModal.showCancel && (
+                  <button 
+                    className="modal-btn cancel-btn" 
+                    onClick={hideNotificationModal}
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button 
+                  className={`modal-btn ${notificationModal.type}-btn`} 
+                  onClick={handleNotificationConfirm}
+                >
+                  {notificationModal.confirmText}
                 </button>
               </div>
             </div>

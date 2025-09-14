@@ -41,10 +41,49 @@ export default function AmbassadorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [applicationId, setApplicationId] = useState<string>('');
+  const [modal, setModal] = useState<{
+    show: boolean;
+    type: 'info' | 'warning' | 'error' | 'success';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+    confirmText?: string;
+    showCancel?: boolean;
+  }>({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'OK',
+    showCancel: false
+  });
 
   const handleResize = useCallback(() => {
     setIsMobile(window.innerWidth < 768);
   }, [setIsMobile]);
+
+  const showModal = useCallback((type: 'info' | 'warning' | 'error' | 'success', title: string, message: string, onConfirm?: () => void, confirmText = 'OK', showCancel = false) => {
+    setModal({
+      show: true,
+      type,
+      title,
+      message,
+      onConfirm,
+      confirmText,
+      showCancel
+    });
+  }, []);
+
+  const hideModal = useCallback(() => {
+    setModal(prev => ({ ...prev, show: false }));
+  }, []);
+
+  const handleModalConfirm = useCallback(() => {
+    if (modal.onConfirm) {
+      modal.onConfirm();
+    }
+    hideModal();
+  }, [modal, hideModal]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -121,13 +160,13 @@ export default function AmbassadorPage() {
     
     // Check if user is authenticated
     if (!currentUser) {
-      alert('You must be logged in to submit an ambassador application.');
+      showModal('warning', 'Authentication Required', 'You must be logged in to submit an ambassador application.');
       return;
     }
     
     // Validate that at least one social media platform is selected
     if (!isAtLeastOneSocialMediaSelected()) {
-      alert('Please select at least one social media platform.');
+      showModal('warning', 'Social Media Required', 'Please select at least one social media platform to continue.');
       return;
     }
     
@@ -548,6 +587,49 @@ export default function AmbassadorPage() {
       </section>
 
       <Footer />
+
+      {/* Custom Modal */}
+      {modal.show && (
+        <div className="ambassador-modal-overlay" onClick={hideModal}>
+          <div className="ambassador-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className={`ambassador-modal-header ${modal.type}`}>
+              <div className="modal-icon">
+                {modal.type === 'success' && '✅'}
+                {modal.type === 'error' && '❌'}
+                {modal.type === 'warning' && '⚠️'}
+                {modal.type === 'info' && 'ℹ️'}
+              </div>
+              <h3 className="modal-title">{modal.title}</h3>
+              <button className="modal-close" onClick={hideModal}>
+                ×
+              </button>
+            </div>
+            
+            <div className="ambassador-modal-body">
+              <p className="modal-message">{modal.message}</p>
+            </div>
+            
+            <div className="ambassador-modal-footer">
+              <div className="modal-actions">
+                {modal.showCancel && (
+                  <button 
+                    className="modal-btn cancel-btn" 
+                    onClick={hideModal}
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button 
+                  className={`modal-btn ${modal.type}-btn`} 
+                  onClick={handleModalConfirm}
+                >
+                  {modal.confirmText}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
