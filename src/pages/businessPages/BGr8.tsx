@@ -6,17 +6,44 @@ import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
 import InstagramFeed from '../../components/social/InstagramFeed';
+import { collection, getDocs } from 'firebase/firestore';
+import { firestore } from '../../firebase/firebase';
 
 export default function BGr8() {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
+  const [ambassadorCount, setAmbassadorCount] = useState(0);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fetch ambassador count
+  useEffect(() => {
+    const fetchAmbassadorCount = async () => {
+      try {
+        const usersCollection = collection(firestore, 'users');
+        const usersSnapshot = await getDocs(usersCollection);
+        
+        let count = 0;
+        usersSnapshot.forEach((docSnapshot) => {
+          const userData = docSnapshot.data();
+          if (userData.roles && userData.roles.ambassador === true) {
+            count++;
+          }
+        });
+        
+        setAmbassadorCount(count);
+      } catch (error) {
+        console.error('Error fetching ambassador count:', error);
+      }
+    };
+
+    fetchAmbassadorCount();
   }, []);
 
   const navigateToMentors = () => {
@@ -348,12 +375,15 @@ export default function BGr8() {
               <div className="bgr8-ambassador-card">
                 <h4>Ready to Make a Difference?</h4>
                 <p>Join our ambassador program and help us create positive change in communities around the world.</p>
-                <button className="bgr8-ambassador-btn">
+                <button 
+                  className="bgr8-ambassador-btn"
+                  onClick={() => navigate('/ambassador')}
+                >
                   Become an Ambassador
                 </button>
                 <div className="bgr8-ambassador-stats">
                   <div className="bgr8-ambassador-stat">
-                    <span className="bgr8-stat-number">500+</span>
+                    <span className="bgr8-stat-number">{ambassadorCount > 0 ? ambassadorCount : '500+'}</span>
                     <span className="bgr8-stat-label">Active Ambassadors</span>
                   </div>
                   <div className="bgr8-ambassador-stat">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { usePagePermissions } from '../hooks/usePagePermissions';
 import { hasRole } from '../utils/userProfile';
-import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug, FaHandshake } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminSettings } from './adminPages/AdminSettings';
@@ -16,6 +16,7 @@ import FeedbackAnalytics from '../components/admin/FeedbackAnalytics';
 import { SessionsManagement } from '../components/admin/SessionsManagement';
 import { MobileAdminPortal } from '../components/admin/MobileAdminPortal';
 import RoleManagement from '../components/admin/RoleManagement';
+import AmbassadorApplications from '../components/admin/AmbassadorApplications';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 
@@ -95,6 +96,7 @@ export default function AdminPortal() {
                 'feedback': FaComments,
                 'testing-feedback': FaBug,
                 'sessions': FaCalendarAlt,
+                'ambassadors': FaHandshake,
                 'settings': FaCog
               };
               
@@ -124,6 +126,7 @@ export default function AdminPortal() {
         {canAccessPage('feedback') && activeSection === 'feedback' && <FeedbackAnalytics />}
         {canAccessPage('testing-feedback') && activeSection === 'testing-feedback' && <AdminTestingFeedback />}
         {canAccessPage('sessions') && activeSection === 'sessions' && <SessionsManagement />}
+        {canAccessPage('ambassadors') && activeSection === 'ambassadors' && <AmbassadorApplications />}
         {canAccessPage('settings') && activeSection === 'settings' && <AdminSettings />}
       </div>
     </div>

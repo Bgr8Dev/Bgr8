@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="src/assets/Bgr8_logo.png" alt="BGr8 Logo" width="300" height="auto">
+
 # 🌟 bgr8 Platform
 
 > **Empowering individuals through community and mentorship**
@@ -16,7 +18,7 @@
 
 **A focused mentoring and community platform, centered around the BGr8 initiative and powered by a unique MentorAlgorithm with advanced availability management and intelligent search capabilities.**
 
-[🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [🤝 Contributing](#-contributing) • [📄 License](#-license)
+[🚀 Quick Start](#-quick-start) • [🌟 Ambassador Program](#-ambassador-program) • [📖 Documentation](#-documentation) • [🤝 Contributing](#-contributing) • [📄 License](#-license)
 
 </div>
 
@@ -29,7 +31,9 @@
 
 - [🎯 Overview](#-overview)
 - [✨ Features](#-features)
+- [🌟 Ambassador Program](#-ambassador-program)
 - [🛠️ Tech Stack](#️-tech-stack)
+- [📖 Documentation](#-documentation)
 - [⚡ Quick Start](#-quick-start)
 - [📋 Prerequisites](#-prerequisites)
 - [🚀 Installation](#-installation)
@@ -60,6 +64,7 @@
 
 - 🤝 **Community Building** - Connect with like-minded individuals
 - 🎓 **Mentorship Programs** - Advanced algorithm-based matching with real-time availability
+- 🌟 **Ambassador Program** - Join our network of passionate advocates making a difference
 - 📈 **Personal Growth** - Structured learning and development
 - 🌍 **Diverse Network** - Inclusive and supportive environment
 - 🔍 **Smart Discovery** - Intelligent search and filtering system
@@ -78,6 +83,8 @@
 |---------|-------------|:------:|
 | 🌟 **BGr8 Community Hub** | Centralized community platform | ✅ Live |
 | 🤝 **Mentor Matching** | Advanced MentorAlgorithm system with real-time availability | ✅ Live |
+| 🌟 **Ambassador Program** | Join our network of passionate advocates | ✅ Live |
+| 📝 **Ambassador Applications** | Streamlined application process with admin management | ✅ Live |
 | 🔍 **Smart Search System** | Intelligent search with dropdown suggestions and filtering | ✅ Live |
 | 📅 **Cal.com Booking System** | Third-party calendar integration | ✅ Live |
 | 📅 **Availability Management** | Direct mentor availability creation and management | ✅ Live |
@@ -146,6 +153,75 @@
 
 ---
 
+## 🌟 Ambassador Program
+
+<div align="center">
+
+**Join our network of passionate advocates making a real difference in communities worldwide! 🌍**
+
+</div>
+
+### 🤝 What is the BGr8 Ambassador Program?
+
+The BGr8 Ambassador Program is our community-driven initiative that empowers passionate individuals to spread our mission of creating positive change through mentorship and community development.
+
+### ✨ Key Features
+
+| Feature | Description | Benefits |
+|---------|-------------|----------|
+| 🌟 **Community Advocacy** | Represent BGr8 in your local community | Build meaningful connections and make an impact |
+| 🤝 **Network Building** | Connect potential mentors and mentees | Expand your professional and personal network |
+| 📈 **Personal Growth** | Develop leadership and communication skills | Enhance your professional profile |
+| 🎯 **Event Organization** | Organize and participate in community events | Strengthen community bonds and visibility |
+| 💬 **Feedback & Insights** | Provide valuable feedback to improve our programs | Shape the future of mentorship |
+
+### 🚀 How to Become an Ambassador
+
+1. **📝 Apply Online**: Visit our [Ambassador Page](/ambassador) to submit your application
+2. **📋 Complete Application**: Fill out our comprehensive application form with:
+   - Personal information and experience
+   - Motivation and availability
+   - Social media presence (Instagram, LinkedIn, Twitter, Facebook, TikTok, YouTube)
+   - Location and community involvement
+3. **👥 Admin Review**: Our team reviews your application thoroughly
+4. **✅ Approval & Onboarding**: Get approved and receive your ambassador role
+5. **🌟 Start Making Impact**: Begin representing BGr8 in your community
+
+### 📊 Program Statistics
+
+- **500+ Active Ambassadors** across the globe
+- **50+ Countries** represented
+- **10,000+ Lives Impacted** through ambassador efforts
+- **Real-time Tracking** of ambassador activities and impact
+
+### 🎯 Ambassador Responsibilities
+
+- **Share BGr8's Mission**: Spread awareness about our platform and values
+- **Connect People**: Introduce potential mentors and mentees to our platform
+- **Organize Events**: Plan and participate in community events and activities
+- **Provide Feedback**: Share insights to help improve our programs
+- **Professional Representation**: Represent BGr8 professionally in your community
+
+### 💡 Benefits of Being an Ambassador
+
+- **🌟 Make an Impact**: Create meaningful change in your community
+- **🤝 Build Connections**: Connect with mentors, mentees, and fellow ambassadors
+- **📈 Personal Growth**: Develop leadership and communication skills
+- **🌍 Global Network**: Join a worldwide network of passionate advocates
+- **📚 Learning Opportunities**: Access to exclusive resources and training
+
+### 🔧 Admin Management
+
+Our comprehensive admin system allows administrators to:
+- **Review Applications**: Thoroughly evaluate ambassador applications
+- **Track Statistics**: Monitor active ambassadors vs. applications
+- **Manage Approvals**: Approve/reject applications with automatic role assignment
+- **Monitor Impact**: Track ambassador activities and community engagement
+
+*Learn more about admin management in our [Admin Portal Overview](docs/ADMIN_PORTAL_OVERVIEW.md)*
+
+---
+
 ## 🛠️ Tech Stack
 
 <div align="center">
@@ -187,6 +263,27 @@ graph TD
 **Our platform leverages cutting-edge technologies for optimal performance and user experience.**
 
 </div>
+
+---
+
+## 📖 Documentation
+
+### 🏢 Admin Documentation
+- [🏢 **Admin Portal Overview**](docs/ADMIN_PORTAL_OVERVIEW.md) - Complete admin portal guide and features
+- [🐛 **Testing Feedback System**](docs/ADMIN_TESTING_FEEDBACK_GUIDE.md) - Detailed feedback management guide
+- [⚡ **Admin Quick Reference**](docs/ADMIN_QUICK_REFERENCE.md) - Quick reference for common admin tasks
+
+### 🛠️ Technical Documentation
+- [📋 Changelog](CHANGELOG.md) - Detailed version history and updates
+- [🤝 Contributing Guide](CONTRIBUTING.md) - How to contribute to the project
+- [🔒 Security Policy](SECURITY.md) - Security guidelines and reporting
+- [📄 License](LICENSE) - MIT License details
+
+### 📚 Additional Resources
+- [🏗️ Architecture Overview](docs/ARCHITECTURE.md) - System architecture and design decisions
+- [🔧 Development Setup](docs/DEVELOPMENT_SETUP.md) - Detailed development environment setup
+- [🚀 Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
+- [📊 API Documentation](docs/API.md) - API endpoints and usage
 
 ---
 

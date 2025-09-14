@@ -23,6 +23,7 @@ export interface UserProfile {
     'social-media': boolean;
     outreach: boolean;
     events: boolean;
+    ambassador: boolean;
   };
 
   // Mentor/Mentee Profile References
