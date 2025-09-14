@@ -522,6 +522,83 @@
   justify-content: center;
 }
 
+/* Tooltip Styles */
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: white;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #1e293b;
+}
+
+.tooltip-container:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+/* Enhanced tooltip positioning for different button types */
+.view-btn:hover .tooltip {
+  background: linear-gradient(135deg, var(--accent) 0%, #2988d4 100%);
+}
+
+.view-btn:hover .tooltip::before {
+  border-bottom-color: var(--accent);
+}
+
+.approve-btn:hover .tooltip {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+.approve-btn:hover .tooltip::before {
+  border-bottom-color: #10b981;
+}
+
+.reject-btn:hover .tooltip {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+}
+
+.reject-btn:hover .tooltip::before {
+  border-bottom-color: #ef4444;
+}
+
+.delete-btn:hover .tooltip {
+  background: linear-gradient(135deg, #dc2626 0%, #fca5a5 100%);
+}
+
+.delete-btn:hover .tooltip::before {
+  border-bottom-color: #dc2626;
+}
+
 .action-btn {
   display: flex;
   align-items: center;
@@ -857,6 +934,37 @@
   transform: translateY(-1px);
 }
 
+/* Modal Button Tooltips */
+.modal-btn.tooltip-container .tooltip {
+  bottom: -40px;
+  font-size: 0.75rem;
+  padding: 6px 10px;
+}
+
+.modal-btn.approve-btn:hover .tooltip {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+.modal-btn.approve-btn:hover .tooltip::before {
+  border-bottom-color: #10b981;
+}
+
+.modal-btn.reject-btn:hover .tooltip {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+}
+
+.modal-btn.reject-btn:hover .tooltip::before {
+  border-bottom-color: #ef4444;
+}
+
+.modal-btn.delete-btn:hover .tooltip {
+  background: linear-gradient(135deg, #dc2626 0%, #fca5a5 100%);
+}
+
+.modal-btn.delete-btn:hover .tooltip::before {
+  border-bottom-color: #dc2626;
+}
+
 /* Loading State */
 .ambassador-admin-loading {
   display: flex;
@@ -972,5 +1080,10 @@
     width: 32px;
     height: 32px;
     font-size: 0.8rem;
+  }
+
+  /* Hide tooltips on very small screens to prevent overlap */
+  .tooltip {
+    display: none;
   }
 }

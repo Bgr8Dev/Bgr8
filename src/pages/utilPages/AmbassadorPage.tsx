@@ -5,6 +5,7 @@ import Footer from '../../components/ui/Footer';
 import { useState as useStateHook, useEffect } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
+import { useAuth } from '../../hooks/useAuth';
 import { 
   FaInstagram, 
   FaLinkedin, 
@@ -16,6 +17,7 @@ import {
 import './AmbassadorPage.css';
 
 export default function AmbassadorPage() {
+  const { user } = useAuth();
   const [isMobile, setIsMobile] = useStateHook(window.innerWidth < 768);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -114,6 +116,12 @@ export default function AmbassadorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check if user is authenticated
+    if (!user) {
+      alert('You must be logged in to submit an ambassador application.');
+      return;
+    }
+    
     // Validate that at least one social media platform is selected
     if (!isAtLeastOneSocialMediaSelected()) {
       alert('Please select at least one social media platform.');
@@ -127,6 +135,7 @@ export default function AmbassadorPage() {
       // Create the application data object
       const applicationData = {
         ...formData,
+        uid: user.uid, // Store the user's UID for direct reference
         submittedAt: serverTimestamp(),
         status: 'pending',
         applicationId: `AMB-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`

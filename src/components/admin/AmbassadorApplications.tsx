@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs, getDoc } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
 import { 
   FaEye, 
@@ -31,6 +31,7 @@ interface SocialMediaHandles {
 
 interface AmbassadorApplication {
   id: string;
+  uid: string; // User's unique ID
   firstName: string;
   lastName: string;
   email: string;
@@ -95,74 +96,88 @@ const AmbassadorApplications: React.FC = () => {
     setFilteredApplications(filtered);
   }, [applications, searchTerm, statusFilter]);
 
-  const updateUserProfileWithAmbassadorRole = async (email: string) => {
+  const updateUserProfileWithAmbassadorRole = async (uid: string, email: string) => {
     try {
-      // First, find the user by email in the users collection
-      const usersCollection = collection(firestore, 'users');
-      const usersSnapshot = await getDocs(usersCollection);
+      console.log(`🔍 Updating user profile for UID: ${uid} (${email})`);
       
-      let userDoc = null;
-      let userDocId = null;
+      // Get the user's document directly using their UID
+      const userRef = doc(firestore, 'users', uid);
       
-      usersSnapshot.forEach((docSnapshot) => {
-        const userData = docSnapshot.data();
-        if (userData.email === email) {
-          userDoc = userData;
-          userDocId = docSnapshot.id;
-        }
-      });
+      // First, get the current user document to check existing roles
+      const userDoc = await getDoc(userRef);
       
-      if (userDoc && userDocId) {
-        // Update the user's roles to include ambassador
-        const userRef = doc(firestore, 'users', userDocId);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log(`📋 Found user document: ${email}`);
         
         // Get current roles or initialize if they don't exist
-        const currentRoles = (userDoc as { roles?: Record<string, boolean> }).roles || {};
+        const currentRoles = (userData as { roles?: Record<string, boolean> }).roles || {};
+        console.log(`🔑 Current roles:`, currentRoles);
         
         // Update roles with ambassador set to true
         const updatedRoles = {
           ...currentRoles,
           ambassador: true
         };
+        console.log(`🔑 Updated roles:`, updatedRoles);
         
         await updateDoc(userRef, {
           roles: updatedRoles,
           lastUpdated: new Date()
         });
         
-        console.log(`Successfully added ambassador role to user: ${email}`);
+        console.log(`✅ Successfully added ambassador role to user: ${email} (UID: ${uid})`);
+        alert(`✅ Ambassador role successfully added to ${email}!`);
         return true;
       } else {
-        console.warn(`User with email ${email} not found in users collection`);
+        console.warn(`❌ User document not found for UID: ${uid} (${email})`);
+        alert(`❌ User profile not found for ${email}. They may need to complete their profile setup.`);
         return false;
       }
     } catch (error) {
-      console.error('Error updating user profile with ambassador role:', error);
+      console.error('❌ Error updating user profile with ambassador role:', error);
+      alert(`❌ Error updating user profile: ${error}`);
       return false;
     }
   };
 
   const updateApplicationStatus = async (id: string, status: 'pending' | 'approved' | 'rejected') => {
     try {
+      console.log(`🔄 Updating application ${id} to status: ${status}`);
+      
+      // Find the application to get the email
+      const application = applications.find(app => app.id === id);
+      if (!application) {
+        alert('❌ Application not found!');
+        return;
+      }
+
+      // Update the application status
       const appRef = doc(firestore, 'ambassadorApplications', id);
-      await updateDoc(appRef, { status });
+      await updateDoc(appRef, { 
+        status,
+        reviewedAt: new Date(),
+        reviewedBy: 'admin'
+      });
+      
+      console.log(`✅ Application status updated to: ${status}`);
 
       // If approving the application, also update the user's profile with ambassador role
       if (status === 'approved') {
-        // Find the application to get the email
-        const application = applications.find(app => app.id === id);
-        if (application) {
-          const roleUpdateSuccess = await updateUserProfileWithAmbassadorRole(application.email);
-          
-          if (roleUpdateSuccess) {
-            console.log(`Ambassador role successfully added to ${application.email}`);
-          } else {
-            console.warn(`Failed to add ambassador role to ${application.email} - user may not exist in users collection`);
-          }
+        console.log(`🎯 Approving application - will add ambassador role to ${application.email} (UID: ${application.uid})`);
+        const roleUpdateSuccess = await updateUserProfileWithAmbassadorRole(application.uid, application.email);
+        
+        if (roleUpdateSuccess) {
+          console.log(`🎉 Successfully approved application and added ambassador role to ${application.email}`);
+        } else {
+          console.warn(`⚠️ Application approved but failed to add ambassador role to ${application.email}`);
         }
+      } else if (status === 'rejected') {
+        alert(`❌ Application rejected for ${application.email}`);
       }
     } catch (error) {
-      console.error('Error updating application status:', error);
+      console.error('❌ Error updating application status:', error);
+      alert(`❌ Error updating application: ${error}`);
     }
   };
 
@@ -334,39 +349,43 @@ const AmbassadorApplications: React.FC = () => {
                   <td>
                     <div className="action-buttons">
                       <button
-                        className="action-btn view-btn"
+                        className="action-btn view-btn tooltip-container"
                         onClick={() => {
                           setSelectedApplication(application);
                           setShowModal(true);
                         }}
-                        title="View Details"
+                        title="View full application details"
                       >
                         <FaEye />
+                        <span className="tooltip">View Details</span>
                       </button>
                       {application.status !== 'approved' && (
                         <button
-                          className="action-btn approve-btn"
+                          className="action-btn approve-btn tooltip-container"
                           onClick={() => updateApplicationStatus(application.id, 'approved')}
-                          title="Approve"
+                          title="Approve application and grant ambassador role"
                         >
                           <FaCheck />
+                          <span className="tooltip">Approve & Grant Role</span>
                         </button>
                       )}
                       {application.status !== 'rejected' && (
                         <button
-                          className="action-btn reject-btn"
+                          className="action-btn reject-btn tooltip-container"
                           onClick={() => updateApplicationStatus(application.id, 'rejected')}
-                          title="Reject"
+                          title="Reject the ambassador application"
                         >
                           <FaTimes />
+                          <span className="tooltip">Reject Application</span>
                         </button>
                       )}
                       <button
-                        className="action-btn delete-btn"
+                        className="action-btn delete-btn tooltip-container"
                         onClick={() => deleteApplication(application.id)}
-                        title="Delete"
+                        title="Permanently delete this application"
                       >
                         <FaTrash />
+                        <span className="tooltip">Delete Forever</span>
                       </button>
                     </div>
                   </td>
@@ -480,34 +499,40 @@ const AmbassadorApplications: React.FC = () => {
               <div className="modal-actions">
                 {selectedApplication.status !== 'approved' && (
                   <button
-                    className="modal-btn approve-btn"
+                    className="modal-btn approve-btn tooltip-container"
                     onClick={() => {
                       updateApplicationStatus(selectedApplication.id, 'approved');
                       setShowModal(false);
                     }}
+                    title="Approve this application and automatically grant the user the ambassador role"
                   >
                     <FaCheck /> Approve
+                    <span className="tooltip">Approve & Grant Ambassador Role</span>
                   </button>
                 )}
                 {selectedApplication.status !== 'rejected' && (
                   <button
-                    className="modal-btn reject-btn"
+                    className="modal-btn reject-btn tooltip-container"
                     onClick={() => {
                       updateApplicationStatus(selectedApplication.id, 'rejected');
                       setShowModal(false);
                     }}
+                    title="Reject this ambassador application"
                   >
                     <FaTimes /> Reject
+                    <span className="tooltip">Reject Application</span>
                   </button>
                 )}
                 <button
-                  className="modal-btn delete-btn"
+                  className="modal-btn delete-btn tooltip-container"
                   onClick={() => {
                     deleteApplication(selectedApplication.id);
                     setShowModal(false);
                   }}
+                  title="Permanently delete this application from the system"
                 >
                   <FaTrash /> Delete
+                  <span className="tooltip">Delete Forever</span>
                 </button>
               </div>
             </div>
