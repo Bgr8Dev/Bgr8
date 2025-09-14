@@ -5,6 +5,7 @@ import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
+import InstagramFeed from '../../components/social/InstagramFeed';
 
 export default function BGr8() {
   const navigate = useNavigate();
@@ -86,6 +87,39 @@ export default function BGr8() {
           <div className="bgr8-cta-bar">
             <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
             <span className="bgr8-arrow">→</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Video Section */}
+      <section className="bgr8-video-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-video-header">
+            <h3>See BGr8 in Action</h3>
+            <p>Watch how your support transforms communities and creates lasting positive change</p>
+          </div>
+          
+          <div className="bgr8-video-container">
+            <div className="bgr8-video-placeholder">
+              <div className="bgr8-video-overlay">
+                <div className="bgr8-play-button">
+                  <div className="bgr8-play-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                  <div className="bgr8-play-ripple"></div>
+                </div>
+                <div className="bgr8-video-title">
+                  <h4>BGr8 Community Impact</h4>
+                  <span className="bgr8-video-duration">3:42</span>
+                </div>
+              </div>
+              <div className="bgr8-video-thumbnail">
+                <div className="bgr8-video-gradient"></div>
+                <div className="bgr8-video-pattern"></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -196,6 +230,104 @@ export default function BGr8() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section className="bgr8-about-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-about-header">
+            <h3>About BGr8</h3>
+            <p>Empowering communities through mentorship, education, and sustainable development</p>
+          </div>
+          
+          <div className="bgr8-about-content">
+            <div className="bgr8-about-text">
+              <div className="bgr8-about-story">
+                <h4>Our Story</h4>
+                <p>
+                  Founded with a vision to create lasting positive change, BGr8 has been at the forefront 
+                  of community development and mentorship programs. We believe that sustainable growth 
+                  comes from empowering individuals and communities to reach their full potential.
+                </p>
+                <p>
+                  Through our comprehensive approach that spans from crisis prevention to long-term 
+                  empowerment, we've helped thousands of people build better futures for themselves 
+                  and their communities.
+                </p>
+              </div>
+              
+              <div className="bgr8-about-mission">
+                <h4>Our Mission</h4>
+                <p>
+                  To provide critical support from the first sign of need to full community transformation, 
+                  ensuring that no one is left behind in the journey toward sustainable development and 
+                  lasting positive change.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bgr8-about-stats">
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">10,000+</div>
+                <div className="bgr8-stat-label">Lives Impacted</div>
+              </div>
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">50+</div>
+                <div className="bgr8-stat-label">Communities Served</div>
+              </div>
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">5</div>
+                <div className="bgr8-stat-label">Years of Service</div>
+              </div>
+              <div className="bgr8-stat-card">
+                <div className="bgr8-stat-number">95%</div>
+                <div className="bgr8-stat-label">Success Rate</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bgr8-about-values">
+            <h4>Our Values</h4>
+            <div className="bgr8-values-grid">
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">🤝</div>
+                <h5>Community First</h5>
+                <p>We prioritize the needs and voices of the communities we serve, ensuring our programs are culturally sensitive and locally relevant.</p>
+              </div>
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">🌱</div>
+                <h5>Sustainable Impact</h5>
+                <p>We focus on creating long-term, sustainable solutions that continue to benefit communities long after our direct involvement.</p>
+              </div>
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">🎓</div>
+                <h5>Education & Mentorship</h5>
+                <p>We believe in the power of education and mentorship to unlock potential and create opportunities for growth.</p>
+              </div>
+              <div className="bgr8-value-item">
+                <div className="bgr8-value-icon">💙</div>
+                <h5>Transparency</h5>
+                <p>We maintain complete transparency in our operations, ensuring donors and partners can see exactly how their support makes a difference.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Instagram Section */}
+      <section className="bgr8-instagram-section">
+        <div className="bgr8-content-wrapper">
+          <div className="bgr8-instagram-header">
+            <h3>Follow Our Journey</h3>
+            <p>See the real impact of your support through our latest updates and community stories</p>
+          </div>
+          <InstagramFeed 
+            accessToken={import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN}
+            maxPosts={6}
+            showProfile={true}
+            className="bgr8-instagram-feed"
+          />
         </div>
       </section>
 
