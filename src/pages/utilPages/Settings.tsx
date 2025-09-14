@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaTimes, 
@@ -168,6 +168,7 @@ interface SettingsState {
     screenReader: boolean;
     highContrast: boolean;
     largeText: boolean;
+    fontSize: number;
     reducedMotion: boolean;
     keyboardNavigation: boolean;
     focusIndicators: boolean;
@@ -330,6 +331,7 @@ export default function Settings() {
       screenReader: false,
       highContrast: false,
       largeText: false,
+      fontSize: 14,
       reducedMotion: false,
       keyboardNavigation: true,
       focusIndicators: true,
@@ -353,6 +355,14 @@ export default function Settings() {
       deleteAccount: false
     }
   });
+
+  // Apply font size dynamically
+  useEffect(() => {
+    const settingsContainer = document.querySelector('.settings-container') as HTMLElement;
+    if (settingsContainer) {
+      settingsContainer.style.setProperty('--settings-font-size', `${settings.accessibility.fontSize}px`);
+    }
+  }, [settings.accessibility.fontSize]);
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: FaUser },
@@ -1024,6 +1034,120 @@ export default function Settings() {
     </div>
   );
 
+  const renderAccessibilitySettings = () => (
+    <div className="settings-section">
+      <h3>Accessibility Settings</h3>
+      
+      <div className="settings-form-group">
+        <label>Font Size: {settings.accessibility.fontSize}px</label>
+        <input 
+          type="range" 
+          min="12" 
+          max="24" 
+          value={settings.accessibility.fontSize}
+          onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, fontSize: parseInt(e.target.value)}})}
+          className="settings-font-size-slider"
+        />
+        <div className="settings-slider-labels">
+          <span>Small (12px)</span>
+          <span>Large (24px)</span>
+        </div>
+      </div>
+
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.screenReader}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, screenReader: e.target.checked}})}
+          />
+          Screen reader support
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.highContrast}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, highContrast: e.target.checked}})}
+          />
+          High contrast mode
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.largeText}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, largeText: e.target.checked}})}
+          />
+          Large text mode
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.reducedMotion}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, reducedMotion: e.target.checked}})}
+          />
+          Reduced motion
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.keyboardNavigation}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, keyboardNavigation: e.target.checked}})}
+          />
+          Enhanced keyboard navigation
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.focusIndicators}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, focusIndicators: e.target.checked}})}
+          />
+          Enhanced focus indicators
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.colorBlindSupport}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, colorBlindSupport: e.target.checked}})}
+          />
+          Color blind support
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.dyslexiaSupport}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, dyslexiaSupport: e.target.checked}})}
+          />
+          Dyslexia-friendly fonts
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.voiceControl}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, voiceControl: e.target.checked}})}
+          />
+          Voice control support
+        </label>
+        
+        <label className="settings-checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={settings.accessibility.gestureControl}
+            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, gestureControl: e.target.checked}})}
+          />
+          Gesture control support
+        </label>
+      </div>
+    </div>
+  );
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -1034,6 +1158,8 @@ export default function Settings() {
         return renderMentoringSettings();
       case 'appearance':
         return renderAppearanceSettings();
+      case 'accessibility':
+        return renderAccessibilitySettings();
       default:
         return (
           <div className="settings-section">
