@@ -1,5 +1,5 @@
 // src/components/Footer.tsx
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 import '../../styles/Footer.css';
 
@@ -48,15 +48,6 @@ export default function Footer() {
           </nav>
         </div>
         
-        <div className="footer-section footer-contact">
-          <h4>Contact Us</h4>
-          <address>
-            <p>Online Mentoring Platform</p>
-            <p>Global Community</p>
-            <p>Email: support@bgr8.com</p>
-            <p>Phone: +44 123 456 7890</p>
-          </address>
-        </div>
       </div>
       
       <div className="footer-bottom">
