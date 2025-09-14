@@ -348,7 +348,10 @@ export default function BGr8() {
               <div className="bgr8-ambassador-card">
                 <h4>Ready to Make a Difference?</h4>
                 <p>Join our ambassador program and help us create positive change in communities around the world.</p>
-                <button className="bgr8-ambassador-btn">
+                <button 
+                  className="bgr8-ambassador-btn"
+                  onClick={() => navigate('/ambassador')}
+                >
                   Become an Ambassador
                 </button>
                 <div className="bgr8-ambassador-stats">
