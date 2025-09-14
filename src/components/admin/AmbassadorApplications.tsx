@@ -173,7 +173,10 @@ const AmbassadorApplications: React.FC = () => {
     <div className="ambassador-applications-admin">
       <div className="admin-section">
         <div className="admin-header">
-          <h2>Ambassador Applications</h2>
+          <div className="header-content">
+            <h2>Ambassador Applications</h2>
+            <p className="admin-section-subtitle">Manage and review ambassador applications with style ✨</p>
+          </div>
           <div className="admin-stats">
             <div className="stat-item">
               <span className="stat-number">{applications.length}</span>
