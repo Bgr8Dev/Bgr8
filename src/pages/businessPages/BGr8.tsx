@@ -32,7 +32,7 @@ export default function BGr8() {
           <div className="bgr8-hero-overlay">
             <div className="bgr8-hero-content">
               <div className="bgr8-hero-text">
-                <h1>BGr8</h1>
+                <h1>Bgr8</h1>
                 <p className="bgr8-hero-subtitle">
                   From mentorship to community development, to long-term empowerment - 
                   will you start a regular gift to support communities at every stage of their journey?
