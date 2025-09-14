@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
-import { useState as useStateHook, useEffect } from 'react';
+import { useState as useStateHook, useEffect, useCallback } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
 import { useAuth } from '../../hooks/useAuth';
@@ -17,7 +17,7 @@ import {
 import './AmbassadorPage.css';
 
 export default function AmbassadorPage() {
-  const { user } = useAuth();
+  const { currentUser, loading } = useAuth();
   const [isMobile, setIsMobile] = useStateHook(window.innerWidth < 768);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -42,11 +42,14 @@ export default function AmbassadorPage() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [applicationId, setApplicationId] = useState<string>('');
 
+  const handleResize = useCallback(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, [setIsMobile]);
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [handleResize]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -117,7 +120,7 @@ export default function AmbassadorPage() {
     e.preventDefault();
     
     // Check if user is authenticated
-    if (!user) {
+    if (!currentUser) {
       alert('You must be logged in to submit an ambassador application.');
       return;
     }
@@ -135,7 +138,7 @@ export default function AmbassadorPage() {
       // Create the application data object
       const applicationData = {
         ...formData,
-        uid: user.uid, // Store the user's UID for direct reference
+        uid: currentUser.uid, // Store the user's UID for direct reference
         submittedAt: serverTimestamp(),
         status: 'pending',
         applicationId: `AMB-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
@@ -293,7 +296,29 @@ export default function AmbassadorPage() {
               <p>Fill out the form below to start your journey as a BGr8 Ambassador</p>
             </div>
 
-            {submitStatus === 'success' && (
+            {/* Loading State */}
+            {loading && (
+              <div className="ambassador-loading-message">
+                <div className="loading-spinner"></div>
+                <p>Loading...</p>
+              </div>
+            )}
+
+            {/* Authentication Required Message */}
+            {!loading && !currentUser && (
+              <div className="ambassador-auth-required">
+                <div className="auth-icon">🔐</div>
+                <h3>Login Required</h3>
+                <p>You must be logged in to submit an ambassador application.</p>
+                <div className="auth-buttons">
+                  <a href="/signin" className="auth-btn primary">Sign In</a>
+                  <a href="/signup" className="auth-btn secondary">Sign Up</a>
+                </div>
+              </div>
+            )}
+
+            {/* Only show form content if user is authenticated and not loading */}
+            {!loading && currentUser && submitStatus === 'success' && (
               <div className="ambassador-success-message">
                 <div className="success-icon">✅</div>
                 <h3>Application Submitted Successfully!</h3>
@@ -305,7 +330,7 @@ export default function AmbassadorPage() {
               </div>
             )}
 
-            {submitStatus === 'error' && (
+            {!loading && currentUser && submitStatus === 'error' && (
               <div className="ambassador-error-message">
                 <div className="error-icon">❌</div>
                 <h3>Submission Failed</h3>
@@ -313,7 +338,7 @@ export default function AmbassadorPage() {
               </div>
             )}
 
-            {submitStatus === 'idle' && (
+            {!loading && currentUser && submitStatus === 'idle' && (
               <form className="ambassador-form" onSubmit={handleSubmit}>
                 <div className="form-row">
                   <div className="form-group">

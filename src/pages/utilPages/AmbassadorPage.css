@@ -541,6 +541,111 @@
   transform: none;
 }
 
+/* Loading State */
+.ambassador-loading-message {
+  background: var(--gray-50);
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--gray-200);
+  border-top: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ambassador-loading-message p {
+  color: var(--gray-600);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Authentication Required */
+.ambassador-auth-required {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  border: 2px solid #f59e0b;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+}
+
+.auth-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.ambassador-auth-required h3 {
+  color: #92400e;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.ambassador-auth-required p {
+  color: #b45309;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.auth-btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  display: inline-block;
+  border: 2px solid transparent;
+}
+
+.auth-btn.primary {
+  background: linear-gradient(135deg, var(--accent) 0%, #2988d4 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 167, 242, 0.3);
+}
+
+.auth-btn.primary:hover {
+  background: linear-gradient(135deg, #2988d4 0%, var(--accent) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 167, 242, 0.4);
+}
+
+.auth-btn.secondary {
+  background: transparent;
+  color: #92400e;
+  border-color: #f59e0b;
+}
+
+.auth-btn.secondary:hover {
+  background: #f59e0b;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
 /* Success/Error Messages */
 .ambassador-success-message,
 .ambassador-error-message {
@@ -732,6 +837,17 @@
   .ambassador-contact-info {
     grid-template-columns: 1fr;
   }
+
+  .auth-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .auth-btn {
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
+  }
 }
 
 /* Accessibility */
@@ -740,10 +856,16 @@
     animation: none;
   }
   
+  .loading-spinner {
+    animation: none;
+    border-top-color: var(--gray-400);
+  }
+  
   .benefit-card,
   .requirement-card,
   .contact-method,
-  .ambassador-submit-btn {
+  .ambassador-submit-btn,
+  .auth-btn {
     transition: none;
   }
 }
