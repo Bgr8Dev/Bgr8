@@ -92,16 +92,25 @@
 }
 
 .footer-links a,
-.footer-mentoring a {
+.footer-mentoring a,
+.footer-nav-button {
   color: var(--gray-400);
   text-decoration: none;
   transition: color 0.2s ease, transform 0.2s ease;
   display: inline-block;
   position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  text-align: left;
 }
 
 .footer-links a::after,
-.footer-mentoring a::after {
+.footer-mentoring a::after,
+.footer-nav-button::after {
   content: '';
   position: absolute;
   width: 0;
@@ -113,13 +122,15 @@
 }
 
 .footer-links a:hover,
-.footer-mentoring a:hover {
+.footer-mentoring a:hover,
+.footer-nav-button:hover {
   color: var(--white);
   transform: translateX(5px);
 }
 
 .footer-links a:hover::after,
-.footer-mentoring a:hover::after {
+.footer-mentoring a:hover::after,
+.footer-nav-button:hover::after {
   width: 100%;
 }
 
@@ -205,7 +216,8 @@
   }
   
   .footer-links a:hover,
-  .footer-mentoring a:hover {
+  .footer-mentoring a:hover,
+  .footer-nav-button:hover {
     transform: none;
   }
   

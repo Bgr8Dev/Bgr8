@@ -5,6 +5,32 @@ import '../../styles/Footer.css';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const isBgr8Page = location.pathname.includes('/bgr8') || location.pathname === '/';
+  
+  const handleSmartNavigation = (section: string) => {
+    if (isBgr8Page) {
+      // If we're on the BGr8 page, scroll to the section
+      let selector = '';
+      if (section === 'about') {
+        selector = '.bgr8-about-section';
+      } else if (section === 'contact') {
+        selector = '.bgr8-contact-section';
+      }
+      
+      const element = document.querySelector(selector);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    } else {
+      // If we're not on the BGr8 page, navigate to it with a hash
+      const hash = section === 'about' ? '#about-us' : '#contact-us';
+      window.location.href = `/${hash}`;
+    }
+  };
   
   return (
     <footer className="footer">
@@ -32,9 +58,19 @@ export default function Footer() {
           <h4>Quick Links</h4>
           <nav>
             <Link to="/">Home</Link>
-            <Link to="/about">About Us</Link>
+            <button 
+              onClick={() => handleSmartNavigation('about')}
+              className="footer-nav-button"
+            >
+              About Us
+            </button>
             <Link to="/mentor">Mentor Portal</Link>
-            <Link to="/contact">Contact</Link>
+            <button 
+              onClick={() => handleSmartNavigation('contact')}
+              className="footer-nav-button"
+            >
+              Contact
+            </button>
           </nav>
         </div>
         
