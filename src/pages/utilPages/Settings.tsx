@@ -384,7 +384,7 @@ export default function Settings() {
   const renderProfileSettings = () => (
     <div className="settings-section">
       <h3>Profile Information</h3>
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Display Name</label>
         <input 
           type="text" 
@@ -394,7 +394,7 @@ export default function Settings() {
         />
       </div>
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Bio</label>
         <textarea 
           value={settings.profile.bio}
@@ -404,7 +404,7 @@ export default function Settings() {
         />
       </div>
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Profile Picture</label>
         <input 
           type="file" 
@@ -413,8 +413,8 @@ export default function Settings() {
         />
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Timezone</label>
           <select 
             value={settings.profile.timezone}
@@ -427,7 +427,7 @@ export default function Settings() {
           </select>
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Language</label>
           <select 
             value={settings.profile.language}
@@ -441,8 +441,8 @@ export default function Settings() {
         </div>
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Date Format</label>
           <select 
             value={settings.profile.dateFormat}
@@ -454,7 +454,7 @@ export default function Settings() {
           </select>
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Currency</label>
           <select 
             value={settings.profile.currency}
@@ -469,8 +469,8 @@ export default function Settings() {
       </div>
       
       <h4>Visibility Settings</h4>
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.profile.showOnlineStatus}
@@ -479,7 +479,7 @@ export default function Settings() {
           Show online status
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.profile.showLastSeen}
@@ -488,7 +488,7 @@ export default function Settings() {
           Show last seen
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.profile.allowDirectMessages}
@@ -498,7 +498,7 @@ export default function Settings() {
         </label>
       </div>
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Profile Visibility</label>
         <select 
           value={settings.profile.profileVisibility}
@@ -516,8 +516,8 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Notification Preferences</h3>
       
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.emailNotifications}
@@ -526,7 +526,7 @@ export default function Settings() {
           Email notifications
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.pushNotifications}
@@ -535,7 +535,7 @@ export default function Settings() {
           Push notifications
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.smsNotifications}
@@ -544,7 +544,7 @@ export default function Settings() {
           SMS notifications
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.inAppNotifications}
@@ -555,8 +555,8 @@ export default function Settings() {
       </div>
       
       <h4>Specific Notifications</h4>
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.newMessageAlerts}
@@ -565,7 +565,7 @@ export default function Settings() {
           New message alerts
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.bookingReminders}
@@ -574,7 +574,7 @@ export default function Settings() {
           Booking reminders
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.sessionReminders}
@@ -583,7 +583,7 @@ export default function Settings() {
           Session reminders
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.weeklyDigest}
@@ -592,7 +592,7 @@ export default function Settings() {
           Weekly digest
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.marketingEmails}
@@ -603,8 +603,8 @@ export default function Settings() {
       </div>
       
       <h4>Notification Behavior</h4>
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.soundEnabled}
@@ -613,7 +613,7 @@ export default function Settings() {
           Sound enabled
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.vibrationEnabled}
@@ -622,7 +622,7 @@ export default function Settings() {
           Vibration enabled
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.notifications.quietHours}
@@ -633,8 +633,8 @@ export default function Settings() {
       </div>
       
       {settings.notifications.quietHours && (
-        <div className="form-row">
-          <div className="form-group">
+        <div className="settings-form-row">
+          <div className="settings-form-group">
             <label>Quiet Start Time</label>
             <input 
               type="time" 
@@ -643,7 +643,7 @@ export default function Settings() {
             />
           </div>
           
-          <div className="form-group">
+          <div className="settings-form-group">
             <label>Quiet End Time</label>
             <input 
               type="time" 
@@ -654,7 +654,7 @@ export default function Settings() {
         </div>
       )}
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Notification Frequency</label>
         <select 
           value={settings.notifications.notificationFrequency}
@@ -673,8 +673,8 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Mentoring Preferences</h3>
       
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.mentoring.mentorMode}
@@ -683,7 +683,7 @@ export default function Settings() {
           Enable mentor mode
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.mentoring.menteeMode}
@@ -692,7 +692,7 @@ export default function Settings() {
           Enable mentee mode
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.mentoring.availableForMentoring}
@@ -701,7 +701,7 @@ export default function Settings() {
           Available for mentoring
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.mentoring.freeSessions}
@@ -711,8 +711,8 @@ export default function Settings() {
         </label>
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Experience Level</label>
           <select 
             value={settings.mentoring.experienceLevel}
@@ -725,7 +725,7 @@ export default function Settings() {
           </select>
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Hourly Rate ($)</label>
           <input 
             type="number" 
@@ -737,8 +737,8 @@ export default function Settings() {
         </div>
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Max Sessions Per Week</label>
           <input 
             type="number" 
@@ -749,7 +749,7 @@ export default function Settings() {
           />
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Preferred Session Length (minutes)</label>
           <input 
             type="number" 
@@ -763,9 +763,9 @@ export default function Settings() {
       </div>
       
       <h4>Availability</h4>
-      <div className="availability-grid">
+      <div className="settings-availability-grid">
         {Object.entries(settings.mentoring.availability).map(([day, available]) => (
-          <label key={day} className="checkbox-label">
+          <label key={day} className="settings-checkbox-label">
             <input 
               type="checkbox" 
               checked={available}
@@ -782,8 +782,8 @@ export default function Settings() {
         ))}
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Working Hours Start</label>
           <input 
             type="time" 
@@ -798,7 +798,7 @@ export default function Settings() {
           />
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Working Hours End</label>
           <input 
             type="time" 
@@ -815,8 +815,8 @@ export default function Settings() {
       </div>
       
       <h4>Booking Settings</h4>
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.mentoring.autoAcceptBookings}
@@ -825,7 +825,7 @@ export default function Settings() {
           Auto-accept bookings
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.mentoring.requireApproval}
@@ -835,7 +835,7 @@ export default function Settings() {
         </label>
       </div>
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Cancellation Policy</label>
         <select 
           value={settings.mentoring.cancellationPolicy}
@@ -848,7 +848,7 @@ export default function Settings() {
         </select>
       </div>
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Refund Policy</label>
         <select 
           value={settings.mentoring.refundPolicy}
@@ -867,10 +867,10 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Appearance & Theme</h3>
       
-      <div className="form-group">
+      <div className="settings-form-group">
         <label>Theme</label>
-        <div className="theme-selector">
-          <label className="theme-option">
+        <div className="settings-theme-selector">
+          <label className="settings-theme-option">
             <input 
               type="radio" 
               name="theme" 
@@ -882,7 +882,7 @@ export default function Settings() {
             <span>Light</span>
           </label>
           
-          <label className="theme-option">
+          <label className="settings-theme-option">
             <input 
               type="radio" 
               name="theme" 
@@ -894,7 +894,7 @@ export default function Settings() {
             <span>Dark</span>
           </label>
           
-          <label className="theme-option">
+          <label className="settings-theme-option">
             <input 
               type="radio" 
               name="theme" 
@@ -908,8 +908,8 @@ export default function Settings() {
         </div>
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Primary Color</label>
           <input 
             type="color" 
@@ -918,7 +918,7 @@ export default function Settings() {
           />
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Accent Color</label>
           <input 
             type="color" 
@@ -928,8 +928,8 @@ export default function Settings() {
         </div>
       </div>
       
-      <div className="form-row">
-        <div className="form-group">
+      <div className="settings-form-row">
+        <div className="settings-form-group">
           <label>Font Size</label>
           <select 
             value={settings.appearance.fontSize}
@@ -941,7 +941,7 @@ export default function Settings() {
           </select>
         </div>
         
-        <div className="form-group">
+        <div className="settings-form-group">
           <label>Font Family</label>
           <select 
             value={settings.appearance.fontFamily}
@@ -957,8 +957,8 @@ export default function Settings() {
       </div>
       
       <h4>Interface Options</h4>
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+      <div className="settings-checkbox-group">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.compactMode}
@@ -967,7 +967,7 @@ export default function Settings() {
           Compact mode
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.showAnimations}
@@ -976,7 +976,7 @@ export default function Settings() {
           Show animations
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.highContrast}
@@ -985,7 +985,7 @@ export default function Settings() {
           High contrast
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.reducedMotion}
@@ -994,7 +994,7 @@ export default function Settings() {
           Reduced motion
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.sidebarCollapsed}
@@ -1003,7 +1003,7 @@ export default function Settings() {
           Collapsed sidebar by default
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.showTooltips}
@@ -1012,7 +1012,7 @@ export default function Settings() {
           Show tooltips
         </label>
         
-        <label className="checkbox-label">
+        <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
             checked={settings.appearance.showBreadcrumbs}
@@ -1049,7 +1049,7 @@ export default function Settings() {
       <div className="settings-container">
         <div className="settings-header">
           <h1>Settings</h1>
-          <button className="close-button" onClick={() => navigate(-1)} aria-label="Close settings">
+          <button className="settings-close-button" onClick={() => navigate(-1)} aria-label="Close settings">
             <FaTimes />
           </button>
         </div>
@@ -1078,10 +1078,10 @@ export default function Settings() {
               {renderTabContent()}
               
               <div className="settings-actions">
-                <button className="btn btn-secondary" onClick={handleReset}>
+                <button className="settings-btn settings-btn-secondary" onClick={handleReset}>
                   Reset to Default
                 </button>
-                <button className="btn btn-primary" onClick={handleSave}>
+                <button className="settings-btn settings-btn-primary" onClick={handleSave}>
                   <FaSave />
                   Save Settings
                 </button>
