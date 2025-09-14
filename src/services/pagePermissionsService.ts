@@ -277,7 +277,8 @@ export class PagePermissionsService {
       'social-media',
       'outreach',
       'events',
-      'tester'
+      'tester',
+      'ambassador'
     ];
   }
 

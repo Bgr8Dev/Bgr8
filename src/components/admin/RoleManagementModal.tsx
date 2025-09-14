@@ -22,13 +22,14 @@ interface UserData {
     outreach: boolean;
     events: boolean;
     tester: boolean;
+    ambassador: boolean;
   };
   dateCreated: Timestamp;
   lastLogin?: Date;
   [key: string]: unknown;
 }
 
-interface Role {
+interface RoleInfo {
   key: keyof UserData['roles'];
   name: string;
   description: string;
@@ -42,7 +43,7 @@ interface RoleManagementModalProps {
   selectedUser: UserData | null;
   onToggleRole: (uid: string, role: keyof UserData['roles'], currentStatus: boolean) => void;
   pulsingRole: string | null;
-  roles: Role[];
+  roles: RoleInfo[];
 }
 
 export default function RoleManagementModal({

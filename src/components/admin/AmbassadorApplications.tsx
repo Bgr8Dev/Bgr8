@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
 import { 
   FaEye, 
@@ -8,12 +8,9 @@ import {
   FaTrash, 
   FaSearch, 
   FaFilter,
-  FaDownload,
   FaEnvelope,
-  FaPhone,
   FaMapMarkerAlt,
   FaCalendarAlt,
-  FaUser,
   FaInstagram,
   FaLinkedin,
   FaTwitter,
@@ -44,7 +41,7 @@ interface AmbassadorApplication {
   availability: string;
   socialMedia: SocialMediaHandles;
   referral: string;
-  submittedAt: any;
+  submittedAt: Date;
   status: 'pending' | 'approved' | 'rejected';
   applicationId: string;
 }
@@ -98,10 +95,72 @@ const AmbassadorApplications: React.FC = () => {
     setFilteredApplications(filtered);
   }, [applications, searchTerm, statusFilter]);
 
+  const updateUserProfileWithAmbassadorRole = async (email: string) => {
+    try {
+      // First, find the user by email in the users collection
+      const usersCollection = collection(firestore, 'users');
+      const usersSnapshot = await getDocs(usersCollection);
+      
+      let userDoc = null;
+      let userDocId = null;
+      
+      usersSnapshot.forEach((docSnapshot) => {
+        const userData = docSnapshot.data();
+        if (userData.email === email) {
+          userDoc = userData;
+          userDocId = docSnapshot.id;
+        }
+      });
+      
+      if (userDoc && userDocId) {
+        // Update the user's roles to include ambassador
+        const userRef = doc(firestore, 'users', userDocId);
+        
+        // Get current roles or initialize if they don't exist
+        const currentRoles = (userDoc as { roles?: Record<string, boolean> }).roles || {};
+        
+        // Update roles with ambassador set to true
+        const updatedRoles = {
+          ...currentRoles,
+          ambassador: true
+        };
+        
+        await updateDoc(userRef, {
+          roles: updatedRoles,
+          lastUpdated: new Date()
+        });
+        
+        console.log(`Successfully added ambassador role to user: ${email}`);
+        return true;
+      } else {
+        console.warn(`User with email ${email} not found in users collection`);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error updating user profile with ambassador role:', error);
+      return false;
+    }
+  };
+
   const updateApplicationStatus = async (id: string, status: 'pending' | 'approved' | 'rejected') => {
     try {
       const appRef = doc(firestore, 'ambassadorApplications', id);
       await updateDoc(appRef, { status });
+
+      // If approving the application, also update the user's profile with ambassador role
+      if (status === 'approved') {
+        // Find the application to get the email
+        const application = applications.find(app => app.id === id);
+        if (application) {
+          const roleUpdateSuccess = await updateUserProfileWithAmbassadorRole(application.email);
+          
+          if (roleUpdateSuccess) {
+            console.log(`Ambassador role successfully added to ${application.email}`);
+          } else {
+            console.warn(`Failed to add ambassador role to ${application.email} - user may not exist in users collection`);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error updating application status:', error);
     }
@@ -154,9 +213,16 @@ const AmbassadorApplications: React.FC = () => {
     }
   };
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: Date | { toDate: () => Date } | unknown) => {
     if (!timestamp) return 'N/A';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    let date: Date;
+    if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
+      date = timestamp.toDate();
+    } else if (timestamp instanceof Date) {
+      date = timestamp;
+    } else {
+      date = new Date(timestamp as string | number);
+    }
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
@@ -208,7 +274,7 @@ const AmbassadorApplications: React.FC = () => {
             <FaFilter className="filter-icon" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'approved' | 'rejected')}
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>

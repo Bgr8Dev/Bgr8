@@ -38,6 +38,7 @@ interface UserData {
     outreach: boolean;
     events: boolean;
     tester: boolean;
+    ambassador: boolean;
   };
   dateCreated: Timestamp;
   lastLogin?: Date;
@@ -122,6 +123,13 @@ const ROLES: RoleInfo[] = [
     description: 'Can submit feedback and bug reports',
     icon: <FaBug />,
     color: '#f56565'
+  },
+  {
+    key: 'ambassador',
+    name: 'Ambassador',
+    description: 'Brand ambassador with outreach privileges',
+    icon: <FaHandshake />,
+    color: '#10b981'
   }
 ];
 
@@ -194,7 +202,8 @@ export default function RoleManagement() {
             'social-media': false,
             outreach: false,
             events: false,
-            tester: false
+            tester: false,
+            ambassador: false
           };
         }
 
