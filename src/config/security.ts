@@ -59,7 +59,8 @@ export const CSP_CONFIG = {
     'https:',
     'blob:',
     'https://*.firebaseapp.com',
-    'https://*.googleapis.com'
+    'https://*.googleapis.com',
+    'https://*.googleusercontent.com'
   ],
   'font-src': [
     "'self'",
