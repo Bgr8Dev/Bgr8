@@ -4,7 +4,7 @@ import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import { useState as useStateHook, useEffect } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { firestore } from '../../firebase/firebase';
 import './AmbassadorPage.css';
 
 export default function AmbassadorPage() {
@@ -54,7 +54,7 @@ export default function AmbassadorPage() {
       };
 
       // Save to Firebase collection
-      const ambassadorApplicationsRef = collection(db, 'ambassadorApplications');
+      const ambassadorApplicationsRef = collection(firestore, 'ambassadorApplications');
       const docRef = await addDoc(ambassadorApplicationsRef, applicationData);
       
       console.log('Ambassador application saved with ID:', docRef.id);
