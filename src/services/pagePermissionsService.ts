@@ -110,6 +110,22 @@ export class PagePermissionsService {
       isEnabled: true
     },
     {
+      pageId: 'emails',
+      pageName: 'Emails',
+      description: 'Compose and manage email campaigns and templates',
+      icon: 'FaMailBulk',
+      allowedRoles: ['admin', 'committee', 'marketing'],
+      isEnabled: true
+    },
+    {
+      pageId: 'announcements',
+      pageName: 'Announcements',
+      description: 'Create and manage announcement banners for the website',
+      icon: 'FaBullhorn',
+      allowedRoles: ['admin', 'committee', 'marketing'],
+      isEnabled: true
+    },
+    {
       pageId: 'settings',
       pageName: 'Settings',
       description: 'Configure system settings and permissions',
@@ -120,9 +136,16 @@ export class PagePermissionsService {
   ];
 
   /**
+   * Get the default permissions configuration
+   */
+  static getDefaultPermissions(): PagePermission[] {
+    return this.DEFAULT_PERMISSIONS;
+  }
+
+  /**
    * Merge existing permissions with default permissions to ensure all pages are present
    */
-  private static mergePermissions(existing: PagePermission[], defaults: PagePermission[]): PagePermission[] {
+  static mergePermissions(existing: PagePermission[], defaults: PagePermission[]): PagePermission[] {
     const merged: PagePermission[] = [];
     
     // Add all default permissions
@@ -163,7 +186,7 @@ export class PagePermissionsService {
         const existingPermissions = data.permissions || [];
         
         // Merge with default permissions to ensure all pages are present and new ones are added
-        const mergedPermissions = this.mergePermissions(existingPermissions, this.DEFAULT_PERMISSIONS);
+        const mergedPermissions = PagePermissionsService.mergePermissions(existingPermissions, this.DEFAULT_PERMISSIONS);
         
         // If there are new permissions, update the database
         if (mergedPermissions.length !== existingPermissions.length) {

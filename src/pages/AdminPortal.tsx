@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { usePagePermissions } from '../hooks/usePagePermissions';
 import { hasRole } from '../utils/userProfile';
-import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug, FaHandshake } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug, FaHandshake, FaMailBulk, FaBullhorn } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminSettings } from './adminPages/AdminSettings';
@@ -11,6 +11,8 @@ import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
 import { AdminMentorVerification } from './adminPages/AdminMentorVerification';
 import AdminTestingFeedback from './adminPages/AdminTestingFeedback';
+import AdminEmails from './adminPages/AdminEmails';
+import AdminAnnouncements from './adminPages/AdminAnnouncements';
 import MentorManagement from '../components/admin/mentors/MentorManagement';
 import FeedbackAnalytics from '../components/admin/feedback/FeedbackAnalytics';
 import { SessionsManagement } from '../components/admin/sessions/SessionsManagement';
@@ -97,6 +99,8 @@ export default function AdminPortal() {
                 'testing-feedback': FaBug,
                 'sessions': FaCalendarAlt,
                 'ambassadors': FaHandshake,
+                'emails': FaMailBulk,
+                'announcements': FaBullhorn,
                 'settings': FaCog
               };
               
@@ -127,6 +131,8 @@ export default function AdminPortal() {
         {canAccessPage('testing-feedback') && activeSection === 'testing-feedback' && <AdminTestingFeedback />}
         {canAccessPage('sessions') && activeSection === 'sessions' && <SessionsManagement />}
         {canAccessPage('ambassadors') && activeSection === 'ambassadors' && <AmbassadorApplications />}
+        {canAccessPage('emails') && activeSection === 'emails' && <AdminEmails />}
+        {canAccessPage('announcements') && activeSection === 'announcements' && <AdminAnnouncements />}
         {canAccessPage('settings') && activeSection === 'settings' && <AdminSettings />}
       </div>
     </div>
