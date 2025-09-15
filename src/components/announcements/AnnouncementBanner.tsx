@@ -241,22 +241,32 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
         }}
         onClick={() => handleClick(currentAnnouncement)}
       >
-        <div className="announcement-banner-content">
-          <div className="announcement-banner-icon-container">
-            {getTypeIcon(currentAnnouncement.type)}
-          </div>
-          
-          <div className="announcement-banner-text-container">
-            <div 
-              className={`announcement-banner-text ${autoScroll ? `announcement-scroll-${scrollSpeed}` : ''}`}
-              style={{
-                fontSize: currentAnnouncement.displaySettings.fontSize === 'small' ? '0.875rem' :
-                         currentAnnouncement.displaySettings.fontSize === 'large' ? '1.125rem' : '1rem'
-              }}
-            >
-              <span className="announcement-banner-title">{currentAnnouncement.title}</span>
-              <span className="announcement-banner-message">{currentAnnouncement.content}</span>
-            </div>
+      <div className="announcement-banner-content">
+        <button
+          className="announcement-banner-close"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDismiss(currentAnnouncement.id);
+          }}
+          title="Dismiss announcement"
+        >
+          <FaTimes />
+        </button>
+
+        <div className="announcement-banner-icon-container">
+          {getTypeIcon(currentAnnouncement.type)}
+        </div>
+        
+        <div className="announcement-banner-text-container">
+          <div 
+            className={`announcement-banner-text ${autoScroll ? `announcement-scroll-${scrollSpeed}` : ''}`}
+            style={{
+              fontSize: currentAnnouncement.displaySettings.fontSize === 'small' ? '0.875rem' :
+                       currentAnnouncement.displaySettings.fontSize === 'large' ? '1.125rem' : '1rem'
+            }}
+          >
+            <span className="announcement-banner-title">{currentAnnouncement.title}</span>
+            <span className="announcement-banner-message">{currentAnnouncement.content}</span>
           </div>
         </div>
 
@@ -297,18 +307,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
               </button>
             </>
           )}
-          
-          <button
-            className="announcement-banner-close"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDismiss(currentAnnouncement.id);
-            }}
-            title="Dismiss announcement"
-          >
-            <FaTimes />
-          </button>
         </div>
+      </div>
 
         {announcements.length > 1 && (
           <div className="announcement-banner-indicators">

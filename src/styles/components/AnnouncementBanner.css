@@ -190,7 +190,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
-  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0; /* Prevent shrinking */
+  z-index: 2; /* Ensure it's clickable */
 }
 
 .announcement-banner-close:hover {
@@ -276,6 +278,7 @@
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
+    margin-right: 0.25rem;
     margin-left: 0;
   }
 
