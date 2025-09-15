@@ -8,26 +8,16 @@ import {
   FaEdit, 
   FaCopy,
   FaUsers,
-  FaUser,
-  FaUserTie,
-  FaGraduationCap,
   FaSearch,
   FaPlus,
-  FaMinus,
   FaEye,
   FaEyeSlash,
   FaBold,
   FaItalic,
   FaUnderline,
   FaListUl,
-  FaListOl,
   FaLink,
-  FaImage,
-  FaAlignLeft,
-  FaAlignCenter,
-  FaAlignRight,
   FaQuoteLeft,
-  FaCode,
   FaUndo,
   FaRedo,
   FaTimes,
@@ -612,6 +602,7 @@ export function MobileAdminEmails() {
               <button 
                 className="close-btn"
                 onClick={() => setShowTemplateModal(false)}
+                title="Close template modal"
               >
                 <FaTimes />
               </button>
