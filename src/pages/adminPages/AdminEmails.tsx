@@ -11,20 +11,6 @@ import {
   FaPlus,
   FaEye,
   FaEyeSlash,
-  FaBold,
-  FaItalic,
-  FaUnderline,
-  FaListUl,
-  FaListOl,
-  FaLink,
-  FaImage,
-  FaAlignLeft,
-  FaAlignCenter,
-  FaAlignRight,
-  FaQuoteLeft,
-  FaCode,
-  FaUndo,
-  FaRedo,
   FaSpinner,
   FaCheck,
   FaTimes,
@@ -36,7 +22,9 @@ import {
 } from 'react-icons/fa';
 import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
 import { useAuth } from '../../hooks/useAuth';
+import RichTextEditor from '../../components/admin/emails/RichTextEditor';
 import '../../styles/adminStyles/AdminEmails.css';
+import '../../styles/adminStyles/RichTextEditor.css';
 
 // Interfaces are now imported from EmailService
 
@@ -473,41 +461,50 @@ const AdminEmails: React.FC = () => {
                 </div>
 
                 <div className="email-compose-body">
-                  <div className="email-editor-toolbar">
-                    <div className="email-toolbar-group">
-                      <button className="email-toolbar-btn" title="Bold"><FaBold /></button>
-                      <button className="email-toolbar-btn" title="Italic"><FaItalic /></button>
-                      <button className="email-toolbar-btn" title="Underline"><FaUnderline /></button>
-                    </div>
-                    <div className="email-toolbar-group">
-                      <button className="email-toolbar-btn" title="Align Left"><FaAlignLeft /></button>
-                      <button className="email-toolbar-btn" title="Align Center"><FaAlignCenter /></button>
-                      <button className="email-toolbar-btn" title="Align Right"><FaAlignRight /></button>
-                    </div>
-                    <div className="email-toolbar-group">
-                      <button className="email-toolbar-btn" title="Bullet List"><FaListUl /></button>
-                      <button className="email-toolbar-btn" title="Numbered List"><FaListOl /></button>
-                      <button className="email-toolbar-btn" title="Quote"><FaQuoteLeft /></button>
-                    </div>
-                    <div className="email-toolbar-group">
-                      <button className="email-toolbar-btn" title="Insert Link"><FaLink /></button>
-                      <button className="email-toolbar-btn" title="Insert Image"><FaImage /></button>
-                      <button className="email-toolbar-btn" title="Code"><FaCode /></button>
-                    </div>
-                    <div className="email-toolbar-group">
-                      <button className="email-toolbar-btn" title="Undo"><FaUndo /></button>
-                      <button className="email-toolbar-btn" title="Redo"><FaRedo /></button>
-                    </div>
-                  </div>
-
-                  <div className="email-editor-content">
-                    <textarea
-                      placeholder="Start writing your email..."
-                      value={currentDraft.content}
-                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, content: e.target.value }))}
-                      className="email-content-editor"
-                    />
-                  </div>
+                  <RichTextEditor
+                    content={currentDraft.content || ''}
+                    onChange={(content) => setCurrentDraft(prev => ({ ...prev, content }))}
+                    placeholder="Start writing your email..."
+                    className="email-rich-text-editor"
+                    showToolbar={true}
+                    showWordCount={true}
+                    showCharCount={true}
+                    maxLength={10000}
+                    allowImages={true}
+                    allowLinks={true}
+                    allowTables={true}
+                    allowCode={true}
+                    allowEmojis={true}
+                    allowFileUpload={true}
+                    onSave={handleSaveDraft}
+                    onPreview={() => setShowPreview(!showPreview)}
+                    onExport={() => {
+                      const blob = new Blob([currentDraft.content || ''], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `email-draft-${Date.now()}.html`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    onImport={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = '.html,.txt,.rtf';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const content = event.target?.result as string;
+                            setCurrentDraft(prev => ({ ...prev, content }));
+                          };
+                          reader.readAsText(file);
+                        }
+                      };
+                      input.click();
+                    }}
+                  />
                 </div>
               </div>
 
