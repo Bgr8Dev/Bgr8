@@ -9,6 +9,8 @@ import {
   FaBug,
   FaCalendarAlt, 
   FaCog,
+  FaMailBulk,
+  FaHandshake,
   FaSave,
   FaUndo,
   FaCheck,
@@ -30,6 +32,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'feedback': FaComments,
   'testing-feedback': FaBug,
   'sessions': FaCalendarAlt,
+  'ambassadors': FaHandshake,
+  'emails': FaMailBulk,
   'settings': FaCog
 };
 
@@ -55,9 +59,23 @@ export const PagePermissionsManager: React.FC<PagePermissionsManagerProps> = ({
       setLoading(true);
       setError(null);
       
-      const config = await PagePermissionsService.getPagePermissions();
-      setPermissions(config.permissions);
-      setOriginalPermissions(JSON.parse(JSON.stringify(config.permissions)));
+      // Always use the default permissions to ensure all pages are shown
+      // This allows admins to configure permissions for new pages even if they're not in Firebase yet
+      const defaultPermissions = PagePermissionsService.getDefaultPermissions();
+      
+      try {
+        // Try to get existing permissions from Firebase
+        const config = await PagePermissionsService.getPagePermissions();
+        // Merge with defaults to ensure all pages are present
+        const mergedPermissions = PagePermissionsService.mergePermissions(config.permissions, defaultPermissions);
+        setPermissions(mergedPermissions);
+        setOriginalPermissions(JSON.parse(JSON.stringify(mergedPermissions)));
+      } catch (firebaseError) {
+        // If Firebase fails, use default permissions
+        console.warn('Failed to load from Firebase, using default permissions:', firebaseError);
+        setPermissions(defaultPermissions);
+        setOriginalPermissions(JSON.parse(JSON.stringify(defaultPermissions)));
+      }
     } catch (err) {
       setError('Failed to load page permissions');
       console.error('Error loading permissions:', err);
@@ -137,7 +155,7 @@ export const PagePermissionsManager: React.FC<PagePermissionsManagerProps> = ({
     <div className="page-permissions-manager">
       <div className="page-permissions-header">
         <h2>Page Access Permissions</h2>
-        <p>Configure which roles can access which admin portal pages</p>
+        <p>Configure which roles can access which admin portal pages. All possible pages are shown below, including new ones that may not be in Firebase yet.</p>
         
         <div className="page-permissions-actions">
           <button
