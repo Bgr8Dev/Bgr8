@@ -228,9 +228,10 @@ export default function FeedbackAnalytics() {
   };
 
 
-  const handleCardClick = (feedback: SessionFeedback, event: React.MouseEvent) => {
-    // Don't show modal if clicking on selection checkbox
-    if ((event.target as HTMLElement).closest('.select-item-btn')) {
+  const handleRowClick = (feedback: SessionFeedback, event: React.MouseEvent) => {
+    // Don't show modal if clicking on selection checkbox or other interactive elements
+    if ((event.target as HTMLElement).closest('.select-item-btn') ||
+        (event.target as HTMLElement).closest('.select-all-btn')) {
       return;
     }
 
@@ -935,7 +936,6 @@ export default function FeedbackAnalytics() {
                 <th>Dev Mode</th>
                 <th>Submitted</th>
                 <th>Session Date</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -943,6 +943,7 @@ export default function FeedbackAnalytics() {
                 <tr 
                   key={feedback.id} 
                   className={`feedback-row ${selectedItems.has(feedback.id) ? 'selected' : ''} ${modalData?.id === feedback.id ? 'modal-active' : ''}`}
+                  onClick={(e) => handleRowClick(feedback, e)}
                 >
                   <td className="select-column">
                     <button 
@@ -1025,18 +1026,6 @@ export default function FeedbackAnalytics() {
                       <div className="date">{feedback.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}</div>
                       <div className="time">{feedback.sessionDate?.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) || ''}</div>
                     </div>
-                  </td>
-                  <td className="actions-cell">
-                    <button 
-                      className="view-details-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(feedback, e);
-                      }}
-                      title="View full details"
-                    >
-                      View Details
-                    </button>
                   </td>
                 </tr>
               ))}

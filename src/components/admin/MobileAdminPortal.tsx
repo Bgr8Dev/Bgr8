@@ -14,10 +14,10 @@ import { AdminSettings } from '../../pages/adminPages/AdminSettings';
 import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
 import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
 import { AdminMentorVerification } from '../../pages/adminPages/AdminMentorVerification';
-import { MobileMentorManagement } from './MobileMentorManagement';
+import { MobileMentorManagement } from './mentors/MobileMentorManagement';
 import FeedbackAnalytics from './feedback/FeedbackAnalytics';
-import { SessionsManagement } from './SessionsManagement';
-import RoleManagement from './RoleManagement';
+import { SessionsManagement } from './sessions/SessionsManagement';
+import RoleManagement from './users/RoleManagement';
 
 
 interface MobileAdminPortalProps {
