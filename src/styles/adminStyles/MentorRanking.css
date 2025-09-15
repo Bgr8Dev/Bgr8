@@ -1,9 +1,31 @@
 /* Mentor Ranking Component Styles */
 .mentor-rankings {
   padding: 20px;
-  background: #181818;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
   min-height: 100vh;
   color: #ffffff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.mentor-rankings::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 179, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 140, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 179, 0, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mentor-rankings > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Header */
@@ -12,24 +34,45 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 24px 28px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mentor-rankings-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 179, 0, 0.5), transparent);
 }
 
 .mentor-rankings-header-content h2 {
   margin: 0 0 8px 0;
-  color: #ffffff;
-  font-size: 28px;
-  font-weight: 600;
+  background: linear-gradient(135deg, #ffffff 0%, #ffb300 50%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .mentor-rankings-header-content p {
   margin: 0;
-  color: #cccccc;
+  color: #b0b0b0;
   font-size: 16px;
+  font-weight: 400;
+  opacity: 0.9;
 }
 
 .mentor-rankings-header-actions {
@@ -38,32 +81,51 @@
 }
 
 .mentor-rankings-refresh-btn, .mentor-rankings-export-btn {
-  padding: 12px 16px;
+  padding: 14px 18px;
   border: 1px solid rgba(255, 179, 0, 0.3);
-  border-radius: 8px;
-  background: rgba(255, 179, 0, 0.1);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%);
   color: #ffb300;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mentor-rankings-refresh-btn::before, .mentor-rankings-export-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
 }
 
 .mentor-rankings-refresh-btn:hover, .mentor-rankings-export-btn:hover {
-  background: rgba(255, 179, 0, 0.2);
-  border-color: rgba(255, 179, 0, 0.5);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.2) 0%, rgba(255, 140, 0, 0.1) 100%);
+  border-color: rgba(255, 179, 0, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.3);
+}
+
+.mentor-rankings-refresh-btn:hover::before, .mentor-rankings-export-btn:hover::before {
+  left: 100%;
 }
 
 .mentor-rankings-refresh-btn:disabled, .mentor-rankings-export-btn:disabled {
-  background: rgba(108, 117, 125, 0.2);
-  border-color: rgba(108, 117, 125, 0.3);
+  background: rgba(108, 117, 125, 0.1);
+  border-color: rgba(108, 117, 125, 0.2);
   color: #6c757d;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .mentor-rankings-spinning {
@@ -75,6 +137,70 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Animation classes */
+.mentor-rankings-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.mentor-rankings-card:nth-child(1) { animation-delay: 0.1s; }
+.mentor-rankings-card:nth-child(2) { animation-delay: 0.2s; }
+.mentor-rankings-card:nth-child(3) { animation-delay: 0.3s; }
+.mentor-rankings-card:nth-child(4) { animation-delay: 0.4s; }
+.mentor-rankings-card:nth-child(5) { animation-delay: 0.5s; }
+.mentor-rankings-card:nth-child(6) { animation-delay: 0.6s; }
+
+.mentor-rankings-header {
+  animation: slideInFromLeft 0.8s ease-out;
+}
+
+.mentor-rankings-view-mode-toggle {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.mentor-rankings-controls-section {
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
 /* View Controls */
 .mentor-rankings-view-controls {
   margin-bottom: 20px;
@@ -82,38 +208,64 @@
 
 .mentor-rankings-view-mode-toggle {
   display: flex;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 8px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
 }
 
 .mentor-rankings-view-btn {
-  padding: 12px 20px;
+  padding: 14px 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   background: transparent;
-  color: #cccccc;
+  color: #b0b0b0;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mentor-rankings-view-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .mentor-rankings-view-btn.mentor-rankings-active {
   background: linear-gradient(135deg, #ffb300 0%, #ff8c00 100%);
   color: #000000;
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: 
+    0 4px 20px rgba(255, 179, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .mentor-rankings-view-btn:hover:not(.mentor-rankings-active) {
-  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.mentor-rankings-view-btn:hover:not(.mentor-rankings-active)::before {
+  opacity: 1;
 }
 
 /* Controls Section */
@@ -123,6 +275,7 @@
 
 .mentor-rankings-search-controls {
   display: flex;
+  justify-content: space-between;
   gap: 16px;
   align-items: center;
   margin-bottom: 16px;
@@ -145,52 +298,83 @@
 
 .mentor-rankings-search-input {
   width: 100%;
-  padding: 12px 12px 12px 40px;
+  padding: 14px 16px 14px 44px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
   color: #ffffff;
   font-size: 14px;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .mentor-rankings-search-input:focus {
   outline: none;
-  border-color: rgba(255, 179, 0, 0.5);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 179, 0, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 0 0 3px rgba(255, 179, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .mentor-rankings-search-input::placeholder {
-  color: #666666;
+  color: #888888;
+  font-weight: 400;
 }
 
 .mentor-rankings-filter-toggle-btn {
-  padding: 12px 16px;
+  padding: 14px 18px;
   border: 1px solid rgba(255, 179, 0, 0.3);
-  border-radius: 8px;
-  background: rgba(255, 179, 0, 0.1);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%);
   color: #ffb300;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mentor-rankings-filter-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
 }
 
 .mentor-rankings-filter-toggle-btn:hover {
-  border-color: rgba(255, 179, 0, 0.5);
-  background: rgba(255, 179, 0, 0.2);
+  border-color: rgba(255, 179, 0, 0.6);
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.2) 0%, rgba(255, 140, 0, 0.1) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.3);
+}
+
+.mentor-rankings-filter-toggle-btn:hover::before {
+  left: 100%;
 }
 
 .mentor-rankings-filters-panel {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   margin-top: 16px;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .mentor-rankings-filter-row {
@@ -213,18 +397,27 @@
 }
 
 .mentor-rankings-filter-group select {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 14px;
-  background: rgba(255, 255, 255, 0.05);
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
   color: #ffffff;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .mentor-rankings-filter-group select:focus {
   outline: none;
-  border-color: rgba(255, 179, 0, 0.5);
+  border-color: rgba(255, 179, 0, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 0 0 3px rgba(255, 179, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .mentor-rankings-filter-group select option {
@@ -285,26 +478,58 @@
 }
 
 .mentor-rankings-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mentor-rankings-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 179, 0, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .mentor-rankings-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 179, 0, 0.3);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 8px 25px rgba(255, 179, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 179, 0, 0.4);
+}
+
+.mentor-rankings-card:hover::before {
+  opacity: 1;
 }
 
 .mentor-rankings-card.mentor-rankings-selected {
   border-color: #ffb300;
-  background: rgba(255, 179, 0, 0.08);
-  box-shadow: 0 4px 16px rgba(255, 179, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.08) 0%, rgba(255, 140, 0, 0.04) 100%);
+  box-shadow: 
+    0 12px 35px rgba(255, 179, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+}
+
+.mentor-rankings-card.mentor-rankings-selected::before {
+  opacity: 1;
+  background: linear-gradient(90deg, transparent, rgba(255, 179, 0, 0.6), transparent);
 }
 
 .mentor-rankings-card-header {
@@ -323,25 +548,31 @@
 }
 
 .rank-icon {
-  font-size: 24px;
+  font-size: 28px;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
 }
 
 .rank-icon.gold {
   color: #ffd700;
+  filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.4));
 }
 
 .rank-icon.silver {
   color: #c0c0c0;
+  filter: drop-shadow(0 2px 8px rgba(192, 192, 192, 0.3));
 }
 
 .rank-icon.bronze {
   color: #cd7f32;
+  filter: drop-shadow(0 2px 8px rgba(205, 127, 50, 0.3));
 }
 
 .rank-number {
-  font-size: 18px;
-  font-weight: 600;
-  color: #495057;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .mentor-rankings-mentor-info {
@@ -349,16 +580,20 @@
 }
 
 .mentor-rankings-mentor-name {
-  margin: 0 0 4px 0;
-  font-size: 18px;
-  font-weight: 600;
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  font-weight: 700;
   color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.3px;
 }
 
 .mentor-rankings-mentor-id {
   margin: 0;
   font-size: 12px;
-  color: #999999;
+  color: #b0b0b0;
+  font-family: 'Courier New', monospace;
+  opacity: 0.8;
 }
 
 .mentor-rankings-trend-section {
@@ -367,87 +602,120 @@
 }
 
 .trend-icon {
-  font-size: 16px;
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
 }
 
 .trend-icon.improving {
-  color: #28a745;
+  color: #22c55e;
+  filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.4));
 }
 
 .trend-icon.declining {
-  color: #dc3545;
+  color: #ef4444;
+  filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.4));
 }
 
 .trend-icon.stable {
-  color: #6c757d;
+  color: #94a3b8;
+  filter: drop-shadow(0 2px 4px rgba(148, 163, 184, 0.3));
 }
 
 .mentor-rankings-card-metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .mentor-rankings-metric {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.mentor-rankings-metric:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 179, 0, 0.2);
+  transform: translateY(-2px);
 }
 
 .mentor-rankings-metric-label {
-  font-size: 12px;
-  color: #cccccc;
-  font-weight: 500;
+  font-size: 11px;
+  color: #b0b0b0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
 }
 
 .mentor-rankings-metric-value {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .star-rating {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .star {
-  font-size: 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .star.filled {
-  color: #ffc107;
+  color: #ffb300;
+  filter: drop-shadow(0 1px 2px rgba(255, 179, 0, 0.4));
 }
 
 .star.empty {
-  color: #e9ecef;
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .rating-number {
-  margin-left: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffb300;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .mentor-rankings-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
 }
 
 .mentor-rankings-percentile {
   font-size: 12px;
   color: #22c55e;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 .mentor-rankings-last-activity {
-  font-size: 12px;
-  color: #999999;
+  font-size: 11px;
+  color: #b0b0b0;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 /* Detailed Table */
