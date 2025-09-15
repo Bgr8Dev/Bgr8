@@ -10,15 +10,15 @@ import {
 } from 'react-icons/fa';
 import '../../styles/adminStyles/MobileAdminPortal.css';
 
-import { AdminSettings } from '../../pages/adminPages/AdminSettings';
-import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
-import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
-import { AdminMentorVerification } from '../../pages/adminPages/AdminMentorVerification';
+import { MobileAdminSettings } from './settings/MobileAdminSettings';
+import MobileAnalytics from './analytics/MobileAnalytics';
+import { MobileEnquiries } from './enquiries/MobileEnquiries';
+import { MobileMentorVerification } from './verification/MobileMentorVerification';
 import AdminTestingFeedback from '../../pages/adminPages/AdminTestingFeedback';
 import { MobileMentorManagement } from './mentors/MobileMentorManagement';
 import FeedbackAnalytics from './feedback/FeedbackAnalytics';
 import { SessionsManagement } from './sessions/SessionsManagement';
-import RoleManagement from './users/RoleManagement';
+import MobileRoleManagement from './users/MobileRoleManagement';
 import AmbassadorApplications from './ambassadors/AmbassadorApplications';
 
 
@@ -61,16 +61,13 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
 
   // Initialize scroll state when component mounts
   useEffect(() => {
-    console.log('Mobile Admin Portal - Total sections:', sections.length);
-    console.log('Sections:', sections.map(s => s.name));
-    
     const container = document.querySelector('.map-section-indicators') as HTMLElement;
     if (container) {
       const { scrollLeft, scrollWidth, clientWidth } = container;
       setCanScrollLeft(scrollLeft > 5);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
     }
-  }, [isOpen, sections]);
+  }, [isOpen]);
 
   if (!isOpen || !hasRole(userProfile, 'admin')) return null;
 
@@ -116,7 +113,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Role Management</h3>
             <div className="map-form-fields">
-              <RoleManagement />
+              <MobileRoleManagement />
             </div>
           </div>
         );
@@ -126,7 +123,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Analytics</h3>
             <div className="map-form-fields">
-              <AdminAnalytics />
+              <MobileAnalytics />
             </div>
           </div>
         );
@@ -136,7 +133,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Enquiries</h3>
             <div className="map-form-fields">
-              <AdminEnquiries />
+              <MobileEnquiries />
             </div>
           </div>
         );
@@ -168,7 +165,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Mentor Verification</h3>
             <div className="map-form-fields">
-              <AdminMentorVerification />
+              <MobileMentorVerification />
             </div>
           </div>
         );
@@ -218,7 +215,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Admin Settings</h3>
             <div className="map-form-fields">
-              <AdminSettings />
+              <MobileAdminSettings />
             </div>
           </div>
         );
