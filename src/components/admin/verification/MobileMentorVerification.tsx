@@ -208,6 +208,7 @@ export function MobileMentorVerification() {
             <button 
               className="clear-search-btn"
               onClick={() => setSearchTerm('')}
+              title="Clear search"
             >
               <FaTimes />
             </button>
@@ -224,7 +225,7 @@ export function MobileMentorVerification() {
             <button
               key={filterOption.key}
               className={`filter-tab ${filter === filterOption.key ? 'active' : ''}`}
-              onClick={() => setFilter(filterOption.key as any)}
+              onClick={() => setFilter(filterOption.key as 'all' | 'pending' | 'approved' | 'rejected')}
             >
               {filterOption.label}
               <span className="filter-count">({filterOption.count})</span>
@@ -345,6 +346,7 @@ export function MobileMentorVerification() {
               <button 
                 className="close-btn"
                 onClick={() => setShowApplicationModal(false)}
+                title="Close application modal"
               >
                 <FaTimes />
               </button>

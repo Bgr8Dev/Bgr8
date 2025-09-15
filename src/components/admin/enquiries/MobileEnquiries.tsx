@@ -207,6 +207,7 @@ export function MobileEnquiries() {
             <button 
               className="clear-search-btn"
               onClick={() => setSearchTerm('')}
+              title="Clear search"
             >
               <FaTimes />
             </button>
@@ -332,6 +333,7 @@ export function MobileEnquiries() {
               <button 
                 className="close-btn"
                 onClick={() => setShowEnquiryModal(false)}
+                title="Close enquiry modal"
               >
                 <FaTimes />
               </button>

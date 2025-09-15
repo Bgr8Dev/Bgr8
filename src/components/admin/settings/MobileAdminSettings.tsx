@@ -102,6 +102,7 @@ export function MobileAdminSettings() {
           <button 
             className="close-message"
             onClick={() => setUpdateMessage(null)}
+            title="Close message"
           >
             <FaTimes />
           </button>

@@ -97,6 +97,7 @@ class InstagramService {
     try {
       // For development/demo purposes, return mock data
       console.warn('Instagram API calls are blocked by CSP. Using mock data for development.');
+      console.log('Access token provided:', accessToken ? 'Yes' : 'No');
       
       // Mock user data for development
       const mockUser: InstagramUser = {
