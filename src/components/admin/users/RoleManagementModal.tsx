@@ -1,8 +1,8 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { FaTimes, FaShieldAlt } from 'react-icons/fa';
-import { useAuth } from '../../hooks/useAuth';
-import { hasRole } from '../../utils/userProfile';
+import { useAuth } from '../../../hooks/useAuth';
+import { hasRole } from '../../../utils/userProfile';
 import { Timestamp } from 'firebase/firestore';
 import './RoleManagementModal.css';
 

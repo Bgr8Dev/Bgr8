@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Booking, ExtendedBooking } from '../../types/bookings';
+import { Booking, ExtendedBooking } from '../../../types/bookings';
 
 interface BookingsTableProps {
   bookings: ExtendedBooking[];

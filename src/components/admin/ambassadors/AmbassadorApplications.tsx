@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
-import { firestore } from '../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { 
   FaEye, 
   FaCheck, 

@@ -11,12 +11,12 @@ import AdminAnalytics from './adminPages/AdminAnalytics';
 import { AdminEnquiries } from './adminPages/AdminEnquiries';
 import { AdminMentorVerification } from './adminPages/AdminMentorVerification';
 import AdminTestingFeedback from './adminPages/AdminTestingFeedback';
-import MentorManagement from '../components/admin/MentorManagement';
-import FeedbackAnalytics from '../components/admin/FeedbackAnalytics';
-import { SessionsManagement } from '../components/admin/SessionsManagement';
+import MentorManagement from '../components/admin/mentors/MentorManagement';
+import FeedbackAnalytics from '../components/admin/feedback/FeedbackAnalytics';
+import { SessionsManagement } from '../components/admin/sessions/SessionsManagement';
 import { MobileAdminPortal } from '../components/admin/MobileAdminPortal';
-import RoleManagement from '../components/admin/RoleManagement';
-import AmbassadorApplications from '../components/admin/AmbassadorApplications';
+import RoleManagement from '../components/admin/users/RoleManagement';
+import AmbassadorApplications from '../components/admin/ambassadors/AmbassadorApplications';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 

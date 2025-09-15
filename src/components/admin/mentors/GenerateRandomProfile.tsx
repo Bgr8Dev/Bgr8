@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { firestore } from '../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { collection, addDoc, getDocs, deleteDoc, setDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { FaRandom, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
-import { getName, MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
-import { Booking } from '../../types/bookings';
-import ukCounties from '../../constants/ukCounties';
-import industriesList from '../../constants/industries';
-import '../../styles/adminStyles/MentorManagement.css';
+import { getName, MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { Booking } from '../../../types/bookings';
+import ukCounties from '../../../constants/ukCounties';
+import industriesList from '../../../constants/industries';
+import '../../../styles/adminStyles/MentorManagement.css';
 
 // Import interfaces for availability
 interface TimeSlot {

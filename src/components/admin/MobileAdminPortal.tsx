@@ -15,7 +15,7 @@ import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
 import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
 import { AdminMentorVerification } from '../../pages/adminPages/AdminMentorVerification';
 import { MobileMentorManagement } from './MobileMentorManagement';
-import FeedbackAnalytics from './FeedbackAnalytics';
+import FeedbackAnalytics from './feedback/FeedbackAnalytics';
 import { SessionsManagement } from './SessionsManagement';
 import RoleManagement from './RoleManagement';
 

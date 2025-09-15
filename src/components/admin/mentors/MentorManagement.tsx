@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { firestore } from '../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where } from 'firebase/firestore';
-import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
-import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../widgets/MentorAlgorithm/CalCom/calComService';
-import { Booking } from '../../types/bookings';
+import { MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../../widgets/MentorAlgorithm/CalCom/calComService';
+import { Booking } from '../../../types/bookings';
 import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck, FaPoundSign } from 'react-icons/fa';
 import AdminMentorModal from './AdminMentorModal';
-import '../../styles/adminStyles/MentorManagement.css';
+import '../../../styles/adminStyles/MentorManagement.css';
 import BookingsTable from './BookingsTable';
 import BookingDetailsModal from './BookingDetailsModal';
 import BookingsGrouped from './BookingsGrouped';

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaInfoCircle, FaSave, FaUndo } from 'react-icons/fa';
-import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
-import ethnicityOptions from '../../constants/ethnicityOptions';
-import religionOptions from '../../constants/religionOptions';
-import ukEducationLevels from '../../constants/ukEducationLevels';
-import ukCounties from '../../constants/ukCounties';
-import '../../styles/adminStyles/AdminMentorModal.css';
+import { MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
+import ethnicityOptions from '../../../constants/ethnicityOptions';
+import religionOptions from '../../../constants/religionOptions';
+import ukEducationLevels from '../../../constants/ukEducationLevels';
+import ukCounties from '../../../constants/ukCounties';
+import '../../../styles/adminStyles/AdminMentorModal.css';
 
 interface AdminMentorModalProps {
   open: boolean;

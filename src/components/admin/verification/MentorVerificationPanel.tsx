@@ -7,9 +7,9 @@ import {
   FaFilter,
   FaSync
 } from 'react-icons/fa';
-import { VerificationService } from '../../services/verificationService';
-import { VerificationStatus, VerificationStep } from '../../types/verification';
-import { VerificationStatusBadge } from '../verification';
+import { VerificationService } from '../../../services/verificationService';
+import { VerificationStatus, VerificationStep } from '../../../types/verification';
+import { VerificationStatusBadge } from '../../verification';
 import './MentorVerificationPanel.css';
 
 interface MentorProfile {

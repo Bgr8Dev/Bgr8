@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle } from 'react-icons/fa';
-import PagePermissionsManager from '../../components/admin/PagePermissionsManager';
+import PagePermissionsManager from '../../components/admin/settings/PagePermissionsManager';
 import { PagePermissionsService } from '../../services/pagePermissionsService';
 import '../../styles/adminStyles/AdminSettings.css';
 

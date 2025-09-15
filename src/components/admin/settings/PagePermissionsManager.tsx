@@ -14,7 +14,7 @@ import {
   FaCheck,
   FaTimes
 } from 'react-icons/fa';
-import { PagePermissionsService, PagePermission } from '../../services/pagePermissionsService';
+import { PagePermissionsService, PagePermission } from '../../../services/pagePermissionsService';
 import './PagePermissionsManager.css';
 
 interface PagePermissionsManagerProps {
