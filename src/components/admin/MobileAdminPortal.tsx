@@ -14,6 +14,7 @@ import { MobileAdminSettings } from './settings/MobileAdminSettings';
 import MobileAnalytics from './analytics/MobileAnalytics';
 import { MobileEnquiries } from './enquiries/MobileEnquiries';
 import { MobileAdminEmails } from './emails/MobileAdminEmails';
+import MobileAdminAnnouncements from './announcements/MobileAdminAnnouncements';
 import { MobileMentorVerification } from './verification/MobileMentorVerification';
 import AdminTestingFeedback from '../../pages/adminPages/AdminTestingFeedback';
 import { MobileMentorManagement } from './mentors/MobileMentorManagement';
@@ -51,6 +52,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     { id: 'sessions', name: 'Sessions', icon: '📅' },
     { id: 'ambassadors', name: 'Ambassadors', icon: '🤝' },
     { id: 'emails', name: 'Emails', icon: '📬' },
+    { id: 'announcements', name: 'Announcements', icon: '📢' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
 
@@ -212,25 +214,35 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 9: // Emails
-        return (
-          <div className="map-section">
-            <h3 className="map-section-title">Email Management</h3>
-            <div className="map-form-fields">
-              <MobileAdminEmails />
+        case 9: // Emails
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Email Management</h3>
+              <div className="map-form-fields">
+                <MobileAdminEmails />
+              </div>
             </div>
-          </div>
-        );
+          );
 
-      case 10: // Settings
-        return (
-          <div className="map-section">
-            <h3 className="map-section-title">Admin Settings</h3>
-            <div className="map-form-fields">
-              <MobileAdminSettings />
+        case 10: // Announcements
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Announcement Management</h3>
+              <div className="map-form-fields">
+                <MobileAdminAnnouncements />
+              </div>
             </div>
-          </div>
-        );
+          );
+
+        case 11: // Settings
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Admin Settings</h3>
+              <div className="map-form-fields">
+                <MobileAdminSettings />
+              </div>
+            </div>
+          );
 
       default:
         return null;

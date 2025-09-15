@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FaUsers, 
-  FaChartBar, 
-  FaEnvelope, 
-  FaChalkboardTeacher, 
-  FaUserCheck, 
-  FaComments, 
+import {
+  FaUsers,
+  FaChartBar,
+  FaEnvelope,
+  FaChalkboardTeacher,
+  FaUserCheck,
+  FaComments,
   FaBug,
-  FaCalendarAlt, 
+  FaCalendarAlt,
   FaCog,
   FaMailBulk,
   FaHandshake,
+  FaBullhorn,
   FaSave,
   FaUndo,
   FaCheck,
@@ -23,19 +24,20 @@ interface PagePermissionsManagerProps {
   onPermissionsChange?: (permissions: PagePermission[]) => void;
 }
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  'users': FaUsers,
-  'analytics': FaChartBar,
-  'enquiries': FaEnvelope,
-  'mentors': FaChalkboardTeacher,
-  'verification': FaUserCheck,
-  'feedback': FaComments,
-  'testing-feedback': FaBug,
-  'sessions': FaCalendarAlt,
-  'ambassadors': FaHandshake,
-  'emails': FaMailBulk,
-  'settings': FaCog
-};
+  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    'users': FaUsers,
+    'analytics': FaChartBar,
+    'enquiries': FaEnvelope,
+    'mentors': FaChalkboardTeacher,
+    'verification': FaUserCheck,
+    'feedback': FaComments,
+    'testing-feedback': FaBug,
+    'sessions': FaCalendarAlt,
+    'ambassadors': FaHandshake,
+    'emails': FaMailBulk,
+    'announcements': FaBullhorn,
+    'settings': FaCog
+  };
 
 export const PagePermissionsManager: React.FC<PagePermissionsManagerProps> = ({ 
   onPermissionsChange 

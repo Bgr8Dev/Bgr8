@@ -118,6 +118,14 @@ export class PagePermissionsService {
       isEnabled: true
     },
     {
+      pageId: 'announcements',
+      pageName: 'Announcements',
+      description: 'Create and manage announcement banners for the website',
+      icon: 'FaBullhorn',
+      allowedRoles: ['admin', 'committee', 'marketing'],
+      isEnabled: true
+    },
+    {
       pageId: 'settings',
       pageName: 'Settings',
       description: 'Configure system settings and permissions',
