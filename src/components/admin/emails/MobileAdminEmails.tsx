@@ -18,8 +18,6 @@ import {
   FaListUl,
   FaLink,
   FaQuoteLeft,
-  FaUndo,
-  FaRedo,
   FaTimes,
   FaChevronDown,
   FaChevronUp
@@ -400,7 +398,7 @@ export function MobileAdminEmails() {
                     <label className="setting-label">Priority</label>
                     <select
                       value={currentDraft.priority}
-                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, priority: e.target.value as any }))}
+                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, priority: e.target.value as 'low' | 'normal' | 'high' }))}
                       className="priority-select"
                     >
                       <option value="low">Low</option>
@@ -623,7 +621,7 @@ export function MobileAdminEmails() {
                 <label>Category</label>
                 <select
                   value={templateForm.category || 'custom'}
-                  onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as any }))}
+                  onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as 'announcement' | 'newsletter' | 'notification' | 'invitation' | 'reminder' | 'custom' }))}
                 >
                   <option value="announcement">Announcement</option>
                   <option value="newsletter">Newsletter</option>

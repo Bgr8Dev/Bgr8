@@ -5,15 +5,12 @@ import {
   FaCheck, 
   FaTrash, 
   FaEnvelope, 
-  FaUndo, 
   FaTimes, 
   FaPaperPlane,
   FaSearch,
-  FaFilter,
   FaEye,
   FaReply,
   FaCalendarAlt,
-  FaUser,
   FaPhone,
   FaGlobe
 } from 'react-icons/fa';
@@ -226,7 +223,7 @@ export function MobileEnquiries() {
             <button
               key={filterOption.key}
               className={`filter-tab ${filter === filterOption.key ? 'active' : ''}`}
-              onClick={() => setFilter(filterOption.key as any)}
+              onClick={() => setFilter(filterOption.key as 'all' | 'pending' | 'read' | 'responded')}
             >
               {filterOption.label}
               <span className="filter-count">({filterOption.count})</span>

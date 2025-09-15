@@ -5,10 +5,7 @@ import {
   FaSync, 
   FaExclamationTriangle,
   FaBell,
-  FaUsers,
-  FaLock,
-  FaGlobe,
-  FaDatabase,
+  FaLock,  
   FaSave,
   FaCheck,
   FaTimes,
@@ -87,7 +84,7 @@ export function MobileAdminSettings() {
           <button
             key={tab.id}
             className={`settings-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as 'permissions' | 'general' | 'notifications' | 'security')}
           >
             {tab.icon}
             <span>{tab.label}</span>

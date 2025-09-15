@@ -3,10 +3,8 @@ import { firestore } from '../../../firebase/firebase';
 import { collection, query, getDocs, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { 
   FaUserCheck, 
-  FaUserTimes, 
   FaEye, 
   FaSearch,
-  FaFilter,
   FaCalendarAlt,
   FaEnvelope,
   FaPhone,
@@ -89,7 +87,7 @@ export function MobileMentorVerification() {
       setApplications(prev => 
         prev.map(app => 
           app.id === applicationId 
-            ? { ...app, status, reviewedBy: 'Admin', reviewedAt: new Date() as any, reviewNotes: notes || '' }
+            ? { ...app, status, reviewedBy: 'Admin', reviewedAt: Timestamp.now(), reviewNotes: notes || '' }
             : app
         )
       );
