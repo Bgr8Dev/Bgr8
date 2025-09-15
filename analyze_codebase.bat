@@ -16,4 +16,7 @@ python codebase_analyzer.py
 
 echo.
 echo ✅ Analysis complete!
+echo 📄 Changelog updated in the 'reports' folder
+echo    - Changelog: codebase_changelog.md
+echo.
 pause
