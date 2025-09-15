@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  FaEnvelope, 
   FaPaperPlane, 
   FaSave, 
   FaFolderOpen, 
@@ -25,45 +24,26 @@ import {
   FaQuoteLeft,
   FaCode,
   FaUndo,
-  FaRedo
+  FaRedo,
+  FaSpinner,
+  FaCheck,
+  FaTimes,
+  FaChartLine,
+  FaExclamationTriangle,
+  FaInfoCircle,
+  FaRocket,
+  FaMousePointer
 } from 'react-icons/fa';
+import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
+import { useAuth } from '../../hooks/useAuth';
 import '../../styles/adminStyles/AdminEmails.css';
 
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  category: 'announcement' | 'newsletter' | 'notification' | 'invitation' | 'reminder' | 'custom';
-}
-
-interface RecipientGroup {
-  id: string;
-  name: string;
-  description: string;
-  count: number;
-  type: 'all' | 'admins' | 'mentors' | 'mentees' | 'students' | 'custom';
-}
-
-interface EmailDraft {
-  id?: string;
-  subject: string;
-  content: string;
-  recipients: string[];
-  recipientGroups: string[];
-  templateId?: string;
-  isScheduled: boolean;
-  scheduledDate?: Date;
-  priority: 'low' | 'normal' | 'high';
-  trackOpens: boolean;
-  trackClicks: boolean;
-}
+// Interfaces are now imported from EmailService
 
 const AdminEmails: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts'>('compose');
-  const [currentDraft, setCurrentDraft] = useState<EmailDraft>({
+  const { userProfile } = useAuth();
+  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics'>('compose');
+  const [currentDraft, setCurrentDraft] = useState<Partial<EmailDraft>>({
     subject: '',
     content: '',
     recipients: [],
@@ -71,10 +51,15 @@ const AdminEmails: React.FC = () => {
     isScheduled: false,
     priority: 'normal',
     trackOpens: true,
-    trackClicks: true
+    trackClicks: true,
+    status: 'draft',
+    createdBy: userProfile?.uid || ''
   });
   
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [drafts, setDrafts] = useState<EmailDraft[]>([]);
+  const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
+  const [recipientGroups, setRecipientGroups] = useState<RecipientGroup[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateForm, setTemplateForm] = useState<Partial<EmailTemplate>>({});
@@ -82,75 +67,99 @@ const AdminEmails: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [analytics, setAnalytics] = useState({
+    totalSent: 0,
+    totalOpens: 0,
+    totalClicks: 0,
+    openRate: 0,
+    clickRate: 0,
+    bounceRate: 0
+  });
 
-  // Mock recipient groups
-  const recipientGroups: RecipientGroup[] = [
-    { id: 'all', name: 'All Users', description: 'All registered users', count: 1247, type: 'all' },
-    { id: 'admins', name: 'Administrators', description: 'Admin users only', count: 12, type: 'admins' },
-    { id: 'mentors', name: 'Mentors', description: 'Active mentors', count: 156, type: 'mentors' },
-    { id: 'mentees', name: 'Mentees', description: 'Students with mentors', count: 892, type: 'mentees' },
-    { id: 'students', name: 'Students', description: 'All students', count: 1103, type: 'students' }
-  ];
+  // Load data from Firebase
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const [templatesData, draftsData, sentEmailsData, recipientGroupsData, analyticsData] = await Promise.all([
+        EmailService.getTemplates(),
+        EmailService.getDrafts(),
+        EmailService.getSentEmails(),
+        EmailService.getRecipientGroups(),
+        EmailService.getEmailAnalytics()
+      ]);
 
-  // Mock templates
-  useEffect(() => {
-    const mockTemplates: EmailTemplate[] = [
-      {
-        id: '1',
-        name: 'Welcome Email',
-        subject: 'Welcome to bgr8!',
-        content: '<h2>Welcome to bgr8!</h2><p>We\'re excited to have you join our community...</p>',
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-15'),
-        category: 'announcement'
-      },
-      {
-        id: '2',
-        name: 'Weekly Newsletter',
-        subject: 'Weekly Update - {{week}}',
-        content: '<h2>Weekly Newsletter</h2><p>Here\'s what happened this week...</p>',
-        createdAt: new Date('2024-01-10'),
-        updatedAt: new Date('2024-01-20'),
-        category: 'newsletter'
-      },
-      {
-        id: '3',
-        name: 'Mentor Reminder',
-        subject: 'Upcoming Session Reminder',
-        content: '<h2>Session Reminder</h2><p>Don\'t forget about your upcoming session...</p>',
-        createdAt: new Date('2024-01-05'),
-        updatedAt: new Date('2024-01-18'),
-        category: 'reminder'
-      }
-    ];
-    setTemplates(mockTemplates);
+      setTemplates(templatesData);
+      setDrafts(draftsData);
+      setSentEmails(sentEmailsData);
+      setRecipientGroups(recipientGroupsData);
+      setAnalytics(analyticsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      showNotification('error', 'Failed to load email data');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const handleSaveTemplate = () => {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  const handleSaveTemplate = async () => {
     if (!templateForm.name || !templateForm.subject || !templateForm.content) {
-      alert('Please fill in all required fields');
+      showNotification('error', 'Please fill in all required fields');
       return;
     }
 
-    const newTemplate: EmailTemplate = {
-      id: selectedTemplate?.id || Date.now().toString(),
-      name: templateForm.name,
-      subject: templateForm.subject,
-      content: templateForm.content,
-      category: templateForm.category || 'custom',
-      createdAt: selectedTemplate?.createdAt || new Date(),
-      updatedAt: new Date()
-    };
+    try {
+      setIsSaving(true);
+      
+      if (selectedTemplate) {
+        // Update existing template
+        await EmailService.updateTemplate(selectedTemplate.id, {
+          name: templateForm.name,
+          subject: templateForm.subject,
+          content: templateForm.content,
+          category: templateForm.category || 'custom',
+          tags: templateForm.tags || [],
+          isPublic: templateForm.isPublic || false
+        });
+        showNotification('success', 'Template updated successfully!');
+      } else {
+        // Create new template
+        await EmailService.saveTemplate({
+          name: templateForm.name,
+          subject: templateForm.subject,
+          content: templateForm.content,
+          category: templateForm.category || 'custom',
+          createdBy: userProfile?.uid || '',
+          isPublic: templateForm.isPublic || false,
+          tags: templateForm.tags || []
+        });
+        showNotification('success', 'Template created successfully!');
+      }
 
-    if (selectedTemplate) {
-      setTemplates(prev => prev.map(t => t.id === selectedTemplate.id ? newTemplate : t));
-    } else {
-      setTemplates(prev => [...prev, newTemplate]);
+      // Reload templates
+      const updatedTemplates = await EmailService.getTemplates();
+      setTemplates(updatedTemplates);
+
+      setShowTemplateModal(false);
+      setTemplateForm({});
+      setSelectedTemplate(null);
+    } catch (error) {
+      console.error('Error saving template:', error);
+      showNotification('error', 'Failed to save template');
+    } finally {
+      setIsSaving(false);
     }
-
-    setShowTemplateModal(false);
-    setTemplateForm({});
-    setSelectedTemplate(null);
   };
 
   const handleLoadTemplate = (template: EmailTemplate) => {
@@ -161,39 +170,107 @@ const AdminEmails: React.FC = () => {
       templateId: template.id
     }));
     setActiveTab('compose');
+    showNotification('info', `Template "${template.name}" loaded successfully!`);
   };
 
   const handleSaveDraft = async () => {
-    setIsSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    alert('Draft saved successfully!');
+    if (!currentDraft.subject || !currentDraft.content) {
+      showNotification('error', 'Please fill in subject and content');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      const draftData = {
+        subject: currentDraft.subject || '',
+        content: currentDraft.content || '',
+        recipients: currentDraft.recipients || [],
+        recipientGroups: currentDraft.recipientGroups || [],
+        templateId: currentDraft.templateId,
+        isScheduled: currentDraft.isScheduled || false,
+        scheduledDate: currentDraft.scheduledDate,
+        priority: currentDraft.priority || 'normal',
+        trackOpens: currentDraft.trackOpens || true,
+        trackClicks: currentDraft.trackClicks || true,
+        status: 'draft' as const,
+        createdBy: userProfile?.uid || ''
+      };
+
+      await EmailService.saveDraft(draftData);
+      
+      // Reload drafts
+      const updatedDrafts = await EmailService.getDrafts();
+      setDrafts(updatedDrafts);
+      
+      showNotification('success', 'Draft saved successfully!');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      showNotification('error', 'Failed to save draft');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSendEmail = async () => {
     if (!currentDraft.subject || !currentDraft.content) {
-      alert('Please fill in subject and content');
+      showNotification('error', 'Please fill in subject and content');
       return;
     }
 
-    if (currentDraft.recipients.length === 0 && currentDraft.recipientGroups.length === 0) {
-      alert('Please select recipients');
+    if ((currentDraft.recipients?.length || 0) === 0 && (currentDraft.recipientGroups?.length || 0) === 0) {
+      showNotification('error', 'Please select recipients');
       return;
     }
 
-    // Simulate sending
-    alert('Email sent successfully!');
-    setCurrentDraft({
-      subject: '',
-      content: '',
-      recipients: [],
-      recipientGroups: [],
-      isScheduled: false,
-      priority: 'normal',
-      trackOpens: true,
-      trackClicks: true
-    });
+    try {
+      setIsSending(true);
+      
+      const draftData = {
+        subject: currentDraft.subject || '',
+        content: currentDraft.content || '',
+        recipients: currentDraft.recipients || [],
+        recipientGroups: currentDraft.recipientGroups || [],
+        templateId: currentDraft.templateId,
+        isScheduled: currentDraft.isScheduled || false,
+        scheduledDate: currentDraft.scheduledDate,
+        priority: currentDraft.priority || 'normal',
+        trackOpens: currentDraft.trackOpens || true,
+        trackClicks: currentDraft.trackClicks || true,
+        status: 'sent' as const,
+        createdBy: userProfile?.uid || ''
+      };
+
+      const result = await EmailService.sendEmail(draftData);
+      
+      if (result.success) {
+        showNotification('success', `Email sent successfully! Message ID: ${result.messageId}`);
+        
+        // Clear current draft
+        setCurrentDraft({
+          subject: '',
+          content: '',
+          recipients: [],
+          recipientGroups: [],
+          isScheduled: false,
+          priority: 'normal',
+          trackOpens: true,
+          trackClicks: true,
+          status: 'draft',
+          createdBy: userProfile?.uid || ''
+        });
+        
+        // Reload data
+        await loadData();
+      } else {
+        showNotification('error', result.error || 'Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      showNotification('error', 'Failed to send email');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const filteredTemplates = templates.filter(template => {
@@ -204,29 +281,105 @@ const AdminEmails: React.FC = () => {
   });
 
   const getTotalRecipients = () => {
-    let total = currentDraft.recipients.length;
-    currentDraft.recipientGroups.forEach(groupId => {
+    let total = currentDraft.recipients?.length || 0;
+    (currentDraft.recipientGroups || []).forEach(groupId => {
       const group = recipientGroups.find(g => g.id === groupId);
       if (group) total += group.count;
     });
     return total;
   };
 
+  if (isLoading) {
+    return (
+      <div className="email-admin-emails">
+        <div className="email-loading-container">
+          <div className="email-loading-spinner">
+            <FaSpinner className="email-spinner-icon" />
+            <h2>Loading Email Management...</h2>
+            <p>Setting up your email workspace</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="email-admin-emails">
+      {/* Notification */}
+      {notification && (
+        <div className={`email-notification email-notification-${notification.type}`}>
+          <div className="email-notification-content">
+            {notification.type === 'success' && <FaCheck />}
+            {notification.type === 'error' && <FaTimes />}
+            {notification.type === 'info' && <FaInfoCircle />}
+            <span>{notification.message}</span>
+          </div>
+          <button 
+            className="email-notification-close"
+            onClick={() => setNotification(null)}
+            title="Close notification"
+          >
+            <FaTimes />
+          </button>
+        </div>
+      )}
+
       <div className="email-emails-header">
         <div className="email-emails-header-content">
-          <h1>Email Management</h1>
-          <p>Compose, manage templates, and send emails to your community</p>
+          <div className="email-header-title">
+            <h1>
+              <FaRocket className="email-title-icon" />
+              Email Management
+            </h1>
+            <p>Compose, manage templates, and send emails to your community</p>
+          </div>
+          <div className="email-header-actions">
+            <button 
+              className="email-refresh-btn"
+              onClick={loadData}
+              disabled={isLoading}
+            >
+              <FaSpinner className={isLoading ? 'email-spinning' : ''} />
+              Refresh
+            </button>
+          </div>
         </div>
         <div className="email-emails-header-stats">
-          <div className="email-stat-item">
-            <FaEnvelope />
-            <span>{templates.length} Templates</span>
+          <div className="email-stat-item email-stat-templates">
+            <div className="email-stat-icon">
+              <FaFolderOpen />
+            </div>
+            <div className="email-stat-content">
+              <span className="email-stat-number">{templates.length}</span>
+              <span className="email-stat-label">Templates</span>
+            </div>
           </div>
-          <div className="email-stat-item">
-            <FaUsers />
-            <span>{recipientGroups.reduce((sum, group) => sum + group.count, 0)} Total Recipients</span>
+          <div className="email-stat-item email-stat-recipients">
+            <div className="email-stat-icon">
+              <FaUsers />
+            </div>
+            <div className="email-stat-content">
+              <span className="email-stat-number">{recipientGroups.reduce((sum, group) => sum + group.count, 0)}</span>
+              <span className="email-stat-label">Recipients</span>
+            </div>
+          </div>
+          <div className="email-stat-item email-stat-sent">
+            <div className="email-stat-icon">
+              <FaPaperPlane />
+            </div>
+            <div className="email-stat-content">
+              <span className="email-stat-number">{analytics.totalSent}</span>
+              <span className="email-stat-label">Sent</span>
+            </div>
+          </div>
+          <div className="email-stat-item email-stat-opens">
+            <div className="email-stat-icon">
+              <FaEye />
+            </div>
+            <div className="email-stat-content">
+              <span className="email-stat-number">{analytics.openRate.toFixed(1)}%</span>
+              <span className="email-stat-label">Open Rate</span>
+            </div>
           </div>
         </div>
       </div>
@@ -237,28 +390,43 @@ const AdminEmails: React.FC = () => {
           onClick={() => setActiveTab('compose')}
         >
           <FaEdit />
-          Compose
+          <span>Compose</span>
+          <div className="email-tab-indicator"></div>
         </button>
         <button 
           className={`email-emails-tab ${activeTab === 'templates' ? 'active' : ''}`}
           onClick={() => setActiveTab('templates')}
         >
           <FaFolderOpen />
-          Templates
+          <span>Templates</span>
+          <div className="email-tab-badge">{templates.length}</div>
+          <div className="email-tab-indicator"></div>
         </button>
         <button 
           className={`email-emails-tab ${activeTab === 'sent' ? 'active' : ''}`}
           onClick={() => setActiveTab('sent')}
         >
           <FaPaperPlane />
-          Sent
+          <span>Sent</span>
+          <div className="email-tab-badge">{sentEmails.length}</div>
+          <div className="email-tab-indicator"></div>
         </button>
         <button 
           className={`email-emails-tab ${activeTab === 'drafts' ? 'active' : ''}`}
           onClick={() => setActiveTab('drafts')}
         >
           <FaSave />
-          Drafts
+          <span>Drafts</span>
+          <div className="email-tab-badge">{drafts.length}</div>
+          <div className="email-tab-indicator"></div>
+        </button>
+        <button 
+          className={`email-emails-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          <FaChartLine />
+          <span>Analytics</span>
+          <div className="email-tab-indicator"></div>
         </button>
       </div>
 
@@ -290,15 +458,16 @@ const AdminEmails: React.FC = () => {
                       onClick={handleSaveDraft}
                       disabled={isSaving}
                     >
-                      <FaSave />
+                      {isSaving ? <FaSpinner className="email-spinning" /> : <FaSave />}
                       {isSaving ? 'Saving...' : 'Save Draft'}
                     </button>
                     <button 
                       className="email-action-btn email-send"
                       onClick={handleSendEmail}
+                      disabled={isSending}
                     >
-                      <FaPaperPlane />
-                      Send Email
+                      {isSending ? <FaSpinner className="email-spinning" /> : <FaPaperPlane />}
+                      {isSending ? 'Sending...' : 'Send Email'}
                     </button>
                   </div>
                 </div>
@@ -355,17 +524,17 @@ const AdminEmails: React.FC = () => {
                       <label key={group.id} className="email-recipient-group-item">
                         <input
                           type="checkbox"
-                          checked={currentDraft.recipientGroups.includes(group.id)}
+                          checked={(currentDraft.recipientGroups || []).includes(group.id)}
                           onChange={(e) => {
                             if (e.target.checked) {
                               setCurrentDraft(prev => ({
                                 ...prev,
-                                recipientGroups: [...prev.recipientGroups, group.id]
+                                recipientGroups: [...(prev.recipientGroups || []), group.id]
                               }));
                             } else {
                               setCurrentDraft(prev => ({
                                 ...prev,
-                                recipientGroups: prev.recipientGroups.filter(id => id !== group.id)
+                                recipientGroups: (prev.recipientGroups || []).filter(id => id !== group.id)
                               }));
                             }
                           }}
@@ -597,10 +766,127 @@ const AdminEmails: React.FC = () => {
 
         {activeTab === 'drafts' && (
           <div className="email-drafts-section">
-            <div className="email-drafts-placeholder">
-              <FaSave className="email-placeholder-icon" />
-              <h3>Draft Emails</h3>
-              <p>Your saved drafts will appear here</p>
+            <div className="email-drafts-header">
+              <h3>Saved Drafts</h3>
+              <p>Manage your email drafts</p>
+            </div>
+            <div className="email-drafts-list">
+              {drafts.length === 0 ? (
+                <div className="email-drafts-placeholder">
+                  <FaSave className="email-placeholder-icon" />
+                  <h3>No Drafts Yet</h3>
+                  <p>Your saved drafts will appear here</p>
+                </div>
+              ) : (
+                drafts.map(draft => (
+                  <div key={draft.id} className="email-draft-card">
+                    <div className="email-draft-header">
+                      <h4>{draft.subject || 'Untitled Draft'}</h4>
+                      <div className="email-draft-actions">
+                        <button 
+                          className="email-draft-action-btn"
+                          onClick={() => {
+                            setCurrentDraft(draft);
+                            setActiveTab('compose');
+                          }}
+                          title="Edit Draft"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          className="email-draft-action-btn email-delete"
+                          title="Delete Draft"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="email-draft-content">
+                      <p>{draft.content.replace(/<[^>]*>/g, '').substring(0, 100)}...</p>
+                    </div>
+                    <div className="email-draft-footer">
+                      <span className="email-draft-date">
+                        Updated {draft.updatedAt.toLocaleDateString()}
+                      </span>
+                      <span className="email-draft-recipients">
+                        {getTotalRecipients()} recipients
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="email-analytics-section">
+            <div className="email-analytics-header">
+              <h3>Email Analytics</h3>
+              <p>Track your email performance and engagement</p>
+            </div>
+            <div className="email-analytics-grid">
+              <div className="email-analytics-card email-analytics-sent">
+                <div className="email-analytics-icon">
+                  <FaPaperPlane />
+                </div>
+                <div className="email-analytics-content">
+                  <h4>Total Sent</h4>
+                  <span className="email-analytics-number">{analytics.totalSent}</span>
+                </div>
+              </div>
+              <div className="email-analytics-card email-analytics-opens">
+                <div className="email-analytics-icon">
+                  <FaEye />
+                </div>
+                <div className="email-analytics-content">
+                  <h4>Total Opens</h4>
+                  <span className="email-analytics-number">{analytics.totalOpens}</span>
+                </div>
+              </div>
+              <div className="email-analytics-card email-analytics-clicks">
+                <div className="email-analytics-icon">
+                  <FaMousePointer />
+                </div>
+                <div className="email-analytics-content">
+                  <h4>Total Clicks</h4>
+                  <span className="email-analytics-number">{analytics.totalClicks}</span>
+                </div>
+              </div>
+              <div className="email-analytics-card email-analytics-open-rate">
+                <div className="email-analytics-icon">
+                  <FaChartLine />
+                </div>
+                <div className="email-analytics-content">
+                  <h4>Open Rate</h4>
+                  <span className="email-analytics-number">{analytics.openRate.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div className="email-analytics-card email-analytics-click-rate">
+                <div className="email-analytics-icon">
+                  <FaMousePointer />
+                </div>
+                <div className="email-analytics-content">
+                  <h4>Click Rate</h4>
+                  <span className="email-analytics-number">{analytics.clickRate.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div className="email-analytics-card email-analytics-bounce-rate">
+                <div className="email-analytics-icon">
+                  <FaExclamationTriangle />
+                </div>
+                <div className="email-analytics-content">
+                  <h4>Bounce Rate</h4>
+                  <span className="email-analytics-number">{analytics.bounceRate.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+            <div className="email-analytics-chart">
+              <h4>Email Performance Over Time</h4>
+              <div className="email-chart-placeholder">
+                <FaChartLine className="email-chart-icon" />
+                <p>Chart visualization coming soon</p>
+              </div>
             </div>
           </div>
         )}
