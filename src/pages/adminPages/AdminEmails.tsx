@@ -8,12 +8,8 @@ import {
   FaEdit, 
   FaCopy,
   FaUsers,
-  FaUser,
-  FaUserTie,
-  FaGraduationCap,
   FaSearch,
   FaPlus,
-  FaMinus,
   FaEye,
   FaEyeSlash,
   FaBold,
@@ -217,48 +213,48 @@ const AdminEmails: React.FC = () => {
   };
 
   return (
-    <div className="admin-emails">
-      <div className="emails-header">
-        <div className="emails-header-content">
+    <div className="email-admin-emails">
+      <div className="email-emails-header">
+        <div className="email-emails-header-content">
           <h1>Email Management</h1>
           <p>Compose, manage templates, and send emails to your community</p>
         </div>
-        <div className="emails-header-stats">
-          <div className="stat-item">
+        <div className="email-emails-header-stats">
+          <div className="email-stat-item">
             <FaEnvelope />
             <span>{templates.length} Templates</span>
           </div>
-          <div className="stat-item">
+          <div className="email-stat-item">
             <FaUsers />
             <span>{recipientGroups.reduce((sum, group) => sum + group.count, 0)} Total Recipients</span>
           </div>
         </div>
       </div>
 
-      <div className="emails-tabs">
+      <div className="email-emails-tabs">
         <button 
-          className={`emails-tab ${activeTab === 'compose' ? 'active' : ''}`}
+          className={`email-emails-tab ${activeTab === 'compose' ? 'active' : ''}`}
           onClick={() => setActiveTab('compose')}
         >
           <FaEdit />
           Compose
         </button>
         <button 
-          className={`emails-tab ${activeTab === 'templates' ? 'active' : ''}`}
+          className={`email-emails-tab ${activeTab === 'templates' ? 'active' : ''}`}
           onClick={() => setActiveTab('templates')}
         >
           <FaFolderOpen />
           Templates
         </button>
         <button 
-          className={`emails-tab ${activeTab === 'sent' ? 'active' : ''}`}
+          className={`email-emails-tab ${activeTab === 'sent' ? 'active' : ''}`}
           onClick={() => setActiveTab('sent')}
         >
           <FaPaperPlane />
           Sent
         </button>
         <button 
-          className={`emails-tab ${activeTab === 'drafts' ? 'active' : ''}`}
+          className={`email-emails-tab ${activeTab === 'drafts' ? 'active' : ''}`}
           onClick={() => setActiveTab('drafts')}
         >
           <FaSave />
@@ -266,31 +262,31 @@ const AdminEmails: React.FC = () => {
         </button>
       </div>
 
-      <div className="emails-content">
+      <div className="email-emails-content">
         {activeTab === 'compose' && (
-          <div className="compose-section">
-            <div className="compose-layout">
-              <div className="compose-main">
-                <div className="compose-header">
-                  <div className="compose-subject">
+          <div className="email-compose-section">
+            <div className="email-compose-layout">
+              <div className="email-compose-main">
+                <div className="email-compose-header">
+                  <div className="email-compose-subject">
                     <input
                       type="text"
                       placeholder="Email subject..."
                       value={currentDraft.subject}
                       onChange={(e) => setCurrentDraft(prev => ({ ...prev, subject: e.target.value }))}
-                      className="subject-input"
+                      className="email-subject-input"
                     />
                   </div>
-                  <div className="compose-actions">
+                  <div className="email-compose-actions">
                     <button 
-                      className="action-btn preview"
+                      className="email-action-btn email-preview"
                       onClick={() => setShowPreview(!showPreview)}
                     >
                       {showPreview ? <FaEyeSlash /> : <FaEye />}
                       {showPreview ? 'Hide Preview' : 'Preview'}
                     </button>
                     <button 
-                      className="action-btn save"
+                      className="email-action-btn email-save"
                       onClick={handleSaveDraft}
                       disabled={isSaving}
                     >
@@ -298,7 +294,7 @@ const AdminEmails: React.FC = () => {
                       {isSaving ? 'Saving...' : 'Save Draft'}
                     </button>
                     <button 
-                      className="action-btn send"
+                      className="email-action-btn email-send"
                       onClick={handleSendEmail}
                     >
                       <FaPaperPlane />
@@ -307,56 +303,56 @@ const AdminEmails: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="compose-body">
-                  <div className="editor-toolbar">
-                    <div className="toolbar-group">
-                      <button className="toolbar-btn" title="Bold"><FaBold /></button>
-                      <button className="toolbar-btn" title="Italic"><FaItalic /></button>
-                      <button className="toolbar-btn" title="Underline"><FaUnderline /></button>
+                <div className="email-compose-body">
+                  <div className="email-editor-toolbar">
+                    <div className="email-toolbar-group">
+                      <button className="email-toolbar-btn" title="Bold"><FaBold /></button>
+                      <button className="email-toolbar-btn" title="Italic"><FaItalic /></button>
+                      <button className="email-toolbar-btn" title="Underline"><FaUnderline /></button>
                     </div>
-                    <div className="toolbar-group">
-                      <button className="toolbar-btn" title="Align Left"><FaAlignLeft /></button>
-                      <button className="toolbar-btn" title="Align Center"><FaAlignCenter /></button>
-                      <button className="toolbar-btn" title="Align Right"><FaAlignRight /></button>
+                    <div className="email-toolbar-group">
+                      <button className="email-toolbar-btn" title="Align Left"><FaAlignLeft /></button>
+                      <button className="email-toolbar-btn" title="Align Center"><FaAlignCenter /></button>
+                      <button className="email-toolbar-btn" title="Align Right"><FaAlignRight /></button>
                     </div>
-                    <div className="toolbar-group">
-                      <button className="toolbar-btn" title="Bullet List"><FaListUl /></button>
-                      <button className="toolbar-btn" title="Numbered List"><FaListOl /></button>
-                      <button className="toolbar-btn" title="Quote"><FaQuoteLeft /></button>
+                    <div className="email-toolbar-group">
+                      <button className="email-toolbar-btn" title="Bullet List"><FaListUl /></button>
+                      <button className="email-toolbar-btn" title="Numbered List"><FaListOl /></button>
+                      <button className="email-toolbar-btn" title="Quote"><FaQuoteLeft /></button>
                     </div>
-                    <div className="toolbar-group">
-                      <button className="toolbar-btn" title="Insert Link"><FaLink /></button>
-                      <button className="toolbar-btn" title="Insert Image"><FaImage /></button>
-                      <button className="toolbar-btn" title="Code"><FaCode /></button>
+                    <div className="email-toolbar-group">
+                      <button className="email-toolbar-btn" title="Insert Link"><FaLink /></button>
+                      <button className="email-toolbar-btn" title="Insert Image"><FaImage /></button>
+                      <button className="email-toolbar-btn" title="Code"><FaCode /></button>
                     </div>
-                    <div className="toolbar-group">
-                      <button className="toolbar-btn" title="Undo"><FaUndo /></button>
-                      <button className="toolbar-btn" title="Redo"><FaRedo /></button>
+                    <div className="email-toolbar-group">
+                      <button className="email-toolbar-btn" title="Undo"><FaUndo /></button>
+                      <button className="email-toolbar-btn" title="Redo"><FaRedo /></button>
                     </div>
                   </div>
 
-                  <div className="editor-content">
+                  <div className="email-editor-content">
                     <textarea
                       placeholder="Start writing your email..."
                       value={currentDraft.content}
                       onChange={(e) => setCurrentDraft(prev => ({ ...prev, content: e.target.value }))}
-                      className="content-editor"
+                      className="email-content-editor"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="compose-sidebar">
-                <div className="sidebar-section">
+              <div className="email-compose-sidebar">
+                <div className="email-sidebar-section">
                   <h3>Recipients</h3>
-                  <div className="recipients-summary">
-                    <span className="recipients-count">{getTotalRecipients()} recipients</span>
+                  <div className="email-recipients-summary">
+                    <span className="email-recipients-count">{getTotalRecipients()} recipients</span>
                   </div>
                   
-                  <div className="recipient-groups">
+                  <div className="email-recipient-groups">
                     <h4>Groups</h4>
                     {recipientGroups.map(group => (
-                      <label key={group.id} className="recipient-group-item">
+                      <label key={group.id} className="email-recipient-group-item">
                         <input
                           type="checkbox"
                           checked={currentDraft.recipientGroups.includes(group.id)}
@@ -374,34 +370,34 @@ const AdminEmails: React.FC = () => {
                             }
                           }}
                         />
-                        <div className="group-info">
-                          <span className="group-name">{group.name}</span>
-                          <span className="group-count">({group.count})</span>
+                        <div className="email-group-info">
+                          <span className="email-group-name">{group.name}</span>
+                          <span className="email-group-count">({group.count})</span>
                         </div>
                       </label>
                     ))}
                   </div>
 
-                  <div className="individual-recipients">
+                  <div className="email-individual-recipients">
                     <h4>Individual Recipients</h4>
-                    <div className="recipient-input">
+                    <div className="email-recipient-input">
                       <input
                         type="email"
                         placeholder="Add email address..."
-                        className="email-input"
+                        className="email-email-input"
                       />
-                      <button className="add-recipient-btn">
+                      <button className="email-add-recipient-btn" title="Add recipient">
                         <FaPlus />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="sidebar-section">
+                <div className="email-sidebar-section">
                   <h3>Email Settings</h3>
                   
-                  <div className="setting-group">
-                    <label className="setting-label">
+                  <div className="email-setting-group">
+                    <label className="email-setting-label">
                       <input
                         type="checkbox"
                         checked={currentDraft.isScheduled}
@@ -412,17 +408,17 @@ const AdminEmails: React.FC = () => {
                     {currentDraft.isScheduled && (
                       <input
                         type="datetime-local"
-                        className="datetime-input"
+                        className="email-datetime-input"
                       />
                     )}
                   </div>
 
-                  <div className="setting-group">
-                    <label className="setting-label">Priority</label>
+                  <div className="email-setting-group">
+                    <label className="email-setting-label">Priority</label>
                     <select
                       value={currentDraft.priority}
-                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, priority: e.target.value as any }))}
-                      className="priority-select"
+                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, priority: e.target.value as 'low' | 'normal' | 'high' }))}
+                      className="email-priority-select"
                     >
                       <option value="low">Low</option>
                       <option value="normal">Normal</option>
@@ -430,8 +426,8 @@ const AdminEmails: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="setting-group">
-                    <label className="setting-label">
+                  <div className="email-setting-group">
+                    <label className="email-setting-label">
                       <input
                         type="checkbox"
                         checked={currentDraft.trackOpens}
@@ -441,8 +437,8 @@ const AdminEmails: React.FC = () => {
                     </label>
                   </div>
 
-                  <div className="setting-group">
-                    <label className="setting-label">
+                  <div className="email-setting-group">
+                    <label className="email-setting-label">
                       <input
                         type="checkbox"
                         checked={currentDraft.trackClicks}
@@ -453,21 +449,21 @@ const AdminEmails: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="sidebar-section">
+                <div className="email-sidebar-section">
                   <h3>Templates</h3>
-                  <div className="template-quick-access">
+                  <div className="email-template-quick-access">
                     {templates.slice(0, 3).map(template => (
                       <button
                         key={template.id}
-                        className="template-quick-btn"
+                        className="email-template-quick-btn"
                         onClick={() => handleLoadTemplate(template)}
                       >
-                        <span className="template-name">{template.name}</span>
+                        <span className="email-template-name">{template.name}</span>
                         <FaCopy />
                       </button>
                     ))}
                     <button
-                      className="template-quick-btn view-all"
+                      className="email-template-quick-btn email-view-all"
                       onClick={() => setActiveTab('templates')}
                     >
                       View All Templates
@@ -478,13 +474,13 @@ const AdminEmails: React.FC = () => {
             </div>
 
             {showPreview && (
-              <div className="email-preview">
+              <div className="email-email-preview">
                 <h3>Email Preview</h3>
-                <div className="preview-content">
-                  <div className="preview-header">
+                <div className="email-preview-content">
+                  <div className="email-preview-header">
                     <strong>Subject:</strong> {currentDraft.subject || 'No subject'}
                   </div>
-                  <div className="preview-body">
+                  <div className="email-preview-body">
                     {currentDraft.content ? (
                       <div dangerouslySetInnerHTML={{ __html: currentDraft.content.replace(/\n/g, '<br>') }} />
                     ) : (
@@ -498,10 +494,10 @@ const AdminEmails: React.FC = () => {
         )}
 
         {activeTab === 'templates' && (
-          <div className="templates-section">
-            <div className="templates-header">
-              <div className="templates-controls">
-                <div className="search-box">
+          <div className="email-templates-section">
+            <div className="email-templates-header">
+              <div className="email-templates-controls">
+                <div className="email-search-box">
                   <FaSearch />
                   <input
                     type="text"
@@ -513,7 +509,7 @@ const AdminEmails: React.FC = () => {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="category-filter"
+                  className="email-category-filter"
                 >
                   <option value="all">All Categories</option>
                   <option value="announcement">Announcements</option>
@@ -524,7 +520,7 @@ const AdminEmails: React.FC = () => {
                   <option value="custom">Custom</option>
                 </select>
                 <button
-                  className="create-template-btn"
+                  className="email-create-template-btn"
                   onClick={() => {
                     setTemplateForm({});
                     setSelectedTemplate(null);
@@ -537,21 +533,21 @@ const AdminEmails: React.FC = () => {
               </div>
             </div>
 
-            <div className="templates-grid">
+            <div className="email-templates-grid">
               {filteredTemplates.map(template => (
-                <div key={template.id} className="template-card">
-                  <div className="template-header">
+                <div key={template.id} className="email-template-card">
+                  <div className="email-template-header">
                     <h3>{template.name}</h3>
-                    <div className="template-actions">
+                    <div className="email-template-actions">
                       <button
-                        className="template-action-btn"
+                        className="email-template-action-btn"
                         onClick={() => handleLoadTemplate(template)}
                         title="Use Template"
                       >
                         <FaCopy />
                       </button>
                       <button
-                        className="template-action-btn"
+                        className="email-template-action-btn"
                         onClick={() => {
                           setTemplateForm(template);
                           setSelectedTemplate(template);
@@ -562,24 +558,24 @@ const AdminEmails: React.FC = () => {
                         <FaEdit />
                       </button>
                       <button
-                        className="template-action-btn delete"
+                        className="email-template-action-btn email-delete"
                         title="Delete Template"
                       >
                         <FaTrash />
                       </button>
                     </div>
                   </div>
-                  <div className="template-content">
-                    <div className="template-subject">
+                  <div className="email-template-content">
+                    <div className="email-template-subject">
                       <strong>Subject:</strong> {template.subject}
                     </div>
-                    <div className="template-preview">
+                    <div className="email-template-preview">
                       {template.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
                     </div>
                   </div>
-                  <div className="template-footer">
-                    <span className="template-category">{template.category}</span>
-                    <span className="template-date">
+                  <div className="email-template-footer">
+                    <span className="email-template-category">{template.category}</span>
+                    <span className="email-template-date">
                       Updated {template.updatedAt.toLocaleDateString()}
                     </span>
                   </div>
@@ -590,9 +586,9 @@ const AdminEmails: React.FC = () => {
         )}
 
         {activeTab === 'sent' && (
-          <div className="sent-section">
-            <div className="sent-placeholder">
-              <FaPaperPlane className="placeholder-icon" />
+          <div className="email-sent-section">
+            <div className="email-sent-placeholder">
+              <FaPaperPlane className="email-placeholder-icon" />
               <h3>Sent Emails</h3>
               <p>Your sent emails will appear here</p>
             </div>
@@ -600,9 +596,9 @@ const AdminEmails: React.FC = () => {
         )}
 
         {activeTab === 'drafts' && (
-          <div className="drafts-section">
-            <div className="drafts-placeholder">
-              <FaSave className="placeholder-icon" />
+          <div className="email-drafts-section">
+            <div className="email-drafts-placeholder">
+              <FaSave className="email-placeholder-icon" />
               <h3>Draft Emails</h3>
               <p>Your saved drafts will appear here</p>
             </div>
@@ -612,20 +608,20 @@ const AdminEmails: React.FC = () => {
 
       {/* Template Modal */}
       {showTemplateModal && (
-        <div className="template-modal-overlay" onClick={() => setShowTemplateModal(false)}>
-          <div className="template-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="email-template-modal-overlay" onClick={() => setShowTemplateModal(false)}>
+          <div className="email-template-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="email-modal-header">
               <h3>{selectedTemplate ? 'Edit Template' : 'Create Template'}</h3>
               <button 
-                className="close-btn"
+                className="email-close-btn"
                 onClick={() => setShowTemplateModal(false)}
               >
                 ×
               </button>
             </div>
             
-            <div className="modal-content">
-              <div className="form-group">
+            <div className="email-modal-content">
+              <div className="email-form-group">
                 <label>Template Name</label>
                 <input
                   type="text"
@@ -635,11 +631,11 @@ const AdminEmails: React.FC = () => {
                 />
               </div>
               
-              <div className="form-group">
+              <div className="email-form-group">
                 <label>Category</label>
                 <select
                   value={templateForm.category || 'custom'}
-                  onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as any }))}
+                  onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as 'announcement' | 'newsletter' | 'notification' | 'invitation' | 'reminder' | 'custom' }))}
                 >
                   <option value="announcement">Announcement</option>
                   <option value="newsletter">Newsletter</option>
@@ -650,7 +646,7 @@ const AdminEmails: React.FC = () => {
                 </select>
               </div>
               
-              <div className="form-group">
+              <div className="email-form-group">
                 <label>Subject</label>
                 <input
                   type="text"
@@ -660,7 +656,7 @@ const AdminEmails: React.FC = () => {
                 />
               </div>
               
-              <div className="form-group">
+              <div className="email-form-group">
                 <label>Content</label>
                 <textarea
                   value={templateForm.content || ''}
@@ -671,15 +667,15 @@ const AdminEmails: React.FC = () => {
               </div>
             </div>
             
-            <div className="modal-actions">
+            <div className="email-modal-actions">
               <button
-                className="modal-btn cancel"
+                className="email-modal-btn email-cancel"
                 onClick={() => setShowTemplateModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="modal-btn save"
+                className="email-modal-btn email-save"
                 onClick={handleSaveTemplate}
               >
                 {selectedTemplate ? 'Update Template' : 'Create Template'}
