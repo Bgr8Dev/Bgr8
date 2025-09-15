@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.8.0-Dunkirk] - 2025-09-16
+
+### 🔧 Pre-release
+**Release Name:** Dunkirk
+
+### ✨ Added New features and enhancements
+- Add Instagram API Integration and Setup Documentation
+- Enhance BGr8 Page with New Sections and Instagram Feed Integration
+- Refactor Footer Component by Removing Contact Section and Adding useLocation Hook
+- Implement Smart Navigation in Footer Component
+- Add Privacy Policy Page and Navigation Route
+- Add Terms of Service Page and Update Navigation
+- Add Ambassador Section to BGr8 Page
+- Add Ambassador Page and Update Navigation
+- Add Social Media Integration to Ambassador Page
+- Add Ambassador Applications Management Component
+- Implement Ambassador Role Management and Update User Profiles
+- Add Tooltip Functionality and User ID Management in Ambassador Applications
+- Implement Notification Modal in Ambassador Components
+- Implement Ambassador Count Fetching Across Components
+- Refactor CSS Imports and Add New Styles for Landing, Privacy Policy, and Terms of Service Pages
+- Add Sessions Management Component with Enhanced Styling and Functionality
+- Add Instagram API Integration Setup Guide and Professionalization Roadmap
+- Add AdminTestingFeedback User Guide
+- Add Admin Portal Overview Documentation
+- Add Ambassador Program Section to README.md
+- Enhance Accessibility Features in Settings Component
+- Add Ambassador Applications and Feedback Analytics Components
+- Remove padding from .admin-content in AdminPortal.css to streamline layout and enhance visual consistency.
+- Enhance MobileAdminPortal with New Sections and Improved Navigation
+- Implement Mobile Enquiries and Admin Settings Components for Enhanced Admin Functionality
+- Add Email Management Functionality to Admin Portal
+- Enhance AdminEmails Component with New Features and Improved Data Management
+- Add Rich Text Editor Component for Enhanced Email Composition
+- Add Announcement Management System with Admin and Mobile Interfaces
+- Add Codebase Analysis Tool with Batch Script and Python Script
+- Add Title Attributes to Buttons for Improved Accessibility
+
+### 🐛 Fixed Bug fixes and improvements
+- Fix header casing in BGr8 component from "BGr8" to "Bgr8" for consistency.
+
+### 📚 Documentation Documentation updates
+- Enhance Admin Portal Documentation with User Guide and API Integration Details
+- Remove Announcement Banner Documentation and Refactor Announcement Service
+
+### 🎨 Changed Code style and formatting changes
+- Enhance BGr8 CSS Styles with Improved Layout and Animation Effects
+- Refactor Settings Component and Styles for Consistency
+- Refactor MentorRanking Component and Styles for Enhanced Usability and Aesthetics
+- Enhance MentorRanking Component Styles for Improved Visual Appeal and Usability
+- Enhance Announcement Management with Customization Options and Improved UI
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor Firebase Integration in Ambassador Page
+- Refactor MobileAdminPortal and FeedbackAnalytics for Improved Structure and Usability
+- Refactor AdminEmails Component for Improved Structure and Consistency
+- Refactor RichTextEditor Component for Enhanced Functionality and Usability
+- Refactor App Structure to Integrate Announcement Banner
+- Refactor MobileAdminEmails and InstagramFeed Components for Improved Functionality
+- Refactor Mobile Components for Type Safety and Code Cleanup
+
+### 🔧 Changed Maintenance tasks and chores
+- Update BGr8 Page Contact Section Heading for Clarity
+- Enhance Ambassador Applications Styling and Structure
+- Enhance AnnouncementBanner with Dismiss Functionality and CSS Improvements
+- Update .gitignore to Correctly Ignore Reports Directory
+
+### 🛡️ Security Security improvements
+- Update Content Security Policy to Include Google User Content
+- Enhance Ambassador Page with Loading and Authentication States
+
+**Total Changes:** 52 commits
+**Code Changes:** +30,813 insertions, -2,525 deletions
+
+---
 ## [v0.7.2-Ambassadors] - 2025-09-14
 
 ### 🔧 Pre-release
@@ -769,6 +844,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.8.0-Dunkirk]: https://github.com/Hum2a/B8/releases/tag/v0.8.0-Dunkirk
 [v0.7.2-Ambassadors]: https://github.com/Hum2a/B8/releases/tag/v0.7.2-Ambassadors
 [v0.7.1]: https://github.com/Hum2a/B8/releases/tag/v0.7.1
 [v0.7.0-Eruption]: https://github.com/Hum2a/B8/releases/tag/v0.7.0-Eruption
