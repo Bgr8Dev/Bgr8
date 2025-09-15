@@ -99,11 +99,10 @@ export class AnnouncementService {
   static async getActiveAnnouncements(): Promise<Announcement[]> {
     try {
       const now = new Date();
+      // Simplified query to avoid index issues - we'll filter in memory
       const q = query(
         collection(firestore, this.COLLECTION_NAME),
         where('isActive', '==', true),
-        where('startDate', '<=', now),
-        orderBy('priority', 'desc'),
         orderBy('createdAt', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -117,9 +116,24 @@ export class AnnouncementService {
           startDate: doc.data().startDate?.toDate() || new Date(),
           endDate: doc.data().endDate?.toDate(),
         }))
-        .filter(announcement => 
-          !announcement.endDate || announcement.endDate > now
-        ) as Announcement[];
+        .filter(announcement => {
+          // Filter by date range in memory
+          const isWithinDateRange = announcement.startDate <= now && 
+            (!announcement.endDate || announcement.endDate > now);
+          return isWithinDateRange;
+        })
+        .sort((a, b) => {
+          // Sort by priority first, then by creation date
+          const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
+          const aPriority = priorityOrder[a.priority] || 2;
+          const bPriority = priorityOrder[b.priority] || 2;
+          
+          if (aPriority !== bPriority) {
+            return bPriority - aPriority; // Higher priority first
+          }
+          
+          return b.createdAt.getTime() - a.createdAt.getTime(); // Newer first
+        }) as Announcement[];
     } catch (error) {
       console.error('Error fetching active announcements:', error);
       throw new Error('Failed to fetch active announcements');

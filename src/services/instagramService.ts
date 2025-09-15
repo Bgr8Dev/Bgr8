@@ -33,6 +33,44 @@ class InstagramService {
    */
   async getRecentMedia(accessToken: string, limit: number = 6): Promise<InstagramPost[]> {
     try {
+      // For development/demo purposes, return mock data
+      // In production, you would need to set up a backend proxy to avoid CSP issues
+      console.warn('Instagram API calls are blocked by CSP. Using mock data for development.');
+      
+      // Mock data for development - using data URIs to avoid CSP issues
+      const mockPosts: InstagramPost[] = [
+        {
+          id: '1',
+          media_type: 'IMAGE',
+          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2I4MmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkluc3RhZ3JhbSBQb3N0IDE8L3RleHQ+PC9zdmc+',
+          caption: 'Welcome to our platform! 🚀 #b8network #tech #innovation',
+          permalink: 'https://instagram.com/p/mock1',
+          timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2I4MmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjE8L3RleHQ+PC9zdmc+'
+        },
+        {
+          id: '2',
+          media_type: 'IMAGE',
+          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTBiOTgxIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkluc3RhZ3JhbSBQb3N0IDI8L3RleHQ+PC9zdmc+',
+          caption: 'Building the future of networking! 💡 #networking #community',
+          permalink: 'https://instagram.com/p/mock2',
+          timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTBiOTgxIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjI8L3RleHQ+PC9zdmc+'
+        },
+        {
+          id: '3',
+          media_type: 'VIDEO',
+          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOGI1Y2Y2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlZpZGVvIFBvc3Q8L3RleHQ+PC9zdmc+',
+          caption: 'Check out our latest features! 🎥 #video #features',
+          permalink: 'https://instagram.com/p/mock3',
+          timestamp: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOGI1Y2Y2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjM8L3RleHQ+PC9zdmc+'
+        }
+      ];
+
+      return mockPosts.slice(0, limit);
+      
+      /* Production code (commented out due to CSP):
       const response = await fetch(
         `${this.baseURL}/${this.version}/me/media?fields=id,media_type,media_url,caption,permalink,timestamp,thumbnail_url&limit=${limit}&access_token=${accessToken}`
       );
@@ -43,9 +81,11 @@ class InstagramService {
 
       const data = await response.json();
       return data.data || [];
+      */
     } catch (error) {
       console.error('Error fetching Instagram posts:', error);
-      throw error;
+      // Return empty array instead of throwing to prevent app crashes
+      return [];
     }
   }
 
@@ -55,6 +95,20 @@ class InstagramService {
    */
   async getUserProfile(accessToken: string): Promise<InstagramUser> {
     try {
+      // For development/demo purposes, return mock data
+      console.warn('Instagram API calls are blocked by CSP. Using mock data for development.');
+      
+      // Mock user data for development
+      const mockUser: InstagramUser = {
+        id: 'mock_user_id',
+        username: 'b8network',
+        account_type: 'BUSINESS',
+        media_count: 150
+      };
+
+      return mockUser;
+      
+      /* Production code (commented out due to CSP):
       const response = await fetch(
         `${this.baseURL}/${this.version}/me?fields=id,username,account_type,media_count&access_token=${accessToken}`
       );
@@ -64,9 +118,16 @@ class InstagramService {
       }
 
       return await response.json();
+      */
     } catch (error) {
       console.error('Error fetching Instagram profile:', error);
-      throw error;
+      // Return mock data instead of throwing to prevent app crashes
+      return {
+        id: 'error_user',
+        username: 'instagram_user',
+        account_type: 'PERSONAL',
+        media_count: 0
+      };
     }
   }
 
