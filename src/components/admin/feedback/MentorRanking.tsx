@@ -149,51 +149,51 @@ export default function MentorRanking({
   const renderLeaderboardCard = (mentor: MentorMetrics) => (
     <div 
       key={mentor.mentorId} 
-      className={`mentor-card ${selectedMentors.has(mentor.mentorId) ? 'selected' : ''}`}
+      className={`mentor-rankings-card ${selectedMentors.has(mentor.mentorId) ? 'mentor-rankings-selected' : ''}`}
       onClick={() => handleSelectMentor(mentor.mentorId)}
     >
-      <div className="card-header">
-        <div className="rank-section">
+      <div className="mentor-rankings-card-header">
+        <div className="mentor-rankings-rank-section">
           {getRankIcon(mentor.rank)}
         </div>
-        <div className="mentor-info">
-          <h3 className="mentor-name">{mentor.mentorName}</h3>
-          <p className="mentor-id">ID: {mentor.mentorId.substring(0, 8)}...</p>
+        <div className="mentor-rankings-mentor-info">
+          <h3 className="mentor-rankings-mentor-name">{mentor.mentorName}</h3>
+          <p className="mentor-rankings-mentor-id">ID: {mentor.mentorId.substring(0, 8)}...</p>
         </div>
-        <div className="trend-section">
+        <div className="mentor-rankings-trend-section">
           {getTrendIcon(mentor.trend)}
         </div>
       </div>
       
-      <div className="card-metrics">
-        <div className="metric">
-          <span className="metric-label">Overall Rating</span>
-          <div className="metric-value">
+      <div className="mentor-rankings-card-metrics">
+        <div className="mentor-rankings-metric">
+          <span className="mentor-rankings-metric-label">Overall Rating</span>
+          <div className="mentor-rankings-metric-value">
             {renderStarRating(mentor.averageRating)}
           </div>
         </div>
         
-        <div className="metric">
-          <span className="metric-label">Feedback Count</span>
-          <span className="metric-value">{mentor.totalFeedback}</span>
+        <div className="mentor-rankings-metric">
+          <span className="mentor-rankings-metric-label">Feedback Count</span>
+          <span className="mentor-rankings-metric-value">{mentor.totalFeedback}</span>
         </div>
         
-        <div className="metric">
-          <span className="metric-label">Response Rate</span>
-          <span className="metric-value">{mentor.responseRate.toFixed(1)}%</span>
+        <div className="mentor-rankings-metric">
+          <span className="mentor-rankings-metric-label">Response Rate</span>
+          <span className="mentor-rankings-metric-value">{mentor.responseRate.toFixed(1)}%</span>
         </div>
         
-        <div className="metric">
-          <span className="metric-label">Consistency</span>
-          <span className="metric-value">{mentor.consistency.toFixed(2)}</span>
+        <div className="mentor-rankings-metric">
+          <span className="mentor-rankings-metric-label">Consistency</span>
+          <span className="mentor-rankings-metric-value">{mentor.consistency.toFixed(2)}</span>
         </div>
       </div>
       
-      <div className="card-footer">
-        <div className="percentile">
+      <div className="mentor-rankings-card-footer">
+        <div className="mentor-rankings-percentile">
           Top {mentor.percentile}% of mentors
         </div>
-        <div className="last-activity">
+        <div className="mentor-rankings-last-activity">
           Last active: {mentor.lastActivity.toLocaleDateString()}
         </div>
       </div>
@@ -201,8 +201,8 @@ export default function MentorRanking({
   );
 
   const renderDetailedTable = () => (
-    <div className="detailed-table-container">
-      <table className="mentor-table">
+    <div className="mentor-rankings-detailed-table-container">
+      <table className="mentor-rankings-table">
         <thead>
           <tr>
             <th>Rank</th>
@@ -220,37 +220,37 @@ export default function MentorRanking({
         </thead>
         <tbody>
           {filteredAndSortedMentors.map(mentor => (
-            <tr key={mentor.mentorId} className={selectedMentors.has(mentor.mentorId) ? 'selected' : ''}>
-              <td className="rank-cell">
+            <tr key={mentor.mentorId} className={selectedMentors.has(mentor.mentorId) ? 'mentor-rankings-selected' : ''}>
+              <td className="mentor-rankings-rank-cell">
                 {getRankIcon(mentor.rank)}
               </td>
-              <td className="mentor-cell">
-                <div className="mentor-info">
-                  <div className="mentor-name">{mentor.mentorName}</div>
-                  <div className="mentor-id">{mentor.mentorId.substring(0, 8)}...</div>
+              <td className="mentor-rankings-mentor-cell">
+                <div className="mentor-rankings-mentor-info">
+                  <div className="mentor-rankings-mentor-name">{mentor.mentorName}</div>
+                  <div className="mentor-rankings-mentor-id">{mentor.mentorId.substring(0, 8)}...</div>
                 </div>
               </td>
-              <td className="rating-cell">
+              <td className="mentor-rankings-rating-cell">
                 {renderStarRating(mentor.averageRating)}
               </td>
-              <td className="rating-cell">
+              <td className="mentor-rankings-rating-cell">
                 {renderStarRating(mentor.averageHelpfulness)}
               </td>
-              <td className="rating-cell">
+              <td className="mentor-rankings-rating-cell">
                 {renderStarRating(mentor.averageComfort)}
               </td>
-              <td className="rating-cell">
+              <td className="mentor-rankings-rating-cell">
                 {renderStarRating(mentor.averageSupport)}
               </td>
-              <td className="number-cell">{mentor.totalFeedback}</td>
-              <td className="number-cell">{mentor.responseRate.toFixed(1)}%</td>
-              <td className="number-cell">{mentor.consistency.toFixed(2)}</td>
-              <td className="trend-cell">
+              <td className="mentor-rankings-number-cell">{mentor.totalFeedback}</td>
+              <td className="mentor-rankings-number-cell">{mentor.responseRate.toFixed(1)}%</td>
+              <td className="mentor-rankings-number-cell">{mentor.consistency.toFixed(2)}</td>
+              <td className="mentor-rankings-trend-cell">
                 {getTrendIcon(mentor.trend)}
               </td>
-              <td className="actions-cell">
+              <td className="mentor-rankings-actions-cell">
                 <button 
-                  className="expand-btn"
+                  className="mentor-rankings-expand-btn"
                   onClick={() => setExpandedMentor(expandedMentor === mentor.mentorId ? null : mentor.mentorId)}
                 >
                   {expandedMentor === mentor.mentorId ? <FaEyeSlash /> : <FaEye />}
@@ -264,9 +264,9 @@ export default function MentorRanking({
   );
 
   const renderMentorDetails = (mentor: MentorMetrics) => (
-    <div className="mentor-details">
-      <div className="details-grid">
-        <div className="detail-section">
+    <div className="mentor-rankings-mentor-details">
+      <div className="mentor-rankings-details-grid">
+        <div className="mentor-rankings-detail-section">
           <h4>Top Strengths</h4>
           <ul>
             {mentor.topStrengths.map((strength, index) => (
@@ -275,7 +275,7 @@ export default function MentorRanking({
           </ul>
         </div>
         
-        <div className="detail-section">
+        <div className="mentor-rankings-detail-section">
           <h4>Common Improvements</h4>
           <ul>
             {mentor.commonImprovements.map((improvement, index) => (
@@ -284,15 +284,15 @@ export default function MentorRanking({
           </ul>
         </div>
         
-        <div className="detail-section">
+        <div className="mentor-rankings-detail-section">
           <h4>Recent Feedback</h4>
-          <div className="recent-feedback">
+          <div className="mentor-rankings-recent-feedback">
             {mentor.recentFeedback.slice(0, 3).map(feedback => (
-              <div key={feedback.id} className="feedback-item">
-                <div className="feedback-rating">
+              <div key={feedback.id} className="mentor-rankings-feedback-item">
+                <div className="mentor-rankings-feedback-rating">
                   {renderStarRating(feedback.overallRating, false)}
                 </div>
-                <div className="feedback-text">
+                <div className="mentor-rankings-feedback-text">
                   {feedback.strengths && (
                     <p><strong>Strength:</strong> {feedback.strengths}</p>
                   )}
@@ -300,7 +300,7 @@ export default function MentorRanking({
                     <p><strong>Improvement:</strong> {feedback.improvements}</p>
                   )}
                 </div>
-                <div className="feedback-date">
+                <div className="mentor-rankings-feedback-date">
                   {feedback.submittedAt.toLocaleDateString()}
                 </div>
               </div>
@@ -313,9 +313,9 @@ export default function MentorRanking({
 
   if (loading) {
     return (
-      <div className="mentor-ranking">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+      <div className="mentor-rankings">
+        <div className="mentor-rankings-loading-container">
+          <div className="mentor-rankings-loading-spinner"></div>
           <p>Loading mentor rankings...</p>
         </div>
       </div>
@@ -323,23 +323,23 @@ export default function MentorRanking({
   }
 
   return (
-    <div className="mentor-ranking">
-      <div className="ranking-header">
-        <div className="header-content">
+    <div className="mentor-rankings">
+      <div className="mentor-rankings-header">
+        <div className="mentor-rankings-header-content">
           <h2>Mentor Rankings & Analytics</h2>
           <p>Comprehensive performance analysis and rankings</p>
         </div>
-        <div className="header-actions">
+        <div className="mentor-rankings-header-actions">
           <button 
-            className="refresh-btn" 
+            className="mentor-rankings-refresh-btn" 
             onClick={onRefresh}
             disabled={loading}
             title="Refresh data"
           >
-            <FaSync className={loading ? 'spinning' : ''} />
+            <FaSync className={loading ? 'mentor-rankings-spinning' : ''} />
           </button>
           <button 
-            className="export-btn" 
+            className="mentor-rankings-export-btn" 
             onClick={() => onExport?.(filteredAndSortedMentors)}
             disabled={filteredAndSortedMentors.length === 0}
             title="Export rankings"
@@ -350,22 +350,22 @@ export default function MentorRanking({
       </div>
 
       {/* View Mode Toggle */}
-      <div className="view-controls">
-        <div className="view-mode-toggle">
+      <div className="mentor-rankings-view-controls">
+        <div className="mentor-rankings-view-mode-toggle">
           <button 
-            className={`view-btn ${viewMode === 'leaderboard' ? 'active' : ''}`}
+            className={`mentor-rankings-view-btn ${viewMode === 'leaderboard' ? 'mentor-rankings-active' : ''}`}
             onClick={() => setViewMode('leaderboard')}
           >
             <FaTrophy /> Leaderboard
           </button>
           <button 
-            className={`view-btn ${viewMode === 'detailed' ? 'active' : ''}`}
+            className={`mentor-rankings-view-btn ${viewMode === 'detailed' ? 'mentor-rankings-active' : ''}`}
             onClick={() => setViewMode('detailed')}
           >
             <FaChartLine /> Detailed
           </button>
           <button 
-            className={`view-btn ${viewMode === 'comparison' ? 'active' : ''}`}
+            className={`mentor-rankings-view-btn ${viewMode === 'comparison' ? 'mentor-rankings-active' : ''}`}
             onClick={() => setViewMode('comparison')}
           >
             <FaUsers /> Compare
@@ -374,21 +374,21 @@ export default function MentorRanking({
       </div>
 
       {/* Search and Filters */}
-      <div className="controls-section">
-        <div className="search-controls">
-          <div className="search-input-container">
-            <FaSearch className="search-icon" />
+      <div className="mentor-rankings-controls-section">
+        <div className="mentor-rankings-search-controls">
+          <div className="mentor-rankings-search-input-container">
+            <FaSearch className="mentor-rankings-search-icon" />
             <input
               type="text"
               placeholder="Search mentors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
+              className="mentor-rankings-search-input"
             />
           </div>
           
           <button 
-            className="filter-toggle-btn"
+            className="mentor-rankings-filter-toggle-btn"
             onClick={() => setShowFilters(!showFilters)}
           >
             <FaFilter />
@@ -398,9 +398,9 @@ export default function MentorRanking({
         </div>
 
         {showFilters && (
-          <div className="filters-panel">
-            <div className="filter-row">
-              <div className="filter-group">
+          <div className="mentor-rankings-filters-panel">
+            <div className="mentor-rankings-filter-row">
+              <div className="mentor-rankings-filter-group">
                 <label>Time Period</label>
                 <select 
                   value={timeFilter} 
@@ -414,7 +414,7 @@ export default function MentorRanking({
                 </select>
               </div>
               
-              <div className="filter-group">
+              <div className="mentor-rankings-filter-group">
                 <label>Sort By</label>
                 <select 
                   value={sortBy} 
@@ -429,7 +429,7 @@ export default function MentorRanking({
                 </select>
               </div>
               
-              <div className="filter-group">
+              <div className="mentor-rankings-filter-group">
                 <label>Order</label>
                 <select 
                   value={sortOrder} 
@@ -446,19 +446,19 @@ export default function MentorRanking({
 
       {/* Selected Mentors Actions */}
       {selectedMentors.size > 0 && (
-        <div className="bulk-actions">
-          <div className="bulk-info">
+        <div className="mentor-rankings-bulk-actions">
+          <div className="mentor-rankings-bulk-info">
             <span>{selectedMentors.size} mentor{selectedMentors.size !== 1 ? 's' : ''} selected</span>
           </div>
-          <div className="bulk-buttons">
+          <div className="mentor-rankings-bulk-buttons">
             <button 
-              className="bulk-btn"
+              className="mentor-rankings-bulk-btn"
               onClick={() => setSelectedMentors(new Set())}
             >
               Clear Selection
             </button>
             <button 
-              className="bulk-btn primary"
+              className="mentor-rankings-bulk-btn mentor-rankings-primary"
               onClick={() => {
                 const selectedMentorData = mentorMetrics.filter(m => selectedMentors.has(m.mentorId));
                 onExport?.(selectedMentorData);
@@ -471,18 +471,18 @@ export default function MentorRanking({
       )}
 
       {/* Content based on view mode */}
-      <div className="ranking-content">
+      <div className="mentor-rankings-content">
         {viewMode === 'leaderboard' && (
-          <div className="leaderboard-grid">
+          <div className="mentor-rankings-leaderboard-grid">
             {filteredAndSortedMentors.map(renderLeaderboardCard)}
           </div>
         )}
         
         {viewMode === 'detailed' && (
-          <div className="detailed-view">
+          <div className="mentor-rankings-detailed-view">
             {renderDetailedTable()}
             {expandedMentor && (
-              <div className="expanded-details">
+              <div className="mentor-rankings-expanded-details">
                 {renderMentorDetails(mentorMetrics.find(m => m.mentorId === expandedMentor)!)}
               </div>
             )}
@@ -490,12 +490,12 @@ export default function MentorRanking({
         )}
         
         {viewMode === 'comparison' && (
-          <div className="comparison-view">
-            <div className="comparison-placeholder">
+          <div className="mentor-rankings-comparison-view">
+            <div className="mentor-rankings-comparison-placeholder">
               <h3>Mentor Comparison</h3>
               <p>Select mentors from the leaderboard to compare their performance side-by-side.</p>
               {selectedMentors.size > 0 && (
-                <div className="selected-for-comparison">
+                <div className="mentor-rankings-selected-for-comparison">
                   <h4>Selected for Comparison:</h4>
                   <ul>
                     {Array.from(selectedMentors).map(mentorId => {
