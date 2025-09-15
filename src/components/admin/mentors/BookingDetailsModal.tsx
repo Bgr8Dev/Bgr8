@@ -1,6 +1,6 @@
 import React from 'react';
-import { Booking } from '../../types/bookings';
-import '../../styles/adminStyles/AdminModal.css';
+import { Booking } from '../../../types/bookings';
+import '../../../styles/adminStyles/AdminModal.css';
 
 // Extend the Booking interface to include generated properties
 interface ExtendedBooking extends Booking {

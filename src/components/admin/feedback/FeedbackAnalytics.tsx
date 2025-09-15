@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { firestore } from '../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { SessionFeedback } from '../../types/b8fc';
-import type { FeedbackAnalytics } from '../../types/b8fc';
+import { SessionFeedback, MentorMetrics } from '../../../types/b8fc';
+import type { FeedbackAnalytics } from '../../../types/b8fc';
 import { 
   FaStar, 
   FaComments, 
@@ -18,9 +18,11 @@ import {
   FaSort,
   FaSortUp,
   FaSortDown,
-  FaSync
+  FaSync,
+  FaTrophy
 } from 'react-icons/fa';
-import '../../styles/adminStyles/FeedbackAnalytics.css';
+import MentorRanking from './MentorRanking';
+import '../../../styles/adminStyles/FeedbackAnalytics.css';
 
 export default function FeedbackAnalytics() {
   const [feedbackData, setFeedbackData] = useState<SessionFeedback[]>([]);
@@ -42,6 +44,7 @@ export default function FeedbackAnalytics() {
   const [showFilters, setShowFilters] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [modalData, setModalData] = useState<SessionFeedback | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'mentorRankings'>('overview');
 
   useEffect(() => {
     const fetchFeedbackData = async () => {
@@ -225,9 +228,10 @@ export default function FeedbackAnalytics() {
   };
 
 
-  const handleCardClick = (feedback: SessionFeedback, event: React.MouseEvent) => {
-    // Don't show modal if clicking on selection checkbox
-    if ((event.target as HTMLElement).closest('.select-item-btn')) {
+  const handleRowClick = (feedback: SessionFeedback, event: React.MouseEvent) => {
+    // Don't show modal if clicking on selection checkbox or other interactive elements
+    if ((event.target as HTMLElement).closest('.select-item-btn') ||
+        (event.target as HTMLElement).closest('.select-all-btn')) {
       return;
     }
 
@@ -361,6 +365,26 @@ export default function FeedbackAnalytics() {
       learnings: string[];
     }> = {};
     
+    // Enhanced mentor metrics
+    const mentorMetrics: Record<string, {
+      mentorId: string;
+      mentorName: string;
+      totalSessions: number;
+      totalFeedback: number;
+      averageRating: number;
+      averageHelpfulness: number;
+      averageComfort: number;
+      averageSupport: number;
+      strengths: string[];
+      improvements: string[];
+      recentFeedback: SessionFeedback[];
+      ratings: number[];
+      helpfulnessRatings: number[];
+      comfortRatings: number[];
+      supportRatings: number[];
+      lastActivity: Date;
+    }> = {};
+    
     feedback.forEach(f => {
       // Group by mentor
       if (!feedbackByMentor[f.mentorId]) {
@@ -380,6 +404,44 @@ export default function FeedbackAnalytics() {
         if (f.improvements) feedbackByMentor[f.mentorId].improvements.push(f.improvements);
       }
       
+      // Enhanced mentor metrics
+      if (!mentorMetrics[f.mentorId]) {
+        mentorMetrics[f.mentorId] = {
+          mentorId: f.mentorId,
+          mentorName: f.mentorName,
+          totalSessions: 0,
+          totalFeedback: 0,
+          averageRating: 0,
+          averageHelpfulness: 0,
+          averageComfort: 0,
+          averageSupport: 0,
+          strengths: [],
+          improvements: [],
+          recentFeedback: [],
+          ratings: [],
+          helpfulnessRatings: [],
+          comfortRatings: [],
+          supportRatings: [],
+          lastActivity: f.submittedAt
+        };
+      }
+      
+      // Update mentor metrics
+      const mentor = mentorMetrics[f.mentorId];
+      mentor.totalSessions++;
+      mentor.lastActivity = f.submittedAt > mentor.lastActivity ? f.submittedAt : mentor.lastActivity;
+      
+      if (f.feedbackType === 'mentor') {
+        mentor.totalFeedback++;
+        mentor.ratings.push(f.overallRating);
+        if (f.helpfulness) mentor.helpfulnessRatings.push(f.helpfulness);
+        if (f.comfort) mentor.comfortRatings.push(f.comfort);
+        if (f.support) mentor.supportRatings.push(f.support);
+        if (f.strengths) mentor.strengths.push(f.strengths);
+        if (f.improvements) mentor.improvements.push(f.improvements);
+        mentor.recentFeedback.push(f);
+      }
+      
       // Group by mentee
       if (!feedbackByMentee[f.menteeId]) {
         feedbackByMentee[f.menteeId] = {
@@ -397,7 +459,7 @@ export default function FeedbackAnalytics() {
       }
     });
     
-    // Calculate averages
+    // Calculate averages for basic analytics
     Object.keys(feedbackByMentor).forEach(mentorId => {
       const mentor = feedbackByMentor[mentorId];
       if (mentor.totalFeedback > 0) {
@@ -412,12 +474,117 @@ export default function FeedbackAnalytics() {
       }
     });
     
+    // Calculate enhanced mentor metrics
+    const mentorRankings: MentorMetrics[] = Object.values(mentorMetrics).map(mentor => {
+      const avgRating = mentor.ratings.length > 0 ? mentor.ratings.reduce((sum, r) => sum + r, 0) / mentor.ratings.length : 0;
+      const avgHelpfulness = mentor.helpfulnessRatings.length > 0 ? mentor.helpfulnessRatings.reduce((sum, r) => sum + r, 0) / mentor.helpfulnessRatings.length : 0;
+      const avgComfort = mentor.comfortRatings.length > 0 ? mentor.comfortRatings.reduce((sum, r) => sum + r, 0) / mentor.comfortRatings.length : 0;
+      const avgSupport = mentor.supportRatings.length > 0 ? mentor.supportRatings.reduce((sum, r) => sum + r, 0) / mentor.supportRatings.length : 0;
+      
+      // Calculate consistency (standard deviation)
+      const variance = mentor.ratings.length > 1 ? 
+        mentor.ratings.reduce((sum, r) => sum + Math.pow(r - avgRating, 2), 0) / (mentor.ratings.length - 1) : 0;
+      const consistency = Math.sqrt(variance);
+      
+      // Calculate response rate (assuming we have session data)
+      const responseRate = mentor.totalSessions > 0 ? (mentor.totalFeedback / mentor.totalSessions) * 100 : 0;
+      
+      // Calculate trend (simplified - compare recent vs older ratings)
+      const recentRatings = mentor.ratings.slice(-3);
+      const olderRatings = mentor.ratings.slice(0, -3);
+      let trend: 'improving' | 'stable' | 'declining' = 'stable';
+      
+      if (recentRatings.length > 0 && olderRatings.length > 0) {
+        const recentAvg = recentRatings.reduce((sum, r) => sum + r, 0) / recentRatings.length;
+        const olderAvg = olderRatings.reduce((sum, r) => sum + r, 0) / olderRatings.length;
+        const diff = recentAvg - olderAvg;
+        
+        if (diff > 0.2) trend = 'improving';
+        else if (diff < -0.2) trend = 'declining';
+      }
+      
+      // Get top strengths and improvements (most common themes)
+      const strengthCounts: Record<string, number> = {};
+      const improvementCounts: Record<string, number> = {};
+      
+      mentor.strengths.forEach(strength => {
+        const words = strength.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          if (word.length > 3) {
+            strengthCounts[word] = (strengthCounts[word] || 0) + 1;
+          }
+        });
+      });
+      
+      mentor.improvements.forEach(improvement => {
+        const words = improvement.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          if (word.length > 3) {
+            improvementCounts[word] = (improvementCounts[word] || 0) + 1;
+          }
+        });
+      });
+      
+      const topStrengths = Object.entries(strengthCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([word]) => word);
+      
+      const commonImprovements = Object.entries(improvementCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([word]) => word);
+      
+      return {
+        mentorId: mentor.mentorId,
+        mentorName: mentor.mentorName,
+        totalSessions: mentor.totalSessions,
+        totalFeedback: mentor.totalFeedback,
+        averageRating: Math.round(avgRating * 10) / 10,
+        averageHelpfulness: Math.round(avgHelpfulness * 10) / 10,
+        averageComfort: Math.round(avgComfort * 10) / 10,
+        averageSupport: Math.round(avgSupport * 10) / 10,
+        strengths: mentor.strengths,
+        improvements: mentor.improvements,
+        recentFeedback: mentor.recentFeedback.slice(-5).sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime()),
+        trend,
+        rank: 0, // Will be set after sorting
+        percentile: 0, // Will be calculated after ranking
+        consistency: Math.round(consistency * 100) / 100,
+        responseRate: Math.round(responseRate * 10) / 10,
+        lastActivity: mentor.lastActivity,
+        topStrengths,
+        commonImprovements
+      };
+    });
+    
+    // Sort and rank mentors
+    mentorRankings.sort((a, b) => b.averageRating - a.averageRating);
+    mentorRankings.forEach((mentor, index) => {
+      mentor.rank = index + 1;
+      mentor.percentile = Math.round(((mentorRankings.length - index) / mentorRankings.length) * 100);
+    });
+    
+    // Get top performers and improvement opportunities
+    const topPerformers = mentorRankings.slice(0, 5);
+    const improvementOpportunities = mentorRankings
+      .filter(m => m.averageRating < 4.0 && m.totalFeedback >= 3)
+      .sort((a, b) => a.averageRating - b.averageRating)
+      .slice(0, 5);
+    
     return {
       totalFeedback,
       averageRating: Math.round(averageRating * 10) / 10,
       feedbackByMentor,
       feedbackByMentee,
-      recentFeedback: feedback.slice(0, 10)
+      recentFeedback: feedback.slice(0, 10),
+      mentorRankings,
+      topPerformers,
+      improvementOpportunities,
+      mentorComparison: {
+        selectedMentors: [],
+        comparisonData: []
+      }
     };
   };
 
@@ -500,8 +667,29 @@ export default function FeedbackAnalytics() {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="summary-cards">
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <button 
+          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          <FaComments />
+          Overview
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'mentorRankings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('mentorRankings')}
+        >
+          <FaTrophy />
+          Mentor Rankings
+        </button>
+      </div>
+
+      {/* Content based on active tab */}
+      {activeTab === 'overview' && (
+        <>
+          {/* Summary Cards */}
+          <div className="summary-cards">
         <div className="summary-card">
           <div className="card-icon">
             <FaComments />
@@ -748,7 +936,6 @@ export default function FeedbackAnalytics() {
                 <th>Dev Mode</th>
                 <th>Submitted</th>
                 <th>Session Date</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -756,6 +943,7 @@ export default function FeedbackAnalytics() {
                 <tr 
                   key={feedback.id} 
                   className={`feedback-row ${selectedItems.has(feedback.id) ? 'selected' : ''} ${modalData?.id === feedback.id ? 'modal-active' : ''}`}
+                  onClick={(e) => handleRowClick(feedback, e)}
                 >
                   <td className="select-column">
                     <button 
@@ -838,18 +1026,6 @@ export default function FeedbackAnalytics() {
                       <div className="date">{feedback.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}</div>
                       <div className="time">{feedback.sessionDate?.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) || ''}</div>
                     </div>
-                  </td>
-                  <td className="actions-cell">
-                    <button 
-                      className="view-details-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(feedback, e);
-                      }}
-                      title="View full details"
-                    >
-                      View Details
-                    </button>
                   </td>
                 </tr>
               ))}
@@ -1113,6 +1289,54 @@ export default function FeedbackAnalytics() {
             </div>
           </div>
         </div>
+      )}
+        </>
+      )}
+
+      {/* Mentor Rankings Tab */}
+      {activeTab === 'mentorRankings' && analytics && (
+        <MentorRanking
+          mentorMetrics={analytics.mentorRankings}
+          loading={loading}
+          onRefresh={handleRefresh}
+          onExport={(mentors) => {
+            // Export mentor rankings to CSV
+            const headers = [
+              'Rank', 'Mentor Name', 'Mentor ID', 'Average Rating', 'Average Helpfulness',
+              'Average Comfort', 'Average Support', 'Total Feedback', 'Response Rate',
+              'Consistency', 'Trend', 'Percentile', 'Last Activity'
+            ];
+            
+            const csvContent = [
+              headers.join(','),
+              ...mentors.map(mentor => [
+                mentor.rank,
+                `"${mentor.mentorName}"`,
+                mentor.mentorId,
+                mentor.averageRating,
+                mentor.averageHelpfulness,
+                mentor.averageComfort,
+                mentor.averageSupport,
+                mentor.totalFeedback,
+                mentor.responseRate,
+                mentor.consistency,
+                mentor.trend,
+                mentor.percentile,
+                mentor.lastActivity.toISOString()
+              ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `mentor-rankings-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
+        />
       )}
     </div>
   );

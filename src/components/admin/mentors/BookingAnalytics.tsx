@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { FaCalendarAlt, FaClock, FaPoundSign, FaCheck } from 'react-icons/fa';
-import { Booking } from '../../types/bookings';
+import { Booking } from '../../../types/bookings';
 
 interface BookingAnalyticsProps {
   bookings: Booking[];

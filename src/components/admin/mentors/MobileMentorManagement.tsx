@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { firestore } from '../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { MentorMenteeProfile } from '../widgets/MentorAlgorithm/algorithm/matchUsers';
-import { CalComAvailability } from '../widgets/MentorAlgorithm/CalCom/calComService';
-import { Booking } from '../../types/bookings';
+import { MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { CalComAvailability } from '../../widgets/MentorAlgorithm/CalCom/calComService';
+import { Booking } from '../../../types/bookings';
 import { 
   FaChevronLeft,
   FaChevronRight,
@@ -13,7 +13,7 @@ import {
   FaUserEdit,
   FaEye
 } from 'react-icons/fa';
-import '../../styles/adminStyles/MobileMentorManagement.css';
+import '../../../styles/adminStyles/MobileMentorManagement.css';
 
 // Import existing components
 import AdminMentorModal from './AdminMentorModal';

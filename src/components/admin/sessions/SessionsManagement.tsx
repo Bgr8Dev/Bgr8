@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { firestore } from '../../firebase/firebase';
-import { Session } from '../../types/sessions';
-import { SessionsService } from '../../services/sessionsService';
+import { firestore } from '../../../firebase/firebase';
+import { Session } from '../../../types/sessions';
+import { SessionsService } from '../../../services/sessionsService';
 import { Timestamp } from 'firebase/firestore';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 import './SessionsManagement.css';

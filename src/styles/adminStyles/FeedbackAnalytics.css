@@ -41,6 +41,57 @@
   align-items: center;
 }
 
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #cccccc;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #ffb300 0%, #ff8c00 100%);
+  color: #000000;
+  font-weight: 600;
+}
+
+.tab-btn.active::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, #ffb300 0%, #ff8c00 100%);
+  border-radius: 10px;
+  z-index: -1;
+  opacity: 0.3;
+}
+
 .refresh-btn,
 .export-btn {
   background: rgba(255, 179, 0, 0.1);
@@ -440,10 +491,42 @@
 .feedback-row {
   transition: all 0.2s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .feedback-row:hover {
   background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-row:hover::after {
+  content: "Click to view details";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 179, 0, 0.9);
+  color: #000000;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  animation: fadeInTooltip 0.2s ease-out 0.5s forwards;
+}
+
+@keyframes fadeInTooltip {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 .feedback-row.selected {
@@ -587,28 +670,6 @@
   border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
-.feedback-table .actions-cell {
-  width: 100px;
-  text-align: center;
-}
-
-.view-details-btn {
-  background: rgba(255, 179, 0, 0.1);
-  border: 1px solid rgba(255, 179, 0, 0.3);
-  color: #ffb300;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.view-details-btn:hover {
-  background: rgba(255, 179, 0, 0.2);
-  border-color: rgba(255, 179, 0, 0.5);
-  transform: translateY(-1px);
-}
 
 /* Recent Feedback */
 .recent-feedback {
@@ -1372,14 +1433,6 @@
     width: 60px;
   }
   
-  .feedback-table .actions-cell {
-    width: 80px;
-  }
-  
-  .view-details-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-  }
   
   .feedback-modal {
     max-width: 95vw;

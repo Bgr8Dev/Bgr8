@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Booking } from '../../types/bookings';
+import { Booking } from '../../../types/bookings';
 
 // Extend the Booking interface to include generated properties
 interface ExtendedBooking extends Booking {

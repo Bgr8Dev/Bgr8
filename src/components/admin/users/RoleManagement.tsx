@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { firestore } from '../../firebase/firebase';
+import { firestore } from '../../../firebase/firebase';
 import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { useAuth } from '../../hooks/useAuth';
-import { hasRole } from '../../utils/userProfile';
+import { useAuth } from '../../../hooks/useAuth';
+import { hasRole } from '../../../utils/userProfile';
 import { 
   FaUsers, 
   FaChartBar, 

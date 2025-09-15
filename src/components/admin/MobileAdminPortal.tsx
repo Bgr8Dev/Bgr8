@@ -10,14 +10,18 @@ import {
 } from 'react-icons/fa';
 import '../../styles/adminStyles/MobileAdminPortal.css';
 
-import { AdminSettings } from '../../pages/adminPages/AdminSettings';
-import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
-import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
-import { AdminMentorVerification } from '../../pages/adminPages/AdminMentorVerification';
-import { MobileMentorManagement } from './MobileMentorManagement';
-import FeedbackAnalytics from './FeedbackAnalytics';
-import { SessionsManagement } from './SessionsManagement';
-import RoleManagement from './RoleManagement';
+import { MobileAdminSettings } from './settings/MobileAdminSettings';
+import MobileAnalytics from './analytics/MobileAnalytics';
+import { MobileEnquiries } from './enquiries/MobileEnquiries';
+import { MobileAdminEmails } from './emails/MobileAdminEmails';
+import MobileAdminAnnouncements from './announcements/MobileAdminAnnouncements';
+import { MobileMentorVerification } from './verification/MobileMentorVerification';
+import AdminTestingFeedback from '../../pages/adminPages/AdminTestingFeedback';
+import { MobileMentorManagement } from './mentors/MobileMentorManagement';
+import FeedbackAnalytics from './feedback/FeedbackAnalytics';
+import { SessionsManagement } from './sessions/SessionsManagement';
+import MobileRoleManagement from './users/MobileRoleManagement';
+import AmbassadorApplications from './ambassadors/AmbassadorApplications';
 
 
 interface MobileAdminPortalProps {
@@ -33,6 +37,8 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
   const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState(0);
   const [showMobileMentorManagement, setShowMobileMentorManagement] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Define sections for mobile navigation
   const sections = [
@@ -42,7 +48,11 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     { id: 'mentors', name: 'Mentors', icon: '👨‍🏫' },
     { id: 'verification', name: 'Verification', icon: '✅' },
     { id: 'feedback', name: 'Feedback', icon: '💬' },
+    { id: 'testing-feedback', name: 'Testing', icon: '🐛' },
     { id: 'sessions', name: 'Sessions', icon: '📅' },
+    { id: 'ambassadors', name: 'Ambassadors', icon: '🤝' },
+    { id: 'emails', name: 'Emails', icon: '📬' },
+    { id: 'announcements', name: 'Announcements', icon: '📢' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
 
@@ -53,17 +63,50 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     }
   }, [userProfile, navigate]);
 
+  // Initialize scroll state when component mounts
+  useEffect(() => {
+    const container = document.querySelector('.map-section-indicators') as HTMLElement;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  }, [isOpen]);
+
   if (!isOpen || !hasRole(userProfile, 'admin')) return null;
 
   const nextSection = () => {
     if (currentSection < sections.length - 1) {
-      setCurrentSection(currentSection + 1);
+      const newSection = currentSection + 1;
+      setCurrentSection(newSection);
+      scrollToActiveTab(newSection);
     }
   };
 
   const prevSection = () => {
     if (currentSection > 0) {
-      setCurrentSection(currentSection - 1);
+      const newSection = currentSection - 1;
+      setCurrentSection(newSection);
+      scrollToActiveTab(newSection);
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+  };
+
+  const scrollToActiveTab = (index: number) => {
+    const container = document.querySelector('.map-section-indicators') as HTMLElement;
+    if (container) {
+      const tabWidth = 70; // Approximate width of each tab
+      const containerWidth = container.clientWidth;
+      const scrollPosition = (index * tabWidth) - (containerWidth / 2) + (tabWidth / 2);
+      container.scrollTo({
+        left: Math.max(0, scrollPosition),
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -74,7 +117,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Role Management</h3>
             <div className="map-form-fields">
-              <RoleManagement />
+              <MobileRoleManagement />
             </div>
           </div>
         );
@@ -84,7 +127,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Analytics</h3>
             <div className="map-form-fields">
-              <AdminAnalytics />
+              <MobileAnalytics />
             </div>
           </div>
         );
@@ -94,7 +137,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Enquiries</h3>
             <div className="map-form-fields">
-              <AdminEnquiries />
+              <MobileEnquiries />
             </div>
           </div>
         );
@@ -126,7 +169,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Mentor Verification</h3>
             <div className="map-form-fields">
-              <AdminMentorVerification />
+              <MobileMentorVerification />
             </div>
           </div>
         );
@@ -141,7 +184,17 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 6: // Sessions
+      case 6: // Testing Feedback
+        return (
+          <div className="map-section">
+            <h3 className="map-section-title">Testing Feedback</h3>
+            <div className="map-form-fields">
+              <AdminTestingFeedback />
+            </div>
+          </div>
+        );
+
+      case 7: // Sessions
         return (
           <div className="map-section">
             <h3 className="map-section-title">Sessions Management</h3>
@@ -151,15 +204,45 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 7: // Settings
+      case 8: // Ambassadors
         return (
           <div className="map-section">
-            <h3 className="map-section-title">Admin Settings</h3>
+            <h3 className="map-section-title">Ambassador Applications</h3>
             <div className="map-form-fields">
-              <AdminSettings />
+              <AmbassadorApplications />
             </div>
           </div>
         );
+
+        case 9: // Emails
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Email Management</h3>
+              <div className="map-form-fields">
+                <MobileAdminEmails />
+              </div>
+            </div>
+          );
+
+        case 10: // Announcements
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Announcement Management</h3>
+              <div className="map-form-fields">
+                <MobileAdminAnnouncements />
+              </div>
+            </div>
+          );
+
+        case 11: // Settings
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Admin Settings</h3>
+              <div className="map-form-fields">
+                <MobileAdminSettings />
+              </div>
+            </div>
+          );
 
       default:
         return null;
@@ -184,7 +267,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
                 <div className="map-title-section">
                   <h2 className="map-title">Admin Portal</h2>
                   <p className="map-progress-text">
-                    Section {currentSection + 1} of {sections.length}
+                    {sections[currentSection]?.name} • {currentSection + 1} of {sections.length}
                   </p>
                 </div>
               </div>
@@ -209,12 +292,19 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
                 Previous
               </button>
 
-              <div className="map-section-indicators">
+              <div 
+                className={`map-section-indicators ${canScrollLeft ? 'scroll-left' : ''} ${!canScrollRight ? 'scroll-right' : ''}`}
+                onScroll={handleScroll}
+              >
                 {sections.map((section, index) => (
                   <button
                     key={section.id}
                     className={`map-section-indicator ${index === currentSection ? 'active' : ''}`}
-                    onClick={() => setCurrentSection(index)}
+                    onClick={() => {
+                      setCurrentSection(index);
+                      scrollToActiveTab(index);
+                    }}
+                    title={section.name}
                   >
                     <span className="map-section-icon">{section.icon}</span>
                     <span className="map-section-name">{section.name}</span>

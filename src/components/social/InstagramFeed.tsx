@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { instagramService, InstagramPost, InstagramUser } from '../../services/instagramService';
 import './InstagramFeed.css';
 
@@ -20,16 +20,7 @@ export default function InstagramFeed({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (accessToken) {
-      fetchInstagramData();
-    } else {
-      setError('Instagram access token is required');
-      setLoading(false);
-    }
-  }, [accessToken, maxPosts]);
-
-  const fetchInstagramData = async () => {
+  const fetchInstagramData = useCallback(async () => {
     if (!accessToken) return;
 
     try {
@@ -52,7 +43,16 @@ export default function InstagramFeed({
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken, maxPosts, showProfile]);
+
+  useEffect(() => {
+    if (accessToken) {
+      fetchInstagramData();
+    } else {
+      setError('Instagram access token is required');
+      setLoading(false);
+    }
+  }, [accessToken, fetchInstagramData]);
 
   const formatDate = (timestamp: string): string => {
     const date = new Date(timestamp);
