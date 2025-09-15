@@ -283,7 +283,7 @@ development.*
 log/
 logs/
 *.report
-reports/
+# reports/
 coverage/
 .coverage
 coverage.*
