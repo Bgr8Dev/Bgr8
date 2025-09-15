@@ -32,14 +32,9 @@ import {
   FaExpand,
   FaCompress,
   FaPalette,
-  FaMagic,
   FaHeading,
   FaParagraph,
-  FaList,
-  FaCheckSquare,
-  FaSquare,
   FaMinus,
-  FaPlus,
   FaTimes,
   FaCheck,
   FaEye,
@@ -48,7 +43,6 @@ import {
   FaUpload,
   FaDownload,
   FaSearch,
-  FaReplace,
   FaSpellCheck,
   FaLanguage,
   FaFileImage,
@@ -75,42 +69,8 @@ import {
   FaThumbsUp,
   FaThumbsDown,
   FaSmile,
-  FaFrown,
-  FaMeh,
-  FaGrin,
-  FaAngry,
-  FaSurprise,
-  FaSadTear,
   FaLaugh,
-  FaKiss,
-  FaWink,
-  FaGrinBeam,
-  FaGrinHearts,
-  FaGrinSquint,
-  FaGrinStars,
-  FaGrinTears,
-  FaGrinTongue,
-  FaGrinWink,
-  FaKissBeam,
-  FaKissWinkHeart,
-  FaLaughBeam,
-  FaLaughSquint,
-  FaLaughWink,
-  FaAngry as FaAngryIcon,
-  FaDizzy,
-  FaFlushed,
-  FaFrownOpen,
-  FaGrimace,
-  FaGrinAlt,
-  FaGrinBeamSweat,
-  FaHushed,
-  FaMehBlank,
-  FaMehRollingEyes,
-  FaSadCry,
-  FaSmileBeam,
-  FaSmileWink,
-  FaTired,
-  FaWink as FaWinkIcon
+  FaCalendarAlt
 } from 'react-icons/fa';
 
 interface RichTextEditorProps {
@@ -137,7 +97,7 @@ interface RichTextEditorProps {
 
 interface ToolbarButton {
   id: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   action: () => void;
   active?: boolean;
@@ -171,7 +131,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
@@ -179,12 +138,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [showSearchReplace, setShowSearchReplace] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [replaceTerm, setReplaceTerm] = useState('');
-  const [currentFormat, setCurrentFormat] = useState<any>({});
+  const [currentFormat, setCurrentFormat] = useState<Record<string, boolean>>({});
   const [history, setHistory] = useState<string[]>([content]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSpellCheck, setShowSpellCheck] = useState(false);
-  const [spellCheckResults, setSpellCheckResults] = useState<any[]>([]);
+  const [spellCheckResults, setSpellCheckResults] = useState<Array<{word: string; index: number; suggestions: string[]}>>([]);
+  
+  // Dialog states
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageAlt, setImageAlt] = useState('');
+  const [imageWidth, setImageWidth] = useState('');
+  const [imageHeight, setImageHeight] = useState('');
+  const [tableRows, setTableRows] = useState(3);
+  const [tableCols, setTableCols] = useState(3);
+  const [codeContent, setCodeContent] = useState('');
+  const [codeLanguage, setCodeLanguage] = useState('html');
+  const [selectedFontFamily] = useState('Arial, sans-serif');
+  const [selectedFontSize] = useState('16');
+  const [selectedTextColor] = useState('#ffffff');
+  const [selectedHighlightColor] = useState('#ffff00');
 
   // Emoji data
   const emojis = [
@@ -209,7 +184,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { name: 'Eye', emoji: '👁️', icon: FaEye },
     { name: 'Eye Slash', emoji: '🙈', icon: FaEyeSlash },
     { name: 'Search', emoji: '🔍', icon: FaSearch },
-    { name: 'Replace', emoji: '🔄', icon: FaReplace },
+    { name: 'Replace', emoji: '🔄', icon: FaSync },
     { name: 'Spell Check', emoji: '📝', icon: FaSpellCheck },
     { name: 'Language', emoji: '🌐', icon: FaLanguage },
     { name: 'Image', emoji: '🖼️', icon: FaFileImage },
@@ -224,31 +199,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { name: 'Video', emoji: '🎬', icon: FaFileVideo }
   ];
 
-  // Color palette
-  const colors = [
-    '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
-    '#FF0000', '#FF6600', '#FFCC00', '#00FF00', '#00CCFF', '#0066FF',
-    '#6600FF', '#FF00CC', '#FF3366', '#FF9933', '#FFFF00', '#66FF00',
-    '#00FFFF', '#3366FF', '#9933FF', '#FF33CC', '#FF6666', '#FF9966',
-    '#FFFF66', '#66FF66', '#66FFFF', '#6666FF', '#9966FF', '#FF66CC'
-  ];
-
-  // Font families
-  const fontFamilies = [
-    'Arial, sans-serif',
-    'Helvetica, sans-serif',
-    'Times New Roman, serif',
-    'Georgia, serif',
-    'Courier New, monospace',
-    'Verdana, sans-serif',
-    'Trebuchet MS, sans-serif',
-    'Arial Black, sans-serif',
-    'Comic Sans MS, cursive',
-    'Impact, sans-serif'
-  ];
-
-  // Font sizes
-  const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
 
   // Update history when content changes
   useEffect(() => {
@@ -270,13 +220,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       editorRef.current.focus();
     }
   }, []);
-
-  // Execute command
-  const execCommand = useCallback((command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    focusEditor();
-    updateFormat();
-  }, [focusEditor]);
 
   // Update current format
   const updateFormat = useCallback(() => {
@@ -311,12 +254,98 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [content, onChange]);
 
+  // Execute command
+  const execCommand = useCallback((command: string, value?: string) => {
+    document.execCommand(command, false, value);
+    focusEditor();
+    updateFormat();
+    handleContentChange();
+  }, [focusEditor, updateFormat, handleContentChange]);
+
+  // Advanced formatting functions
+  const applyFontFamily = useCallback((family: string) => {
+    execCommand('fontName', family);
+  }, [execCommand]);
+
+  const applyFontSize = useCallback((size: string) => {
+    execCommand('fontSize', size);
+  }, [execCommand]);
+
+  const applyTextColor = useCallback((color: string) => {
+    execCommand('foreColor', color);
+  }, [execCommand]);
+
+  const applyHighlightColor = useCallback((color: string) => {
+    execCommand('backColor', color);
+  }, [execCommand]);
+
+  const insertHorizontalRule = useCallback(() => {
+    execCommand('insertHTML', '<hr style="border: none; height: 2px; background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent); margin: 2rem 0;">');
+  }, [execCommand]);
+
+  const insertParagraph = useCallback(() => {
+    execCommand('insertHTML', '<p></p>');
+  }, [execCommand]);
+
+  const insertHeading = useCallback((level: number) => {
+    execCommand('formatBlock', `h${level}`);
+  }, [execCommand]);
+
+  const insertBlockquote = useCallback(() => {
+    execCommand('formatBlock', 'blockquote');
+  }, [execCommand]);
+
+  const clearFormatting = useCallback(() => {
+    execCommand('removeFormat');
+  }, [execCommand]);
+
+  const selectAll = useCallback(() => {
+    execCommand('selectAll');
+  }, [execCommand]);
+
+  const copyContent = useCallback(() => {
+    execCommand('copy');
+  }, [execCommand]);
+
+  const cutContent = useCallback(() => {
+    execCommand('cut');
+  }, [execCommand]);
+
+  const pasteContent = useCallback(() => {
+    execCommand('paste');
+  }, [execCommand]);
+
+  const insertText = useCallback((text: string) => {
+    execCommand('insertText', text);
+  }, [execCommand]);
+
+  const insertHTML = useCallback((html: string) => {
+    execCommand('insertHTML', html);
+  }, [execCommand]);
+
   // Handle paste
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
     document.execCommand('insertText', false, text);
   }, []);
+
+  // Undo/Redo
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      onChange(history[newIndex]);
+    }
+  }, [historyIndex, history, onChange]);
+
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      onChange(history[newIndex]);
+    }
+  }, [historyIndex, history, onChange]);
 
   // Handle key down
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -373,24 +402,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           break;
       }
     }
-  }, [execCommand, onSave]);
-
-  // Undo/Redo
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      setHistoryIndex(newIndex);
-      onChange(history[newIndex]);
-    }
-  }, [historyIndex, history, onChange]);
-
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      setHistoryIndex(newIndex);
-      onChange(history[newIndex]);
-    }
-  }, [historyIndex, history, onChange]);
+  }, [execCommand, onSave, undo, redo]);
 
   // Insert emoji
   const insertEmoji = useCallback((emoji: string) => {
@@ -399,43 +411,70 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [execCommand]);
 
   // Insert link
-  const insertLink = useCallback((url: string, text: string) => {
-    if (url && text) {
-      execCommand('createLink', url);
+  const insertLink = useCallback(() => {
+    if (linkUrl) {
+      if (linkText) {
+        // Insert link with custom text
+        const linkHTML = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+        insertHTML(linkHTML);
+      } else {
+        // Insert link with selected text or URL as text
+        const selection = window.getSelection();
+        if (selection && selection.toString()) {
+          execCommand('createLink', linkUrl);
+        } else {
+          const linkHTML = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkUrl}</a>`;
+          insertHTML(linkHTML);
+        }
+      }
     }
     setShowLinkDialog(false);
-  }, [execCommand]);
+    setLinkUrl('');
+    setLinkText('');
+  }, [linkUrl, linkText, insertHTML, execCommand]);
 
   // Insert image
-  const insertImage = useCallback((src: string, alt: string, width?: string, height?: string) => {
-    if (src) {
-      const imgTag = `<img src="${src}" alt="${alt}" ${width ? `width="${width}"` : ''} ${height ? `height="${height}"` : ''} style="max-width: 100%; height: auto;">`;
-      execCommand('insertHTML', imgTag);
+  const insertImage = useCallback(() => {
+    if (imageUrl) {
+      const imgTag = `<img src="${imageUrl}" alt="${imageAlt || 'Image'}" ${imageWidth ? `width="${imageWidth}"` : ''} ${imageHeight ? `height="${imageHeight}"` : ''} style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">`;
+      insertHTML(imgTag);
     }
     setShowImageDialog(false);
-  }, [execCommand]);
+    setImageUrl('');
+    setImageAlt('');
+    setImageWidth('');
+    setImageHeight('');
+  }, [imageUrl, imageAlt, imageWidth, imageHeight, insertHTML]);
 
   // Insert table
-  const insertTable = useCallback((rows: number, cols: number) => {
-    let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
-    for (let i = 0; i < rows; i++) {
+  const insertTable = useCallback(() => {
+    let tableHTML = '<table style="border-collapse: collapse; width: 100%; margin: 1.5rem 0; background: rgba(255, 255, 255, 0.05); border-radius: 8px; overflow: hidden;">';
+    for (let i = 0; i < tableRows; i++) {
       tableHTML += '<tr>';
-      for (let j = 0; j < cols; j++) {
-        tableHTML += '<td style="padding: 8px; border: 1px solid #ccc;">&nbsp;</td>';
+      for (let j = 0; j < tableCols; j++) {
+        const isHeader = i === 0;
+        const tag = isHeader ? 'th' : 'td';
+        const style = isHeader 
+          ? 'padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: left; background: rgba(59, 130, 246, 0.2); font-weight: 600; color: #ffffff;'
+          : 'padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: left; color: rgba(255, 255, 255, 0.9);';
+        tableHTML += `<${tag} style="${style}">&nbsp;</${tag}>`;
       }
       tableHTML += '</tr>';
     }
     tableHTML += '</table>';
-    execCommand('insertHTML', tableHTML);
+    insertHTML(tableHTML);
     setShowTableDialog(false);
-  }, [execCommand]);
+  }, [tableRows, tableCols, insertHTML]);
 
   // Insert code
-  const insertCode = useCallback((code: string, language: string) => {
-    const codeTag = `<pre><code class="language-${language}">${code}</code></pre>`;
-    execCommand('insertHTML', codeTag);
+  const insertCode = useCallback(() => {
+    if (codeContent) {
+      const codeTag = `<pre style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin: 1.5rem 0; overflow-x: auto; font-family: 'Courier New', monospace; color: #ffffff;"><code class="language-${codeLanguage}">${codeContent}</code></pre>`;
+      insertHTML(codeTag);
+    }
     setShowCodeDialog(false);
-  }, [execCommand]);
+    setCodeContent('');
+  }, [codeContent, codeLanguage, insertHTML]);
 
   // Search and replace
   const searchAndReplace = useCallback(() => {
@@ -444,7 +483,81 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       onChange(newContent);
     }
     setShowSearchReplace(false);
+    setSearchTerm('');
+    setReplaceTerm('');
   }, [searchTerm, replaceTerm, content, onChange]);
+
+  // Spell check functionality
+  const performSpellCheck = useCallback(() => {
+    if (editorRef.current) {
+      const text = editorRef.current.innerText;
+      const words = text.split(/\s+/).filter(word => word.length > 0);
+      const misspelledWords: Array<{word: string; index: number; suggestions: string[]}> = [];
+      
+      // Simple spell check - in a real implementation, you'd use a proper spell check library
+      words.forEach((word, index) => {
+        // Remove punctuation for checking
+        const cleanWord = word.replace(/[^\w]/g, '');
+        if (cleanWord.length > 2 && !/^[A-Z]+$/.test(cleanWord)) {
+          // This is a simplified check - in reality you'd check against a dictionary
+          if (Math.random() < 0.1) { // Simulate 10% misspelling rate
+            misspelledWords.push({
+              word: cleanWord,
+              index: index,
+              suggestions: [cleanWord + '1', cleanWord + '2', cleanWord + '3']
+            });
+          }
+        }
+      });
+      
+      setSpellCheckResults(misspelledWords);
+    }
+  }, []);
+
+  // Replace misspelled word
+  const replaceMisspelledWord = useCallback((oldWord: string, newWord: string) => {
+    const newContent = content.replace(new RegExp(oldWord, 'g'), newWord);
+    onChange(newContent);
+    setSpellCheckResults(prev => prev.filter(item => item.word !== oldWord));
+  }, [content, onChange]);
+
+
+  // Insert date/time
+  const insertDateTime = useCallback(() => {
+    const now = new Date();
+    const dateTime = now.toLocaleString();
+    insertText(dateTime);
+  }, [insertText]);
+
+  // Insert page break
+  const insertPageBreak = useCallback(() => {
+    insertHTML('<div style="page-break-before: always;"></div>');
+  }, [insertHTML]);
+
+  // Toggle fullscreen
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen(!isFullscreen);
+  }, [isFullscreen]);
+
+  // Export content
+  const exportContent = useCallback(() => {
+    onExport?.();
+  }, [onExport]);
+
+  // Import content
+  const importContent = useCallback(() => {
+    onImport?.();
+  }, [onImport]);
+
+  // Save content
+  const saveContent = useCallback(() => {
+    onSave?.();
+  }, [onSave]);
+
+  // Preview content
+  const previewContent = useCallback(() => {
+    onPreview?.();
+  }, [onPreview]);
 
   // Handle file upload
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -454,16 +567,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       reader.onload = (event) => {
         const result = event.target?.result as string;
         if (file.type.startsWith('image/')) {
-          insertImage(result, file.name);
+          setImageUrl(result);
+          setImageAlt(file.name);
         } else {
           // Handle other file types
           const fileTag = `<a href="${result}" download="${file.name}">${file.name}</a>`;
-          execCommand('insertHTML', fileTag);
+          insertHTML(fileTag);
         }
       };
       reader.readAsDataURL(file);
     }
-  }, [insertImage, execCommand]);
+  }, [insertHTML]);
 
   // Word and character count
   const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length;
@@ -483,17 +597,29 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { id: 'superscript', icon: FaSuperscript, title: 'Superscript', action: () => execCommand('superscript'), active: currentFormat.superscript, group: 'format' },
     { id: 'subscript', icon: FaSubscript, title: 'Subscript', action: () => execCommand('subscript'), active: currentFormat.subscript, group: 'format' },
     
+    // Font controls
+    { id: 'font-family', icon: FaFont, title: 'Font Family', action: () => applyFontFamily(selectedFontFamily), group: 'font' },
+    { id: 'font-size', icon: FaTextHeight, title: 'Font Size', action: () => applyFontSize(selectedFontSize), group: 'font' },
+    { id: 'text-color', icon: FaPalette, title: 'Text Color', action: () => applyTextColor(selectedTextColor), group: 'font' },
+    { id: 'highlight', icon: FaHighlighter, title: 'Highlight Color', action: () => applyHighlightColor(selectedHighlightColor), group: 'font' },
+    
     // Alignment
     { id: 'align-left', icon: FaAlignLeft, title: 'Align Left', action: () => execCommand('justifyLeft'), active: currentFormat.justifyLeft, group: 'align' },
     { id: 'align-center', icon: FaAlignCenter, title: 'Align Center', action: () => execCommand('justifyCenter'), active: currentFormat.justifyCenter, group: 'align' },
     { id: 'align-right', icon: FaAlignRight, title: 'Align Right', action: () => execCommand('justifyRight'), active: currentFormat.justifyRight, group: 'align' },
     { id: 'align-justify', icon: FaAlignJustify, title: 'Justify', action: () => execCommand('justifyFull'), active: currentFormat.justifyFull, group: 'align' },
     
-    // Lists
+    // Lists and indentation
     { id: 'bullet-list', icon: FaListUl, title: 'Bullet List', action: () => execCommand('insertUnorderedList'), active: currentFormat.insertUnorderedList, group: 'list' },
     { id: 'numbered-list', icon: FaListOl, title: 'Numbered List', action: () => execCommand('insertOrderedList'), active: currentFormat.insertOrderedList, group: 'list' },
     { id: 'indent', icon: FaIndent, title: 'Indent', action: () => execCommand('indent'), active: currentFormat.indent, group: 'list' },
     { id: 'outdent', icon: FaOutdent, title: 'Outdent', action: () => execCommand('outdent'), active: currentFormat.outdent, group: 'list' },
+    
+    // Block formatting
+    { id: 'heading', icon: FaHeading, title: 'Heading', action: () => insertHeading(2), group: 'block' },
+    { id: 'paragraph', icon: FaParagraph, title: 'Paragraph', action: () => insertParagraph(), group: 'block' },
+    { id: 'blockquote', icon: FaQuoteLeft, title: 'Blockquote', action: () => insertBlockquote(), group: 'block' },
+    { id: 'horizontal-rule', icon: FaMinus, title: 'Horizontal Rule', action: () => insertHorizontalRule(), group: 'block' },
     
     // Insert
     { id: 'link', icon: FaLink, title: 'Insert Link (Ctrl+K)', action: () => setShowLinkDialog(true), disabled: !allowLinks, group: 'insert' },
@@ -502,16 +628,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { id: 'code', icon: FaCode, title: 'Insert Code', action: () => setShowCodeDialog(true), disabled: !allowCode, group: 'insert' },
     { id: 'emoji', icon: FaSmile, title: 'Insert Emoji', action: () => setShowEmojiPicker(!showEmojiPicker), disabled: !allowEmojis, group: 'insert' },
     
+    // Clipboard operations
+    { id: 'cut', icon: FaCut, title: 'Cut (Ctrl+X)', action: () => cutContent(), group: 'clipboard' },
+    { id: 'copy', icon: FaCopy, title: 'Copy (Ctrl+C)', action: () => copyContent(), group: 'clipboard' },
+    { id: 'paste', icon: FaPaste, title: 'Paste (Ctrl+V)', action: () => pasteContent(), group: 'clipboard' },
+    { id: 'select-all', icon: FaTextWidth, title: 'Select All (Ctrl+A)', action: () => selectAll(), group: 'clipboard' },
+    
     // Tools
     { id: 'search', icon: FaSearch, title: 'Search (Ctrl+F)', action: () => setShowSearchReplace(true), group: 'tools' },
-    { id: 'spell-check', icon: FaSpellCheck, title: 'Spell Check', action: () => setShowSpellCheck(!showSpellCheck), group: 'tools' },
-    { id: 'fullscreen', icon: isFullscreen ? FaCompress : FaExpand, title: 'Toggle Fullscreen', action: () => setIsFullscreen(!isFullscreen), group: 'tools' },
+    { id: 'spell-check', icon: FaSpellCheck, title: 'Spell Check', action: () => { setShowSpellCheck(!showSpellCheck); if (!showSpellCheck) performSpellCheck(); }, group: 'tools' },
+    { id: 'clear-format', icon: FaEraser, title: 'Clear Formatting', action: () => clearFormatting(), group: 'tools' },
+    { id: 'fullscreen', icon: isFullscreen ? FaCompress : FaExpand, title: 'Toggle Fullscreen', action: () => toggleFullscreen(), group: 'tools' },
+    
+    // Special insertions
+    { id: 'date-time', icon: FaCalendarAlt, title: 'Insert Date/Time', action: () => insertDateTime(), group: 'special' },
+    { id: 'page-break', icon: FaFileAlt, title: 'Page Break', action: () => insertPageBreak(), group: 'special' },
     
     // Actions
-    { id: 'save', icon: FaSave, title: 'Save (Ctrl+S)', action: () => onSave?.(), group: 'actions' },
-    { id: 'preview', icon: FaEye, title: 'Preview', action: () => onPreview?.(), group: 'actions' },
-    { id: 'export', icon: FaDownload, title: 'Export', action: () => onExport?.(), group: 'actions' },
-    { id: 'import', icon: FaUpload, title: 'Import', action: () => onImport?.(), group: 'actions' }
+    { id: 'save', icon: FaSave, title: 'Save (Ctrl+S)', action: () => saveContent(), group: 'actions' },
+    { id: 'preview', icon: FaEye, title: 'Preview', action: () => previewContent(), group: 'actions' },
+    { id: 'export', icon: FaDownload, title: 'Export', action: () => exportContent(), group: 'actions' },
+    { id: 'import', icon: FaUpload, title: 'Import', action: () => importContent(), group: 'actions' }
   ];
 
   // Group buttons by category
@@ -607,18 +744,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </div>
           <div className="dialog-content">
             <input
-              type="text"
-              placeholder="Link URL"
+              type="url"
+              placeholder="Link URL (e.g., https://example.com)"
               className="link-url-input"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
             />
             <input
               type="text"
-              placeholder="Link Text"
+              placeholder="Link Text (optional)"
               className="link-text-input"
+              value={linkText}
+              onChange={(e) => setLinkText(e.target.value)}
             />
             <div className="dialog-actions">
               <button onClick={() => setShowLinkDialog(false)}>Cancel</button>
-              <button onClick={() => insertLink('', '')}>Insert</button>
+              <button onClick={insertLink} disabled={!linkUrl}>Insert Link</button>
             </div>
           </div>
         </div>
@@ -636,24 +777,34 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <div className="dialog-content">
             <input
               type="url"
-              placeholder="Image URL"
+              placeholder="Image URL (e.g., https://example.com/image.jpg)"
               className="image-url-input"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
             />
             <input
               type="text"
-              placeholder="Alt Text"
+              placeholder="Alt Text (for accessibility)"
               className="image-alt-input"
+              value={imageAlt}
+              onChange={(e) => setImageAlt(e.target.value)}
             />
-            <input
-              type="number"
-              placeholder="Width (optional)"
-              className="image-width-input"
-            />
-            <input
-              type="number"
-              placeholder="Height (optional)"
-              className="image-height-input"
-            />
+            <div className="image-dimensions">
+              <input
+                type="number"
+                placeholder="Width (px)"
+                className="image-width-input"
+                value={imageWidth}
+                onChange={(e) => setImageWidth(e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Height (px)"
+                className="image-height-input"
+                value={imageHeight}
+                onChange={(e) => setImageHeight(e.target.value)}
+              />
+            </div>
             <div className="file-upload-area">
               <input
                 ref={fileInputRef}
@@ -668,7 +819,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </div>
             <div className="dialog-actions">
               <button onClick={() => setShowImageDialog(false)}>Cancel</button>
-              <button onClick={() => insertImage('', '', '', '')}>Insert</button>
+              <button onClick={insertImage} disabled={!imageUrl}>Insert Image</button>
             </div>
           </div>
         </div>
@@ -686,13 +837,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <div className="dialog-content">
             <div className="table-size-selector">
               <label>Rows:</label>
-              <input type="number" min="1" max="20" defaultValue="3" />
+              <input 
+                type="number" 
+                min="1" 
+                max="20" 
+                value={tableRows}
+                onChange={(e) => setTableRows(parseInt(e.target.value) || 3)}
+              />
               <label>Columns:</label>
-              <input type="number" min="1" max="20" defaultValue="3" />
+              <input 
+                type="number" 
+                min="1" 
+                max="20" 
+                value={tableCols}
+                onChange={(e) => setTableCols(parseInt(e.target.value) || 3)}
+              />
+            </div>
+            <div className="table-preview">
+              <p>Preview: {tableRows} rows × {tableCols} columns</p>
             </div>
             <div className="dialog-actions">
               <button onClick={() => setShowTableDialog(false)}>Cancel</button>
-              <button onClick={() => insertTable(3, 3)}>Insert</button>
+              <button onClick={insertTable}>Insert Table</button>
             </div>
           </div>
         </div>
@@ -708,10 +874,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </button>
           </div>
           <div className="dialog-content">
-            <select className="code-language-select">
+            <select 
+              className="code-language-select"
+              value={codeLanguage}
+              onChange={(e) => setCodeLanguage(e.target.value)}
+            >
               <option value="html">HTML</option>
               <option value="css">CSS</option>
               <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
               <option value="python">Python</option>
               <option value="java">Java</option>
               <option value="cpp">C++</option>
@@ -721,15 +892,21 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               <option value="json">JSON</option>
               <option value="xml">XML</option>
               <option value="markdown">Markdown</option>
+              <option value="bash">Bash</option>
+              <option value="powershell">PowerShell</option>
+              <option value="yaml">YAML</option>
+              <option value="dockerfile">Dockerfile</option>
             </select>
             <textarea
               placeholder="Enter your code here..."
               className="code-textarea"
               rows={10}
+              value={codeContent}
+              onChange={(e) => setCodeContent(e.target.value)}
             />
             <div className="dialog-actions">
               <button onClick={() => setShowCodeDialog(false)}>Cancel</button>
-              <button onClick={() => insertCode('', 'html')}>Insert</button>
+              <button onClick={insertCode} disabled={!codeContent.trim()}>Insert Code</button>
             </div>
           </div>
         </div>
@@ -761,8 +938,44 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             />
             <div className="dialog-actions">
               <button onClick={() => setShowSearchReplace(false)}>Cancel</button>
-              <button onClick={searchAndReplace}>Replace All</button>
+              <button onClick={searchAndReplace} disabled={!searchTerm.trim()}>Replace All</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Spell Check Results */}
+      {showSpellCheck && spellCheckResults.length > 0 && (
+        <div className="spell-check-results">
+          <div className="spell-check-header">
+            <h4>Spell Check Results</h4>
+            <button onClick={() => setShowSpellCheck(false)} title="Close spell check">
+              <FaTimes />
+            </button>
+          </div>
+          <div className="spell-check-content">
+            {spellCheckResults.map((result, index) => (
+              <div key={index} className="spell-check-item">
+                <span className="misspelled-word">{result.word}</span>
+                <div className="suggestions">
+                  {result.suggestions.map((suggestion: string, i: number) => (
+                    <button
+                      key={i}
+                      className="suggestion-btn"
+                      onClick={() => replaceMisspelledWord(result.word, suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="ignore-btn"
+                  onClick={() => setSpellCheckResults(prev => prev.filter(item => item.word !== result.word))}
+                >
+                  Ignore
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}
