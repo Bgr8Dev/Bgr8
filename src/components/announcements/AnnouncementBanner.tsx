@@ -228,89 +228,161 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   if (!currentAnnouncement) return null;
 
   const typeColor = getTypeColor(currentAnnouncement.type);
-  const scrollSpeed = currentAnnouncement.displaySettings.scrollSpeed || 'normal';
-  const autoScroll = currentAnnouncement.displaySettings.autoScroll !== false;
+  const settings = currentAnnouncement.displaySettings;
+  const scrollSpeed = settings.scrollSpeed || 'normal';
+  const autoScroll = settings.autoScroll !== false;
+
+  // Build dynamic styles based on customization options
+  const bannerStyles: React.CSSProperties = {
+    backgroundColor: settings.backgroundColor || typeColor,
+    color: settings.textColor || '#ffffff',
+    opacity: settings.opacity || 1,
+    borderRadius: settings.borderRadius === 'none' ? '0' :
+                 settings.borderRadius === 'small' ? '4px' :
+                 settings.borderRadius === 'medium' ? '8px' :
+                 settings.borderRadius === 'large' ? '12px' :
+                 settings.borderRadius === 'full' ? '50px' : '8px',
+    padding: settings.padding === 'small' ? '8px 16px' :
+            settings.padding === 'medium' ? '12px 20px' :
+            settings.padding === 'large' ? '16px 24px' :
+            settings.padding === 'extra-large' ? '20px 32px' : '12px 20px',
+    margin: settings.margin === 'none' ? '0' :
+           settings.margin === 'small' ? '4px' :
+           settings.margin === 'medium' ? '8px' :
+           settings.margin === 'large' ? '16px' : '0',
+    boxShadow: settings.shadow === 'none' ? 'none' :
+              settings.shadow === 'small' ? '0 2px 4px rgba(0,0,0,0.1)' :
+              settings.shadow === 'medium' ? '0 4px 8px rgba(0,0,0,0.15)' :
+              settings.shadow === 'large' ? '0 8px 16px rgba(0,0,0,0.2)' :
+              settings.shadow === 'glow' ? `0 0 20px ${settings.accentColor || typeColor}40` : '0 4px 8px rgba(0,0,0,0.15)',
+    backdropFilter: settings.blur === 'none' ? 'none' :
+                   settings.blur === 'light' ? 'blur(2px)' :
+                   settings.blur === 'medium' ? 'blur(4px)' :
+                   settings.blur === 'heavy' ? 'blur(8px)' : 'none',
+    border: settings.borderColor ? `2px solid ${settings.borderColor}` : 'none',
+    background: settings.gradient && settings.gradientColors ? 
+      `linear-gradient(${settings.gradientDirection === 'horizontal' ? '90deg' :
+                      settings.gradientDirection === 'vertical' ? '180deg' :
+                      settings.gradientDirection === 'diagonal' ? '45deg' :
+                      settings.gradientDirection === 'radial' ? 'circle' : '90deg'}, 
+       ${settings.gradientColors.join(', ')})` : 
+      (settings.backgroundColor || typeColor)
+  };
+
+  // Build CSS classes based on customization options
+  const bannerClasses = [
+    'announcement-banner',
+    settings.animation !== 'none' ? `announcement-${settings.animation}` : '',
+    settings.animationSpeed ? `announcement-speed-${settings.animationSpeed}` : '',
+    settings.hoverEffect !== 'none' ? `announcement-hover-${settings.hoverEffect}` : '',
+    settings.clickEffect !== 'none' ? `announcement-click-${settings.clickEffect}` : '',
+    settings.pattern !== 'none' ? `announcement-pattern-${settings.pattern}` : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <div className={`announcement-banner-container ${className}`}>
       <div 
-        className="announcement-banner"
-        style={{
-          backgroundColor: currentAnnouncement.displaySettings.backgroundColor || typeColor,
-          color: currentAnnouncement.displaySettings.textColor || '#ffffff'
-        }}
+        className={bannerClasses}
+        style={bannerStyles}
         onClick={() => handleClick(currentAnnouncement)}
       >
       <div className="announcement-banner-content">
-        <button
-          className="announcement-banner-close"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDismiss(currentAnnouncement.id);
-          }}
-          title="Dismiss announcement"
-        >
-          <FaTimes />
-        </button>
+        {settings.showCloseButton && (
+          <button
+            className={`announcement-banner-close ${settings.closeButtonStyle === 'minimal' ? 'minimal' : 
+                      settings.closeButtonStyle === 'prominent' ? 'prominent' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDismiss(currentAnnouncement.id);
+            }}
+            title="Dismiss announcement"
+          >
+            <FaTimes />
+          </button>
+        )}
 
-        <div className="announcement-banner-icon-container">
-          {getTypeIcon(currentAnnouncement.type)}
-        </div>
+        {settings.showIcon && settings.iconPosition !== 'hidden' && (
+          <div className={`announcement-banner-icon-container ${settings.iconPosition === 'center' ? 'center' : ''}`}>
+            {getTypeIcon(currentAnnouncement.type)}
+          </div>
+        )}
         
         <div className="announcement-banner-text-container">
           <div 
             className={`announcement-banner-text ${autoScroll ? `announcement-scroll-${scrollSpeed}` : ''}`}
             style={{
-              fontSize: currentAnnouncement.displaySettings.fontSize === 'small' ? '0.875rem' :
-                       currentAnnouncement.displaySettings.fontSize === 'large' ? '1.125rem' : '1rem'
+              fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                       settings.fontSize === 'medium' ? '1rem' :
+                       settings.fontSize === 'large' ? '1.125rem' :
+                       settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+              fontWeight: settings.fontWeight === 'normal' ? '400' :
+                         settings.fontWeight === 'medium' ? '500' :
+                         settings.fontWeight === 'semibold' ? '600' :
+                         settings.fontWeight === 'bold' ? '700' : '500',
+              textAlign: settings.textAlign || 'left'
             }}
           >
-            <span className="announcement-banner-title">{currentAnnouncement.title}</span>
-            <span className="announcement-banner-message">{currentAnnouncement.content}</span>
+            {settings.displayMode === 'title-only' && (
+              <span className="announcement-banner-title">{currentAnnouncement.title}</span>
+            )}
+            {settings.displayMode === 'content-only' && (
+              <span className="announcement-banner-message">{currentAnnouncement.content}</span>
+            )}
+            {settings.displayMode === 'title-and-content' && (
+              <>
+                <span className="announcement-banner-title">{currentAnnouncement.title}</span>
+                <span className="announcement-banner-message">{currentAnnouncement.content}</span>
+              </>
+            )}
+            {settings.displayMode === 'custom' && settings.customDisplayText && (
+              <span className="announcement-banner-custom">{settings.customDisplayText}</span>
+            )}
           </div>
         </div>
 
-        <div className="announcement-banner-controls">
-          {announcements.length > 1 && (
-            <>
-              <button
-                className="announcement-banner-control-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePrevious();
-                }}
-                title="Previous announcement"
-              >
-                <FaChevronLeft />
-              </button>
-              
-              <button
-                className="announcement-banner-control-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  togglePause();
-                }}
-                title={isPaused ? 'Resume auto-scroll' : 'Pause auto-scroll'}
-              >
-                {isPaused ? <FaPlay /> : <FaPause />}
-              </button>
-              
-              <button
-                className="announcement-banner-control-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleNext();
-                }}
-                title="Next announcement"
-              >
-                <FaChevronRight />
-              </button>
-            </>
-          )}
-        </div>
+        {settings.showControls && (
+          <div className="announcement-banner-controls">
+            {announcements.length > 1 && (
+              <>
+                <button
+                  className="announcement-banner-control-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrevious();
+                  }}
+                  title="Previous announcement"
+                >
+                  <FaChevronLeft />
+                </button>
+                
+                <button
+                  className="announcement-banner-control-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePause();
+                  }}
+                  title={isPaused ? 'Resume auto-scroll' : 'Pause auto-scroll'}
+                >
+                  {isPaused ? <FaPlay /> : <FaPause />}
+                </button>
+                
+                <button
+                  className="announcement-banner-control-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNext();
+                  }}
+                  title="Next announcement"
+                >
+                  <FaChevronRight />
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
-        {announcements.length > 1 && (
+        {settings.showIndicators && announcements.length > 1 && (
           <div className="announcement-banner-indicators">
             {announcements.map((_, index) => (
               <button

@@ -28,10 +28,39 @@ export interface Announcement {
     showOnPortal: boolean;
     showOnMobile: boolean;
     autoScroll: boolean;
-    scrollSpeed: 'slow' | 'normal' | 'fast';
-    backgroundColor?: string;
-    textColor?: string;
-    fontSize: 'small' | 'medium' | 'large';
+    scrollSpeed: 'slow' | 'normal' | 'fast' | 'very-slow' | 'very-fast';
+    scrollDirection: 'left-to-right' | 'right-to-left' | 'bounce' | 'alternate';
+    displayMode: 'title-only' | 'content-only' | 'title-and-content' | 'custom';
+    customDisplayText?: string;
+    fontSize: 'small' | 'medium' | 'large' | 'extra-large';
+    fontWeight: 'normal' | 'medium' | 'semibold' | 'bold';
+    textAlign: 'left' | 'center' | 'right';
+    backgroundColor: string;
+    textColor: string;
+    accentColor?: string;
+    borderColor?: string;
+    borderRadius: 'none' | 'small' | 'medium' | 'large' | 'full';
+    padding: 'small' | 'medium' | 'large' | 'extra-large';
+    margin: 'none' | 'small' | 'medium' | 'large';
+    shadow: 'none' | 'small' | 'medium' | 'large' | 'glow';
+    animation: 'none' | 'fade' | 'slide' | 'bounce' | 'pulse' | 'glow' | 'shimmer';
+    animationSpeed: 'slow' | 'normal' | 'fast';
+    showIcon: boolean;
+    iconPosition: 'left' | 'right' | 'center' | 'hidden';
+    showControls: boolean;
+    showIndicators: boolean;
+    showCloseButton: boolean;
+    closeButtonPosition: 'left' | 'right';
+    closeButtonStyle: 'default' | 'minimal' | 'prominent' | 'hidden';
+    opacity: number; // 0-1
+    blur: 'none' | 'light' | 'medium' | 'heavy';
+    gradient: boolean;
+    gradientColors?: string[];
+    gradientDirection: 'horizontal' | 'vertical' | 'diagonal' | 'radial';
+    pattern: 'none' | 'dots' | 'lines' | 'grid' | 'waves' | 'stars';
+    patternOpacity: number; // 0-1
+    hoverEffect: 'none' | 'lift' | 'glow' | 'scale' | 'fade';
+    clickEffect: 'none' | 'ripple' | 'bounce' | 'shake' | 'glow';
   };
   clickAction?: {
     type: 'none' | 'link' | 'modal' | 'page';
@@ -151,7 +180,36 @@ export class AnnouncementService {
             showOnPortal: true,
             showOnMobile: true,
             autoScroll: true,
-            scrollSpeed: 'normal' as const
+            scrollSpeed: 'normal' as const,
+            scrollDirection: 'left-to-right' as const,
+            displayMode: 'title-and-content' as const,
+            fontSize: 'medium' as const,
+            fontWeight: 'medium' as const,
+            textAlign: 'left' as const,
+            backgroundColor: '#3b82f6',
+            textColor: '#ffffff',
+            accentColor: '#60a5fa',
+            borderRadius: 'medium' as const,
+            padding: 'medium' as const,
+            margin: 'none' as const,
+            shadow: 'medium' as const,
+            animation: 'shimmer' as const,
+            animationSpeed: 'normal' as const,
+            showIcon: true,
+            iconPosition: 'left' as const,
+            showControls: true,
+            showIndicators: true,
+            showCloseButton: true,
+            closeButtonPosition: 'left' as const,
+            closeButtonStyle: 'default' as const,
+            opacity: 1,
+            blur: 'none' as const,
+            gradient: false,
+            gradientDirection: 'horizontal' as const,
+            pattern: 'none' as const,
+            patternOpacity: 0.1,
+            hoverEffect: 'glow' as const,
+            clickEffect: 'ripple' as const
           },
           targetAudience: 'all' as const,
           createdBy: 'system',
@@ -184,7 +242,36 @@ export class AnnouncementService {
           showOnPortal: true,
           showOnMobile: true,
           autoScroll: true,
-          scrollSpeed: 'normal' as const
+          scrollSpeed: 'normal' as const,
+          scrollDirection: 'left-to-right' as const,
+          displayMode: 'title-and-content' as const,
+          fontSize: 'medium' as const,
+          fontWeight: 'medium' as const,
+          textAlign: 'left' as const,
+          backgroundColor: '#3b82f6',
+          textColor: '#ffffff',
+          accentColor: '#60a5fa',
+          borderRadius: 'medium' as const,
+          padding: 'medium' as const,
+          margin: 'none' as const,
+          shadow: 'medium' as const,
+          animation: 'shimmer' as const,
+          animationSpeed: 'normal' as const,
+          showIcon: true,
+          iconPosition: 'left' as const,
+          showControls: true,
+          showIndicators: true,
+          showCloseButton: true,
+          closeButtonPosition: 'left' as const,
+          closeButtonStyle: 'default' as const,
+          opacity: 1,
+          blur: 'none' as const,
+          gradient: false,
+          gradientDirection: 'horizontal' as const,
+          pattern: 'none' as const,
+          patternOpacity: 0.1,
+          hoverEffect: 'glow' as const,
+          clickEffect: 'ripple' as const
         },
         targetAudience: 'all' as const,
         createdBy: 'system',
