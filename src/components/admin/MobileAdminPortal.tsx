@@ -11,7 +11,7 @@ import {
 import '../../styles/adminStyles/MobileAdminPortal.css';
 
 import { MobileAdminSettings } from './settings/MobileAdminSettings';
-import { default as MobileAnalytics } from './analytics/MobileAnalytics';
+import MobileAnalytics from '../admin/analytics/MobileAnalytics';
 import { MobileEnquiries } from './enquiries/MobileEnquiries';
 import { MobileAdminEmails } from './emails/MobileAdminEmails';
 import MobileAdminAnnouncements from './announcements/MobileAdminAnnouncements';
