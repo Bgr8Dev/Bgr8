@@ -11,7 +11,128 @@ import {
 import '../../styles/adminStyles/MobileAdminPortal.css';
 
 import { MobileAdminSettings } from './settings/MobileAdminSettings';
-import MobileAnalytics from '../admin/analytics/MobileAnalytics';
+// import MobileAnalytics from './analytics/MobileAnalytics';
+
+// Inline MobileAnalytics component to avoid import issues
+const MobileAnalytics: React.FC = () => {
+  // Mock data - in a real app, this would come from your backend
+  const analyticsData = {
+    totalUsers: 1247,
+    newUsersThisMonth: 89,
+    totalMentors: 156,
+    activeMentors: 142,
+    totalSessions: 2341,
+    sessionsThisMonth: 187,
+    totalEnquiries: 456,
+    pendingEnquiries: 23,
+    totalFeedback: 1892,
+    averageRating: 4.7,
+    totalTestingFeedback: 234,
+    pendingTestingFeedback: 12,
+    totalAmbassadors: 45,
+    pendingAmbassadors: 8
+  };
+
+  const getTrendIcon = (current: number, previous: number) => {
+    if (current > previous) return <FaArrowUp className="trend-up" />;
+    if (current < previous) return <FaArrowDown className="trend-down" />;
+    return <FaMinus className="trend-neutral" />;
+  };
+
+  const getTrendPercentage = (current: number, previous: number) => {
+    if (previous === 0) return 0;
+    return Math.round(((current - previous) / previous) * 100);
+  };
+
+  return (
+    <div className="mobile-analytics">
+      {/* Overview Cards */}
+      <div className="analytics-overview">
+        <h3>Platform Overview</h3>
+        <div className="overview-grid">
+          <div className="overview-card users">
+            <div className="card-icon">
+              <FaUsers />
+            </div>
+            <div className="card-content">
+              <h4>Total Users</h4>
+              <p className="card-number">{analyticsData.totalUsers.toLocaleString()}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.newUsersThisMonth, 75)}
+                <span>+{analyticsData.newUsersThisMonth} this month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="overview-card mentors">
+            <div className="card-icon">
+              <FaChalkboardTeacher />
+            </div>
+            <div className="card-content">
+              <h4>Active Mentors</h4>
+              <p className="card-number">{analyticsData.activeMentors}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.activeMentors, 138)}
+                <span>{getTrendPercentage(analyticsData.activeMentors, 138)}% vs last month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="overview-card sessions">
+            <div className="card-icon">
+              <FaCalendarAlt />
+            </div>
+            <div className="card-content">
+              <h4>Sessions</h4>
+              <p className="card-number">{analyticsData.sessionsThisMonth}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.sessionsThisMonth, 165)}
+                <span>{getTrendPercentage(analyticsData.sessionsThisMonth, 165)}% vs last month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="overview-card rating">
+            <div className="card-icon">
+              <FaComments />
+            </div>
+            <div className="card-content">
+              <h4>Avg Rating</h4>
+              <p className="card-number">{analyticsData.averageRating}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.averageRating, 4.6)}
+                <span>{getTrendPercentage(analyticsData.averageRating * 10, 4.6 * 10)}% vs last month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="analytics-actions">
+        <h3>Quick Actions</h3>
+        <div className="actions-grid">
+          <button className="action-btn primary">
+            <FaChartBar />
+            <span>View Detailed Reports</span>
+          </button>
+          <button className="action-btn secondary">
+            <FaUsers />
+            <span>User Analytics</span>
+          </button>
+          <button className="action-btn secondary">
+            <FaComments />
+            <span>Feedback Analysis</span>
+          </button>
+          <button className="action-btn secondary">
+            <FaCog />
+            <span>Export Data</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 import { MobileEnquiries } from './enquiries/MobileEnquiries';
 import { MobileAdminEmails } from './emails/MobileAdminEmails';
 import MobileAdminAnnouncements from './announcements/MobileAdminAnnouncements';
