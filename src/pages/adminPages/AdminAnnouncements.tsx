@@ -1273,7 +1273,7 @@ const AdminAnnouncements: React.FC = () => {
                     <label className="announcement-checkbox-label">
                       <input
                         type="checkbox"
-                        checked={formData.displaySettings?.autoScroll || true}
+                        checked={formData.displaySettings?.autoScroll !== false}
                         onChange={(e) => setFormData(prev => ({ 
                           ...prev, 
                           displaySettings: { 
@@ -1320,7 +1320,7 @@ const AdminAnnouncements: React.FC = () => {
                     }))}
                   >
                     <option value="left-to-right">Left to Right</option>
-                    <option value="right-to-left">Right to Left</option>
+                    <option value="right-to-left" disabled title="Right to Left scrolling is temporarily disabled - not working at the moment">Right to Left (Disabled)</option>
                     <option value="bounce">Bounce</option>
                     <option value="alternate">Alternate</option>
                   </select>

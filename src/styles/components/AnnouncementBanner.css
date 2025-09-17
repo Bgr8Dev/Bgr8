@@ -91,6 +91,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .announcement-banner-text {
@@ -100,6 +101,16 @@
   white-space: nowrap;
   font-weight: 500;
   line-height: 1.4;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Ensure scrolling text is wider than container and positioned correctly */
+.announcement-banner-text[class*="announcement-scroll-"] {
+  width: max-content;
+  min-width: 300%;
+  position: relative;
+  padding: 0 50px;
 }
 
 .announcement-banner-title {
@@ -113,32 +124,88 @@
   opacity: 0.95;
 }
 
-/* Scrolling animations */
+/* Scrolling animations - Left to Right */
+.announcement-scroll-very-slow {
+  animation: announcement-scroll-left 20s linear infinite;
+}
+
 .announcement-scroll-slow {
-  animation: announcement-banner-scroll-slow 15s linear infinite;
+  animation: announcement-scroll-left 15s linear infinite;
 }
 
 .announcement-scroll-normal {
-  animation: announcement-banner-scroll-normal 10s linear infinite;
+  animation: announcement-scroll-left 10s linear infinite;
 }
 
 .announcement-scroll-fast {
-  animation: announcement-banner-scroll-fast 5s linear infinite;
+  animation: announcement-scroll-left 5s linear infinite;
 }
 
-@keyframes announcement-banner-scroll-slow {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+.announcement-scroll-very-fast {
+  animation: announcement-scroll-left 3s linear infinite;
 }
 
-@keyframes announcement-banner-scroll-normal {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+/* Scrolling animations - Right to Left */
+.announcement-scroll-very-slow-rtl {
+  animation: announcement-scroll-right 20s linear infinite;
 }
 
-@keyframes announcement-banner-scroll-fast {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+.announcement-scroll-slow-rtl {
+  animation: announcement-scroll-right 15s linear infinite;
+}
+
+.announcement-scroll-normal-rtl {
+  animation: announcement-scroll-right 10s linear infinite;
+}
+
+.announcement-scroll-fast-rtl {
+  animation: announcement-scroll-right 5s linear infinite;
+}
+
+.announcement-scroll-very-fast-rtl {
+  animation: announcement-scroll-right 3s linear infinite;
+}
+
+/* Scrolling animations - Bounce */
+.announcement-scroll-very-slow-bounce {
+  animation: announcement-scroll-bounce 20s ease-in-out infinite;
+}
+
+.announcement-scroll-slow-bounce {
+  animation: announcement-scroll-bounce 15s ease-in-out infinite;
+}
+
+.announcement-scroll-normal-bounce {
+  animation: announcement-scroll-bounce 10s ease-in-out infinite;
+}
+
+.announcement-scroll-fast-bounce {
+  animation: announcement-scroll-bounce 5s ease-in-out infinite;
+}
+
+.announcement-scroll-very-fast-bounce {
+  animation: announcement-scroll-bounce 3s ease-in-out infinite;
+}
+
+/* Scrolling animations - Alternate */
+.announcement-scroll-very-slow-alternate {
+  animation: announcement-scroll-alternate 20s ease-in-out infinite;
+}
+
+.announcement-scroll-slow-alternate {
+  animation: announcement-scroll-alternate 15s ease-in-out infinite;
+}
+
+.announcement-scroll-normal-alternate {
+  animation: announcement-scroll-alternate 10s ease-in-out infinite;
+}
+
+.announcement-scroll-fast-alternate {
+  animation: announcement-scroll-alternate 5s ease-in-out infinite;
+}
+
+.announcement-scroll-very-fast-alternate {
+  animation: announcement-scroll-alternate 3s ease-in-out infinite;
 }
 
 .announcement-banner-controls {
@@ -358,9 +425,26 @@
     animation: none;
   }
 
+  .announcement-scroll-very-slow,
   .announcement-scroll-slow,
   .announcement-scroll-normal,
-  .announcement-scroll-fast {
+  .announcement-scroll-fast,
+  .announcement-scroll-very-fast,
+  .announcement-scroll-very-slow-rtl,
+  .announcement-scroll-slow-rtl,
+  .announcement-scroll-normal-rtl,
+  .announcement-scroll-fast-rtl,
+  .announcement-scroll-very-fast-rtl,
+  .announcement-scroll-very-slow-bounce,
+  .announcement-scroll-slow-bounce,
+  .announcement-scroll-normal-bounce,
+  .announcement-scroll-fast-bounce,
+  .announcement-scroll-very-fast-bounce,
+  .announcement-scroll-very-slow-alternate,
+  .announcement-scroll-slow-alternate,
+  .announcement-scroll-normal-alternate,
+  .announcement-scroll-fast-alternate,
+  .announcement-scroll-very-fast-alternate {
     animation: none;
   }
 
@@ -721,30 +805,34 @@
   90% { transform: translateX(-1px) rotate(-0.2deg); }
 }
 
-/* Enhanced Scroll Animations */
-.announcement-scroll-very-slow {
-  animation: announcement-scroll-left 20s linear infinite;
-}
-
-.announcement-scroll-slow {
-  animation: announcement-scroll-left 15s linear infinite;
-}
-
-.announcement-scroll-normal {
-  animation: announcement-scroll-left 10s linear infinite;
-}
-
-.announcement-scroll-fast {
-  animation: announcement-scroll-left 5s linear infinite;
-}
-
-.announcement-scroll-very-fast {
-  animation: announcement-scroll-left 3s linear infinite;
-}
-
+/* Scroll Animation Keyframes */
 @keyframes announcement-scroll-left {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes announcement-scroll-right {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
+}
+
+@keyframes announcement-scroll-bounce {
+  0%, 100% { transform: translateX(100%); }
+  50% { transform: translateX(-100%); }
+}
+
+@keyframes announcement-scroll-alternate {
+  0% { transform: translateX(100%); }
+  25% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  75% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Debug: Make scroll animations more visible */
+.announcement-banner-text[class*="announcement-scroll-"] {
+  animation-fill-mode: both;
+  will-change: transform;
 }
 
 

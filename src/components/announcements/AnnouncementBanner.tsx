@@ -258,11 +258,26 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     animationSpeed: settings.animationSpeed,
     hoverEffect: settings.hoverEffect,
     clickEffect: settings.clickEffect,
+    scrollSpeed: settings.scrollSpeed,
+    scrollDirection: settings.scrollDirection,
+    autoScroll: settings.autoScroll,
     allSettings: settings
   });
   
   const scrollSpeed = settings.scrollSpeed || 'normal';
+  const scrollDirection = settings.scrollDirection || 'left-to-right';
   const autoScroll = settings.autoScroll !== false;
+  
+  // Generate scroll class name
+  const scrollClassName = autoScroll ? 
+    `announcement-scroll-${scrollSpeed}${scrollDirection !== 'left-to-right' ? `-${scrollDirection}` : ''}` : '';
+  
+  console.log('Scroll settings:', {
+    scrollSpeed,
+    scrollDirection,
+    autoScroll,
+    scrollClassName
+  });
 
   // Build dynamic styles based on customization options
   const bannerStyles: React.CSSProperties = {
@@ -354,7 +369,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
         
         <div className="announcement-banner-text-container">
           <div 
-            className={`announcement-banner-text ${autoScroll ? `announcement-scroll-${scrollSpeed}` : ''}`}
+            className={`announcement-banner-text ${scrollClassName}`}
             style={{
               fontSize: (() => {
                 const size = settings.fontSize === 'small' ? '0.875rem' :
@@ -413,40 +428,44 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
               </>
             )}
             {settings.displayMode === 'title-only' && (
-              <span 
-                className="announcement-banner-title"
-                style={{
-                  fontSize: settings.fontSize === 'small' ? '0.875rem' :
-                           settings.fontSize === 'medium' ? '1rem' :
-                           settings.fontSize === 'large' ? '1.125rem' :
-                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
-                  fontWeight: settings.fontWeight === 'normal' ? '400' :
-                             settings.fontWeight === 'medium' ? '500' :
-                             settings.fontWeight === 'semibold' ? '600' :
-                             settings.fontWeight === 'bold' ? '700' : '500',
-                  color: settings.textColor || '#ffffff'
-                }}
-              >
-                {currentAnnouncement.title}
-              </span>
+              <>
+                <span 
+                  className="announcement-banner-title"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.title}
+                </span>
+              </>
             )}
             {settings.displayMode === 'content-only' && (
-              <span 
-                className="announcement-banner-message"
-                style={{
-                  fontSize: settings.fontSize === 'small' ? '0.875rem' :
-                           settings.fontSize === 'medium' ? '1rem' :
-                           settings.fontSize === 'large' ? '1.125rem' :
-                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
-                  fontWeight: settings.fontWeight === 'normal' ? '400' :
-                             settings.fontWeight === 'medium' ? '500' :
-                             settings.fontWeight === 'semibold' ? '600' :
-                             settings.fontWeight === 'bold' ? '700' : '500',
-                  color: settings.textColor || '#ffffff'
-                }}
-              >
-                {currentAnnouncement.content}
-              </span>
+              <>
+                <span 
+                  className="announcement-banner-message"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.content}
+                </span>
+              </>
             )}
             {settings.displayMode === 'custom' && settings.customDisplayText && (
               <span 
