@@ -25,6 +25,9 @@ export interface UserProfile {
     events: boolean;
     ambassador: boolean;
   };
+  
+  // Role protection - prevents role modification
+  isProtected?: boolean;
 
   // Mentor/Mentee Profile References
   mentorProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
@@ -178,8 +181,10 @@ export const createUserProfile = async (
       'vetting-officer': false,
       'social-media': false,
       outreach: false,
-      events: false
+      events: false,
+      ambassador: false
     },
+    isProtected: false,
     ethnicity: 'N/A',
     nationality: 'N/A',
     activityLog: {
