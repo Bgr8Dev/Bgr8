@@ -7,6 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.8.1] - 2025-09-18
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Add Ambassador Applications and Feedback Analytics Components
+- Remove padding from .admin-content in AdminPortal.css to streamline layout and enhance visual consistency.
+- Enhance MobileAdminPortal with New Sections and Improved Navigation
+- Implement Mobile Enquiries and Admin Settings Components for Enhanced Admin Functionality
+- Add Email Management Functionality to Admin Portal
+- Enhance AdminEmails Component with New Features and Improved Data Management
+- Add Rich Text Editor Component for Enhanced Email Composition
+- Add Announcement Management System with Admin and Mobile Interfaces
+- Add Codebase Analysis Tool with Batch Script and Python Script
+- Add Title Attributes to Buttons for Improved Accessibility
+- Add comprehensive testing documentation for BGr8 platform
+- Add comprehensive testing documentation for BGr8 platform
+- Implement Inline MobileAnalytics Component in MobileAdminPortal
+- Add Developer To-Do List for BGr8 Platform
+- Add isProtected Field to UserProfile for Role Protection
+- Implement Role Protection Features in Role Management
+- Enhance Mobile Role Management with Protected Account Features
+- Add BlueLocked Component for Managing Protected Accounts
+- Enhance AnnouncementBanner and AdminAnnouncements with New Features and Styles
+- Enhance AnnouncementBanner and AdminAnnouncements with Background Customization Features
+- Enhance AnnouncementBanner with Advanced Scrolling Features
+- Add Announcement Modal Component for Enhanced Announcement Management
+- Implement Enhanced Password Security and Role Protection Features
+- Add Password History Service and Update .gitignore
+
+### 🐛 Fixed Bug fixes and improvements
+- Refactor AnnouncementBanner Component for Improved Logic and Debugging
+
+### 📚 Documentation Documentation updates
+- Remove Announcement Banner Documentation and Refactor Announcement Service
+- Revise Testing Documentation for BGr8 Platform
+- Revise Security Testing Documentation for BGr8 Platform
+
+### 🎨 Changed Code style and formatting changes
+- Refactor MentorRanking Component and Styles for Enhanced Usability and Aesthetics
+- Enhance MentorRanking Component Styles for Improved Visual Appeal and Usability
+- Enhance Announcement Management with Customization Options and Improved UI
+- Remove AnnouncementBannerDemo Component and Associated Styles
+- Enhance AnnouncementBanner with Dynamic Effects and Improved Styles
+- Revamp AdminInstagram Component Styles and Layout
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor MobileAdminPortal and FeedbackAnalytics for Improved Structure and Usability
+- Refactor AdminEmails Component for Improved Structure and Consistency
+- Refactor RichTextEditor Component for Enhanced Functionality and Usability
+- Refactor App Structure to Integrate Announcement Banner
+- Refactor MobileAdminEmails and InstagramFeed Components for Improved Functionality
+- Refactor Mobile Components for Type Safety and Code Cleanup
+- Refactor MobileAdminPortal to Use Default Import for MobileAnalytics
+- Refactor MobileAdminPortal to Correct MobileAnalytics Import Path
+- Refactor BlueLocked Component for Enhanced Usability and Design
+- Refactor BlueLocked Component CSS Classes for Consistency and Clarity
+- Refactor AnnouncementBanner and AnnouncementModal for Simplified Controls
+- Refactor AnnouncementBanner Filtering Logic and Clean Up CSS
+- Refactor AdminInstagram Component for Improved Consistency and Usability
+- Refactor Announcement Components for Improved Functionality and Clarity
+
+### 🧪 Testing Test additions and improvements
+- Update Testing Checklist for BGr8 Platform
+
+### 🔧 Changed Maintenance tasks and chores
+- Enhance AnnouncementBanner with Dismiss Functionality and CSS Improvements
+- Update .gitignore to Correctly Ignore Reports Directory
+- Enhance AnnouncementBanner Component with Animation Support
+- Update AnnouncementBanner and AdminAnnouncements for Enhanced Customization
+- Update AnnouncementBanner and AdminAnnouncements for Icon Customization
+- Enhance AdminAnnouncements with Tooltip for Scroll Direction
+- Update AdminAnnouncements to Include Close Button in Announcement Settings
+- Revamp Instagram Feed Management System
+- Update AdminInstagram CSS for Enhanced Visual Consistency
+- Enhance Firestore Indexes and Improve AdminInstagram Component Functionality
+
+### 🛡️ Security Security improvements
+- Enhance Developer To-Do List for Role Protection System
+
+**Total Changes:** 60 commits
+**Code Changes:** +34,318 insertions, -8,432 deletions
+
+---
 ## [v0.8.0-Dunkirk] - 2025-09-16
 
 ### 🔧 Pre-release
@@ -844,6 +927,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.8.1]: https://github.com/Hum2a/B8/releases/tag/v0.8.1
 [v0.8.0-Dunkirk]: https://github.com/Hum2a/B8/releases/tag/v0.8.0-Dunkirk
 [v0.7.2-Ambassadors]: https://github.com/Hum2a/B8/releases/tag/v0.7.2-Ambassadors
 [v0.7.1]: https://github.com/Hum2a/B8/releases/tag/v0.7.1
