@@ -1,166 +1,146 @@
-# Instagram API Integration Setup Guide
+# Instagram Feed Management
 
-This guide will help you set up Instagram API integration for your BGr8 website.
+This document explains how to set up and manage the Instagram feed feature through the admin portal.
 
-## Prerequisites
+## Overview
 
-1. A Facebook Developer account
-2. An Instagram account (personal or business)
-3. Access to your website's environment variables
+The Instagram feed system allows administrators to manage Instagram posts and profile information through a dedicated admin interface. Instead of relying on the Instagram API (which has CSP restrictions), the system uses Firestore and Firebase Storage to manage content.
 
-## Step 1: Create a Facebook App
+## Features
 
-1. Go to [Facebook Developers Portal](https://developers.facebook.com/)
-2. Click "Create App" and select "Consumer" app type
-3. Fill in your app details:
-   - App Name: "BGr8 Website"
-   - App Contact Email: Your email
-   - App Purpose: Choose appropriate category
+- **Post Management**: Create, edit, delete, and reorder Instagram posts
+- **Image Upload**: Upload images to Firebase Storage with automatic URL generation
+- **Profile Management**: Configure Instagram profile information (username, account type, etc.)
+- **Active/Inactive Toggle**: Control which posts are displayed on the public feed
+- **Role-based Access**: Different admin roles can manage the Instagram feed
 
-## Step 2: Add Instagram Basic Display API
+## Setup Instructions
 
-1. In your app dashboard, click "Add Product"
-2. Find "Instagram Basic Display" and click "Set Up"
-3. Configure the product:
-   - Valid OAuth Redirect URIs: `http://localhost:5173/auth/instagram/callback` (for development)
-   - Valid OAuth Redirect URIs: `https://yourdomain.com/auth/instagram/callback` (for production)
+### 1. Access the Admin Portal
 
-## Step 3: Create Environment Variables
+1. Log in with an admin account
+2. Navigate to the Admin Portal
+3. Look for the "Instagram" section in the navigation menu
 
-Create a `.env` file in your project root with the following variables:
+### 2. Configure User Profile
 
-```env
-# Instagram API Configuration (Vite format)
-VITE_INSTAGRAM_APP_ID=your_facebook_app_id_here
-VITE_INSTAGRAM_APP_SECRET=your_facebook_app_secret_here
-VITE_INSTAGRAM_ACCESS_TOKEN=your_instagram_access_token_here
-VITE_INSTAGRAM_REDIRECT_URI=http://localhost:5173/auth/instagram/callback
+1. Click "Setup Profile" or "Edit Profile" in the Instagram Profile section
+2. Fill in the required information:
+   - **Username**: Instagram username (without @)
+   - **Account Type**: Business or Personal
+   - **Media Count**: Total number of posts
+   - **Active**: Whether the profile should be displayed
+3. Click "Save Profile"
+
+### 3. Add Instagram Posts
+
+1. Click "Add Post" in the Instagram Posts section
+2. Fill in the post details:
+   - **Media Type**: Image, Video, or Album
+   - **Image Upload**: Select an image file (max 5MB)
+   - **Caption**: Post caption/description
+   - **Instagram URL**: Link to the original Instagram post
+   - **Order**: Display order (lower numbers appear first)
+   - **Active**: Whether the post should be displayed
+3. Click "Create Post"
+
+### 4. Manage Existing Posts
+
+- **Edit**: Click the edit button to modify post details
+- **Toggle Status**: Click the eye icon to show/hide posts
+- **Delete**: Click the trash icon to remove posts permanently
+
+## File Structure
+
+```
+src/
+├── services/
+│   ├── instagramService.ts          # Public Instagram service (used by components)
+│   └── instagramAdminService.ts     # Admin Instagram service (CRUD operations)
+├── pages/adminPages/
+│   └── AdminInstagram.tsx           # Instagram admin interface
+├── components/social/
+│   ├── InstagramFeed.tsx            # Public Instagram feed component
+│   └── InstagramFeed.css            # Feed styling
+└── styles/adminStyles/
+    └── AdminInstagram.css           # Admin interface styling
 ```
 
-## Step 4: Get Access Token
+## Database Collections
 
-### Option A: Using Instagram Basic Display API (Recommended for personal accounts)
+### Firestore Collections
 
-1. **Generate Authorization URL:**
-   ```javascript
-   const authURL = instagramService.generateAuthURL(
-     'YOUR_APP_ID',
-     'YOUR_REDIRECT_URI'
-   );
-   console.log('Visit this URL to authorize:', authURL);
-   ```
+- **instagramPosts**: Stores Instagram post data
+  - `id`: Document ID
+  - `media_type`: IMAGE, VIDEO, or CAROUSEL_ALBUM
+  - `media_url`: URL to the uploaded image
+  - `caption`: Post caption
+  - `permalink`: Instagram post URL
+  - `timestamp`: Post creation date
+  - `thumbnail_url`: Thumbnail image URL
+  - `isActive`: Whether post is displayed
+  - `order`: Display order
+  - `createdAt`: Record creation date
+  - `updatedAt`: Last update date
 
-2. **After authorization, extract the code from the callback URL:**
-   ```javascript
-   const code = instagramService.extractCodeFromCallback(window.location.href);
-   ```
+- **instagramUsers**: Stores Instagram profile data
+  - `id`: Document ID
+  - `username`: Instagram username
+  - `account_type`: BUSINESS or PERSONAL
+  - `media_count`: Total number of posts
+  - `isActive`: Whether profile is displayed
+  - `createdAt`: Record creation date
+  - `updatedAt`: Last update date
 
-3. **Exchange code for access token:**
-   ```javascript
-   const accessToken = await instagramService.exchangeCodeForToken(
-     code,
-     'YOUR_APP_ID',
-     'YOUR_APP_SECRET',
-     'YOUR_REDIRECT_URI'
-   );
-   ```
+### Firebase Storage
 
-4. **Get long-lived token (optional but recommended):**
-   ```javascript
-   const longLivedToken = await instagramService.getLongLivedToken(
-     accessToken,
-     'YOUR_APP_SECRET'
-   );
-   ```
+- **instagram/**: Contains uploaded Instagram images
+  - Files are automatically named with timestamps
+  - 5MB size limit per image
+  - Supports common image formats (JPEG, PNG, WebP, etc.)
 
-### Option B: For Business Accounts (Instagram Graph API)
+## Security Rules
 
-If you have a business Instagram account connected to a Facebook Page:
+### Firestore Rules
 
-1. Go to Facebook Developers Portal
-2. Add "Instagram Graph API" product
-3. Connect your Instagram Business account to a Facebook Page
-4. Use the Page Access Token to access Instagram data
+- **Read Access**: Public can read active posts and profiles
+- **Write Access**: Admin, Committee, Marketing, and Social Media roles can manage content
 
-## Step 5: Test the Integration
+### Storage Rules
 
-1. Add your access token to the `.env` file
-2. Restart your development server
-3. Visit your BGr8 page to see the Instagram feed
+- **Upload**: Admin users can upload images (5MB limit)
+- **Read**: Public read access to uploaded images
 
-## Step 6: Token Management
+## Permissions
 
-### Long-lived Token Refresh
+The following roles can access the Instagram admin:
 
-Instagram access tokens expire. You'll need to refresh them periodically:
-
-```javascript
-// Refresh token (should be done before it expires)
-const newToken = await instagramService.refreshLongLivedToken(longLivedToken);
-```
-
-### Token Expiration Handling
-
-Add error handling in your component to detect expired tokens:
-
-```javascript
-useEffect(() => {
-  if (error && error.includes('token')) {
-    // Handle token expiration
-    console.log('Instagram token expired, please refresh');
-  }
-}, [error]);
-```
+- **admin**: Full access to all features
+- **committee**: Full access to all features
+- **marketing**: Full access to all features
+- **social-media**: Full access to all features
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **"Invalid access token"**
-   - Check if your token is correct
-   - Verify the token hasn't expired
-   - Ensure you're using the right API version
+1. **Images not uploading**: Check file size (must be under 5MB) and format
+2. **Posts not displaying**: Ensure posts are marked as "Active"
+3. **Permission denied**: Verify user has appropriate role (admin, committee, marketing, or social-media)
+4. **Storage errors**: Check Firebase Storage rules and quota limits
 
-2. **"User not authorized"**
-   - Make sure the Instagram account has granted permissions
-   - Check that the user is added as a test user in your Facebook app
+### Fallback Behavior
 
-3. **"Rate limit exceeded"**
-   - Instagram has rate limits (200 calls per hour per user)
-   - Implement caching to reduce API calls
-   - Consider using a backend service to cache data
+If Firestore is unavailable, the system will display fallback mock data to prevent the feed from breaking.
 
-### Rate Limits
+## Migration from Mock Data
 
-- **Basic Display API**: 200 calls per hour per user
-- **Graph API**: 4800 calls per hour per app
+The system automatically migrated from hardcoded mock data to Firestore-based data. Existing Instagram feeds will continue to work while you populate the admin portal with real content.
 
-## Security Considerations
+## Best Practices
 
-1. **Never expose your App Secret in client-side code**
-2. **Use environment variables for all sensitive data**
-3. **Implement proper error handling**
-4. **Consider using a backend service for production**
-
-## Alternative Solutions
-
-If the Instagram API setup is too complex, consider these alternatives:
-
-1. **EmbedSocial**: Third-party service that handles Instagram integration
-2. **SnapWidget**: Simple Instagram widget
-3. **Juicer**: Social media aggregator
-4. **Manual updates**: Periodically update posts manually
-
-## Production Deployment
-
-1. Update redirect URIs to your production domain
-2. Submit your app for Facebook review if needed
-3. Implement proper error handling and fallbacks
-4. Consider using a backend service to manage tokens securely
-
-## Support
-
-For issues with the Instagram API, check:
-- [Instagram Basic Display API Documentation](https://developers.facebook.com/docs/instagram-basic-display-api)
-- [Facebook Developers Community](https://developers.facebook.com/community/)
-- [Instagram API Status](https://developers.facebook.com/status/)
+1. **Image Optimization**: Compress images before upload for better performance
+2. **Consistent Ordering**: Use sequential order numbers for predictable display
+3. **Regular Updates**: Keep the feed fresh with new content
+4. **Quality Control**: Review posts before making them active
+5. **Backup**: Regular exports of Firestore data for content backup

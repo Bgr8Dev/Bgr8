@@ -126,6 +126,14 @@ export class PagePermissionsService {
       isEnabled: true
     },
     {
+      pageId: 'instagram',
+      pageName: 'Instagram',
+      description: 'Manage Instagram feed posts and profile information',
+      icon: 'FaInstagram',
+      allowedRoles: ['admin', 'committee', 'marketing', 'social-media'],
+      isEnabled: true
+    },
+    {
       pageId: 'settings',
       pageName: 'Settings',
       description: 'Configure system settings and permissions',
