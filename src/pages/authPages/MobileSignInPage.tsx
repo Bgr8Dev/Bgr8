@@ -8,17 +8,17 @@ import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/MobileAuthPages.css';
-import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput } from '../../utils/security';
+import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
+import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
+import { PasswordHistoryService } from '../../services/passwordHistoryService';
+import { AccountLockoutService } from '../../services/accountLockoutService';
+import { BruteForceProtectionService } from '../../services/bruteForceProtectionService';
 
 // Define FirebaseErrorWithCode type to handle Firebase errors
 interface FirebaseErrorWithCode extends Error {
   code: string;
 }
 
-interface PasswordRequirement {
-  label: string;
-  met: boolean;
-}
 
 export default function MobileSignInPage() {
   const [searchParams] = useSearchParams();
@@ -32,13 +32,7 @@ export default function MobileSignInPage() {
   });
   const [error, setError] = useState('');
   const [isBlocked, setIsBlocked] = useState(false);
-  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirement[]>([
-    { label: 'At least 12 characters long', met: false },
-    { label: 'Contains uppercase letter', met: false },
-    { label: 'Contains lowercase letter', met: false },
-    { label: 'Contains number', met: false },
-    { label: 'Contains special character (@$!%*?&)', met: false }
-  ]);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
   const navigate = useNavigate();
 
   // Handle URL parameters to set initial tab
@@ -52,13 +46,13 @@ export default function MobileSignInPage() {
   }, [searchParams]);
 
   const updatePasswordRequirements = (password: string) => {
-    setPasswordRequirements([
-      { label: 'At least 12 characters long', met: password.length >= 12 },
-      { label: 'Contains uppercase letter', met: /[A-Z]/.test(password) },
-      { label: 'Contains lowercase letter', met: /[a-z]/.test(password) },
-      { label: 'Contains number', met: /\d/.test(password) },
-      { label: 'Contains special character (@$!%*?&#^~`|\\/<>:";=+_-)', met: /[@$!%*?&#^~`|\\/<>:";=+_-]/.test(password) }
-    ]);
+    // Calculate enhanced password strength
+    const strength = calculatePasswordStrength(password, {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email
+    });
+    setPasswordStrength(strength);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,8 +103,41 @@ export default function MobileSignInPage() {
     
     try {
       if (isSignIn) {
+        // Check comprehensive brute force protection first
+        const bruteForceStatus = await BruteForceProtectionService.checkComprehensiveProtection(formData.email);
+        if (bruteForceStatus.isBlocked) {
+          const timeRemaining = bruteForceStatus.blockedUntil 
+            ? Math.ceil((bruteForceStatus.blockedUntil.getTime() - Date.now()) / (1000 * 60))
+            : null;
+          setError(`Access blocked due to suspicious activity. Please try again in ${timeRemaining || 'unknown'} minutes.`);
+          setIsBlocked(true);
+          return;
+        }
+
+        // Check account lockout status
+        const lockoutStatus = await AccountLockoutService.isAccountLocked(formData.email);
+        if (lockoutStatus.isLocked) {
+          if (lockoutStatus.isPermanent) {
+            setError('Account has been permanently locked due to repeated security violations. Please contact support.');
+          } else if (lockoutStatus.lockoutExpiresAt) {
+            const timeRemaining = Math.ceil((lockoutStatus.lockoutExpiresAt.getTime() - Date.now()) / (1000 * 60));
+            setError(`Account is temporarily locked. Please try again in ${timeRemaining} minutes.`);
+          } else {
+            setError('Account is currently locked. Please try again later.');
+          }
+          return;
+        }
+
         // Sign-in logic
         await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        
+        // Clear any failed attempts on successful login
+        await Promise.all([
+          AccountLockoutService.clearFailedAttempts(formData.email),
+          BruteForceProtectionService.clearComprehensiveAttempts(formData.email),
+          clearRateLimit(formData.email)
+        ]);
+        
         updateLastActivity(); // Set initial session timestamp
         navigate('/');
       } else {
@@ -135,6 +162,9 @@ export default function MobileSignInPage() {
           {}
         );
 
+        // Add initial password to history
+        await PasswordHistoryService.addPasswordToHistory(userCredential.user.uid, formData.password);
+
         updateLastActivity(); // Set initial session timestamp
         navigate('/'); // Redirect to home page
       }
@@ -143,6 +173,32 @@ export default function MobileSignInPage() {
       let errorMessage: string;
       
       if (isSignIn) {
+        // Record failed attempt for security-related errors
+        if (firebaseError.code === 'auth/wrong-password' || firebaseError.code === 'auth/user-not-found') {
+          try {
+            const reason = firebaseError.code === 'auth/wrong-password' ? 'wrong_password' : 'user_not_found';
+            
+            // Record in both account lockout and brute force protection
+            const [lockoutResult, bruteForceResult] = await Promise.all([
+              AccountLockoutService.recordFailedAttempt(formData.email, formData.email, reason),
+              BruteForceProtectionService.recordComprehensiveFailedAttempt(formData.email, undefined, reason)
+            ]);
+            
+            if (lockoutResult.isLocked || bruteForceResult.isBlocked) {
+              const timeRemaining = lockoutResult.lockoutExpiresAt 
+                ? Math.ceil((lockoutResult.lockoutExpiresAt.getTime() - Date.now()) / (1000 * 60))
+                : bruteForceResult.blockedUntil
+                ? Math.ceil((bruteForceResult.blockedUntil.getTime() - Date.now()) / (1000 * 60))
+                : null;
+              setError(`Too many failed attempts. Access blocked for ${timeRemaining || 'unknown'} minutes.`);
+              setIsBlocked(true);
+              return;
+            }
+          } catch (lockoutError) {
+            console.error('Error recording failed attempt:', lockoutError);
+          }
+        }
+
         switch (firebaseError.code) {
           case 'auth/user-not-found':
             setError('No account found with this email');
@@ -325,13 +381,13 @@ export default function MobileSignInPage() {
                       required
                       disabled={isBlocked}
                     />
-                    <div className="mobile-password-requirements">
-                      {passwordRequirements.map((req, index) => (
-                        <div key={index} className={`mobile-requirement ${req.met ? 'met' : ''}`}>
-                          {req.met ? '✓' : '○'} {req.label}
-                        </div>
-                      ))}
-                    </div>
+                    {passwordStrength && (
+                      <PasswordStrengthMeter 
+                        strength={passwordStrength}
+                        showFeedback={true}
+                        className="mobile-password-strength"
+                      />
+                    )}
                   </div>
                   
                   <div className="mobile-auth-input-group">
