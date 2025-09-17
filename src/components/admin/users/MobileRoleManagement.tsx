@@ -19,7 +19,8 @@ import {
   FaCalendar,
   FaBug,
   FaTimes,
-  FaCog
+  FaCog,
+  FaLock
 } from 'react-icons/fa';
 import RoleManagementModal from './RoleManagementModal';
 import './MobileRoleManagement.css';
@@ -42,6 +43,7 @@ interface UserData {
     tester: boolean;
     ambassador: boolean;
   };
+  isProtected?: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
   [key: string]: unknown;
@@ -260,6 +262,13 @@ export default function MobileRoleManagement() {
 
   const handleRoleUpdate = async (userId: string, roleKey: string, value: boolean) => {
     try {
+      // Check if user is protected
+      const user = users.find(u => u.uid === userId);
+      if (user?.isProtected) {
+        alert('This account is protected and cannot have its roles modified.');
+        return;
+      }
+
       const userRef = doc(firestore, 'users', userId);
       await updateDoc(userRef, {
         [`roles.${roleKey}`]: value
@@ -378,6 +387,8 @@ export default function MobileRoleManagement() {
           <button 
             className="clear-search-btn"
             onClick={() => setSearchTerm('')}
+            title="Clear search"
+            aria-label="Clear search"
           >
             <FaTimes />
           </button>
@@ -393,6 +404,8 @@ export default function MobileRoleManagement() {
             <button
               className="clear-filter-btn"
               onClick={() => setRoleFilter('all')}
+              title="Clear filter"
+              aria-label="Clear filter"
             >
               <FaTimes />
             </button>
@@ -409,6 +422,13 @@ export default function MobileRoleManagement() {
               <div className="user-info">
                 <h4 className="user-name">
                   {user.firstName} {user.lastName}
+                  {user.isProtected && (
+                    <FaLock 
+                      className="protected-indicator" 
+                      title="Protected Account - Roles cannot be modified"
+                      style={{ marginLeft: '8px', color: '#e53e3e' }}
+                    />
+                  )}
                 </h4>
                 <p className="user-email">{user.email}</p>
                 <p className="user-date">
@@ -416,14 +436,20 @@ export default function MobileRoleManagement() {
                 </p>
               </div>
               <button
-                className="manage-roles-btn"
+                className={`manage-roles-btn ${user.isProtected ? 'disabled' : ''}`}
                 onClick={() => {
+                  if (user.isProtected) {
+                    alert('This account is protected and cannot have its roles modified.');
+                    return;
+                  }
                   setSelectedUser(user);
                   setShowRoleModal(true);
                 }}
+                disabled={user.isProtected}
+                title={user.isProtected ? 'Protected Account - Roles cannot be modified' : 'Manage user roles'}
               >
                 <FaCog />
-                Manage
+                {user.isProtected ? 'Protected' : 'Manage'}
               </button>
             </div>
             
@@ -463,13 +489,14 @@ export default function MobileRoleManagement() {
       {/* Role Management Modal */}
       {selectedUser && (
         <RoleManagementModal
-          user={selectedUser}
+          selectedUser={selectedUser}
           isOpen={showRoleModal}
           onClose={() => {
             setShowRoleModal(false);
             setSelectedUser(null);
           }}
-          onRoleUpdate={handleRoleUpdate}
+          onToggleRole={handleRoleUpdate}
+          pulsingRole={pulsingRole}
           roles={ROLES}
         />
       )}

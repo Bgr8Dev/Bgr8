@@ -30,7 +30,7 @@ export default function InstagramFeed({
       // Fetch user profile and posts in parallel
       const [postsData, userData] = await Promise.all([
         instagramService.getRecentMedia(accessToken, maxPosts),
-        showProfile ? instagramService.getUserProfile(accessToken) : null
+        showProfile ? instagramService.getUserProfile() : null
       ]);
 
       setPosts(postsData);

@@ -4,6 +4,7 @@ import { auth, firestore, logAnalyticsEvent } from '../firebase/firebase';
 import { onAuthStateChanged, User, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { UserProfile } from '../utils/userProfile';
+import { PasswordHistoryService } from '../services/passwordHistoryService';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -45,6 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      // Validate new password against history
+      const historyValidation = await PasswordHistoryService.validateNewPassword(currentUser.uid, newPassword);
+      if (!historyValidation.isValid) {
+        throw new Error(historyValidation.reason || 'Password validation failed');
+      }
+
       // Create credential with current password
       const credential = EmailAuthProvider.credential(
         currentUser.email,
@@ -56,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Update password
       await updatePassword(currentUser, newPassword);
+      
+      // Add new password to history
+      await PasswordHistoryService.addPasswordToHistory(currentUser.uid, newPassword);
       
       // Log password change event
       logAnalyticsEvent('password_changed', {
@@ -75,6 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           throw new Error(`Failed to change password: ${firebaseError.message || 'Unknown error'}`);
         }
+      } else if (error instanceof Error) {
+        // Re-throw validation errors from password history service
+        throw error;
       } else {
         throw new Error('Failed to change password: Unknown error');
       }

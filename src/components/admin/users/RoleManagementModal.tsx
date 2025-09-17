@@ -24,6 +24,7 @@ interface UserData {
     tester: boolean;
     ambassador: boolean;
   };
+  isProtected?: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
   [key: string]: unknown;
@@ -112,16 +113,23 @@ export default function RoleManagementModal({
         </div>
         <div className="role-modal-content">
           <p className="role-modal-email">{selectedUser.email}</p>
+          {selectedUser.isProtected && (
+            <div className="protected-account-warning">
+              <FaShieldAlt />
+              <span>This account is protected and roles cannot be modified.</span>
+            </div>
+          )}
           <div className="role-modal-roles">
             {roles.map(role => (
               <label 
                 key={role.key} 
-                className={`role-modal-toggle ${selectedUser.roles[role.key] ? 'active' : ''} ${pulsingRole === role.key ? 'pulse' : ''}`}
+                className={`role-modal-toggle ${selectedUser.roles[role.key] ? 'active' : ''} ${pulsingRole === role.key ? 'pulse' : ''} ${selectedUser.isProtected ? 'disabled' : ''}`}
               >
                 <input
                   type="checkbox"
                   checked={selectedUser.roles[role.key]}
                   onChange={() => onToggleRole(selectedUser.uid, role.key, selectedUser.roles[role.key])}
+                  disabled={selectedUser.isProtected}
                 />
                 <span className="role-modal-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
                   <span className="role-modal-icon">{role.icon}</span>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { usePagePermissions } from '../hooks/usePagePermissions';
 import { hasRole } from '../utils/userProfile';
-import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug, FaHandshake, FaMailBulk, FaBullhorn } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug, FaHandshake, FaMailBulk, FaBullhorn, FaInstagram } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
 
 import { AdminSettings } from './adminPages/AdminSettings';
@@ -13,6 +13,7 @@ import { AdminMentorVerification } from './adminPages/AdminMentorVerification';
 import AdminTestingFeedback from './adminPages/AdminTestingFeedback';
 import AdminEmails from './adminPages/AdminEmails';
 import AdminAnnouncements from './adminPages/AdminAnnouncements';
+import AdminInstagram from './adminPages/AdminInstagram';
 import MentorManagement from '../components/admin/mentors/MentorManagement';
 import FeedbackAnalytics from '../components/admin/feedback/FeedbackAnalytics';
 import { SessionsManagement } from '../components/admin/sessions/SessionsManagement';
@@ -101,6 +102,7 @@ export default function AdminPortal() {
                 'ambassadors': FaHandshake,
                 'emails': FaMailBulk,
                 'announcements': FaBullhorn,
+                'instagram': FaInstagram,
                 'settings': FaCog
               };
               
@@ -133,6 +135,7 @@ export default function AdminPortal() {
         {canAccessPage('ambassadors') && activeSection === 'ambassadors' && <AmbassadorApplications />}
         {canAccessPage('emails') && activeSection === 'emails' && <AdminEmails />}
         {canAccessPage('announcements') && activeSection === 'announcements' && <AdminAnnouncements />}
+        {canAccessPage('instagram') && activeSection === 'instagram' && <AdminInstagram />}
         {canAccessPage('settings') && activeSection === 'settings' && <AdminSettings />}
       </div>
     </div>

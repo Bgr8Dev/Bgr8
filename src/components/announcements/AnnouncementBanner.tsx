@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaBullhorn, FaTimes, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle, FaGift, FaChevronLeft, FaChevronRight, FaPause, FaPlay } from 'react-icons/fa';
+import { FaBullhorn, FaTimes, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle, FaGift } from 'react-icons/fa';
 import { AnnouncementService, Announcement } from '../../services/announcementService';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/components/AnnouncementBanner.css';
@@ -20,7 +20,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   const { userProfile } = useAuth();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused] = useState(false);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +36,9 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       // Filter announcements based on user role and display settings
       const filteredAnnouncements = activeAnnouncements.filter(announcement => {
         // Check if announcement should be shown based on display settings
-        if (!announcement.displaySettings.showOnHomepage && showOnHomepage) return false;
-        if (!announcement.displaySettings.showOnPortal && showOnPortal) return false;
-        if (!announcement.displaySettings.showOnMobile && showOnMobile) return false;
+        if (showOnHomepage && !announcement.displaySettings.showOnHomepage) return false;
+        if (showOnPortal && !announcement.displaySettings.showOnPortal) return false;
+        if (showOnMobile && !announcement.displaySettings.showOnMobile) return false;
         
         // Check target audience
         if (announcement.targetAudience === 'all') return true;
@@ -167,6 +167,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     try {
       await AnnouncementService.recordClick(announcement.id);
       
+      
       if (announcement.clickAction) {
         switch (announcement.clickAction.type) {
           case 'link':
@@ -192,17 +193,6 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     }
   }, []);
 
-  const handlePrevious = () => {
-    setCurrentIndex(prev => (prev - 1 + announcements.length) % announcements.length);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex(prev => (prev + 1) % announcements.length);
-  };
-
-  const togglePause = () => {
-    setIsPaused(prev => !prev);
-  };
 
   // Cleanup intervals on unmount
   useEffect(() => {
@@ -213,8 +203,13 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     };
   }, []);
 
-  // Don't render if no announcements or loading
-  if (isLoading || announcements.length === 0) {
+  // Don't render if loading
+  if (isLoading) {
+    return null;
+  }
+
+  // Don't render if no announcements
+  if (announcements.length === 0) {
     return null;
   }
 
@@ -227,10 +222,51 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   const currentAnnouncement = announcements[currentIndex];
   if (!currentAnnouncement) return null;
 
+  // Ensure we have displaySettings from Firebase - don't render with defaults
+  if (!currentAnnouncement.displaySettings) {
+    console.warn('AnnouncementBanner: No displaySettings found in Firebase data');
+    return null;
+  }
+
   const typeColor = getTypeColor(currentAnnouncement.type);
   const settings = currentAnnouncement.displaySettings;
+  
+  // Log the actual Firebase values being used (for debugging)
+  console.log('AnnouncementBanner using Firebase data:', {
+    fontSize: settings.fontSize,
+    fontWeight: settings.fontWeight,
+    textColor: settings.textColor,
+    backgroundColor: settings.backgroundColor,
+    gradient: settings.gradient,
+    gradientDirection: settings.gradientDirection,
+    gradientColors: settings.gradientColors,
+    pattern: settings.pattern,
+    opacity: settings.opacity,
+    displayMode: settings.displayMode,
+    animation: settings.animation,
+    animationSpeed: settings.animationSpeed,
+    hoverEffect: settings.hoverEffect,
+    clickEffect: settings.clickEffect,
+    scrollSpeed: settings.scrollSpeed,
+    scrollDirection: settings.scrollDirection,
+    autoScroll: settings.autoScroll,
+    allSettings: settings
+  });
+  
   const scrollSpeed = settings.scrollSpeed || 'normal';
+  const scrollDirection = settings.scrollDirection || 'left-to-right';
   const autoScroll = settings.autoScroll !== false;
+  
+  // Generate scroll class name
+  const scrollClassName = autoScroll ? 
+    `announcement-scroll-${scrollSpeed}${scrollDirection !== 'left-to-right' ? `-${scrollDirection}` : ''}` : '';
+  
+  console.log('Scroll settings:', {
+    scrollSpeed,
+    scrollDirection,
+    autoScroll,
+    scrollClassName
+  });
 
   // Build dynamic styles based on customization options
   const bannerStyles: React.CSSProperties = {
@@ -255,17 +291,13 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
               settings.shadow === 'medium' ? '0 4px 8px rgba(0,0,0,0.15)' :
               settings.shadow === 'large' ? '0 8px 16px rgba(0,0,0,0.2)' :
               settings.shadow === 'glow' ? `0 0 20px ${settings.accentColor || typeColor}40` : '0 4px 8px rgba(0,0,0,0.15)',
-    backdropFilter: settings.blur === 'none' ? 'none' :
-                   settings.blur === 'light' ? 'blur(2px)' :
-                   settings.blur === 'medium' ? 'blur(4px)' :
-                   settings.blur === 'heavy' ? 'blur(8px)' : 'none',
     border: settings.borderColor ? `2px solid ${settings.borderColor}` : 'none',
-    background: settings.gradient && settings.gradientColors ? 
+    background: (settings.gradient && settings.gradientColors) ? 
       `linear-gradient(${settings.gradientDirection === 'horizontal' ? '90deg' :
                       settings.gradientDirection === 'vertical' ? '180deg' :
                       settings.gradientDirection === 'diagonal' ? '45deg' :
                       settings.gradientDirection === 'radial' ? 'circle' : '90deg'}, 
-       ${settings.gradientColors.join(', ')})` : 
+       ${settings.gradientColors?.join(', ') || [settings.backgroundColor || typeColor, settings.accentColor || typeColor].join(', ')})` : 
       (settings.backgroundColor || typeColor)
   };
 
@@ -275,12 +307,29 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     settings.animation !== 'none' ? `announcement-${settings.animation}` : '',
     settings.animationSpeed ? `announcement-speed-${settings.animationSpeed}` : '',
     settings.hoverEffect !== 'none' ? `announcement-hover-${settings.hoverEffect}` : '',
-    settings.clickEffect !== 'none' ? `announcement-click-${settings.clickEffect}` : '',
+    settings.clickEffect !== 'none' && settings.clickEffect !== 'ripple' ? `announcement-click-${settings.clickEffect}` : '',
     settings.pattern !== 'none' ? `announcement-pattern-${settings.pattern}` : ''
   ].filter(Boolean).join(' ');
 
+  // Log animation classes being applied
+  console.log('Animation classes being applied:', {
+    animation: settings.animation,
+    animationSpeed: settings.animationSpeed,
+    hoverEffect: settings.hoverEffect,
+    clickEffect: settings.clickEffect,
+    pattern: settings.pattern,
+    bannerClasses: bannerClasses
+  });
+
+  // Apply container-level animations (like slide-down)
+  const containerClasses = [
+    'announcement-banner-container',
+    settings.animation === 'slide' ? 'announcement-container-slide' : '',
+    className
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`announcement-banner-container ${className}`}>
+    <div className={containerClasses}>
       <div 
         className={bannerClasses}
         style={bannerStyles}
@@ -302,101 +351,134 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
         )}
 
         {settings.showIcon && settings.iconPosition !== 'hidden' && (
-          <div className={`announcement-banner-icon-container ${settings.iconPosition === 'center' ? 'center' : ''}`}>
+          <div className={`announcement-banner-icon-container ${settings.iconPosition === 'center' ? 'center' : settings.iconPosition === 'right' ? 'right' : ''}`}>
             {getTypeIcon(currentAnnouncement.type)}
           </div>
         )}
         
         <div className="announcement-banner-text-container">
           <div 
-            className={`announcement-banner-text ${autoScroll ? `announcement-scroll-${scrollSpeed}` : ''}`}
+            className={`announcement-banner-text ${scrollClassName}`}
             style={{
-              fontSize: settings.fontSize === 'small' ? '0.875rem' :
-                       settings.fontSize === 'medium' ? '1rem' :
-                       settings.fontSize === 'large' ? '1.125rem' :
-                       settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
-              fontWeight: settings.fontWeight === 'normal' ? '400' :
-                         settings.fontWeight === 'medium' ? '500' :
-                         settings.fontWeight === 'semibold' ? '600' :
-                         settings.fontWeight === 'bold' ? '700' : '500',
-              textAlign: settings.textAlign || 'left'
+              fontSize: (() => {
+                const size = settings.fontSize === 'small' ? '0.875rem' :
+                           settings.fontSize === 'medium' ? '1rem' :
+                           settings.fontSize === 'large' ? '1.125rem' :
+                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem';
+                console.log(`Font size: ${settings.fontSize} -> ${size}`);
+                return size;
+              })(),
+              fontWeight: (() => {
+                const weight = settings.fontWeight === 'normal' ? '400' :
+                             settings.fontWeight === 'medium' ? '500' :
+                             settings.fontWeight === 'semibold' ? '600' :
+                             settings.fontWeight === 'bold' ? '700' : '500';
+                console.log(`Font weight: ${settings.fontWeight} -> ${weight}`);
+                return weight;
+              })(),
+              color: settings.textColor || '#ffffff'
             }}
           >
+            {/* Dynamic display based on displayMode setting */}
+            {(!settings.displayMode || settings.displayMode === 'title-and-content') && (
+              <>
+                <span 
+                  className="announcement-banner-title"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.title}
+                </span>
+                <span 
+                  className="announcement-banner-message"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.content}
+                </span>
+              </>
+            )}
             {settings.displayMode === 'title-only' && (
-              <span className="announcement-banner-title">{currentAnnouncement.title}</span>
+              <>
+                <span 
+                  className="announcement-banner-title"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.title}
+                </span>
+              </>
             )}
             {settings.displayMode === 'content-only' && (
-              <span className="announcement-banner-message">{currentAnnouncement.content}</span>
-            )}
-            {settings.displayMode === 'title-and-content' && (
               <>
-                <span className="announcement-banner-title">{currentAnnouncement.title}</span>
-                <span className="announcement-banner-message">{currentAnnouncement.content}</span>
+                <span 
+                  className="announcement-banner-message"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.content}
+                </span>
               </>
             )}
             {settings.displayMode === 'custom' && settings.customDisplayText && (
-              <span className="announcement-banner-custom">{settings.customDisplayText}</span>
+              <span 
+                className="announcement-banner-custom"
+                style={{
+                  fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                           settings.fontSize === 'medium' ? '1rem' :
+                           settings.fontSize === 'large' ? '1.125rem' :
+                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                  fontWeight: settings.fontWeight === 'normal' ? '400' :
+                             settings.fontWeight === 'medium' ? '500' :
+                             settings.fontWeight === 'semibold' ? '600' :
+                             settings.fontWeight === 'bold' ? '700' : '500',
+                  color: settings.textColor || '#ffffff'
+                }}
+              >
+                {settings.customDisplayText}
+              </span>
             )}
           </div>
         </div>
 
-        {settings.showControls && (
-          <div className="announcement-banner-controls">
-            {announcements.length > 1 && (
-              <>
-                <button
-                  className="announcement-banner-control-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevious();
-                  }}
-                  title="Previous announcement"
-                >
-                  <FaChevronLeft />
-                </button>
-                
-                <button
-                  className="announcement-banner-control-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    togglePause();
-                  }}
-                  title={isPaused ? 'Resume auto-scroll' : 'Pause auto-scroll'}
-                >
-                  {isPaused ? <FaPlay /> : <FaPause />}
-                </button>
-                
-                <button
-                  className="announcement-banner-control-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNext();
-                  }}
-                  title="Next announcement"
-                >
-                  <FaChevronRight />
-                </button>
-              </>
-            )}
-          </div>
-        )}
       </div>
 
-        {settings.showIndicators && announcements.length > 1 && (
-          <div className="announcement-banner-indicators">
-            {announcements.map((_, index) => (
-              <button
-                key={index}
-                className={`announcement-banner-indicator ${index === currentIndex ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentIndex(index);
-                }}
-                title={`Go to announcement ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

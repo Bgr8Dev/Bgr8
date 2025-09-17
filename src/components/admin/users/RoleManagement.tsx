@@ -17,7 +17,8 @@ import {
   FaShareAlt,
   FaHandshake,
   FaCalendar,
-  FaBug
+  FaBug,
+  FaLock
 } from 'react-icons/fa';
 import RoleManagementModal from './RoleManagementModal';
 import './RoleManagement.css';
@@ -40,6 +41,7 @@ interface UserData {
     tester: boolean;
     ambassador: boolean;
   };
+  isProtected?: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
   [key: string]: unknown;
@@ -242,6 +244,13 @@ export default function RoleManagement() {
 
   const toggleUserRole = async (uid: string, role: keyof UserData['roles'], currentStatus: boolean) => {
     try {
+      // Check if user is protected
+      const user = users.find(u => u.uid === uid);
+      if (user?.isProtected) {
+        alert('This account is protected and cannot have its roles modified.');
+        return;
+      }
+
       // Add pulse animation
       setPulsingRole(role);
       setTimeout(() => setPulsingRole(null), 600);
@@ -483,6 +492,13 @@ export default function RoleManagement() {
                 <td className="user-info">
                   <div className="user-name">
                     {user.firstName} {user.lastName}
+                    {user.isProtected && (
+                      <FaLock 
+                        className="protected-indicator" 
+                        title="Protected Account - Roles cannot be modified"
+                        style={{ marginLeft: '8px', color: '#e53e3e' }}
+                      />
+                    )}
                   </div>
                 </td>
                 <td className="user-email">{user.email}</td>
@@ -526,13 +542,19 @@ export default function RoleManagement() {
                       )}
                     </div>
                     <button
-                      className="manage-roles-btn"
+                      className={`manage-roles-btn ${user.isProtected ? 'disabled' : ''}`}
                       onClick={() => {
+                        if (user.isProtected) {
+                          alert('This account is protected and cannot have its roles modified.');
+                          return;
+                        }
                         setSelectedUser(user);
                         setShowRoleModal(true);
                       }}
+                      disabled={user.isProtected}
+                      title={user.isProtected ? 'Protected Account - Roles cannot be modified' : 'Manage user roles'}
                     >
-                      Manage Roles
+                      {user.isProtected ? 'Protected' : 'Manage Roles'}
                     </button>
                   </div>
                 </td>

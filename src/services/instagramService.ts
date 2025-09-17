@@ -1,5 +1,7 @@
 // Instagram API Service
-// This service handles Instagram Basic Display API integration
+// This service handles Instagram feed data from Firestore and Instagram Basic Display API integration
+
+import { instagramAdminService } from './instagramAdminService';
 
 export interface InstagramPost {
   id: string;
@@ -27,50 +29,29 @@ class InstagramService {
   }
 
   /**
-   * Get recent media posts from Instagram account
-   * @param accessToken - Instagram access token
-   * @param limit - Number of posts to fetch (max 25)
+   * Get recent media posts from Firestore (managed through admin portal)
+   * @param accessToken - Instagram access token (not used for Firestore data)
+   * @param limit - Number of posts to fetch
    */
-  async getRecentMedia(accessToken: string, limit: number = 6): Promise<InstagramPost[]> {
+  async getRecentMedia(_accessToken: string, limit: number = 6): Promise<InstagramPost[]> {
     try {
-      // For development/demo purposes, return mock data
-      // In production, you would need to set up a backend proxy to avoid CSP issues
-      console.warn('Instagram API calls are blocked by CSP. Using mock data for development.');
+      // Get active posts from Firestore via admin service
+      const adminPosts = await instagramAdminService.getActivePosts(limit);
       
-      // Mock data for development - using data URIs to avoid CSP issues
-      const mockPosts: InstagramPost[] = [
-        {
-          id: '1',
-          media_type: 'IMAGE',
-          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2I4MmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkluc3RhZ3JhbSBQb3N0IDE8L3RleHQ+PC9zdmc+',
-          caption: 'Welcome to our platform! 🚀 #b8network #tech #innovation',
-          permalink: 'https://instagram.com/p/mock1',
-          timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2I4MmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjE8L3RleHQ+PC9zdmc+'
-        },
-        {
-          id: '2',
-          media_type: 'IMAGE',
-          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTBiOTgxIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkluc3RhZ3JhbSBQb3N0IDI8L3RleHQ+PC9zdmc+',
-          caption: 'Building the future of networking! 💡 #networking #community',
-          permalink: 'https://instagram.com/p/mock2',
-          timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTBiOTgxIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjI8L3RleHQ+PC9zdmc+'
-        },
-        {
-          id: '3',
-          media_type: 'VIDEO',
-          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOGI1Y2Y2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlZpZGVvIFBvc3Q8L3RleHQ+PC9zdmc+',
-          caption: 'Check out our latest features! 🎥 #video #features',
-          permalink: 'https://instagram.com/p/mock3',
-          timestamp: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOGI1Y2Y2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjM8L3RleHQ+PC9zdmc+'
-        }
-      ];
+      // Convert admin posts to public interface format
+      const posts: InstagramPost[] = adminPosts.map(post => ({
+        id: post.id!,
+        media_type: post.media_type,
+        media_url: post.media_url,
+        caption: post.caption,
+        permalink: post.permalink,
+        timestamp: (post.timestamp instanceof Date ? post.timestamp : post.timestamp.toDate()).toISOString(),
+        thumbnail_url: post.thumbnail_url
+      }));
 
-      return mockPosts.slice(0, limit);
+      return posts;
       
-      /* Production code (commented out due to CSP):
+      /* Fallback to Instagram API (commented out due to CSP):
       const response = await fetch(
         `${this.baseURL}/${this.version}/me/media?fields=id,media_type,media_url,caption,permalink,timestamp,thumbnail_url&limit=${limit}&access_token=${accessToken}`
       );
@@ -84,32 +65,52 @@ class InstagramService {
       */
     } catch (error) {
       console.error('Error fetching Instagram posts:', error);
-      // Return empty array instead of throwing to prevent app crashes
-      return [];
+      
+      // Return mock data as fallback if Firestore is unavailable
+      console.warn('Using mock data as fallback due to Firestore error');
+      const mockPosts: InstagramPost[] = [
+        {
+          id: 'fallback-1',
+          media_type: 'IMAGE',
+          media_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2I4MmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkluc3RhZ3JhbSBQb3N0IDE8L3RleHQ+PC9zdmc+',
+          caption: 'Welcome to our platform! 🚀 #b8network #tech #innovation',
+          permalink: 'https://instagram.com/p/fallback1',
+          timestamp: new Date(Date.now() - 86400000).toISOString(),
+          thumbnail_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2I4MmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjE8L3RleHQ+PC9zdmc+'
+        }
+      ];
+
+      return mockPosts.slice(0, limit);
     }
   }
 
   /**
-   * Get user profile information
-   * @param accessToken - Instagram access token
+   * Get user profile information from Firestore (managed through admin portal)
    */
-  async getUserProfile(accessToken: string): Promise<InstagramUser> {
+  async getUserProfile(): Promise<InstagramUser> {
     try {
-      // For development/demo purposes, return mock data
-      console.warn('Instagram API calls are blocked by CSP. Using mock data for development.');
-      console.log('Access token provided:', accessToken ? 'Yes' : 'No');
+      // Get user profile from Firestore via admin service
+      const adminUsers = await instagramAdminService.getUserProfile();
       
-      // Mock user data for development
-      const mockUser: InstagramUser = {
-        id: 'mock_user_id',
+      if (adminUsers.length > 0) {
+        const adminUser = adminUsers[0];
+        return {
+          id: adminUser.id!,
+          username: adminUser.username,
+          account_type: adminUser.account_type,
+          media_count: adminUser.media_count
+        };
+      }
+      
+      // Return default user data if no profile is configured
+      return {
+        id: 'default_user',
         username: 'b8network',
         account_type: 'BUSINESS',
-        media_count: 150
+        media_count: 0
       };
-
-      return mockUser;
       
-      /* Production code (commented out due to CSP):
+      /* Fallback to Instagram API (commented out due to CSP):
       const response = await fetch(
         `${this.baseURL}/${this.version}/me?fields=id,username,account_type,media_count&access_token=${accessToken}`
       );
@@ -122,11 +123,12 @@ class InstagramService {
       */
     } catch (error) {
       console.error('Error fetching Instagram profile:', error);
-      // Return mock data instead of throwing to prevent app crashes
+      
+      // Return fallback data if Firestore is unavailable
       return {
-        id: 'error_user',
-        username: 'instagram_user',
-        account_type: 'PERSONAL',
+        id: 'fallback_user',
+        username: 'b8network',
+        account_type: 'BUSINESS',
         media_count: 0
       };
     }

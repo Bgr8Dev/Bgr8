@@ -162,6 +162,26 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
+    // Instagram feed management
+    match /instagramPosts/{postId} {
+      // Public read access for active posts
+      allow read: if resource.data.isActive == true;
+      // Write access for admin, committee, marketing, and social-media roles
+      allow write: if isAdmin() || isCommittee() || isMarketing() || isSocialMedia();
+    }
+    
+    match /instagramUsers/{userId} {
+      // Public read access for active profiles
+      allow read: if resource.data.isActive == true;
+      // Write access for admin, committee, marketing, and social-media roles
+      allow write: if isAdmin() || isCommittee() || isMarketing() || isSocialMedia();
+    }
+    
+    // Admin configuration
+    match /admin-config/{configId} {
+      allow read, write: if isAdmin();
+    }
+    
     // Public data (read-only for authenticated users)
     match /public/{document=**} {
       allow read: if isAuthenticated();

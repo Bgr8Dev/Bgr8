@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle } from 'react-icons/fa';
 import PagePermissionsManager from '../../components/admin/settings/PagePermissionsManager';
+import BlueLocked from '../../components/admin/settings/BlueLocked';
 import { PagePermissionsService } from '../../services/pagePermissionsService';
 import '../../styles/adminStyles/AdminSettings.css';
 
@@ -79,10 +80,7 @@ export function AdminSettings() {
 
               {activeTab === 'general' && (
                 <div className="admin-settings-general">
-                  <div className="settings-section">
-                    <h3>General Settings</h3>
-                    <p>General system configuration options will be available here.</p>
-                  </div>
+                  <BlueLocked />
                 </div>
               )}
             </div>

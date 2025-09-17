@@ -5,5 +5,17 @@ service firebase.storage {
     match /{allPaths=**} {
       allow read, write: if true;
     }
+    
+    // Instagram feed images
+    match /instagram/{fileName} {
+      // Allow authenticated users to upload images
+      allow write: if request.auth != null 
+        && request.auth.token.admin == true
+        && resource.contentType.matches('image/.*')
+        && resource.size < 5 * 1024 * 1024; // 5MB limit
+      
+      // Allow public read access to Instagram images
+      allow read: if true;
+    }
   }
 }

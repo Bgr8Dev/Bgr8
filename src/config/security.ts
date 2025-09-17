@@ -5,7 +5,12 @@ export const AUTH_CONFIG = {
   LOGIN_TIMEOUT: 15 * 60 * 1000, // 15 minutes
   SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
   PASSWORD_RESET_EXPIRY: 24 * 60 * 60 * 1000, // 24 hours
-  REQUIRE_EMAIL_VERIFICATION: true
+  REQUIRE_EMAIL_VERIFICATION: true,
+  PASSWORD_HISTORY_SIZE: 5, // Keep last 5 passwords
+  MIN_PASSWORD_STRENGTH_SCORE: 60, // Minimum password strength score (0-100)
+  PROGRESSIVE_LOCKOUT: true, // Enable progressive lockout duration
+  MAX_LOCKOUT_DURATION: 24 * 60, // Maximum lockout duration in minutes (24 hours)
+  PERMANENT_LOCKOUT_THRESHOLD: 10 // Number of lockouts before permanent lockout
 };
 
 // API security settings
