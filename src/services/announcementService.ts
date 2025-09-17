@@ -152,137 +152,28 @@ export class AnnouncementService {
         })
         .sort((a, b) => {
           // Sort by priority first, then by creation date
-          const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
-          const aPriority = priorityOrder[a.priority] || 2;
-          const bPriority = priorityOrder[b.priority] || 2;
+          const priorityOrder: Record<string, number> = { urgent: 4, high: 3, normal: 2, low: 1 };
+          const aData = a as Announcement;
+          const bData = b as Announcement;
+          const aPriority = priorityOrder[aData.priority] || 2;
+          const bPriority = priorityOrder[bData.priority] || 2;
           
           if (aPriority !== bPriority) {
             return bPriority - aPriority; // Higher priority first
           }
           
-          return b.createdAt.getTime() - a.createdAt.getTime(); // Newer first
+          return bData.createdAt.getTime() - aData.createdAt.getTime(); // Newer first
         }) as Announcement[];
 
-      // If no announcements found, return a demo announcement for development
+      // Return empty array if no announcements found
       if (announcements.length === 0) {
-        console.log('No active announcements found. Creating demo announcement for development.');
-        return [{
-          id: 'demo-announcement',
-          title: 'Welcome to B8 Network!',
-          content: 'This is a demo announcement banner. Create announcements in the admin panel to customize this message.',
-          type: 'info' as const,
-          priority: 'normal' as const,
-          isActive: true,
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          displaySettings: {
-            showOnHomepage: true,
-            showOnPortal: true,
-            showOnMobile: true,
-            autoScroll: true,
-            scrollSpeed: 'normal' as const,
-            scrollDirection: 'left-to-right' as const,
-            displayMode: 'title-and-content' as const,
-            fontSize: 'medium' as const,
-            fontWeight: 'medium' as const,
-            textAlign: 'left' as const,
-            backgroundColor: '#3b82f6',
-            textColor: '#ffffff',
-            accentColor: '#60a5fa',
-            borderRadius: 'medium' as const,
-            padding: 'medium' as const,
-            margin: 'none' as const,
-            shadow: 'medium' as const,
-            animation: 'shimmer' as const,
-            animationSpeed: 'normal' as const,
-            showIcon: true,
-            iconPosition: 'left' as const,
-            showControls: true,
-            showIndicators: true,
-            showCloseButton: true,
-            closeButtonPosition: 'left' as const,
-            closeButtonStyle: 'default' as const,
-            opacity: 1,
-            blur: 'none' as const,
-            gradient: false,
-            gradientDirection: 'horizontal' as const,
-            pattern: 'none' as const,
-            patternOpacity: 0.1,
-            hoverEffect: 'glow' as const,
-            clickEffect: 'ripple' as const
-          },
-          targetAudience: 'all' as const,
-          createdBy: 'system',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          analytics: {
-            views: 0,
-            clicks: 0,
-            dismissals: 0
-          }
-        }];
+        return [];
       }
 
       return announcements;
     } catch (error) {
       console.error('Error fetching active announcements:', error);
-      // Return demo announcement instead of throwing error
-      console.log('Firebase error occurred. Using demo announcement for development.');
-      return [{
-        id: 'demo-announcement',
-        title: 'Welcome to B8 Network!',
-        content: 'This is a demo announcement banner. Create announcements in the admin panel to customize this message.',
-        type: 'info' as const,
-        priority: 'normal' as const,
-        isActive: true,
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        displaySettings: {
-          showOnHomepage: true,
-          showOnPortal: true,
-          showOnMobile: true,
-          autoScroll: true,
-          scrollSpeed: 'normal' as const,
-          scrollDirection: 'left-to-right' as const,
-          displayMode: 'title-and-content' as const,
-          fontSize: 'medium' as const,
-          fontWeight: 'medium' as const,
-          textAlign: 'left' as const,
-          backgroundColor: '#3b82f6',
-          textColor: '#ffffff',
-          accentColor: '#60a5fa',
-          borderRadius: 'medium' as const,
-          padding: 'medium' as const,
-          margin: 'none' as const,
-          shadow: 'medium' as const,
-          animation: 'shimmer' as const,
-          animationSpeed: 'normal' as const,
-          showIcon: true,
-          iconPosition: 'left' as const,
-          showControls: true,
-          showIndicators: true,
-          showCloseButton: true,
-          closeButtonPosition: 'left' as const,
-          closeButtonStyle: 'default' as const,
-          opacity: 1,
-          blur: 'none' as const,
-          gradient: false,
-          gradientDirection: 'horizontal' as const,
-          pattern: 'none' as const,
-          patternOpacity: 0.1,
-          hoverEffect: 'glow' as const,
-          clickEffect: 'ripple' as const
-        },
-        targetAudience: 'all' as const,
-        createdBy: 'system',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        analytics: {
-          views: 0,
-          clicks: 0,
-          dismissals: 0
-        }
-      }];
+      return [];
     }
   }
 

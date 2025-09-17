@@ -213,8 +213,13 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     };
   }, []);
 
-  // Don't render if no announcements or loading
-  if (isLoading || announcements.length === 0) {
+  // Don't render if loading
+  if (isLoading) {
+    return null;
+  }
+
+  // Don't render if no announcements
+  if (announcements.length === 0) {
     return null;
   }
 
@@ -227,8 +232,25 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   const currentAnnouncement = announcements[currentIndex];
   if (!currentAnnouncement) return null;
 
+  // Ensure we have displaySettings from Firebase - don't render with defaults
+  if (!currentAnnouncement.displaySettings) {
+    console.warn('AnnouncementBanner: No displaySettings found in Firebase data');
+    return null;
+  }
+
   const typeColor = getTypeColor(currentAnnouncement.type);
   const settings = currentAnnouncement.displaySettings;
+  
+  // Log the actual Firebase values being used (for debugging)
+  console.log('AnnouncementBanner using Firebase data:', {
+    fontSize: settings.fontSize,
+    fontWeight: settings.fontWeight,
+    textColor: settings.textColor,
+    backgroundColor: settings.backgroundColor,
+    displayMode: settings.displayMode,
+    allSettings: settings
+  });
+  
   const scrollSpeed = settings.scrollSpeed || 'normal';
   const autoScroll = settings.autoScroll !== false;
 
@@ -311,31 +333,115 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
           <div 
             className={`announcement-banner-text ${autoScroll ? `announcement-scroll-${scrollSpeed}` : ''}`}
             style={{
-              fontSize: settings.fontSize === 'small' ? '0.875rem' :
-                       settings.fontSize === 'medium' ? '1rem' :
-                       settings.fontSize === 'large' ? '1.125rem' :
-                       settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
-              fontWeight: settings.fontWeight === 'normal' ? '400' :
-                         settings.fontWeight === 'medium' ? '500' :
-                         settings.fontWeight === 'semibold' ? '600' :
-                         settings.fontWeight === 'bold' ? '700' : '500',
-              textAlign: settings.textAlign || 'left'
+              fontSize: (() => {
+                const size = settings.fontSize === 'small' ? '0.875rem' :
+                           settings.fontSize === 'medium' ? '1rem' :
+                           settings.fontSize === 'large' ? '1.125rem' :
+                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem';
+                console.log(`Font size: ${settings.fontSize} -> ${size}`);
+                return size;
+              })(),
+              fontWeight: (() => {
+                const weight = settings.fontWeight === 'normal' ? '400' :
+                             settings.fontWeight === 'medium' ? '500' :
+                             settings.fontWeight === 'semibold' ? '600' :
+                             settings.fontWeight === 'bold' ? '700' : '500';
+                console.log(`Font weight: ${settings.fontWeight} -> ${weight}`);
+                return weight;
+              })(),
+              color: settings.textColor || '#ffffff'
             }}
           >
-            {settings.displayMode === 'title-only' && (
-              <span className="announcement-banner-title">{currentAnnouncement.title}</span>
-            )}
-            {settings.displayMode === 'content-only' && (
-              <span className="announcement-banner-message">{currentAnnouncement.content}</span>
-            )}
-            {settings.displayMode === 'title-and-content' && (
+            {/* Dynamic display based on displayMode setting */}
+            {(!settings.displayMode || settings.displayMode === 'title-and-content') && (
               <>
-                <span className="announcement-banner-title">{currentAnnouncement.title}</span>
-                <span className="announcement-banner-message">{currentAnnouncement.content}</span>
+                <span 
+                  className="announcement-banner-title"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.title}
+                </span>
+                <span 
+                  className="announcement-banner-message"
+                  style={{
+                    fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                             settings.fontSize === 'medium' ? '1rem' :
+                             settings.fontSize === 'large' ? '1.125rem' :
+                             settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                    fontWeight: settings.fontWeight === 'normal' ? '400' :
+                               settings.fontWeight === 'medium' ? '500' :
+                               settings.fontWeight === 'semibold' ? '600' :
+                               settings.fontWeight === 'bold' ? '700' : '500',
+                    color: settings.textColor || '#ffffff'
+                  }}
+                >
+                  {currentAnnouncement.content}
+                </span>
               </>
             )}
+            {settings.displayMode === 'title-only' && (
+              <span 
+                className="announcement-banner-title"
+                style={{
+                  fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                           settings.fontSize === 'medium' ? '1rem' :
+                           settings.fontSize === 'large' ? '1.125rem' :
+                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                  fontWeight: settings.fontWeight === 'normal' ? '400' :
+                             settings.fontWeight === 'medium' ? '500' :
+                             settings.fontWeight === 'semibold' ? '600' :
+                             settings.fontWeight === 'bold' ? '700' : '500',
+                  color: settings.textColor || '#ffffff'
+                }}
+              >
+                {currentAnnouncement.title}
+              </span>
+            )}
+            {settings.displayMode === 'content-only' && (
+              <span 
+                className="announcement-banner-message"
+                style={{
+                  fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                           settings.fontSize === 'medium' ? '1rem' :
+                           settings.fontSize === 'large' ? '1.125rem' :
+                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                  fontWeight: settings.fontWeight === 'normal' ? '400' :
+                             settings.fontWeight === 'medium' ? '500' :
+                             settings.fontWeight === 'semibold' ? '600' :
+                             settings.fontWeight === 'bold' ? '700' : '500',
+                  color: settings.textColor || '#ffffff'
+                }}
+              >
+                {currentAnnouncement.content}
+              </span>
+            )}
             {settings.displayMode === 'custom' && settings.customDisplayText && (
-              <span className="announcement-banner-custom">{settings.customDisplayText}</span>
+              <span 
+                className="announcement-banner-custom"
+                style={{
+                  fontSize: settings.fontSize === 'small' ? '0.875rem' :
+                           settings.fontSize === 'medium' ? '1rem' :
+                           settings.fontSize === 'large' ? '1.125rem' :
+                           settings.fontSize === 'extra-large' ? '1.25rem' : '1rem',
+                  fontWeight: settings.fontWeight === 'normal' ? '400' :
+                             settings.fontWeight === 'medium' ? '500' :
+                             settings.fontWeight === 'semibold' ? '600' :
+                             settings.fontWeight === 'bold' ? '700' : '500',
+                  color: settings.textColor || '#ffffff'
+                }}
+              >
+                {settings.customDisplayText}
+              </span>
             )}
           </div>
         </div>

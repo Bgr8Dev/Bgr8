@@ -781,43 +781,23 @@ const AdminAnnouncements: React.FC = () => {
                   Display Settings
                 </h3>
 
-                <div className="announcement-form-row">
-                  <div className="announcement-form-group">
-                    <label>Display Mode</label>
-                    <select
-                      value={formData.displaySettings?.displayMode || 'title-and-content'}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        displaySettings: { 
-                          ...prev.displaySettings, 
-                          displayMode: e.target.value as Announcement['displaySettings']['displayMode']
-                        }
-                      }))}
-                    >
-                      <option value="title-only">Title Only</option>
-                      <option value="content-only">Content Only</option>
-                      <option value="title-and-content">Title + Content</option>
-                      <option value="custom">Custom Text</option>
-                    </select>
-                  </div>
-                  
-                  <div className="announcement-form-group">
-                    <label>Text Alignment</label>
-                    <select
-                      value={formData.displaySettings?.textAlign || 'left'}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        displaySettings: { 
-                          ...prev.displaySettings, 
-                          textAlign: e.target.value as Announcement['displaySettings']['textAlign']
-                        }
-                      }))}
-                    >
-                      <option value="left">Left</option>
-                      <option value="center">Center</option>
-                      <option value="right">Right</option>
-                    </select>
-                  </div>
+                <div className="announcement-form-group">
+                  <label>Display Mode</label>
+                  <select
+                    value={formData.displaySettings?.displayMode || 'title-and-content'}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      displaySettings: { 
+                        ...prev.displaySettings, 
+                        displayMode: e.target.value as Announcement['displaySettings']['displayMode']
+                      }
+                    }))}
+                  >
+                    <option value="title-only">Title Only</option>
+                    <option value="content-only">Content Only</option>
+                    <option value="title-and-content">Title + Content</option>
+                    <option value="custom">Custom Text</option>
+                  </select>
                 </div>
 
                 {formData.displaySettings?.displayMode === 'custom' && (

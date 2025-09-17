@@ -6,7 +6,7 @@
   right: 0;
   z-index: 1000;
   width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  /* Remove default background - it will be set dynamically by the component */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   animation: announcement-banner-slide-down 0.5s ease-out;
 }
