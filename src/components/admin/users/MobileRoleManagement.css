@@ -5,6 +5,25 @@
   color: #ffffff;
 }
 
+/* Protected Account Styles for Mobile */
+.mobile-user-card .protected-indicator {
+  font-size: 0.8rem;
+  vertical-align: middle;
+}
+
+.mobile-user-card .manage-roles-btn.disabled {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mobile-user-card .manage-roles-btn.disabled:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  transform: none;
+}
+
 /* Loading and Access Denied */
 .loading-container, .access-denied {
   display: flex;
