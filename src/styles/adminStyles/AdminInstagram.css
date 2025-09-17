@@ -2,50 +2,105 @@
 
 .admin-insta-container {
   padding: 2rem;
-  max-width: 1200px;
   margin: 0 auto;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  border-radius: 0;
 }
 
 .admin-insta-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .admin-insta-header h2 {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--accent);
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  justify-content: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .admin-insta-header p {
-  color: #374151;
-  font-size: 1.1rem;
+  color: #4b5563;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+.admin-insta-header .header-controls {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-insta-header .header-controls button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.admin-insta-header .header-controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.admin-insta-header .header-controls span {
+  font-size: 0.9rem;
+  color: #6b7280;
+  background: #f8fafc;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 /* Alerts */
 .admin-insta-alert {
-  padding: 1rem 1.5rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 500;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .admin-insta-alert-error {
-  background: #fee2e2;
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.9), rgba(252, 165, 165, 0.8));
   color: #dc2626;
-  border: 1px solid #fca5a5;
+  border: 1px solid rgba(252, 165, 165, 0.3);
 }
 
 .admin-insta-alert-success {
-  background: #dcfce7;
+  background: linear-gradient(135deg, rgba(220, 252, 231, 0.9), rgba(134, 239, 172, 0.8));
   color: #16a34a;
-  border: 1px solid #86efac;
+  border: 1px solid rgba(134, 239, 172, 0.3);
 }
 
 .admin-insta-alert-close {
@@ -54,138 +109,188 @@
   color: inherit;
   cursor: pointer;
   font-size: 1.2rem;
-  padding: 0;
+  padding: 0.25rem;
   margin-left: 1rem;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .admin-insta-alert-close:hover {
-  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
 }
 
 /* Sections */
 .admin-insta-section {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-insta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045);
 }
 
 .admin-insta-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f3f4f6;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.5);
 }
 
 .admin-insta-section-header h3 {
-  color: #111827;
-  font-size: 1.5rem;
+  color: #1e293b;
+  font-size: 1.75rem;
+  font-weight: 700;
   margin: 0;
+  background: linear-gradient(135deg, #1e293b, #475569);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* User Profile Display */
 .admin-insta-user-profile-display {
-  background: #f9fafb;
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .admin-insta-profile-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
 }
 
 .admin-insta-profile-info strong {
-  color: #3b82f6;
-  font-size: 1.2rem;
+  color: #1e40af;
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .admin-insta-profile-type {
-  background: #e5e7eb;
-  color: #374151;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  color: #3730a3;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
   font-size: 0.9rem;
+  font-weight: 600;
   text-transform: capitalize;
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .admin-insta-profile-count {
-  color: #4b5563;
-  font-weight: 500;
+  color: #475569;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .admin-insta-profile-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .admin-insta-profile-status.active {
-  background: #dcfce7;
-  color: #16a34a;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #166534;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .admin-insta-profile-status.inactive {
-  background: #fee2e2;
-  color: #dc2626;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 /* Forms */
 .admin-insta-form-container {
-  background: #f9fafb;
-  padding: 2rem;
-  border-radius: var(--radius-md);
-  border: 1px solid #e5e7eb;
-  margin-top: 1rem;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 2.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 
 .admin-insta-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .admin-insta-form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .admin-insta-form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #111827;
-  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.025em;
 }
 
 .admin-insta-checkbox-label {
   display: flex !important;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   cursor: pointer;
+  font-weight: 600;
+  color: #374151;
 }
 
 .admin-insta-checkbox-label input[type="checkbox"] {
   margin: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
 }
 
 .admin-insta-form-group input,
 .admin-insta-form-group select,
 .admin-insta-form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: var(--radius-md);
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   background: #ffffff;
-  color: #111827;
+  color: #1e293b;
   font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .admin-insta-form-group input:focus,
@@ -193,26 +298,55 @@
 .admin-insta-form-group textarea:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
 }
 
 .admin-insta-form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.admin-insta-form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 /* Image Upload */
 .admin-insta-upload-area {
-  border: 2px dashed #d1d5db;
-  border-radius: var(--radius-md);
-  padding: 1rem;
+  border: 3px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 2rem;
   text-align: center;
-  background: #ffffff;
-  transition: border-color 0.3s ease;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-insta-upload-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s ease;
 }
 
 .admin-insta-upload-area:hover {
   border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.admin-insta-upload-area:hover::before {
+  left: 100%;
 }
 
 .admin-insta-file-input {
@@ -220,274 +354,366 @@
 }
 
 .admin-insta-upload-button {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #ffffff;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin: 0 auto;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .admin-insta-upload-button:hover {
-  background: #e5e7eb;
-  color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
 }
 
 .admin-insta-file-name {
   display: block;
-  margin-top: 0.5rem;
-  color: #4b5563;
+  margin-top: 1rem;
+  color: #475569;
   font-size: 0.9rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .admin-insta-image-preview {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   text-align: center;
 }
 
 .admin-insta-image-preview img {
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: var(--radius-md);
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  max-width: 250px;
+  max-height: 250px;
+  border-radius: 16px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.admin-insta-image-preview img:hover {
+  transform: scale(1.05);
 }
 
 /* Form Actions */
 .admin-insta-form-actions {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   justify-content: flex-end;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(226, 232, 240, 0.5);
 }
 
 /* Buttons */
 .admin-insta-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
   border: none;
-  border-radius: var(--radius-md);
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-insta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.admin-insta-btn:hover::before {
+  left: 100%;
 }
 
 .admin-insta-btn-primary {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: #ffffff;
-  border: 1px solid #3b82f6;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .admin-insta-btn-primary:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
 }
 
 .admin-insta-btn-primary:disabled {
-  background: #9ca3af;
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
   color: #ffffff;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .admin-insta-btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #475569;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .admin-insta-btn-secondary:hover {
-  background: #e5e7eb;
-  color: #111827;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  color: #1e293b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .admin-insta-btn-danger {
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #ffffff;
-  border: 1px solid #ef4444;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
 
 .admin-insta-btn-danger:hover {
-  background: #dc2626;
-  color: #ffffff;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
 }
 
 .admin-insta-btn-sm {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
 }
 
 /* Posts Grid */
 .admin-insta-posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
 }
 
 .admin-insta-post-card {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.admin-insta-post-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .admin-insta-post-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.admin-insta-post-card:hover::before {
+  opacity: 1;
 }
 
 .admin-insta-post-card.inactive {
-  opacity: 0.6;
-  border-color: #d1d5db;
+  opacity: 0.7;
+  border-color: #cbd5e1;
 }
 
 .admin-insta-post-image {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 250px;
   overflow: hidden;
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
 }
 
 .admin-insta-post-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 }
 
 .admin-insta-post-card:hover .admin-insta-post-image img {
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .admin-insta-post-overlay {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 1rem;
+  right: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .admin-insta-post-type {
-  background: rgba(0, 0, 0, 0.7);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
   color: #ffffff;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
 }
 
 .admin-insta-post-order {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: #ffffff;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .admin-insta-post-content {
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 .admin-insta-post-caption {
-  color: #374151;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-bottom: 0.75rem;
+  color: #1e293b;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }
 
 .admin-insta-post-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 1rem;
 }
 
 .admin-insta-post-status {
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
 }
 
 .admin-insta-post-status.active {
-  background: #dcfce7;
-  color: #16a34a;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #166534;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .admin-insta-post-status.inactive {
-  background: #fee2e2;
-  color: #dc2626;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .admin-insta-post-actions {
   display: flex;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .admin-insta-post-actions .admin-insta-btn {
   flex: 1;
   justify-content: center;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
 }
 
 /* Empty State */
 .admin-insta-empty-state {
   text-align: center;
-  padding: 3rem 2rem;
-  color: #6b7280;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .admin-insta-empty-state svg {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: #9ca3af;
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .admin-insta-empty-state h4 {
-  color: #4b5563;
-  margin-bottom: 0.5rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .admin-insta-empty-state p {
-  color: #6b7280;
+  color: #64748b;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 /* Loading Spinner */
 .admin-insta-loading-spinner {
   text-align: center;
-  padding: 3rem;
+  padding: 4rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .admin-insta-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e5e7eb;
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
   border-top: 4px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.admin-insta-loading-spinner p {
+  color: #475569;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 @keyframes spin {

@@ -278,15 +278,14 @@ export default function AdminInstagram() {
           <FaInstagram /> Homepage Instagram Feed
         </h2>
         <p>Manage content for the Instagram feed displayed on the BGR8 homepage</p>
-        <div style={{marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center'}}>
+        <div className="header-controls">
           <button 
-            className="admin-insta-btn admin-insta-btn-secondary admin-insta-btn-sm"
             onClick={loadData}
             title="Refresh data from Firestore"
           >
             🔄 Refresh Data
           </button>
-          <span style={{fontSize: '0.9rem', color: '#6b7280'}}>
+          <span>
             {posts.length} posts loaded from Firestore
           </span>
         </div>
