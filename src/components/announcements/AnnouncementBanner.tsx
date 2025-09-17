@@ -248,6 +248,10 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     fontWeight: settings.fontWeight,
     textColor: settings.textColor,
     backgroundColor: settings.backgroundColor,
+    backgroundType: settings.backgroundType,
+    gradientDirection: settings.gradientDirection,
+    gradientColors: settings.gradientColors,
+    pattern: settings.pattern,
     displayMode: settings.displayMode,
     animation: settings.animation,
     animationSpeed: settings.animationSpeed,
@@ -287,12 +291,12 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
                    settings.blur === 'medium' ? 'blur(4px)' :
                    settings.blur === 'heavy' ? 'blur(8px)' : 'none',
     border: settings.borderColor ? `2px solid ${settings.borderColor}` : 'none',
-    background: settings.gradient && settings.gradientColors ? 
+    background: (settings.backgroundType === 'gradient' || (settings.gradient && settings.gradientColors)) ? 
       `linear-gradient(${settings.gradientDirection === 'horizontal' ? '90deg' :
                       settings.gradientDirection === 'vertical' ? '180deg' :
                       settings.gradientDirection === 'diagonal' ? '45deg' :
                       settings.gradientDirection === 'radial' ? 'circle' : '90deg'}, 
-       ${settings.gradientColors.join(', ')})` : 
+       ${settings.gradientColors?.join(', ') || [settings.backgroundColor || typeColor, settings.accentColor || typeColor].join(', ')})` : 
       (settings.backgroundColor || typeColor)
   };
 
@@ -312,6 +316,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     animationSpeed: settings.animationSpeed,
     hoverEffect: settings.hoverEffect,
     clickEffect: settings.clickEffect,
+    pattern: settings.pattern,
     bannerClasses: bannerClasses
   });
 

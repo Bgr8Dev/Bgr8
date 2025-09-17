@@ -870,6 +870,23 @@ const AdminAnnouncements: React.FC = () => {
 
                 <div className="announcement-form-row">
                   <div className="announcement-form-group">
+                    <label>Background Type</label>
+                    <select
+                      value={formData.displaySettings?.backgroundType || 'solid'}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        displaySettings: { 
+                          ...prev.displaySettings, 
+                          backgroundType: e.target.value as Announcement['displaySettings']['backgroundType']
+                        }
+                      }))}
+                    >
+                      <option value="solid">Solid Color</option>
+                      <option value="gradient">Gradient</option>
+                    </select>
+                  </div>
+                  
+                  <div className="announcement-form-group">
                     <label>Background Color</label>
                     <div className="announcement-color-input">
                       <input
@@ -897,6 +914,60 @@ const AdminAnnouncements: React.FC = () => {
                       />
                     </div>
                   </div>
+                </div>
+
+                {formData.displaySettings?.backgroundType === 'gradient' && (
+                  <div className="announcement-form-row">
+                    <div className="announcement-form-group">
+                      <label>Gradient Direction</label>
+                      <select
+                        value={formData.displaySettings?.gradientDirection || 'horizontal'}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          displaySettings: { 
+                            ...prev.displaySettings, 
+                            gradientDirection: e.target.value as Announcement['displaySettings']['gradientDirection']
+                          }
+                        }))}
+                      >
+                        <option value="horizontal">Horizontal</option>
+                        <option value="vertical">Vertical</option>
+                        <option value="diagonal">Diagonal</option>
+                        <option value="radial">Radial</option>
+                      </select>
+                    </div>
+                    
+                    <div className="announcement-form-group">
+                      <label>Gradient Colors</label>
+                      <div className="announcement-gradient-colors">
+                        <input
+                          type="color"
+                          value={formData.displaySettings?.gradientColors?.[0] || '#3b82f6'}
+                          onChange={(e) => setFormData(prev => ({ 
+                            ...prev, 
+                            displaySettings: { 
+                              ...prev.displaySettings, 
+                              gradientColors: [e.target.value, prev.displaySettings?.gradientColors?.[1] || '#1d4ed8']
+                            }
+                          }))}
+                        />
+                        <input
+                          type="color"
+                          value={formData.displaySettings?.gradientColors?.[1] || '#1d4ed8'}
+                          onChange={(e) => setFormData(prev => ({ 
+                            ...prev, 
+                            displaySettings: { 
+                              ...prev.displaySettings, 
+                              gradientColors: [prev.displaySettings?.gradientColors?.[0] || '#3b82f6', e.target.value]
+                            }
+                          }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="announcement-form-row">
                   
                   <div className="announcement-form-group">
                     <label>Text Color</label>
@@ -1180,6 +1251,12 @@ const AdminAnnouncements: React.FC = () => {
                       <option value="grid">Grid</option>
                       <option value="waves">Waves</option>
                       <option value="stars">Stars</option>
+                      <option value="circles">Circles</option>
+                      <option value="hexagons">Hexagons</option>
+                      <option value="triangles">Triangles</option>
+                      <option value="diagonal">Diagonal Stripes</option>
+                      <option value="polka">Polka Dots</option>
+                      <option value="mesh">Mesh</option>
                     </select>
                   </div>
                   
