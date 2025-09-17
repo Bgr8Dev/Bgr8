@@ -250,6 +250,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     displayMode: settings.displayMode,
     animation: settings.animation,
     animationSpeed: settings.animationSpeed,
+    hoverEffect: settings.hoverEffect,
+    clickEffect: settings.clickEffect,
     allSettings: settings
   });
   
@@ -307,6 +309,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   console.log('Animation classes being applied:', {
     animation: settings.animation,
     animationSpeed: settings.animationSpeed,
+    hoverEffect: settings.hoverEffect,
+    clickEffect: settings.clickEffect,
     bannerClasses: bannerClasses
   });
 

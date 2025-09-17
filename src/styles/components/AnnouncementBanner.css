@@ -34,10 +34,7 @@
   overflow: hidden;
 }
 
-.announcement-banner:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
+/* Removed hardcoded hover effect - now controlled by Firebase settings */
 
 .announcement-banner::before {
   content: '';
@@ -478,26 +475,29 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.4);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition: width 0.4s ease-out, height 0.4s ease-out;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .announcement-click-ripple:active::after {
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
 }
 
 .announcement-click-bounce:active {
-  animation: announcement-click-bounce 0.3s ease-out;
+  animation: announcement-click-bounce 0.4s ease-out;
 }
 
 .announcement-click-shake:active {
-  animation: announcement-shake 0.5s ease-in-out;
+  animation: announcement-click-shake 0.6s ease-in-out;
 }
 
 .announcement-click-glow:active {
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 50px rgba(59, 130, 246, 1), 0 0 100px rgba(59, 130, 246, 0.6) !important;
+  transform: scale(1.02);
 }
 
 /* Pattern Overlays */
@@ -625,14 +625,23 @@
 
 @keyframes announcement-click-bounce {
   0% { transform: scale(1); }
-  50% { transform: scale(0.95); }
+  25% { transform: scale(0.9); }
+  50% { transform: scale(1.05); }
+  75% { transform: scale(0.98); }
   100% { transform: scale(1); }
 }
 
-@keyframes announcement-shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-  20%, 40%, 60%, 80% { transform: translateX(2px); }
+@keyframes announcement-click-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  10% { transform: translateX(-5px) rotate(-1deg); }
+  20% { transform: translateX(5px) rotate(1deg); }
+  30% { transform: translateX(-4px) rotate(-0.8deg); }
+  40% { transform: translateX(4px) rotate(0.8deg); }
+  50% { transform: translateX(-3px) rotate(-0.6deg); }
+  60% { transform: translateX(3px) rotate(0.6deg); }
+  70% { transform: translateX(-2px) rotate(-0.4deg); }
+  80% { transform: translateX(2px) rotate(0.4deg); }
+  90% { transform: translateX(-1px) rotate(-0.2deg); }
 }
 
 /* Enhanced Scroll Animations */
