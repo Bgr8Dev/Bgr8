@@ -71,7 +71,8 @@ const AdminAnnouncements: React.FC = () => {
           fontSize: 'medium',
           clickEffect: 'bounce',
           showIcon: true,
-          iconPosition: 'left'
+          iconPosition: 'left',
+          showCloseButton: true
         },
     clickAction: {
       type: 'none'
@@ -147,7 +148,8 @@ const AdminAnnouncements: React.FC = () => {
           fontSize: 'medium',
           clickEffect: 'bounce',
           showIcon: true,
-          iconPosition: 'left'
+          iconPosition: 'left',
+          showCloseButton: true
         },
         clickAction: {
           type: 'none'
