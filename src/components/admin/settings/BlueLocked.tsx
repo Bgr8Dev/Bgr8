@@ -160,9 +160,9 @@ export default function BlueLocked() {
 
   if (!canManageProtected) {
     return (
-      <div className="blue-locked">
-        <div className="access-denied">
-          <FaShieldAlt className="access-denied-icon" />
+      <div className="bl-container">
+        <div className="bl-access-denied">
+          <FaShieldAlt className="bl-access-denied-icon" />
           <h3>Access Denied</h3>
           <p>You don't have permission to manage protected accounts.</p>
         </div>
@@ -172,9 +172,9 @@ export default function BlueLocked() {
 
   if (loading) {
     return (
-      <div className="blue-locked">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+      <div className="bl-container">
+        <div className="bl-loading-container">
+          <div className="bl-loading-spinner"></div>
           <p>Loading users...</p>
         </div>
       </div>
@@ -182,44 +182,44 @@ export default function BlueLocked() {
   }
 
   return (
-    <div className="blue-locked-widget">
+    <div className="bl-widget">
       {/* Widget Header */}
-      <div className="widget-header" onClick={toggleWidget}>
-        <div className="widget-title">
-          <FaLock className="widget-icon" />
+      <div className="bl-widget-header" onClick={toggleWidget}>
+        <div className="bl-widget-title">
+          <FaLock className="bl-widget-icon" />
           <h3>Blue Locked Accounts</h3>
-          <span className="widget-summary">
+          <span className="bl-widget-summary">
             {protectedCount} protected, {unprotectedCount} unprotected
           </span>
         </div>
-        <div className="widget-expand-icon">
+        <div className="bl-widget-expand-icon">
           {isWidgetExpanded ? <FaChevronDown /> : <FaChevronRight />}
         </div>
       </div>
 
       {/* Widget Content */}
       {isWidgetExpanded && (
-        <div className="widget-content">
+        <div className="bl-widget-content">
           {/* Compact Header */}
-          <div className="blue-locked-header">
-            <div className="header-title" onClick={() => toggleSection('stats')}>
-              <div className="title-content">
-                <FaLock className="header-icon" />
+          <div className="bl-header">
+            <div className="bl-header-title" onClick={() => toggleSection('stats')}>
+              <div className="bl-title-content">
+                <FaLock className="bl-header-icon" />
                 <h4>Protection Statistics</h4>
-                <span className="user-count">({users.length} users)</span>
+                <span className="bl-user-count">({users.length} users)</span>
               </div>
-              <div className="expand-icon">
+              <div className="bl-expand-icon">
                 {expandedSections.stats ? <FaChevronDown /> : <FaChevronRight />}
               </div>
             </div>
             
             {expandedSections.stats && (
-              <div className="protection-stats-compact">
-                <div className="stat-item protected">
+              <div className="bl-protection-stats-compact">
+                <div className="bl-stat-item bl-protected">
                   <FaLock />
                   <span>{protectedCount}</span>
                 </div>
-                <div className="stat-item unprotected">
+                <div className="bl-stat-item bl-unprotected">
                   <FaUnlock />
                   <span>{unprotectedCount}</span>
                 </div>
@@ -228,13 +228,13 @@ export default function BlueLocked() {
           </div>
 
           {message && (
-            <div className={`message ${message.type}`}>
-              <div className="message-icon">
+            <div className={`bl-message bl-${message.type}`}>
+              <div className="bl-message-icon">
                 {message.type === 'success' ? <FaCheck /> : <FaExclamationTriangle />}
               </div>
               <span>{message.text}</span>
               <button 
-                className="message-close"
+                className="bl-message-close"
                 onClick={() => setMessage(null)}
                 aria-label="Close message"
               >
@@ -244,36 +244,36 @@ export default function BlueLocked() {
           )}
 
           {/* Expandable Search & Filter Section */}
-          <div className="search-section">
-            <div className="search-header" onClick={() => toggleSection('search')}>
-              <div className="search-title">
+          <div className="bl-search-section">
+            <div className="bl-search-header" onClick={() => toggleSection('search')}>
+              <div className="bl-search-title">
                 <FaSearch />
                 <span>Search & Filter</span>
-                <span className="filter-count">({filteredUsers.length} results)</span>
+                <span className="bl-filter-count">({filteredUsers.length} results)</span>
               </div>
-              <div className="expand-icon">
+              <div className="bl-expand-icon">
                 {expandedSections.search ? <FaChevronDown /> : <FaChevronRight />}
               </div>
             </div>
             
             {expandedSections.search && (
-              <div className="search-controls">
-                <div className="search-container">
-                  <FaSearch className="search-icon" />
+              <div className="bl-search-controls">
+                <div className="bl-search-container">
+                  <FaSearch className="bl-search-icon" />
                   <input
                     type="text"
                     placeholder="Search users..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
+                    className="bl-search-input"
                   />
                 </div>
-                <div className="filter-container">
-                  <FaFilter className="filter-icon" />
+                <div className="bl-filter-container">
+                  <FaFilter className="bl-filter-icon" />
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value as 'all' | 'protected' | 'unprotected')}
-                    className="filter-select"
+                    className="bl-filter-select"
                   >
                     <option value="all">All Users</option>
                     <option value="protected">Protected Only</option>
@@ -285,49 +285,49 @@ export default function BlueLocked() {
           </div>
 
           {/* Expandable Users List */}
-          <div className="users-section">
-            <div className="users-header" onClick={() => toggleSection('users')}>
-              <div className="users-title">
+          <div className="bl-users-section">
+            <div className="bl-users-header" onClick={() => toggleSection('users')}>
+              <div className="bl-users-title">
                 <FaUsers />
                 <span>Users ({filteredUsers.length})</span>
               </div>
-              <div className="expand-icon">
+              <div className="bl-expand-icon">
                 {expandedSections.users ? <FaChevronDown /> : <FaChevronRight />}
               </div>
             </div>
             
             {expandedSections.users && (
-              <div className="users-list-compact">
+              <div className="bl-users-list-compact">
                 {filteredUsers.length === 0 ? (
-                  <div className="no-users">
-                    <FaUsers className="no-users-icon" />
+                  <div className="bl-no-users">
+                    <FaUsers className="bl-no-users-icon" />
                     <h4>No users found</h4>
                     <p>Try adjusting your search criteria</p>
                   </div>
                 ) : (
                   filteredUsers.map((user) => (
-                    <div key={user.uid} className={`user-card-compact ${user.isProtected ? 'protected' : 'unprotected'}`}>
-                      <div className="user-info-compact">
-                        <div className="user-avatar-compact">
+                    <div key={user.uid} className={`bl-user-card-compact ${user.isProtected ? 'bl-protected' : 'bl-unprotected'}`}>
+                      <div className="bl-user-info-compact">
+                        <div className="bl-user-avatar-compact">
                           {user.isProtected ? <FaLock /> : <FaUnlock />}
                         </div>
-                        <div className="user-details-compact">
-                          <div className="user-name-compact">
+                        <div className="bl-user-details-compact">
+                          <div className="bl-user-name-compact">
                             {user.firstName} {user.lastName}
                           </div>
-                          <div className="user-email-compact">{user.email}</div>
-                          <div className="user-roles-compact">
+                          <div className="bl-user-email-compact">{user.email}</div>
+                          <div className="bl-user-roles-compact">
                             {Object.entries(user.roles)
                               .filter(([, hasRole]) => hasRole)
                               .slice(0, 3)
                               .map(([role]) => (
-                                <span key={role} className="role-badge-compact">
+                                <span key={role} className="bl-role-badge-compact">
                                   {role}
                                 </span>
                               ))
                             }
                             {Object.entries(user.roles).filter(([, hasRole]) => hasRole).length > 3 && (
-                              <span className="role-badge-compact more">
+                              <span className="bl-role-badge-compact bl-more">
                                 +{Object.entries(user.roles).filter(([, hasRole]) => hasRole).length - 3}
                               </span>
                             )}
@@ -335,15 +335,15 @@ export default function BlueLocked() {
                         </div>
                       </div>
                       
-                      <div className="user-actions-compact">
+                      <div className="bl-user-actions-compact">
                         <button
-                          className={`protection-toggle-compact ${user.isProtected ? 'protected' : 'unprotected'}`}
+                          className={`bl-protection-toggle-compact ${user.isProtected ? 'bl-protected' : 'bl-unprotected'}`}
                           onClick={() => toggleProtection(user.uid, user.isProtected || false)}
                           disabled={updatingUsers.has(user.uid)}
                           title={user.isProtected ? 'Remove protection' : 'Add protection'}
                         >
                           {updatingUsers.has(user.uid) ? (
-                            <div className="loading-spinner-small" />
+                            <div className="bl-loading-spinner-small" />
                           ) : user.isProtected ? (
                             <FaUnlock />
                           ) : (
@@ -359,24 +359,24 @@ export default function BlueLocked() {
           </div>
 
           {/* Expandable Info Section */}
-          <div className="info-section">
-            <div className="info-header" onClick={() => toggleSection('info')}>
-              <div className="info-title">
+          <div className="bl-info-section">
+            <div className="bl-info-header" onClick={() => toggleSection('info')}>
+              <div className="bl-info-title">
                 <FaShieldAlt />
                 <span>About Blue Locked Accounts</span>
               </div>
-              <div className="expand-icon">
+              <div className="bl-expand-icon">
                 {expandedSections.info ? <FaChevronDown /> : <FaChevronRight />}
               </div>
             </div>
             
             {expandedSections.info && (
-              <div className="info-content">
+              <div className="bl-info-content">
                 <p>
                   Protected accounts cannot have their roles modified through the admin interface. 
                   This provides an additional security layer for critical accounts.
                 </p>
-                <div className="info-tips">
+                <div className="bl-info-tips">
                   <h6>Quick Tips:</h6>
                   <ul>
                     <li>Use the search to find specific users quickly</li>
