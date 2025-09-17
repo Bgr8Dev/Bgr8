@@ -36,9 +36,9 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       // Filter announcements based on user role and display settings
       const filteredAnnouncements = activeAnnouncements.filter(announcement => {
         // Check if announcement should be shown based on display settings
-        if (!announcement.displaySettings.showOnHomepage && showOnHomepage) return false;
-        if (!announcement.displaySettings.showOnPortal && showOnPortal) return false;
-        if (!announcement.displaySettings.showOnMobile && showOnMobile) return false;
+        if (showOnHomepage && !announcement.displaySettings.showOnHomepage) return false;
+        if (showOnPortal && !announcement.displaySettings.showOnPortal) return false;
+        if (showOnMobile && !announcement.displaySettings.showOnMobile) return false;
         
         // Check target audience
         if (announcement.targetAudience === 'all') return true;

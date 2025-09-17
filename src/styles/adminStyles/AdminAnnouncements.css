@@ -23,11 +23,6 @@
   z-index: 0;
 }
 
-.announcement-admin-announcements > * {
-  position: relative;
-  z-index: 1;
-}
-
 /* Loading States */
 .announcement-loading-container {
   display: flex;
