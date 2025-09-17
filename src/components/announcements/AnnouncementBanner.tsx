@@ -20,7 +20,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   const { userProfile } = useAuth();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused] = useState(false);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,7 +163,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     }
   }, [announcements.length]);
 
-  const handleClick = useCallback(async (announcement: Announcement, event: React.MouseEvent) => {
+  const handleClick = useCallback(async (announcement: Announcement) => {
     try {
       await AnnouncementService.recordClick(announcement.id);
       
@@ -237,7 +237,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     fontWeight: settings.fontWeight,
     textColor: settings.textColor,
     backgroundColor: settings.backgroundColor,
-    backgroundType: settings.backgroundType,
+    gradient: settings.gradient,
     gradientDirection: settings.gradientDirection,
     gradientColors: settings.gradientColors,
     pattern: settings.pattern,
@@ -292,7 +292,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
               settings.shadow === 'large' ? '0 8px 16px rgba(0,0,0,0.2)' :
               settings.shadow === 'glow' ? `0 0 20px ${settings.accentColor || typeColor}40` : '0 4px 8px rgba(0,0,0,0.15)',
     border: settings.borderColor ? `2px solid ${settings.borderColor}` : 'none',
-    background: (settings.backgroundType === 'gradient' || (settings.gradient && settings.gradientColors)) ? 
+    background: (settings.gradient && settings.gradientColors) ? 
       `linear-gradient(${settings.gradientDirection === 'horizontal' ? '90deg' :
                       settings.gradientDirection === 'vertical' ? '180deg' :
                       settings.gradientDirection === 'diagonal' ? '45deg' :
@@ -333,7 +333,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       <div 
         className={bannerClasses}
         style={bannerStyles}
-        onClick={(e) => handleClick(currentAnnouncement, e)}
+        onClick={() => handleClick(currentAnnouncement)}
       >
       <div className="announcement-banner-content">
         {settings.showCloseButton && (

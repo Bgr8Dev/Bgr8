@@ -6,8 +6,7 @@ import {
   FaRocket,
   FaMousePointer,
   FaCog,
-  FaSpinner,
-  FaTimes
+  FaSpinner
 } from 'react-icons/fa';
 import { Announcement } from '../../services/announcementService';
 import './AnnouncementModal.css';
@@ -33,18 +32,30 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: unknown) => {
     onFormDataChange({ ...formData, [field]: value });
   };
 
-  const handleDisplaySettingsChange = (field: string, value: any) => {
+  const handleDisplaySettingsChange = (field: string, value: unknown) => {
+    const currentSettings = formData.displaySettings || {};
     onFormDataChange({
       ...formData,
       displaySettings: {
-        ...formData.displaySettings,
+        ...currentSettings,
         [field]: value
-      }
+      } as Announcement['displaySettings'] // Type assertion needed due to partial form data
     });
+  };
+
+  const handleDateChange = (field: string, value: string) => {
+    onFormDataChange({ ...formData, [field]: value ? new Date(value) : undefined });
+  };
+
+  const handleGradientColorChange = (index: number, value: string) => {
+    const currentColors = formData.displaySettings?.gradientColors || ['#3b82f6', '#1d4ed8'];
+    const newColors = [...currentColors];
+    newColors[index] = value;
+    handleDisplaySettingsChange('gradientColors', newColors);
   };
 
   return (
@@ -123,7 +134,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
                 <input
                   type="datetime-local"
                   value={formData.startDate ? new Date(formData.startDate.getTime() - formData.startDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => handleInputChange('startDate', new Date(e.target.value))}
+                  onChange={(e) => handleDateChange('startDate', e.target.value)}
                 />
               </div>
               
@@ -132,7 +143,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
                 <input
                   type="datetime-local"
                   value={formData.endDate ? new Date(formData.endDate.getTime() - formData.endDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => handleInputChange('endDate', e.target.value ? new Date(e.target.value) : undefined)}
+                  onChange={(e) => handleDateChange('endDate', e.target.value)}
                 />
               </div>
             </div>
@@ -235,8 +246,8 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
               <div className="announcement-form-group">
                 <label>Background Type</label>
                 <select
-                  value={formData.displaySettings?.backgroundType || 'solid'}
-                  onChange={(e) => handleDisplaySettingsChange('backgroundType', e.target.value)}
+                  value={formData.displaySettings?.gradient ? 'gradient' : 'solid'}
+                  onChange={(e) => handleDisplaySettingsChange('gradient', e.target.value === 'gradient')}
                 >
                   <option value="solid">Solid Color</option>
                   <option value="gradient">Gradient</option>
@@ -261,7 +272,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
               </div>
             </div>
 
-            {formData.displaySettings?.backgroundType === 'gradient' && (
+            {formData.displaySettings?.gradient && (
               <div className="announcement-form-row">
                 <div className="announcement-form-group">
                   <label>Gradient Direction</label>
@@ -282,12 +293,12 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
                     <input
                       type="color"
                       value={formData.displaySettings?.gradientColors?.[0] || '#3b82f6'}
-                      onChange={(e) => handleDisplaySettingsChange('gradientColors', [e.target.value, formData.displaySettings?.gradientColors?.[1] || '#1d4ed8'])}
+                      onChange={(e) => handleGradientColorChange(0, e.target.value)}
                     />
                     <input
                       type="color"
                       value={formData.displaySettings?.gradientColors?.[1] || '#1d4ed8'}
-                      onChange={(e) => handleDisplaySettingsChange('gradientColors', [formData.displaySettings?.gradientColors?.[0] || '#3b82f6', e.target.value])}
+                      onChange={(e) => handleGradientColorChange(1, e.target.value)}
                     />
                   </div>
                 </div>

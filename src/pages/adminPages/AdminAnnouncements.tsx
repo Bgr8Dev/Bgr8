@@ -24,9 +24,7 @@ import {
   FaMousePointer,
   FaEye as FaViews,
   FaTimes as FaDismissals,
-  FaRocket,
-  FaPalette,
-  FaCog
+  FaRocket
 } from 'react-icons/fa';
 import { AnnouncementService, Announcement, AnnouncementAnalytics } from '../../services/announcementService';
 import { useAuth } from '../../hooks/useAuth';
