@@ -8,7 +8,7 @@
   width: 100%;
   /* Remove default background - it will be set dynamically by the component */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  animation: announcement-banner-slide-down 0.5s ease-out;
+  /* Removed hardcoded slide-down animation - now controlled by Firebase settings */
 }
 
 @keyframes announcement-banner-slide-down {
@@ -391,13 +391,18 @@
 
 /* Enhanced Customization Styles */
 
+/* Container-level animations */
+.announcement-container-slide {
+  animation: announcement-banner-slide-down 0.5s ease-out;
+}
+
 /* Animation Effects */
 .announcement-fade {
   animation: announcement-fade-in 2s ease-in-out;
 }
 
 .announcement-slide {
-  animation: announcement-slide-down 0.5s ease-out;
+  /* Slide animation is now handled by container */
 }
 
 .announcement-bounce {

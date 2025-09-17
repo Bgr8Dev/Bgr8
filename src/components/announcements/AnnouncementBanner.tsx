@@ -248,6 +248,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     textColor: settings.textColor,
     backgroundColor: settings.backgroundColor,
     displayMode: settings.displayMode,
+    animation: settings.animation,
+    animationSpeed: settings.animationSpeed,
     allSettings: settings
   });
   
@@ -301,8 +303,22 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     settings.pattern !== 'none' ? `announcement-pattern-${settings.pattern}` : ''
   ].filter(Boolean).join(' ');
 
+  // Log animation classes being applied
+  console.log('Animation classes being applied:', {
+    animation: settings.animation,
+    animationSpeed: settings.animationSpeed,
+    bannerClasses: bannerClasses
+  });
+
+  // Apply container-level animations (like slide-down)
+  const containerClasses = [
+    'announcement-banner-container',
+    settings.animation === 'slide' ? 'announcement-container-slide' : '',
+    className
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`announcement-banner-container ${className}`}>
+    <div className={containerClasses}>
       <div 
         className={bannerClasses}
         style={bannerStyles}
