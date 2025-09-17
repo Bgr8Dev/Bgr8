@@ -747,6 +747,7 @@
   100% { transform: translateX(-100%); }
 }
 
+
 /* Gradient Color Input Styles */
 .announcement-gradient-colors {
   display: flex;

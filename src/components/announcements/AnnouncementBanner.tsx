@@ -252,6 +252,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     gradientDirection: settings.gradientDirection,
     gradientColors: settings.gradientColors,
     pattern: settings.pattern,
+    opacity: settings.opacity,
     displayMode: settings.displayMode,
     animation: settings.animation,
     animationSpeed: settings.animationSpeed,
@@ -286,10 +287,6 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
               settings.shadow === 'medium' ? '0 4px 8px rgba(0,0,0,0.15)' :
               settings.shadow === 'large' ? '0 8px 16px rgba(0,0,0,0.2)' :
               settings.shadow === 'glow' ? `0 0 20px ${settings.accentColor || typeColor}40` : '0 4px 8px rgba(0,0,0,0.15)',
-    backdropFilter: settings.blur === 'none' ? 'none' :
-                   settings.blur === 'light' ? 'blur(2px)' :
-                   settings.blur === 'medium' ? 'blur(4px)' :
-                   settings.blur === 'heavy' ? 'blur(8px)' : 'none',
     border: settings.borderColor ? `2px solid ${settings.borderColor}` : 'none',
     background: (settings.backgroundType === 'gradient' || (settings.gradient && settings.gradientColors)) ? 
       `linear-gradient(${settings.gradientDirection === 'horizontal' ? '90deg' :

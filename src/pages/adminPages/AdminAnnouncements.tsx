@@ -1232,52 +1232,31 @@ const AdminAnnouncements: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="announcement-form-row">
-                  <div className="announcement-form-group">
-                    <label>Background Pattern</label>
-                    <select
-                      value={formData.displaySettings?.pattern || 'none'}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        displaySettings: { 
-                          ...prev.displaySettings, 
-                          pattern: e.target.value as Announcement['displaySettings']['pattern']
-                        }
-                      }))}
-                    >
-                      <option value="none">None</option>
-                      <option value="dots">Dots</option>
-                      <option value="lines">Lines</option>
-                      <option value="grid">Grid</option>
-                      <option value="waves">Waves</option>
-                      <option value="stars">Stars</option>
-                      <option value="circles">Circles</option>
-                      <option value="hexagons">Hexagons</option>
-                      <option value="triangles">Triangles</option>
-                      <option value="diagonal">Diagonal Stripes</option>
-                      <option value="polka">Polka Dots</option>
-                      <option value="mesh">Mesh</option>
-                    </select>
-                  </div>
-                  
-                  <div className="announcement-form-group">
-                    <label>Blur Effect</label>
-                    <select
-                      value={formData.displaySettings?.blur || 'none'}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        displaySettings: { 
-                          ...prev.displaySettings, 
-                          blur: e.target.value as Announcement['displaySettings']['blur']
-                        }
-                      }))}
-                    >
-                      <option value="none">None</option>
-                      <option value="light">Light</option>
-                      <option value="medium">Medium</option>
-                      <option value="heavy">Heavy</option>
-                    </select>
-                  </div>
+                <div className="announcement-form-group">
+                  <label>Background Pattern</label>
+                  <select
+                    value={formData.displaySettings?.pattern || 'none'}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      displaySettings: { 
+                        ...prev.displaySettings, 
+                        pattern: e.target.value as Announcement['displaySettings']['pattern']
+                      }
+                    }))}
+                  >
+                    <option value="none">None</option>
+                    <option value="dots">Dots</option>
+                    <option value="lines">Lines</option>
+                    <option value="grid">Grid</option>
+                    <option value="waves">Waves</option>
+                    <option value="stars">Stars</option>
+                    <option value="circles">Circles</option>
+                    <option value="hexagons">Hexagons</option>
+                    <option value="triangles">Triangles</option>
+                    <option value="diagonal">Diagonal Stripes</option>
+                    <option value="polka">Polka Dots</option>
+                    <option value="mesh">Mesh</option>
+                  </select>
                 </div>
               </div>
 
