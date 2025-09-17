@@ -24,9 +24,9 @@ This is the master development roadmap for the BGr8 platform. Use this to track 
   - [ ] Brute force protection enhancements
 
 - [ ] **Role Protection System**
-  - [ ] Protected account designation
+  - [ ] Add `isProtected` boolean field to user profile document
   - [ ] Role modification restrictions for protected accounts
-  - [ ] Admin override capabilities
+  - [ ] Admin override capabilities (super admin only)
   - [ ] Protected account indicators in UI
   - [ ] Audit logging for role protection events
   - [ ] Emergency role modification procedures
@@ -228,12 +228,12 @@ This is the master development roadmap for the BGr8 platform. Use this to track 
   - [ ] Rate limiting enhancements
 
 - [ ] **Role Protection Implementation**
-  - [ ] Database schema for protected accounts
-  - [ ] Role modification API restrictions
-  - [ ] Frontend role selection restrictions
-  - [ ] Protected account validation
-  - [ ] Role protection middleware
-  - [ ] Protected account configuration
+  - [ ] Add `isProtected` field to Firestore user documents
+  - [ ] Role modification API restrictions (check `isProtected` field)
+  - [ ] Frontend role selection restrictions (disable for protected accounts)
+  - [ ] Protected account validation in role change functions
+  - [ ] Role protection middleware (Firebase security rules)
+  - [ ] Protected account configuration (database field toggle)
   - [ ] Role protection testing
 
 ---
@@ -352,11 +352,11 @@ This is the master development roadmap for the BGr8 platform. Use this to track 
   - [ ] Improve form validation messages
 
 - [ ] **Role Protection Quick Implementation**
-  - [ ] Add protected account flag to user schema
-  - [ ] Disable role selection for protected accounts
-  - [ ] Add visual indicators for protected accounts
+  - [ ] Add `isProtected: boolean` field to user profile document
+  - [ ] Disable role selection for protected accounts in admin portal
+  - [ ] Add visual indicators (lock icon) for protected accounts
   - [ ] Add confirmation dialog for role changes
-  - [ ] Implement basic role protection logic
+  - [ ] Implement basic role protection logic (check `isProtected` field)
 
 ### 🎨 UI Polish
 - [ ] **Visual Improvements**
