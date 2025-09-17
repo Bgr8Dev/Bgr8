@@ -147,20 +147,28 @@ class InstagramAdminService {
    */
   async getPosts(): Promise<InstagramAdminPost[]> {
     try {
+      // Simple query without composite index requirement
       const postsQuery = query(
         collection(firestore, this.postsCollection),
-        orderBy('order', 'asc'),
         orderBy('createdAt', 'desc')
       );
       
       const querySnapshot = await getDocs(postsQuery);
-      return querySnapshot.docs.map(doc => ({
+      const posts = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
         timestamp: doc.data().timestamp?.toDate() || new Date()
       })) as InstagramAdminPost[];
+      
+      // Sort by order first, then by creation date (handled in application layer)
+      return posts.sort((a, b) => {
+        if (a.order !== b.order) {
+          return a.order - b.order;
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
     } catch (error) {
       console.error('Error getting posts:', error);
       throw new Error('Failed to fetch posts');

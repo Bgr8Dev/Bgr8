@@ -63,12 +63,19 @@ export default function AdminInstagram() {
       setLoading(true);
       setError(null);
       
+      console.log('Loading Instagram admin data from Firestore...');
+      
       const [postsData, userData] = await Promise.all([
         instagramAdminService.getPosts(),
         instagramAdminService.getUserProfile()
       ]);
       
+      console.log('Loaded posts:', postsData.length);
+      console.log('Loaded user profiles:', userData.length);
+      
+      // Posts are already sorted in the service
       setPosts(postsData);
+      
       if (userData.length > 0) {
         setUserProfile(userData[0]);
         setUserForm({
@@ -77,10 +84,13 @@ export default function AdminInstagram() {
           media_count: userData[0].media_count,
           isActive: userData[0].isActive
         });
+      } else {
+        console.log('No user profile found - will show setup form');
       }
     } catch (err) {
-      setError('Failed to load Instagram data');
-      console.error('Error loading data:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`Failed to load Instagram data: ${errorMessage}`);
+      console.error('Error loading Instagram admin data:', err);
     } finally {
       setLoading(false);
     }
@@ -97,6 +107,18 @@ export default function AdminInstagram() {
         setError('Please select a valid image file');
       }
     }
+  };
+
+  const generateRandomInstagramLink = () => {
+    // Generate a random post ID (mix of letters and numbers like real Instagram posts)
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let postId = '';
+    for (let i = 0; i < 11; i++) {
+      postId += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    
+    const randomLink = `https://instagram.com/p/${postId}/`;
+    setPostForm({...postForm, permalink: randomLink});
   };
 
   const handlePostSubmit = async (e: React.FormEvent) => {
@@ -133,14 +155,16 @@ export default function AdminInstagram() {
 
       if (editingPost) {
         await instagramAdminService.updatePost(editingPost.id!, postData);
-        setSuccess('Post updated successfully');
+        console.log('Post updated successfully:', editingPost.id);
+        setSuccess('Post updated successfully and saved to Firestore');
       } else {
         // Set order to be the highest
         const maxOrder = Math.max(...posts.map(p => p.order), -1);
         postData.order = maxOrder + 1;
         
-        await instagramAdminService.createPost(postData);
-        setSuccess('Post created successfully');
+        const newPostId = await instagramAdminService.createPost(postData);
+        console.log('Post created successfully with ID:', newPostId);
+        setSuccess('Post created successfully and saved to Firestore');
       }
 
       resetPostForm();
@@ -158,21 +182,23 @@ export default function AdminInstagram() {
     
     try {
       setError(null);
-      await instagramAdminService.updateUserProfile(userForm);
-      setSuccess('User profile updated successfully');
+      const userId = await instagramAdminService.updateUserProfile(userForm);
+      console.log('User profile updated successfully:', userId);
+      setSuccess('Brand info updated successfully and saved to Firestore');
       setShowUserForm(false);
       loadData();
     } catch (err) {
-      setError('Failed to update user profile');
+      setError('Failed to update brand info');
       console.error('Error updating user profile:', err);
     }
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
+    if (window.confirm('Are you sure you want to delete this post? This will also delete the associated image from storage.')) {
       try {
         await instagramAdminService.deletePost(postId);
-        setSuccess('Post deleted successfully');
+        console.log('Post deleted successfully:', postId);
+        setSuccess('Post deleted successfully from Firestore and storage');
         loadData();
       } catch (err) {
         setError('Failed to delete post');
@@ -184,10 +210,11 @@ export default function AdminInstagram() {
   const handleTogglePostStatus = async (postId: string) => {
     try {
       await instagramAdminService.togglePostStatus(postId);
-      setSuccess('Post status updated');
+      console.log('Post status toggled:', postId);
+      setSuccess('Post visibility updated on homepage');
       loadData();
     } catch (err) {
-      setError('Failed to update post status');
+      setError('Failed to update post visibility');
       console.error('Error toggling post status:', err);
     }
   };
@@ -248,9 +275,21 @@ export default function AdminInstagram() {
     <div className="admin-insta-container">
       <div className="admin-insta-header">
         <h2>
-          <FaInstagram /> Instagram Feed Management
+          <FaInstagram /> Homepage Instagram Feed
         </h2>
-        <p>Manage your Instagram posts and profile information</p>
+        <p>Manage content for the Instagram feed displayed on the BGR8 homepage</p>
+        <div style={{marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center'}}>
+          <button 
+            className="admin-insta-btn admin-insta-btn-secondary admin-insta-btn-sm"
+            onClick={loadData}
+            title="Refresh data from Firestore"
+          >
+            🔄 Refresh Data
+          </button>
+          <span style={{fontSize: '0.9rem', color: '#6b7280'}}>
+            {posts.length} posts loaded from Firestore
+          </span>
+        </div>
       </div>
 
       {error && (
@@ -271,15 +310,15 @@ export default function AdminInstagram() {
         </div>
       )}
 
-      {/* User Profile Section */}
+      {/* Homepage Brand Section */}
       <div className="admin-insta-section">
         <div className="admin-insta-section-header">
-          <h3>Instagram Profile</h3>
+          <h3>Homepage Branding</h3>
           <button 
             className="admin-insta-btn admin-insta-btn-primary"
             onClick={() => setShowUserForm(!showUserForm)}
           >
-            {userProfile ? 'Edit Profile' : 'Setup Profile'}
+            {userProfile ? 'Edit Brand Info' : 'Setup Brand Info'}
           </button>
         </div>
 
@@ -290,7 +329,7 @@ export default function AdminInstagram() {
               <span className="admin-insta-profile-type">{userProfile.account_type}</span>
               <span className="admin-insta-profile-count">{userProfile.media_count} posts</span>
               <span className={`admin-insta-profile-status ${userProfile.isActive ? 'active' : 'inactive'}`}>
-                {userProfile.isActive ? 'Active' : 'Inactive'}
+                {userProfile.isActive ? 'Visible on Homepage' : 'Hidden'}
               </span>
             </div>
           </div>
@@ -301,12 +340,12 @@ export default function AdminInstagram() {
             <form onSubmit={handleUserSubmit} className="user-form">
               <div className="admin-insta-form-row">
                 <div className="admin-insta-form-group">
-                  <label>Username</label>
+                  <label>Instagram Handle</label>
                   <input
                     type="text"
                     value={userForm.username}
                     onChange={(e) => setUserForm({...userForm, username: e.target.value})}
-                    placeholder="@username"
+                    placeholder="@bgr8_official"
                     required
                   />
                 </div>
@@ -316,19 +355,20 @@ export default function AdminInstagram() {
                     value={userForm.account_type}
                     onChange={(e) => setUserForm({...userForm, account_type: e.target.value as 'BUSINESS' | 'PERSONAL'})}
                   >
-                    <option value="BUSINESS">Business</option>
-                    <option value="PERSONAL">Personal</option>
+                    <option value="BUSINESS">Business Account</option>
+                    <option value="PERSONAL">Personal Account</option>
                   </select>
                 </div>
               </div>
               <div className="admin-insta-form-row">
                 <div className="admin-insta-form-group">
-                  <label>Media Count</label>
+                  <label>Total Posts Count</label>
                   <input
                     type="number"
                     value={userForm.media_count}
                     onChange={(e) => setUserForm({...userForm, media_count: parseInt(e.target.value) || 0})}
                     min="0"
+                    placeholder="0"
                   />
                 </div>
                 <div className="admin-insta-form-group">
@@ -338,13 +378,13 @@ export default function AdminInstagram() {
                       checked={userForm.isActive}
                       onChange={(e) => setUserForm({...userForm, isActive: e.target.checked})}
                     />
-                    Active
+                    Show on Homepage
                   </label>
                 </div>
               </div>
               <div className="admin-insta-form-actions">
                 <button type="submit" className="admin-insta-btn admin-insta-btn-primary">
-                  <FaSave /> Save Profile
+                  <FaSave /> Save Brand Info
                 </button>
                 <button type="button" className="admin-insta-btn admin-insta-btn-secondary" onClick={() => setShowUserForm(false)}>
                   Cancel
@@ -355,15 +395,15 @@ export default function AdminInstagram() {
         )}
       </div>
 
-      {/* Posts Section */}
+      {/* Homepage Feed Posts */}
       <div className="admin-insta-section">
         <div className="admin-insta-section-header">
-          <h3>Instagram Posts ({posts.length})</h3>
+          <h3>Homepage Feed Posts ({posts.length})</h3>
           <button 
             className="admin-insta-btn admin-insta-btn-primary"
             onClick={() => setShowPostForm(!showPostForm)}
           >
-            <FaPlus /> Add Post
+            <FaPlus /> Add Homepage Post
           </button>
         </div>
 
@@ -372,29 +412,31 @@ export default function AdminInstagram() {
             <form onSubmit={handlePostSubmit} className="post-form">
               <div className="admin-insta-form-row">
                 <div className="admin-insta-form-group">
-                  <label>Media Type</label>
+                  <label>Content Type</label>
                   <select
                     value={postForm.media_type}
                     onChange={(e) => setPostForm({...postForm, media_type: e.target.value as 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM'})}
                   >
-                    <option value="IMAGE">Image</option>
+                    <option value="IMAGE">Single Image</option>
                     <option value="VIDEO">Video</option>
-                    <option value="CAROUSEL_ALBUM">Album</option>
+                    <option value="CAROUSEL_ALBUM">Image Gallery</option>
                   </select>
                 </div>
                 <div className="admin-insta-form-group">
-                  <label>Order</label>
+                  <label>Display Order</label>
                   <input
                     type="number"
                     value={postForm.order}
                     onChange={(e) => setPostForm({...postForm, order: parseInt(e.target.value) || 0})}
                     min="0"
+                    placeholder="0 (appears first)"
                   />
+                  <small style={{color: '#6b7280', fontSize: '0.8rem'}}>Lower numbers appear first on homepage</small>
                 </div>
               </div>
 
               <div className="admin-insta-form-group">
-                <label>Image Upload</label>
+                <label>Post Image</label>
                 <div className="admin-insta-upload-area">
                   <input
                     ref={fileInputRef}
@@ -408,7 +450,7 @@ export default function AdminInstagram() {
                     className="admin-insta-upload-button"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <FaUpload /> {selectedImage ? 'Change Image' : 'Select Image'}
+                    <FaUpload /> {selectedImage ? 'Change Image' : 'Upload Image'}
                   </button>
                   {selectedImage && (
                     <span className="admin-insta-file-name">{selectedImage.name}</span>
@@ -419,27 +461,42 @@ export default function AdminInstagram() {
                     <img src={previewUrl} alt="Preview" />
                   </div>
                 )}
+                <small style={{color: '#6b7280', fontSize: '0.8rem'}}>Recommended: Square or 4:5 aspect ratio for best homepage display</small>
               </div>
 
               <div className="admin-insta-form-group">
-                <label>Caption</label>
+                <label>Post Description</label>
                 <textarea
                   value={postForm.caption}
                   onChange={(e) => setPostForm({...postForm, caption: e.target.value})}
-                  placeholder="Post caption..."
+                  placeholder="Describe your post content, event, or announcement..."
                   rows={3}
                 />
+                <small style={{color: '#6b7280', fontSize: '0.8rem'}}>This will be shown on the homepage feed</small>
               </div>
 
               <div className="admin-insta-form-group">
-                <label>Instagram URL</label>
-                <input
-                  type="url"
-                  value={postForm.permalink}
-                  onChange={(e) => setPostForm({...postForm, permalink: e.target.value})}
-                  placeholder="https://instagram.com/p/..."
-                  required
-                />
+                <label>Link to Original Post</label>
+                <div style={{display: 'flex', gap: '0.5rem', alignItems: 'flex-start'}}>
+                  <input
+                    type="url"
+                    value={postForm.permalink}
+                    onChange={(e) => setPostForm({...postForm, permalink: e.target.value})}
+                    placeholder="https://instagram.com/p/abc123/"
+                    required
+                    style={{flex: 1}}
+                  />
+                  <button 
+                    type="button"
+                    className="admin-insta-btn admin-insta-btn-secondary admin-insta-btn-sm"
+                    onClick={generateRandomInstagramLink}
+                    title="Generate random Instagram link"
+                    style={{whiteSpace: 'nowrap'}}
+                  >
+                    🎲 Auto-fill
+                  </button>
+                </div>
+                <small style={{color: '#6b7280', fontSize: '0.8rem'}}>Link to the original Instagram post (optional but recommended)</small>
               </div>
 
               <div className="admin-insta-form-group">
@@ -449,8 +506,9 @@ export default function AdminInstagram() {
                     checked={postForm.isActive}
                     onChange={(e) => setPostForm({...postForm, isActive: e.target.checked})}
                   />
-                  Active
+                  Show on Homepage
                 </label>
+                <small style={{color: '#6b7280', fontSize: '0.8rem', display: 'block', marginTop: '0.5rem'}}>Uncheck to hide this post from the homepage feed</small>
               </div>
 
               <div className="admin-insta-form-actions">
@@ -459,7 +517,7 @@ export default function AdminInstagram() {
                   className="admin-insta-btn admin-insta-btn-primary"
                   disabled={uploadingImage}
                 >
-                  {uploadingImage ? 'Uploading...' : editingPost ? 'Update Post' : 'Create Post'}
+                  {uploadingImage ? 'Uploading...' : editingPost ? 'Update Post' : 'Add to Homepage'}
                 </button>
                 <button type="button" className="admin-insta-btn admin-insta-btn-secondary" onClick={resetPostForm}>
                   Cancel
@@ -474,7 +532,14 @@ export default function AdminInstagram() {
           {posts.map((post) => (
             <div key={post.id} className={`admin-insta-post-card ${!post.isActive ? 'inactive' : ''}`}>
               <div className="admin-insta-post-image">
-                <img src={post.thumbnail_url || post.media_url} alt={post.caption || 'Instagram post'} />
+                <img 
+                  src={post.thumbnail_url || post.media_url} 
+                  alt={post.caption || 'Instagram post'}
+                  onError={(e) => {
+                    console.error('Failed to load image:', post.media_url);
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBWMTIwSDgwdjQwaDQwdjQwSDgwIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUNBM0FGIiBmb250LXNpemU9IjEyIj5JbWFnZSBVbmF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+';
+                  }}
+                />
                 <div className="admin-insta-post-overlay">
                   <span className="admin-insta-post-type">{post.media_type}</span>
                   <span className="admin-insta-post-order">#{post.order}</span>
@@ -491,15 +556,27 @@ export default function AdminInstagram() {
                 <div className="admin-insta-post-meta">
                   <span className="post-date">{formatDate(post.timestamp)}</span>
                   <span className={`admin-insta-post-status ${post.isActive ? 'active' : 'inactive'}`}>
-                    {post.isActive ? 'Active' : 'Inactive'}
+                    {post.isActive ? 'On Homepage' : 'Hidden'}
                   </span>
                 </div>
+                {post.permalink && (
+                  <div style={{marginTop: '0.5rem', fontSize: '0.8rem', color: '#6b7280'}}>
+                    <a 
+                      href={post.permalink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{color: '#3b82f6', textDecoration: 'none'}}
+                    >
+                      View Original Post →
+                    </a>
+                  </div>
+                )}
               </div>
               <div className="admin-insta-post-actions">
                 <button 
                   className="admin-insta-btn admin-insta-btn-sm admin-insta-btn-secondary"
                   onClick={() => handleTogglePostStatus(post.id!)}
-                  title={post.isActive ? 'Hide post' : 'Show post'}
+                  title={post.isActive ? 'Hide from homepage' : 'Show on homepage'}
                 >
                   {post.isActive ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -525,8 +602,8 @@ export default function AdminInstagram() {
         {posts.length === 0 && (
           <div className="admin-insta-empty-state">
             <FaInstagram />
-            <h4>No posts yet</h4>
-            <p>Create your first Instagram post to get started</p>
+            <h4>No homepage posts yet</h4>
+            <p>Add your first post to start building your homepage Instagram feed</p>
           </div>
         )}
       </div>
