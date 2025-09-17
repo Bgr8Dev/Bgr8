@@ -1313,21 +1313,26 @@ const AdminAnnouncements: React.FC = () => {
 
                 <div className="announcement-form-group">
                   <label>Scroll Direction</label>
-                  <select
-                    value={formData.displaySettings?.scrollDirection || 'left-to-right'}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      displaySettings: { 
-                        ...prev.displaySettings, 
-                        scrollDirection: e.target.value as Announcement['displaySettings']['scrollDirection']
-                      }
-                    }))}
-                  >
-                    <option value="left-to-right">Left to Right</option>
-                    <option value="right-to-left" disabled title="Right to Left scrolling is temporarily disabled - not working at the moment">Right to Left (Disabled)</option>
-                    <option value="bounce">Bounce</option>
-                    <option value="alternate">Alternate</option>
-                  </select>
+                  <div className="announcement-select-with-tooltip">
+                    <select
+                      value={formData.displaySettings?.scrollDirection || 'left-to-right'}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        displaySettings: { 
+                          ...prev.displaySettings, 
+                          scrollDirection: e.target.value as Announcement['displaySettings']['scrollDirection']
+                        }
+                      }))}
+                    >
+                      <option value="left-to-right">Left to Right</option>
+                      <option value="right-to-left" disabled>Right to Left (Disabled)</option>
+                      <option value="bounce">Bounce</option>
+                      <option value="alternate">Alternate</option>
+                    </select>
+                    <div className="announcement-tooltip">
+                      Right to Left scrolling is temporarily disabled - not working at the moment
+                    </div>
+                  </div>
                 </div>
               </div>
 

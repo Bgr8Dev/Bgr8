@@ -1507,3 +1507,50 @@
     height: 50px;
   }
 }
+
+/* Tooltip Styles */
+.announcement-select-with-tooltip {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.announcement-select-with-tooltip:hover .announcement-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-100%) translateX(-50%);
+}
+
+.announcement-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 250px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.announcement-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+}
