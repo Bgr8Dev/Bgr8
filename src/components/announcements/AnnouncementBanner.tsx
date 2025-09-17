@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaBullhorn, FaTimes, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle, FaGift, FaChevronLeft, FaChevronRight, FaPause, FaPlay } from 'react-icons/fa';
+import { FaBullhorn, FaTimes, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle, FaGift } from 'react-icons/fa';
 import { AnnouncementService, Announcement } from '../../services/announcementService';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/components/AnnouncementBanner.css';
@@ -193,17 +193,6 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     }
   }, []);
 
-  const handlePrevious = () => {
-    setCurrentIndex(prev => (prev - 1 + announcements.length) % announcements.length);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex(prev => (prev + 1) % announcements.length);
-  };
-
-  const togglePause = () => {
-    setIsPaused(prev => !prev);
-  };
 
   // Cleanup intervals on unmount
   useEffect(() => {
@@ -488,63 +477,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
           </div>
         </div>
 
-        {settings.showControls && (
-          <div className="announcement-banner-controls">
-            {announcements.length > 1 && (
-              <>
-                <button
-                  className="announcement-banner-control-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevious();
-                  }}
-                  title="Previous announcement"
-                >
-                  <FaChevronLeft />
-                </button>
-                
-                <button
-                  className="announcement-banner-control-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    togglePause();
-                  }}
-                  title={isPaused ? 'Resume auto-scroll' : 'Pause auto-scroll'}
-                >
-                  {isPaused ? <FaPlay /> : <FaPause />}
-                </button>
-                
-                <button
-                  className="announcement-banner-control-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNext();
-                  }}
-                  title="Next announcement"
-                >
-                  <FaChevronRight />
-                </button>
-              </>
-            )}
-          </div>
-        )}
       </div>
 
-        {settings.showIndicators && announcements.length > 1 && (
-          <div className="announcement-banner-indicators">
-            {announcements.map((_, index) => (
-              <button
-                key={index}
-                className={`announcement-banner-indicator ${index === currentIndex ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentIndex(index);
-                }}
-                title={`Go to announcement ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

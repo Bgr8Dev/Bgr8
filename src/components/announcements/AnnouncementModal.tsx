@@ -584,31 +584,6 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
               </div>
             </div>
 
-            <div className="announcement-form-row">
-              <div className="announcement-form-group">
-                <label>Show Controls</label>
-                <label className="announcement-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.displaySettings?.showControls !== false}
-                    onChange={(e) => handleDisplaySettingsChange('showControls', e.target.checked)}
-                  />
-                  Show navigation controls
-                </label>
-              </div>
-              
-              <div className="announcement-form-group">
-                <label>Show Indicators</label>
-                <label className="announcement-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.displaySettings?.showIndicators !== false}
-                    onChange={(e) => handleDisplaySettingsChange('showIndicators', e.target.checked)}
-                  />
-                  Show dot indicators
-                </label>
-              </div>
-            </div>
 
             <div className="announcement-form-row">
               <div className="announcement-form-group">
