@@ -61,14 +61,15 @@ const AdminAnnouncements: React.FC = () => {
     isActive: true,
     startDate: new Date(),
     targetAudience: 'all',
-    displaySettings: {
-      showOnHomepage: true,
-      showOnPortal: true,
-      showOnMobile: true,
-      autoScroll: true,
-      scrollSpeed: 'normal',
-      fontSize: 'medium'
-    },
+        displaySettings: {
+          showOnHomepage: true,
+          showOnPortal: true,
+          showOnMobile: true,
+          autoScroll: true,
+          scrollSpeed: 'normal',
+          fontSize: 'medium',
+          clickEffect: 'bounce'
+        },
     clickAction: {
       type: 'none'
     }
@@ -140,7 +141,8 @@ const AdminAnnouncements: React.FC = () => {
           showOnMobile: true,
           autoScroll: true,
           scrollSpeed: 'normal',
-          fontSize: 'medium'
+          fontSize: 'medium',
+          clickEffect: 'bounce'
         },
         clickAction: {
           type: 'none'
@@ -1142,7 +1144,7 @@ const AdminAnnouncements: React.FC = () => {
                   <div className="announcement-form-group">
                     <label>Click Effect</label>
                     <select
-                      value={formData.displaySettings?.clickEffect || 'ripple'}
+                      value={formData.displaySettings?.clickEffect || 'bounce'}
                       onChange={(e) => setFormData(prev => ({ 
                         ...prev, 
                         displaySettings: { 
@@ -1152,7 +1154,6 @@ const AdminAnnouncements: React.FC = () => {
                       }))}
                     >
                       <option value="none">None</option>
-                      <option value="ripple">Ripple</option>
                       <option value="bounce">Bounce</option>
                       <option value="shake">Shake</option>
                       <option value="glow">Glow</option>

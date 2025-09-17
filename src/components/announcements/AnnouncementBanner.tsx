@@ -163,9 +163,10 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     }
   }, [announcements.length]);
 
-  const handleClick = useCallback(async (announcement: Announcement) => {
+  const handleClick = useCallback(async (announcement: Announcement, event: React.MouseEvent) => {
     try {
       await AnnouncementService.recordClick(announcement.id);
+      
       
       if (announcement.clickAction) {
         switch (announcement.clickAction.type) {
@@ -301,7 +302,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     settings.animation !== 'none' ? `announcement-${settings.animation}` : '',
     settings.animationSpeed ? `announcement-speed-${settings.animationSpeed}` : '',
     settings.hoverEffect !== 'none' ? `announcement-hover-${settings.hoverEffect}` : '',
-    settings.clickEffect !== 'none' ? `announcement-click-${settings.clickEffect}` : '',
+    settings.clickEffect !== 'none' && settings.clickEffect !== 'ripple' ? `announcement-click-${settings.clickEffect}` : '',
     settings.pattern !== 'none' ? `announcement-pattern-${settings.pattern}` : ''
   ].filter(Boolean).join(' ');
 
@@ -326,7 +327,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       <div 
         className={bannerClasses}
         style={bannerStyles}
-        onClick={() => handleClick(currentAnnouncement)}
+        onClick={(e) => handleClick(currentAnnouncement, e)}
       >
       <div className="announcement-banner-content">
         {settings.showCloseButton && (
