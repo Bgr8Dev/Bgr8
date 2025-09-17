@@ -1,17 +1,17 @@
 /* Instagram Admin Styles */
 
-.admin-instagram {
+.admin-insta-container {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.admin-header {
+.admin-insta-header {
   margin-bottom: 2rem;
   text-align: center;
 }
 
-.admin-header h2 {
+.admin-insta-header h2 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -20,13 +20,13 @@
   margin-bottom: 0.5rem;
 }
 
-.admin-header p {
+.admin-insta-header p {
   color: #374151;
   font-size: 1.1rem;
 }
 
 /* Alerts */
-.alert {
+.admin-insta-alert {
   padding: 1rem 1.5rem;
   border-radius: var(--radius-md);
   margin-bottom: 1.5rem;
@@ -36,19 +36,19 @@
   font-weight: 500;
 }
 
-.alert-error {
+.admin-insta-alert-error {
   background: #fee2e2;
   color: #dc2626;
   border: 1px solid #fca5a5;
 }
 
-.alert-success {
+.admin-insta-alert-success {
   background: #dcfce7;
   color: #16a34a;
   border: 1px solid #86efac;
 }
 
-.alert-close {
+.admin-insta-alert-close {
   background: none;
   border: none;
   color: inherit;
@@ -58,12 +58,12 @@
   margin-left: 1rem;
 }
 
-.alert-close:hover {
+.admin-insta-alert-close:hover {
   opacity: 0.8;
 }
 
 /* Sections */
-.admin-section {
+.admin-insta-section {
   background: #ffffff;
   border-radius: var(--radius-lg);
   padding: 2rem;
@@ -72,7 +72,7 @@
   border: 1px solid #e5e7eb;
 }
 
-.section-header {
+.admin-insta-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -81,33 +81,33 @@
   border-bottom: 2px solid #f3f4f6;
 }
 
-.section-header h3 {
+.admin-insta-section-header h3 {
   color: #111827;
   font-size: 1.5rem;
   margin: 0;
 }
 
 /* User Profile Display */
-.user-profile-display {
+.admin-insta-user-profile-display {
   background: #f9fafb;
   padding: 1.5rem;
   border-radius: var(--radius-md);
   border: 1px solid #e5e7eb;
 }
 
-.profile-info {
+.admin-insta-profile-info {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.profile-info strong {
+.admin-insta-profile-info strong {
   color: #3b82f6;
   font-size: 1.2rem;
 }
 
-.profile-type {
+.admin-insta-profile-type {
   background: #e5e7eb;
   color: #374151;
   padding: 0.25rem 0.75rem;
@@ -116,30 +116,30 @@
   text-transform: capitalize;
 }
 
-.profile-count {
+.admin-insta-profile-count {
   color: #4b5563;
   font-weight: 500;
 }
 
-.profile-status {
+.admin-insta-profile-status {
   padding: 0.25rem 0.75rem;
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
-.profile-status.active {
+.admin-insta-profile-status.active {
   background: #dcfce7;
   color: #16a34a;
 }
 
-.profile-status.inactive {
+.admin-insta-profile-status.inactive {
   background: #fee2e2;
   color: #dc2626;
 }
 
 /* Forms */
-.form-container {
+.admin-insta-form-container {
   background: #f9fafb;
   padding: 2rem;
   border-radius: var(--radius-md);
@@ -147,38 +147,38 @@
   margin-top: 1rem;
 }
 
-.form-row {
+.admin-insta-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.form-group {
+.admin-insta-form-group {
   margin-bottom: 1rem;
 }
 
-.form-group label {
+.admin-insta-form-group label {
   display: block;
   margin-bottom: 0.5rem;
   color: #111827;
   font-weight: 600;
 }
 
-.checkbox-label {
+.admin-insta-checkbox-label {
   display: flex !important;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
 }
 
-.checkbox-label input[type="checkbox"] {
+.admin-insta-checkbox-label input[type="checkbox"] {
   margin: 0;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.admin-insta-form-group input,
+.admin-insta-form-group select,
+.admin-insta-form-group textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #d1d5db;
@@ -188,21 +188,21 @@
   font-size: 1rem;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.admin-insta-form-group input:focus,
+.admin-insta-form-group select:focus,
+.admin-insta-form-group textarea:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.form-group textarea {
+.admin-insta-form-group textarea {
   resize: vertical;
   min-height: 80px;
 }
 
 /* Image Upload */
-.upload-area {
+.admin-insta-upload-area {
   border: 2px dashed #d1d5db;
   border-radius: var(--radius-md);
   padding: 1rem;
@@ -211,15 +211,15 @@
   transition: border-color 0.3s ease;
 }
 
-.upload-area:hover {
+.admin-insta-upload-area:hover {
   border-color: #3b82f6;
 }
 
-.file-input {
+.admin-insta-file-input {
   display: none;
 }
 
-.upload-button {
+.admin-insta-upload-button {
   background: #f3f4f6;
   color: #374151;
   border: 1px solid #d1d5db;
@@ -234,24 +234,24 @@
   transition: all 0.3s ease;
 }
 
-.upload-button:hover {
+.admin-insta-upload-button:hover {
   background: #e5e7eb;
   color: #111827;
 }
 
-.file-name {
+.admin-insta-file-name {
   display: block;
   margin-top: 0.5rem;
   color: #4b5563;
   font-size: 0.9rem;
 }
 
-.image-preview {
+.admin-insta-image-preview {
   margin-top: 1rem;
   text-align: center;
 }
 
-.image-preview img {
+.admin-insta-image-preview img {
   max-width: 200px;
   max-height: 200px;
   border-radius: var(--radius-md);
@@ -260,7 +260,7 @@
 }
 
 /* Form Actions */
-.form-actions {
+.admin-insta-form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -270,7 +270,7 @@
 }
 
 /* Buttons */
-.btn {
+.admin-insta-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -284,60 +284,60 @@
   font-size: 1rem;
 }
 
-.btn-primary {
+.admin-insta-btn-primary {
   background: #3b82f6;
   color: #ffffff;
   border: 1px solid #3b82f6;
 }
 
-.btn-primary:hover {
+.admin-insta-btn-primary:hover {
   background: #2563eb;
   transform: translateY(-1px);
 }
 
-.btn-primary:disabled {
+.admin-insta-btn-primary:disabled {
   background: #9ca3af;
   color: #ffffff;
   cursor: not-allowed;
   transform: none;
 }
 
-.btn-secondary {
+.admin-insta-btn-secondary {
   background: #f3f4f6;
   color: #374151;
   border: 1px solid #d1d5db;
 }
 
-.btn-secondary:hover {
+.admin-insta-btn-secondary:hover {
   background: #e5e7eb;
   color: #111827;
 }
 
-.btn-danger {
+.admin-insta-btn-danger {
   background: #ef4444;
   color: #ffffff;
   border: 1px solid #ef4444;
 }
 
-.btn-danger:hover {
+.admin-insta-btn-danger:hover {
   background: #dc2626;
   color: #ffffff;
 }
 
-.btn-sm {
+.admin-insta-btn-sm {
   padding: 0.5rem 0.75rem;
   font-size: 0.9rem;
 }
 
 /* Posts Grid */
-.posts-grid {
+.admin-insta-posts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
-.post-card {
+.admin-insta-post-card {
   background: #ffffff;
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -346,17 +346,17 @@
   transition: all 0.3s ease;
 }
 
-.post-card:hover {
+.admin-insta-post-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.post-card.inactive {
+.admin-insta-post-card.inactive {
   opacity: 0.6;
   border-color: #d1d5db;
 }
 
-.post-image {
+.admin-insta-post-image {
   position: relative;
   width: 100%;
   height: 200px;
@@ -364,18 +364,18 @@
   background: #f3f4f6;
 }
 
-.post-image img {
+.admin-insta-post-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
-.post-card:hover .post-image img {
+.admin-insta-post-card:hover .admin-insta-post-image img {
   transform: scale(1.05);
 }
 
-.post-overlay {
+.admin-insta-post-overlay {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -384,7 +384,7 @@
   gap: 0.25rem;
 }
 
-.post-type {
+.admin-insta-post-type {
   background: rgba(0, 0, 0, 0.7);
   color: #ffffff;
   padding: 0.25rem 0.5rem;
@@ -393,7 +393,7 @@
   font-weight: 600;
 }
 
-.post-order {
+.admin-insta-post-order {
   background: #3b82f6;
   color: #ffffff;
   padding: 0.25rem 0.5rem;
@@ -402,18 +402,18 @@
   font-weight: 600;
 }
 
-.post-content {
+.admin-insta-post-content {
   padding: 1rem;
 }
 
-.post-caption {
+.admin-insta-post-caption {
   color: #374151;
   font-size: 0.9rem;
   line-height: 1.4;
   margin-bottom: 0.75rem;
 }
 
-.post-meta {
+.admin-insta-post-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -421,7 +421,7 @@
   color: #6b7280;
 }
 
-.post-status {
+.admin-insta-post-status {
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -429,17 +429,17 @@
   font-size: 0.7rem;
 }
 
-.post-status.active {
+.admin-insta-post-status.active {
   background: #dcfce7;
   color: #16a34a;
 }
 
-.post-status.inactive {
+.admin-insta-post-status.inactive {
   background: #fee2e2;
   color: #dc2626;
 }
 
-.post-actions {
+.admin-insta-post-actions {
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
@@ -447,40 +447,40 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.post-actions .btn {
+.admin-insta-post-actions .admin-insta-btn {
   flex: 1;
   justify-content: center;
 }
 
 /* Empty State */
-.empty-state {
+.admin-insta-empty-state {
   text-align: center;
   padding: 3rem 2rem;
   color: #6b7280;
 }
 
-.empty-state svg {
+.admin-insta-empty-state svg {
   font-size: 3rem;
   margin-bottom: 1rem;
   color: #9ca3af;
 }
 
-.empty-state h4 {
+.admin-insta-empty-state h4 {
   color: #4b5563;
   margin-bottom: 0.5rem;
 }
 
-.empty-state p {
+.admin-insta-empty-state p {
   color: #6b7280;
 }
 
 /* Loading Spinner */
-.loading-spinner {
+.admin-insta-loading-spinner {
   text-align: center;
   padding: 3rem;
 }
 
-.spinner {
+.admin-insta-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #e5e7eb;
@@ -497,69 +497,69 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .admin-instagram {
+  .admin-insta-container {
     padding: 1rem;
   }
 
-  .admin-header h2 {
+  .admin-insta-header h2 {
     font-size: 1.5rem;
   }
 
-  .admin-section {
+  .admin-insta-section {
     padding: 1.5rem;
   }
 
-  .section-header {
+  .admin-insta-section-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
   }
 
-  .form-row {
+  .admin-insta-form-row {
     grid-template-columns: 1fr;
   }
 
-  .form-actions {
+  .admin-insta-form-actions {
     flex-direction: column;
   }
 
-  .posts-grid {
+  .admin-insta-posts-grid {
     grid-template-columns: 1fr;
   }
 
-  .profile-info {
+  .admin-insta-profile-info {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
 
-  .post-actions {
+  .admin-insta-post-actions {
     flex-direction: column;
   }
 
-  .post-actions .btn {
+  .admin-insta-post-actions .admin-insta-btn {
     flex: none;
   }
 }
 
 @media (max-width: 480px) {
-  .admin-instagram {
+  .admin-insta-container {
     padding: 0.5rem;
   }
 
-  .admin-section {
+  .admin-insta-section {
     padding: 1rem;
   }
 
-  .form-container {
+  .admin-insta-form-container {
     padding: 1rem;
   }
 
-  .post-image {
+  .admin-insta-post-image {
     height: 150px;
   }
 
-  .image-preview img {
+  .admin-insta-image-preview img {
     max-width: 150px;
     max-height: 150px;
   }

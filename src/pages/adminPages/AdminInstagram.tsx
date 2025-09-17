@@ -235,9 +235,9 @@ export default function AdminInstagram() {
 
   if (loading) {
     return (
-      <div className="admin-instagram">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
+      <div className="admin-insta-container">
+        <div className="admin-insta-loading-spinner">
+          <div className="admin-insta-spinner"></div>
           <p>Loading Instagram data...</p>
         </div>
       </div>
@@ -245,8 +245,8 @@ export default function AdminInstagram() {
   }
 
   return (
-    <div className="admin-instagram">
-      <div className="admin-header">
+    <div className="admin-insta-container">
+      <div className="admin-insta-header">
         <h2>
           <FaInstagram /> Instagram Feed Management
         </h2>
@@ -254,29 +254,29 @@ export default function AdminInstagram() {
       </div>
 
       {error && (
-        <div className="alert alert-error">
+        <div className="admin-insta-alert admin-insta-alert-error">
           {error}
-          <button onClick={() => setError(null)} className="alert-close" title="Close error message">
+          <button onClick={() => setError(null)} className="admin-insta-alert-close" title="Close error message">
             <FaTimes />
           </button>
         </div>
       )}
 
       {success && (
-        <div className="alert alert-success">
+        <div className="admin-insta-alert admin-insta-alert-success">
           {success}
-          <button onClick={() => setSuccess(null)} className="alert-close" title="Close success message">
+          <button onClick={() => setSuccess(null)} className="admin-insta-alert-close" title="Close success message">
             <FaTimes />
           </button>
         </div>
       )}
 
       {/* User Profile Section */}
-      <div className="admin-section">
-        <div className="section-header">
+      <div className="admin-insta-section">
+        <div className="admin-insta-section-header">
           <h3>Instagram Profile</h3>
           <button 
-            className="btn btn-primary"
+            className="admin-insta-btn admin-insta-btn-primary"
             onClick={() => setShowUserForm(!showUserForm)}
           >
             {userProfile ? 'Edit Profile' : 'Setup Profile'}
@@ -284,12 +284,12 @@ export default function AdminInstagram() {
         </div>
 
         {userProfile && (
-          <div className="user-profile-display">
-            <div className="profile-info">
+          <div className="admin-insta-user-profile-display">
+            <div className="admin-insta-profile-info">
               <strong>@{userProfile.username}</strong>
-              <span className="profile-type">{userProfile.account_type}</span>
-              <span className="profile-count">{userProfile.media_count} posts</span>
-              <span className={`profile-status ${userProfile.isActive ? 'active' : 'inactive'}`}>
+              <span className="admin-insta-profile-type">{userProfile.account_type}</span>
+              <span className="admin-insta-profile-count">{userProfile.media_count} posts</span>
+              <span className={`admin-insta-profile-status ${userProfile.isActive ? 'active' : 'inactive'}`}>
                 {userProfile.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>
@@ -297,10 +297,10 @@ export default function AdminInstagram() {
         )}
 
         {showUserForm && (
-          <div className="form-container">
+          <div className="admin-insta-form-container">
             <form onSubmit={handleUserSubmit} className="user-form">
-              <div className="form-row">
-                <div className="form-group">
+              <div className="admin-insta-form-row">
+                <div className="admin-insta-form-group">
                   <label>Username</label>
                   <input
                     type="text"
@@ -310,7 +310,7 @@ export default function AdminInstagram() {
                     required
                   />
                 </div>
-                <div className="form-group">
+                <div className="admin-insta-form-group">
                   <label>Account Type</label>
                   <select
                     value={userForm.account_type}
@@ -321,8 +321,8 @@ export default function AdminInstagram() {
                   </select>
                 </div>
               </div>
-              <div className="form-row">
-                <div className="form-group">
+              <div className="admin-insta-form-row">
+                <div className="admin-insta-form-group">
                   <label>Media Count</label>
                   <input
                     type="number"
@@ -331,8 +331,8 @@ export default function AdminInstagram() {
                     min="0"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="checkbox-label">
+                <div className="admin-insta-form-group">
+                  <label className="admin-insta-checkbox-label">
                     <input
                       type="checkbox"
                       checked={userForm.isActive}
@@ -342,11 +342,11 @@ export default function AdminInstagram() {
                   </label>
                 </div>
               </div>
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
+              <div className="admin-insta-form-actions">
+                <button type="submit" className="admin-insta-btn admin-insta-btn-primary">
                   <FaSave /> Save Profile
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowUserForm(false)}>
+                <button type="button" className="admin-insta-btn admin-insta-btn-secondary" onClick={() => setShowUserForm(false)}>
                   Cancel
                 </button>
               </div>
@@ -356,11 +356,11 @@ export default function AdminInstagram() {
       </div>
 
       {/* Posts Section */}
-      <div className="admin-section">
-        <div className="section-header">
+      <div className="admin-insta-section">
+        <div className="admin-insta-section-header">
           <h3>Instagram Posts ({posts.length})</h3>
           <button 
-            className="btn btn-primary"
+            className="admin-insta-btn admin-insta-btn-primary"
             onClick={() => setShowPostForm(!showPostForm)}
           >
             <FaPlus /> Add Post
@@ -368,10 +368,10 @@ export default function AdminInstagram() {
         </div>
 
         {showPostForm && (
-          <div className="form-container">
+          <div className="admin-insta-form-container">
             <form onSubmit={handlePostSubmit} className="post-form">
-              <div className="form-row">
-                <div className="form-group">
+              <div className="admin-insta-form-row">
+                <div className="admin-insta-form-group">
                   <label>Media Type</label>
                   <select
                     value={postForm.media_type}
@@ -382,7 +382,7 @@ export default function AdminInstagram() {
                     <option value="CAROUSEL_ALBUM">Album</option>
                   </select>
                 </div>
-                <div className="form-group">
+                <div className="admin-insta-form-group">
                   <label>Order</label>
                   <input
                     type="number"
@@ -393,35 +393,35 @@ export default function AdminInstagram() {
                 </div>
               </div>
 
-              <div className="form-group">
+              <div className="admin-insta-form-group">
                 <label>Image Upload</label>
-                <div className="upload-area">
+                <div className="admin-insta-upload-area">
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     onChange={handleImageSelect}
-                    className="file-input"
+                    className="admin-insta-file-input"
                   />
                   <button 
                     type="button" 
-                    className="upload-button"
+                    className="admin-insta-upload-button"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <FaUpload /> {selectedImage ? 'Change Image' : 'Select Image'}
                   </button>
                   {selectedImage && (
-                    <span className="file-name">{selectedImage.name}</span>
+                    <span className="admin-insta-file-name">{selectedImage.name}</span>
                   )}
                 </div>
                 {previewUrl && (
-                  <div className="image-preview">
+                  <div className="admin-insta-image-preview">
                     <img src={previewUrl} alt="Preview" />
                   </div>
                 )}
               </div>
 
-              <div className="form-group">
+              <div className="admin-insta-form-group">
                 <label>Caption</label>
                 <textarea
                   value={postForm.caption}
@@ -431,7 +431,7 @@ export default function AdminInstagram() {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="admin-insta-form-group">
                 <label>Instagram URL</label>
                 <input
                   type="url"
@@ -442,8 +442,8 @@ export default function AdminInstagram() {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="checkbox-label">
+              <div className="admin-insta-form-group">
+                <label className="admin-insta-checkbox-label">
                   <input
                     type="checkbox"
                     checked={postForm.isActive}
@@ -453,15 +453,15 @@ export default function AdminInstagram() {
                 </label>
               </div>
 
-              <div className="form-actions">
+              <div className="admin-insta-form-actions">
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="admin-insta-btn admin-insta-btn-primary"
                   disabled={uploadingImage}
                 >
                   {uploadingImage ? 'Uploading...' : editingPost ? 'Update Post' : 'Create Post'}
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={resetPostForm}>
+                <button type="button" className="admin-insta-btn admin-insta-btn-secondary" onClick={resetPostForm}>
                   Cancel
                 </button>
               </div>
@@ -470,48 +470,48 @@ export default function AdminInstagram() {
         )}
 
         {/* Posts List */}
-        <div className="posts-grid">
+        <div className="admin-insta-posts-grid">
           {posts.map((post) => (
-            <div key={post.id} className={`post-card ${!post.isActive ? 'inactive' : ''}`}>
-              <div className="post-image">
+            <div key={post.id} className={`admin-insta-post-card ${!post.isActive ? 'inactive' : ''}`}>
+              <div className="admin-insta-post-image">
                 <img src={post.thumbnail_url || post.media_url} alt={post.caption || 'Instagram post'} />
-                <div className="post-overlay">
-                  <span className="post-type">{post.media_type}</span>
-                  <span className="post-order">#{post.order}</span>
+                <div className="admin-insta-post-overlay">
+                  <span className="admin-insta-post-type">{post.media_type}</span>
+                  <span className="admin-insta-post-order">#{post.order}</span>
                 </div>
               </div>
-              <div className="post-content">
-                <div className="post-caption">
+              <div className="admin-insta-post-content">
+                <div className="admin-insta-post-caption">
                   {post.caption ? (
                     post.caption.length > 100 ? 
                       `${post.caption.substring(0, 100)}...` : 
                       post.caption
                   ) : 'No caption'}
                 </div>
-                <div className="post-meta">
+                <div className="admin-insta-post-meta">
                   <span className="post-date">{formatDate(post.timestamp)}</span>
-                  <span className={`post-status ${post.isActive ? 'active' : 'inactive'}`}>
+                  <span className={`admin-insta-post-status ${post.isActive ? 'active' : 'inactive'}`}>
                     {post.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </div>
-              <div className="post-actions">
+              <div className="admin-insta-post-actions">
                 <button 
-                  className="btn btn-sm btn-secondary"
+                  className="admin-insta-btn admin-insta-btn-sm admin-insta-btn-secondary"
                   onClick={() => handleTogglePostStatus(post.id!)}
                   title={post.isActive ? 'Hide post' : 'Show post'}
                 >
                   {post.isActive ? <FaEyeSlash /> : <FaEye />}
                 </button>
                 <button 
-                  className="btn btn-sm btn-secondary"
+                  className="admin-insta-btn admin-insta-btn-sm admin-insta-btn-secondary"
                   onClick={() => startEditPost(post)}
                   title="Edit post"
                 >
                   <FaEdit />
                 </button>
                 <button 
-                  className="btn btn-sm btn-danger"
+                  className="admin-insta-btn admin-insta-btn-sm admin-insta-btn-danger"
                   onClick={() => handleDeletePost(post.id!)}
                   title="Delete post"
                 >
@@ -523,7 +523,7 @@ export default function AdminInstagram() {
         </div>
 
         {posts.length === 0 && (
-          <div className="empty-state">
+          <div className="admin-insta-empty-state">
             <FaInstagram />
             <h4>No posts yet</h4>
             <p>Create your first Instagram post to get started</p>
