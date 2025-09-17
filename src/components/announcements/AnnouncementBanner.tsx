@@ -362,7 +362,7 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
         )}
 
         {settings.showIcon && settings.iconPosition !== 'hidden' && (
-          <div className={`announcement-banner-icon-container ${settings.iconPosition === 'center' ? 'center' : ''}`}>
+          <div className={`announcement-banner-icon-container ${settings.iconPosition === 'center' ? 'center' : settings.iconPosition === 'right' ? 'right' : ''}`}>
             {getTypeIcon(currentAnnouncement.type)}
           </div>
         )}

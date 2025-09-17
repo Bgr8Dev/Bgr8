@@ -745,6 +745,11 @@
   z-index: 1;
 }
 
+.announcement-banner-icon-container.right {
+  order: 2;
+  margin-left: auto;
+}
+
 /* Custom Text Display */
 .announcement-banner-custom {
   font-style: italic;

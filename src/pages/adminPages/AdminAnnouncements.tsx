@@ -68,7 +68,9 @@ const AdminAnnouncements: React.FC = () => {
           autoScroll: true,
           scrollSpeed: 'normal',
           fontSize: 'medium',
-          clickEffect: 'bounce'
+          clickEffect: 'bounce',
+          showIcon: true,
+          iconPosition: 'left'
         },
     clickAction: {
       type: 'none'
@@ -142,7 +144,9 @@ const AdminAnnouncements: React.FC = () => {
           autoScroll: true,
           scrollSpeed: 'normal',
           fontSize: 'medium',
-          clickEffect: 'bounce'
+          clickEffect: 'bounce',
+          showIcon: true,
+          iconPosition: 'left'
         },
         clickAction: {
           type: 'none'
