@@ -12,7 +12,54 @@ import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
 import MobileSignInPage from './MobileSignInPage';
-import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
+// import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
+
+// Simple inline PasswordStrengthMeter component
+const SimplePasswordStrengthMeter = ({ strength }: { strength: PasswordStrength }) => {
+  const getColor = (level: PasswordStrength['level']) => {
+    switch (level) {
+      case 'Very Weak': return '#dc3545';
+      case 'Weak': return '#fd7e14';
+      case 'Fair': return '#ffc107';
+      case 'Good': return '#20c997';
+      case 'Strong': return '#198754';
+      case 'Very Strong': return '#0d6efd';
+      default: return '#6c757d';
+    }
+  };
+
+  return (
+    <div style={{ marginTop: '0.5rem' }}>
+      <div style={{ 
+        width: '100%', 
+        height: '4px', 
+        backgroundColor: '#e9ecef', 
+        borderRadius: '2px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          width: `${strength.score}%`,
+          height: '100%',
+          backgroundColor: getColor(strength.level),
+          transition: 'all 0.3s ease'
+        }} />
+      </div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        marginTop: '0.25rem',
+        fontSize: '0.875rem'
+      }}>
+        <span style={{ color: getColor(strength.level), fontWeight: '600' }}>
+          {strength.level}
+        </span>
+        <span style={{ color: '#6c757d' }}>
+          {strength.score}/100
+        </span>
+      </div>
+    </div>
+  );
+};
 import { PasswordHistoryService } from '../../services/passwordHistoryService';
 import { AccountLockoutService } from '../../services/accountLockoutService';
 import { BruteForceProtectionService } from '../../services/bruteForceProtectionService';
@@ -415,9 +462,8 @@ export default function SignInPage() {
                             disabled={isBlocked}
                           />
                           {passwordStrength && (
-                            <PasswordStrengthMeter 
+                            <SimplePasswordStrengthMeter 
                               strength={passwordStrength}
-                              showFeedback={true}
                             />
                           )}
                         </div>
