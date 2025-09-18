@@ -9,7 +9,7 @@ import Footer from '../../components/ui/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/MobileAuthPages.css';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
-import { PasswordStrengthMeter } from '../../components/ui';
+import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 import { PasswordHistoryService } from '../../services/passwordHistoryService';
 import { AccountLockoutService } from '../../services/accountLockoutService';
 import { BruteForceProtectionService } from '../../services/bruteForceProtectionService';

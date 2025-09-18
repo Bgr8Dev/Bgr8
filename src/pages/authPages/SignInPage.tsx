@@ -12,7 +12,7 @@ import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
 import MobileSignInPage from './MobileSignInPage';
-import { PasswordStrengthMeter } from '../../components/ui';
+import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 import { PasswordHistoryService } from '../../services/passwordHistoryService';
 import { AccountLockoutService } from '../../services/accountLockoutService';
 import { BruteForceProtectionService } from '../../services/bruteForceProtectionService';
