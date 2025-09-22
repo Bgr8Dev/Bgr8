@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaBug, FaPlus, FaSearch, FaSort, FaEye, FaEdit, FaTrash, FaThumbsUp, FaThumbsDown, FaTag, FaUser, FaCalendar, FaClock, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaPause, FaCopy, FaTimes, FaComments } from 'react-icons/fa';
 import { FeedbackService } from '../../services/feedbackService';
-import { FeedbackTicket, FeedbackStats, FeedbackFilters, FeedbackStatus, FeedbackPriority, FeedbackCategory } from '../../types/feedback';
+import { FeedbackTicket, FeedbackStats, FeedbackFilters, FeedbackStatus, FeedbackPriority, FeedbackCategory, TicketUpdateData } from '../../types/feedback';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserProfile, getUserRoles, UserProfile } from '../../utils/userProfile';
 import CreateTicketModal from '../../components/modals/CreateTicketModal';
@@ -572,26 +572,36 @@ export default function AdminTestingFeedback() {
     setShowEditModal(true);
   };
 
-  const handleUpdateTicket = async (ticketData: Partial<FeedbackTicket>) => {
+  const handleUpdateTicket = async (ticketData: TicketUpdateData) => {
     if (!editingTicket) return;
 
     const originalTicket = tickets.find(t => t.id === editingTicket.id);
     if (!originalTicket) return;
 
-    const updatedTicket = { ...editingTicket, ...ticketData };
+    // Convert File[] attachments to FeedbackAttachment[] if needed
+    // Here, we assume attachments are not updated via this modal, or you have a way to handle uploads elsewhere.
+    // If you need to upload and convert File[] to FeedbackAttachment[], do it here.
+
+    // Ensure attachments remain FeedbackAttachment[] (not File[])
+    const updatedTicket = { 
+      ...editingTicket, 
+      ...ticketData, 
+      updatedAt: new Date(),
+      attachments: editingTicket.attachments // preserve original attachments type
+    };
 
     // Optimistic update for both lists
-    setTickets(prevTickets => 
-      prevTickets.map(ticket => 
-        ticket.id === editingTicket.id 
-          ? { ...ticket, ...updatedTicket, updatedAt: new Date() }
+    setTickets(prevTickets =>
+      prevTickets.map(ticket =>
+        ticket.id === editingTicket.id
+          ? updatedTicket
           : ticket
       )
     );
-    setAllTickets(prevTickets => 
-      prevTickets.map(ticket => 
-        ticket.id === editingTicket.id 
-          ? { ...ticket, ...updatedTicket, updatedAt: new Date() }
+    setAllTickets(prevTickets =>
+      prevTickets.map(ticket =>
+        ticket.id === editingTicket.id
+          ? updatedTicket
           : ticket
       )
     );
@@ -601,40 +611,18 @@ export default function AdminTestingFeedback() {
     setEditingTicket(null);
 
     try {
-      await FeedbackService.updateTicket(editingTicket.id, {
-        title: updatedTicket.title,
-        description: updatedTicket.description,
-        category: updatedTicket.category,
-        priority: updatedTicket.priority,
-        status: updatedTicket.status,
-        tags: updatedTicket.tags,
-        // Testing-specific fields
-        urlToPage: updatedTicket.urlToPage,
-        browser: updatedTicket.browser,
-        browserVersion: updatedTicket.browserVersion,
-        operatingSystem: updatedTicket.operatingSystem,
-        deviceType: updatedTicket.deviceType,
-        screenResolution: updatedTicket.screenResolution,
-        stepsToReproduce: updatedTicket.stepsToReproduce,
-        expectedBehavior: updatedTicket.expectedBehavior,
-        actualBehavior: updatedTicket.actualBehavior,
-        severity: updatedTicket.severity,
-        environment: updatedTicket.environment,
-        testCaseId: updatedTicket.testCaseId,
-        regression: updatedTicket.regression,
-        workaround: updatedTicket.workaround
-      });
+      await FeedbackService.updateTicket(editingTicket.id, ticketData);
     } catch (err) {
       console.error('Error updating ticket:', err);
       setError('Failed to update ticket');
       // Revert optimistic update on error for both lists
-      setTickets(prevTickets => 
-        prevTickets.map(ticket => 
+      setTickets(prevTickets =>
+        prevTickets.map(ticket =>
           ticket.id === editingTicket.id ? originalTicket : ticket
         )
       );
-      setAllTickets(prevTickets => 
-        prevTickets.map(ticket => 
+      setAllTickets(prevTickets =>
+        prevTickets.map(ticket =>
           ticket.id === editingTicket.id ? originalTicket : ticket
         )
       );

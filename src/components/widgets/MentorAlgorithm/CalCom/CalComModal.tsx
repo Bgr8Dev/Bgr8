@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaTimes, FaExternalLinkAlt, FaCalendarAlt } from 'react-icons/fa';
-import { MentorMenteeProfile } from '../algorithm/matchUsers';
+import { getName, MentorMenteeProfile } from '../algorithm/matchUsers';
 import './CalComModal.css';
 
 interface CalComModalProps {
@@ -17,7 +17,7 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
       <div className="calcom-modal" onClick={e => e.stopPropagation()}>
         <div className="calcom-modal-header">
           <h3>
-            <FaCalendarAlt /> Book with {mentor.name}
+            <FaCalendarAlt /> Book with {getName(mentor)}
           </h3>
           <button onClick={onClose} className="calcom-modal-close" title="Close Cal.com modal">
             <FaTimes />
@@ -28,7 +28,7 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
             <>
               <div className="calcom-modal-intro">
                 <p>
-                  Book a session directly with <b>{mentor.name}</b> using their Cal.com calendar.
+                  Book a session directly with <b>{getName(mentor)}</b> using their Cal.com calendar.
                 </p>
                 <a
                   href={mentor.calCom}

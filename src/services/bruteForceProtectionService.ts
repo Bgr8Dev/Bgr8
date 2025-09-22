@@ -238,14 +238,15 @@ export class BruteForceProtectionService {
 
         if (shouldBlock) {
           updateData.blockedUntil = blockedUntil;
-          updateData.totalBlocks = increment(1);
+          // Do not set totalBlocks here, handle it in updateDoc below
         }
 
         await updateDoc(docRef, {
           ...updateData,
           lastAttemptTimestamp: serverTimestamp(),
           lastUpdatedTimestamp: serverTimestamp(),
-          blockedUntilTimestamp: blockedUntil ? serverTimestamp() : null
+          blockedUntilTimestamp: blockedUntil ? serverTimestamp() : null,
+          ...(shouldBlock && { totalBlocks: increment(1) })
         });
 
         // Log analytics event

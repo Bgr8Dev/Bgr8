@@ -4,7 +4,7 @@ import { useIsMobile } from '../../../../hooks/useIsMobile';
 import { doc, getDoc, collection, addDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../../firebase/firebase';
 import { FaClock, FaTimes, FaCalendarAlt, FaExternalLinkAlt, FaListUl, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
-import { MentorMenteeProfile } from '../algorithm/matchUsers';
+import { getName, MentorMenteeProfile } from '../algorithm/matchUsers';
 import { CalComService, CalComEventType, CalComTokenManager } from '../CalCom/calComService';
 import { Booking } from '../../../../types/bookings';
 import { SessionsService } from '../../../../services/sessionsService';
@@ -476,7 +476,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
             </div>
           )}
           <div className="booking-modal-header-content">
-            <h3>Book Session with {mentor.name}</h3>
+            <h3>Book Session with {getName(mentor)}</h3>
             <button onClick={onClose} className="booking-modal-close" title="Close booking modal">
               <FaTimes />
             </button>
@@ -582,7 +582,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                   <div className="booking-modal-summary-details">
                     <div className="booking-modal-summary-row">
                       <span>Mentor:</span>
-                      <span>{mentor.name}</span>
+                      <span>{getName(mentor)}</span>
                     </div>
                     <div className="booking-modal-summary-row">
                       <span>Date:</span>

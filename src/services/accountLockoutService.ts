@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment, Timestamp } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { logAnalyticsEvent } from '../firebase/firebase';
 
@@ -18,6 +18,8 @@ export interface LockoutEntry {
   totalLockouts: number;
   createdAt: Date;
   lastUpdated: Date;
+  lastFailedAttemptTimestamp?: Timestamp;
+  lastUpdatedTimestamp?: Timestamp;
 }
 
 export interface LockoutPolicy {
@@ -115,9 +117,9 @@ export class AccountLockoutService {
         const updateData: Partial<LockoutEntry> = {
           failedAttempts: newFailedAttempts,
           lastFailedAttempt: now,
-          lastFailedAttemptTimestamp: serverTimestamp(),
+          // lastFailedAttemptTimestamp: serverTimestamp(),
           lastUpdated: now,
-          lastUpdatedTimestamp: serverTimestamp(),
+          // lastUpdatedTimestamp: serverTimestamp(),
           ...clientInfo
         };
 
@@ -125,7 +127,6 @@ export class AccountLockoutService {
           updateData.isLocked = true;
           updateData.lockoutExpiresAt = lockoutExpiresAt;
           updateData.lockoutReason = reason;
-          updateData.totalLockouts = increment(1);
           updateData.unlockToken = this.generateUnlockToken();
           
           if (isPermanentLockout) {
@@ -136,6 +137,7 @@ export class AccountLockoutService {
 
         await updateDoc(docRef, {
           ...updateData,
+          ...(shouldLock ? { totalLockouts: increment(1) } : {}),
           lockoutExpiresAtTimestamp: lockoutExpiresAt ? serverTimestamp() : null
         });
 

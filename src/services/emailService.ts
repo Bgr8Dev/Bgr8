@@ -319,7 +319,7 @@ export class EmailService {
         id: doc.id,
         ...doc.data(),
         lastActive: doc.data().lastActive?.toDate()
-      })) as RecipientGroup[];
+      })) as unknown as RecipientGroup[];
     } catch (error) {
       console.error('Error getting recipient groups:', error);
       // Return default groups if Firebase fails

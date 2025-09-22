@@ -136,7 +136,7 @@ export class SessionsService {
     );
     
     const feedbackDocs = await getDocs(feedbackQuery);
-    return feedbackDocs.docs.map(doc => ({ id: doc.id, ...doc.data() } as SessionFeedback));
+    return feedbackDocs.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as SessionFeedback));
   }
 
   // Get questions for specific feedback
@@ -146,7 +146,7 @@ export class SessionsService {
     );
     
     const questionDocs = await getDocs(questionsQuery);
-    return questionDocs.docs.map(doc => ({ id: doc.id, ...doc.data() } as FeedbackQuestion));
+    return questionDocs.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as FeedbackQuestion));
   }
 
   // Check if user has already submitted feedback for a session

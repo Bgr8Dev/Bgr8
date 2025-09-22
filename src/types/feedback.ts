@@ -1,3 +1,28 @@
+export type TicketUpdateData = {
+  title?: string;
+  description?: string;
+  category?: FeedbackCategory;
+  priority?: FeedbackPriority;
+  status?: FeedbackStatus;
+  tags?: string[];
+  attachments?: File[]; // or FeedbackAttachment[] if you already have a type for saved attachments
+  urlToPage?: string;
+  browser?: string;
+  browserVersion?: string;
+  operatingSystem?: string;
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+  screenResolution?: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  actualBehavior?: string;
+  severity?: 'cosmetic' | 'minor' | 'major' | 'critical' | 'blocker';
+  environment?: 'development' | 'staging' | 'production';
+  testCaseId?: string;
+  regression?: boolean;
+  workaround?: string;
+};
+
+
 export type FeedbackStatus = 
   | 'draft'
   | 'open'

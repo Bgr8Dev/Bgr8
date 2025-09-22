@@ -6,6 +6,7 @@ import { FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaMapMarkerAlt, FaG
 import { useAuth } from '../../../hooks/useAuth';
 import MentorProfile from './MentorProfile';
 import { ageCloseReasonIDs, ageExperiencedMentorReasonIDs, checkReasonType, countyReasonIDs, educationLevelReasonIDs, getBestMatchesForUser, 
+  getName, 
   hobbiesReasonIDs, industriesReasonIDs, MatchResult, MENTEE, MENTOR, MentorMenteeProfile, professionReasonIDs, skillsReasonIDs, UserType } from './algorithm/matchUsers';
 import MentorModal from './MentorModal';
 import BookingModal from './booking/BookingModal';
@@ -1008,8 +1009,8 @@ export default function MentorProgram() {
                   )}
                   <div className="match-card-header">
                     <div className="match-card-title">
-                      <span className="match-card-name">{user.name}</span>
-                      <span className="match-card-type">({user.type})</span>
+                      <span className="match-card-name">{getName(user)}</span>
+                      <span className="match-card-type">({user.type as string})</span>
                     </div>
                   </div>
                   <div className="match-card-info">
