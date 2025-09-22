@@ -23,10 +23,6 @@ import AmbassadorPage from '../pages/utilPages/AmbassadorPage';
 export default function Navigation() {
   const { loading } = useAuth();
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
   return (
     <Routes>
       <Route path="/" element={<BGr8 />} />

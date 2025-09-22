@@ -12,7 +12,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Set a timeout to stop loading after 10 seconds
+    const timeoutId = setTimeout(() => {
+      console.warn('Firebase auth initialization timeout - proceeding without auth');
+      setLoading(false);
+    }, 10000);
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // Clear the timeout since auth state changed
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      
       setCurrentUser(user);
       
       if (user) {
@@ -22,10 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           method: user.providerData[0]?.providerId
         });
         
-        // Fetch user profile from Firestore
-        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-        if (userDoc.exists()) {
-          setUserProfile(userDoc.data() as UserProfile);
+        // Fetch user profile from Firestore (non-blocking)
+        try {
+          const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+          if (userDoc.exists()) {
+            setUserProfile(userDoc.data() as UserProfile);
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          // Continue without profile data
         }
       } else {
         setUserProfile(null);
@@ -36,7 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      unsubscribe();
+    };
   }, []);
 
   // Function to change user password
@@ -109,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 } 

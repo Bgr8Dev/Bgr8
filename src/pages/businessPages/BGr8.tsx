@@ -14,7 +14,7 @@ export default function BGr8() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
-  const [ambassadorCount, setAmbassadorCount] = useState(0);
+  const [ambassadorCount, setAmbassadorCount] = useState(500); // Default fallback value
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -22,7 +22,7 @@ export default function BGr8() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch ambassador count
+  // Fetch ambassador count (non-blocking)
   useEffect(() => {
     const fetchAmbassadorCount = async () => {
       try {
@@ -40,9 +40,11 @@ export default function BGr8() {
         setAmbassadorCount(count);
       } catch (error) {
         console.error('Error fetching ambassador count:', error);
+        // Keep the default fallback value on error
       }
     };
 
+    // Run this in the background without blocking the UI
     fetchAmbassadorCount();
   }, []);
 
@@ -383,7 +385,7 @@ export default function BGr8() {
                 </button>
                 <div className="bgr8-ambassador-stats">
                   <div className="bgr8-ambassador-stat">
-                    <span className="bgr8-stat-number">{ambassadorCount > 0 ? ambassadorCount : '500+'}</span>
+                    <span className="bgr8-stat-number">{ambassadorCount}+</span>
                     <span className="bgr8-stat-label">Active Ambassadors</span>
                   </div>
                   <div className="bgr8-ambassador-stat">
