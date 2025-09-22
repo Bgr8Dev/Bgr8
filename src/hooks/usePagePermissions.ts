@@ -30,7 +30,8 @@ export const usePagePermissions = () => {
   const getUserRoles = (): string[] => {
     if (!userProfile?.roles) return [];
     
-    return Object.keys(userProfile.roles).filter(role => userProfile.roles[role] === true);
+    return (Object.keys(userProfile.roles) as (keyof typeof userProfile.roles)[])
+      .filter(role => userProfile.roles[role] === true);
   };
 
   const canAccessPage = (pageId: string): boolean => {

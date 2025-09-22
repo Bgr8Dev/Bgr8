@@ -167,7 +167,9 @@ class InstagramAdminService {
         if (a.order !== b.order) {
           return a.order - b.order;
         }
-        return b.createdAt.getTime() - a.createdAt.getTime();
+        const aDate = a.createdAt instanceof Date ? a.createdAt : (a.createdAt as any)?.toDate?.() || new Date();
+        const bDate = b.createdAt instanceof Date ? b.createdAt : (b.createdAt as any)?.toDate?.() || new Date();
+        return bDate.valueOf() - aDate.valueOf();
       });
     } catch (error) {
       console.error('Error getting posts:', error);
