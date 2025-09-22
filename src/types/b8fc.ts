@@ -65,9 +65,35 @@ export interface SessionFeedback {
   isAnonymous: boolean;
   status: 'submitted' | 'reviewed' | 'archived';
   
+  // Developer mode support
+  isDeveloperMode?: boolean;
+  developerModeMentorId?: string;
+  
   // Cal.com support
   isCalComBooking?: boolean;
   calComBookingId?: string;
+}
+
+export interface MentorMetrics {
+  mentorId: string;
+  mentorName: string;
+  totalSessions: number;
+  totalFeedback: number;
+  averageRating: number;
+  averageHelpfulness: number;
+  averageComfort: number;
+  averageSupport: number;
+  strengths: string[];
+  improvements: string[];
+  recentFeedback: SessionFeedback[];
+  trend: 'improving' | 'stable' | 'declining';
+  rank: number;
+  percentile: number;
+  consistency: number; // Standard deviation of ratings
+  responseRate: number; // Percentage of sessions with feedback
+  lastActivity: Date;
+  topStrengths: string[];
+  commonImprovements: string[];
 }
 
 export interface FeedbackAnalytics {
@@ -87,4 +113,12 @@ export interface FeedbackAnalytics {
     learnings: string[];
   }>;
   recentFeedback: SessionFeedback[];
+  // Enhanced mentor analytics
+  mentorRankings: MentorMetrics[];
+  topPerformers: MentorMetrics[];
+  improvementOpportunities: MentorMetrics[];
+  mentorComparison: {
+    selectedMentors: string[];
+    comparisonData: MentorMetrics[];
+  };
 } 

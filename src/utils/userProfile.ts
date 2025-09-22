@@ -1,4 +1,4 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { firestore } from "../firebase/firebase";
 
 export interface UserProfile {
@@ -12,7 +12,22 @@ export interface UserProfile {
   phoneNumber?: string;
   dateCreated: Date;
   lastUpdated: Date;
-  admin: boolean;
+  // Role-based access control
+  roles: {
+    admin: boolean;
+    developer: boolean;
+    committee: boolean;
+    audit: boolean;
+    marketing: boolean;
+    'vetting-officer': boolean;
+    'social-media': boolean;
+    outreach: boolean;
+    events: boolean;
+    ambassador: boolean;
+  };
+  
+  // Role protection - prevents role modification
+  isProtected?: boolean;
 
   // Mentor/Mentee Profile References
   mentorProfileRef?: string; // Reference to users/{uid}/mentorProgram/profile
@@ -84,6 +99,62 @@ export interface UserProfile {
   };
 }
 
+// Legacy user profile type for backward compatibility
+interface LegacyUserProfile {
+  admin?: boolean;
+  developer?: boolean;
+}
+
+// Role checking utility functions
+export const hasRole = (userProfile: UserProfile | null, role: keyof UserProfile['roles']): boolean => {
+  if (!userProfile) return false;
+  
+  // Check new roles object first
+  if (userProfile.roles?.[role] === true) return true;
+  
+  // Backward compatibility: check old admin/developer fields
+  const legacyProfile = userProfile as UserProfile & LegacyUserProfile;
+  if (role === 'admin' && legacyProfile.admin === true) return true;
+  if (role === 'developer' && legacyProfile.developer === true) return true;
+  
+  return false;
+};
+
+export const hasAnyRole = (userProfile: UserProfile | null, roles: (keyof UserProfile['roles'])[]): boolean => {
+  if (!userProfile) return false;
+  
+  // Check if any of the requested roles are present
+  return roles.some(role => hasRole(userProfile, role));
+};
+
+export const hasAllRoles = (userProfile: UserProfile | null, roles: (keyof UserProfile['roles'])[]): boolean => {
+  if (!userProfile) return false;
+  return roles.every(role => hasRole(userProfile, role));
+};
+
+export const getUserRoles = (userProfile: UserProfile | null): (keyof UserProfile['roles'])[] => {
+  if (!userProfile?.roles) return [];
+  return Object.entries(userProfile.roles)
+    .filter(([, hasRole]) => hasRole)
+    .map(([role]) => role as keyof UserProfile['roles']);
+};
+
+export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
+  try {
+    const userRef = doc(firestore, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (userDoc.exists()) {
+      return userDoc.data() as UserProfile;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+};
+
 export const createUserProfile = async (
   uid: string,
   email: string,
@@ -101,7 +172,19 @@ export const createUserProfile = async (
     displayName: `${firstName} ${lastName}`,
     dateCreated: new Date(),
     lastUpdated: new Date(),
-    admin: false,
+    roles: {
+      admin: false,
+      developer: false,
+      committee: false,
+      audit: false,
+      marketing: false,
+      'vetting-officer': false,
+      'social-media': false,
+      outreach: false,
+      events: false,
+      ambassador: false
+    },
+    isProtected: false,
     ethnicity: 'N/A',
     nationality: 'N/A',
     activityLog: {

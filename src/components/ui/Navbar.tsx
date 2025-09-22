@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../hooks/useAuth';
+import { hasRole } from '../../utils/userProfile';
 import '../../styles/Navbar.css';
 import logo from '../../assets/Bgr8_logo.png';
 
@@ -65,7 +66,7 @@ export default function Navbar() {
               <div className="user-menu" role="menu">
                 <Link to="/profile" role="menuitem">Profile</Link>
                 <Link to="/settings" role="menuitem">Settings</Link>
-                {userProfile?.admin && (
+                {hasRole(userProfile, 'committee') && (
                   <Link to="/admin-portal" className="admin-link" role="menuitem">
                     Admin Portal
                   </Link>

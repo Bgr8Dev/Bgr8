@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MentorMenteeProfile, MentorAvailability } from '../types';
 import { ViewBookingsModal } from './ViewBookingsModal';
+import { VerificationStatus, canAccessPlatform, isUnderReview, isRejected } from '../../../types/verification';
+import { VerificationService } from '../../../services/verificationService';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -42,6 +44,33 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const [isAvailabilityCardExpanded, setIsAvailabilityCardExpanded] = useState(false);
   const [isBookingWidgetMinimized, setIsBookingWidgetMinimized] = useState(false);
   const [showViewBookingsModal, setShowViewBookingsModal] = useState(false);
+  
+  // Verification state
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
+  const [verificationLoading, setVerificationLoading] = useState(true);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  // Fetch verification status on component mount
+  useEffect(() => {
+    const fetchVerificationStatus = async () => {
+      if (!currentUserProfile?.uid) return;
+      
+      try {
+        setVerificationLoading(true);
+        setVerificationError(null);
+        
+        const verificationData = await VerificationService.getVerificationData(currentUserProfile.uid);
+        setVerificationStatus(verificationData?.status || null);
+      } catch (error) {
+        console.error('Error fetching verification status:', error);
+        setVerificationError('Failed to load verification status');
+      } finally {
+        setVerificationLoading(false);
+      }
+    };
+
+    fetchVerificationStatus();
+  }, [currentUserProfile?.uid]);
 
   const toggleBookingWidget = () => {
     setIsBookingWidgetMinimized(!isBookingWidgetMinimized);
@@ -69,6 +98,87 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       new Date(booking.sessionDate) <= new Date()
     );
   };
+
+  // Show verification status if not approved
+  if (verificationLoading) {
+    return (
+      <div className="verification-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading verification status...</p>
+      </div>
+    );
+  }
+
+  if (verificationError) {
+    return (
+      <div className="verification-error">
+        <h2>Verification Error</h2>
+        <p>{verificationError}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
+
+  // If verification status is not approved, show verification status page
+  if (verificationStatus && !canAccessPlatform(verificationStatus)) {
+    return (
+      <div className="verification-status-page">
+        <div className="verification-status-card">
+          <h2>Verification Status</h2>
+          <div className={`verification-status-badge ${verificationStatus}`}>
+            {verificationStatus.replace('_', ' ').toUpperCase()}
+          </div>
+          
+          {isUnderReview(verificationStatus) && (
+            <div className="verification-message">
+              <h3>Your profile is under review</h3>
+              <p>Thank you for submitting your mentor profile. Our team is currently reviewing your application. You'll receive an email notification once the review is complete.</p>
+              <div className="verification-timeline">
+                <div className="timeline-item active">
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-content">
+                    <h4>Profile Submitted</h4>
+                    <p>Your profile has been submitted for verification</p>
+                  </div>
+                </div>
+                <div className="timeline-item">
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-content">
+                    <h4>Under Review</h4>
+                    <p>Our team is reviewing your qualifications</p>
+                  </div>
+                </div>
+                <div className="timeline-item">
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-content">
+                    <h4>Verification Complete</h4>
+                    <p>You'll gain access to the mentor dashboard</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isRejected(verificationStatus) && (
+            <div className="verification-message">
+              <h3>Application Not Approved</h3>
+              <p>Unfortunately, your mentor application was not approved at this time. Please review the requirements and consider reapplying in the future.</p>
+              <button onClick={onProfileEdit} className="edit-profile-btn">
+                Edit Profile
+              </button>
+            </div>
+          )}
+
+          {verificationStatus === 'suspended' && (
+            <div className="verification-message">
+              <h3>Account Suspended</h3>
+              <p>Your mentor account has been temporarily suspended. Please contact support for more information.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

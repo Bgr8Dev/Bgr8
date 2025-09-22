@@ -49,6 +49,9 @@ export interface Booking {
   feedbackSubmitted_mentee?: boolean;
   feedbackSubmittedAt_mentor?: Timestamp;
   feedbackSubmittedAt_mentee?: Timestamp;
+  
+  // Developer mode
+  isDeveloperMode?: boolean;
 }
 
 // Extend the Booking interface to include generated properties

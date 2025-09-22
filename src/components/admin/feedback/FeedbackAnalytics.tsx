@@ -1,0 +1,1343 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { firestore } from '../../../firebase/firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { SessionFeedback, MentorMetrics } from '../../../types/b8fc';
+import type { FeedbackAnalytics } from '../../../types/b8fc';
+import { 
+  FaStar, 
+  FaComments, 
+  FaUsers, 
+  FaThumbsUp, 
+  FaSearch, 
+  FaFilter, 
+  FaDownload, 
+  FaChevronDown, 
+  FaChevronUp, 
+  FaCheckSquare, 
+  FaSquare,
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+  FaSync,
+  FaTrophy
+} from 'react-icons/fa';
+import MentorRanking from './MentorRanking';
+import '../../../styles/adminStyles/FeedbackAnalytics.css';
+
+export default function FeedbackAnalytics() {
+  const [feedbackData, setFeedbackData] = useState<SessionFeedback[]>([]);
+  const [analytics, setAnalytics] = useState<FeedbackAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Enhanced filtering and management state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState<string>('all');
+  const [selectedMentor, setSelectedMentor] = useState<string>('all');
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
+  const [dateRange, setDateRange] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'rating' | 'mentor' | 'type'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [modalData, setModalData] = useState<SessionFeedback | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'mentorRankings'>('overview');
+
+  useEffect(() => {
+    const fetchFeedbackData = async () => {
+      try {
+        setLoading(true);
+        const feedbackQuery = query(
+          collection(firestore, 'feedback'),
+          orderBy('submittedAt', 'desc')
+        );
+        
+        const snapshot = await getDocs(feedbackQuery);
+        const feedback: SessionFeedback[] = [];
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          feedback.push({
+            id: doc.id,
+            ...data,
+            sessionDate: data.sessionDate?.toDate?.() || new Date(data.sessionDate),
+            submittedAt: data.submittedAt?.toDate?.() || new Date(data.submittedAt),
+            isCalComBooking: data.isCalComBooking || false,
+            calComBookingId: data.calComBookingId || null
+          } as unknown as SessionFeedback);
+        });
+        
+        setFeedbackData(feedback);
+        setLastRefresh(new Date());
+        
+        // Calculate analytics
+        const analyticsData = calculateAnalytics(feedback);
+        setAnalytics(analyticsData);
+        
+      } catch (err) {
+        console.error('Error fetching feedback data:', err);
+        setError('Failed to load feedback data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchFeedbackData();
+  }, []);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && modalData) {
+        handleCloseModal();
+      }
+    };
+
+    if (modalData) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [modalData]);
+
+  // Enhanced filtering and sorting logic
+  const filteredAndSortedFeedback = useMemo(() => {
+    let filtered = [...feedbackData];
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(feedback => 
+        feedback.mentorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        feedback.menteeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        feedback.strengths?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        feedback.improvements?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        feedback.learnings?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply feedback type filter
+    if (selectedFeedbackType !== 'all') {
+      filtered = filtered.filter(feedback => feedback.feedbackType === selectedFeedbackType);
+    }
+
+    // Apply mentor filter
+    if (selectedMentor !== 'all') {
+      filtered = filtered.filter(feedback => feedback.mentorId === selectedMentor);
+    }
+
+    // Apply rating filter
+    if (ratingFilter !== 'all') {
+      const rating = parseInt(ratingFilter);
+      filtered = filtered.filter(feedback => feedback.overallRating >= rating && feedback.overallRating < rating + 1);
+    }
+
+    // Apply date range filter
+    if (dateRange !== 'all') {
+      const now = new Date();
+      const cutoffDate = new Date();
+      
+      switch (dateRange) {
+        case '7days':
+          cutoffDate.setDate(now.getDate() - 7);
+          break;
+        case '30days':
+          cutoffDate.setDate(now.getDate() - 30);
+          break;
+        case '90days':
+          cutoffDate.setDate(now.getDate() - 90);
+          break;
+        case '1year':
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+      
+      filtered = filtered.filter(feedback => feedback.submittedAt >= cutoffDate);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue: string | number | Date, bValue: string | number | Date;
+      
+      switch (sortBy) {
+        case 'date':
+          aValue = a.submittedAt;
+          bValue = b.submittedAt;
+          break;
+        case 'rating':
+          aValue = a.overallRating;
+          bValue = b.overallRating;
+          break;
+        case 'mentor':
+          aValue = a.mentorName?.toLowerCase() || '';
+          bValue = b.mentorName?.toLowerCase() || '';
+          break;
+        case 'type':
+          aValue = a.feedbackType;
+          bValue = b.feedbackType;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [feedbackData, searchTerm, selectedFeedbackType, selectedMentor, ratingFilter, dateRange, sortBy, sortOrder]);
+
+  // Pagination logic
+  const paginatedFeedback = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedFeedback.slice(startIndex, endIndex);
+  }, [filteredAndSortedFeedback, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedFeedback.length / itemsPerPage);
+
+  // Get unique mentors for filter dropdown
+  const uniqueMentors = useMemo(() => {
+    const mentorSet = new Set(feedbackData.map(f => f.mentorId));
+    const mentors = Array.from(mentorSet);
+    return mentors.map(mentorId => ({
+      id: mentorId,
+      name: feedbackData.find(f => f.mentorId === mentorId)?.mentorName || mentorId
+    }));
+  }, [feedbackData]);
+
+  // Utility functions for handling selections and actions
+  const handleSelectItem = (itemId: string) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(itemId)) {
+      newSelected.delete(itemId);
+    } else {
+      newSelected.add(itemId);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.size === paginatedFeedback.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(paginatedFeedback.map(f => f.id)));
+    }
+  };
+
+
+  const handleRowClick = (feedback: SessionFeedback, event: React.MouseEvent) => {
+    // Don't show modal if clicking on selection checkbox or other interactive elements
+    if ((event.target as HTMLElement).closest('.select-item-btn') ||
+        (event.target as HTMLElement).closest('.select-all-btn')) {
+      return;
+    }
+
+    setModalData(feedback);
+  };
+
+  const handleCloseModal = () => {
+    setModalData(null);
+  };
+
+  const handleModalClick = (event: React.MouseEvent) => {
+    // Prevent modal from closing when clicking inside it
+    event.stopPropagation();
+  };
+
+  const handleOverlayClick = () => {
+    handleCloseModal();
+  };
+
+  const handleSort = (newSortBy: 'date' | 'rating' | 'mentor' | 'type') => {
+    if (sortBy === newSortBy) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder('desc');
+    }
+    setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const feedbackQuery = query(
+        collection(firestore, 'feedback'),
+        orderBy('submittedAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(feedbackQuery);
+      const feedback: SessionFeedback[] = [];
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        feedback.push({
+          id: doc.id,
+          ...data,
+          sessionDate: data.sessionDate?.toDate?.() || new Date(data.sessionDate),
+          submittedAt: data.submittedAt?.toDate?.() || new Date(data.submittedAt),
+          isCalComBooking: data.isCalComBooking || false,
+          calComBookingId: data.calComBookingId || null
+        } as unknown as SessionFeedback);
+      });
+      
+      setFeedbackData(feedback);
+      setLastRefresh(new Date());
+      const analyticsData = calculateAnalytics(feedback);
+      setAnalytics(analyticsData);
+      setSelectedItems(new Set());
+    } catch (err) {
+      console.error('Error refreshing feedback data:', err);
+      setError('Failed to refresh feedback data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportToCSV = () => {
+    const headers = [
+      'ID', 'Feedback Type', 'Mentor Name', 'Mentee Name', 'Overall Rating',
+      'Helpfulness', 'Comfort', 'Support', 'Strengths', 'Improvements', 'Learnings',
+      'Submitted At', 'Session Date', 'Status', 'Is Anonymous', 'Is Developer Mode',
+      'Developer Mode Mentor ID', 'Booking ID', 'Mentor ID', 'Mentee ID', 'Submitted By',
+      'Is Cal.com Booking', 'Cal.com Booking ID'
+    ];
+    
+    const csvContent = [
+      headers.join(','),
+      ...filteredAndSortedFeedback.map(feedback => [
+        feedback.id,
+        feedback.feedbackType,
+        feedback.mentorName || '',
+        feedback.menteeName || '',
+        feedback.overallRating,
+        feedback.helpfulness || '',
+        feedback.comfort || '',
+        feedback.support || '',
+        `"${(feedback.strengths || '').replace(/"/g, '""')}"`,
+        `"${(feedback.improvements || '').replace(/"/g, '""')}"`,
+        `"${(feedback.learnings || '').replace(/"/g, '""')}"`,
+        feedback.submittedAt.toISOString(),
+        feedback.sessionDate?.toISOString() || '',
+        feedback.status || '',
+        feedback.isAnonymous || false,
+        feedback.isDeveloperMode || false,
+        feedback.developerModeMentorId || '',
+        feedback.bookingId || '',
+        feedback.mentorId || '',
+        feedback.menteeId || '',
+        feedback.submittedBy || '',
+        feedback.isCalComBooking || false,
+        feedback.calComBookingId || ''
+      ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `feedback-analytics-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const calculateAnalytics = (feedback: SessionFeedback[]): FeedbackAnalytics => {
+    const totalFeedback = feedback.length;
+    const totalRating = feedback.reduce((sum, f) => sum + f.overallRating, 0);
+    const averageRating = totalFeedback > 0 ? totalRating / totalFeedback : 0;
+    
+    const feedbackByMentor: Record<string, {
+      totalSessions: number;
+      totalFeedback: number;
+      averageRating: number;
+      strengths: string[];
+      improvements: string[];
+    }> = {};
+    const feedbackByMentee: Record<string, {
+      totalSessions: number;
+      totalFeedback: number;
+      averageRating: number;
+      learnings: string[];
+    }> = {};
+    
+    // Enhanced mentor metrics
+    const mentorMetrics: Record<string, {
+      mentorId: string;
+      mentorName: string;
+      totalSessions: number;
+      totalFeedback: number;
+      averageRating: number;
+      averageHelpfulness: number;
+      averageComfort: number;
+      averageSupport: number;
+      strengths: string[];
+      improvements: string[];
+      recentFeedback: SessionFeedback[];
+      ratings: number[];
+      helpfulnessRatings: number[];
+      comfortRatings: number[];
+      supportRatings: number[];
+      lastActivity: Date;
+    }> = {};
+    
+    feedback.forEach(f => {
+      // Group by mentor
+      if (!feedbackByMentor[f.mentorId]) {
+        feedbackByMentor[f.mentorId] = {
+          totalSessions: 0,
+          totalFeedback: 0,
+          averageRating: 0,
+          strengths: [],
+          improvements: []
+        };
+      }
+      
+      if (f.feedbackType === 'mentor') {
+        feedbackByMentor[f.mentorId].totalFeedback++;
+        feedbackByMentor[f.mentorId].averageRating += f.overallRating;
+        if (f.strengths) feedbackByMentor[f.mentorId].strengths.push(f.strengths);
+        if (f.improvements) feedbackByMentor[f.mentorId].improvements.push(f.improvements);
+      }
+      
+      // Enhanced mentor metrics
+      if (!mentorMetrics[f.mentorId]) {
+        mentorMetrics[f.mentorId] = {
+          mentorId: f.mentorId,
+          mentorName: f.mentorName,
+          totalSessions: 0,
+          totalFeedback: 0,
+          averageRating: 0,
+          averageHelpfulness: 0,
+          averageComfort: 0,
+          averageSupport: 0,
+          strengths: [],
+          improvements: [],
+          recentFeedback: [],
+          ratings: [],
+          helpfulnessRatings: [],
+          comfortRatings: [],
+          supportRatings: [],
+          lastActivity: f.submittedAt
+        };
+      }
+      
+      // Update mentor metrics
+      const mentor = mentorMetrics[f.mentorId];
+      mentor.totalSessions++;
+      mentor.lastActivity = f.submittedAt > mentor.lastActivity ? f.submittedAt : mentor.lastActivity;
+      
+      if (f.feedbackType === 'mentor') {
+        mentor.totalFeedback++;
+        mentor.ratings.push(f.overallRating);
+        if (f.helpfulness) mentor.helpfulnessRatings.push(f.helpfulness);
+        if (f.comfort) mentor.comfortRatings.push(f.comfort);
+        if (f.support) mentor.supportRatings.push(f.support);
+        if (f.strengths) mentor.strengths.push(f.strengths);
+        if (f.improvements) mentor.improvements.push(f.improvements);
+        mentor.recentFeedback.push(f);
+      }
+      
+      // Group by mentee
+      if (!feedbackByMentee[f.menteeId]) {
+        feedbackByMentee[f.menteeId] = {
+          totalSessions: 0,
+          totalFeedback: 0,
+          averageRating: 0,
+          learnings: []
+        };
+      }
+      
+      if (f.feedbackType === 'mentee') {
+        feedbackByMentee[f.menteeId].totalFeedback++;
+        feedbackByMentee[f.menteeId].averageRating += f.overallRating;
+        if (f.learnings) feedbackByMentee[f.menteeId].learnings.push(f.learnings);
+      }
+    });
+    
+    // Calculate averages for basic analytics
+    Object.keys(feedbackByMentor).forEach(mentorId => {
+      const mentor = feedbackByMentor[mentorId];
+      if (mentor.totalFeedback > 0) {
+        mentor.averageRating = mentor.averageRating / mentor.totalFeedback;
+      }
+    });
+    
+    Object.keys(feedbackByMentee).forEach(menteeId => {
+      const mentee = feedbackByMentee[menteeId];
+      if (mentee.totalFeedback > 0) {
+        mentee.averageRating = mentee.averageRating / mentee.totalFeedback;
+      }
+    });
+    
+    // Calculate enhanced mentor metrics
+    const mentorRankings: MentorMetrics[] = Object.values(mentorMetrics).map(mentor => {
+      const avgRating = mentor.ratings.length > 0 ? mentor.ratings.reduce((sum, r) => sum + r, 0) / mentor.ratings.length : 0;
+      const avgHelpfulness = mentor.helpfulnessRatings.length > 0 ? mentor.helpfulnessRatings.reduce((sum, r) => sum + r, 0) / mentor.helpfulnessRatings.length : 0;
+      const avgComfort = mentor.comfortRatings.length > 0 ? mentor.comfortRatings.reduce((sum, r) => sum + r, 0) / mentor.comfortRatings.length : 0;
+      const avgSupport = mentor.supportRatings.length > 0 ? mentor.supportRatings.reduce((sum, r) => sum + r, 0) / mentor.supportRatings.length : 0;
+      
+      // Calculate consistency (standard deviation)
+      const variance = mentor.ratings.length > 1 ? 
+        mentor.ratings.reduce((sum, r) => sum + Math.pow(r - avgRating, 2), 0) / (mentor.ratings.length - 1) : 0;
+      const consistency = Math.sqrt(variance);
+      
+      // Calculate response rate (assuming we have session data)
+      const responseRate = mentor.totalSessions > 0 ? (mentor.totalFeedback / mentor.totalSessions) * 100 : 0;
+      
+      // Calculate trend (simplified - compare recent vs older ratings)
+      const recentRatings = mentor.ratings.slice(-3);
+      const olderRatings = mentor.ratings.slice(0, -3);
+      let trend: 'improving' | 'stable' | 'declining' = 'stable';
+      
+      if (recentRatings.length > 0 && olderRatings.length > 0) {
+        const recentAvg = recentRatings.reduce((sum, r) => sum + r, 0) / recentRatings.length;
+        const olderAvg = olderRatings.reduce((sum, r) => sum + r, 0) / olderRatings.length;
+        const diff = recentAvg - olderAvg;
+        
+        if (diff > 0.2) trend = 'improving';
+        else if (diff < -0.2) trend = 'declining';
+      }
+      
+      // Get top strengths and improvements (most common themes)
+      const strengthCounts: Record<string, number> = {};
+      const improvementCounts: Record<string, number> = {};
+      
+      mentor.strengths.forEach(strength => {
+        const words = strength.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          if (word.length > 3) {
+            strengthCounts[word] = (strengthCounts[word] || 0) + 1;
+          }
+        });
+      });
+      
+      mentor.improvements.forEach(improvement => {
+        const words = improvement.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          if (word.length > 3) {
+            improvementCounts[word] = (improvementCounts[word] || 0) + 1;
+          }
+        });
+      });
+      
+      const topStrengths = Object.entries(strengthCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([word]) => word);
+      
+      const commonImprovements = Object.entries(improvementCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([word]) => word);
+      
+      return {
+        mentorId: mentor.mentorId,
+        mentorName: mentor.mentorName,
+        totalSessions: mentor.totalSessions,
+        totalFeedback: mentor.totalFeedback,
+        averageRating: Math.round(avgRating * 10) / 10,
+        averageHelpfulness: Math.round(avgHelpfulness * 10) / 10,
+        averageComfort: Math.round(avgComfort * 10) / 10,
+        averageSupport: Math.round(avgSupport * 10) / 10,
+        strengths: mentor.strengths,
+        improvements: mentor.improvements,
+        recentFeedback: mentor.recentFeedback.slice(-5).sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime()),
+        trend,
+        rank: 0, // Will be set after sorting
+        percentile: 0, // Will be calculated after ranking
+        consistency: Math.round(consistency * 100) / 100,
+        responseRate: Math.round(responseRate * 10) / 10,
+        lastActivity: mentor.lastActivity,
+        topStrengths,
+        commonImprovements
+      };
+    });
+    
+    // Sort and rank mentors
+    mentorRankings.sort((a, b) => b.averageRating - a.averageRating);
+    mentorRankings.forEach((mentor, index) => {
+      mentor.rank = index + 1;
+      mentor.percentile = Math.round(((mentorRankings.length - index) / mentorRankings.length) * 100);
+    });
+    
+    // Get top performers and improvement opportunities
+    const topPerformers = mentorRankings.slice(0, 5);
+    const improvementOpportunities = mentorRankings
+      .filter(m => m.averageRating < 4.0 && m.totalFeedback >= 3)
+      .sort((a, b) => a.averageRating - b.averageRating)
+      .slice(0, 5);
+    
+    return {
+      totalFeedback,
+      averageRating: Math.round(averageRating * 10) / 10,
+      feedbackByMentor,
+      feedbackByMentee,
+      recentFeedback: feedback.slice(0, 10),
+      mentorRankings,
+      topPerformers,
+      improvementOpportunities,
+      mentorComparison: {
+        selectedMentors: [],
+        comparisonData: []
+      }
+    };
+  };
+
+  const renderStarRating = (rating: number, showText: boolean = true) => {
+    return (
+      <div className="star-display">
+        {[1, 2, 3, 4, 5].map(star => (
+          <FaStar
+            key={star}
+            className={star <= rating ? 'filled' : 'empty'}
+          />
+        ))}
+        {showText && <span className="rating-text">{rating.toFixed(1)}</span>}
+      </div>
+    );
+  };
+
+  const getSortIcon = (column: 'date' | 'rating' | 'mentor' | 'type') => {
+    if (sortBy !== column) return <FaSort className="sort-icon" />;
+    return sortOrder === 'asc' ? <FaSortUp className="sort-icon" /> : <FaSortDown className="sort-icon" />;
+  };
+
+  if (loading) {
+    return (
+      <div className="feedback-analytics">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading feedback analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="feedback-analytics">
+        <div className="error-container">
+          <h2>Error</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <div className="feedback-analytics">
+        <div className="empty-container">
+          <h2>No Feedback Data</h2>
+          <p>No feedback has been submitted yet.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="feedback-analytics">
+      <div className="analytics-header">
+        <div className="header-content">
+          <h2>Feedback Analytics</h2>
+          <p>Comprehensive insights from mentor and mentee feedback</p>
+        </div>
+        <div className="header-actions">
+          <button 
+            className="refresh-btn" 
+            onClick={handleRefresh}
+            disabled={loading}
+            title="Refresh data"
+          >
+            <FaSync className={loading ? 'spinning' : ''} />
+          </button>
+          <button 
+            className="export-btn" 
+            onClick={exportToCSV}
+            disabled={filteredAndSortedFeedback.length === 0}
+            title="Export to CSV"
+          >
+            <FaDownload />
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <button 
+          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          <FaComments />
+          Overview
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'mentorRankings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('mentorRankings')}
+        >
+          <FaTrophy />
+          Mentor Rankings
+        </button>
+      </div>
+
+      {/* Content based on active tab */}
+      {activeTab === 'overview' && (
+        <>
+          {/* Summary Cards */}
+          <div className="summary-cards">
+        <div className="summary-card">
+          <div className="card-icon">
+            <FaComments />
+          </div>
+          <div className="card-content">
+            <h3>{analytics.totalFeedback}</h3>
+            <p>Total Feedback</p>
+            <small>Showing {filteredAndSortedFeedback.length} filtered</small>
+          </div>
+        </div>
+        
+        <div className="summary-card">
+          <div className="card-icon">
+            <FaStar />
+          </div>
+          <div className="card-content">
+            <h3>{analytics.averageRating}</h3>
+            <p>Average Rating</p>
+            <small>Based on all feedback</small>
+          </div>
+        </div>
+        
+        <div className="summary-card">
+          <div className="card-icon">
+            <FaUsers />
+          </div>
+          <div className="card-content">
+            <h3>{Object.keys(analytics.feedbackByMentor).length}</h3>
+            <p>Mentors with Feedback</p>
+            <small>Active mentors</small>
+          </div>
+        </div>
+        
+        <div className="summary-card">
+          <div className="card-icon">
+            <FaThumbsUp />
+          </div>
+          <div className="card-content">
+            <h3>{Math.round((analytics.averageRating / 5) * 100)}%</h3>
+            <p>Satisfaction Rate</p>
+            <small>Overall satisfaction</small>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Controls */}
+      <div className="controls-section">
+        <div className="search-controls">
+          <div className="search-input-container">
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search feedback content, mentors, or mentees..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          
+          <button 
+            className="filter-toggle-btn"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FaFilter />
+            Filters
+            {showFilters ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
+        </div>
+
+        {showFilters && (
+          <div className="filters-panel">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Feedback Type</label>
+                <select 
+                  value={selectedFeedbackType} 
+                  onChange={(e) => setSelectedFeedbackType(e.target.value)}
+                >
+                  <option value="all">All Types</option>
+                  <option value="mentor">Mentor Feedback</option>
+                  <option value="mentee">Mentee Feedback</option>
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Mentor</label>
+                <select 
+                  value={selectedMentor} 
+                  onChange={(e) => setSelectedMentor(e.target.value)}
+                >
+                  <option value="all">All Mentors</option>
+                  {uniqueMentors.map(mentor => (
+                    <option key={mentor.id} value={mentor.id}>
+                      {mentor.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Rating</label>
+                <select 
+                  value={ratingFilter} 
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                >
+                  <option value="all">All Ratings</option>
+                  <option value="5">5 Stars</option>
+                  <option value="4">4+ Stars</option>
+                  <option value="3">3+ Stars</option>
+                  <option value="2">2+ Stars</option>
+                  <option value="1">1+ Stars</option>
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Date Range</label>
+                <select 
+                  value={dateRange} 
+                  onChange={(e) => setDateRange(e.target.value)}
+                >
+                  <option value="all">All Time</option>
+                  <option value="7days">Last 7 Days</option>
+                  <option value="30days">Last 30 Days</option>
+                  <option value="90days">Last 90 Days</option>
+                  <option value="1year">Last Year</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bulk Actions */}
+      {selectedItems.size > 0 && (
+        <div className="bulk-actions">
+          <div className="bulk-info">
+            <span>{selectedItems.size} item{selectedItems.size !== 1 ? 's' : ''} selected</span>
+          </div>
+          <div className="bulk-buttons">
+            <button 
+              className="bulk-btn"
+              onClick={() => setSelectedItems(new Set())}
+            >
+              Clear Selection
+            </button>
+            <button 
+              className="bulk-btn primary"
+              onClick={() => {
+                // Export only selected items
+                const selectedFeedback = feedbackData.filter(f => selectedItems.has(f.id));
+                console.log('Selected feedback:', selectedFeedback);
+              }}
+            >
+              Export Selected
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Feedback List */}
+      <div className="feedback-management">
+        <div className="list-header">
+          <div className="list-controls">
+            <div className="selection-control">
+              <button 
+                className="select-all-btn"
+                onClick={handleSelectAll}
+                title={selectedItems.size === paginatedFeedback.length ? "Deselect All" : "Select All"}
+              >
+                {selectedItems.size === paginatedFeedback.length ? <FaCheckSquare /> : <FaSquare />}
+                {selectedItems.size === paginatedFeedback.length ? "Deselect All" : "Select All"}
+              </button>
+            </div>
+            
+            <div className="view-controls">
+              <select 
+                value={itemsPerPage} 
+                onChange={(e) => {
+                  setItemsPerPage(parseInt(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="items-per-page"
+              >
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={50}>50 per page</option>
+                <option value={100}>100 per page</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="sort-controls">
+            <span>Sort by:</span>
+            <button 
+              className={`sort-btn ${sortBy === 'date' ? 'active' : ''}`}
+              onClick={() => handleSort('date')}
+            >
+              Date {getSortIcon('date')}
+            </button>
+            <button 
+              className={`sort-btn ${sortBy === 'rating' ? 'active' : ''}`}
+              onClick={() => handleSort('rating')}
+            >
+              Rating {getSortIcon('rating')}
+            </button>
+            <button 
+              className={`sort-btn ${sortBy === 'mentor' ? 'active' : ''}`}
+              onClick={() => handleSort('mentor')}
+            >
+              Mentor {getSortIcon('mentor')}
+            </button>
+            <button 
+              className={`sort-btn ${sortBy === 'type' ? 'active' : ''}`}
+              onClick={() => handleSort('type')}
+            >
+              Type {getSortIcon('type')}
+            </button>
+          </div>
+        </div>
+
+        <div className="feedback-table-container">
+          <table className="feedback-table">
+            <thead>
+              <tr>
+                <th className="select-column">
+                  <button 
+                    className="select-all-btn"
+                    onClick={handleSelectAll}
+                    title={selectedItems.size === paginatedFeedback.length ? "Deselect All" : "Select All"}
+                  >
+                    {selectedItems.size === paginatedFeedback.length ? <FaCheckSquare /> : <FaSquare />}
+                  </button>
+                </th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Mentor</th>
+                <th>Mentee</th>
+                <th>Overall Rating</th>
+                <th>Helpfulness</th>
+                <th>Comfort</th>
+                <th>Support</th>
+                <th>Status</th>
+                <th>Anonymous</th>
+                <th>Dev Mode</th>
+                <th>Submitted</th>
+                <th>Session Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedFeedback.map(feedback => (
+                <tr 
+                  key={feedback.id} 
+                  className={`feedback-row ${selectedItems.has(feedback.id) ? 'selected' : ''} ${modalData?.id === feedback.id ? 'modal-active' : ''}`}
+                  onClick={(e) => handleRowClick(feedback, e)}
+                >
+                  <td className="select-column">
+                    <button 
+                      className="select-item-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectItem(feedback.id);
+                      }}
+                    >
+                      {selectedItems.has(feedback.id) ? <FaCheckSquare /> : <FaSquare />}
+                    </button>
+                  </td>
+                  <td className="id-cell">
+                    <span className="feedback-id" title={feedback.id}>
+                      {feedback.id.substring(0, 8)}...
+                    </span>
+                  </td>
+                  <td>
+                    <span className="feedback-type">{feedback.feedbackType}</span>
+                  </td>
+                  <td className="name-cell">
+                    <div className="name-info">
+                      <div className="name">{feedback.mentorName}</div>
+                      <div className="id-small">ID: {feedback.mentorId?.substring(0, 8)}...</div>
+                    </div>
+                  </td>
+                  <td className="name-cell">
+                    <div className="name-info">
+                      <div className="name">{feedback.menteeName}</div>
+                      <div className="id-small">ID: {feedback.menteeId?.substring(0, 8)}...</div>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.overallRating, false)}
+                      <span className="rating-number">{feedback.overallRating}</span>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.helpfulness || 0, false)}
+                      <span className="rating-number">{feedback.helpfulness || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.comfort || 0, false)}
+                      <span className="rating-number">{feedback.comfort || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td className="rating-cell">
+                    <div className="rating-display">
+                      {renderStarRating(feedback.support || 0, false)}
+                      <span className="rating-number">{feedback.support || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${feedback.status}`}>
+                      {feedback.status || 'submitted'}
+                    </span>
+                  </td>
+                  <td className="boolean-cell">
+                    <span className={`boolean-badge ${feedback.isAnonymous ? 'true' : 'false'}`}>
+                      {feedback.isAnonymous ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td className="boolean-cell">
+                    <span className={`boolean-badge ${feedback.isDeveloperMode ? 'true' : 'false'}`}>
+                      {feedback.isDeveloperMode ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td className="date-cell">
+                    <div className="date-info">
+                      <div className="date">{feedback.submittedAt.toLocaleDateString('en-GB')}</div>
+                      <div className="time">{feedback.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                  </td>
+                  <td className="date-cell">
+                    <div className="date-info">
+                      <div className="date">{feedback.sessionDate?.toLocaleDateString('en-GB') || 'N/A'}</div>
+                      <div className="time">{feedback.sessionDate?.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) || ''}</div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="pagination">
+          <div className="pagination-info">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedFeedback.length)} of {filteredAndSortedFeedback.length} results
+          </div>
+          
+          <div className="pagination-controls">
+            <button 
+              className="pagination-btn"
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+            >
+              First
+            </button>
+            <button 
+              className="pagination-btn"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="page-numbers">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                if (pageNum > totalPages) return null;
+                
+                return (
+                  <button
+                    key={pageNum}
+                    className={`pagination-btn page-number ${pageNum === currentPage ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button 
+              className="pagination-btn"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+            <button 
+              className="pagination-btn"
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+            >
+              Last
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Last Updated */}
+      <div className="last-updated">
+        Last updated: {lastRefresh.toLocaleString()}
+      </div>
+
+      {/* Feedback Details Modal */}
+      {modalData && (
+        <div className="feedback-modal-overlay" onClick={handleOverlayClick}>
+          <div className="feedback-modal" onClick={handleModalClick}>
+            <div className="modal-header">
+              <h3>Feedback Details</h3>
+              <button 
+                className="modal-close"
+                onClick={handleCloseModal}
+                title="Close modal"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <table className="feedback-details-table">
+                <tbody>
+                  <tr>
+                    <td className="table-label">Feedback ID</td>
+                    <td className="table-value table-id">{modalData.id}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Feedback Type</td>
+                    <td className="table-value">
+                      <span className="feedback-type">{modalData.feedbackType}</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Status</td>
+                    <td className="table-value">
+                      <span className={`status-badge ${modalData.status}`}>
+                        {modalData.status || 'submitted'}
+                      </span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Overall Rating</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.overallRating, false)}
+                      <span className="rating-number">{modalData.overallRating}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Helpfulness</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.helpfulness || 0, false)}
+                      <span className="rating-number">{modalData.helpfulness || 'N/A'}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Comfort</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.comfort || 0, false)}
+                      <span className="rating-number">{modalData.comfort || 'N/A'}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Support</td>
+                    <td className="table-value">
+                      {renderStarRating(modalData.support || 0, false)}
+                      <span className="rating-number">{modalData.support || 'N/A'}/5</span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentor Name</td>
+                    <td className="table-value">{modalData.mentorName}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentor ID</td>
+                    <td className="table-value table-id">{modalData.mentorId}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentee Name</td>
+                    <td className="table-value">{modalData.menteeName}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Mentee ID</td>
+                    <td className="table-value table-id">{modalData.menteeId}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Submitted By</td>
+                    <td className="table-value table-id">{modalData.submittedBy}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Submitted At</td>
+                    <td className="table-value">
+                      {modalData.submittedAt.toLocaleDateString('en-GB')} at {modalData.submittedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Session Date</td>
+                    <td className="table-value">
+                      {modalData.sessionDate?.toLocaleDateString('en-GB') || 'N/A'} 
+                      {modalData.sessionDate && ` at ${modalData.sessionDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`}
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Booking ID</td>
+                    <td className="table-value table-id">{modalData.bookingId || 'N/A'}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Is Anonymous</td>
+                    <td className="table-value">
+                      <span className={`boolean-badge ${modalData.isAnonymous ? 'true' : 'false'}`}>
+                        {modalData.isAnonymous ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td className="table-label">Is Developer Mode</td>
+                    <td className="table-value">
+                      <span className={`boolean-badge ${modalData.isDeveloperMode ? 'true' : 'false'}`}>
+                        {modalData.isDeveloperMode ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                  </tr>
+                  
+                  {modalData.developerModeMentorId && (
+                    <tr>
+                      <td className="table-label">Developer Mode Mentor ID</td>
+                      <td className="table-value table-id">{modalData.developerModeMentorId}</td>
+                    </tr>
+                  )}
+                  
+                  {modalData.isCalComBooking && (
+                    <tr>
+                      <td className="table-label">Is Cal.com Booking</td>
+                      <td className="table-value">
+                        <span className="calcom-badge">Yes</span>
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {modalData.calComBookingId && (
+                    <tr>
+                      <td className="table-label">Cal.com Booking ID</td>
+                      <td className="table-value table-id">{modalData.calComBookingId}</td>
+                    </tr>
+                  )}
+                  
+                  {modalData.strengths && (
+                    <tr>
+                      <td className="table-label">Strengths</td>
+                      <td className="table-value table-text">
+                        {modalData.strengths}
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {modalData.improvements && (
+                    <tr>
+                      <td className="table-label">Improvements</td>
+                      <td className="table-value table-text">
+                        {modalData.improvements}
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {modalData.learnings && (
+                    <tr>
+                      <td className="table-label">Learnings</td>
+                      <td className="table-value table-text">
+                        {modalData.learnings}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="modal-close-btn" onClick={handleCloseModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+        </>
+      )}
+
+      {/* Mentor Rankings Tab */}
+      {activeTab === 'mentorRankings' && analytics && (
+        <MentorRanking
+          mentorMetrics={analytics.mentorRankings}
+          loading={loading}
+          onRefresh={handleRefresh}
+          onExport={(mentors) => {
+            // Export mentor rankings to CSV
+            const headers = [
+              'Rank', 'Mentor Name', 'Mentor ID', 'Average Rating', 'Average Helpfulness',
+              'Average Comfort', 'Average Support', 'Total Feedback', 'Response Rate',
+              'Consistency', 'Trend', 'Percentile', 'Last Activity'
+            ];
+            
+            const csvContent = [
+              headers.join(','),
+              ...mentors.map(mentor => [
+                mentor.rank,
+                `"${mentor.mentorName}"`,
+                mentor.mentorId,
+                mentor.averageRating,
+                mentor.averageHelpfulness,
+                mentor.averageComfort,
+                mentor.averageSupport,
+                mentor.totalFeedback,
+                mentor.responseRate,
+                mentor.consistency,
+                mentor.trend,
+                mentor.percentile,
+                mentor.lastActivity.toISOString()
+              ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `mentor-rankings-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
+        />
+      )}
+    </div>
+  );
+} 

@@ -9,7 +9,9 @@ import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
-  import '../styles/ProfileEditModal.css';
+import { useAuth } from '../../../hooks/useAuth';
+import { hasRole } from '../../../utils/userProfile';
+import '../styles/ProfileEditModal.css';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -42,12 +44,16 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   onAddPastProfession,
   onRemovePastProfession
 }) => {
+  const { userProfile } = useAuth();
   const [activeSection, setActiveSection] = useState<string>('section-personal-information');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [devMode, setDevMode] = useState(false);
   const [isDevModeExiting, setIsDevModeExiting] = useState(false);
+  
+  // Check if user has developer role
+  const isDeveloper = hasRole(userProfile, 'developer');
   
   // Local form state for editing
   const [localFormData, setLocalFormData] = useState<ProfileFormData>(profile);
@@ -471,8 +477,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               })}
             </div>
 
-            {/* Developer Mode Section */}
-            {(devMode || isDevModeExiting) && (
+            {/* Developer Mode Section - Only visible to developers */}
+            {isDeveloper && (devMode || isDevModeExiting) && (
               <div className={`pem-developer-mode-section ${isDevModeExiting ? 'exiting' : ''}`}>
                 <div className="pem-dev-section-header">
                   <h4>⚠️ Developer Mode</h4>
@@ -504,21 +510,23 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
             )}
 
-            {/* Dev Mode Toggle */}
-            <button
-              className={`pem-developer-mode-toggle ${devMode ? 'active' : ''}`}
-              onClick={() => {
-                if (devMode) {
-                  // Start exit animation when turning off dev mode
-                  setIsDevModeExiting(true);
-                }
-                setDevMode(!devMode);
-              }}
-              title="Toggle developer mode"
-            >
-              <FaEdit className="pem-dev-icon" />
-              {devMode ? 'Dev Mode ON' : 'Dev Mode'}
-            </button>
+            {/* Dev Mode Toggle - Only visible to developers */}
+            {isDeveloper && (
+              <button
+                className={`pem-developer-mode-toggle ${devMode ? 'active' : ''}`}
+                onClick={() => {
+                  if (devMode) {
+                    // Start exit animation when turning off dev mode
+                    setIsDevModeExiting(true);
+                  }
+                  setDevMode(!devMode);
+                }}
+                title="Toggle developer mode"
+              >
+                <FaEdit className="pem-dev-icon" />
+                {devMode ? 'Dev Mode ON' : 'Dev Mode'}
+              </button>
+            )}
 
             {/* Close Button */}
             <button className="pem-close-button" onClick={onClose} title="Close">

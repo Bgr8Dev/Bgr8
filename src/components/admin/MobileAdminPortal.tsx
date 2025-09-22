@@ -2,36 +2,148 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { firestore } from '../../firebase/firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { hasRole } from '../../utils/userProfile';
 import { 
-  FaTimes, 
-  FaUserEdit, 
-  FaCheck, 
-  FaChevronLeft,
-  FaChevronRight,
-  FaSearch,
+  FaChevronLeft, 
+  FaChevronRight, 
   FaArrowLeft
 } from 'react-icons/fa';
 import '../../styles/adminStyles/MobileAdminPortal.css';
 
-import { AdminSettings } from '../../pages/adminPages/AdminSettings';
-import AdminAnalytics from '../../pages/adminPages/AdminAnalytics';
-import { AdminEnquiries } from '../../pages/adminPages/AdminEnquiries';
-import { MobileMentorManagement } from './MobileMentorManagement';
-import FeedbackAnalytics from './FeedbackAnalytics';
-import { SessionsManagement } from './SessionsManagement';
+import { MobileAdminSettings } from './settings/MobileAdminSettings';
+// import MobileAnalytics from './analytics/MobileAnalytics';
 
-interface UserData {
-  uid: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  admin: boolean;
-  dateCreated: Timestamp;
-  lastLogin?: Date;
-  [key: string]: unknown;
-}
+// Inline MobileAnalytics component to avoid import issues
+const MobileAnalytics: React.FC = () => {
+  // Mock data - in a real app, this would come from your backend
+  const analyticsData = {
+    totalUsers: 1247,
+    newUsersThisMonth: 89,
+    totalMentors: 156,
+    activeMentors: 142,
+    totalSessions: 2341,
+    sessionsThisMonth: 187,
+    totalEnquiries: 456,
+    pendingEnquiries: 23,
+    totalFeedback: 1892,
+    averageRating: 4.7,
+    totalTestingFeedback: 234,
+    pendingTestingFeedback: 12,
+    totalAmbassadors: 45,
+    pendingAmbassadors: 8
+  };
+
+  const getTrendIcon = (current: number, previous: number) => {
+    if (current > previous) return <FaArrowUp className="trend-up" />;
+    if (current < previous) return <FaArrowDown className="trend-down" />;
+    return <FaMinus className="trend-neutral" />;
+  };
+
+  const getTrendPercentage = (current: number, previous: number) => {
+    if (previous === 0) return 0;
+    return Math.round(((current - previous) / previous) * 100);
+  };
+
+  return (
+    <div className="mobile-analytics">
+      {/* Overview Cards */}
+      <div className="analytics-overview">
+        <h3>Platform Overview</h3>
+        <div className="overview-grid">
+          <div className="overview-card users">
+            <div className="card-icon">
+              <FaUsers />
+            </div>
+            <div className="card-content">
+              <h4>Total Users</h4>
+              <p className="card-number">{analyticsData.totalUsers.toLocaleString()}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.newUsersThisMonth, 75)}
+                <span>+{analyticsData.newUsersThisMonth} this month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="overview-card mentors">
+            <div className="card-icon">
+              <FaChalkboardTeacher />
+            </div>
+            <div className="card-content">
+              <h4>Active Mentors</h4>
+              <p className="card-number">{analyticsData.activeMentors}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.activeMentors, 138)}
+                <span>{getTrendPercentage(analyticsData.activeMentors, 138)}% vs last month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="overview-card sessions">
+            <div className="card-icon">
+              <FaCalendarAlt />
+            </div>
+            <div className="card-content">
+              <h4>Sessions</h4>
+              <p className="card-number">{analyticsData.sessionsThisMonth}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.sessionsThisMonth, 165)}
+                <span>{getTrendPercentage(analyticsData.sessionsThisMonth, 165)}% vs last month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="overview-card rating">
+            <div className="card-icon">
+              <FaComments />
+            </div>
+            <div className="card-content">
+              <h4>Avg Rating</h4>
+              <p className="card-number">{analyticsData.averageRating}</p>
+              <div className="card-trend">
+                {getTrendIcon(analyticsData.averageRating, 4.6)}
+                <span>{getTrendPercentage(analyticsData.averageRating * 10, 4.6 * 10)}% vs last month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="analytics-actions">
+        <h3>Quick Actions</h3>
+        <div className="actions-grid">
+          <button className="action-btn primary">
+            <FaChartBar />
+            <span>View Detailed Reports</span>
+          </button>
+          <button className="action-btn secondary">
+            <FaUsers />
+            <span>User Analytics</span>
+          </button>
+          <button className="action-btn secondary">
+            <FaComments />
+            <span>Feedback Analysis</span>
+          </button>
+          <button className="action-btn secondary">
+            <FaCog />
+            <span>Export Data</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+import { MobileEnquiries } from './enquiries/MobileEnquiries';
+import { MobileAdminEmails } from './emails/MobileAdminEmails';
+import MobileAdminAnnouncements from './announcements/MobileAdminAnnouncements';
+import { MobileMentorVerification } from './verification/MobileMentorVerification';
+import AdminTestingFeedback from '../../pages/adminPages/AdminTestingFeedback';
+import { MobileMentorManagement } from './mentors/MobileMentorManagement';
+import FeedbackAnalytics from './feedback/FeedbackAnalytics';
+import { SessionsManagement } from './sessions/SessionsManagement';
+import MobileRoleManagement from './users/MobileRoleManagement';
+import AmbassadorApplications from './ambassadors/AmbassadorApplications';
+
 
 interface MobileAdminPortalProps {
   isOpen: boolean;
@@ -44,99 +156,78 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [userStats, setUserStats] = useState({
-    total: 0,
-    admins: 0,
-    newThisMonth: 0
-  });
   const [showMobileMentorManagement, setShowMobileMentorManagement] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Define sections for mobile navigation
   const sections = [
-    { id: 'users', name: 'Users', icon: '👥' },
+    { id: 'users', name: 'Roles', icon: '👥' },
     { id: 'analytics', name: 'Analytics', icon: '📊' },
     { id: 'enquiries', name: 'Enquiries', icon: '📧' },
     { id: 'mentors', name: 'Mentors', icon: '👨‍🏫' },
+    { id: 'verification', name: 'Verification', icon: '✅' },
     { id: 'feedback', name: 'Feedback', icon: '💬' },
+    { id: 'testing-feedback', name: 'Testing', icon: '🐛' },
     { id: 'sessions', name: 'Sessions', icon: '📅' },
+    { id: 'ambassadors', name: 'Ambassadors', icon: '🤝' },
+    { id: 'emails', name: 'Emails', icon: '📬' },
+    { id: 'announcements', name: 'Announcements', icon: '📢' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
 
   useEffect(() => {
-    if (!userProfile?.admin) {
+    if (!hasRole(userProfile, 'admin')) {
       navigate('/');
       return;
     }
-
-    fetchUsers();
   }, [userProfile, navigate]);
 
-  const fetchUsers = async () => {
-    try {
-      const usersRef = collection(firestore, 'users');
-      const q = query(usersRef, orderBy('dateCreated', 'desc'));
-      const querySnapshot = await getDocs(q);
-      
-      const userData: UserData[] = [];
-      let adminCount = 0;
-      let newThisMonth = 0;
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      querySnapshot.forEach((doc) => {
-        const user = doc.data() as UserData;
-        userData.push(user);
-        
-        if (user.admin) adminCount++;
-        if (user.dateCreated?.toDate() > thirtyDaysAgo) newThisMonth++;
-      });
-
-      setUsers(userData);
-      setUserStats({
-        total: userData.length,
-        admins: adminCount,
-        newThisMonth
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setLoading(false);
+  // Initialize scroll state when component mounts
+  useEffect(() => {
+    const container = document.querySelector('.map-section-indicators') as HTMLElement;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
     }
-  };
+  }, [isOpen]);
 
-  const toggleUserAdmin = async (uid: string, currentAdminStatus: boolean) => {
-    try {
-      const userRef = doc(firestore, 'users', uid);
-      await updateDoc(userRef, {
-        admin: !currentAdminStatus
-      });
-      await fetchUsers(); // Refresh user list
-    } catch (error) {
-      console.error('Error updating user admin status:', error);
-    }
-  };
-
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (!isOpen || !userProfile?.admin) return null;
+  if (!isOpen || !hasRole(userProfile, 'admin')) return null;
 
   const nextSection = () => {
     if (currentSection < sections.length - 1) {
-      setCurrentSection(currentSection + 1);
+      const newSection = currentSection + 1;
+      setCurrentSection(newSection);
+      scrollToActiveTab(newSection);
     }
   };
 
   const prevSection = () => {
     if (currentSection > 0) {
-      setCurrentSection(currentSection - 1);
+      const newSection = currentSection - 1;
+      setCurrentSection(newSection);
+      scrollToActiveTab(newSection);
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+  };
+
+  const scrollToActiveTab = (index: number) => {
+    const container = document.querySelector('.map-section-indicators') as HTMLElement;
+    if (container) {
+      const tabWidth = 70; // Approximate width of each tab
+      const containerWidth = container.clientWidth;
+      const scrollPosition = (index * tabWidth) - (containerWidth / 2) + (tabWidth / 2);
+      container.scrollTo({
+        left: Math.max(0, scrollPosition),
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -145,84 +236,9 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
       case 0: // Users
         return (
           <div className="map-section">
-            <h3 className="map-section-title">User Management</h3>
+            <h3 className="map-section-title">Role Management</h3>
             <div className="map-form-fields">
-              {/* User Stats */}
-              <div className="map-stats-grid">
-                <div className="map-stat-card">
-                  <div className="map-stat-icon">👥</div>
-                  <div className="map-stat-content">
-                    <h4>Total Users</h4>
-                    <p>{userStats.total}</p>
-                  </div>
-                </div>
-                <div className="map-stat-card">
-                  <div className="map-stat-icon">👑</div>
-                  <div className="map-stat-content">
-                    <h4>Admins</h4>
-                    <p>{userStats.admins}</p>
-                  </div>
-                </div>
-                <div className="map-stat-card">
-                  <div className="map-stat-icon">🆕</div>
-                  <div className="map-stat-content">
-                    <h4>New This Month</h4>
-                    <p>{userStats.newThisMonth}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div className="map-input-group">
-                <label htmlFor="userSearch" className="map-field-label">
-                  Search Users
-                </label>
-                <div className="map-search-container">
-                  <FaSearch className="map-search-icon" />
-                  <input
-                    id="userSearch"
-                    type="text"
-                    placeholder="Search by name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="map-search-input"
-                  />
-                </div>
-              </div>
-
-              {/* Users List */}
-              <div className="map-users-list">
-                {loading ? (
-                  <div className="map-loading">Loading users...</div>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <div key={user.uid} className="map-user-card">
-                      <div className="map-user-info">
-                        <div className="map-user-name">
-                          {user.firstName} {user.lastName}
-                        </div>
-                        <div className="map-user-email">{user.email}</div>
-                        <div className="map-user-date">
-                          Joined: {user.dateCreated?.toDate().toLocaleDateString()}
-                        </div>
-                      </div>
-                      <div className="map-user-actions">
-                        <div className={`map-admin-badge ${user.admin ? 'admin' : 'user'}`}>
-                          {user.admin ? <FaCheck /> : <FaTimes />}
-                          {user.admin ? 'Admin' : 'User'}
-                        </div>
-                        <button
-                          className={`map-toggle-admin-btn ${user.admin ? 'remove' : 'add'}`}
-                          onClick={() => toggleUserAdmin(user.uid, user.admin)}
-                        >
-                          <FaUserEdit />
-                          {user.admin ? 'Remove Admin' : 'Make Admin'}
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              <MobileRoleManagement />
             </div>
           </div>
         );
@@ -232,7 +248,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Analytics</h3>
             <div className="map-form-fields">
-              <AdminAnalytics />
+              <MobileAnalytics />
             </div>
           </div>
         );
@@ -242,7 +258,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           <div className="map-section">
             <h3 className="map-section-title">Enquiries</h3>
             <div className="map-form-fields">
-              <AdminEnquiries />
+              <MobileEnquiries />
             </div>
           </div>
         );
@@ -269,7 +285,17 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 4: // Feedback
+      case 4: // Verification
+        return (
+          <div className="map-section">
+            <h3 className="map-section-title">Mentor Verification</h3>
+            <div className="map-form-fields">
+              <MobileMentorVerification />
+            </div>
+          </div>
+        );
+
+      case 5: // Feedback
         return (
           <div className="map-section">
             <h3 className="map-section-title">Feedback Analytics</h3>
@@ -279,7 +305,17 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 5: // Sessions
+      case 6: // Testing Feedback
+        return (
+          <div className="map-section">
+            <h3 className="map-section-title">Testing Feedback</h3>
+            <div className="map-form-fields">
+              <AdminTestingFeedback />
+            </div>
+          </div>
+        );
+
+      case 7: // Sessions
         return (
           <div className="map-section">
             <h3 className="map-section-title">Sessions Management</h3>
@@ -289,15 +325,45 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
           </div>
         );
 
-      case 6: // Settings
+      case 8: // Ambassadors
         return (
           <div className="map-section">
-            <h3 className="map-section-title">Admin Settings</h3>
+            <h3 className="map-section-title">Ambassador Applications</h3>
             <div className="map-form-fields">
-              <AdminSettings />
+              <AmbassadorApplications />
             </div>
           </div>
         );
+
+        case 9: // Emails
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Email Management</h3>
+              <div className="map-form-fields">
+                <MobileAdminEmails />
+              </div>
+            </div>
+          );
+
+        case 10: // Announcements
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Announcement Management</h3>
+              <div className="map-form-fields">
+                <MobileAdminAnnouncements />
+              </div>
+            </div>
+          );
+
+        case 11: // Settings
+          return (
+            <div className="map-section">
+              <h3 className="map-section-title">Admin Settings</h3>
+              <div className="map-form-fields">
+                <MobileAdminSettings />
+              </div>
+            </div>
+          );
 
       default:
         return null;
@@ -322,7 +388,7 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
                 <div className="map-title-section">
                   <h2 className="map-title">Admin Portal</h2>
                   <p className="map-progress-text">
-                    Section {currentSection + 1} of {sections.length}
+                    {sections[currentSection]?.name} • {currentSection + 1} of {sections.length}
                   </p>
                 </div>
               </div>
@@ -347,12 +413,19 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
                 Previous
               </button>
 
-              <div className="map-section-indicators">
+              <div 
+                className={`map-section-indicators ${canScrollLeft ? 'scroll-left' : ''} ${!canScrollRight ? 'scroll-right' : ''}`}
+                onScroll={handleScroll}
+              >
                 {sections.map((section, index) => (
                   <button
                     key={section.id}
                     className={`map-section-indicator ${index === currentSection ? 'active' : ''}`}
-                    onClick={() => setCurrentSection(index)}
+                    onClick={() => {
+                      setCurrentSection(index);
+                      scrollToActiveTab(index);
+                    }}
+                    title={section.name}
                   >
                     <span className="map-section-icon">{section.icon}</span>
                     <span className="map-section-name">{section.name}</span>

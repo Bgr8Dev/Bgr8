@@ -1,0 +1,770 @@
+/* Announcement Banner Styles */
+.announcement-banner-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  /* Remove default background - it will be set dynamically by the component */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Removed hardcoded slide-down animation - now controlled by Firebase settings */
+}
+
+@keyframes announcement-banner-slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.announcement-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  min-height: 60px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Removed hardcoded hover effect - now controlled by Firebase settings */
+
+.announcement-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: announcement-banner-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes announcement-banner-shimmer {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+.announcement-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.announcement-banner-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.announcement-banner-icon {
+  font-size: 1.25rem;
+  animation: announcement-banner-icon-pulse 2s ease-in-out infinite;
+}
+
+.announcement-banner-icon.info { color: #ffffff; }
+.announcement-banner-icon.warning { color: #fef3c7; }
+.announcement-banner-icon.success { color: #d1fae5; }
+.announcement-banner-icon.error { color: #fecaca; }
+.announcement-banner-icon.promotion { color: #e9d5ff; }
+
+@keyframes announcement-banner-icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.announcement-banner-text-container {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.announcement-banner-text {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  white-space: nowrap;
+  font-weight: 500;
+  line-height: 1.4;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Ensure scrolling text is wider than container and positioned correctly */
+.announcement-banner-text[class*="announcement-scroll-"] {
+  width: max-content;
+  min-width: 300%;
+  position: relative;
+  padding: 0 50px;
+}
+
+.announcement-banner-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.announcement-banner-message {
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+/* Scrolling animations - Left to Right */
+.announcement-scroll-very-slow {
+  animation: announcement-scroll-left 20s linear infinite;
+}
+
+.announcement-scroll-slow {
+  animation: announcement-scroll-left 15s linear infinite;
+}
+
+.announcement-scroll-normal {
+  animation: announcement-scroll-left 10s linear infinite;
+}
+
+.announcement-scroll-fast {
+  animation: announcement-scroll-left 5s linear infinite;
+}
+
+.announcement-scroll-very-fast {
+  animation: announcement-scroll-left 3s linear infinite;
+}
+
+/* Scrolling animations - Right to Left */
+.announcement-scroll-very-slow-rtl {
+  animation: announcement-scroll-right 20s linear infinite;
+}
+
+.announcement-scroll-slow-rtl {
+  animation: announcement-scroll-right 15s linear infinite;
+}
+
+.announcement-scroll-normal-rtl {
+  animation: announcement-scroll-right 10s linear infinite;
+}
+
+.announcement-scroll-fast-rtl {
+  animation: announcement-scroll-right 5s linear infinite;
+}
+
+.announcement-scroll-very-fast-rtl {
+  animation: announcement-scroll-right 3s linear infinite;
+}
+
+/* Scrolling animations - Bounce */
+.announcement-scroll-very-slow-bounce {
+  animation: announcement-scroll-bounce 20s ease-in-out infinite;
+}
+
+.announcement-scroll-slow-bounce {
+  animation: announcement-scroll-bounce 15s ease-in-out infinite;
+}
+
+.announcement-scroll-normal-bounce {
+  animation: announcement-scroll-bounce 10s ease-in-out infinite;
+}
+
+.announcement-scroll-fast-bounce {
+  animation: announcement-scroll-bounce 5s ease-in-out infinite;
+}
+
+.announcement-scroll-very-fast-bounce {
+  animation: announcement-scroll-bounce 3s ease-in-out infinite;
+}
+
+/* Scrolling animations - Alternate */
+.announcement-scroll-very-slow-alternate {
+  animation: announcement-scroll-alternate 20s ease-in-out infinite;
+}
+
+.announcement-scroll-slow-alternate {
+  animation: announcement-scroll-alternate 15s ease-in-out infinite;
+}
+
+.announcement-scroll-normal-alternate {
+  animation: announcement-scroll-alternate 10s ease-in-out infinite;
+}
+
+.announcement-scroll-fast-alternate {
+  animation: announcement-scroll-alternate 5s ease-in-out infinite;
+}
+
+.announcement-scroll-very-fast-alternate {
+  animation: announcement-scroll-alternate 3s ease-in-out infinite;
+}
+
+
+.announcement-banner-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0; /* Prevent shrinking */
+  z-index: 2; /* Ensure it's clickable */
+}
+
+.announcement-banner-close:hover {
+  background: rgba(239, 68, 68, 0.8);
+  transform: scale(1.05);
+}
+
+.announcement-banner-close:active {
+  transform: scale(0.95);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .announcement-banner {
+    padding: 0.5rem 0.75rem;
+    min-height: 50px;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .announcement-banner-content {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .announcement-banner-text {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  .announcement-banner-title {
+    font-size: 0.9rem;
+  }
+
+  .announcement-banner-message {
+    font-size: 0.85rem;
+  }
+
+
+  .announcement-banner-close {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+    margin-left: 0;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .announcement-banner {
+    padding: 0.5rem;
+    min-height: 45px;
+  }
+
+  .announcement-banner-icon {
+    font-size: 1rem;
+  }
+
+  .announcement-banner-title {
+    font-size: 0.85rem;
+  }
+
+  .announcement-banner-message {
+    font-size: 0.8rem;
+  }
+
+
+  .announcement-banner-close {
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+  }
+
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .announcement-banner {
+    border: 2px solid #ffffff;
+  }
+
+  .announcement-banner-close {
+    border: 1px solid #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .announcement-banner-container {
+    animation: none;
+  }
+
+  .announcement-banner::before {
+    animation: none;
+  }
+
+  .announcement-banner-icon {
+    animation: none;
+  }
+
+  .announcement-scroll-very-slow,
+  .announcement-scroll-slow,
+  .announcement-scroll-normal,
+  .announcement-scroll-fast,
+  .announcement-scroll-very-fast,
+  .announcement-scroll-very-slow-rtl,
+  .announcement-scroll-slow-rtl,
+  .announcement-scroll-normal-rtl,
+  .announcement-scroll-fast-rtl,
+  .announcement-scroll-very-fast-rtl,
+  .announcement-scroll-very-slow-bounce,
+  .announcement-scroll-slow-bounce,
+  .announcement-scroll-normal-bounce,
+  .announcement-scroll-fast-bounce,
+  .announcement-scroll-very-fast-bounce,
+  .announcement-scroll-very-slow-alternate,
+  .announcement-scroll-slow-alternate,
+  .announcement-scroll-normal-alternate,
+  .announcement-scroll-fast-alternate,
+  .announcement-scroll-very-fast-alternate {
+    animation: none;
+  }
+
+  .announcement-banner:hover {
+    transform: none;
+  }
+
+  .announcement-banner-close:hover {
+    transform: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .announcement-banner {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .announcement-banner:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Enhanced Customization Styles */
+
+/* Container-level animations */
+.announcement-container-slide {
+  animation: announcement-banner-slide-down 0.5s ease-out;
+}
+
+/* Animation Effects */
+.announcement-fade {
+  animation: announcement-fade-in 2s ease-in-out;
+}
+
+.announcement-slide {
+  /* Slide animation is now handled by container */
+}
+
+.announcement-bounce {
+  animation: announcement-bounce-in 0.8s ease-out;
+}
+
+.announcement-pulse {
+  animation: announcement-pulse 2s ease-in-out infinite;
+}
+
+.announcement-glow {
+  animation: announcement-glow 2s ease-in-out infinite alternate;
+}
+
+.announcement-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.announcement-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: announcement-shimmer-effect 3s infinite;
+}
+
+/* Animation Speed Variants */
+.announcement-speed-slow {
+  animation-duration: 3s;
+}
+
+.announcement-speed-normal {
+  animation-duration: 2s;
+}
+
+.announcement-speed-fast {
+  animation-duration: 1s;
+}
+
+/* Hover Effects */
+.announcement-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.announcement-hover-glow:hover {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+}
+
+.announcement-hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.announcement-hover-fade:hover {
+  opacity: 0.9;
+}
+
+/* Click Effects */
+.announcement-click-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.announcement-click-bounce:active {
+  animation: announcement-click-bounce 0.4s ease-out;
+}
+
+.announcement-click-shake:active {
+  animation: announcement-click-shake 0.6s ease-in-out;
+}
+
+.announcement-click-glow:active {
+  box-shadow: 0 0 50px rgba(59, 130, 246, 1), 0 0 100px rgba(59, 130, 246, 0.6) !important;
+  transform: scale(1.02);
+}
+
+/* Pattern Overlays - Using ::after to avoid conflict with shimmer ::before */
+.announcement-pattern-dots::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-lines::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-grid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-waves::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-stars::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20.5L18 18l2-2 2 2-2 2.5zM20 0l2 2-2 2-2-2 2-2zM20 40l2-2-2-2-2 2 2 2zM0 20l2-2 2 2-2 2-2-2zM40 20l-2-2 2-2 2 2-2 2z'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+/* Additional Pattern Styles */
+.announcement-pattern-circles::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.15) 2px, transparent 2px);
+  background-size: 30px 30px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-hexagons::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M30 0l15 8.66v17.32L30 34.64 15 25.98V8.66L30 0zM0 20l15 8.66v17.32L0 54.64V37.32L15 28.66V11.34L0 20zM60 20l-15 8.66v17.32L60 54.64V37.32L45 28.66V11.34L60 20z'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-triangles::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 0l20 34.64H0L20 0z'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-diagonal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.08) 8px, rgba(255,255,255,0.08) 16px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-polka::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.2) 3px, transparent 3px);
+  background-size: 25px 25px;
+  background-position: 0 0, 12.5px 12.5px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+.announcement-pattern-mesh::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(45deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(-45deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 1;
+}
+
+/* Close Button Styles */
+.announcement-banner-close.minimal {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+}
+
+.announcement-banner-close.prominent {
+  background: rgba(239, 68, 68, 0.9);
+  border: 2px solid #ffffff;
+  width: 36px;
+  height: 36px;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Icon Position Styles */
+.announcement-banner-icon-container.center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.announcement-banner-icon-container.right {
+  order: 2;
+  margin-left: auto;
+}
+
+/* Custom Text Display */
+.announcement-banner-custom {
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* Keyframe Animations */
+@keyframes announcement-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes announcement-slide-down {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes announcement-bounce-in {
+  0% { transform: translateY(-100%) scale(0.3); opacity: 0; }
+  50% { transform: translateY(0) scale(1.05); }
+  70% { transform: translateY(-10px) scale(0.95); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes announcement-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes announcement-glow {
+  0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+  100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+}
+
+@keyframes announcement-shimmer-effect {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes announcement-click-bounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(0.9); }
+  50% { transform: scale(1.05); }
+  75% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes announcement-click-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  10% { transform: translateX(-5px) rotate(-1deg); }
+  20% { transform: translateX(5px) rotate(1deg); }
+  30% { transform: translateX(-4px) rotate(-0.8deg); }
+  40% { transform: translateX(4px) rotate(0.8deg); }
+  50% { transform: translateX(-3px) rotate(-0.6deg); }
+  60% { transform: translateX(3px) rotate(0.6deg); }
+  70% { transform: translateX(-2px) rotate(-0.4deg); }
+  80% { transform: translateX(2px) rotate(0.4deg); }
+  90% { transform: translateX(-1px) rotate(-0.2deg); }
+}
+
+/* Scroll Animation Keyframes */
+@keyframes announcement-scroll-left {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes announcement-scroll-right {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes announcement-scroll-bounce {
+  0%, 100% { transform: translateX(100%); }
+  50% { transform: translateX(-100%); }
+}
+
+@keyframes announcement-scroll-alternate {
+  0% { transform: translateX(100%); }
+  25% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  75% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Debug: Make scroll animations more visible */
+.announcement-banner-text[class*="announcement-scroll-"] {
+  animation-fill-mode: both;
+  will-change: transform;
+}
+
+
+/* Gradient Color Input Styles */
+.announcement-gradient-colors {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.announcement-gradient-colors input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.announcement-gradient-colors input[type="color"]:hover {
+  transform: scale(1.05);
+}
+
+/* Print styles */
+@media print {
+  .announcement-banner-container {
+    display: none;
+  }
+}

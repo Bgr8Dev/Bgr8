@@ -1,4 +1,5 @@
 import { MentorMenteeProfile, UserType, MENTOR, MENTEE, MatchResult } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { VerificationData } from '../../../types/verification';
 
 export const MENTEE_MIN_AGE = 15;
 export const MENTEE_MAX_AGE = 19;
@@ -26,6 +27,9 @@ export interface ProfileFormData {
   userRef?: string;
   isMentor?: boolean;
   isMentee?: boolean;
+  
+  // Verification data (only for mentors)
+  verification?: VerificationData;
 }
 
 export interface MentorAvailability {
