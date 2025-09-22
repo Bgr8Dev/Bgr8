@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { firestore } from '../../../firebase/firebase';
-import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where } from 'firebase/firestore';
-import { MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where, Timestamp } from 'firebase/firestore';
+import { getDisplayName, getName, MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../../widgets/MentorAlgorithm/CalCom/calComService';
 import { Booking } from '../../../types/bookings';
 import GenerateRandomProfile from './GenerateRandomProfile';
@@ -185,7 +185,7 @@ export default function MentorManagement() {
               id: userDoc.id,
               isGenerated: isGenerated, // Use the actual flag from the profile data
               type: userType // Ensure we have the correct type
-            } as MentorMenteeProfileWithId);
+            } as unknown as MentorMenteeProfileWithId);
           }
         } catch (error) {
           console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
@@ -209,7 +209,7 @@ export default function MentorManagement() {
             id: doc.id,
             isGenerated: true, // Mark as generated profile
             type: userType // Ensure correct type
-          } as MentorMenteeProfileWithId);
+          } as unknown as MentorMenteeProfileWithId);
         });
       } catch (error) {
         console.error('Error fetching generated mentors:', error);
@@ -232,7 +232,7 @@ export default function MentorManagement() {
             id: doc.id,
             isGenerated: true, // Mark as generated profile
             type: userType // Ensure correct type
-          } as MentorMenteeProfileWithId);
+          } as unknown as MentorMenteeProfileWithId);
         });
       } catch (error) {
         console.error('Error fetching generated mentees:', error);
@@ -332,12 +332,12 @@ export default function MentorManagement() {
                         menteeName: mentee?.name || 'Unknown Mentee',
                         mentorEmail: mentor?.email || mentorData.email || '',
                         menteeEmail: mentee?.email || '',
-                        sessionDate: startDate,
+                        sessionDate: Timestamp.fromDate(startDate),
                         startTime: startDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
                         endTime: endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
                         status: calBooking.status === 'ACCEPTED' ? 'confirmed' : 
                                 calBooking.status === 'PENDING' ? 'pending' : 'cancelled',
-                        createdAt: new Date(),
+                        createdAt: Timestamp.fromDate(new Date()), // Cal.com bookings do not have Firestore Timestamp, set to null or undefined
                         duration: (calBooking.eventType as { length?: number; price?: number })?.length || 60,
                         revenue: (calBooking.eventType as { length?: number; price?: number })?.price || 0,
                         isCalComBooking: true,
@@ -553,7 +553,13 @@ export default function MentorManagement() {
            const generatedAvailability: MentorAvailabilityWithProfile = {
              ...generatedAvailabilityData,
              mentorId: doc.id,
-             mentorProfile: usersData.find(user => user.id === doc.id) || undefined
+             mentorProfile: usersData.find(user => user.id === doc.id) || undefined,
+             timeSlots: generatedAvailabilityData.timeSlots || [],
+             lastUpdated: generatedAvailabilityData.lastUpdated
+               ? (isFirestoreTimestamp(generatedAvailabilityData.lastUpdated)
+                   ? generatedAvailabilityData.lastUpdated.toDate()
+                   : new Date(generatedAvailabilityData.lastUpdated))
+               : new Date()
            };
            allAvailabilityData.push(generatedAvailability);
          });
@@ -781,7 +787,7 @@ export default function MentorManagement() {
       const s = userSearch.toLowerCase();
       const matchesSearch =
         s === '' ||
-        (user.name?.toLowerCase() ?? '').includes(s) ||
+        (getName(user).toLowerCase() ?? '').includes(s) ||
         (user.email?.toLowerCase() ?? '').includes(s) ||
         (user.profession?.toLowerCase() ?? '').includes(s);
       return matchesType && matchesGenerated && matchesSearch;
@@ -792,9 +798,9 @@ export default function MentorManagement() {
     return [...filteredUsers].sort((a, b) => {
       let vA: string | undefined, vB: string | undefined;
       if (userSortField === 'name') {
-        vA = a.name?.toLowerCase(); vB = b.name?.toLowerCase();
+        vA = getName(a).toLowerCase(); vB = getName(b).toLowerCase();
       } else if (userSortField === 'type') {
-        vA = a.type; vB = b.type;
+        vA = a.type as string; vB = b.type as string;
       } else if (userSortField === 'email') {
         vA = a.email?.toLowerCase(); vB = b.email?.toLowerCase();
       } else if (userSortField === 'profession') {
@@ -812,7 +818,7 @@ export default function MentorManagement() {
   // Filter and sort availability data
   const filteredAvailability = useMemo(() => {
     return availabilityData.filter(availability => {
-      const mentorName = availability.mentorProfile?.name?.toLowerCase() || '';
+      const mentorName = availability.mentorProfile ? getName(availability.mentorProfile).toLowerCase() : ''
       const mentorEmail = availability.mentorProfile?.email?.toLowerCase() || '';
       const searchTerm = availabilitySearch.toLowerCase();
       
@@ -885,7 +891,7 @@ export default function MentorManagement() {
 
   // Helper functions for availability display
   const getMentorName = (availability: MentorAvailabilityWithProfile) => {
-    return availability.mentorProfile?.name || `Mentor ${availability.mentorId.slice(0, 8)}`;
+    return getDisplayName(availability.mentorProfile, availability.mentorId)
   };
 
   const getMentorEmail = (availability: MentorAvailabilityWithProfile) => {
@@ -1158,7 +1164,14 @@ export default function MentorManagement() {
     // Get today's bookings
     const today = new Date();
     const todayBookings = bookings.filter(b => {
-      const bookingDate = b.sessionDate instanceof Date ? b.sessionDate : new Date(b.sessionDate || '');
+      const bookingDate =
+        b.sessionDate instanceof Date
+          ? b.sessionDate
+          : isFirestoreTimestamp(b.sessionDate)
+          ? b.sessionDate.toDate()
+          : b.sessionDate
+          ? new Date(b.sessionDate)
+          : new Date('');
       return bookingDate.toDateString() === today.toDateString();
     }).length;
     
@@ -1168,7 +1181,14 @@ export default function MentorManagement() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     const thisWeekBookings = bookings.filter(b => {
-      const bookingDate = b.sessionDate instanceof Date ? b.sessionDate : new Date(b.sessionDate || '');
+      const bookingDate =
+        b.sessionDate instanceof Date
+          ? b.sessionDate
+          : isFirestoreTimestamp(b.sessionDate)
+          ? b.sessionDate.toDate()
+          : b.sessionDate
+          ? new Date(b.sessionDate)
+          : new Date('');
       return bookingDate >= weekStart && bookingDate <= weekEnd;
     }).length;
 
@@ -1404,7 +1424,7 @@ export default function MentorManagement() {
                     <td>
                       <div className="user-info">
                         <span className="user-name">
-                          {user.name}
+                          {getName(user)}
                           {user.isGenerated && (
                             <span className="generated-badge" title="Generated Profile">
                               🎲

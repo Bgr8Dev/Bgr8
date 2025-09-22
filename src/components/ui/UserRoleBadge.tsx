@@ -15,7 +15,11 @@ const roleIcons = {
   committee: FaUsers,
   'vetting-officer': FaUserCheck,
   audit: FaShieldAlt,
-  marketing: FaBullhorn
+  marketing: FaBullhorn,
+  'social-media': FaBullhorn,
+  outreach: FaUsers,
+  events: FaUsers,
+  ambassador: FaUserCheck
 };
 
 const roleColors = {
@@ -24,7 +28,11 @@ const roleColors = {
   committee: '#9b59b6',
   'vetting-officer': '#3498db',
   audit: '#2ecc71',
-  marketing: '#e67e22'
+  marketing: '#e67e22',
+  'social-media': '#1abc9c',
+  outreach: '#34495e',
+  events: '#8e44ad',
+  ambassador: '#16a085'
 };
 
 const roleNames = {
@@ -33,7 +41,11 @@ const roleNames = {
   committee: 'Committee',
   'vetting-officer': 'Vetting',
   audit: 'Audit',
-  marketing: 'Marketing'
+  marketing: 'Marketing',
+  'social-media': 'Social Media',
+  outreach: 'Outreach',
+  events: 'Events',
+  ambassador: 'Ambassador'
 };
 
 export const UserRoleBadge: React.FC<UserRoleBadgeProps> = ({ 

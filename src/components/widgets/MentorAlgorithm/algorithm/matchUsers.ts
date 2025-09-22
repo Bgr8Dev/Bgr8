@@ -1,6 +1,6 @@
 import { firestore } from '../../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { VerificationData } from '../../../types/verification';
+import { VerificationData } from '../../../../types/verification';
 
 export type UserType = 'mentor' | 'mentee';
 export const MENTOR = 'mentor';
@@ -47,6 +47,13 @@ export interface MatchResult {
 export function getName(profile: MentorMenteeProfile): string {
   return `${profile.firstName} ${profile.lastName}`;
 }
+
+export function getDisplayName(profile: MentorMenteeProfile | undefined, id: string) {
+  if (profile)
+    return getName(profile)
+  else 
+    `Mentor ${id.slice(0, 8)}`;
+};
 
 const educationLevelEncoding: { [level: string]: number } = {
   'GCSEs': 0,

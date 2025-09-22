@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
+import { getDisplayName, getName, MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComAvailability } from '../../widgets/MentorAlgorithm/CalCom/calComService';
 import { Booking } from '../../../types/bookings';
 import { 
@@ -18,6 +18,7 @@ import '../../../styles/adminStyles/MobileMentorManagement.css';
 // Import existing components
 import AdminMentorModal from './AdminMentorModal';
 import BookingDetailsModal from './BookingDetailsModal';
+import { get } from 'http';
 
 // Interfaces
 interface TimeSlot {
@@ -511,7 +512,7 @@ export const MobileMentorManagement: React.FC<MobileMentorManagementProps> = ({
                     <div key={user.id} className="mmm-user-card">
                       <div className="mmm-user-info">
                         <div className="mmm-user-name">
-                          {user.name}
+                          {getName(user)}
                           {user.isGenerated && <span className="mmm-user-badge generated">🎲</span>}
                         </div>
                         <div className="mmm-user-email">{user.email}</div>
@@ -802,7 +803,7 @@ export const MobileMentorManagement: React.FC<MobileMentorManagementProps> = ({
                     <div key={availability.mentorId} className="mmm-user-card">
                       <div className="mmm-user-info">
                         <div className="mmm-user-name">
-                          {availability.mentorProfile?.name || `Mentor ${availability.mentorId.slice(0, 8)}`}
+                          {getDisplayName(availability.mentorProfile, availability.mentorId)}
                         </div>
                         <div className="mmm-user-email">
                           {availability.mentorProfile?.email || 'No email'}

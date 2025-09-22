@@ -29,38 +29,38 @@ export interface Announcement {
     showOnMobile: boolean;
     autoScroll: boolean;
     scrollSpeed: 'slow' | 'normal' | 'fast' | 'very-slow' | 'very-fast';
-    scrollDirection: 'left-to-right' | 'right-to-left' | 'bounce' | 'alternate';
-    displayMode: 'title-only' | 'content-only' | 'title-and-content' | 'custom';
+    scrollDirection?: 'left-to-right' | 'right-to-left' | 'bounce' | 'alternate';
+    displayMode?: 'title-only' | 'content-only' | 'title-and-content' | 'custom';
     customDisplayText?: string;
     fontSize: 'small' | 'medium' | 'large' | 'extra-large';
-    fontWeight: 'normal' | 'medium' | 'semibold' | 'bold';
-    textAlign: 'left' | 'center' | 'right';
-    backgroundColor: string;
-    textColor: string;
+    fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
+    textAlign?: 'left' | 'center' | 'right';
+    backgroundColor?: string;
+    textColor?: string;
     accentColor?: string;
     borderColor?: string;
-    borderRadius: 'none' | 'small' | 'medium' | 'large' | 'full';
-    padding: 'small' | 'medium' | 'large' | 'extra-large';
-    margin: 'none' | 'small' | 'medium' | 'large';
-    shadow: 'none' | 'small' | 'medium' | 'large' | 'glow';
-    animation: 'none' | 'fade' | 'slide' | 'bounce' | 'pulse' | 'glow' | 'shimmer';
-    animationSpeed: 'slow' | 'normal' | 'fast';
-    showIcon: boolean;
-    iconPosition: 'left' | 'right' | 'center' | 'hidden';
-    showControls: boolean;
-    showIndicators: boolean;
-    showCloseButton: boolean;
-    closeButtonPosition: 'left' | 'right';
-    closeButtonStyle: 'default' | 'minimal' | 'prominent' | 'hidden';
-    opacity: number; // 0-1
-    blur: 'none' | 'light' | 'medium' | 'heavy';
-    gradient: boolean;
+    borderRadius?: 'none' | 'small' | 'medium' | 'large' | 'full';
+    padding?: 'small' | 'medium' | 'large' | 'extra-large';
+    margin?: 'none' | 'small' | 'medium' | 'large';
+    shadow?: 'none' | 'small' | 'medium' | 'large' | 'glow';
+    animation?: 'none' | 'fade' | 'slide' | 'bounce' | 'pulse' | 'glow' | 'shimmer';
+    animationSpeed?: 'slow' | 'normal' | 'fast';
+    showIcon?: boolean;
+    iconPosition?: 'left' | 'right' | 'center' | 'hidden';
+    showControls?: boolean;
+    showIndicators?: boolean;
+    showCloseButton?: boolean;
+    closeButtonPosition?: 'left' | 'right';
+    closeButtonStyle?: 'default' | 'minimal' | 'prominent' | 'hidden';
+    opacity?: number; // 0-1
+    blur?: 'none' | 'light' | 'medium' | 'heavy';
+    gradient?: boolean;
     gradientColors?: string[];
-    gradientDirection: 'horizontal' | 'vertical' | 'diagonal' | 'radial';
-    pattern: 'none' | 'dots' | 'lines' | 'grid' | 'waves' | 'stars';
-    patternOpacity: number; // 0-1
-    hoverEffect: 'none' | 'lift' | 'glow' | 'scale' | 'fade';
-    clickEffect: 'none' | 'ripple' | 'bounce' | 'shake' | 'glow';
+    gradientDirection?: 'horizontal' | 'vertical' | 'diagonal' | 'radial';
+    pattern?: 'none' | 'dots' | 'lines' | 'grid' | 'waves' | 'stars';
+    patternOpacity?: number; // 0-1
+    hoverEffect?: 'none' | 'lift' | 'glow' | 'scale' | 'fade';
+    clickEffect?: 'none' | 'ripple' | 'bounce' | 'shake' | 'glow';
   };
   clickAction?: {
     type: 'none' | 'link' | 'modal' | 'page';
