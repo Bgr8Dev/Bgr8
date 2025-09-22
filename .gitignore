@@ -32,6 +32,8 @@ pnpm-lock.yaml
 secrets.*
 *secret*
 *password*
+!**/passwordHistoryService.ts
+!**/passwordService.ts
 *credential*
 *key*
 *token*
@@ -283,7 +285,7 @@ development.*
 log/
 logs/
 *.report
-reports/
+# reports/
 coverage/
 .coverage
 coverage.*

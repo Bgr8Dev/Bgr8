@@ -7,6 +7,453 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.8.1] - 2025-09-18
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Add Ambassador Applications and Feedback Analytics Components
+- Remove padding from .admin-content in AdminPortal.css to streamline layout and enhance visual consistency.
+- Enhance MobileAdminPortal with New Sections and Improved Navigation
+- Implement Mobile Enquiries and Admin Settings Components for Enhanced Admin Functionality
+- Add Email Management Functionality to Admin Portal
+- Enhance AdminEmails Component with New Features and Improved Data Management
+- Add Rich Text Editor Component for Enhanced Email Composition
+- Add Announcement Management System with Admin and Mobile Interfaces
+- Add Codebase Analysis Tool with Batch Script and Python Script
+- Add Title Attributes to Buttons for Improved Accessibility
+- Add comprehensive testing documentation for BGr8 platform
+- Add comprehensive testing documentation for BGr8 platform
+- Implement Inline MobileAnalytics Component in MobileAdminPortal
+- Add Developer To-Do List for BGr8 Platform
+- Add isProtected Field to UserProfile for Role Protection
+- Implement Role Protection Features in Role Management
+- Enhance Mobile Role Management with Protected Account Features
+- Add BlueLocked Component for Managing Protected Accounts
+- Enhance AnnouncementBanner and AdminAnnouncements with New Features and Styles
+- Enhance AnnouncementBanner and AdminAnnouncements with Background Customization Features
+- Enhance AnnouncementBanner with Advanced Scrolling Features
+- Add Announcement Modal Component for Enhanced Announcement Management
+- Implement Enhanced Password Security and Role Protection Features
+- Add Password History Service and Update .gitignore
+
+### 🐛 Fixed Bug fixes and improvements
+- Refactor AnnouncementBanner Component for Improved Logic and Debugging
+
+### 📚 Documentation Documentation updates
+- Remove Announcement Banner Documentation and Refactor Announcement Service
+- Revise Testing Documentation for BGr8 Platform
+- Revise Security Testing Documentation for BGr8 Platform
+
+### 🎨 Changed Code style and formatting changes
+- Refactor MentorRanking Component and Styles for Enhanced Usability and Aesthetics
+- Enhance MentorRanking Component Styles for Improved Visual Appeal and Usability
+- Enhance Announcement Management with Customization Options and Improved UI
+- Remove AnnouncementBannerDemo Component and Associated Styles
+- Enhance AnnouncementBanner with Dynamic Effects and Improved Styles
+- Revamp AdminInstagram Component Styles and Layout
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor MobileAdminPortal and FeedbackAnalytics for Improved Structure and Usability
+- Refactor AdminEmails Component for Improved Structure and Consistency
+- Refactor RichTextEditor Component for Enhanced Functionality and Usability
+- Refactor App Structure to Integrate Announcement Banner
+- Refactor MobileAdminEmails and InstagramFeed Components for Improved Functionality
+- Refactor Mobile Components for Type Safety and Code Cleanup
+- Refactor MobileAdminPortal to Use Default Import for MobileAnalytics
+- Refactor MobileAdminPortal to Correct MobileAnalytics Import Path
+- Refactor BlueLocked Component for Enhanced Usability and Design
+- Refactor BlueLocked Component CSS Classes for Consistency and Clarity
+- Refactor AnnouncementBanner and AnnouncementModal for Simplified Controls
+- Refactor AnnouncementBanner Filtering Logic and Clean Up CSS
+- Refactor AdminInstagram Component for Improved Consistency and Usability
+- Refactor Announcement Components for Improved Functionality and Clarity
+
+### 🧪 Testing Test additions and improvements
+- Update Testing Checklist for BGr8 Platform
+
+### 🔧 Changed Maintenance tasks and chores
+- Enhance AnnouncementBanner with Dismiss Functionality and CSS Improvements
+- Update .gitignore to Correctly Ignore Reports Directory
+- Enhance AnnouncementBanner Component with Animation Support
+- Update AnnouncementBanner and AdminAnnouncements for Enhanced Customization
+- Update AnnouncementBanner and AdminAnnouncements for Icon Customization
+- Enhance AdminAnnouncements with Tooltip for Scroll Direction
+- Update AdminAnnouncements to Include Close Button in Announcement Settings
+- Revamp Instagram Feed Management System
+- Update AdminInstagram CSS for Enhanced Visual Consistency
+- Enhance Firestore Indexes and Improve AdminInstagram Component Functionality
+
+### 🛡️ Security Security improvements
+- Enhance Developer To-Do List for Role Protection System
+
+**Total Changes:** 60 commits
+**Code Changes:** +34,318 insertions, -8,432 deletions
+
+---
+## [v0.8.0-Dunkirk] - 2025-09-16
+
+### 🔧 Pre-release
+**Release Name:** Dunkirk
+
+### ✨ Added New features and enhancements
+- Add Instagram API Integration and Setup Documentation
+- Enhance BGr8 Page with New Sections and Instagram Feed Integration
+- Refactor Footer Component by Removing Contact Section and Adding useLocation Hook
+- Implement Smart Navigation in Footer Component
+- Add Privacy Policy Page and Navigation Route
+- Add Terms of Service Page and Update Navigation
+- Add Ambassador Section to BGr8 Page
+- Add Ambassador Page and Update Navigation
+- Add Social Media Integration to Ambassador Page
+- Add Ambassador Applications Management Component
+- Implement Ambassador Role Management and Update User Profiles
+- Add Tooltip Functionality and User ID Management in Ambassador Applications
+- Implement Notification Modal in Ambassador Components
+- Implement Ambassador Count Fetching Across Components
+- Refactor CSS Imports and Add New Styles for Landing, Privacy Policy, and Terms of Service Pages
+- Add Sessions Management Component with Enhanced Styling and Functionality
+- Add Instagram API Integration Setup Guide and Professionalization Roadmap
+- Add AdminTestingFeedback User Guide
+- Add Admin Portal Overview Documentation
+- Add Ambassador Program Section to README.md
+- Enhance Accessibility Features in Settings Component
+- Add Ambassador Applications and Feedback Analytics Components
+- Remove padding from .admin-content in AdminPortal.css to streamline layout and enhance visual consistency.
+- Enhance MobileAdminPortal with New Sections and Improved Navigation
+- Implement Mobile Enquiries and Admin Settings Components for Enhanced Admin Functionality
+- Add Email Management Functionality to Admin Portal
+- Enhance AdminEmails Component with New Features and Improved Data Management
+- Add Rich Text Editor Component for Enhanced Email Composition
+- Add Announcement Management System with Admin and Mobile Interfaces
+- Add Codebase Analysis Tool with Batch Script and Python Script
+- Add Title Attributes to Buttons for Improved Accessibility
+
+### 🐛 Fixed Bug fixes and improvements
+- Fix header casing in BGr8 component from "BGr8" to "Bgr8" for consistency.
+
+### 📚 Documentation Documentation updates
+- Enhance Admin Portal Documentation with User Guide and API Integration Details
+- Remove Announcement Banner Documentation and Refactor Announcement Service
+
+### 🎨 Changed Code style and formatting changes
+- Enhance BGr8 CSS Styles with Improved Layout and Animation Effects
+- Refactor Settings Component and Styles for Consistency
+- Refactor MentorRanking Component and Styles for Enhanced Usability and Aesthetics
+- Enhance MentorRanking Component Styles for Improved Visual Appeal and Usability
+- Enhance Announcement Management with Customization Options and Improved UI
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor Firebase Integration in Ambassador Page
+- Refactor MobileAdminPortal and FeedbackAnalytics for Improved Structure and Usability
+- Refactor AdminEmails Component for Improved Structure and Consistency
+- Refactor RichTextEditor Component for Enhanced Functionality and Usability
+- Refactor App Structure to Integrate Announcement Banner
+- Refactor MobileAdminEmails and InstagramFeed Components for Improved Functionality
+- Refactor Mobile Components for Type Safety and Code Cleanup
+
+### 🔧 Changed Maintenance tasks and chores
+- Update BGr8 Page Contact Section Heading for Clarity
+- Enhance Ambassador Applications Styling and Structure
+- Enhance AnnouncementBanner with Dismiss Functionality and CSS Improvements
+- Update .gitignore to Correctly Ignore Reports Directory
+
+### 🛡️ Security Security improvements
+- Update Content Security Policy to Include Google User Content
+- Enhance Ambassador Page with Loading and Authentication States
+
+**Total Changes:** 52 commits
+**Code Changes:** +30,813 insertions, -2,525 deletions
+
+---
+## [v0.7.2-Ambassadors] - 2025-09-14
+
+### 🔧 Pre-release
+**Release Name:** Ambassadors
+
+### ✨ Added New features and enhancements
+- Add Testing-Specific Fields to AdminTestingFeedback Component
+- Add Modals for Ticket Management in AdminTestingFeedback Component
+- Enhance CreateTicketModal with Validation and Error Handling
+- Add Screen Resolution Detection to Ticket Modals
+- Implement Draft Saving Functionality in CreateTicketModal
+- Enhance CreateTicketModal with Autofill Feature and Async Submission
+- Refactor CreateTicketModal to Use Random Autofill Data
+- Add StatsTiles Component for Feedback Statistics Display
+- Refactor CreateTicketModal CSS for Improved Checkbox Styling
+- Add Developer and Mentor Feedback Modals with Styling and Functionality
+- Enhance FeedbackAnalytics Component with Advanced Filtering and Sorting Features
+- Refactor FeedbackAnalytics Component to Implement Modal for Feedback Details
+- Implement Role-Based Access Control in Role Management
+- Implement Image Overlay and File Download Functionality in Ticket Modals
+- Add Instagram API Integration and Setup Documentation
+- Enhance BGr8 Page with New Sections and Instagram Feed Integration
+- Refactor Footer Component by Removing Contact Section and Adding useLocation Hook
+- Implement Smart Navigation in Footer Component
+- Add Privacy Policy Page and Navigation Route
+- Add Terms of Service Page and Update Navigation
+- Add Ambassador Section to BGr8 Page
+- Add Ambassador Page and Update Navigation
+- Add Social Media Integration to Ambassador Page
+- Add Ambassador Applications Management Component
+- Implement Ambassador Role Management and Update User Profiles
+- Add Tooltip Functionality and User ID Management in Ambassador Applications
+- Implement Notification Modal in Ambassador Components
+- Implement Ambassador Count Fetching Across Components
+- Refactor CSS Imports and Add New Styles for Landing, Privacy Policy, and Terms of Service Pages
+- Add Sessions Management Component with Enhanced Styling and Functionality
+- Add Instagram API Integration Setup Guide and Professionalization Roadmap
+- Add AdminTestingFeedback User Guide
+- Add Admin Portal Overview Documentation
+- Add Ambassador Program Section to README.md
+- Enhance Accessibility Features in Settings Component
+
+### 🐛 Fixed Bug fixes and improvements
+- Refactor Error Handling in MentorFeedbackService and Update Screen Resolution Comments
+- Fix header casing in BGr8 component from "BGr8" to "Bgr8" for consistency.
+
+### 📚 Documentation Documentation updates
+- Enhance CommentsSidebar Component with Modern Styles and Functionality
+- Enhance Edit and View Ticket Modals with Comments Functionality
+- Enhance Admin Portal Documentation with User Guide and API Integration Details
+
+### 🎨 Changed Code style and formatting changes
+- Enhance Ticket Modals with File Attachment Validation and Improved UI
+- Refactor Modal Close Button Styles and Class Names for Consistency
+- Enhance BGr8 CSS Styles with Improved Layout and Animation Effects
+- Refactor Settings Component and Styles for Consistency
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor DeveloperFeedbackModal and Enhance Feedback Form Functionality
+- Refactor MentorFeedbackModal and FeedbackPage for Improved Data Handling
+- Refactor Firebase Integration in Ambassador Page
+
+### 🚀 Performance Performance improvements
+- Enhance DeveloperFeedbackService with Logging and Mentor Retrieval Improvements
+- Enhance DeveloperFeedbackModal and MenteeDashboard with Role-Based Access Control
+
+### 🧪 Testing Test additions and improvements
+- Enhance AdminTestingFeedback with User Profile Integration
+- Enhance StatsTiles and AdminTestingFeedback for Improved Status Filtering
+
+### 🔧 Changed Maintenance tasks and chores
+- Update Navbar to Change Admin Role Link to Committee Role
+- Enhance FeedbackAnalytics Component with Expanded Feedback Data and Improved Table Layout
+- Enhance EditTicketModal with Local State Management for Ticket Updates
+- Update BGr8 Page Contact Section Heading for Clarity
+- Enhance Ambassador Applications Styling and Structure
+
+### 🛡️ Security Security improvements
+- Update Content Security Policy to Include Google User Content
+- Enhance Ambassador Page with Loading and Authentication States
+
+**Total Changes:** 58 commits
+**Code Changes:** +22,735 insertions, -3,445 deletions
+
+---
+## [v0.7.1] - 2025-09-13
+
+### 🐛 Patch Release
+### ✨ Added New features and enhancements
+- Add verification system types and integrate into user profiles
+- Add initial verification data creation for mentor profiles in useMentorData
+- Add VerificationService to manage mentor verification processes including creation, updates, querying, and statistics.
+- Add verification components including VerificationStatusBadge, VerificationProgress, and VerificationPendingNotice with associated styles. These components enhance the user experience by providing visual feedback on the verification process.
+- Add MentorVerificationPanel component for managing mentor verification processes, including data loading, filtering, and action handling. Enhance user experience with a detailed mentor list and status overview.
+- Add CSS styles for MentorVerificationPanel component to enhance layout, responsiveness, and user interaction. Includes styles for headers, buttons, loading states, error messages, and modal components, with dark mode support and mobile responsiveness adjustments.
+- Fix import path for createInitialVerification in useMentorData to ensure correct module resolution for mentor profile verification data.
+- Add Firestore security rules for user profiles, mentor programs, and admin access. Introduce helper functions for authentication and role verification, enhancing data protection and access control across various collections.
+- Add AdminMentorVerification component for managing mentor verification processes, including data loading, filtering, and action handling. Update MobileAdminPortal and AdminPortal to integrate verification functionality with navigation and display. Enhance styles for improved layout and responsiveness.
+- Implement role-based access control by refactoring user profile management. Introduce role-checking utility functions and update components to utilize these roles for access control. Add RoleManagement component for managing user roles with associated styles. Enhance Firestore security rules to support new role structure.
+- Refactor MobileAdminPortal and RoleManagement components to streamline user role management. Remove deprecated user data fetching logic and integrate role statistics display. Enhance styles for improved layout and responsiveness in role management features.
+- Enhance RoleManagement component by adding default role creation and refining role count updates. Introduce getRoleCount function for improved role statistics display. Add console logging for default role creation to aid in debugging.
+- Add new roles for social media, outreach, and events in RoleManagement component. Update Firestore rules to include role-checking functions for enhanced access control. Modify user profile interface and default role creation to accommodate new roles.
+- Enhance RoleManagement component with new role management modal and improved user role display. Add clear filter button and filter status indication for better user experience. Update styles for role badges, buttons, and modal to improve layout and responsiveness.
+- Implement Role Management Modal with enhanced animations and styles for user role management. Refactor RoleManagement component to utilize the new modal, adding pulsing effects for role toggles and improving overall user experience. Introduce CSS animations for modal transitions and toggle interactions.
+- Implement developer mode visibility in profile edit modals. Integrate role-checking functionality to conditionally display developer options, enhancing user experience for developers. Update styles and logic for developer mode toggle in both MobileProfileEditModal and ProfileEditModal components.
+- Implement verification status handling in MentorDashboard component. Add loading and error states for verification data fetching, and display appropriate messages based on verification status. Enhance styles for verification status display, including loading indicators and error messages, to improve user experience.
+- Refactor MentorVerificationPanel and AdminMentorVerification components to use getAllMentors for fetching mentor data, enhancing data retrieval efficiency. Add a Verification Process Guide to improve user understanding of the verification steps. Update styles for mentor details and action buttons for better user experience, including enhanced status messages for mentor verification outcomes.
+- Update AdminMentorVerification styles for improved UI consistency and responsiveness. Adjust background gradients, padding, and font sizes for various elements, including verification steps, action buttons, and mentor cards. Introduce new mentor card header and date sections, enhancing layout and user experience across devices.
+- Add success message handling and optimistic UI updates in AdminMentorVerification component
+- Add Page Permissions Management feature
+- Enhance Admin Portal UI with new sidebar header and improved styles
+- Implement Testing Feedback Management Feature
+- Implement Create Ticket Modal in AdminTestingFeedback Component
+- Enhance AdminTestingFeedback Component with File Attachment Features
+- Enhance AdminTestingFeedback Component with Ticket Viewing and Editing Features
+- Add Delete Ticket Functionality to AdminTestingFeedback Component
+- Enhance AdminTestingFeedback Component with Testing-Specific Features
+- Implement Optimistic UI Updates and Loading States in AdminTestingFeedback Component
+- Add Closed and Duplicate Status Cards to AdminTestingFeedback Component
+- Implement Floating Action Buttons in AdminTestingFeedback Component
+- Add Comments Loading State and Fetching Logic in AdminTestingFeedback Component
+- Add Status-Themed Ticket Cards in AdminTestingFeedback Component
+- Add Testing-Specific Fields to AdminTestingFeedback Component
+- Add Modals for Ticket Management in AdminTestingFeedback Component
+- Enhance CreateTicketModal with Validation and Error Handling
+- Add Screen Resolution Detection to Ticket Modals
+- Implement Draft Saving Functionality in CreateTicketModal
+- Enhance CreateTicketModal with Autofill Feature and Async Submission
+- Refactor CreateTicketModal to Use Random Autofill Data
+- Add StatsTiles Component for Feedback Statistics Display
+- Refactor CreateTicketModal CSS for Improved Checkbox Styling
+- Add Developer and Mentor Feedback Modals with Styling and Functionality
+- Enhance FeedbackAnalytics Component with Advanced Filtering and Sorting Features
+- Refactor FeedbackAnalytics Component to Implement Modal for Feedback Details
+- Implement Role-Based Access Control in Role Management
+- Implement Image Overlay and File Download Functionality in Ticket Modals
+
+### 🐛 Fixed Bug fixes and improvements
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Refactor Error Handling in MentorFeedbackService and Update Screen Resolution Comments
+
+### 📚 Documentation Documentation updates
+- Refactor AdminTestingFeedback Component to Simplify Comment Handling
+- Enhance CommentsSidebar Component with Modern Styles and Functionality
+- Enhance Edit and View Ticket Modals with Comments Functionality
+
+### 🎨 Changed Code style and formatting changes
+- Update styles for VerificationProgress and AdminMentorVerification components to enhance UI consistency. Change background colors, borders, and text colors for improved readability and aesthetics. Adjust box shadows and hover effects for better user interaction.
+- Refactor verification data handling in VerificationService to utilize Firestore Timestamps. Convert date fields to Timestamps for proper Firestore compatibility, ensuring accurate data representation. Update history entries to maintain consistent timestamp formats and enhance data integrity during updates.
+- Update AdminTestingFeedback styles for improved color consistency
+- Enhance Page Permissions Manager Styles for Improved Usability
+- Enhance Ticket Modals with File Attachment Validation and Improved UI
+- Refactor Modal Close Button Styles and Class Names for Consistency
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor MentorVerificationPanel and AdminMentorVerification components to utilize VerificationService for data fetching and streamline mentor filtering logic. Replace deprecated icons with FaSync for loading states and enhance mobile detection in AdminPortal for improved responsiveness.
+- Refactor AuthLock component to utilize hasRole utility for permission checks, enhancing role-based access control. Remove deprecated hasPermission function and improve user profile compatibility with legacy roles in userProfile utility.
+- Refactor ProtectedRoute and Update Type Definitions
+- Refactor DeveloperFeedbackModal and Enhance Feedback Form Functionality
+- Refactor MentorFeedbackModal and FeedbackPage for Improved Data Handling
+
+### 🚀 Performance Performance improvements
+- Enhance DeveloperFeedbackService with Logging and Mentor Retrieval Improvements
+- Enhance DeveloperFeedbackModal and MenteeDashboard with Role-Based Access Control
+
+### 🧪 Testing Test additions and improvements
+- Enhance AdminTestingFeedback with User Profile Integration
+- Enhance StatsTiles and AdminTestingFeedback for Improved Status Filtering
+
+### 🔧 Changed Maintenance tasks and chores
+- Update robots.txt for Bgr8 Network
+- Update sitemap.xml for Bgr8 Network
+- Enhance SEO and Meta Tags in index.html for Bgr8 Network
+- Update manifest.json for Bgr8 Network
+- Update main.tsx
+- Refine mobile detection logic in useIsMobile hook to improve accuracy. Update conditions to exclude iPads in desktop mode from being classified as mobile, ensuring a more reliable responsive design experience.
+- Enhance Feedback Ticket Management with Sequential IDs
+- Update Navbar to Change Admin Role Link to Committee Role
+- Enhance FeedbackAnalytics Component with Expanded Feedback Data and Improved Table Layout
+- Enhance EditTicketModal with Local State Management for Ticket Updates
+
+### 🗑️ Removed Removed features and cleanup
+- Delete generateUsers.ts
+
+**Total Changes:** 81 commits
+**Code Changes:** +28,697 insertions, -4,770 deletions
+
+---
+## [v0.7.0-Eruption] - 2025-09-11
+
+### 🔧 Pre-release
+**Release Name:** Eruption
+
+### ✨ Added New features and enhancements
+- 📝 Update LICENSE file to reflect new ownership and add additional terms
+- 📝 Add Professionalization Roadmap for Bgr8 Platform
+- Add MobileSignInPage component for improved mobile authentication experience
+- Add MobileAuthPages.css for mobile sign-in page styling
+- Update package.json to include new dependencies for enhanced development and styling
+- Implement MobileProfileEditModal for enhanced mobile profile editing experience
+- Add MobileAdminPortal component for enhanced mobile admin experience
+- Implement MobileMentorManagement component for enhanced mentor management on mobile
+- Add verification system types and integrate into user profiles
+- Add initial verification data creation for mentor profiles in useMentorData
+- Add VerificationService to manage mentor verification processes including creation, updates, querying, and statistics.
+- Add verification components including VerificationStatusBadge, VerificationProgress, and VerificationPendingNotice with associated styles. These components enhance the user experience by providing visual feedback on the verification process.
+- Add MentorVerificationPanel component for managing mentor verification processes, including data loading, filtering, and action handling. Enhance user experience with a detailed mentor list and status overview.
+- Add CSS styles for MentorVerificationPanel component to enhance layout, responsiveness, and user interaction. Includes styles for headers, buttons, loading states, error messages, and modal components, with dark mode support and mobile responsiveness adjustments.
+- Fix import path for createInitialVerification in useMentorData to ensure correct module resolution for mentor profile verification data.
+- Add Firestore security rules for user profiles, mentor programs, and admin access. Introduce helper functions for authentication and role verification, enhancing data protection and access control across various collections.
+- Add AdminMentorVerification component for managing mentor verification processes, including data loading, filtering, and action handling. Update MobileAdminPortal and AdminPortal to integrate verification functionality with navigation and display. Enhance styles for improved layout and responsiveness.
+- Implement role-based access control by refactoring user profile management. Introduce role-checking utility functions and update components to utilize these roles for access control. Add RoleManagement component for managing user roles with associated styles. Enhance Firestore security rules to support new role structure.
+- Refactor MobileAdminPortal and RoleManagement components to streamline user role management. Remove deprecated user data fetching logic and integrate role statistics display. Enhance styles for improved layout and responsiveness in role management features.
+- Enhance RoleManagement component by adding default role creation and refining role count updates. Introduce getRoleCount function for improved role statistics display. Add console logging for default role creation to aid in debugging.
+- Add new roles for social media, outreach, and events in RoleManagement component. Update Firestore rules to include role-checking functions for enhanced access control. Modify user profile interface and default role creation to accommodate new roles.
+- Enhance RoleManagement component with new role management modal and improved user role display. Add clear filter button and filter status indication for better user experience. Update styles for role badges, buttons, and modal to improve layout and responsiveness.
+- Implement Role Management Modal with enhanced animations and styles for user role management. Refactor RoleManagement component to utilize the new modal, adding pulsing effects for role toggles and improving overall user experience. Introduce CSS animations for modal transitions and toggle interactions.
+- Implement developer mode visibility in profile edit modals. Integrate role-checking functionality to conditionally display developer options, enhancing user experience for developers. Update styles and logic for developer mode toggle in both MobileProfileEditModal and ProfileEditModal components.
+- Implement verification status handling in MentorDashboard component. Add loading and error states for verification data fetching, and display appropriate messages based on verification status. Enhance styles for verification status display, including loading indicators and error messages, to improve user experience.
+- Refactor MentorVerificationPanel and AdminMentorVerification components to use getAllMentors for fetching mentor data, enhancing data retrieval efficiency. Add a Verification Process Guide to improve user understanding of the verification steps. Update styles for mentor details and action buttons for better user experience, including enhanced status messages for mentor verification outcomes.
+- Update AdminMentorVerification styles for improved UI consistency and responsiveness. Adjust background gradients, padding, and font sizes for various elements, including verification steps, action buttons, and mentor cards. Introduce new mentor card header and date sections, enhancing layout and user experience across devices.
+- Add success message handling and optimistic UI updates in AdminMentorVerification component
+- Add Page Permissions Management feature
+- Enhance Admin Portal UI with new sidebar header and improved styles
+- Implement Testing Feedback Management Feature
+- Implement Create Ticket Modal in AdminTestingFeedback Component
+- Enhance AdminTestingFeedback Component with File Attachment Features
+- Enhance AdminTestingFeedback Component with Ticket Viewing and Editing Features
+- Add Delete Ticket Functionality to AdminTestingFeedback Component
+- Enhance AdminTestingFeedback Component with Testing-Specific Features
+- Implement Optimistic UI Updates and Loading States in AdminTestingFeedback Component
+- Add Closed and Duplicate Status Cards to AdminTestingFeedback Component
+- Implement Floating Action Buttons in AdminTestingFeedback Component
+- Add Comments Loading State and Fetching Logic in AdminTestingFeedback Component
+- Add Status-Themed Ticket Cards in AdminTestingFeedback Component
+
+### 🐛 Fixed Bug fixes and improvements
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+- Apply litany of programming fixes
+
+### 📚 Documentation Documentation updates
+- Refactor AdminTestingFeedback Component to Simplify Comment Handling
+
+### 🎨 Changed Code style and formatting changes
+- Enhance mobile responsiveness in MentorDashboard and MentorPage styles
+- Refactor MobileAdminPortal and MobileMentorManagement components to remove unused close buttons and associated styles
+- Update styles for VerificationProgress and AdminMentorVerification components to enhance UI consistency. Change background colors, borders, and text colors for improved readability and aesthetics. Adjust box shadows and hover effects for better user interaction.
+- Refactor verification data handling in VerificationService to utilize Firestore Timestamps. Convert date fields to Timestamps for proper Firestore compatibility, ensuring accurate data representation. Update history entries to maintain consistent timestamp formats and enhance data integrity during updates.
+- Update AdminTestingFeedback styles for improved color consistency
+- Enhance Page Permissions Manager Styles for Improved Usability
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor Web Vitals monitoring in index.html for improved performance tracking
+- Refactor MobileAdminPortal to replace unused FaTimes alias with FaTimes icon
+- Refactor MentorVerificationPanel and AdminMentorVerification components to utilize VerificationService for data fetching and streamline mentor filtering logic. Replace deprecated icons with FaSync for loading states and enhance mobile detection in AdminPortal for improved responsiveness.
+- Refactor AuthLock component to utilize hasRole utility for permission checks, enhancing role-based access control. Remove deprecated hasPermission function and improve user profile compatibility with legacy roles in userProfile utility.
+- Refactor ProtectedRoute and Update Type Definitions
+
+### 🚀 Performance Performance improvements
+- Enhance index.html with improved meta tags, security headers, and performance optimizations
+
+### 🔧 Changed Maintenance tasks and chores
+- Enhance index.html and BGr8.css with image preloads and background gradient updates
+- Hide sidebar and toggle button on mobile view in MentorResponsive.css for improved mobile experience.
+- Update theme colors in index.html for improved dark and light mode support
+- Update robots.txt for Bgr8 Network
+- Update sitemap.xml for Bgr8 Network
+- Enhance SEO and Meta Tags in index.html for Bgr8 Network
+- Update manifest.json for Bgr8 Network
+- Update main.tsx
+- Refine mobile detection logic in useIsMobile hook to improve accuracy. Update conditions to exclude iPads in desktop mode from being classified as mobile, ensuring a more reliable responsive design experience.
+- Enhance Feedback Ticket Management with Sequential IDs
+
+### 🛡️ Security Security improvements
+- 🛡️ Update SECURITY.md for Bgr8 Platform
+
+### 🗑️ Removed Removed features and cleanup
+- Remove unused dependencies from package.json to streamline project setup
+- Delete generateUsers.ts
+
+**Total Changes:** 71 commits
+**Code Changes:** +21,827 insertions, -2,152 deletions
+
+---
 ## [v0.6.13] - 2025-09-09
 
 ### 🐛 Patch Release
@@ -480,6 +927,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.8.1]: https://github.com/Hum2a/B8/releases/tag/v0.8.1
+[v0.8.0-Dunkirk]: https://github.com/Hum2a/B8/releases/tag/v0.8.0-Dunkirk
+[v0.7.2-Ambassadors]: https://github.com/Hum2a/B8/releases/tag/v0.7.2-Ambassadors
+[v0.7.1]: https://github.com/Hum2a/B8/releases/tag/v0.7.1
+[v0.7.0-Eruption]: https://github.com/Hum2a/B8/releases/tag/v0.7.0-Eruption
 [v0.6.13]: https://github.com/Hum2a/B8/releases/tag/v0.6.13
 [v0.6.12]: https://github.com/Bgr8Dev/Bgr8/releases/tag/v0.6.12
 [v0.6.11-changelog]: https://github.com/Bgr8Dev/Bgr8/releases/tag/v0.6.11-changelog

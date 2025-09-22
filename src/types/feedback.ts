@@ -22,7 +22,6 @@ export type TicketUpdateData = {
   workaround?: string;
 };
 
-
 export type FeedbackStatus = 
   | 'draft'
   | 'open'
