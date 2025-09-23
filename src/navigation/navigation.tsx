@@ -5,14 +5,12 @@ import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
 import ForgotPasswordPage from '../pages/authPages/ForgotPasswordPage';
 import { useAuth } from '../hooks/useAuth';
-import LoadingSpinner from '../components/animations/LoadingSpinner';
 import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
 import FeedbackPage from '../pages/utilPages/FeedbackPage';
 import AdminPortal from '../pages/AdminPortal';
 import MentorPage from '../pages/mentorPages/MentorPage';
 import { SessionsPage } from '../pages/SessionsPage';
-import React from 'react';
 import Success from '../pages/Success';
 import Cancel from '../pages/Cancel';
 import { AuthLock } from '../components/auth/AuthLock';
@@ -22,6 +20,7 @@ import AmbassadorPage from '../pages/utilPages/AmbassadorPage';
 
 export default function Navigation() {
   const { loading } = useAuth();
+  loading; // To avoid unused variable warning
 
   return (
     <Routes>
