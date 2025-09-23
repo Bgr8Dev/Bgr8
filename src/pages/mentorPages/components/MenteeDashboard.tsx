@@ -133,11 +133,11 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Industry:</span>
-                  <span className="detail-value">{currentUserProfile.industry || 'Not specified'}</span>
+                  <span className="detail-value">{(currentUserProfile.industry  || 'Not specified') as string}</span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Experience:</span>
-                  <span className="detail-value">{currentUserProfile.yearsOfExperience || 'Not specified'} years</span>
+                  <span className="detail-value">{(currentUserProfile.yearsOfExperience || 'Not specified') as string} years</span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Skills:</span>
