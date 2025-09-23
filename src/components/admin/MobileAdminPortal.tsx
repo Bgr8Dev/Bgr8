@@ -6,7 +6,16 @@ import { hasRole } from '../../utils/userProfile';
 import { 
   FaChevronLeft, 
   FaChevronRight, 
-  FaArrowLeft
+  FaArrowLeft,
+  FaArrowUp,
+  FaArrowDown,
+  FaMinus,
+  FaUsers,
+  FaChalkboardTeacher,
+  FaCalendarAlt,
+  FaComments,
+  FaChartBar,
+  FaCog
 } from 'react-icons/fa';
 import '../../styles/adminStyles/MobileAdminPortal.css';
 
