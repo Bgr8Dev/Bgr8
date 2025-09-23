@@ -19,8 +19,7 @@ import TermsOfService from '../pages/utilPages/TermsOfService';
 import AmbassadorPage from '../pages/utilPages/AmbassadorPage';
 
 export default function Navigation() {
-  const { loading } = useAuth();
-  loading; // To avoid unused variable warning
+  /* const {loading} = */ useAuth();
 
   return (
     <Routes>
