@@ -48,12 +48,12 @@ export function getName(profile: MentorMenteeProfile): string {
   return `${profile.firstName} ${profile.lastName}`;
 }
 
-export function getDisplayName(profile: MentorMenteeProfile | undefined, id: string) {
+export function getDisplayName(profile: MentorMenteeProfile | undefined, id: string): string {
   if (profile)
-    return getName(profile)
+    return getName(profile);
   else 
-    `Mentor ${id.slice(0, 8)}`;
-};
+    return `Mentor ${id.slice(0, 8)}`;
+}
 
 const educationLevelEncoding: { [level: string]: number } = {
   'GCSEs': 0,

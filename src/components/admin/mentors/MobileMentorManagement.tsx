@@ -18,7 +18,6 @@ import '../../../styles/adminStyles/MobileMentorManagement.css';
 // Import existing components
 import AdminMentorModal from './AdminMentorModal';
 import BookingDetailsModal from './BookingDetailsModal';
-import { get } from 'http';
 
 // Interfaces
 interface TimeSlot {
