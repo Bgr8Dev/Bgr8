@@ -323,7 +323,6 @@ training/
 *.onnx
 
 # Analytics & Tracking
-analytics/
 tracking/
 *.analytics
 google-analytics.json
