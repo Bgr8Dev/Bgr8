@@ -13,8 +13,35 @@
   padding: 1rem;
 }
 
+/* Force text visibility in modal - override any theme conflicts */
+.modal-overlay .modal-content,
+.modal-overlay .modal-content * {
+  color: #1e293b !important;
+}
+
+.modal-overlay .modal-content input,
+.modal-overlay .modal-content textarea,
+.modal-overlay .modal-content select {
+  color: #1e293b !important;
+  background: white !important;
+}
+
+/* Fix all dropdown options across the modal */
+.modal-overlay .modal-content select option {
+  background: white !important;
+  color: #1e293b !important;
+  padding: 0.5rem;
+}
+
+/* Ensure dropdowns have proper styling when opened */
+.modal-overlay .modal-content select:focus,
+.modal-overlay .modal-content select:hover {
+  background: white !important;
+  color: #1e293b !important;
+}
+
 .modal-content {
-  background: white;
+  background: white !important;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   max-width: 600px;
@@ -23,6 +50,7 @@
   overflow-y: auto;
   animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #1e293b !important;
 }
 
 .modal-header {
@@ -43,7 +71,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #1e293b !important;
 }
 
 .create-modal-close {
@@ -99,6 +127,29 @@
 
 .modal-body {
   padding: 2rem;
+  color: #1e293b !important;
+}
+
+/* Ensure all text within the modal is visible */
+.modal-content * {
+  color: inherit !important;
+}
+
+/* Override any white text that might be inherited */
+.modal-content input,
+.modal-content textarea,
+.modal-content select,
+.modal-content label,
+.modal-content span,
+.modal-content div,
+.modal-content p,
+.modal-content h1,
+.modal-content h2,
+.modal-content h3,
+.modal-content h4,
+.modal-content h5,
+.modal-content h6 {
+  color: #1e293b !important;
 }
 
 .form-group {
@@ -115,7 +166,7 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #374151;
+  color: #374151 !important;
   font-size: 0.875rem;
 }
 
@@ -127,9 +178,22 @@
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.95rem;
-  color: #1e293b;
+  color: #1e293b !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: white;
+  background: white !important;
+}
+
+/* Fix dropdown options styling */
+.form-select option {
+  background: white !important;
+  color: #1e293b !important;
+  padding: 0.5rem;
+}
+
+/* Ensure dropdown options are visible when opened */
+.form-select:focus option {
+  background: white !important;
+  color: #1e293b !important;
 }
 
 .form-input:focus,
@@ -402,7 +466,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #1e293b !important;
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -415,7 +479,7 @@
   gap: 0.75rem;
   cursor: pointer;
   font-weight: 500;
-  color: #374151;
+  color: #374151 !important;
   padding: 0.75rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
@@ -446,6 +510,7 @@
   font-size: 0.9rem;
   line-height: 1.5;
   flex: 1;
+  color: #374151 !important;
 }
 
 .form-group-header {
@@ -515,10 +580,17 @@
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.85rem;
-  color: #4b5563;
-  background: #f8fafc;
+  color: #1e293b !important;
+  background: white !important;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fix resolution dropdown options */
+.resolution-dropdown option {
+  background: white !important;
+  color: #1e293b !important;
+  padding: 0.5rem;
 }
 
 .resolution-dropdown:focus {
