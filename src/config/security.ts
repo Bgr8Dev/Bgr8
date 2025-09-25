@@ -85,7 +85,9 @@ export const CSP_CONFIG = {
     "'self'",
     'https://*.firebaseapp.com',
     'https://*.stripe.com',
-    'https://*.google.com'
+    'https://*.google.com',
+    'https://cal.com',
+    'https://*.cal.com'
   ],
   'media-src': ["'self'"],
   'object-src': ["'none'"],
