@@ -3,6 +3,7 @@
 # Release Tag Manager with Smart Changelog Generation
 # Creates and manages semantic versioning tags for releases
 # Automatically generates intelligent changelog entries using Python script
+# Automatically updates version numbers in package.json and README.md
 # Works on Windows (Git Bash), Linux, and macOS
 
 # Initialize variables
@@ -385,6 +386,66 @@ EOF
   fi
 }
 
+# Function to update version in package.json
+update_package_json() {
+  local version=$1
+  local package_file="package.json"
+  
+  if [[ ! -f "$package_file" ]]; then
+    echo "⚠️  Warning: package.json not found"
+    return 1
+  fi
+  
+  # Extract version number without 'v' prefix
+  local version_number=${version#v}
+  
+  # Update version in package.json using sed
+  if command -v sed &> /dev/null; then
+    # For GNU sed (Linux) and BSD sed (macOS)
+    if sed -i.bak "s/\"version\": \"[^\"]*\"/\"version\": \"$version_number\"/" "$package_file" 2>/dev/null; then
+      rm -f "${package_file}.bak" 2>/dev/null
+      echo "✅ Updated version in package.json to $version_number"
+      return 0
+    else
+      echo "⚠️  Warning: Failed to update package.json"
+      return 1
+    fi
+  else
+    echo "⚠️  Warning: sed command not found, cannot update package.json"
+    return 1
+  fi
+}
+
+# Function to update version in README.md
+update_readme() {
+  local version=$1
+  local readme_file="README.md"
+  
+  if [[ ! -f "$readme_file" ]]; then
+    echo "⚠️  Warning: README.md not found"
+    return 1
+  fi
+  
+  # Extract version number without 'v' prefix
+  local version_number=${version#v}
+  
+  # Update version badge in README.md using sed
+  if command -v sed &> /dev/null; then
+    # Update the version badge pattern
+    if sed -i.bak "s/\[!\[Version\](https:\/\/img\.shields\.io\/badge\/version-[^-]*-brightgreen\.svg\?style=for-the-badge)\](CHANGELOG\.md)/[![Version](https:\/\/img\.shields\.io\/badge\/version-$version_number-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)/" "$readme_file" 2>/dev/null; then
+      rm -f "${readme_file}.bak" 2>/dev/null
+      echo "✅ Updated version badge in README.md to $version_number"
+      return 0
+    else
+      echo "⚠️  Warning: Failed to update README.md version badge"
+      return 1
+    fi
+  else
+    echo "⚠️  Warning: sed command not found, cannot update README.md"
+    return 1
+  fi
+}
+
 # Function to commit changelog changes
 commit_changelog() {
   local version=$1
@@ -403,6 +464,38 @@ commit_changelog() {
     fi
   else
     echo "ℹ️  No changelog changes to commit"
+    return 0
+  fi
+}
+
+# Function to commit version updates
+commit_version_updates() {
+  local version=$1
+  local files_to_commit=()
+  
+  # Check which files have changes
+  if [[ -n "$(git status --porcelain package.json 2>/dev/null)" ]]; then
+    files_to_commit+=("package.json")
+  fi
+  
+  if [[ -n "$(git status --porcelain README.md 2>/dev/null)" ]]; then
+    files_to_commit+=("README.md")
+  fi
+  
+  if [[ ${#files_to_commit[@]} -gt 0 ]]; then
+    echo "Committing version updates..."
+    git add "${files_to_commit[@]}"
+    git commit -m "🔢 Update version to $version in package.json and README.md" --no-verify
+    
+    if [[ $? -eq 0 ]]; then
+      echo "✅ Committed version updates for $version"
+      return 0
+    else
+      echo "⚠️  Warning: Failed to commit version updates"
+      return 1
+    fi
+  else
+    echo "ℹ️  No version updates to commit"
     return 0
   fi
 }
@@ -599,6 +692,11 @@ if [[ -n "$LATEST_TAG" ]]; then
   fi
 fi
 
+# Update version numbers in package.json and README.md
+echo "🔢 Updating version numbers..."
+update_package_json "$NEW_TAG"
+update_readme "$NEW_TAG"
+
 # Update changelog if not skipped
 if [[ "$SKIP_CHANGELOG" == false ]]; then
   echo "Updating changelog..."
@@ -617,6 +715,9 @@ git tag "$NEW_TAG"
 if [[ $? -eq 0 ]]; then
   echo "✅ Successfully created release tag: $NEW_TAG"
   
+  # Commit version updates
+  commit_version_updates "$NEW_TAG"
+  
   # Commit changelog changes if any
   if [[ "$SKIP_CHANGELOG" == false ]]; then
     commit_changelog "$NEW_TAG"
@@ -629,6 +730,10 @@ if [[ $? -eq 0 ]]; then
   
   echo "🎉 Release $NEW_TAG successfully created and pushed!"
   echo "Tag URL: https://github.com/$(git remote get-url origin | sed -E 's/.*[:/]([^/]+\/[^/]+)\.git.*/\1/')/releases/tag/$NEW_TAG"
+  echo ""
+  echo "✅ Version updates completed:"
+  echo "   - package.json version updated to ${NEW_TAG#v}"
+  echo "   - README.md version badge updated to ${NEW_TAG#v}"
   
   if [[ "$SKIP_CHANGELOG" == false ]]; then
     echo ""
