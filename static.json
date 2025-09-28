@@ -1,6 +1,12 @@
 {
-    "routes": {
-      "/**": "index.html"
+  "root": "dist",
+  "routes": {
+    "/**": "index.html"
+  },
+  "headers": {
+    "/**": {
+      "Cache-Control": "no-cache"
     }
   }
+}
   
