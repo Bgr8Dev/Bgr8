@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.9.0] - 2025-09-28
+
+### ✨ Minor Release
+### ✨ Added New features and enhancements
+- Add UI Components Export File and Update Imports
+- Implement Simple Password Strength Meter in SignIn and MobileSignIn Pages
+- Add Mobile Analytics Component and Styles
+- Add backdrop-filter support for MobileAdminEmails styles
+- Enhance CreateTicketModal styles for improved text visibility
+- Update static.json to configure root directory and add cache control headers
+- Update static.json to add new routes and configure clean URLs
+- Update static.json, vite.config.ts, and add headers and redirects files
+- Add Firebase and Netlify configuration files for deployment
+- Add Big Text feature for improved accessibility
+- Add Tooltip and InfoAlert components for enhanced user guidance
+- Add ConfirmationModal and Modal components for enhanced user interactions
+- Implement Big Text feature and UI enhancements
+
+### 🐛 Fixed Bug fixes and improvements
+- Antonio fixes everything
+- Undid loading error
+- Fix imports on MobileAdminPortal
+- Fix typing errors
+- Attempt Linter Fixes and minor bugfix
+
+### 🎨 Changed Code style and formatting changes
+- Remove UI Components Export File and Update Imports
+- Enhance Settings page with Tooltips and InfoAlerts for improved user guidance
+
+### 🔧 Changed Code refactoring and restructuring
+- Refactor Mentor Management Components for Enhanced Functionality and Clarity
+- Refactor Tooltip and BigTextContext for improved performance and usability
+
+### 🔧 Changed Maintenance tasks and chores
+- Master changes
+- Catch up to master
+- Update navigation.tsx to pass linter.
+- Update navigation.tsx
+- Update AdminPortal.css for improved overflow handling
+- Enhance Tooltip positioning and styling for better user experience
+
+### 🛡️ Security Security improvements
+- Update Content Security Policy to include cal.com domains
+
+**Total Changes:** 29 commits
+**Code Changes:** +65,204 insertions, -2,513 deletions
+
+---
 ## [v0.8.2] - 2025-09-28
 
 ### 🐛 Patch Release
@@ -1017,6 +1065,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.9.0]: https://github.com/Hum2a/B8/releases/tag/v0.9.0
 [v0.8.2]: https://github.com/Hum2a/B8/releases/tag/v0.8.2
 [v0.8.1]: https://github.com/Hum2a/B8/releases/tag/v0.8.1
 [v0.8.0-Dunkirk]: https://github.com/Hum2a/B8/releases/tag/v0.8.0-Dunkirk
