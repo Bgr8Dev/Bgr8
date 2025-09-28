@@ -1,6 +1,13 @@
 {
   "root": "dist",
+  "clean_urls": false,
   "routes": {
+    "/dashboard": "index.html",
+    "/profile": "index.html",
+    "/settings": "index.html",
+    "/sessions": "index.html",
+    "/admin-portal": "index.html",
+    "/feedback/*": "index.html",
     "/**": "index.html"
   },
   "headers": {
