@@ -63,9 +63,30 @@ export default function Tooltip({
     const tooltipRect = tooltip.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     
-    // Check if tooltip would go off the right edge
-    if (position === 'right' && rect.right + tooltipRect.width > viewportWidth - 20) {
-      setUseFallback(true);
+    // For right-positioned tooltips, calculate position relative to viewport
+    if (position === 'right') {
+      const tooltipLeft = rect.right + 8; // 8px gap from trigger
+      const tooltipTop = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+      
+      // Check if tooltip would go off the right edge
+      if (tooltipLeft + tooltipRect.width > viewportWidth - 20) {
+        // Use fallback positioning (below the trigger)
+        const fallbackTop = rect.bottom + 8;
+        const fallbackLeft = rect.left;
+        
+        tooltip.style.position = 'fixed';
+        tooltip.style.left = `${fallbackLeft}px`;
+        tooltip.style.top = `${fallbackTop}px`;
+        tooltip.style.transform = 'none';
+        setUseFallback(true);
+      } else {
+        // Normal positioning (to the right of trigger)
+        tooltip.style.position = 'fixed';
+        tooltip.style.left = `${tooltipLeft}px`;
+        tooltip.style.top = `${tooltipTop}px`;
+        tooltip.style.transform = 'none';
+        setUseFallback(false);
+      }
     } else {
       setUseFallback(false);
     }

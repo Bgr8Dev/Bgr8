@@ -9,6 +9,11 @@
   align-items: center;
   cursor: help;
   position: relative;
+  /* Ensure trigger doesn't affect parent layout */
+  width: auto;
+  height: auto;
+  /* Prevent tooltip from causing layout shifts */
+  vertical-align: baseline;
 }
 
 .tooltip-icon {
@@ -38,6 +43,12 @@
   max-width: 280px;
   /* Ensure tooltips are overlays that don't affect layout */
   pointer-events: none;
+  /* Prevent tooltip from affecting parent container width */
+  width: max-content;
+  min-width: 0;
+  /* Ensure tooltip doesn't cause horizontal scrolling */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tooltip-content.tooltip-visible {
@@ -93,20 +104,15 @@
 }
 
 .tooltip-content.right-full {
-  left: calc(100% + 8px);
-  top: 50%;
-  transform: translateY(-50%);
+  /* Position will be set dynamically by JavaScript */
   /* Ensure tooltip stays within viewport */
   max-width: 250px;
-  position: absolute;
   /* Ensure it appears to the right of the trigger element */
   white-space: normal;
   word-wrap: break-word;
   /* Force positioning relative to the trigger element */
   margin: 0;
   padding: 8px 12px;
-  /* Position relative to the trigger, not the container */
-  right: auto;
   /* Ensure it's positioned relative to the trigger element */
   z-index: 1001;
 }
@@ -145,6 +151,11 @@
   display: inline-block;
   /* Prevent tooltip from going outside the form */
   overflow: visible;
+  /* Ensure container doesn't affect parent layout */
+  width: auto;
+  height: auto;
+  /* Prevent tooltip from causing layout shifts */
+  vertical-align: baseline;
 }
 
 /* Debug: Add a border to see tooltip container boundaries */
@@ -169,6 +180,24 @@
   overflow: visible;
 }
 
+/* Ensure sidebar layout isn't affected by tooltips */
+.settings-sidebar {
+  /* Prevent tooltips from affecting sidebar width */
+  min-width: 0;
+  flex-shrink: 0;
+  /* Ensure sidebar maintains its width */
+  width: auto;
+}
+
+/* Ensure main content area isn't squashed by tooltips */
+.settings-main-content {
+  /* Prevent tooltips from affecting main content width */
+  min-width: 0;
+  flex: 1;
+  /* Ensure main content maintains its space */
+  width: auto;
+}
+
 /* Additional constraints for right-positioned tooltips */
 .tooltip-content.right-full {
   /* Ensure tooltip doesn't go beyond the form boundaries */
@@ -180,13 +209,17 @@
   left: calc(100% + 8px) !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
+  /* Ensure tooltip doesn't cause horizontal scrolling */
+  right: auto;
+  /* Prevent tooltip from affecting parent container width */
+  width: max-content;
+  min-width: 0;
 }
 
 /* Fallback positioning when there's not enough space */
 .tooltip-content.right-full.fallback-top {
-  position: absolute;
-  left: 0;
-  top: 100%;
+  position: fixed;
+  /* Position will be set dynamically by JavaScript */
   transform: none;
   margin-left: 0;
   margin-top: 8px;

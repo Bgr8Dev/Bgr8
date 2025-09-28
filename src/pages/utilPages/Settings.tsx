@@ -1290,16 +1290,7 @@ export default function Settings() {
                 );
 
                 if (isAccessibility) {
-                  return (
-                    <Tooltip
-                      key={tab.id}
-                      content="Customize font sizes, contrast, and other accessibility features to make the website easier to use and read."
-                      position="right"
-                      delay={500}
-                    >
-                      {button}
-                    </Tooltip>
-                  );
+                  return button;
                 }
 
                 return button;
