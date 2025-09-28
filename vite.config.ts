@@ -7,10 +7,16 @@ export default defineConfig({
   plugins: [react(), emulatorCheckPlugin()],
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
   server: {
     fs: {
       strict: false,
     },
-  }
+  },
+  base: './'
 });

@@ -1,19 +1,21 @@
 {
   "root": "dist",
   "clean_urls": false,
+  "trailing_slash": false,
   "routes": {
-    "/dashboard": "index.html",
-    "/profile": "index.html",
-    "/settings": "index.html",
-    "/sessions": "index.html",
-    "/admin-portal": "index.html",
+    "/dashboard*": "index.html",
+    "/profile*": "index.html", 
+    "/settings*": "index.html",
+    "/sessions*": "index.html",
+    "/admin-portal*": "index.html",
     "/feedback/*": "index.html",
-    "/**": "index.html"
-  },
-  "headers": {
-    "/**": {
-      "Cache-Control": "no-cache"
-    }
+    "/signin*": "index.html",
+    "/forgot-password*": "index.html",
+    "/success*": "index.html",
+    "/cancel*": "index.html",
+    "/privacy-policy*": "index.html",
+    "/ambassador*": "index.html",
+    "/*": "index.html"
   }
 }
   
