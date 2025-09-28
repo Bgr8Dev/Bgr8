@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './utils/updatePermissions'; // Import to make updatePagePermissions available globally
 import './App.css';
 import './styles/bigText.css';
+import './styles/tooltip.css';
 import AnnouncementBanner from './components/announcements/AnnouncementBanner';
 import { useIsMobile } from './hooks/useIsMobile';
 

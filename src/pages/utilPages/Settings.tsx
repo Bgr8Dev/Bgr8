@@ -19,6 +19,8 @@ import {
 import '../../styles/Overlay.css';
 import '../../styles/Settings.css';
 import { useBigText } from '../../contexts/BigTextContext';
+import Tooltip from '../../components/ui/Tooltip';
+import InfoAlert from '../../components/ui/InfoAlert';
 
 interface SettingsState {
   // Profile Settings
@@ -1041,8 +1043,23 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Accessibility Settings</h3>
       
+      <InfoAlert 
+        title="Accessibility Features" 
+        type="info"
+        className="mb-4"
+      >
+        These settings help make the website more accessible and easier to use. 
+        Changes are saved automatically and will persist across all your devices when you're logged in.
+      </InfoAlert>
+      
       <div className="settings-form-group">
-        <label>Font Size: {fontSize}px</label>
+        <Tooltip 
+          content="Adjust the font size across the entire website. This affects all text, buttons, and interface elements to make them easier to read. The setting is saved automatically and will remember your preference."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Font Size: {fontSize}px</label>
+        </Tooltip>
         <input 
           type="range" 
           min="12" 
@@ -1055,99 +1072,169 @@ export default function Settings() {
           <span>Small (12px)</span>
           <span>Large (24px)</span>
         </div>
+        
+        <InfoAlert 
+          title="💡 Pro Tip" 
+          type="tip"
+          className="mt-2"
+        >
+          Try adjusting the font size slider above to find your perfect reading size. 
+          The changes apply instantly across the entire website, and your preference 
+          will be remembered for future visits.
+        </InfoAlert>
       </div>
 
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.screenReader}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, screenReader: e.target.checked}})}
-          />
-          Screen reader support
-        </label>
+        <Tooltip 
+          content="Enables better support for screen readers and assistive technologies. This improves the experience for users who rely on screen readers to navigate the website."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.screenReader}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, screenReader: e.target.checked}})}
+            />
+            Screen reader support
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.highContrast}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, highContrast: e.target.checked}})}
-          />
-          High contrast mode
-        </label>
+        <Tooltip 
+          content="Increases the contrast between text and background colors to make content easier to read for users with visual impairments."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.highContrast}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, highContrast: e.target.checked}})}
+            />
+            High contrast mode
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={isBigTextEnabled}
-            onChange={toggleBigText}
-          />
-          <FaTextHeight style={{ marginRight: '8px' }} />
-          Big text mode (increases font size across the entire website)
-        </label>
+        <Tooltip 
+          content="Enables the big text mode which increases font sizes across the entire website. This works together with the font size slider above to make text more readable."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={isBigTextEnabled}
+              onChange={toggleBigText}
+            />
+            <FaTextHeight style={{ marginRight: '8px' }} />
+            Big text mode (increases font size across the entire website)
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.reducedMotion}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, reducedMotion: e.target.checked}})}
-          />
-          Reduced motion
-        </label>
+        <Tooltip 
+          content="Reduces or eliminates animations and transitions for users who are sensitive to motion. This helps prevent dizziness and other motion-related discomfort."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.reducedMotion}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, reducedMotion: e.target.checked}})}
+            />
+            Reduced motion
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.keyboardNavigation}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, keyboardNavigation: e.target.checked}})}
-          />
-          Enhanced keyboard navigation
-        </label>
+        <Tooltip 
+          content="Enhances keyboard navigation by making it easier to navigate through the website using only the keyboard (Tab, Enter, Arrow keys)."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.keyboardNavigation}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, keyboardNavigation: e.target.checked}})}
+            />
+            Enhanced keyboard navigation
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.focusIndicators}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, focusIndicators: e.target.checked}})}
-          />
-          Enhanced focus indicators
-        </label>
+        <Tooltip 
+          content="Makes focus indicators more visible and prominent so users can easily see which element is currently selected when navigating with the keyboard."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.focusIndicators}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, focusIndicators: e.target.checked}})}
+            />
+            Enhanced focus indicators
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.colorBlindSupport}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, colorBlindSupport: e.target.checked}})}
-          />
-          Color blind support
-        </label>
+        <Tooltip 
+          content="Adjusts colors and provides alternative visual cues to make the website more accessible for users with color vision deficiencies."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.colorBlindSupport}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, colorBlindSupport: e.target.checked}})}
+            />
+            Color blind support
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.dyslexiaSupport}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, dyslexiaSupport: e.target.checked}})}
-          />
-          Dyslexia-friendly fonts
-        </label>
+        <Tooltip 
+          content="Uses fonts and text formatting that are easier to read for users with dyslexia, including better letter spacing and font choices."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.dyslexiaSupport}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, dyslexiaSupport: e.target.checked}})}
+            />
+            Dyslexia-friendly fonts
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.voiceControl}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, voiceControl: e.target.checked}})}
-          />
-          Voice control support
-        </label>
+        <Tooltip 
+          content="Enables voice control features that allow users to navigate and interact with the website using voice commands."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.voiceControl}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, voiceControl: e.target.checked}})}
+            />
+            Voice control support
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.gestureControl}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, gestureControl: e.target.checked}})}
-          />
-          Gesture control support
-        </label>
+        <Tooltip 
+          content="Enables gesture-based navigation for touch devices, making it easier to navigate using swipes, pinches, and other touch gestures."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.gestureControl}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, gestureControl: e.target.checked}})}
+            />
+            Gesture control support
+          </label>
+        </Tooltip>
       </div>
     </div>
   );
@@ -1189,7 +1276,9 @@ export default function Settings() {
             <nav className="settings-nav">
               {tabs.map(tab => {
                 const Icon = tab.icon;
-                return (
+                const isAccessibility = tab.id === 'accessibility';
+                
+                const button = (
                   <button
                     key={tab.id}
                     className={`settings-nav-item ${activeTab === tab.id ? 'active' : ''}`}
@@ -1199,6 +1288,21 @@ export default function Settings() {
                     <span>{tab.label}</span>
                   </button>
                 );
+
+                if (isAccessibility) {
+                  return (
+                    <Tooltip
+                      key={tab.id}
+                      content="Customize font sizes, contrast, and other accessibility features to make the website easier to use and read."
+                      position="right"
+                      delay={500}
+                    >
+                      {button}
+                    </Tooltip>
+                  );
+                }
+
+                return button;
               })}
             </nav>
           </div>

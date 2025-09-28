@@ -1,0 +1,304 @@
+/* Tooltip Styles */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+  position: relative;
+}
+
+.tooltip-icon {
+  margin-left: 6px;
+  color: #9ca3af;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.tooltip-trigger:hover .tooltip-icon {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.tooltip-content {
+  position: absolute;
+  z-index: 1000;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #374151;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  transform-origin: center;
+  max-width: 280px;
+  /* Ensure tooltips are overlays that don't affect layout */
+  pointer-events: none;
+}
+
+.tooltip-content.tooltip-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tooltip-content.tooltip-hidden {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.tooltip-text {
+  line-height: 1.4;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+}
+
+/* Position classes */
+.tooltip-content.bottom-full {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 12px;
+}
+
+.tooltip-content.bottom-full .tooltip-arrow {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: #d1d5db;
+  border-bottom: none;
+}
+
+.tooltip-content.top-full {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 12px;
+}
+
+.tooltip-content.top-full .tooltip-arrow {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: #d1d5db;
+  border-top: none;
+}
+
+.tooltip-content.right-full {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  /* Ensure tooltip stays within viewport */
+  max-width: 250px;
+  position: absolute;
+  /* Ensure it appears to the right of the trigger element */
+  white-space: normal;
+  word-wrap: break-word;
+  /* Force positioning relative to the trigger element */
+  margin: 0;
+  padding: 8px 12px;
+  /* Position relative to the trigger, not the container */
+  right: auto;
+  /* Ensure it's positioned relative to the trigger element */
+  z-index: 1001;
+}
+
+.tooltip-content.right-full .tooltip-arrow {
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: #d1d5db;
+  border-left: none;
+}
+
+.tooltip-content.left-full {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  /* Ensure tooltip stays within viewport */
+  max-width: 250px;
+  position: absolute;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.tooltip-content.left-full .tooltip-arrow {
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: #d1d5db;
+  border-right: none;
+}
+
+
+/* Ensure tooltips don't overflow the container */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  /* Prevent tooltip from going outside the form */
+  overflow: visible;
+}
+
+/* Debug: Add a border to see tooltip container boundaries */
+.tooltip-container {
+  /* border: 1px dashed red; /* Uncomment for debugging */
+}
+
+/* Container constraints for tooltips */
+.settings-section {
+  position: relative;
+  overflow: visible;
+}
+
+.settings-checkbox-group {
+  position: relative;
+  overflow: visible;
+}
+
+/* Ensure tooltips stay within the form container */
+.settings-form-group {
+  position: relative;
+  overflow: visible;
+}
+
+/* Additional constraints for right-positioned tooltips */
+.tooltip-content.right-full {
+  /* Ensure tooltip doesn't go beyond the form boundaries */
+  max-width: min(250px, calc(100vw - 100px));
+  word-wrap: break-word;
+  white-space: normal;
+  /* Force positioning to be relative to the trigger element */
+  position: absolute !important;
+  left: calc(100% + 8px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* Fallback positioning when there's not enough space */
+.tooltip-content.right-full.fallback-top {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform: none;
+  margin-left: 0;
+  margin-top: 8px;
+  max-width: 280px;
+  z-index: 1000;
+}
+
+/* Mobile-friendly tooltip adjustments */
+@media (max-width: 768px) {
+  .tooltip-content {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+    max-width: 90vw !important;
+    margin: 0 !important;
+  }
+  
+  .tooltip-arrow {
+    display: none !important;
+  }
+}
+
+/* Focus styles for accessibility */
+.tooltip-trigger:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-content {
+    transition: none;
+  }
+}
+
+/* Info Alert Styles */
+.info-alert {
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.info-alert-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-alert-icon {
+  flex-shrink: 0;
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.info-alert-text {
+  flex: 1;
+}
+
+.info-alert-title {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.info-alert-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.info-alert-dismiss {
+  flex-shrink: 0;
+  margin-left: 8px;
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.info-alert-dismiss:hover {
+  color: #6b7280;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Alert type styles */
+.info-alert.bg-blue-50\/50 {
+  background-color: rgba(239, 246, 255, 0.5);
+  border-color: rgba(191, 219, 254, 0.5);
+  color: #1e40af;
+}
+
+.info-alert.bg-amber-50\/50 {
+  background-color: rgba(255, 251, 235, 0.5);
+  border-color: rgba(253, 230, 138, 0.5);
+  color: #d97706;
+}
+
+.info-alert.bg-orange-50\/50 {
+  background-color: rgba(255, 247, 237, 0.5);
+  border-color: rgba(253, 186, 116, 0.5);
+  color: #ea580c;
+}
+
+/* Font size label styling */
+.font-size-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
