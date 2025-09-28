@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
 
 interface TooltipProps {
@@ -27,34 +27,9 @@ export default function Tooltip({
   const [useFallback, setUseFallback] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node) &&
-          triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
-        setIsVisible(false);
-        setShowTooltip(false);
-      }
-    };
-    
-    const handleResize = () => {
-      if (isVisible) {
-        checkPosition();
-      }
-    };
-
-    if (isVisible) {
-      document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('resize', handleResize);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        window.removeEventListener('resize', handleResize);
-      };
-    }
-  }, [isVisible]);
-
-  const checkPosition = () => {
+  const checkPosition = useCallback(() => {
     if (!tooltipRef.current || !triggerRef.current) return;
     
     const tooltip = tooltipRef.current;
@@ -90,7 +65,32 @@ export default function Tooltip({
     } else {
       setUseFallback(false);
     }
-  };
+  }, [position]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node) &&
+          triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
+        setIsVisible(false);
+        setShowTooltip(false);
+      }
+    };
+    
+    const handleResize = () => {
+      if (isVisible) {
+        checkPosition();
+      }
+    };
+
+    if (isVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('resize', handleResize);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [isVisible, checkPosition]);
 
   const handleMouseEnter = () => {
     if (disabled) return;
@@ -136,10 +136,6 @@ export default function Tooltip({
     }
   };
 
-  const getArrowClasses = () => {
-    // Arrow positioning is handled by CSS, so we don't need to return specific classes
-    return '';
-  };
 
   return (
     <div className={`tooltip-container ${className}`}>

@@ -1474,6 +1474,9 @@ export default function Settings() {
                 <button className="settings-btn settings-btn-secondary" onClick={handleReset}>
                   Reset to Default
                 </button>
+                <button className="settings-btn settings-btn-danger" onClick={handleDeleteAccount}>
+                  Delete Account
+                </button>
                 <button className="settings-btn settings-btn-primary" onClick={handleSave}>
                   <FaSave />
                   Save Settings

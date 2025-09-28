@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
@@ -37,14 +37,7 @@ export function BigTextProvider({ children }: BigTextProviderProps) {
     setLoading(false);
   }, []);
 
-  // Load preference from Firebase when user is logged in
-  useEffect(() => {
-    if (currentUser) {
-      loadUserPreference();
-    }
-  }, [currentUser]);
-
-  const loadUserPreference = async () => {
+  const loadUserPreference = useCallback(async () => {
     if (!currentUser) return;
     
     try {
@@ -68,7 +61,14 @@ export function BigTextProvider({ children }: BigTextProviderProps) {
     } catch (error) {
       console.error('Error loading user preferences:', error);
     }
-  };
+  }, [currentUser]);
+
+  // Load preference from Firebase when user is logged in
+  useEffect(() => {
+    if (currentUser) {
+      loadUserPreference();
+    }
+  }, [currentUser, loadUserPreference]);
 
   const setFontSize = async (newFontSize: number) => {
     setFontSizeState(newFontSize);

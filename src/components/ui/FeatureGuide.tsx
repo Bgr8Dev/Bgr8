@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FaInfoCircle, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import InfoAlert from './InfoAlert';
+import { FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 interface FeatureGuideProps {
   title: string;
