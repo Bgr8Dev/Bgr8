@@ -13,10 +13,17 @@ import {
   FaDesktop,
   FaMoon,
   FaSun,
-  FaEnvelope
+  FaEnvelope,
+  FaTextHeight
 } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 import '../../styles/Settings.css';
+import '../../styles/modal.css';
+import { useBigText } from '../../contexts/BigTextContext';
+import Tooltip from '../../components/ui/Tooltip';
+import InfoAlert from '../../components/ui/InfoAlert';
+import Modal from '../../components/ui/Modal';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
 
 interface SettingsState {
   // Profile Settings
@@ -198,6 +205,13 @@ interface SettingsState {
 export default function Settings() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  const { isBigTextEnabled, toggleBigText, fontSize, setFontSize } = useBigText();
+  
+  // Modal states
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [infoModalContent, setInfoModalContent] = useState({ title: '', content: '' });
   const [settings, setSettings] = useState<SettingsState>({
     profile: {
       displayName: '',
@@ -380,22 +394,64 @@ export default function Settings() {
   const handleSave = () => {
     // Save settings logic here
     console.log('Saving settings:', settings);
-    alert('Settings saved successfully!');
+    setInfoModalContent({
+      title: 'Settings Saved',
+      content: 'Your settings have been saved successfully! All changes have been applied and will be remembered for future visits.'
+    });
+    setShowInfoModal(true);
   };
 
   const handleReset = () => {
-    if (confirm('Are you sure you want to reset all settings to default?')) {
-      // Reset logic here
-      console.log('Resetting settings');
-      alert('Settings reset to default!');
-    }
+    setShowResetModal(true);
+  };
+
+  const confirmReset = () => {
+    // Reset logic here
+    console.log('Resetting settings');
+    setShowResetModal(false);
+    setInfoModalContent({
+      title: 'Settings Reset',
+      content: 'All settings have been reset to their default values. You can now customize them again to your preferences.'
+    });
+    setShowInfoModal(true);
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAccount = () => {
+    // Delete account logic here
+    console.log('Deleting account');
+    setShowDeleteModal(false);
+    setInfoModalContent({
+      title: 'Account Deletion',
+      content: 'Your account deletion request has been submitted. You will receive a confirmation email shortly. This action cannot be undone.'
+    });
+    setShowInfoModal(true);
   };
 
   const renderProfileSettings = () => (
     <div className="settings-section">
       <h3>Profile Information</h3>
+      
+      <InfoAlert 
+        title="Profile Setup" 
+        type="info"
+        className="mb-4"
+      >
+        Customize your profile information to help others learn more about you. 
+        This information will be visible to other users and helps with mentor matching.
+      </InfoAlert>
+      
       <div className="settings-form-group">
-        <label>Display Name</label>
+        <Tooltip 
+          content="Your display name is how other users will see you on the platform. Choose something professional and memorable."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Display Name</label>
+        </Tooltip>
         <input 
           type="text" 
           value={settings.profile.displayName}
@@ -405,7 +461,13 @@ export default function Settings() {
       </div>
       
       <div className="settings-form-group">
-        <label>Bio</label>
+        <Tooltip 
+          content="Write a brief description about yourself, your experience, and what you can offer as a mentor or what you're looking for as a mentee."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Bio</label>
+        </Tooltip>
         <textarea 
           value={settings.profile.bio}
           onChange={(e) => setSettings({...settings, profile: {...settings.profile, bio: e.target.value}})}
@@ -415,7 +477,13 @@ export default function Settings() {
       </div>
       
       <div className="settings-form-group">
-        <label>Profile Picture</label>
+        <Tooltip 
+          content="Upload a professional photo that represents you well. This helps build trust and makes your profile more engaging."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Profile Picture</label>
+        </Tooltip>
         <input 
           type="file" 
           accept="image/*"
@@ -425,7 +493,13 @@ export default function Settings() {
       
       <div className="settings-form-row">
         <div className="settings-form-group">
-          <label>Timezone</label>
+          <Tooltip 
+            content="Select your timezone to help others know when you're available for sessions and meetings."
+            position="top"
+            delay={300}
+          >
+            <label className="font-size-label">Timezone</label>
+          </Tooltip>
           <select 
             value={settings.profile.timezone}
             onChange={(e) => setSettings({...settings, profile: {...settings.profile, timezone: e.target.value}})}
@@ -438,7 +512,13 @@ export default function Settings() {
         </div>
         
         <div className="settings-form-group">
-          <label>Language</label>
+          <Tooltip 
+            content="Choose your preferred language for the interface and communications."
+            position="top"
+            delay={300}
+          >
+            <label className="font-size-label">Language</label>
+          </Tooltip>
           <select 
             value={settings.profile.language}
             onChange={(e) => setSettings({...settings, profile: {...settings.profile, language: e.target.value}})}
@@ -526,72 +606,123 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Notification Preferences</h3>
       
+      <InfoAlert 
+        title="Notification Settings" 
+        type="info"
+        className="mb-4"
+      >
+        Choose how you want to be notified about important updates, messages, and activities. 
+        You can customize different types of notifications to stay informed without being overwhelmed.
+      </InfoAlert>
+      
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.emailNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, emailNotifications: e.target.checked}})}
-          />
-          Email notifications
-        </label>
+        <Tooltip 
+          content="Receive important updates and summaries via email. Great for staying informed about your mentoring activities."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.emailNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, emailNotifications: e.target.checked}})}
+            />
+            Email notifications
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.pushNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, pushNotifications: e.target.checked}})}
-          />
-          Push notifications
-        </label>
+        <Tooltip 
+          content="Get instant notifications on your device when you receive messages or important updates."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.pushNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, pushNotifications: e.target.checked}})}
+            />
+            Push notifications
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.smsNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, smsNotifications: e.target.checked}})}
-          />
-          SMS notifications
-        </label>
+        <Tooltip 
+          content="Receive text messages for urgent notifications. Useful when you're away from your computer."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.smsNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, smsNotifications: e.target.checked}})}
+            />
+            SMS notifications
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.inAppNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, inAppNotifications: e.target.checked}})}
-          />
-          In-app notifications
-        </label>
+        <Tooltip 
+          content="Show notifications within the app interface. These appear as banners or popups while you're using the platform."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.inAppNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, inAppNotifications: e.target.checked}})}
+            />
+            In-app notifications
+          </label>
+        </Tooltip>
       </div>
       
       <h4>Specific Notifications</h4>
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.newMessageAlerts}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, newMessageAlerts: e.target.checked}})}
-          />
-          New message alerts
-        </label>
+        <Tooltip 
+          content="Get notified immediately when you receive new messages from mentors or mentees."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.newMessageAlerts}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, newMessageAlerts: e.target.checked}})}
+            />
+            New message alerts
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.bookingReminders}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, bookingReminders: e.target.checked}})}
-          />
-          Booking reminders
-        </label>
+        <Tooltip 
+          content="Receive reminders about upcoming bookings and appointments to help you stay organized."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.bookingReminders}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, bookingReminders: e.target.checked}})}
+            />
+            Booking reminders
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.sessionReminders}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, sessionReminders: e.target.checked}})}
-          />
-          Session reminders
-        </label>
+        <Tooltip 
+          content="Get notified before your mentoring sessions start to ensure you're prepared and on time."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.sessionReminders}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, sessionReminders: e.target.checked}})}
+            />
+            Session reminders
+          </label>
+        </Tooltip>
         
         <label className="settings-checkbox-label">
           <input 
@@ -683,33 +814,60 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Mentoring Preferences</h3>
       
+      <InfoAlert 
+        title="Mentoring Setup" 
+        type="info"
+        className="mb-4"
+      >
+        Configure your mentoring preferences to help the platform match you with the right mentors or mentees. 
+        You can be both a mentor and mentee, or focus on one role.
+      </InfoAlert>
+      
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.mentoring.mentorMode}
-            onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, mentorMode: e.target.checked}})}
-          />
-          Enable mentor mode
-        </label>
+        <Tooltip 
+          content="Enable this to offer mentoring to others. You'll be visible to mentees looking for guidance in your areas of expertise."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.mentoring.mentorMode}
+              onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, mentorMode: e.target.checked}})}
+            />
+            Enable mentor mode
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.mentoring.menteeMode}
-            onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, menteeMode: e.target.checked}})}
-          />
-          Enable mentee mode
-        </label>
+        <Tooltip 
+          content="Enable this to seek mentoring from others. You'll be matched with mentors who can help you grow in your chosen areas."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.mentoring.menteeMode}
+              onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, menteeMode: e.target.checked}})}
+            />
+            Enable mentee mode
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.mentoring.availableForMentoring}
-            onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, availableForMentoring: e.target.checked}})}
-          />
-          Available for mentoring
-        </label>
+        <Tooltip 
+          content="Show that you're currently available to take on new mentees. This helps mentees know when you're accepting new mentoring relationships."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.mentoring.availableForMentoring}
+              onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, availableForMentoring: e.target.checked}})}
+            />
+            Available for mentoring
+          </label>
+        </Tooltip>
         
         <label className="settings-checkbox-label">
           <input 
@@ -877,8 +1035,23 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Appearance & Theme</h3>
       
+      <InfoAlert 
+        title="Customize Your Experience" 
+        type="info"
+        className="mb-4"
+      >
+        Personalize the look and feel of the platform to match your preferences. 
+        These settings help create a more comfortable and enjoyable experience.
+      </InfoAlert>
+      
       <div className="settings-form-group">
-        <label>Theme</label>
+        <Tooltip 
+          content="Choose your preferred color scheme. Light mode is easier on the eyes during the day, while dark mode is better for low-light environments."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Theme</label>
+        </Tooltip>
         <div className="settings-theme-selector">
           <label className="settings-theme-option">
             <input 
@@ -1038,112 +1211,198 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Accessibility Settings</h3>
       
+      <InfoAlert 
+        title="Accessibility Features" 
+        type="info"
+        className="mb-4"
+      >
+        These settings help make the website more accessible and easier to use. 
+        Changes are saved automatically and will persist across all your devices when you're logged in.
+      </InfoAlert>
+      
       <div className="settings-form-group">
-        <label>Font Size: {settings.accessibility.fontSize}px</label>
+        <Tooltip 
+          content="Adjust the font size across the entire website. This affects all text, buttons, and interface elements to make them easier to read. The setting is saved automatically and will remember your preference."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Font Size: {fontSize}px</label>
+        </Tooltip>
         <input 
           type="range" 
           min="12" 
           max="24" 
-          value={settings.accessibility.fontSize}
-          onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, fontSize: parseInt(e.target.value)}})}
+          value={fontSize}
+          onChange={(e) => setFontSize(parseInt(e.target.value))}
           className="settings-font-size-slider"
         />
         <div className="settings-slider-labels">
           <span>Small (12px)</span>
           <span>Large (24px)</span>
         </div>
+        
+        <InfoAlert 
+          title="💡 Pro Tip" 
+          type="tip"
+          className="mt-2"
+        >
+          Try adjusting the font size slider above to find your perfect reading size. 
+          The changes apply instantly across the entire website, and your preference 
+          will be remembered for future visits.
+        </InfoAlert>
       </div>
 
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.screenReader}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, screenReader: e.target.checked}})}
-          />
-          Screen reader support
-        </label>
+        <Tooltip 
+          content="Enables better support for screen readers and assistive technologies. This improves the experience for users who rely on screen readers to navigate the website."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.screenReader}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, screenReader: e.target.checked}})}
+            />
+            Screen reader support
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.highContrast}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, highContrast: e.target.checked}})}
-          />
-          High contrast mode
-        </label>
+        <Tooltip 
+          content="Increases the contrast between text and background colors to make content easier to read for users with visual impairments."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.highContrast}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, highContrast: e.target.checked}})}
+            />
+            High contrast mode
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.largeText}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, largeText: e.target.checked}})}
-          />
-          Large text mode
-        </label>
+        <Tooltip 
+          content="Enables the big text mode which increases font sizes across the entire website. This works together with the font size slider above to make text more readable."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={isBigTextEnabled}
+              onChange={toggleBigText}
+            />
+            <FaTextHeight style={{ marginRight: '8px' }} />
+            Big text mode (increases font size across the entire website)
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.reducedMotion}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, reducedMotion: e.target.checked}})}
-          />
-          Reduced motion
-        </label>
+        <Tooltip 
+          content="Reduces or eliminates animations and transitions for users who are sensitive to motion. This helps prevent dizziness and other motion-related discomfort."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.reducedMotion}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, reducedMotion: e.target.checked}})}
+            />
+            Reduced motion
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.keyboardNavigation}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, keyboardNavigation: e.target.checked}})}
-          />
-          Enhanced keyboard navigation
-        </label>
+        <Tooltip 
+          content="Enhances keyboard navigation by making it easier to navigate through the website using only the keyboard (Tab, Enter, Arrow keys)."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.keyboardNavigation}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, keyboardNavigation: e.target.checked}})}
+            />
+            Enhanced keyboard navigation
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.focusIndicators}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, focusIndicators: e.target.checked}})}
-          />
-          Enhanced focus indicators
-        </label>
+        <Tooltip 
+          content="Makes focus indicators more visible and prominent so users can easily see which element is currently selected when navigating with the keyboard."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.focusIndicators}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, focusIndicators: e.target.checked}})}
+            />
+            Enhanced focus indicators
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.colorBlindSupport}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, colorBlindSupport: e.target.checked}})}
-          />
-          Color blind support
-        </label>
+        <Tooltip 
+          content="Adjusts colors and provides alternative visual cues to make the website more accessible for users with color vision deficiencies."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.colorBlindSupport}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, colorBlindSupport: e.target.checked}})}
+            />
+            Color blind support
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.dyslexiaSupport}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, dyslexiaSupport: e.target.checked}})}
-          />
-          Dyslexia-friendly fonts
-        </label>
+        <Tooltip 
+          content="Uses fonts and text formatting that are easier to read for users with dyslexia, including better letter spacing and font choices."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.dyslexiaSupport}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, dyslexiaSupport: e.target.checked}})}
+            />
+            Dyslexia-friendly fonts
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.voiceControl}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, voiceControl: e.target.checked}})}
-          />
-          Voice control support
-        </label>
+        <Tooltip 
+          content="Enables voice control features that allow users to navigate and interact with the website using voice commands."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.voiceControl}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, voiceControl: e.target.checked}})}
+            />
+            Voice control support
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.accessibility.gestureControl}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, gestureControl: e.target.checked}})}
-          />
-          Gesture control support
-        </label>
+        <Tooltip 
+          content="Enables gesture-based navigation for touch devices, making it easier to navigate using swipes, pinches, and other touch gestures."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.accessibility.gestureControl}
+              onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, gestureControl: e.target.checked}})}
+            />
+            Gesture control support
+          </label>
+        </Tooltip>
       </div>
     </div>
   );
@@ -1185,7 +1444,9 @@ export default function Settings() {
             <nav className="settings-nav">
               {tabs.map(tab => {
                 const Icon = tab.icon;
-                return (
+                const isAccessibility = tab.id === 'accessibility';
+                
+                const button = (
                   <button
                     key={tab.id}
                     className={`settings-nav-item ${activeTab === tab.id ? 'active' : ''}`}
@@ -1195,6 +1456,12 @@ export default function Settings() {
                     <span>{tab.label}</span>
                   </button>
                 );
+
+                if (isAccessibility) {
+                  return button;
+                }
+
+                return button;
               })}
             </nav>
           </div>
@@ -1207,6 +1474,9 @@ export default function Settings() {
                 <button className="settings-btn settings-btn-secondary" onClick={handleReset}>
                   Reset to Default
                 </button>
+                <button className="settings-btn settings-btn-danger" onClick={handleDeleteAccount}>
+                  Delete Account
+                </button>
                 <button className="settings-btn settings-btn-primary" onClick={handleSave}>
                   <FaSave />
                   Save Settings
@@ -1216,6 +1486,47 @@ export default function Settings() {
           </div>
         </div>
       </div>
+      
+      {/* Modals */}
+      <ConfirmationModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={confirmReset}
+        title="Reset Settings"
+        message="Are you sure you want to reset all settings to their default values? This action cannot be undone and will affect all your preferences."
+        confirmText="Reset Settings"
+        cancelText="Cancel"
+        type="warning"
+      />
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteAccount}
+        title="Delete Account"
+        message="Are you absolutely sure you want to delete your account? This will permanently remove all your data, settings, and mentoring relationships. This action cannot be undone."
+        confirmText="Delete Account"
+        cancelText="Cancel"
+        type="error"
+      />
+      
+      <Modal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title={infoModalContent.title}
+        type="success"
+        size="small"
+      >
+        <p>{infoModalContent.content}</p>
+        <div className="modal-buttons">
+          <button
+            className="modal-button modal-button-primary"
+            onClick={() => setShowInfoModal(false)}
+          >
+            Got it
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 } 

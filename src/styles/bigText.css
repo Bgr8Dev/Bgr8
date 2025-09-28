@@ -1,0 +1,241 @@
+/* Big Text Global Styles */
+.big-text {
+  --font-size-multiplier: 1;
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  line-height: 1.6 !important;
+}
+
+.big-text h1 {
+  font-size: calc(var(--font-size-multiplier) * 2.5em) !important;
+  line-height: 1.3 !important;
+}
+
+.big-text h2 {
+  font-size: calc(var(--font-size-multiplier) * 2.2em) !important;
+  line-height: 1.3 !important;
+}
+
+.big-text h3 {
+  font-size: calc(var(--font-size-multiplier) * 1.9em) !important;
+  line-height: 1.4 !important;
+}
+
+.big-text h4 {
+  font-size: calc(var(--font-size-multiplier) * 1.6em) !important;
+  line-height: 1.4 !important;
+}
+
+.big-text h5 {
+  font-size: calc(var(--font-size-multiplier) * 1.4em) !important;
+  line-height: 1.5 !important;
+}
+
+.big-text h6 {
+  font-size: calc(var(--font-size-multiplier) * 1.2em) !important;
+  line-height: 1.5 !important;
+}
+
+.big-text p {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  line-height: 1.6 !important;
+}
+
+.big-text span {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text div {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text button {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) calc(var(--font-size-multiplier) * 1.6em) !important;
+}
+
+.big-text input {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+.big-text textarea {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+.big-text select {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+.big-text label {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text a {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text li {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  line-height: 1.6 !important;
+}
+
+.big-text td {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+.big-text th {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+/* Specific component adjustments */
+.big-text .navbar {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .navbar a {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .modal {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .modal-content {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .modal-header {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .modal-body {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .modal-footer {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .card {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .card-title {
+  font-size: calc(var(--font-size-multiplier) * 1.4em) !important;
+}
+
+.big-text .card-text {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .btn {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) calc(var(--font-size-multiplier) * 1.6em) !important;
+}
+
+.big-text .form-control {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+.big-text .form-label {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .alert {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .toast {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .dropdown-menu {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .dropdown-item {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+/* Table adjustments */
+.big-text table {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .table th,
+.big-text .table td {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) !important;
+}
+
+/* Navigation adjustments */
+.big-text .nav-link {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+  padding: calc(var(--font-size-multiplier) * 0.8em) calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .nav-item {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+/* Footer adjustments */
+.big-text .footer {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .footer a {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+/* Icon adjustments - make icons slightly larger too */
+.big-text .icon {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text svg {
+  width: calc(var(--font-size-multiplier) * 1em) !important;
+  height: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+.big-text .fa {
+  font-size: calc(var(--font-size-multiplier) * 1em) !important;
+}
+
+/* Spacing adjustments for better readability */
+.big-text .container {
+  line-height: 1.6 !important;
+}
+
+.big-text .row {
+  line-height: 1.6 !important;
+}
+
+.big-text .col {
+  line-height: 1.6 !important;
+}
+
+/* Big Text Indicator */
+.big-text-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.25em 0.5em;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+.big-text-indicator svg {
+  width: 1em;
+  height: 1em;
+}
