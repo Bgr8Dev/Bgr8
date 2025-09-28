@@ -399,8 +399,24 @@ export default function Settings() {
   const renderProfileSettings = () => (
     <div className="settings-section">
       <h3>Profile Information</h3>
+      
+      <InfoAlert 
+        title="Profile Setup" 
+        type="info"
+        className="mb-4"
+      >
+        Customize your profile information to help others learn more about you. 
+        This information will be visible to other users and helps with mentor matching.
+      </InfoAlert>
+      
       <div className="settings-form-group">
-        <label>Display Name</label>
+        <Tooltip 
+          content="Your display name is how other users will see you on the platform. Choose something professional and memorable."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Display Name</label>
+        </Tooltip>
         <input 
           type="text" 
           value={settings.profile.displayName}
@@ -410,7 +426,13 @@ export default function Settings() {
       </div>
       
       <div className="settings-form-group">
-        <label>Bio</label>
+        <Tooltip 
+          content="Write a brief description about yourself, your experience, and what you can offer as a mentor or what you're looking for as a mentee."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Bio</label>
+        </Tooltip>
         <textarea 
           value={settings.profile.bio}
           onChange={(e) => setSettings({...settings, profile: {...settings.profile, bio: e.target.value}})}
@@ -420,7 +442,13 @@ export default function Settings() {
       </div>
       
       <div className="settings-form-group">
-        <label>Profile Picture</label>
+        <Tooltip 
+          content="Upload a professional photo that represents you well. This helps build trust and makes your profile more engaging."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Profile Picture</label>
+        </Tooltip>
         <input 
           type="file" 
           accept="image/*"
@@ -430,7 +458,13 @@ export default function Settings() {
       
       <div className="settings-form-row">
         <div className="settings-form-group">
-          <label>Timezone</label>
+          <Tooltip 
+            content="Select your timezone to help others know when you're available for sessions and meetings."
+            position="top"
+            delay={300}
+          >
+            <label className="font-size-label">Timezone</label>
+          </Tooltip>
           <select 
             value={settings.profile.timezone}
             onChange={(e) => setSettings({...settings, profile: {...settings.profile, timezone: e.target.value}})}
@@ -443,7 +477,13 @@ export default function Settings() {
         </div>
         
         <div className="settings-form-group">
-          <label>Language</label>
+          <Tooltip 
+            content="Choose your preferred language for the interface and communications."
+            position="top"
+            delay={300}
+          >
+            <label className="font-size-label">Language</label>
+          </Tooltip>
           <select 
             value={settings.profile.language}
             onChange={(e) => setSettings({...settings, profile: {...settings.profile, language: e.target.value}})}
@@ -531,72 +571,123 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Notification Preferences</h3>
       
+      <InfoAlert 
+        title="Notification Settings" 
+        type="info"
+        className="mb-4"
+      >
+        Choose how you want to be notified about important updates, messages, and activities. 
+        You can customize different types of notifications to stay informed without being overwhelmed.
+      </InfoAlert>
+      
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.emailNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, emailNotifications: e.target.checked}})}
-          />
-          Email notifications
-        </label>
+        <Tooltip 
+          content="Receive important updates and summaries via email. Great for staying informed about your mentoring activities."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.emailNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, emailNotifications: e.target.checked}})}
+            />
+            Email notifications
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.pushNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, pushNotifications: e.target.checked}})}
-          />
-          Push notifications
-        </label>
+        <Tooltip 
+          content="Get instant notifications on your device when you receive messages or important updates."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.pushNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, pushNotifications: e.target.checked}})}
+            />
+            Push notifications
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.smsNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, smsNotifications: e.target.checked}})}
-          />
-          SMS notifications
-        </label>
+        <Tooltip 
+          content="Receive text messages for urgent notifications. Useful when you're away from your computer."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.smsNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, smsNotifications: e.target.checked}})}
+            />
+            SMS notifications
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.inAppNotifications}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, inAppNotifications: e.target.checked}})}
-          />
-          In-app notifications
-        </label>
+        <Tooltip 
+          content="Show notifications within the app interface. These appear as banners or popups while you're using the platform."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.inAppNotifications}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, inAppNotifications: e.target.checked}})}
+            />
+            In-app notifications
+          </label>
+        </Tooltip>
       </div>
       
       <h4>Specific Notifications</h4>
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.newMessageAlerts}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, newMessageAlerts: e.target.checked}})}
-          />
-          New message alerts
-        </label>
+        <Tooltip 
+          content="Get notified immediately when you receive new messages from mentors or mentees."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.newMessageAlerts}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, newMessageAlerts: e.target.checked}})}
+            />
+            New message alerts
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.bookingReminders}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, bookingReminders: e.target.checked}})}
-          />
-          Booking reminders
-        </label>
+        <Tooltip 
+          content="Receive reminders about upcoming bookings and appointments to help you stay organized."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.bookingReminders}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, bookingReminders: e.target.checked}})}
+            />
+            Booking reminders
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.notifications.sessionReminders}
-            onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, sessionReminders: e.target.checked}})}
-          />
-          Session reminders
-        </label>
+        <Tooltip 
+          content="Get notified before your mentoring sessions start to ensure you're prepared and on time."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.notifications.sessionReminders}
+              onChange={(e) => setSettings({...settings, notifications: {...settings.notifications, sessionReminders: e.target.checked}})}
+            />
+            Session reminders
+          </label>
+        </Tooltip>
         
         <label className="settings-checkbox-label">
           <input 
@@ -688,33 +779,60 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Mentoring Preferences</h3>
       
+      <InfoAlert 
+        title="Mentoring Setup" 
+        type="info"
+        className="mb-4"
+      >
+        Configure your mentoring preferences to help the platform match you with the right mentors or mentees. 
+        You can be both a mentor and mentee, or focus on one role.
+      </InfoAlert>
+      
       <div className="settings-checkbox-group">
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.mentoring.mentorMode}
-            onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, mentorMode: e.target.checked}})}
-          />
-          Enable mentor mode
-        </label>
+        <Tooltip 
+          content="Enable this to offer mentoring to others. You'll be visible to mentees looking for guidance in your areas of expertise."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.mentoring.mentorMode}
+              onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, mentorMode: e.target.checked}})}
+            />
+            Enable mentor mode
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.mentoring.menteeMode}
-            onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, menteeMode: e.target.checked}})}
-          />
-          Enable mentee mode
-        </label>
+        <Tooltip 
+          content="Enable this to seek mentoring from others. You'll be matched with mentors who can help you grow in your chosen areas."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.mentoring.menteeMode}
+              onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, menteeMode: e.target.checked}})}
+            />
+            Enable mentee mode
+          </label>
+        </Tooltip>
         
-        <label className="settings-checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={settings.mentoring.availableForMentoring}
-            onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, availableForMentoring: e.target.checked}})}
-          />
-          Available for mentoring
-        </label>
+        <Tooltip 
+          content="Show that you're currently available to take on new mentees. This helps mentees know when you're accepting new mentoring relationships."
+          position="right"
+          delay={400}
+        >
+          <label className="settings-checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={settings.mentoring.availableForMentoring}
+              onChange={(e) => setSettings({...settings, mentoring: {...settings.mentoring, availableForMentoring: e.target.checked}})}
+            />
+            Available for mentoring
+          </label>
+        </Tooltip>
         
         <label className="settings-checkbox-label">
           <input 
@@ -882,8 +1000,23 @@ export default function Settings() {
     <div className="settings-section">
       <h3>Appearance & Theme</h3>
       
+      <InfoAlert 
+        title="Customize Your Experience" 
+        type="info"
+        className="mb-4"
+      >
+        Personalize the look and feel of the platform to match your preferences. 
+        These settings help create a more comfortable and enjoyable experience.
+      </InfoAlert>
+      
       <div className="settings-form-group">
-        <label>Theme</label>
+        <Tooltip 
+          content="Choose your preferred color scheme. Light mode is easier on the eyes during the day, while dark mode is better for low-light environments."
+          position="top"
+          delay={300}
+        >
+          <label className="font-size-label">Theme</label>
+        </Tooltip>
         <div className="settings-theme-selector">
           <label className="settings-theme-option">
             <input 
