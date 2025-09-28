@@ -18,9 +18,12 @@ import {
 } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 import '../../styles/Settings.css';
+import '../../styles/modal.css';
 import { useBigText } from '../../contexts/BigTextContext';
 import Tooltip from '../../components/ui/Tooltip';
 import InfoAlert from '../../components/ui/InfoAlert';
+import Modal from '../../components/ui/Modal';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
 
 interface SettingsState {
   // Profile Settings
@@ -203,6 +206,12 @@ export default function Settings() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const { isBigTextEnabled, toggleBigText, fontSize, setFontSize } = useBigText();
+  
+  // Modal states
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [infoModalContent, setInfoModalContent] = useState({ title: '', content: '' });
   const [settings, setSettings] = useState<SettingsState>({
     profile: {
       displayName: '',
@@ -385,15 +394,41 @@ export default function Settings() {
   const handleSave = () => {
     // Save settings logic here
     console.log('Saving settings:', settings);
-    alert('Settings saved successfully!');
+    setInfoModalContent({
+      title: 'Settings Saved',
+      content: 'Your settings have been saved successfully! All changes have been applied and will be remembered for future visits.'
+    });
+    setShowInfoModal(true);
   };
 
   const handleReset = () => {
-    if (confirm('Are you sure you want to reset all settings to default?')) {
-      // Reset logic here
-      console.log('Resetting settings');
-      alert('Settings reset to default!');
-    }
+    setShowResetModal(true);
+  };
+
+  const confirmReset = () => {
+    // Reset logic here
+    console.log('Resetting settings');
+    setShowResetModal(false);
+    setInfoModalContent({
+      title: 'Settings Reset',
+      content: 'All settings have been reset to their default values. You can now customize them again to your preferences.'
+    });
+    setShowInfoModal(true);
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAccount = () => {
+    // Delete account logic here
+    console.log('Deleting account');
+    setShowDeleteModal(false);
+    setInfoModalContent({
+      title: 'Account Deletion',
+      content: 'Your account deletion request has been submitted. You will receive a confirmation email shortly. This action cannot be undone.'
+    });
+    setShowInfoModal(true);
   };
 
   const renderProfileSettings = () => (
@@ -1448,6 +1483,47 @@ export default function Settings() {
           </div>
         </div>
       </div>
+      
+      {/* Modals */}
+      <ConfirmationModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={confirmReset}
+        title="Reset Settings"
+        message="Are you sure you want to reset all settings to their default values? This action cannot be undone and will affect all your preferences."
+        confirmText="Reset Settings"
+        cancelText="Cancel"
+        type="warning"
+      />
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteAccount}
+        title="Delete Account"
+        message="Are you absolutely sure you want to delete your account? This will permanently remove all your data, settings, and mentoring relationships. This action cannot be undone."
+        confirmText="Delete Account"
+        cancelText="Cancel"
+        type="error"
+      />
+      
+      <Modal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title={infoModalContent.title}
+        type="success"
+        size="small"
+      >
+        <p>{infoModalContent.content}</p>
+        <div className="modal-buttons">
+          <button
+            className="modal-button modal-button-primary"
+            onClick={() => setShowInfoModal(false)}
+          >
+            Got it
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 } 
