@@ -13,10 +13,12 @@ import {
   FaDesktop,
   FaMoon,
   FaSun,
-  FaEnvelope
+  FaEnvelope,
+  FaTextHeight
 } from 'react-icons/fa';
 import '../../styles/Overlay.css';
 import '../../styles/Settings.css';
+import { useBigText } from '../../contexts/BigTextContext';
 
 interface SettingsState {
   // Profile Settings
@@ -198,6 +200,7 @@ interface SettingsState {
 export default function Settings() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  const { isBigTextEnabled, toggleBigText, fontSize, setFontSize } = useBigText();
   const [settings, setSettings] = useState<SettingsState>({
     profile: {
       displayName: '',
@@ -1039,13 +1042,13 @@ export default function Settings() {
       <h3>Accessibility Settings</h3>
       
       <div className="settings-form-group">
-        <label>Font Size: {settings.accessibility.fontSize}px</label>
+        <label>Font Size: {fontSize}px</label>
         <input 
           type="range" 
           min="12" 
           max="24" 
-          value={settings.accessibility.fontSize}
-          onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, fontSize: parseInt(e.target.value)}})}
+          value={fontSize}
+          onChange={(e) => setFontSize(parseInt(e.target.value))}
           className="settings-font-size-slider"
         />
         <div className="settings-slider-labels">
@@ -1076,10 +1079,11 @@ export default function Settings() {
         <label className="settings-checkbox-label">
           <input 
             type="checkbox" 
-            checked={settings.accessibility.largeText}
-            onChange={(e) => setSettings({...settings, accessibility: {...settings.accessibility, largeText: e.target.checked}})}
+            checked={isBigTextEnabled}
+            onChange={toggleBigText}
           />
-          Large text mode
+          <FaTextHeight style={{ marginRight: '8px' }} />
+          Big text mode (increases font size across the entire website)
         </label>
         
         <label className="settings-checkbox-label">
