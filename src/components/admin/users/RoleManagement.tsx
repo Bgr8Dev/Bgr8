@@ -356,7 +356,7 @@ export default function RoleManagement() {
   if (loading) {
     return (
       <div className="role-management-loading">
-        <div className="loading-spinner"></div>
+        <div className="rm-loading-spinner"></div>
         <p>Loading users...</p>
       </div>
     );
@@ -366,8 +366,8 @@ export default function RoleManagement() {
   if (!canManageRoles) {
     return (
       <div className="role-management-access-denied">
-        <div className="access-denied-content">
-          <div className="access-denied-icon">
+        <div className="rm-access-denied-content">
+          <div className="rm-access-denied-icon">
             <FaShieldAlt />
           </div>
           <h2>Access Denied</h2>
@@ -379,29 +379,29 @@ export default function RoleManagement() {
   }
 
   return (
-    <div className="role-management">
-      <div className="role-management-header">
+    <div className="rm-role-management">
+      <div className="rm-role-management-header">
         <h2>Role Management</h2>
         <p>Manage user roles and permissions across the platform</p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="role-stats">
-        <div className="stat-card total">
-          <div className="stat-icon">
+      <div className="rm-role-stats">
+        <div className="rm-stat-card rm-total">
+          <div className="rm-stat-icon">
             <FaUsers />
           </div>
-          <div className="stat-content">
+          <div className="rm-stat-content">
             <h3>Total Users</h3>
             <p>{userStats.total}</p>
           </div>
         </div>
         
-        <div className="stat-card new">
-          <div className="stat-icon">
+        <div className="rm-stat-card rm-new">
+          <div className="rm-stat-icon">
             <FaChartBar />
           </div>
-          <div className="stat-content">
+          <div className="rm-stat-content">
             <h3>New This Month</h3>
             <p>{userStats.newThisMonth}</p>
           </div>
@@ -410,15 +410,15 @@ export default function RoleManagement() {
         {ROLES.map(role => (
           <div 
             key={role.key} 
-            className={`stat-card ${roleFilter === role.key ? 'active' : ''}`} 
+            className={`rm-stat-card ${roleFilter === role.key ? 'active' : ''}`} 
             style={{ borderLeftColor: role.color, cursor: 'pointer' }}
             onClick={() => setRoleFilter(roleFilter === role.key ? 'all' : role.key)}
             title={`Click to filter by ${role.name}`}
           >
-            <div className="stat-icon" style={{ color: role.color }}>
+            <div className="rm-stat-icon" style={{ color: role.color }}>
               {role.icon}
             </div>
-            <div className="stat-content">
+            <div className="rm-stat-content">
               <h3>{role.name}</h3>
               <p>{getRoleCount(role.key)}</p>
             </div>
@@ -427,24 +427,24 @@ export default function RoleManagement() {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="role-controls">
-        <div className="search-container">
-          <FaSearch className="search-icon" />
+      <div className="rm-role-controls">
+        <div className="rm-search-container">
+          <FaSearch className="rm-search-icon" />
           <input
             type="text"
             placeholder="Search users by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className="rm-search-input"
           />
         </div>
 
-        <div className="filter-container">
-          <FaFilter className="filter-icon" />
+        <div className="rm-filter-container">
+          <FaFilter className="rm-filter-icon" />
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="role-filter"
+            className="rm-role-filter"
           >
             <option value="all">All Roles</option>
             {ROLES.map(role => (
@@ -455,7 +455,7 @@ export default function RoleManagement() {
           </select>
           {roleFilter !== 'all' && (
             <button
-              className="clear-filter-btn"
+              className="rm-clear-filter-btn"
               onClick={() => setRoleFilter('all')}
               title="Clear filter"
             >
@@ -467,16 +467,16 @@ export default function RoleManagement() {
 
       {/* Filter Status */}
       {roleFilter !== 'all' && (
-        <div className="filter-status">
-          <span className="filter-status-text">
+        <div className="rm-filter-status">
+          <span className="rm-filter-status-text">
             Showing {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} with {ROLES.find(r => r.key === roleFilter)?.name} role
           </span>
         </div>
       )}
 
       {/* Users Table */}
-      <div className="users-table-container">
-        <table className="users-table">
+      <div className="rm-users-table-container">
+        <table className="rm-users-table">
           <thead>
             <tr>
               <th>User</th>
@@ -489,25 +489,25 @@ export default function RoleManagement() {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.uid}>
-                <td className="user-info">
-                  <div className="user-name">
+                <td className="rm-user-info">
+                  <div className="rm-user-name">
                     {user.firstName} {user.lastName}
                     {user.isProtected && (
                       <FaLock 
-                        className="protected-indicator" 
+                        className="rm-protected-indicator" 
                         title="Protected Account - Roles cannot be modified"
                         style={{ marginLeft: '8px', color: '#e53e3e' }}
                       />
                     )}
                   </div>
                 </td>
-                <td className="user-email">{user.email}</td>
-                <td className="user-roles">
-                  <div className="role-badges">
+                <td className="rm-user-email">{user.email}</td>
+                <td className="rm-user-roles">
+                  <div className="rm-role-badges">
                     {getUserRoles(user).map(role => (
                       <span
                         key={role.key}
-                        className="role-badge"
+                        className="rm-role-badge"
                         style={{ backgroundColor: role.color }}
                         title={role.description}
                       >
@@ -516,20 +516,20 @@ export default function RoleManagement() {
                       </span>
                     ))}
                     {getUserRoles(user).length === 0 && (
-                      <span className="no-roles">No roles assigned</span>
+                      <span className="rm-no-roles">No roles assigned</span>
                     )}
                   </div>
                 </td>
-                <td className="user-date">
+                <td className="rm-user-date">
                   {user.dateCreated?.toDate().toLocaleDateString()}
                 </td>
-                <td className="user-actions">
-                  <div className="role-management-container">
-                    <div className="role-badges-display">
+                <td className="rm-user-actions">
+                  <div className="rm-role-management-container">
+                    <div className="rm-role-badges-display">
                       {getUserRoles(user).map(role => (
                         <span
                           key={role.key}
-                          className="role-badge-small"
+                          className="rm-role-badge-small"
                           style={{ backgroundColor: role.color }}
                           title={role.description}
                         >
@@ -538,11 +538,11 @@ export default function RoleManagement() {
                         </span>
                       ))}
                       {getUserRoles(user).length === 0 && (
-                        <span className="no-roles-small">No roles</span>
+                        <span className="rm-no-roles-small">No roles</span>
                       )}
                     </div>
                     <button
-                      className={`manage-roles-btn ${user.isProtected ? 'disabled' : ''}`}
+                      className={`rm-manage-roles-btn ${user.isProtected ? 'disabled' : ''}`}
                       onClick={() => {
                         if (user.isProtected) {
                           alert('This account is protected and cannot have its roles modified.');
@@ -565,8 +565,8 @@ export default function RoleManagement() {
       </div>
 
       {filteredUsers.length === 0 && (
-        <div className="no-users">
-          <FaUsers className="no-users-icon" />
+        <div className="rm-no-users">
+          <FaUsers className="rm-no-users-icon" />
           <h3>No users found</h3>
           <p>Try adjusting your search or filter criteria</p>
         </div>
