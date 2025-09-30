@@ -244,15 +244,87 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, []);
 
-  // Handle content change
+  // Save cursor position
+  const saveCursorPosition = useCallback(() => {
+    if (editorRef.current) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(editorRef.current);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        const caretOffset = preCaretRange.toString().length;
+        return caretOffset;
+      }
+    }
+    return 0;
+  }, []);
+
+  // Restore cursor position
+  const restoreCursorPosition = useCallback((offset: number) => {
+    if (editorRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = document.createRange();
+        const walker = document.createTreeWalker(
+          editorRef.current,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false
+        );
+        
+        let currentOffset = 0;
+        let targetNode = null;
+        let targetOffset = 0;
+        
+        let node;
+        while (node = walker.nextNode()) {
+          const nodeLength = node.textContent?.length || 0;
+          if (currentOffset + nodeLength >= offset) {
+            targetNode = node;
+            targetOffset = offset - currentOffset;
+            break;
+          }
+          currentOffset += nodeLength;
+        }
+        
+        if (targetNode) {
+          range.setStart(targetNode, targetOffset);
+          range.setEnd(targetNode, targetOffset);
+        } else {
+          // If we can't find the exact position, put cursor at the end
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+        }
+        
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+  }, []);
+
+  // Handle content change with cursor preservation
   const handleContentChange = useCallback(() => {
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
       if (newContent !== content) {
+        const cursorPosition = saveCursorPosition();
         onChange(newContent);
+        // Restore cursor position after state update
+        setTimeout(() => restoreCursorPosition(cursorPosition), 0);
       }
     }
-  }, [content, onChange]);
+  }, [content, onChange, saveCursorPosition, restoreCursorPosition]);
+
+  // Sync content when it changes externally (e.g., from templates)
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== content) {
+      const cursorPosition = saveCursorPosition();
+      editorRef.current.innerHTML = content;
+      // Restore cursor position after content update
+      setTimeout(() => restoreCursorPosition(cursorPosition), 0);
+    }
+  }, [content, saveCursorPosition, restoreCursorPosition]);
 
   // Execute command
   const execCommand = useCallback((command: string, value?: string) => {
@@ -688,7 +760,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           ref={editorRef}
           className={`rich-text-editor-content ${isFocused ? 'focused' : ''}`}
           contentEditable={!disabled}
-          dangerouslySetInnerHTML={{ __html: content }}
+          suppressContentEditableWarning={true}
           onInput={handleContentChange}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
@@ -698,7 +770,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onKeyUp={updateFormat}
           style={{ minHeight: '400px' }}
           data-placeholder={placeholder}
-        />
+        >
+          {/* Content will be managed by the contenteditable itself */}
+        </div>
       </div>
 
       {(showWordCount || showCharCount) && (

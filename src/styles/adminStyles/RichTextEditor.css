@@ -1,4 +1,4 @@
-/* Rich Text Editor Styles */
+/* Rich Text Editor Styles - Clean Rebuild */
 .rich-text-editor {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -297,29 +297,59 @@
   box-shadow: none;
 }
 
-/* Editor Content */
+/* Editor Content - Clean Rebuild */
 .rich-text-content {
   position: relative;
+  background: transparent;
 }
 
+/* NEW: Clean contenteditable area */
 .rich-text-editor-content {
+  /* Reset everything to defaults first */
+  all: initial;
+  
+  /* Basic layout */
+  display: block;
+  position: relative;
   padding: 2rem;
   min-height: 400px;
-  background: transparent;
-  color: #ffffff;
-  font-size: 1rem;
-  line-height: 1.6;
+  width: 100%;
+  box-sizing: border-box;
+  
+  /* Typography */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  outline: none;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #ffffff;
+  
+  /* Visual styling */
+  background: transparent;
   border: none;
+  outline: none;
   resize: none;
   overflow-y: auto;
-  position: relative;
+  
+  /* Text flow - explicitly set to normal */
+  direction: ltr;
+  writing-mode: horizontal-tb;
+  text-align: left;
+  vertical-align: top;
+  
+  /* Ensure no transforms */
+  transform: none;
+  
+  /* User interaction */
+  user-select: text;
+  cursor: text;
+  
+  /* Z-index for layering */
   z-index: 1;
 }
 
 .rich-text-editor-content:focus {
   outline: none;
+  /* Add subtle focus indicator */
+  box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
 .rich-text-editor-content[contenteditable="true"]:empty:before {
@@ -333,7 +363,7 @@
   box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
-/* Editor Content Styling */
+/* Editor Content Styling - Clean */
 .rich-text-editor-content h1,
 .rich-text-editor-content h2,
 .rich-text-editor-content h3,
