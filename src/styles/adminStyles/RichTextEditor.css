@@ -21,8 +21,8 @@
   background: rgba(15, 23, 42, 0.95);
 }
 
-/* Toolbar */
-.rich-text-toolbar {
+/* Toolbar - Scoped to Rich Text Editor */
+.rich-text-editor .rich-text-toolbar {
   display: flex !important;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -35,7 +35,7 @@
   opacity: 1 !important;
 }
 
-.toolbar-group {
+.rich-text-editor .toolbar-group {
   display: flex !important;
   gap: 0.25rem;
   padding-right: 1rem;
@@ -44,11 +44,11 @@
   opacity: 1 !important;
 }
 
-.toolbar-group:last-child {
+.rich-text-editor .toolbar-group:last-child {
   border-right: none;
 }
 
-.toolbar-btn {
+.rich-text-editor .toolbar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@
   overflow: hidden;
 }
 
-.toolbar-btn::before {
+.rich-text-editor .toolbar-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -77,19 +77,19 @@
   transition: opacity 0.2s ease;
 }
 
-.toolbar-btn:hover::before {
+.rich-text-editor .toolbar-btn:hover::before {
   opacity: 1;
 }
 
-.toolbar-btn:hover {
+.rich-text-editor .toolbar-btn:hover {
   border-color: #3b82f6;
   color: #1e293b;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
-/* React Icons SVG handling */
-.toolbar-btn svg {
+/* React Icons SVG handling - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn svg {
   width: 16px !important;
   height: 16px !important;
   fill: #1e293b !important;
@@ -101,7 +101,7 @@
   position: relative;
 }
 
-.toolbar-btn:hover svg {
+.rich-text-editor .toolbar-btn:hover svg {
   fill: #1e293b !important;
   color: #1e293b !important;
   display: block !important;
@@ -109,10 +109,10 @@
   opacity: 1 !important;
 }
 
-/* FontAwesome and other icon fonts */
-.toolbar-btn i,
-.toolbar-btn .fa,
-.toolbar-btn [class*="fa-"] {
+/* FontAwesome and other icon fonts - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn i,
+.rich-text-editor .toolbar-btn .fa,
+.rich-text-editor .toolbar-btn [class*="fa-"] {
   color: #1e293b !important;
   font-size: 16px !important;
   display: block !important;
@@ -122,45 +122,45 @@
   position: relative;
 }
 
-.toolbar-btn:hover i,
-.toolbar-btn:hover .fa,
-.toolbar-btn:hover [class*="fa-"] {
+.rich-text-editor .toolbar-btn:hover i,
+.rich-text-editor .toolbar-btn:hover .fa,
+.rich-text-editor .toolbar-btn:hover [class*="fa-"] {
   color: #1e293b !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* Universal icon container - handles any child element */
-.toolbar-btn > * {
+/* Universal icon container - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn > * {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  color: #1e293b !important;
-  fill: #1e293b !important;
-}
-
-.toolbar-btn:hover > * {
   color: #1e293b !important;
   fill: #1e293b !important;
+}
+
+.rich-text-editor .toolbar-btn:hover > * {
+  color: #1e293b !important;
+  fill: #1e293b !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-.toolbar-btn.active {
+.rich-text-editor .toolbar-btn.active {
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   border-color: #3b82f6;
   color: white;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
-.toolbar-btn.active::before {
+.rich-text-editor .toolbar-btn.active::before {
   opacity: 0;
 }
 
-/* Active state - React Icons SVG */
-.toolbar-btn.active svg {
+/* Active state - React Icons SVG - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn.active svg {
   fill: white !important;
   color: white !important;
   display: block !important;
@@ -168,18 +168,18 @@
   opacity: 1 !important;
 }
 
-/* Active state - FontAwesome and icon fonts */
-.toolbar-btn.active i,
-.toolbar-btn.active .fa,
-.toolbar-btn.active [class*="fa-"] {
+/* Active state - FontAwesome and icon fonts - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn.active i,
+.rich-text-editor .toolbar-btn.active .fa,
+.rich-text-editor .toolbar-btn.active [class*="fa-"] {
   color: white !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* Active state - Universal */
-.toolbar-btn.active > * {
+/* Active state - Universal - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn.active > * {
   color: white !important;
   fill: white !important;
   display: block !important;
@@ -187,15 +187,15 @@
   opacity: 1 !important;
 }
 
-.toolbar-btn.disabled {
+.rich-text-editor .toolbar-btn.disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   background: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Disabled state - React Icons SVG */
-.toolbar-btn.disabled svg {
+/* Disabled state - React Icons SVG - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn.disabled svg {
   fill: #64748b !important;
   color: #64748b !important;
   display: block !important;
@@ -203,18 +203,18 @@
   opacity: 0.8 !important;
 }
 
-/* Disabled state - FontAwesome and icon fonts */
-.toolbar-btn.disabled i,
-.toolbar-btn.disabled .fa,
-.toolbar-btn.disabled [class*="fa-"] {
+/* Disabled state - FontAwesome and icon fonts - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn.disabled i,
+.rich-text-editor .toolbar-btn.disabled .fa,
+.rich-text-editor .toolbar-btn.disabled [class*="fa-"] {
   color: #64748b !important;
   display: block !important;
   visibility: visible !important;
   opacity: 0.8 !important;
 }
 
-/* Disabled state - Universal */
-.toolbar-btn.disabled > * {
+/* Disabled state - Universal - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn.disabled > * {
   color: #64748b !important;
   fill: #64748b !important;
   display: block !important;
@@ -222,77 +222,77 @@
   opacity: 0.8 !important;
 }
 
-/* React Icons specific handling */
-.toolbar-btn svg path {
+/* React Icons specific handling - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn svg path {
   fill: inherit !important;
   stroke: none !important;
 }
 
-.toolbar-btn:hover svg path {
+.rich-text-editor .toolbar-btn:hover svg path {
   fill: inherit !important;
   stroke: none !important;
 }
 
-.toolbar-btn.active svg path {
+.rich-text-editor .toolbar-btn.active svg path {
   fill: inherit !important;
   stroke: none !important;
 }
 
-.toolbar-btn.disabled svg path {
+.rich-text-editor .toolbar-btn.disabled svg path {
   fill: inherit !important;
   stroke: none !important;
 }
 
-/* Override any potential hiding rules */
-.toolbar-btn * {
+/* Override any potential hiding rules - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn * {
   display: block !important;
   visibility: visible !important;
 }
 
-/* Ensure button content is always visible */
-.toolbar-btn {
+/* Ensure button content is always visible - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* Force all direct children to be visible */
-.toolbar-btn > * {
+/* Force all direct children to be visible - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn > * {
   display: block !important;
   visibility: visible !important;
   opacity: inherit !important;
 }
 
-/* React Icons library specific overrides */
-.toolbar-btn svg[data-icon],
-.toolbar-btn svg[class*="react-icons"] {
+/* React Icons library specific overrides - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn svg[data-icon],
+.rich-text-editor .toolbar-btn svg[class*="react-icons"] {
   width: 16px !important;
   height: 16px !important;
   fill: currentColor !important;
   color: inherit !important;
 }
 
-/* FontAwesome React Icons */
-.toolbar-btn svg[class*="fa-"] {
+/* FontAwesome React Icons - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn svg[class*="fa-"] {
   width: 16px !important;
   height: 16px !important;
   fill: currentColor !important;
   color: inherit !important;
 }
 
-/* Ensure SVG viewBox is respected */
-.toolbar-btn svg {
+/* Ensure SVG viewBox is respected - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn svg {
   flex-shrink: 0;
   flex-grow: 0;
 }
 
-/* Handle any nested SVG elements */
-.toolbar-btn svg svg {
+/* Handle any nested SVG elements - Scoped to Rich Text Editor */
+.rich-text-editor .toolbar-btn svg svg {
   width: 100% !important;
   height: 100% !important;
 }
 
-.toolbar-btn.disabled:hover {
+.rich-text-editor .toolbar-btn.disabled:hover {
   transform: none;
   box-shadow: none;
 }
