@@ -10,13 +10,13 @@ interface RoleSelectionProps {
 export const RoleSelection: React.FC<RoleSelectionProps> = ({ onRoleSelect }) => {
   return (
     <div className="rs-mentor-role-selection">
-      <div className="rs-role-cards">
-        <div className="rs-role-card rs-mentor" onClick={() => onRoleSelect(MENTOR)}>
+      <div className="rs-role-selection-cards">
+        <div className="rs-role-selection-card rs-mentor-selection" onClick={() => onRoleSelect(MENTOR)}>
           <FaChalkboardTeacher size={48} />
           <h3>Become a Mentor</h3>
           <p>Share your expertise and help guide the next generation. List your skills and get matched with mentees looking for your knowledge.</p>
         </div>
-        <div className="rs-role-card rs-mentee" onClick={() => onRoleSelect(MENTEE)}>
+        <div className="rs-role-selection-card rs-mentee-selection" onClick={() => onRoleSelect(MENTEE)}>
           <FaUserGraduate size={48} />
           <h3>Become a Mentee</h3>
           <p>Find a mentor to help you grow. Tell us what skills you're looking for and get matched with the right mentor for you.</p>
