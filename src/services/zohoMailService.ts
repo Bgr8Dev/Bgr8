@@ -29,11 +29,25 @@ export interface ZohoAttachment {
   contentType: string;
 }
 
+export interface ZohoAccountInfo {
+  accountId: string;
+  email: string;
+  displayName: string;
+  quota: {
+    used: number;
+    total: number;
+  };
+  settings: {
+    timezone: string;
+    language: string;
+  };
+}
+
 export interface ZohoEmailResponse {
   success: boolean;
   messageId?: string;
   error?: string;
-  details?: any;
+  details?: ZohoAccountInfo | Record<string, unknown>;
 }
 
 export class ZohoMailService {
@@ -202,7 +216,7 @@ export class ZohoMailService {
   /**
    * Get account information
    */
-  static async getAccountInfo(): Promise<{ success: boolean; data?: any; error?: string }> {
+  static async getAccountInfo(): Promise<{ success: boolean; data?: ZohoAccountInfo; error?: string }> {
     if (!this.config) {
       return { success: false, error: 'Zoho Mail not initialized' };
     }

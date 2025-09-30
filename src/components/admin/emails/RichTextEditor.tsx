@@ -269,16 +269,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         const walker = document.createTreeWalker(
           editorRef.current,
           NodeFilter.SHOW_TEXT,
-          null,
-          false
+          null
         );
         
         let currentOffset = 0;
         let targetNode = null;
         let targetOffset = 0;
         
-        let node;
-        while (node = walker.nextNode()) {
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
           const nodeLength = node.textContent?.length || 0;
           if (currentOffset + nodeLength >= offset) {
             targetNode = node;

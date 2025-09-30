@@ -26,11 +26,23 @@ export interface EmailApiMessage {
   }[];
 }
 
+export interface EmailStats {
+  sent: number;
+  delivered: number;
+  failed: number;
+  pending: number;
+  lastSent?: string;
+  quota: {
+    used: number;
+    total: number;
+  };
+}
+
 export interface EmailApiResponse {
   success: boolean;
   messageId?: string;
   error?: string;
-  details?: any;
+  details?: EmailStats | Record<string, unknown>;
 }
 
 export class EmailApiService {
@@ -171,7 +183,7 @@ export class EmailApiService {
   /**
    * Get email statistics
    */
-  static async getEmailStats(): Promise<{ success: boolean; data?: any; error?: string }> {
+  static async getEmailStats(): Promise<{ success: boolean; data?: EmailStats; error?: string }> {
     if (!this.config) {
       return { success: false, error: 'Email API not initialized' };
     }
