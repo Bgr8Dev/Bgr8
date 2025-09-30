@@ -63,7 +63,7 @@ export const UserRoleBadge: React.FC<UserRoleBadgeProps> = ({
   const remainingCount = roles.length - displayRoles.length;
 
   return (
-    <div className="user-role-badges">
+    <div className="user-role-badge-container">
       {displayRoles.map(role => {
         const Icon = roleIcons[role];
         const color = roleColors[role];
@@ -72,17 +72,17 @@ export const UserRoleBadge: React.FC<UserRoleBadgeProps> = ({
         return (
           <div 
             key={role} 
-            className="user-role-badge"
+            className="user-role-badge-item"
             style={{ borderColor: color, color: color }}
             title={`${name} role`}
           >
-            <Icon className="role-icon" />
-            <span className="role-name">{name}</span>
+            <Icon className="user-role-badge-icon" />
+            <span className="user-role-badge-name">{name}</span>
           </div>
         );
       })}
       {remainingCount > 0 && (
-        <div className="user-role-badge more-roles" title={`+${remainingCount} more roles`}>
+        <div className="user-role-badge-item user-role-badge-more" title={`+${remainingCount} more roles`}>
           +{remainingCount}
         </div>
       )}

@@ -1,12 +1,12 @@
 /* User Role Badge */
-.user-role-badges {
+.user-role-badge-container {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
 }
 
-.user-role-badge {
+.user-role-badge-item {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -21,28 +21,28 @@
   white-space: nowrap;
 }
 
-.user-role-badge:hover {
+.user-role-badge-item:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.role-icon {
+.user-role-badge-icon {
   font-size: 0.875rem;
 }
 
-.role-name {
+.user-role-badge-name {
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-.more-roles {
+.user-role-badge-more {
   background: #f7fafc;
   border-color: #e2e8f0;
   color: #718096;
   font-weight: 500;
 }
 
-.more-roles:hover {
+.user-role-badge-more:hover {
   background: #edf2f7;
   border-color: #cbd5e0;
 }
