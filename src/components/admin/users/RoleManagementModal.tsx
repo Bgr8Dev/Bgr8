@@ -65,21 +65,21 @@ export default function RoleManagementModal({
   // Access control check
   if (!canManageRoles) {
     return createPortal(
-      <div className="role-modal-overlay" onClick={onClose}>
-        <div className="role-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="role-modal-header">
+      <div className="rmm-role-modal-overlay" onClick={onClose}>
+        <div className="rmm-role-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="rmm-role-modal-header">
             <h3>Access Denied</h3>
             <button 
-              className="role-modal-close"
+              className="rmm-role-modal-close"
               onClick={onClose}
               aria-label="Close modal"
             >
               <FaTimes />
             </button>
           </div>
-          <div className="role-modal-content">
-            <div className="access-denied-modal">
-              <div className="access-denied-icon">
+          <div className="rmm-role-modal-content">
+            <div className="rmm-access-denied-modal">
+              <div className="rmm-access-denied-icon">
                 <FaShieldAlt />
               </div>
               <h4>Insufficient Permissions</h4>
@@ -87,8 +87,8 @@ export default function RoleManagementModal({
               <p>Please contact an administrator if you believe this is an error.</p>
             </div>
           </div>
-          <div className="role-modal-footer">
-            <button className="role-modal-btn" onClick={onClose}>
+          <div className="rmm-role-modal-footer">
+            <button className="rmm-role-modal-btn" onClick={onClose}>
               Close
             </button>
           </div>
@@ -99,31 +99,31 @@ export default function RoleManagementModal({
   }
 
   return createPortal(
-    <div className="role-modal-overlay" onClick={onClose}>
-      <div className="role-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="role-modal-header">
+    <div className="rmm-role-modal-overlay" onClick={onClose}>
+      <div className="rmm-role-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="rmm-role-modal-header">
           <h3>Manage Roles for {selectedUser.firstName} {selectedUser.lastName}</h3>
           <button 
-            className="role-modal-close"
+            className="rmm-role-modal-close"
             onClick={onClose}
             aria-label="Close modal"
           >
             <FaTimes />
           </button>
         </div>
-        <div className="role-modal-content">
-          <p className="role-modal-email">{selectedUser.email}</p>
+        <div className="rmm-role-modal-content">
+          <p className="rmm-role-modal-email">{selectedUser.email}</p>
           {selectedUser.isProtected && (
-            <div className="protected-account-warning">
+            <div className="rmm-protected-account-warning">
               <FaShieldAlt />
               <span>This account is protected and roles cannot be modified.</span>
             </div>
           )}
-          <div className="role-modal-roles">
+          <div className="rmm-role-modal-roles">
             {roles.map(role => (
               <label 
                 key={role.key} 
-                className={`role-modal-toggle ${selectedUser.roles[role.key] ? 'active' : ''} ${pulsingRole === role.key ? 'pulse' : ''} ${selectedUser.isProtected ? 'disabled' : ''}`}
+                className={`rmm-role-modal-toggle ${selectedUser.roles[role.key] ? 'active' : ''} ${pulsingRole === role.key ? 'pulse' : ''} ${selectedUser.isProtected ? 'disabled' : ''}`}
               >
                 <input
                   type="checkbox"
@@ -131,20 +131,20 @@ export default function RoleManagementModal({
                   onChange={() => onToggleRole(selectedUser.uid, role.key, selectedUser.roles[role.key])}
                   disabled={selectedUser.isProtected}
                 />
-                <span className="role-modal-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
-                  <span className="role-modal-icon">{role.icon}</span>
+                <span className="rmm-role-modal-slider" style={{ '--role-color': role.color } as React.CSSProperties}>
+                  <span className="rmm-role-modal-icon">{role.icon}</span>
                 </span>
-                <div className="role-modal-info">
-                  <span className="role-modal-name">{role.name}</span>
-                  <span className="role-modal-description">{role.description}</span>
+                <div className="rmm-role-modal-info">
+                  <span className="rmm-role-modal-name">{role.name}</span>
+                  <span className="rmm-role-modal-description">{role.description}</span>
                 </div>
               </label>
             ))}
           </div>
         </div>
-        <div className="role-modal-footer">
+        <div className="rmm-role-modal-footer">
           <button 
-            className="role-modal-save"
+            className="rmm-role-modal-save"
             onClick={onClose}
           >
             Done
