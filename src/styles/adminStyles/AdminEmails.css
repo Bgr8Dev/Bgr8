@@ -901,20 +901,22 @@
   height: 36px;
   min-width: 36px;
   min-height: 36px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #64748b;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
   font-size: 16px;
+  font-weight: 500;
 }
 
 .email-toolbar-btn svg {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  color: #1e293b;
 }
 
 .email-toolbar-btn:hover {
@@ -925,8 +927,35 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
+.email-toolbar-btn:hover svg {
+  color: white;
+}
+
 .email-toolbar-btn:active {
   transform: translateY(0);
+}
+
+/* Additional styles for better icon visibility */
+.email-toolbar-btn i,
+.email-toolbar-btn .fa,
+.email-toolbar-btn [class*="fa-"] {
+  color: #1e293b !important;
+  font-size: 14px;
+}
+
+.email-toolbar-btn:hover i,
+.email-toolbar-btn:hover .fa,
+.email-toolbar-btn:hover [class*="fa-"] {
+  color: white !important;
+}
+
+/* Ensure all icon types are visible */
+.email-toolbar-btn * {
+  color: inherit;
+}
+
+.email-toolbar-btn:hover * {
+  color: white !important;
 }
 
 .email-editor-content {
