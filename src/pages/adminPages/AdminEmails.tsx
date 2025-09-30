@@ -23,6 +23,7 @@ import {
 import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
 import { useAuth } from '../../hooks/useAuth';
 import RichTextEditor from '../../components/admin/emails/RichTextEditor';
+import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
 import '../../styles/adminStyles/AdminEmails.css';
 import '../../styles/adminStyles/RichTextEditor.css';
 
@@ -66,6 +67,26 @@ const AdminEmails: React.FC = () => {
     clickRate: 0,
     bounceRate: 0
   });
+  const [emailConfigValid, setEmailConfigValid] = useState(false);
+  const [emailConfigErrors, setEmailConfigErrors] = useState<string[]>([]);
+
+  // Initialize email service
+  useEffect(() => {
+    // Initialize email API service
+    EmailService.initializeEmailApi({
+      apiBaseUrl: emailConfig.apiBaseUrl,
+      apiKey: emailConfig.apiKey
+    });
+
+    // Validate email configuration
+    const configValidation = validateEmailConfig();
+    setEmailConfigValid(configValidation.valid);
+    setEmailConfigErrors(configValidation.errors);
+
+    if (!configValidation.valid) {
+      showNotification('error', `Email configuration invalid: ${configValidation.errors.join(', ')}`);
+    }
+  }, []);
 
   // Load data from Firebase
   const loadData = useCallback(async () => {
@@ -320,6 +341,12 @@ const AdminEmails: React.FC = () => {
               Email Management
             </h1>
             <p>Compose, manage templates, and send emails to your community</p>
+            {!emailConfigValid && (
+              <div className="email-config-warning">
+                <FaExclamationTriangle />
+                <span>Email service not configured: {emailConfigErrors.join(', ')}</span>
+              </div>
+            )}
           </div>
           <div className="email-header-actions">
             <button 

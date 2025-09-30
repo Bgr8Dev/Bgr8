@@ -18,6 +18,7 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
+import { EmailApiService, EmailApiMessage } from './emailApiService';
 
 export interface EmailTemplate {
   id: string;
@@ -85,6 +86,13 @@ export class EmailService {
   private static readonly DRAFTS_COLLECTION = 'email-drafts';
   private static readonly SENT_EMAILS_COLLECTION = 'sent-emails';
   private static readonly RECIPIENT_GROUPS_COLLECTION = 'recipient-groups';
+
+  /**
+   * Initialize email service with API configuration
+   */
+  static initializeEmailApi(config: { apiBaseUrl: string; apiKey: string }): void {
+    EmailApiService.initialize(config);
+  }
 
   /**
    * Get all email templates
@@ -341,45 +349,132 @@ export class EmailService {
   }
 
   /**
-   * Send email (mock implementation)
+   * Send email through Zoho Mail API
    */
   static async sendEmail(draft: Omit<EmailDraft, 'id' | 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
-      // Mock email sending - replace with actual email service integration
-      console.log('Sending email:', draft);
+      // Get all recipients (individual + groups)
+      const allRecipients = await this.getAllRecipients(draft.recipients, draft.recipientGroups);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock success response
-      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Save sent email record
-      await this.saveSentEmail({
-        subject: draft.subject,
-        content: draft.content,
-        recipients: draft.recipients,
-        recipientGroups: draft.recipientGroups,
-        templateId: draft.templateId,
-        sentAt: new Date(),
-        sentBy: draft.createdBy,
-        status: 'sent',
-        openCount: 0,
-        clickCount: 0,
-        bounceCount: 0,
-        unsubscribeCount: 0
-      });
-
-      // Increment template usage if applicable
-      if (draft.templateId) {
-        await this.incrementTemplateUsage(draft.templateId);
+      if (allRecipients.length === 0) {
+        return { success: false, error: 'No recipients specified' };
       }
 
-      return { success: true, messageId };
+      // Prepare email message for API
+      const emailMessage: EmailApiMessage = {
+        to: allRecipients,
+        subject: draft.subject,
+        content: draft.content,
+        contentType: 'text/html',
+        fromEmail: 'info@bgr8.uk',
+        fromName: 'Bgr8 Team'
+      };
+
+      // Send email through API
+      const result = await EmailApiService.sendEmail(emailMessage);
+      
+      if (result.success) {
+        // Save sent email record
+        await this.saveSentEmail({
+          subject: draft.subject,
+          content: draft.content,
+          recipients: draft.recipients,
+          recipientGroups: draft.recipientGroups,
+          templateId: draft.templateId,
+          sentAt: new Date(),
+          sentBy: draft.createdBy,
+          status: 'sent',
+          openCount: 0,
+          clickCount: 0,
+          bounceCount: 0,
+          unsubscribeCount: 0
+        });
+
+        // Increment template usage if applicable
+        if (draft.templateId) {
+          await this.incrementTemplateUsage(draft.templateId);
+        }
+
+        return { success: true, messageId: result.messageId };
+      } else {
+        // Save failed email record
+        await this.saveSentEmail({
+          subject: draft.subject,
+          content: draft.content,
+          recipients: draft.recipients,
+          recipientGroups: draft.recipientGroups,
+          templateId: draft.templateId,
+          sentAt: new Date(),
+          sentBy: draft.createdBy,
+          status: 'failed',
+          openCount: 0,
+          clickCount: 0,
+          bounceCount: 0,
+          unsubscribeCount: 0
+        });
+
+        return { success: false, error: result.error || 'Failed to send email' };
+      }
     } catch (error) {
       console.error('Error sending email:', error);
+      
+      // Save failed email record
+      try {
+        await this.saveSentEmail({
+          subject: draft.subject,
+          content: draft.content,
+          recipients: draft.recipients,
+          recipientGroups: draft.recipientGroups,
+          templateId: draft.templateId,
+          sentAt: new Date(),
+          sentBy: draft.createdBy,
+          status: 'failed',
+          openCount: 0,
+          clickCount: 0,
+          bounceCount: 0,
+          unsubscribeCount: 0
+        });
+      } catch (saveError) {
+        console.error('Error saving failed email record:', saveError);
+      }
+
       return { success: false, error: 'Failed to send email' };
     }
+  }
+
+  /**
+   * Get all recipients from individual emails and groups
+   */
+  private static async getAllRecipients(individualRecipients: string[], recipientGroups: string[]): Promise<string[]> {
+    const allRecipients = [...individualRecipients];
+    
+    // Get recipients from groups
+    for (const groupId of recipientGroups) {
+      const group = await this.getRecipientGroupById(groupId);
+      if (group && group.recipients) {
+        allRecipients.push(...group.recipients);
+      }
+    }
+    
+    // Remove duplicates
+    return Array.from(new Set(allRecipients));
+  }
+
+  /**
+   * Get recipient group by ID (placeholder - implement based on your data structure)
+   */
+  private static async getRecipientGroupById(groupId: string): Promise<{ recipients: string[] } | null> {
+    // This is a placeholder - you'll need to implement this based on your data structure
+    // For now, return mock data for the default groups
+    const defaultGroups: { [key: string]: { recipients: string[] } } = {
+      'all': { recipients: [] }, // You'll need to populate this with actual user emails
+      'admins': { recipients: [] }, // You'll need to populate this with admin emails
+      'mentors': { recipients: [] }, // You'll need to populate this with mentor emails
+      'mentees': { recipients: [] }, // You'll need to populate this with mentee emails
+      'students': { recipients: [] } // You'll need to populate this with student emails
+    };
+    
+    return defaultGroups[groupId] || null;
   }
 
   /**
