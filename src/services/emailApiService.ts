@@ -62,6 +62,10 @@ export class EmailApiService {
           'Authorization': `Bearer ${this.config.apiKey}`,
         },
         body: JSON.stringify(message),
+        // Add timeout and credentials for production
+        signal: AbortSignal.timeout(30000), // 30 second timeout
+        mode: 'cors', // Ensure CORS is handled properly
+        credentials: 'omit', // Don't send cookies
       });
 
       if (!response.ok) {
@@ -105,6 +109,9 @@ export class EmailApiService {
           'Authorization': `Bearer ${this.config.apiKey}`,
         },
         body: JSON.stringify({ messages }),
+        signal: AbortSignal.timeout(60000), // 60 second timeout for bulk
+        mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
@@ -139,6 +146,9 @@ export class EmailApiService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.config.apiKey}`,
         },
+        signal: AbortSignal.timeout(15000), // 15 second timeout for test
+        mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
@@ -172,6 +182,9 @@ export class EmailApiService {
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
         },
+        signal: AbortSignal.timeout(10000), // 10 second timeout for stats
+        mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {

@@ -14,7 +14,8 @@ export interface EmailConfig {
 // Frontend email configuration
 export const emailConfig: EmailConfig = {
   // Backend API configuration (only these are needed in frontend)
-  apiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL || 'http://localhost:3001',
+  apiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL || 
+    (import.meta.env.PROD ? 'https://bgr8-email-server.onrender.com' : 'http://localhost:3001'),
   apiKey: import.meta.env.VITE_EMAIL_API_KEY || 'your_api_key_here',
 };
 
