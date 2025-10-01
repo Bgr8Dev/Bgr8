@@ -720,7 +720,7 @@ const AdminEmails: React.FC = () => {
       {/* Tabs */}
       <EmailTabs
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab: 'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'developer') => setActiveTab(tab)}
         templatesCount={templates.length}
         sentEmailsCount={sentEmails.length}
         draftsCount={drafts.length}
