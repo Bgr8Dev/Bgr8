@@ -11,7 +11,9 @@ import {
   FaCopy
 } from 'react-icons/fa';
 import RichTextEditor from './RichTextEditor';
+import EmailPreview from './EmailPreview';
 import { EmailDraft, RecipientGroup, EmailTemplate } from '../../../services/emailService';
+import './EmailPreview.css';
 
 interface ComposeTabProps {
   currentDraft: Partial<EmailDraft>;
@@ -526,23 +528,21 @@ export const ComposeTab: React.FC<ComposeTabProps> = ({
         </div>
       </div>
 
-      {showPreview && (
-        <div className="email-email-preview">
-          <h3>Email Preview</h3>
-          <div className="email-preview-content">
-            <div className="email-preview-header">
-              <strong>Subject:</strong> {currentDraft.subject || 'No subject'}
-            </div>
-            <div className="email-preview-body">
-              {currentDraft.content ? (
-                <div dangerouslySetInnerHTML={{ __html: currentDraft.content.replace(/\n/g, '<br>') }} />
-              ) : (
-                <p>No content yet</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Email Preview Modal */}
+      <EmailPreview
+        isOpen={showPreview}
+        onClose={onTogglePreview}
+        subject={currentDraft.subject || ''}
+        content={currentDraft.content || ''}
+        recipients={currentDraft.recipients || []}
+        recipientGroups={currentDraft.recipientGroups || []}
+        priority={currentDraft.priority || 'normal'}
+        trackOpens={currentDraft.trackOpens || true}
+        trackClicks={currentDraft.trackClicks || true}
+        scheduledDate={currentDraft.scheduledDate}
+        isScheduled={currentDraft.isScheduled || false}
+        recipientGroupsData={recipientGroups}
+      />
     </div>
   );
 };

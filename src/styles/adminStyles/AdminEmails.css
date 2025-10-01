@@ -1391,40 +1391,7 @@
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
-/* Email Preview */
-.email-email-preview {
-  border-top: 1px solid var(--gray-200);
-  padding: 2rem;
-  background: var(--gray-50);
-}
-
-.email-email-preview h3 {
-  color: var(--text);
-  margin: 0 0 1rem 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.email-preview-content {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.email-preview-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--gray-200);
-  font-size: 1.1rem;
-  color: #0f172a;
-}
-
-.email-preview-body {
-  line-height: 1.6;
-  color: var(--text);
-}
+/* Email Preview - Now handled by EmailPreview modal component */
 
 /* Templates Section */
 .email-templates-section {
