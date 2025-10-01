@@ -420,7 +420,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   // Handle key down
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Handle shortcuts
+    // Handle shortcuts only for specific Ctrl/Cmd combinations
     if (e.ctrlKey || e.metaKey) {
       switch (e.key) {
         case 'b':
@@ -471,8 +471,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             execCommand('insertHTML', '<p></p>');
           }
           break;
+        // Allow all other keys to work normally (including Space, letters, numbers, etc.)
+        default:
+          // Don't prevent default for normal typing keys
+          break;
       }
     }
+    // For non-Ctrl/Cmd keys, allow normal behavior (including Space, Enter, etc.)
   }, [execCommand, onSave, undo, redo]);
 
   // Insert emoji
