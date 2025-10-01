@@ -1,37 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  FaPaperPlane, 
-  FaSave, 
-  FaFolderOpen, 
-  FaTrash, 
-  FaEdit, 
-  FaCopy,
-  FaUsers,
-  FaSearch,
-  FaPlus,
-  FaEye,
-  FaEyeSlash,
-  FaSpinner,
-  FaCheck,
-  FaTimes,
-  FaChartLine,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaRocket,
-  FaMousePointer,
-  FaCalendarAlt,
-  FaCheckCircle
-} from 'react-icons/fa';
+import { FaSpinner, FaCheck, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
 import { useAuth } from '../../hooks/useAuth';
-import RichTextEditor from '../../components/admin/emails/RichTextEditor';
 import RecipientSelector from '../../components/admin/emails/RecipientSelector';
 import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
+
+// Import the new components
+import EmailHeader from '../../components/admin/emails/EmailHeader';
+import EmailTabs from '../../components/admin/emails/EmailTabs';
+import ComposeTab from '../../components/admin/emails/ComposeTab';
+import TemplatesTab from '../../components/admin/emails/TemplatesTab';
+import SentTab from '../../components/admin/emails/SentTab';
+import DraftsTab from '../../components/admin/emails/DraftsTab';
+import AnalyticsTab from '../../components/admin/emails/AnalyticsTab';
+import DeveloperTab from '../../components/admin/emails/DeveloperTab';
+import TemplateModal from '../../components/admin/emails/TemplateModal';
+
+// Import styles
 import '../../styles/adminStyles/AdminEmails.css';
 import '../../styles/adminStyles/RichTextEditor.css';
 import '../../components/admin/emails/RecipientSelector.css';
-
-// Interfaces are now imported from EmailService
 
 const AdminEmails: React.FC = () => {
   const { userProfile } = useAuth();
@@ -89,13 +77,11 @@ const AdminEmails: React.FC = () => {
 
   // Initialize email service
   useEffect(() => {
-    // Initialize email API service
     EmailService.initializeEmailApi({
       apiBaseUrl: emailConfig.apiBaseUrl,
       apiKey: emailConfig.apiKey
     });
 
-    // Validate email configuration
     const configValidation = validateEmailConfig();
     setEmailConfigValid(configValidation.valid);
     setEmailConfigErrors(configValidation.errors);
@@ -104,195 +90,6 @@ const AdminEmails: React.FC = () => {
       showNotification('error', `Email configuration invalid: ${configValidation.errors.join(', ')}`);
     }
   }, []);
-
-  // Test email server connection
-  const testEmailServerConnection = async () => {
-    try {
-      updateTestStatus('server', 'testing', 'Testing server connection...');
-      const result = await EmailService.testEmailServerConnection();
-      if (result.success) {
-        updateTestStatus('server', 'success', 'Server is running and accessible!');
-        showNotification('success', 'Email server is running and accessible!');
-      } else {
-        updateTestStatus('server', 'error', `Connection failed: ${result.error}`);
-        showNotification('error', `Email server connection failed: ${result.error}`);
-      }
-    } catch (error) {
-      updateTestStatus('server', 'error', `Test failed: ${error}`);
-      showNotification('error', `Failed to test email server: ${error}`);
-    }
-  };
-
-  // Test email configuration
-  const testEmailConfiguration = async () => {
-    try {
-      updateTestStatus('config', 'testing', 'Testing email configuration...');
-      const response = await fetch(`${emailConfig.apiBaseUrl}/api/config-test`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${emailConfig.apiKey}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('🔧 Email configuration test:', data);
-        
-        if (data.config.accessTokenTest === 'success') {
-          updateTestStatus('config', 'success', 'Configuration is working correctly!');
-          showNotification('success', 'Email configuration is working correctly!');
-        } else {
-          updateTestStatus('config', 'error', `Config issue: ${data.config.accessTokenError || 'Unknown error'}`);
-          showNotification('error', `Email configuration issue: ${data.config.accessTokenError || 'Unknown error'}`);
-        }
-      } else {
-        updateTestStatus('config', 'error', `Test failed: ${response.status} ${response.statusText}`);
-        showNotification('error', `Configuration test failed: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Configuration test error:', error);
-      updateTestStatus('config', 'error', `Test failed: ${error}`);
-      showNotification('error', `Failed to test configuration: ${error}`);
-    }
-  };
-
-  // Test Zoho API setup
-  const testZohoSetup = async () => {
-    try {
-      updateTestStatus('zoho', 'testing', 'Testing Zoho API setup...');
-      const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${emailConfig.apiKey}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('🔍 Zoho API test:', data);
-        
-        if (data.success) {
-          updateTestStatus('zoho', 'success', 'Zoho API is working!');
-          showNotification('success', `Zoho API is working! ${data.message}`);
-          console.log('📋 Next steps:', data.nextSteps);
-        } else {
-          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}`);
-          showNotification('error', `Zoho API issue: ${data.message}`);
-          console.log('📋 Next steps:', data.nextSteps);
-        }
-      } else {
-        updateTestStatus('zoho', 'error', `Test failed: ${response.status} ${response.statusText}`);
-        showNotification('error', `Zoho test failed: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Zoho test error:', error);
-      updateTestStatus('zoho', 'error', `Test failed: ${error}`);
-      showNotification('error', `Failed to test Zoho: ${error}`);
-    }
-  };
-
-  // Test email sending with selected recipient
-  const testEmailSending = async () => {
-    try {
-      updateTestStatus('email', 'testing', 'Preparing test email...');
-      
-      // Get the first recipient from the current draft, or use a default
-      let testRecipients = currentDraft.recipients || [];
-      
-      if (testRecipients.length === 0) {
-        // If no recipients selected, try to get from saved recipients
-        try {
-          updateTestStatus('email', 'testing', 'Finding recipients...');
-          const savedRecipients = await EmailService.getRecipients();
-          if (savedRecipients.length > 0) {
-            testRecipients = [savedRecipients[0].email];
-            updateTestStatus('email', 'testing', `Using recipient: ${savedRecipients[0].email}`);
-            showNotification('info', `Using first saved recipient: ${savedRecipients[0].email}`);
-          } else {
-            updateTestStatus('email', 'error', 'No recipients available');
-            showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
-            return;
-          }
-        } catch {
-          updateTestStatus('email', 'error', 'Failed to load recipients');
-          showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
-          return;
-        }
-      }
-
-      updateTestStatus('email', 'testing', 'Sending test email...');
-
-      const testDraft = {
-        subject: 'Test Email from Bgr8 Admin Panel',
-        content: '<p>This is a test email from the Bgr8 admin panel to verify email functionality.</p><p>If you received this email, the email system is working correctly!</p>',
-        recipients: testRecipients,
-        recipientGroups: [],
-        templateId: undefined,
-        isScheduled: false,
-        priority: 'normal' as const,
-        trackOpens: true,
-        trackClicks: true,
-        status: 'sent' as const,
-        createdBy: userProfile?.uid || ''
-      };
-
-      console.log('🧪 Testing email with draft:', testDraft);
-      const result = await EmailService.sendEmail(testDraft);
-      
-      if (result.success) {
-        updateTestStatus('email', 'success', `Email sent to ${testRecipients.length} recipient(s)!`);
-        showNotification('success', `Test email sent successfully to ${testRecipients.join(', ')}! Message ID: ${result.messageId}`);
-      } else {
-        updateTestStatus('email', 'error', `Send failed: ${result.error}`);
-        showNotification('error', `Test email failed: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Test email error:', error);
-      updateTestStatus('email', 'error', `Test failed: ${error}`);
-      showNotification('error', `Test email failed: ${error}`);
-    }
-  };
-
-  // Create test recipients for testing
-  const createTestRecipients = async () => {
-    try {
-      const testRecipients = [
-        {
-          email: 'test1@example.com',
-          name: 'Test User 1',
-          firstName: 'Test',
-          lastName: 'User 1',
-          tags: ['test'],
-          groups: [],
-          isActive: true,
-          isVerified: true,
-          createdBy: userProfile?.uid || '',
-          notes: 'Test recipient 1'
-        },
-        {
-          email: 'test2@example.com',
-          name: 'Test User 2',
-          firstName: 'Test',
-          lastName: 'User 2',
-          tags: ['test'],
-          groups: [],
-          isActive: true,
-          isVerified: true,
-          createdBy: userProfile?.uid || '',
-          notes: 'Test recipient 2'
-        }
-      ];
-
-      for (const recipient of testRecipients) {
-        await EmailService.saveRecipient(recipient);
-      }
-
-      showNotification('success', 'Test recipients created successfully!');
-    } catch (error) {
-      console.error('Error creating test recipients:', error);
-      showNotification('error', 'Failed to create test recipients');
-    }
-  };
 
   // Load data from Firebase
   const loadData = useCallback(async () => {
@@ -340,6 +137,176 @@ const AdminEmails: React.FC = () => {
     }));
   };
 
+  // Test functions
+  const testEmailServerConnection = async () => {
+    try {
+      updateTestStatus('server', 'testing', 'Testing server connection...');
+      const result = await EmailService.testEmailServerConnection();
+      if (result.success) {
+        updateTestStatus('server', 'success', 'Server is running and accessible!');
+        showNotification('success', 'Email server is running and accessible!');
+      } else {
+        updateTestStatus('server', 'error', `Connection failed: ${result.error}`);
+        showNotification('error', `Email server connection failed: ${result.error}`);
+      }
+    } catch (error) {
+      updateTestStatus('server', 'error', `Test failed: ${error}`);
+      showNotification('error', `Failed to test email server: ${error}`);
+    }
+  };
+
+  const testEmailConfiguration = async () => {
+    try {
+      updateTestStatus('config', 'testing', 'Testing email configuration...');
+      const response = await fetch(`${emailConfig.apiBaseUrl}/api/config-test`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${emailConfig.apiKey}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.config.accessTokenTest === 'success') {
+          updateTestStatus('config', 'success', 'Configuration is working correctly!');
+          showNotification('success', 'Email configuration is working correctly!');
+        } else {
+          updateTestStatus('config', 'error', `Config issue: ${data.config.accessTokenError || 'Unknown error'}`);
+          showNotification('error', `Email configuration issue: ${data.config.accessTokenError || 'Unknown error'}`);
+        }
+      } else {
+        updateTestStatus('config', 'error', `Test failed: ${response.status} ${response.statusText}`);
+        showNotification('error', `Configuration test failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      updateTestStatus('config', 'error', `Test failed: ${error}`);
+      showNotification('error', `Failed to test configuration: ${error}`);
+    }
+  };
+
+  const testZohoSetup = async () => {
+    try {
+      updateTestStatus('zoho', 'testing', 'Testing Zoho API setup...');
+      const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${emailConfig.apiKey}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          updateTestStatus('zoho', 'success', 'Zoho API is working!');
+          showNotification('success', `Zoho API is working! ${data.message}`);
+        } else {
+          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}`);
+          showNotification('error', `Zoho API issue: ${data.message}`);
+        }
+      } else {
+        updateTestStatus('zoho', 'error', `Test failed: ${response.status} ${response.statusText}`);
+        showNotification('error', `Zoho test failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      updateTestStatus('zoho', 'error', `Test failed: ${error}`);
+      showNotification('error', `Failed to test Zoho: ${error}`);
+    }
+  };
+
+  const testEmailSending = async () => {
+    try {
+      updateTestStatus('email', 'testing', 'Preparing test email...');
+      
+      let testRecipients = currentDraft.recipients || [];
+      
+      if (testRecipients.length === 0) {
+        try {
+          updateTestStatus('email', 'testing', 'Finding recipients...');
+          const savedRecipients = await EmailService.getRecipients();
+          if (savedRecipients.length > 0) {
+            testRecipients = [savedRecipients[0].email];
+            updateTestStatus('email', 'testing', `Using recipient: ${savedRecipients[0].email}`);
+            showNotification('info', `Using first saved recipient: ${savedRecipients[0].email}`);
+          } else {
+            updateTestStatus('email', 'error', 'No recipients available');
+            showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
+            return;
+          }
+        } catch {
+          updateTestStatus('email', 'error', 'Failed to load recipients');
+          showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
+          return;
+        }
+      }
+
+      updateTestStatus('email', 'testing', 'Sending test email...');
+
+      const testDraft = {
+        subject: 'Test Email from Bgr8 Admin Panel',
+        content: '<p>This is a test email from the Bgr8 admin panel to verify email functionality.</p><p>If you received this email, the email system is working correctly!</p>',
+        recipients: testRecipients,
+        recipientGroups: [],
+        templateId: undefined,
+        isScheduled: false,
+        priority: 'normal' as const,
+        trackOpens: true,
+        trackClicks: true,
+        status: 'sent' as const,
+        createdBy: userProfile?.uid || ''
+      };
+
+      const result = await EmailService.sendEmail(testDraft);
+      
+      if (result.success) {
+        updateTestStatus('email', 'success', `Email sent to ${testRecipients.length} recipient(s)!`);
+        showNotification('success', `Test email sent successfully to ${testRecipients.join(', ')}! Message ID: ${result.messageId}`);
+      } else {
+        updateTestStatus('email', 'error', `Send failed: ${result.error}`);
+        showNotification('error', `Test email failed: ${result.error}`);
+      }
+    } catch (error) {
+      updateTestStatus('email', 'error', `Test failed: ${error}`);
+      showNotification('error', `Test email failed: ${error}`);
+    }
+  };
+
+  const createTestRecipients = async () => {
+    try {
+      const testRecipients = [
+        {
+          email: 'test1@example.com',
+          name: 'Test User 1',
+          firstName: 'Test',
+          lastName: 'User 1',
+          tags: ['test'],
+          groups: [],
+          isActive: true,
+          isVerified: true,
+          createdBy: userProfile?.uid || '',
+          notes: 'Test recipient 1'
+        },
+        {
+          email: 'test2@example.com',
+          name: 'Test User 2',
+          firstName: 'Test',
+          lastName: 'User 2',
+          tags: ['test'],
+          groups: [],
+          isActive: true,
+          isVerified: true,
+          createdBy: userProfile?.uid || '',
+          notes: 'Test recipient 2'
+        }
+      ];
+
+      for (const recipient of testRecipients) {
+        await EmailService.saveRecipient(recipient);
+      }
+
+      showNotification('success', 'Test recipients created successfully!');
+    } catch (error) {
+      console.error('Error creating test recipients:', error);
+      showNotification('error', 'Failed to create test recipients');
+    }
+  };
+
+  // Template handlers
   const handleSaveTemplate = async () => {
     if (!templateForm.name || !templateForm.subject || !templateForm.content) {
       showNotification('error', 'Please fill in all required fields');
@@ -350,7 +317,6 @@ const AdminEmails: React.FC = () => {
       setIsSaving(true);
       
       if (selectedTemplate) {
-        // Update existing template
         await EmailService.updateTemplate(selectedTemplate.id, {
           name: templateForm.name,
           subject: templateForm.subject,
@@ -361,7 +327,6 @@ const AdminEmails: React.FC = () => {
         });
         showNotification('success', 'Template updated successfully!');
       } else {
-        // Create new template
         await EmailService.saveTemplate({
           name: templateForm.name,
           subject: templateForm.subject,
@@ -374,7 +339,6 @@ const AdminEmails: React.FC = () => {
         showNotification('success', 'Template created successfully!');
       }
 
-      // Reload templates
       const updatedTemplates = await EmailService.getTemplates();
       setTemplates(updatedTemplates);
 
@@ -395,7 +359,6 @@ const AdminEmails: React.FC = () => {
         await EmailService.deleteTemplate(templateId);
         showNotification('success', 'Template deleted successfully!');
         
-        // Reload templates
         const updatedTemplates = await EmailService.getTemplates();
         setTemplates(updatedTemplates);
       } catch (error) {
@@ -429,13 +392,13 @@ const AdminEmails: React.FC = () => {
     showNotification('info', `Template "${template.name}" loaded successfully!`);
   };
 
+  // Draft handlers
   const handleDeleteDraft = async (draftId: string) => {
     if (window.confirm('Are you sure you want to delete this draft?')) {
       try {
         await EmailService.deleteDraft(draftId);
         showNotification('success', 'Draft deleted successfully!');
         
-        // Reload drafts
         const updatedDrafts = await EmailService.getDrafts();
         setDrafts(updatedDrafts);
       } catch (error) {
@@ -471,7 +434,6 @@ const AdminEmails: React.FC = () => {
 
       await EmailService.saveDraft(draftData);
       
-      // Reload drafts
       const updatedDrafts = await EmailService.getDrafts();
       setDrafts(updatedDrafts);
       
@@ -518,7 +480,6 @@ const AdminEmails: React.FC = () => {
       if (result.success) {
         showNotification('success', `Email sent successfully! Message ID: ${result.messageId}`);
         
-        // Clear current draft
         setCurrentDraft({
           subject: '',
           content: '',
@@ -532,7 +493,6 @@ const AdminEmails: React.FC = () => {
           createdBy: userProfile?.uid || ''
         });
         
-        // Reload data
         await loadData();
       } else {
         showNotification('error', result.error || 'Failed to send email');
@@ -545,29 +505,13 @@ const AdminEmails: React.FC = () => {
     }
   };
 
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const getTotalRecipients = () => {
-    let total = currentDraft.recipients?.length || 0;
-    (currentDraft.recipientGroups || []).forEach(groupId => {
-      const group = recipientGroups.find(g => g.id === groupId);
-      if (group) total += group.count;
-    });
-    return total;
-  };
-
   // Email validation
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Add individual recipient
+  // Recipient handlers
   const handleAddIndividualRecipient = () => {
     const email = individualEmailInput.trim();
     
@@ -596,7 +540,6 @@ const AdminEmails: React.FC = () => {
     showNotification('success', 'Recipient added successfully');
   };
 
-  // Remove individual recipient
   const handleRemoveIndividualRecipient = (emailToRemove: string) => {
     setCurrentDraft(prev => ({
       ...prev,
@@ -605,7 +548,6 @@ const AdminEmails: React.FC = () => {
     showNotification('info', 'Recipient removed');
   };
 
-  // Handle Enter key in email input
   const handleEmailInputKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -613,7 +555,6 @@ const AdminEmails: React.FC = () => {
     }
   };
 
-  // Clear all individual recipients
   const handleClearIndividualRecipients = () => {
     setCurrentDraft(prev => ({
       ...prev,
@@ -622,8 +563,6 @@ const AdminEmails: React.FC = () => {
     showNotification('info', 'All individual recipients cleared');
   };
 
-
-  // Clear all recipients (both individual and groups)
   const handleClearAllRecipients = () => {
     setCurrentDraft(prev => ({
       ...prev,
@@ -633,31 +572,22 @@ const AdminEmails: React.FC = () => {
     showNotification('info', 'All recipients cleared');
   };
 
-  // Handle recipient selection from saved recipients
   const handleRecipientSelection = async (selectedRecipientIds: string[]) => {
     try {
       console.log('🔍 Selected recipient IDs:', selectedRecipientIds);
       
       if (selectedRecipientIds.length === 0) {
-        console.log('⚠️ No recipients selected');
         return;
       }
       
-      // Convert recipient IDs to emails by fetching recipient data
       const selectedEmails: string[] = [];
       
       for (const recipientId of selectedRecipientIds) {
-        console.log('🔍 Fetching recipient:', recipientId);
         const recipient = await EmailService.getRecipient(recipientId);
-        console.log('📧 Recipient data:', recipient);
         if (recipient && recipient.email) {
           selectedEmails.push(recipient.email);
-        } else {
-          console.warn('⚠️ Recipient not found or missing email:', recipientId, recipient);
         }
       }
-      
-      console.log('✅ Final selected emails:', selectedEmails);
       
       if (selectedEmails.length > 0) {
         setCurrentDraft(prev => ({
@@ -676,7 +606,6 @@ const AdminEmails: React.FC = () => {
     }
   };
 
-  // Handle bulk email import
   const handleBulkImport = () => {
     const emails = bulkEmailInput
       .split(/[,\n;]/)
@@ -719,6 +648,28 @@ const AdminEmails: React.FC = () => {
     setShowBulkImport(false);
   };
 
+  const handleResendEmail = (email: SentEmail) => {
+    setCurrentDraft({
+      subject: email.subject,
+      content: email.content,
+      recipients: email.recipients || [],
+      recipientGroups: email.recipientGroups || [],
+      templateId: email.templateId,
+      isScheduled: false,
+      priority: 'normal',
+      trackOpens: true,
+      trackClicks: true,
+      status: 'draft',
+      createdBy: userProfile?.uid || ''
+    });
+    setActiveTab('compose');
+  };
+
+  const handleEditDraft = (draft: EmailDraft) => {
+    setCurrentDraft(draft);
+    setActiveTab('compose');
+  };
+
   if (isLoading) {
     return (
       <div className="email-admin-emails">
@@ -732,57 +683,6 @@ const AdminEmails: React.FC = () => {
       </div>
     );
   }
-
-  // Test Button Component with Status Bar
-  const TestButton: React.FC<{
-    onClick: () => void;
-    title: string;
-    icon: React.ReactNode;
-    text: string;
-    testType: keyof typeof testStatuses;
-    disabled?: boolean;
-  }> = ({ onClick, title, icon, text, testType, disabled = false }) => {
-    const status = testStatuses[testType];
-    
-    return (
-      <div className="email-test-button-container">
-        <button 
-          className="email-refresh-btn"
-          onClick={onClick}
-          title={title}
-          disabled={disabled || status.status === 'testing'}
-        >
-          {status.status === 'testing' ? <FaSpinner className="email-spinning" /> : icon}
-          {text}
-        </button>
-        
-        {/* Status Bar */}
-        <div className={`email-test-status-bar email-test-status-${status.status}`}>
-          <div className="email-test-status-content">
-            <div className="email-test-status-icon">
-              {status.status === 'idle' && <FaInfoCircle />}
-              {status.status === 'testing' && <FaSpinner className="email-spinning" />}
-              {status.status === 'success' && <FaCheck />}
-              {status.status === 'error' && <FaTimes />}
-            </div>
-            <div className="email-test-status-text">
-              <div className="email-test-status-message">
-                {status.status === 'idle' && 'Ready to test'}
-                {status.status === 'testing' && status.message}
-                {status.status === 'success' && status.message}
-                {status.status === 'error' && status.message}
-              </div>
-              {status.timestamp && (
-                <div className="email-test-status-time">
-                  {status.timestamp.toLocaleTimeString()}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="email-admin-emails">
@@ -805,1227 +705,126 @@ const AdminEmails: React.FC = () => {
         </div>
       )}
 
-      <div className="email-emails-header">
-        <div className="email-emails-header-content">
-          <div className="email-header-title">
-            <h1>
-              <FaRocket className="email-title-icon" />
-              Email Management
-            </h1>
-            <p>Compose, manage templates, and send emails to your community</p>
-            {!emailConfigValid && (
-              <div className="email-config-warning">
-                <FaExclamationTriangle />
-                <span>Email service not configured: {emailConfigErrors.join(', ')}</span>
-              </div>
-            )}
-          </div>
-          <div className="email-header-actions">
-            <button 
-              className="email-refresh-btn"
-              onClick={loadData}
-              disabled={isLoading}
-            >
-              <FaSpinner className={isLoading ? 'email-spinning' : ''} />
-              Refresh
-            </button>
-          </div>
-        </div>
-        <div className="email-emails-header-stats">
-          <div className="email-stat-item email-stat-templates">
-            <div className="email-stat-icon">
-              <FaFolderOpen />
-            </div>
-            <div className="email-stat-content">
-              <span className="email-stat-number">{templates.length}</span>
-              <span className="email-stat-label">Templates</span>
-            </div>
-          </div>
-          <div className="email-stat-item email-stat-recipients">
-            <div className="email-stat-icon">
-              <FaUsers />
-            </div>
-            <div className="email-stat-content">
-              <span className="email-stat-number">{recipientGroups.reduce((sum, group) => sum + group.count, 0)}</span>
-              <span className="email-stat-label">Recipients</span>
-            </div>
-          </div>
-          <div className="email-stat-item email-stat-sent">
-            <div className="email-stat-icon">
-              <FaPaperPlane />
-            </div>
-            <div className="email-stat-content">
-              <span className="email-stat-number">{analytics.totalSent}</span>
-              <span className="email-stat-label">Sent</span>
-            </div>
-          </div>
-          <div className="email-stat-item email-stat-opens">
-            <div className="email-stat-icon">
-              <FaEye />
-            </div>
-            <div className="email-stat-content">
-              <span className="email-stat-number">{analytics.openRate.toFixed(1)}%</span>
-              <span className="email-stat-label">Open Rate</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Header */}
+      <EmailHeader
+        emailConfigValid={emailConfigValid}
+        emailConfigErrors={emailConfigErrors}
+        templatesCount={templates.length}
+        totalRecipients={recipientGroups.reduce((sum, group) => sum + group.count, 0)}
+        totalSent={analytics.totalSent}
+        openRate={analytics.openRate}
+        isLoading={isLoading}
+        onRefresh={loadData}
+      />
 
-      <div className="email-emails-tabs">
-        <button 
-          className={`email-emails-tab ${activeTab === 'compose' ? 'active' : ''}`}
-          onClick={() => setActiveTab('compose')}
-        >
-          <FaEdit />
-          <span>Compose</span>
-          <div className="email-tab-indicator"></div>
-        </button>
-        <button 
-          className={`email-emails-tab ${activeTab === 'templates' ? 'active' : ''}`}
-          onClick={() => setActiveTab('templates')}
-        >
-          <FaFolderOpen />
-          <span>Templates</span>
-          <div className="email-tab-badge">{templates.length}</div>
-          <div className="email-tab-indicator"></div>
-        </button>
-        <button 
-          className={`email-emails-tab ${activeTab === 'sent' ? 'active' : ''}`}
-          onClick={() => setActiveTab('sent')}
-        >
-          <FaPaperPlane />
-          <span>Sent</span>
-          <div className="email-tab-badge">{sentEmails.length}</div>
-          <div className="email-tab-indicator"></div>
-        </button>
-        <button 
-          className={`email-emails-tab ${activeTab === 'drafts' ? 'active' : ''}`}
-          onClick={() => setActiveTab('drafts')}
-        >
-          <FaSave />
-          <span>Drafts</span>
-          <div className="email-tab-badge">{drafts.length}</div>
-          <div className="email-tab-indicator"></div>
-        </button>
-        <button 
-          className={`email-emails-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          <FaChartLine />
-          <span>Analytics</span>
-          <div className="email-tab-indicator"></div>
-        </button>
-        <button 
-          className={`email-emails-tab ${activeTab === 'developer' ? 'active' : ''}`}
-          onClick={() => setActiveTab('developer')}
-        >
-          <FaRocket />
-          <span>Developer</span>
-          <div className="email-tab-indicator"></div>
-        </button>
-      </div>
+      {/* Tabs */}
+      <EmailTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        templatesCount={templates.length}
+        sentEmailsCount={sentEmails.length}
+        draftsCount={drafts.length}
+      />
 
+      {/* Content */}
       <div className="email-emails-content">
         {activeTab === 'compose' && (
-          <div className="email-compose-section">
-            <div className="email-compose-layout">
-              <div className="email-compose-main">
-                <div className="email-compose-header">
-                  <div className="email-compose-subject">
-                    <input
-                      type="text"
-                      placeholder="Email subject..."
-                      value={currentDraft.subject}
-                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, subject: e.target.value }))}
-                      className="email-subject-input"
-                    />
-                  </div>
-                  <div className="email-compose-actions">
-                    <button 
-                      className="email-action-btn email-preview"
-                      onClick={() => setShowPreview(!showPreview)}
-                    >
-                      {showPreview ? <FaEyeSlash /> : <FaEye />}
-                      {showPreview ? 'Hide Preview' : 'Preview'}
-                    </button>
-                    <button 
-                      className="email-action-btn email-save"
-                      onClick={handleSaveDraft}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? <FaSpinner className="email-spinning" /> : <FaSave />}
-                      {isSaving ? 'Saving...' : 'Save Draft'}
-                    </button>
-                    <button 
-                      className="email-action-btn email-send"
-                      onClick={handleSendEmail}
-                      disabled={isSending}
-                    >
-                      {isSending ? <FaSpinner className="email-spinning" /> : <FaPaperPlane />}
-                      {isSending ? 'Sending...' : 'Send Email'}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="email-compose-body">
-                  <RichTextEditor
-                    content={currentDraft.content || ''}
-                    onChange={(content) => setCurrentDraft(prev => ({ ...prev, content }))}
-                    placeholder="Start writing your email..."
-                    className="email-rich-text-editor"
-                    showToolbar={true}
-                    showWordCount={true}
-                    showCharCount={true}
-                    maxLength={10000}
-                    allowImages={true}
-                    allowLinks={true}
-                    allowTables={true}
-                    allowCode={true}
-                    allowEmojis={true}
-                    allowFileUpload={true}
-                    onSave={handleSaveDraft}
-                    onPreview={() => setShowPreview(!showPreview)}
-                    onExport={() => {
-                      const blob = new Blob([currentDraft.content || ''], { type: 'text/html' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `email-draft-${Date.now()}.html`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    onImport={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = '.html,.txt,.rtf';
-                      input.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (event) => {
-                            const content = event.target?.result as string;
-                            setCurrentDraft(prev => ({ ...prev, content }));
-                          };
-                          reader.readAsText(file);
-                        }
-                      };
-                      input.click();
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="email-compose-sidebar">
-                <div className="email-sidebar-section">
-                  <h3>Recipients</h3>
-                  <div className="email-recipients-summary">
-                    <span className="email-recipients-count">{getTotalRecipients()} recipients</span>
-                    {getTotalRecipients() > 0 && (
-                      <button
-                        onClick={handleClearAllRecipients}
-                        style={{
-                          background: 'rgba(239, 68, 68, 0.2)',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                          color: '#ef4444',
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '6px',
-                          fontSize: '0.7rem',
-                          cursor: 'pointer',
-                          marginLeft: '0.5rem',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                        }}
-                        title="Clear all recipients"
-                      >
-                        Clear All
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="email-recipient-groups">
-                    <h4>Groups</h4>
-                    {recipientGroups.map(group => (
-                      <label key={group.id} className="email-recipient-group-item">
-                        <input
-                          type="checkbox"
-                          checked={(currentDraft.recipientGroups || []).includes(group.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setCurrentDraft(prev => ({
-                                ...prev,
-                                recipientGroups: [...(prev.recipientGroups || []), group.id]
-                              }));
-                            } else {
-                              setCurrentDraft(prev => ({
-                                ...prev,
-                                recipientGroups: (prev.recipientGroups || []).filter(id => id !== group.id)
-                              }));
-                            }
-                          }}
-                        />
-                        <div className="email-group-info">
-                          <span className="email-group-name">{group.name}</span>
-                          <span className="email-group-count">({group.count})</span>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="email-individual-recipients">
-                    <h4>Individual Recipients</h4>
-                    <div className="email-recipient-input">
-                      <input
-                        type="email"
-                        placeholder="Add email address..."
-                        className="email-email-input"
-                        value={individualEmailInput}
-                        onChange={(e) => {
-                          setIndividualEmailInput(e.target.value);
-                          setEmailValidationError('');
-                        }}
-                        onKeyPress={handleEmailInputKeyPress}
-                      />
-                      <button 
-                        className="email-add-recipient-btn" 
-                        title="Add recipient"
-                        onClick={handleAddIndividualRecipient}
-                      >
-                        <FaPlus />
-                      </button>
-                    </div>
-
-                    {/* Select from Saved Recipients */}
-                    <div style={{ marginTop: '0.75rem' }}>
-                      <button
-                        onClick={() => setShowRecipientSelector(true)}
-                        style={{
-                          background: 'rgba(16, 185, 129, 0.2)',
-                          border: '1px solid rgba(16, 185, 129, 0.3)',
-                          color: '#10b981',
-                          padding: '0.5rem 0.75rem',
-                          borderRadius: '6px',
-                          fontSize: '0.8rem',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(16, 185, 129, 0.3)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(16, 185, 129, 0.2)';
-                        }}
-                        title="Select from saved recipients"
-                      >
-                        <FaUsers />
-                        Select from Saved Recipients
-                      </button>
-                    </div>
-
-                    {/* Bulk Import Toggle */}
-                    <div style={{ marginTop: '0.75rem' }}>
-                      <button
-                        onClick={() => setShowBulkImport(!showBulkImport)}
-                        style={{
-                          background: 'rgba(59, 130, 246, 0.2)',
-                          border: '1px solid rgba(59, 130, 246, 0.3)',
-                          color: '#3b82f6',
-                          padding: '0.5rem 0.75rem',
-                          borderRadius: '6px',
-                          fontSize: '0.8rem',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(59, 130, 246, 0.3)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
-                        }}
-                        title="Bulk import emails"
-                      >
-                        <FaPlus />
-                        {showBulkImport ? 'Hide Bulk Import' : 'Bulk Import'}
-                      </button>
-                    </div>
-
-                    {/* Bulk Import Textarea */}
-                    {showBulkImport && (
-                      <div style={{ marginTop: '0.75rem' }}>
-                        <label style={{ 
-                          color: '#ffffff', 
-                          fontSize: '0.8rem', 
-                          fontWeight: '600',
-                          marginBottom: '0.5rem',
-                          display: 'block'
-                        }}>
-                          Paste emails (comma, semicolon, or line separated):
-                        </label>
-                        <textarea
-                          value={bulkEmailInput}
-                          onChange={(e) => setBulkEmailInput(e.target.value)}
-                          placeholder="email1@example.com, email2@example.com&#10;email3@example.com&#10;email4@example.com"
-                          style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '8px',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            color: '#ffffff',
-                            fontSize: '0.8rem',
-                            minHeight: '80px',
-                            resize: 'vertical',
-                            fontFamily: 'monospace'
-                          }}
-                        />
-                        <div style={{ 
-                          display: 'flex', 
-                          gap: '0.5rem', 
-                          marginTop: '0.5rem' 
-                        }}>
-                          <button
-                            onClick={handleBulkImport}
-                            style={{
-                              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                              border: 'none',
-                              color: '#ffffff',
-                              padding: '0.5rem 1rem',
-                              borderRadius: '6px',
-                              fontSize: '0.8rem',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'translateY(-1px)';
-                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'translateY(0)';
-                              e.currentTarget.style.boxShadow = 'none';
-                            }}
-                          >
-                            Import Emails
-                          </button>
-                          <button
-                            onClick={() => {
-                              setShowBulkImport(false);
-                              setBulkEmailInput('');
-                              setEmailValidationError('');
-                            }}
-                            style={{
-                              background: 'rgba(107, 114, 128, 0.2)',
-                              border: '1px solid rgba(107, 114, 128, 0.3)',
-                              color: '#9ca3af',
-                              padding: '0.5rem 1rem',
-                              borderRadius: '6px',
-                              fontSize: '0.8rem',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease'
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {emailValidationError && (
-                      <div className="email-validation-error" style={{ 
-                        color: '#ef4444', 
-                        fontSize: '0.8rem', 
-                        marginTop: '0.5rem' 
-                      }}>
-                        {emailValidationError}
-                      </div>
-                    )}
-
-                    {/* Display individual recipients */}
-                    {currentDraft.recipients && currentDraft.recipients.length > 0 && (
-                      <div className="email-individual-recipients-list" style={{ marginTop: '1rem' }}>
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          alignItems: 'center',
-                          marginBottom: '0.5rem'
-                        }}>
-                          <h5 style={{ 
-                            color: '#ffffff', 
-                            fontSize: '0.9rem', 
-                            margin: 0,
-                            fontWeight: '600'
-                          }}>
-                            Added Recipients ({currentDraft.recipients.length})
-                          </h5>
-                          <button
-                            onClick={handleClearIndividualRecipients}
-                            style={{
-                              background: 'rgba(239, 68, 68, 0.2)',
-                              border: '1px solid rgba(239, 68, 68, 0.3)',
-                              color: '#ef4444',
-                              padding: '0.25rem 0.5rem',
-                              borderRadius: '6px',
-                              fontSize: '0.7rem',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                            }}
-                            title="Clear all individual recipients"
-                          >
-                            Clear
-                          </button>
-                        </div>
-                        <div className="email-recipients-tags">
-                          {currentDraft.recipients.map((email, index) => (
-                            <div 
-                              key={index} 
-                              className="email-recipient-tag"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 0.75rem',
-                                background: 'rgba(59, 130, 246, 0.2)',
-                                border: '1px solid rgba(59, 130, 246, 0.3)',
-                                borderRadius: '8px',
-                                margin: '0.25rem',
-                                fontSize: '0.8rem',
-                                color: '#ffffff'
-                              }}
-                            >
-                              <span>{email}</span>
-                              <button
-                                onClick={() => handleRemoveIndividualRecipient(email)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: '#ef4444',
-                                  cursor: 'pointer',
-                                  padding: '0.25rem',
-                                  borderRadius: '4px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                                title="Remove recipient"
-                              >
-                                <FaTimes />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="email-sidebar-section">
-                  <h3>Email Settings</h3>
-                  
-                  <div className="email-setting-group">
-                    <label className="email-setting-label">
-                      <input
-                        type="checkbox"
-                        checked={currentDraft.isScheduled}
-                        onChange={(e) => setCurrentDraft(prev => ({ ...prev, isScheduled: e.target.checked }))}
-                      />
-                      Schedule Email
-                    </label>
-                    {currentDraft.isScheduled && (
-                      <input
-                        type="datetime-local"
-                        className="email-datetime-input"
-                      />
-                    )}
-                  </div>
-
-                  <div className="email-setting-group">
-                    <label className="email-setting-label">Priority</label>
-                    <select
-                      value={currentDraft.priority}
-                      onChange={(e) => setCurrentDraft(prev => ({ ...prev, priority: e.target.value as 'low' | 'normal' | 'high' }))}
-                      className="email-priority-select"
-                    >
-                      <option value="low">Low</option>
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-
-                  <div className="email-setting-group">
-                    <label className="email-setting-label">
-                      <input
-                        type="checkbox"
-                        checked={currentDraft.trackOpens}
-                        onChange={(e) => setCurrentDraft(prev => ({ ...prev, trackOpens: e.target.checked }))}
-                      />
-                      Track Opens
-                    </label>
-                  </div>
-
-                  <div className="email-setting-group">
-                    <label className="email-setting-label">
-                      <input
-                        type="checkbox"
-                        checked={currentDraft.trackClicks}
-                        onChange={(e) => setCurrentDraft(prev => ({ ...prev, trackClicks: e.target.checked }))}
-                      />
-                      Track Clicks
-                    </label>
-                  </div>
-                </div>
-
-                <div className="email-sidebar-section">
-                  <h3>Templates</h3>
-                  <div className="email-template-quick-access">
-                    {templates.slice(0, 3).map(template => (
-                      <button
-                        key={template.id}
-                        className="email-template-quick-btn"
-                        onClick={() => handleLoadTemplate(template)}
-                      >
-                        <span className="email-template-name">{template.name}</span>
-                        <FaCopy />
-                      </button>
-                    ))}
-                    <button
-                      className="email-template-quick-btn email-view-all"
-                      onClick={() => setActiveTab('templates')}
-                    >
-                      View All Templates
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {showPreview && (
-              <div className="email-email-preview">
-                <h3>Email Preview</h3>
-                <div className="email-preview-content">
-                  <div className="email-preview-header">
-                    <strong>Subject:</strong> {currentDraft.subject || 'No subject'}
-                  </div>
-                  <div className="email-preview-body">
-                    {currentDraft.content ? (
-                      <div dangerouslySetInnerHTML={{ __html: currentDraft.content.replace(/\n/g, '<br>') }} />
-                    ) : (
-                      <p>No content yet</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <ComposeTab
+            currentDraft={currentDraft}
+            recipientGroups={recipientGroups}
+            templates={templates}
+            showPreview={showPreview}
+            individualEmailInput={individualEmailInput}
+            emailValidationError={emailValidationError}
+            showBulkImport={showBulkImport}
+            bulkEmailInput={bulkEmailInput}
+            isSaving={isSaving}
+            isSending={isSending}
+            onDraftChange={setCurrentDraft}
+            onSaveDraft={handleSaveDraft}
+            onSendEmail={handleSendEmail}
+            onTogglePreview={() => setShowPreview(!showPreview)}
+            onEmailInputChange={setIndividualEmailInput}
+            onEmailInputKeyPress={handleEmailInputKeyPress}
+            onAddIndividualRecipient={handleAddIndividualRecipient}
+            onRemoveIndividualRecipient={handleRemoveIndividualRecipient}
+            onClearIndividualRecipients={handleClearIndividualRecipients}
+            onClearAllRecipients={handleClearAllRecipients}
+            onShowRecipientSelector={() => setShowRecipientSelector(true)}
+            onToggleBulkImport={() => setShowBulkImport(!showBulkImport)}
+            onBulkImportChange={setBulkEmailInput}
+            onBulkImport={handleBulkImport}
+            onLoadTemplate={handleLoadTemplate}
+          />
         )}
 
         {activeTab === 'templates' && (
-          <div className="email-templates-section">
-            <div className="email-templates-header">
-              <div className="email-templates-controls">
-                <div className="email-search-box">
-                  <FaSearch />
-                  <input
-                    type="text"
-                    placeholder="Search templates..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="email-category-filter"
-                >
-                  <option value="all">All Categories</option>
-                  <option value="announcement">Announcements</option>
-                  <option value="newsletter">Newsletters</option>
-                  <option value="notification">Notifications</option>
-                  <option value="invitation">Invitations</option>
-                  <option value="reminder">Reminders</option>
-                  <option value="custom">Custom</option>
-                </select>
-                <button
-                  className="email-create-template-btn"
-                  onClick={() => {
-                    setTemplateForm({});
-                    setSelectedTemplate(null);
-                    setShowTemplateModal(true);
-                  }}
-                >
-                  <FaPlus />
-                  Create Template
-                </button>
-              </div>
-            </div>
-
-            <div className="email-templates-grid">
-              {filteredTemplates.map(template => (
-                <div key={template.id} className="email-template-card">
-                  <div className="email-template-header">
-                    <h3>{template.name}</h3>
-                    <div className="email-template-actions">
-                      <button
-                        className="email-template-action-btn"
-                        onClick={() => handleLoadTemplate(template)}
-                        title="Use Template"
-                      >
-                        <FaCopy />
-                      </button>
-                      <button
-                        className="email-template-action-btn"
-                        onClick={() => handleEditTemplate(template)}
-                        title="Edit Template"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="email-template-action-btn email-delete"
-                        onClick={() => handleDeleteTemplate(template.id)}
-                        title="Delete Template"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="email-template-content">
-                    <div className="email-template-subject">
-                      <strong>Subject:</strong> {template.subject}
-                    </div>
-                    <div className="email-template-preview">
-                      {template.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
-                    </div>
-                  </div>
-                  <div className="email-template-footer">
-                    <span className="email-template-category">{template.category}</span>
-                    <span className="email-template-date">
-                      Updated {template.updatedAt.toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TemplatesTab
+            templates={templates}
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+            onSearchChange={setSearchTerm}
+            onCategoryChange={setSelectedCategory}
+            onCreateTemplate={() => {
+              setTemplateForm({});
+              setSelectedTemplate(null);
+              setShowTemplateModal(true);
+            }}
+            onEditTemplate={handleEditTemplate}
+            onDeleteTemplate={handleDeleteTemplate}
+            onLoadTemplate={handleLoadTemplate}
+          />
         )}
 
         {activeTab === 'sent' && (
-          <div className="email-sent-section">
-            <div className="email-sent-header">
-              <h3>Sent Emails</h3>
-              <p>View and manage your sent email campaigns</p>
-            </div>
-            
-            {sentEmails.length === 0 ? (
-              <div className="email-sent-placeholder">
-                <FaPaperPlane className="email-placeholder-icon" />
-                <h3>No Sent Emails Yet</h3>
-                <p>Your sent emails will appear here once you start sending campaigns</p>
-              </div>
-            ) : (
-              <div className="email-sent-list">
-                {sentEmails.map(email => (
-                  <div key={email.id} className="email-sent-card">
-                    <div className="email-sent-header-card">
-                      <h4>{email.subject || 'No Subject'}</h4>
-                      <div className="email-sent-actions">
-                        <button 
-                          className="email-sent-action-btn"
-                          onClick={() => {
-                            setCurrentDraft({
-                              subject: email.subject,
-                              content: email.content,
-                              recipients: email.recipients || [],
-                              recipientGroups: email.recipientGroups || [],
-                              templateId: email.templateId,
-                              isScheduled: false,
-                              priority: email.priority || 'normal',
-                              trackOpens: email.trackOpens || true,
-                              trackClicks: email.trackClicks || true,
-                              status: 'draft',
-                              createdBy: userProfile?.uid || ''
-                            });
-                            setActiveTab('compose');
-                          }}
-                          title="Resend Email"
-                        >
-                          <FaCopy />
-                        </button>
-                        <button 
-                          className="email-sent-action-btn"
-                          onClick={() => {
-                            const previewWindow = window.open('', '_blank', 'width=800,height=600');
-                            if (previewWindow) {
-                              previewWindow.document.write(`
-                                <html>
-                                  <head><title>Email Preview: ${email.subject}</title></head>
-                                  <body style="font-family: Arial, sans-serif; padding: 20px;">
-                                    <h2>${email.subject}</h2>
-                                    <div>${email.content}</div>
-                                  </body>
-                                </html>
-                              `);
-                            }
-                          }}
-                          title="Preview Email"
-                        >
-                          <FaEye />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="email-sent-content">
-                      <div className="email-sent-meta">
-                        <span className="email-sent-recipients">
-                          <FaUsers /> {email.recipients?.length || 0} recipients
-                        </span>
-                        <span className="email-sent-date">
-                          <FaCalendarAlt /> {email.sentAt?.toLocaleDateString() || 'Unknown date'}
-                        </span>
-                        <span className="email-sent-status">
-                          <FaCheckCircle /> {email.status || 'sent'}
-                        </span>
-                      </div>
-                      
-                      <div className="email-sent-preview">
-                        {email.content ? (
-                          <div dangerouslySetInnerHTML={{ 
-                            __html: email.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' 
-                          }} />
-                        ) : (
-                          <p>No content preview available</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <SentTab
+            sentEmails={sentEmails}
+            onResendEmail={handleResendEmail}
+          />
         )}
 
         {activeTab === 'drafts' && (
-          <div className="email-drafts-section">
-            <div className="email-drafts-header">
-              <h3>Saved Drafts</h3>
-              <p>Manage your email drafts</p>
-            </div>
-            <div className="email-drafts-list">
-              {drafts.length === 0 ? (
-                <div className="email-drafts-placeholder">
-                  <FaSave className="email-placeholder-icon" />
-                  <h3>No Drafts Yet</h3>
-                  <p>Your saved drafts will appear here</p>
-                </div>
-              ) : (
-                drafts.map(draft => (
-                  <div key={draft.id} className="email-draft-card">
-                    <div className="email-draft-header">
-                      <h4>{draft.subject || 'Untitled Draft'}</h4>
-                      <div className="email-draft-actions">
-                        <button 
-                          className="email-draft-action-btn"
-                          onClick={() => {
-                            setCurrentDraft(draft);
-                            setActiveTab('compose');
-                          }}
-                          title="Edit Draft"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          className="email-draft-action-btn"
-                          onClick={() => {
-                            const previewWindow = window.open('', '_blank', 'width=800,height=600');
-                            if (previewWindow) {
-                              previewWindow.document.write(`
-                                <html>
-                                  <head><title>Draft Preview: ${draft.subject}</title></head>
-                                  <body style="font-family: Arial, sans-serif; padding: 20px;">
-                                    <h2>${draft.subject}</h2>
-                                    <div>${draft.content}</div>
-                                  </body>
-                                </html>
-                              `);
-                            }
-                          }}
-                          title="Preview Draft"
-                        >
-                          <FaEye />
-                        </button>
-                        <button 
-                          className="email-draft-action-btn email-delete"
-                          onClick={() => handleDeleteDraft(draft.id)}
-                          title="Delete Draft"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="email-draft-content">
-                      <p>{draft.content.replace(/<[^>]*>/g, '').substring(0, 100)}...</p>
-                    </div>
-                    <div className="email-draft-footer">
-                      <span className="email-draft-date">
-                        Updated {draft.updatedAt?.toLocaleDateString() || 'Unknown date'}
-                      </span>
-                      <span className="email-draft-recipients">
-                        {(draft.recipients?.length || 0) + (draft.recipientGroups?.length || 0)} recipients
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <DraftsTab
+            drafts={drafts}
+            onEditDraft={handleEditDraft}
+            onDeleteDraft={handleDeleteDraft}
+          />
         )}
 
         {activeTab === 'analytics' && (
-          <div className="email-analytics-section">
-            <div className="email-analytics-header">
-              <h3>Email Analytics</h3>
-              <p>Track your email performance and engagement</p>
-            </div>
-            <div className="email-analytics-grid">
-              <div className="email-analytics-card email-analytics-sent">
-                <div className="email-analytics-icon">
-                  <FaPaperPlane />
-                </div>
-                <div className="email-analytics-content">
-                  <h4>Total Sent</h4>
-                  <span className="email-analytics-number">{analytics.totalSent}</span>
-                </div>
-              </div>
-              <div className="email-analytics-card email-analytics-opens">
-                <div className="email-analytics-icon">
-                  <FaEye />
-                </div>
-                <div className="email-analytics-content">
-                  <h4>Total Opens</h4>
-                  <span className="email-analytics-number">{analytics.totalOpens}</span>
-                </div>
-              </div>
-              <div className="email-analytics-card email-analytics-clicks">
-                <div className="email-analytics-icon">
-                  <FaMousePointer />
-                </div>
-                <div className="email-analytics-content">
-                  <h4>Total Clicks</h4>
-                  <span className="email-analytics-number">{analytics.totalClicks}</span>
-                </div>
-              </div>
-              <div className="email-analytics-card email-analytics-open-rate">
-                <div className="email-analytics-icon">
-                  <FaChartLine />
-                </div>
-                <div className="email-analytics-content">
-                  <h4>Open Rate</h4>
-                  <span className="email-analytics-number">{analytics.openRate.toFixed(1)}%</span>
-                </div>
-              </div>
-              <div className="email-analytics-card email-analytics-click-rate">
-                <div className="email-analytics-icon">
-                  <FaMousePointer />
-                </div>
-                <div className="email-analytics-content">
-                  <h4>Click Rate</h4>
-                  <span className="email-analytics-number">{analytics.clickRate.toFixed(1)}%</span>
-                </div>
-              </div>
-              <div className="email-analytics-card email-analytics-bounce-rate">
-                <div className="email-analytics-icon">
-                  <FaExclamationTriangle />
-                </div>
-                <div className="email-analytics-content">
-                  <h4>Bounce Rate</h4>
-                  <span className="email-analytics-number">{analytics.bounceRate.toFixed(1)}%</span>
-                </div>
-              </div>
-            </div>
-            <div className="email-analytics-chart">
-              <h4>Email Performance Over Time</h4>
-              <div className="email-chart-placeholder">
-                <FaChartLine className="email-chart-icon" />
-                <p>Chart visualization coming soon</p>
-              </div>
-            </div>
-          </div>
+          <AnalyticsTab analytics={analytics} />
         )}
 
         {activeTab === 'developer' && (
-          <div className="email-developer-section">
-            <div className="email-developer-header">
-              <h3>Developer Tools</h3>
-              <p>Test and debug email functionality</p>
-            </div>
-            
-            <div className="email-developer-grid">
-              <div className="email-developer-card">
-                <div className="email-developer-card-header">
-                  <div className="email-developer-card-icon">
-                    <FaInfoCircle />
-                  </div>
-                  <div className="email-developer-card-title">
-                    <h4>Server Connection</h4>
-                    <p>Test email server connectivity</p>
-                  </div>
-                </div>
-                <div className="email-developer-card-content">
-                  <TestButton
-                    onClick={testEmailServerConnection}
-                    title="Test email server connection"
-                    icon={<FaInfoCircle />}
-                    text="Test Server"
-                    testType="server"
-                  />
-                </div>
-              </div>
-
-              <div className="email-developer-card">
-                <div className="email-developer-card-header">
-                  <div className="email-developer-card-icon">
-                    <FaExclamationTriangle />
-                  </div>
-                  <div className="email-developer-card-title">
-                    <h4>Configuration</h4>
-                    <p>Validate email configuration</p>
-                  </div>
-                </div>
-                <div className="email-developer-card-content">
-                  <TestButton
-                    onClick={testEmailConfiguration}
-                    title="Test email configuration and Zoho setup"
-                    icon={<FaExclamationTriangle />}
-                    text="Test Config"
-                    testType="config"
-                  />
-                </div>
-              </div>
-
-              <div className="email-developer-card">
-                <div className="email-developer-card-header">
-                  <div className="email-developer-card-icon">
-                    <FaRocket />
-                  </div>
-                  <div className="email-developer-card-title">
-                    <h4>Zoho API</h4>
-                    <p>Test Zoho API integration</p>
-                  </div>
-                </div>
-                <div className="email-developer-card-content">
-                  <TestButton
-                    onClick={testZohoSetup}
-                    title="Test Zoho API setup and permissions"
-                    icon={<FaRocket />}
-                    text="Test Zoho"
-                    testType="zoho"
-                  />
-                </div>
-              </div>
-
-              <div className="email-developer-card">
-                <div className="email-developer-card-header">
-                  <div className="email-developer-card-icon">
-                    <FaPaperPlane />
-                  </div>
-                  <div className="email-developer-card-title">
-                    <h4>Email Sending</h4>
-                    <p>Test actual email delivery</p>
-                  </div>
-                </div>
-                <div className="email-developer-card-content">
-                  <TestButton
-                    onClick={testEmailSending}
-                    title={`Test email sending to ${currentDraft.recipients?.length ? currentDraft.recipients.join(', ') : 'first available recipient'}`}
-                    icon={<FaPaperPlane />}
-                    text={`Test Email ${currentDraft.recipients?.length ? `(${currentDraft.recipients.length})` : ''}`}
-                    testType="email"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="email-developer-utilities">
-              <h4>Utilities</h4>
-              <div className="email-developer-utilities-grid">
-                <button 
-                  className="email-developer-utility-btn"
-                  onClick={createTestRecipients}
-                  title="Create test recipients for testing"
-                >
-                  <FaUsers />
-                  <span>Create Test Recipients</span>
-                  <p>Generate sample recipients for testing</p>
-                </button>
-                
-                <button 
-                  className="email-developer-utility-btn"
-                  onClick={loadData}
-                  disabled={isLoading}
-                  title="Refresh all email data"
-                >
-                  <FaSpinner className={isLoading ? 'email-spinning' : ''} />
-                  <span>Refresh Data</span>
-                  <p>Reload templates, drafts, and sent emails</p>
-                </button>
-              </div>
-            </div>
-
-            <div className="email-developer-status-overview">
-              <h4>System Status Overview</h4>
-              <div className="email-developer-status-grid">
-                {Object.entries(testStatuses).map(([key, status]) => (
-                  <div key={key} className={`email-developer-status-item email-developer-status-${status.status}`}>
-                    <div className="email-developer-status-icon">
-                      {status.status === 'idle' && <FaInfoCircle />}
-                      {status.status === 'testing' && <FaSpinner className="email-spinning" />}
-                      {status.status === 'success' && <FaCheck />}
-                      {status.status === 'error' && <FaTimes />}
-                    </div>
-                    <div className="email-developer-status-info">
-                      <div className="email-developer-status-label">
-                        {key.charAt(0).toUpperCase() + key.slice(1)} Test
-                      </div>
-                      <div className="email-developer-status-message">
-                        {status.status === 'idle' && 'Ready to test'}
-                        {status.status === 'testing' && status.message}
-                        {status.status === 'success' && status.message}
-                        {status.status === 'error' && status.message}
-                      </div>
-                      {status.timestamp && (
-                        <div className="email-developer-status-time">
-                          Last run: {status.timestamp.toLocaleTimeString()}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <DeveloperTab
+            testStatuses={testStatuses}
+            currentDraftRecipients={currentDraft.recipients || []}
+            isLoading={isLoading}
+            onTestServer={testEmailServerConnection}
+            onTestConfig={testEmailConfiguration}
+            onTestZoho={testZohoSetup}
+            onTestEmail={testEmailSending}
+            onCreateTestRecipients={createTestRecipients}
+            onRefresh={loadData}
+          />
         )}
       </div>
 
       {/* Template Modal */}
-      {showTemplateModal && (
-        <div className="email-template-modal-overlay" onClick={() => setShowTemplateModal(false)}>
-          <div className="email-template-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="email-modal-header">
-              <h3>{selectedTemplate ? 'Edit Template' : 'Create Template'}</h3>
-              <button 
-                className="email-close-btn"
-                onClick={() => setShowTemplateModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="email-modal-content">
-              <div className="email-form-group">
-                <label>Template Name</label>
-                <input
-                  type="text"
-                  value={templateForm.name || ''}
-                  onChange={(e) => setTemplateForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter template name..."
-                />
-              </div>
-              
-              <div className="email-form-group">
-                <label>Category</label>
-                <select
-                  value={templateForm.category || 'custom'}
-                  onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as 'announcement' | 'newsletter' | 'notification' | 'invitation' | 'reminder' | 'custom' }))}
-                >
-                  <option value="announcement">Announcement</option>
-                  <option value="newsletter">Newsletter</option>
-                  <option value="notification">Notification</option>
-                  <option value="invitation">Invitation</option>
-                  <option value="reminder">Reminder</option>
-                  <option value="custom">Custom</option>
-                </select>
-              </div>
-              
-              <div className="email-form-group">
-                <label>Subject</label>
-                <input
-                  type="text"
-                  value={templateForm.subject || ''}
-                  onChange={(e) => setTemplateForm(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder="Enter email subject..."
-                />
-              </div>
-              
-              <div className="email-form-group">
-                <label>Content</label>
-                <textarea
-                  value={templateForm.content || ''}
-                  onChange={(e) => setTemplateForm(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder="Enter email content..."
-                  rows={10}
-                />
-              </div>
-              
-              <div className="email-form-group">
-                <label>Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={templateForm.tags?.join(', ') || ''}
-                  onChange={(e) => setTemplateForm(prev => ({ 
-                    ...prev, 
-                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
-                  }))}
-                  placeholder="e.g., newsletter, announcement, welcome"
-                />
-              </div>
-              
-              <div className="email-form-group">
-                <label className="email-setting-label">
-                  <input
-                    type="checkbox"
-                    checked={templateForm.isPublic || false}
-                    onChange={(e) => setTemplateForm(prev => ({ ...prev, isPublic: e.target.checked }))}
-                  />
-                  Make this template public (visible to other admins)
-                </label>
-              </div>
-            </div>
-            
-            <div className="email-modal-actions">
-              <button
-                className="email-modal-btn email-cancel"
-                onClick={() => setShowTemplateModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="email-modal-btn email-save"
-                onClick={handleSaveTemplate}
-              >
-                {selectedTemplate ? 'Update Template' : 'Create Template'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <TemplateModal
+        show={showTemplateModal}
+        selectedTemplate={selectedTemplate}
+        templateForm={templateForm}
+        isSaving={isSaving}
+        onClose={() => setShowTemplateModal(false)}
+        onSave={handleSaveTemplate}
+        onFormChange={(updates) => setTemplateForm(prev => ({ ...prev, ...updates }))}
+      />
 
       {/* Recipient Selector Modal */}
       {showRecipientSelector && (
         <RecipientSelector
-          selectedRecipients={[]} // Start with empty selection
+          selectedRecipients={[]}
           onRecipientsChange={handleRecipientSelection}
           onClose={() => setShowRecipientSelector(false)}
         />
