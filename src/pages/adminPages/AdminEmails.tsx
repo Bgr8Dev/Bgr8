@@ -35,7 +35,7 @@ import '../../components/admin/emails/RecipientSelector.css';
 
 const AdminEmails: React.FC = () => {
   const { userProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics'>('compose');
+  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'developer'>('compose');
   const [currentDraft, setCurrentDraft] = useState<Partial<EmailDraft>>({
     subject: '',
     content: '',
@@ -78,6 +78,14 @@ const AdminEmails: React.FC = () => {
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkEmailInput, setBulkEmailInput] = useState('');
   const [showRecipientSelector, setShowRecipientSelector] = useState(false);
+  
+  // Testing status states
+  const [testStatuses, setTestStatuses] = useState({
+    server: { status: 'idle', message: '', timestamp: null as Date | null },
+    config: { status: 'idle', message: '', timestamp: null as Date | null },
+    zoho: { status: 'idle', message: '', timestamp: null as Date | null },
+    email: { status: 'idle', message: '', timestamp: null as Date | null }
+  });
 
   // Initialize email service
   useEffect(() => {
@@ -100,13 +108,17 @@ const AdminEmails: React.FC = () => {
   // Test email server connection
   const testEmailServerConnection = async () => {
     try {
+      updateTestStatus('server', 'testing', 'Testing server connection...');
       const result = await EmailService.testEmailServerConnection();
       if (result.success) {
+        updateTestStatus('server', 'success', 'Server is running and accessible!');
         showNotification('success', 'Email server is running and accessible!');
       } else {
+        updateTestStatus('server', 'error', `Connection failed: ${result.error}`);
         showNotification('error', `Email server connection failed: ${result.error}`);
       }
     } catch (error) {
+      updateTestStatus('server', 'error', `Test failed: ${error}`);
       showNotification('error', `Failed to test email server: ${error}`);
     }
   };
@@ -114,6 +126,7 @@ const AdminEmails: React.FC = () => {
   // Test email configuration
   const testEmailConfiguration = async () => {
     try {
+      updateTestStatus('config', 'testing', 'Testing email configuration...');
       const response = await fetch(`${emailConfig.apiBaseUrl}/api/config-test`, {
         method: 'GET',
         headers: {
@@ -126,15 +139,19 @@ const AdminEmails: React.FC = () => {
         console.log('🔧 Email configuration test:', data);
         
         if (data.config.accessTokenTest === 'success') {
+          updateTestStatus('config', 'success', 'Configuration is working correctly!');
           showNotification('success', 'Email configuration is working correctly!');
         } else {
+          updateTestStatus('config', 'error', `Config issue: ${data.config.accessTokenError || 'Unknown error'}`);
           showNotification('error', `Email configuration issue: ${data.config.accessTokenError || 'Unknown error'}`);
         }
       } else {
+        updateTestStatus('config', 'error', `Test failed: ${response.status} ${response.statusText}`);
         showNotification('error', `Configuration test failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Configuration test error:', error);
+      updateTestStatus('config', 'error', `Test failed: ${error}`);
       showNotification('error', `Failed to test configuration: ${error}`);
     }
   };
@@ -142,6 +159,7 @@ const AdminEmails: React.FC = () => {
   // Test Zoho API setup
   const testZohoSetup = async () => {
     try {
+      updateTestStatus('zoho', 'testing', 'Testing Zoho API setup...');
       const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
         method: 'GET',
         headers: {
@@ -154,17 +172,21 @@ const AdminEmails: React.FC = () => {
         console.log('🔍 Zoho API test:', data);
         
         if (data.success) {
+          updateTestStatus('zoho', 'success', 'Zoho API is working!');
           showNotification('success', `Zoho API is working! ${data.message}`);
           console.log('📋 Next steps:', data.nextSteps);
         } else {
+          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}`);
           showNotification('error', `Zoho API issue: ${data.message}`);
           console.log('📋 Next steps:', data.nextSteps);
         }
       } else {
+        updateTestStatus('zoho', 'error', `Test failed: ${response.status} ${response.statusText}`);
         showNotification('error', `Zoho test failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Zoho test error:', error);
+      updateTestStatus('zoho', 'error', `Test failed: ${error}`);
       showNotification('error', `Failed to test Zoho: ${error}`);
     }
   };
@@ -172,25 +194,33 @@ const AdminEmails: React.FC = () => {
   // Test email sending with selected recipient
   const testEmailSending = async () => {
     try {
+      updateTestStatus('email', 'testing', 'Preparing test email...');
+      
       // Get the first recipient from the current draft, or use a default
       let testRecipients = currentDraft.recipients || [];
       
       if (testRecipients.length === 0) {
         // If no recipients selected, try to get from saved recipients
         try {
+          updateTestStatus('email', 'testing', 'Finding recipients...');
           const savedRecipients = await EmailService.getRecipients();
           if (savedRecipients.length > 0) {
             testRecipients = [savedRecipients[0].email];
+            updateTestStatus('email', 'testing', `Using recipient: ${savedRecipients[0].email}`);
             showNotification('info', `Using first saved recipient: ${savedRecipients[0].email}`);
           } else {
+            updateTestStatus('email', 'error', 'No recipients available');
             showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
             return;
           }
         } catch {
+          updateTestStatus('email', 'error', 'Failed to load recipients');
           showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
           return;
         }
       }
+
+      updateTestStatus('email', 'testing', 'Sending test email...');
 
       const testDraft = {
         subject: 'Test Email from Bgr8 Admin Panel',
@@ -210,12 +240,15 @@ const AdminEmails: React.FC = () => {
       const result = await EmailService.sendEmail(testDraft);
       
       if (result.success) {
+        updateTestStatus('email', 'success', `Email sent to ${testRecipients.length} recipient(s)!`);
         showNotification('success', `Test email sent successfully to ${testRecipients.join(', ')}! Message ID: ${result.messageId}`);
       } else {
+        updateTestStatus('email', 'error', `Send failed: ${result.error}`);
         showNotification('error', `Test email failed: ${result.error}`);
       }
     } catch (error) {
       console.error('Test email error:', error);
+      updateTestStatus('email', 'error', `Test failed: ${error}`);
       showNotification('error', `Test email failed: ${error}`);
     }
   };
@@ -293,6 +326,18 @@ const AdminEmails: React.FC = () => {
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 5000);
+  };
+
+  // Update test status helper
+  const updateTestStatus = (testType: keyof typeof testStatuses, status: 'idle' | 'testing' | 'success' | 'error', message: string = '') => {
+    setTestStatuses(prev => ({
+      ...prev,
+      [testType]: {
+        status,
+        message,
+        timestamp: new Date()
+      }
+    }));
   };
 
   const handleSaveTemplate = async () => {
@@ -688,6 +733,57 @@ const AdminEmails: React.FC = () => {
     );
   }
 
+  // Test Button Component with Status Bar
+  const TestButton: React.FC<{
+    onClick: () => void;
+    title: string;
+    icon: React.ReactNode;
+    text: string;
+    testType: keyof typeof testStatuses;
+    disabled?: boolean;
+  }> = ({ onClick, title, icon, text, testType, disabled = false }) => {
+    const status = testStatuses[testType];
+    
+    return (
+      <div className="email-test-button-container">
+        <button 
+          className="email-refresh-btn"
+          onClick={onClick}
+          title={title}
+          disabled={disabled || status.status === 'testing'}
+        >
+          {status.status === 'testing' ? <FaSpinner className="email-spinning" /> : icon}
+          {text}
+        </button>
+        
+        {/* Status Bar */}
+        <div className={`email-test-status-bar email-test-status-${status.status}`}>
+          <div className="email-test-status-content">
+            <div className="email-test-status-icon">
+              {status.status === 'idle' && <FaInfoCircle />}
+              {status.status === 'testing' && <FaSpinner className="email-spinning" />}
+              {status.status === 'success' && <FaCheck />}
+              {status.status === 'error' && <FaTimes />}
+            </div>
+            <div className="email-test-status-text">
+              <div className="email-test-status-message">
+                {status.status === 'idle' && 'Ready to test'}
+                {status.status === 'testing' && status.message}
+                {status.status === 'success' && status.message}
+                {status.status === 'error' && status.message}
+              </div>
+              {status.timestamp && (
+                <div className="email-test-status-time">
+                  {status.timestamp.toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="email-admin-emails">
       {/* Notification */}
@@ -725,46 +821,6 @@ const AdminEmails: React.FC = () => {
             )}
           </div>
           <div className="email-header-actions">
-            <button 
-              className="email-refresh-btn"
-              onClick={testEmailServerConnection}
-              title="Test email server connection"
-            >
-              <FaInfoCircle />
-              Test Server
-            </button>
-            <button 
-              className="email-refresh-btn"
-              onClick={testEmailConfiguration}
-              title="Test email configuration and Zoho setup"
-            >
-              <FaExclamationTriangle />
-              Test Config
-            </button>
-            <button 
-              className="email-refresh-btn"
-              onClick={testZohoSetup}
-              title="Test Zoho API setup and permissions"
-            >
-              <FaRocket />
-              Test Zoho
-            </button>
-            <button 
-              className="email-refresh-btn"
-              onClick={testEmailSending}
-              title={`Test email sending to ${currentDraft.recipients?.length ? currentDraft.recipients.join(', ') : 'first available recipient'}`}
-            >
-              <FaPaperPlane />
-              Test Email {currentDraft.recipients?.length ? `(${currentDraft.recipients.length})` : ''}
-            </button>
-            <button 
-              className="email-refresh-btn"
-              onClick={createTestRecipients}
-              title="Create test recipients for testing"
-            >
-              <FaUsers />
-              Create Test Recipients
-            </button>
             <button 
               className="email-refresh-btn"
               onClick={loadData}
@@ -857,6 +913,14 @@ const AdminEmails: React.FC = () => {
         >
           <FaChartLine />
           <span>Analytics</span>
+          <div className="email-tab-indicator"></div>
+        </button>
+        <button 
+          className={`email-emails-tab ${activeTab === 'developer' ? 'active' : ''}`}
+          onClick={() => setActiveTab('developer')}
+        >
+          <FaRocket />
+          <span>Developer</span>
           <div className="email-tab-indicator"></div>
         </button>
       </div>
@@ -1696,6 +1760,159 @@ const AdminEmails: React.FC = () => {
               <div className="email-chart-placeholder">
                 <FaChartLine className="email-chart-icon" />
                 <p>Chart visualization coming soon</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'developer' && (
+          <div className="email-developer-section">
+            <div className="email-developer-header">
+              <h3>Developer Tools</h3>
+              <p>Test and debug email functionality</p>
+            </div>
+            
+            <div className="email-developer-grid">
+              <div className="email-developer-card">
+                <div className="email-developer-card-header">
+                  <div className="email-developer-card-icon">
+                    <FaInfoCircle />
+                  </div>
+                  <div className="email-developer-card-title">
+                    <h4>Server Connection</h4>
+                    <p>Test email server connectivity</p>
+                  </div>
+                </div>
+                <div className="email-developer-card-content">
+                  <TestButton
+                    onClick={testEmailServerConnection}
+                    title="Test email server connection"
+                    icon={<FaInfoCircle />}
+                    text="Test Server"
+                    testType="server"
+                  />
+                </div>
+              </div>
+
+              <div className="email-developer-card">
+                <div className="email-developer-card-header">
+                  <div className="email-developer-card-icon">
+                    <FaExclamationTriangle />
+                  </div>
+                  <div className="email-developer-card-title">
+                    <h4>Configuration</h4>
+                    <p>Validate email configuration</p>
+                  </div>
+                </div>
+                <div className="email-developer-card-content">
+                  <TestButton
+                    onClick={testEmailConfiguration}
+                    title="Test email configuration and Zoho setup"
+                    icon={<FaExclamationTriangle />}
+                    text="Test Config"
+                    testType="config"
+                  />
+                </div>
+              </div>
+
+              <div className="email-developer-card">
+                <div className="email-developer-card-header">
+                  <div className="email-developer-card-icon">
+                    <FaRocket />
+                  </div>
+                  <div className="email-developer-card-title">
+                    <h4>Zoho API</h4>
+                    <p>Test Zoho API integration</p>
+                  </div>
+                </div>
+                <div className="email-developer-card-content">
+                  <TestButton
+                    onClick={testZohoSetup}
+                    title="Test Zoho API setup and permissions"
+                    icon={<FaRocket />}
+                    text="Test Zoho"
+                    testType="zoho"
+                  />
+                </div>
+              </div>
+
+              <div className="email-developer-card">
+                <div className="email-developer-card-header">
+                  <div className="email-developer-card-icon">
+                    <FaPaperPlane />
+                  </div>
+                  <div className="email-developer-card-title">
+                    <h4>Email Sending</h4>
+                    <p>Test actual email delivery</p>
+                  </div>
+                </div>
+                <div className="email-developer-card-content">
+                  <TestButton
+                    onClick={testEmailSending}
+                    title={`Test email sending to ${currentDraft.recipients?.length ? currentDraft.recipients.join(', ') : 'first available recipient'}`}
+                    icon={<FaPaperPlane />}
+                    text={`Test Email ${currentDraft.recipients?.length ? `(${currentDraft.recipients.length})` : ''}`}
+                    testType="email"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="email-developer-utilities">
+              <h4>Utilities</h4>
+              <div className="email-developer-utilities-grid">
+                <button 
+                  className="email-developer-utility-btn"
+                  onClick={createTestRecipients}
+                  title="Create test recipients for testing"
+                >
+                  <FaUsers />
+                  <span>Create Test Recipients</span>
+                  <p>Generate sample recipients for testing</p>
+                </button>
+                
+                <button 
+                  className="email-developer-utility-btn"
+                  onClick={loadData}
+                  disabled={isLoading}
+                  title="Refresh all email data"
+                >
+                  <FaSpinner className={isLoading ? 'email-spinning' : ''} />
+                  <span>Refresh Data</span>
+                  <p>Reload templates, drafts, and sent emails</p>
+                </button>
+              </div>
+            </div>
+
+            <div className="email-developer-status-overview">
+              <h4>System Status Overview</h4>
+              <div className="email-developer-status-grid">
+                {Object.entries(testStatuses).map(([key, status]) => (
+                  <div key={key} className={`email-developer-status-item email-developer-status-${status.status}`}>
+                    <div className="email-developer-status-icon">
+                      {status.status === 'idle' && <FaInfoCircle />}
+                      {status.status === 'testing' && <FaSpinner className="email-spinning" />}
+                      {status.status === 'success' && <FaCheck />}
+                      {status.status === 'error' && <FaTimes />}
+                    </div>
+                    <div className="email-developer-status-info">
+                      <div className="email-developer-status-label">
+                        {key.charAt(0).toUpperCase() + key.slice(1)} Test
+                      </div>
+                      <div className="email-developer-status-message">
+                        {status.status === 'idle' && 'Ready to test'}
+                        {status.status === 'testing' && status.message}
+                        {status.status === 'success' && status.message}
+                        {status.status === 'error' && status.message}
+                      </div>
+                      {status.timestamp && (
+                        <div className="email-developer-status-time">
+                          Last run: {status.timestamp.toLocaleTimeString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
