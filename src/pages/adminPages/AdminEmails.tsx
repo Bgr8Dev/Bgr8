@@ -23,9 +23,11 @@ import {
 import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
 import { useAuth } from '../../hooks/useAuth';
 import RichTextEditor from '../../components/admin/emails/RichTextEditor';
+import RecipientSelector from '../../components/admin/emails/RecipientSelector';
 import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
 import '../../styles/adminStyles/AdminEmails.css';
 import '../../styles/adminStyles/RichTextEditor.css';
+import '../../components/admin/emails/RecipientSelector.css';
 
 // Interfaces are now imported from EmailService
 
@@ -69,6 +71,11 @@ const AdminEmails: React.FC = () => {
   });
   const [emailConfigValid, setEmailConfigValid] = useState(false);
   const [emailConfigErrors, setEmailConfigErrors] = useState<string[]>([]);
+  const [individualEmailInput, setIndividualEmailInput] = useState('');
+  const [emailValidationError, setEmailValidationError] = useState('');
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkEmailInput, setBulkEmailInput] = useState('');
+  const [showRecipientSelector, setShowRecipientSelector] = useState(false);
 
   // Initialize email service
   useEffect(() => {
@@ -87,6 +94,170 @@ const AdminEmails: React.FC = () => {
       showNotification('error', `Email configuration invalid: ${configValidation.errors.join(', ')}`);
     }
   }, []);
+
+  // Test email server connection
+  const testEmailServerConnection = async () => {
+    try {
+      const result = await EmailService.testEmailServerConnection();
+      if (result.success) {
+        showNotification('success', 'Email server is running and accessible!');
+      } else {
+        showNotification('error', `Email server connection failed: ${result.error}`);
+      }
+    } catch (error) {
+      showNotification('error', `Failed to test email server: ${error}`);
+    }
+  };
+
+  // Test email configuration
+  const testEmailConfiguration = async () => {
+    try {
+      const response = await fetch(`${emailConfig.apiBaseUrl}/api/config-test`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${emailConfig.apiKey}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔧 Email configuration test:', data);
+        
+        if (data.config.accessTokenTest === 'success') {
+          showNotification('success', 'Email configuration is working correctly!');
+        } else {
+          showNotification('error', `Email configuration issue: ${data.config.accessTokenError || 'Unknown error'}`);
+        }
+      } else {
+        showNotification('error', `Configuration test failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Configuration test error:', error);
+      showNotification('error', `Failed to test configuration: ${error}`);
+    }
+  };
+
+  // Test Zoho API setup
+  const testZohoSetup = async () => {
+    try {
+      const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${emailConfig.apiKey}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔍 Zoho API test:', data);
+        
+        if (data.success) {
+          showNotification('success', `Zoho API is working! ${data.message}`);
+          console.log('📋 Next steps:', data.nextSteps);
+        } else {
+          showNotification('error', `Zoho API issue: ${data.message}`);
+          console.log('📋 Next steps:', data.nextSteps);
+        }
+      } else {
+        showNotification('error', `Zoho test failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Zoho test error:', error);
+      showNotification('error', `Failed to test Zoho: ${error}`);
+    }
+  };
+
+  // Test email sending with selected recipient
+  const testEmailSending = async () => {
+    try {
+      // Get the first recipient from the current draft, or use a default
+      let testRecipients = currentDraft.recipients || [];
+      
+      if (testRecipients.length === 0) {
+        // If no recipients selected, try to get from saved recipients
+        try {
+          const savedRecipients = await EmailService.getRecipients();
+          if (savedRecipients.length > 0) {
+            testRecipients = [savedRecipients[0].email];
+            showNotification('info', `Using first saved recipient: ${savedRecipients[0].email}`);
+          } else {
+            showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
+            return;
+          }
+        } catch {
+          showNotification('error', 'No recipients available. Please add recipients first or create test recipients.');
+          return;
+        }
+      }
+
+      const testDraft = {
+        subject: 'Test Email from Bgr8 Admin Panel',
+        content: '<p>This is a test email from the Bgr8 admin panel to verify email functionality.</p><p>If you received this email, the email system is working correctly!</p>',
+        recipients: testRecipients,
+        recipientGroups: [],
+        templateId: undefined,
+        isScheduled: false,
+        priority: 'normal' as const,
+        trackOpens: true,
+        trackClicks: true,
+        status: 'sent' as const,
+        createdBy: userProfile?.uid || ''
+      };
+
+      console.log('🧪 Testing email with draft:', testDraft);
+      const result = await EmailService.sendEmail(testDraft);
+      
+      if (result.success) {
+        showNotification('success', `Test email sent successfully to ${testRecipients.join(', ')}! Message ID: ${result.messageId}`);
+      } else {
+        showNotification('error', `Test email failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Test email error:', error);
+      showNotification('error', `Test email failed: ${error}`);
+    }
+  };
+
+  // Create test recipients for testing
+  const createTestRecipients = async () => {
+    try {
+      const testRecipients = [
+        {
+          email: 'test1@example.com',
+          name: 'Test User 1',
+          firstName: 'Test',
+          lastName: 'User 1',
+          tags: ['test'],
+          groups: [],
+          isActive: true,
+          isVerified: true,
+          createdBy: userProfile?.uid || '',
+          notes: 'Test recipient 1'
+        },
+        {
+          email: 'test2@example.com',
+          name: 'Test User 2',
+          firstName: 'Test',
+          lastName: 'User 2',
+          tags: ['test'],
+          groups: [],
+          isActive: true,
+          isVerified: true,
+          createdBy: userProfile?.uid || '',
+          notes: 'Test recipient 2'
+        }
+      ];
+
+      for (const recipient of testRecipients) {
+        await EmailService.saveRecipient(recipient);
+      }
+
+      showNotification('success', 'Test recipients created successfully!');
+    } catch (error) {
+      console.error('Error creating test recipients:', error);
+      showNotification('error', 'Failed to create test recipients');
+    }
+  };
 
   // Load data from Firebase
   const loadData = useCallback(async () => {
@@ -298,6 +469,164 @@ const AdminEmails: React.FC = () => {
     return total;
   };
 
+  // Email validation
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Add individual recipient
+  const handleAddIndividualRecipient = () => {
+    const email = individualEmailInput.trim();
+    
+    if (!email) {
+      setEmailValidationError('Please enter an email address');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setEmailValidationError('Please enter a valid email address');
+      return;
+    }
+
+    if (currentDraft.recipients?.includes(email)) {
+      setEmailValidationError('This email is already added');
+      return;
+    }
+
+    setCurrentDraft(prev => ({
+      ...prev,
+      recipients: [...(prev.recipients || []), email]
+    }));
+
+    setIndividualEmailInput('');
+    setEmailValidationError('');
+    showNotification('success', 'Recipient added successfully');
+  };
+
+  // Remove individual recipient
+  const handleRemoveIndividualRecipient = (emailToRemove: string) => {
+    setCurrentDraft(prev => ({
+      ...prev,
+      recipients: (prev.recipients || []).filter(email => email !== emailToRemove)
+    }));
+    showNotification('info', 'Recipient removed');
+  };
+
+  // Handle Enter key in email input
+  const handleEmailInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddIndividualRecipient();
+    }
+  };
+
+  // Clear all individual recipients
+  const handleClearIndividualRecipients = () => {
+    setCurrentDraft(prev => ({
+      ...prev,
+      recipients: []
+    }));
+    showNotification('info', 'All individual recipients cleared');
+  };
+
+
+  // Clear all recipients (both individual and groups)
+  const handleClearAllRecipients = () => {
+    setCurrentDraft(prev => ({
+      ...prev,
+      recipients: [],
+      recipientGroups: []
+    }));
+    showNotification('info', 'All recipients cleared');
+  };
+
+  // Handle recipient selection from saved recipients
+  const handleRecipientSelection = async (selectedRecipientIds: string[]) => {
+    try {
+      console.log('🔍 Selected recipient IDs:', selectedRecipientIds);
+      
+      if (selectedRecipientIds.length === 0) {
+        console.log('⚠️ No recipients selected');
+        return;
+      }
+      
+      // Convert recipient IDs to emails by fetching recipient data
+      const selectedEmails: string[] = [];
+      
+      for (const recipientId of selectedRecipientIds) {
+        console.log('🔍 Fetching recipient:', recipientId);
+        const recipient = await EmailService.getRecipient(recipientId);
+        console.log('📧 Recipient data:', recipient);
+        if (recipient && recipient.email) {
+          selectedEmails.push(recipient.email);
+        } else {
+          console.warn('⚠️ Recipient not found or missing email:', recipientId, recipient);
+        }
+      }
+      
+      console.log('✅ Final selected emails:', selectedEmails);
+      
+      if (selectedEmails.length > 0) {
+        setCurrentDraft(prev => ({
+          ...prev,
+          recipients: [...(prev.recipients || []), ...selectedEmails]
+        }));
+        
+        setShowRecipientSelector(false);
+        showNotification('success', `${selectedEmails.length} recipients added`);
+      } else {
+        showNotification('error', 'No valid recipients found');
+      }
+    } catch (error) {
+      console.error('Error fetching recipient emails:', error);
+      showNotification('error', 'Failed to load recipient emails');
+    }
+  };
+
+  // Handle bulk email import
+  const handleBulkImport = () => {
+    const emails = bulkEmailInput
+      .split(/[,\n;]/)
+      .map(email => email.trim())
+      .filter(email => email.length > 0);
+
+    if (emails.length === 0) {
+      setEmailValidationError('Please enter at least one email address');
+      return;
+    }
+
+    const validEmails: string[] = [];
+    const invalidEmails: string[] = [];
+
+    emails.forEach(email => {
+      if (isValidEmail(email)) {
+        if (!currentDraft.recipients?.includes(email)) {
+          validEmails.push(email);
+        }
+      } else {
+        invalidEmails.push(email);
+      }
+    });
+
+    if (validEmails.length > 0) {
+      setCurrentDraft(prev => ({
+        ...prev,
+        recipients: [...(prev.recipients || []), ...validEmails]
+      }));
+      showNotification('success', `${validEmails.length} recipients added successfully`);
+    }
+
+    if (invalidEmails.length > 0) {
+      setEmailValidationError(`Invalid emails: ${invalidEmails.join(', ')}`);
+    } else {
+      setEmailValidationError('');
+    }
+
+    setBulkEmailInput('');
+    setShowBulkImport(false);
+  };
+
   if (isLoading) {
     return (
       <div className="email-admin-emails">
@@ -349,6 +678,46 @@ const AdminEmails: React.FC = () => {
             )}
           </div>
           <div className="email-header-actions">
+            <button 
+              className="email-refresh-btn"
+              onClick={testEmailServerConnection}
+              title="Test email server connection"
+            >
+              <FaInfoCircle />
+              Test Server
+            </button>
+            <button 
+              className="email-refresh-btn"
+              onClick={testEmailConfiguration}
+              title="Test email configuration and Zoho setup"
+            >
+              <FaExclamationTriangle />
+              Test Config
+            </button>
+            <button 
+              className="email-refresh-btn"
+              onClick={testZohoSetup}
+              title="Test Zoho API setup and permissions"
+            >
+              <FaRocket />
+              Test Zoho
+            </button>
+            <button 
+              className="email-refresh-btn"
+              onClick={testEmailSending}
+              title={`Test email sending to ${currentDraft.recipients?.length ? currentDraft.recipients.join(', ') : 'first available recipient'}`}
+            >
+              <FaPaperPlane />
+              Test Email {currentDraft.recipients?.length ? `(${currentDraft.recipients.length})` : ''}
+            </button>
+            <button 
+              className="email-refresh-btn"
+              onClick={createTestRecipients}
+              title="Create test recipients for testing"
+            >
+              <FaUsers />
+              Create Test Recipients
+            </button>
             <button 
               className="email-refresh-btn"
               onClick={loadData}
@@ -540,6 +909,31 @@ const AdminEmails: React.FC = () => {
                   <h3>Recipients</h3>
                   <div className="email-recipients-summary">
                     <span className="email-recipients-count">{getTotalRecipients()} recipients</span>
+                    {getTotalRecipients() > 0 && (
+                      <button
+                        onClick={handleClearAllRecipients}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#ef4444',
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '6px',
+                          fontSize: '0.7rem',
+                          cursor: 'pointer',
+                          marginLeft: '0.5rem',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                        }}
+                        title="Clear all recipients"
+                      >
+                        Clear All
+                      </button>
+                    )}
                   </div>
                   
                   <div className="email-recipient-groups">
@@ -578,11 +972,253 @@ const AdminEmails: React.FC = () => {
                         type="email"
                         placeholder="Add email address..."
                         className="email-email-input"
+                        value={individualEmailInput}
+                        onChange={(e) => {
+                          setIndividualEmailInput(e.target.value);
+                          setEmailValidationError('');
+                        }}
+                        onKeyPress={handleEmailInputKeyPress}
                       />
-                      <button className="email-add-recipient-btn" title="Add recipient">
+                      <button 
+                        className="email-add-recipient-btn" 
+                        title="Add recipient"
+                        onClick={handleAddIndividualRecipient}
+                      >
                         <FaPlus />
                       </button>
                     </div>
+
+                    {/* Select from Saved Recipients */}
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <button
+                        onClick={() => setShowRecipientSelector(true)}
+                        style={{
+                          background: 'rgba(16, 185, 129, 0.2)',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                          color: '#10b981',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(16, 185, 129, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(16, 185, 129, 0.2)';
+                        }}
+                        title="Select from saved recipients"
+                      >
+                        <FaUsers />
+                        Select from Saved Recipients
+                      </button>
+                    </div>
+
+                    {/* Bulk Import Toggle */}
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <button
+                        onClick={() => setShowBulkImport(!showBulkImport)}
+                        style={{
+                          background: 'rgba(59, 130, 246, 0.2)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          color: '#3b82f6',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(59, 130, 246, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
+                        }}
+                        title="Bulk import emails"
+                      >
+                        <FaPlus />
+                        {showBulkImport ? 'Hide Bulk Import' : 'Bulk Import'}
+                      </button>
+                    </div>
+
+                    {/* Bulk Import Textarea */}
+                    {showBulkImport && (
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <label style={{ 
+                          color: '#ffffff', 
+                          fontSize: '0.8rem', 
+                          fontWeight: '600',
+                          marginBottom: '0.5rem',
+                          display: 'block'
+                        }}>
+                          Paste emails (comma, semicolon, or line separated):
+                        </label>
+                        <textarea
+                          value={bulkEmailInput}
+                          onChange={(e) => setBulkEmailInput(e.target.value)}
+                          placeholder="email1@example.com, email2@example.com&#10;email3@example.com&#10;email4@example.com"
+                          style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            color: '#ffffff',
+                            fontSize: '0.8rem',
+                            minHeight: '80px',
+                            resize: 'vertical',
+                            fontFamily: 'monospace'
+                          }}
+                        />
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: '0.5rem', 
+                          marginTop: '0.5rem' 
+                        }}>
+                          <button
+                            onClick={handleBulkImport}
+                            style={{
+                              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                              border: 'none',
+                              color: '#ffffff',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '6px',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                          >
+                            Import Emails
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowBulkImport(false);
+                              setBulkEmailInput('');
+                              setEmailValidationError('');
+                            }}
+                            style={{
+                              background: 'rgba(107, 114, 128, 0.2)',
+                              border: '1px solid rgba(107, 114, 128, 0.3)',
+                              color: '#9ca3af',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '6px',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {emailValidationError && (
+                      <div className="email-validation-error" style={{ 
+                        color: '#ef4444', 
+                        fontSize: '0.8rem', 
+                        marginTop: '0.5rem' 
+                      }}>
+                        {emailValidationError}
+                      </div>
+                    )}
+
+                    {/* Display individual recipients */}
+                    {currentDraft.recipients && currentDraft.recipients.length > 0 && (
+                      <div className="email-individual-recipients-list" style={{ marginTop: '1rem' }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          marginBottom: '0.5rem'
+                        }}>
+                          <h5 style={{ 
+                            color: '#ffffff', 
+                            fontSize: '0.9rem', 
+                            margin: 0,
+                            fontWeight: '600'
+                          }}>
+                            Added Recipients ({currentDraft.recipients.length})
+                          </h5>
+                          <button
+                            onClick={handleClearIndividualRecipients}
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.2)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#ef4444',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '6px',
+                              fontSize: '0.7rem',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                            }}
+                            title="Clear all individual recipients"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        <div className="email-recipients-tags">
+                          {currentDraft.recipients.map((email, index) => (
+                            <div 
+                              key={index} 
+                              className="email-recipient-tag"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.75rem',
+                                background: 'rgba(59, 130, 246, 0.2)',
+                                border: '1px solid rgba(59, 130, 246, 0.3)',
+                                borderRadius: '8px',
+                                margin: '0.25rem',
+                                fontSize: '0.8rem',
+                                color: '#ffffff'
+                              }}
+                            >
+                              <span>{email}</span>
+                              <button
+                                onClick={() => handleRemoveIndividualRecipient(email)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  padding: '0.25rem',
+                                  borderRadius: '4px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title="Remove recipient"
+                              >
+                                <FaTimes />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -993,6 +1629,15 @@ const AdminEmails: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Recipient Selector Modal */}
+      {showRecipientSelector && (
+        <RecipientSelector
+          selectedRecipients={[]} // Start with empty selection
+          onRecipientsChange={handleRecipientSelection}
+          onClose={() => setShowRecipientSelector(false)}
+        />
       )}
     </div>
   );

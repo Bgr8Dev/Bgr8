@@ -81,17 +81,48 @@ export interface RecipientGroup {
   };
 }
 
+export interface Recipient {
+  id: string;
+  email: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  tags: string[];
+  groups: string[]; // Array of group IDs this recipient belongs to
+  isActive: boolean;
+  isVerified: boolean;
+  lastUsed?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  notes?: string;
+  metadata?: {
+    source?: string; // 'manual', 'import', 'signup', etc.
+    unsubscribeToken?: string;
+    bounceCount?: number;
+    complaintCount?: number;
+  };
+}
+
 export class EmailService {
   private static readonly TEMPLATES_COLLECTION = 'email-templates';
   private static readonly DRAFTS_COLLECTION = 'email-drafts';
   private static readonly SENT_EMAILS_COLLECTION = 'sent-emails';
   private static readonly RECIPIENT_GROUPS_COLLECTION = 'recipient-groups';
+  private static readonly RECIPIENTS_COLLECTION = 'recipients';
 
   /**
    * Initialize email service with API configuration
    */
   static initializeEmailApi(config: { apiBaseUrl: string; apiKey: string }): void {
     EmailApiService.initialize(config);
+  }
+
+  /**
+   * Test email server connection
+   */
+  static async testEmailServerConnection(): Promise<{ success: boolean; error?: string }> {
+    return await EmailApiService.testConnection();
   }
 
   /**
@@ -148,8 +179,14 @@ export class EmailService {
   static async saveTemplate(template: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>): Promise<string> {
     try {
       const templatesRef = collection(firestore, this.TEMPLATES_COLLECTION);
+      
+      // Filter out undefined values to prevent Firebase errors
+      const cleanTemplate = Object.fromEntries(
+        Object.entries(template).filter(([, value]) => value !== undefined)
+      );
+      
       const docRef = await addDoc(templatesRef, {
-        ...template,
+        ...cleanTemplate,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         usageCount: 0
@@ -237,8 +274,14 @@ export class EmailService {
   static async saveDraft(draft: Omit<EmailDraft, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
       const draftsRef = collection(firestore, this.DRAFTS_COLLECTION);
+      
+      // Filter out undefined values to prevent Firebase errors
+      const cleanDraft = Object.fromEntries(
+        Object.entries(draft).filter(([, value]) => value !== undefined)
+      );
+      
       const docRef = await addDoc(draftsRef, {
-        ...draft,
+        ...cleanDraft,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -307,7 +350,13 @@ export class EmailService {
   static async saveSentEmail(sentEmail: Omit<SentEmail, 'id'>): Promise<string> {
     try {
       const sentRef = collection(firestore, this.SENT_EMAILS_COLLECTION);
-      const docRef = await addDoc(sentRef, sentEmail);
+      
+      // Filter out undefined values to prevent Firebase errors
+      const cleanSentEmail = Object.fromEntries(
+        Object.entries(sentEmail).filter(([, value]) => value !== undefined)
+      );
+      
+      const docRef = await addDoc(sentRef, cleanSentEmail);
       return docRef.id;
     } catch (error) {
       console.error('Error saving sent email:', error);
@@ -369,6 +418,15 @@ export class EmailService {
         fromEmail: 'info@bgr8.uk',
         fromName: 'Bgr8 Team'
       };
+
+      console.log('📧 Final email message being sent:', {
+        to: emailMessage.to,
+        subject: emailMessage.subject,
+        contentLength: emailMessage.content?.length || 0,
+        contentType: emailMessage.contentType,
+        fromEmail: emailMessage.fromEmail,
+        fromName: emailMessage.fromName
+      });
 
       // Send email through API
       const result = await EmailApiService.sendEmail(emailMessage);
@@ -446,18 +504,27 @@ export class EmailService {
    * Get all recipients from individual emails and groups
    */
   private static async getAllRecipients(individualRecipients: string[], recipientGroups: string[]): Promise<string[]> {
+    console.log('🔍 Getting all recipients:', {
+      individualRecipients,
+      recipientGroups
+    });
+    
     const allRecipients = [...individualRecipients];
     
     // Get recipients from groups
     for (const groupId of recipientGroups) {
       const group = await this.getRecipientGroupById(groupId);
+      console.log(`📋 Group ${groupId}:`, group);
       if (group && group.recipients) {
         allRecipients.push(...group.recipients);
       }
     }
     
     // Remove duplicates
-    return Array.from(new Set(allRecipients));
+    const uniqueRecipients = Array.from(new Set(allRecipients));
+    console.log('✅ Final recipients list:', uniqueRecipients);
+    
+    return uniqueRecipients;
   }
 
   /**
@@ -518,6 +585,225 @@ export class EmailService {
         clickRate: 0,
         bounceRate: 0
       };
+    }
+  }
+
+  // ========================================
+  // RECIPIENT MANAGEMENT FUNCTIONS
+  // ========================================
+
+  /**
+   * Get all recipients
+   */
+  static async getRecipients(): Promise<Recipient[]> {
+    try {
+      const recipientsRef = collection(firestore, this.RECIPIENTS_COLLECTION);
+      const q = query(recipientsRef, orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          lastUsed: data.lastUsed?.toDate()
+        } as Recipient;
+      });
+    } catch (error) {
+      console.error('Error getting recipients:', error);
+      throw new Error('Failed to load recipients');
+    }
+  }
+
+  /**
+   * Get recipient by ID
+   */
+  static async getRecipient(recipientId: string): Promise<Recipient | null> {
+    try {
+      const recipientRef = doc(firestore, this.RECIPIENTS_COLLECTION, recipientId);
+      const recipientSnap = await getDoc(recipientRef);
+      
+      if (recipientSnap.exists()) {
+        const data = recipientSnap.data();
+        return {
+          id: recipientSnap.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          lastUsed: data.lastUsed?.toDate()
+        } as Recipient;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting recipient:', error);
+      throw new Error('Failed to load recipient');
+    }
+  }
+
+  /**
+   * Save recipient
+   */
+  static async saveRecipient(recipient: Omit<Recipient, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const recipientsRef = collection(firestore, this.RECIPIENTS_COLLECTION);
+      
+      // Filter out undefined values to prevent Firebase errors
+      const cleanRecipient = Object.fromEntries(
+        Object.entries(recipient).filter(([, value]) => value !== undefined)
+      );
+      
+      const docRef = await addDoc(recipientsRef, {
+        ...cleanRecipient,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error saving recipient:', error);
+      throw new Error('Failed to save recipient');
+    }
+  }
+
+  /**
+   * Update recipient
+   */
+  static async updateRecipient(recipientId: string, updates: Partial<Recipient>): Promise<void> {
+    try {
+      const recipientRef = doc(firestore, this.RECIPIENTS_COLLECTION, recipientId);
+      
+      // Filter out undefined values to prevent Firebase errors
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([, value]) => value !== undefined)
+      );
+      
+      await updateDoc(recipientRef, {
+        ...cleanUpdates,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating recipient:', error);
+      throw new Error('Failed to update recipient');
+    }
+  }
+
+  /**
+   * Delete recipient
+   */
+  static async deleteRecipient(recipientId: string): Promise<void> {
+    try {
+      const recipientRef = doc(firestore, this.RECIPIENTS_COLLECTION, recipientId);
+      await deleteDoc(recipientRef);
+    } catch (error) {
+      console.error('Error deleting recipient:', error);
+      throw new Error('Failed to delete recipient');
+    }
+  }
+
+  /**
+   * Search recipients by email, name, or tags
+   */
+  static async searchRecipients(searchTerm: string): Promise<Recipient[]> {
+    try {
+      const recipients = await this.getRecipients();
+      const term = searchTerm.toLowerCase();
+      
+      return recipients.filter(recipient => 
+        recipient.email.toLowerCase().includes(term) ||
+        recipient.name?.toLowerCase().includes(term) ||
+        recipient.firstName?.toLowerCase().includes(term) ||
+        recipient.lastName?.toLowerCase().includes(term) ||
+        recipient.tags.some(tag => tag.toLowerCase().includes(term))
+      );
+    } catch (error) {
+      console.error('Error searching recipients:', error);
+      throw new Error('Failed to search recipients');
+    }
+  }
+
+  /**
+   * Get recipients by tags
+   */
+  static async getRecipientsByTags(tags: string[]): Promise<Recipient[]> {
+    try {
+      const recipients = await this.getRecipients();
+      return recipients.filter(recipient => 
+        tags.some(tag => recipient.tags.includes(tag))
+      );
+    } catch (error) {
+      console.error('Error getting recipients by tags:', error);
+      throw new Error('Failed to get recipients by tags');
+    }
+  }
+
+  /**
+   * Get recipients by group
+   */
+  static async getRecipientsByGroup(groupId: string): Promise<Recipient[]> {
+    try {
+      const recipients = await this.getRecipients();
+      return recipients.filter(recipient => 
+        recipient.groups.includes(groupId)
+      );
+    } catch (error) {
+      console.error('Error getting recipients by group:', error);
+      throw new Error('Failed to get recipients by group');
+    }
+  }
+
+  /**
+   * Add recipient to group
+   */
+  static async addRecipientToGroup(recipientId: string, groupId: string): Promise<void> {
+    try {
+      const recipient = await this.getRecipient(recipientId);
+      if (!recipient) {
+        throw new Error('Recipient not found');
+      }
+
+      if (!recipient.groups.includes(groupId)) {
+        await this.updateRecipient(recipientId, {
+          groups: [...recipient.groups, groupId]
+        });
+      }
+    } catch (error) {
+      console.error('Error adding recipient to group:', error);
+      throw new Error('Failed to add recipient to group');
+    }
+  }
+
+  /**
+   * Remove recipient from group
+   */
+  static async removeRecipientFromGroup(recipientId: string, groupId: string): Promise<void> {
+    try {
+      const recipient = await this.getRecipient(recipientId);
+      if (!recipient) {
+        throw new Error('Recipient not found');
+      }
+
+      await this.updateRecipient(recipientId, {
+        groups: recipient.groups.filter(id => id !== groupId)
+      });
+    } catch (error) {
+      console.error('Error removing recipient from group:', error);
+      throw new Error('Failed to remove recipient from group');
+    }
+  }
+
+  /**
+   * Update recipient last used timestamp
+   */
+  static async updateRecipientLastUsed(recipientId: string): Promise<void> {
+    try {
+      await this.updateRecipient(recipientId, {
+        lastUsed: new Date()
+      });
+    } catch (error) {
+      console.error('Error updating recipient last used:', error);
+      // Don't throw error for this as it's not critical
     }
   }
 }

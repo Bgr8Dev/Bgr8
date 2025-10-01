@@ -53,6 +53,54 @@ export class EmailApiService {
    */
   static initialize(config: EmailApiConfig): void {
     this.config = config;
+    console.log('🚀 Email API Service initialized with config:', {
+      apiBaseUrl: config.apiBaseUrl,
+      apiKey: config.apiKey ? '***configured***' : 'NOT CONFIGURED'
+    });
+  }
+
+  /**
+   * Test connection to email API server
+   */
+  static async testConnection(): Promise<{ success: boolean; error?: string }> {
+    if (!this.config) {
+      return {
+        success: false,
+        error: 'Email API not initialized'
+      };
+    }
+
+    try {
+      const healthUrl = `${this.config.apiBaseUrl}/api/health`;
+      console.log('🏥 Testing email server connection:', healthUrl);
+      
+      const response = await fetch(healthUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+        },
+        signal: AbortSignal.timeout(5000), // 5 second timeout for health check
+        mode: 'cors',
+        credentials: 'omit',
+      });
+
+      if (response.ok) {
+        console.log('✅ Email server is running and accessible');
+        return { success: true };
+      } else {
+        console.log('❌ Email server responded with error:', response.status, response.statusText);
+        return { 
+          success: false, 
+          error: `Server responded with ${response.status}: ${response.statusText}` 
+        };
+      }
+    } catch (error) {
+      console.log('❌ Email server connection failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Connection failed'
+      };
+    }
   }
 
   /**
@@ -67,7 +115,31 @@ export class EmailApiService {
     }
 
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}/api/email/send`, {
+      // Validate email message
+      if (!message.to || message.to.length === 0) {
+        throw new Error('No recipients specified');
+      }
+      
+      if (!message.subject || message.subject.trim() === '') {
+        throw new Error('Email subject is required');
+      }
+      
+      if (!message.content || message.content.trim() === '') {
+        throw new Error('Email content is required');
+      }
+      
+      // Validate email addresses
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const invalidEmails = message.to.filter(email => !emailRegex.test(email));
+      if (invalidEmails.length > 0) {
+        throw new Error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
+      }
+
+      const apiUrl = `${this.config.apiBaseUrl}/api/email/send`;
+      console.log('🔗 Attempting to send email to:', apiUrl);
+      console.log('📧 Email message:', message);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,8 +153,22 @@ export class EmailApiService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`API error: ${response.statusText} - ${errorData.message || 'Unknown error'}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { message: 'Failed to parse error response' };
+        }
+        
+        console.error('❌ Email API Error Details:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          requestUrl: apiUrl,
+          requestBody: message
+        });
+        
+        throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.message || errorData.error || 'Unknown error'}`);
       }
 
       const result = await response.json();
