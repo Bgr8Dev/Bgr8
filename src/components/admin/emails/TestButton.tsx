@@ -12,7 +12,6 @@ interface TestButtonProps {
   title: string;
   icon: React.ReactNode;
   text: string;
-  testType: string;
   disabled?: boolean;
   status: TestStatus;
 }
@@ -22,7 +21,6 @@ export const TestButton: React.FC<TestButtonProps> = ({
   title, 
   icon, 
   text, 
-  testType, 
   disabled = false,
   status 
 }) => {

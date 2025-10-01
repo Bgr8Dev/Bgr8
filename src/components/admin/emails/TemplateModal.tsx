@@ -50,7 +50,7 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
             <label>Category</label>
             <select
               value={templateForm.category || 'custom'}
-              onChange={(e) => onFormChange({ category: e.target.value as any })}
+              onChange={(e) => onFormChange({ category: e.target.value as 'announcement' | 'newsletter' | 'notification' | 'invitation' | 'reminder' | 'custom' })}
             >
               <option value="announcement">Announcement</option>
               <option value="newsletter">Newsletter</option>

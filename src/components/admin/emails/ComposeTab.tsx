@@ -11,12 +11,12 @@ import {
   FaCopy
 } from 'react-icons/fa';
 import RichTextEditor from './RichTextEditor';
-import { EmailDraft, RecipientGroup } from '../../../services/emailService';
+import { EmailDraft, RecipientGroup, EmailTemplate } from '../../../services/emailService';
 
 interface ComposeTabProps {
   currentDraft: Partial<EmailDraft>;
   recipientGroups: RecipientGroup[];
-  templates: any[];
+  templates: EmailTemplate[];
   showPreview: boolean;
   individualEmailInput: string;
   emailValidationError: string;
@@ -38,7 +38,7 @@ interface ComposeTabProps {
   onToggleBulkImport: () => void;
   onBulkImportChange: (value: string) => void;
   onBulkImport: () => void;
-  onLoadTemplate: (template: any) => void;
+  onLoadTemplate: (template: EmailTemplate) => void;
 }
 
 export const ComposeTab: React.FC<ComposeTabProps> = ({
@@ -470,7 +470,7 @@ export const ComposeTab: React.FC<ComposeTabProps> = ({
               <label className="email-setting-label">Priority</label>
               <select
                 value={currentDraft.priority}
-                onChange={(e) => onDraftChange({ priority: e.target.value as any })}
+                onChange={(e) => onDraftChange({ priority: e.target.value as 'low' | 'normal' | 'high' })}
                 className="email-priority-select"
               >
                 <option value="low">Low</option>
