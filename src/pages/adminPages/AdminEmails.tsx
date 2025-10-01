@@ -18,7 +18,9 @@ import {
   FaExclamationTriangle,
   FaInfoCircle,
   FaRocket,
-  FaMousePointer
+  FaMousePointer,
+  FaCalendarAlt,
+  FaCheckCircle
 } from 'react-icons/fa';
 import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
 import { useAuth } from '../../hooks/useAuth';
@@ -342,6 +344,35 @@ const AdminEmails: React.FC = () => {
     }
   };
 
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (window.confirm('Are you sure you want to delete this template?')) {
+      try {
+        await EmailService.deleteTemplate(templateId);
+        showNotification('success', 'Template deleted successfully!');
+        
+        // Reload templates
+        const updatedTemplates = await EmailService.getTemplates();
+        setTemplates(updatedTemplates);
+      } catch (error) {
+        console.error('Error deleting template:', error);
+        showNotification('error', 'Failed to delete template');
+      }
+    }
+  };
+
+  const handleEditTemplate = (template: EmailTemplate) => {
+    setTemplateForm({
+      name: template.name,
+      subject: template.subject,
+      content: template.content,
+      category: template.category,
+      tags: template.tags || [],
+      isPublic: template.isPublic || false
+    });
+    setSelectedTemplate(template);
+    setShowTemplateModal(true);
+  };
+
   const handleLoadTemplate = (template: EmailTemplate) => {
     setCurrentDraft(prev => ({
       ...prev,
@@ -351,6 +382,22 @@ const AdminEmails: React.FC = () => {
     }));
     setActiveTab('compose');
     showNotification('info', `Template "${template.name}" loaded successfully!`);
+  };
+
+  const handleDeleteDraft = async (draftId: string) => {
+    if (window.confirm('Are you sure you want to delete this draft?')) {
+      try {
+        await EmailService.deleteDraft(draftId);
+        showNotification('success', 'Draft deleted successfully!');
+        
+        // Reload drafts
+        const updatedDrafts = await EmailService.getDrafts();
+        setDrafts(updatedDrafts);
+      } catch (error) {
+        console.error('Error deleting draft:', error);
+        showNotification('error', 'Failed to delete draft');
+      }
+    }
   };
 
   const handleSaveDraft = async () => {
@@ -1377,17 +1424,14 @@ const AdminEmails: React.FC = () => {
                       </button>
                       <button
                         className="email-template-action-btn"
-                        onClick={() => {
-                          setTemplateForm(template);
-                          setSelectedTemplate(template);
-                          setShowTemplateModal(true);
-                        }}
+                        onClick={() => handleEditTemplate(template)}
                         title="Edit Template"
                       >
                         <FaEdit />
                       </button>
                       <button
                         className="email-template-action-btn email-delete"
+                        onClick={() => handleDeleteTemplate(template.id)}
                         title="Delete Template"
                       >
                         <FaTrash />
@@ -1416,11 +1460,96 @@ const AdminEmails: React.FC = () => {
 
         {activeTab === 'sent' && (
           <div className="email-sent-section">
-            <div className="email-sent-placeholder">
-              <FaPaperPlane className="email-placeholder-icon" />
+            <div className="email-sent-header">
               <h3>Sent Emails</h3>
-              <p>Your sent emails will appear here</p>
+              <p>View and manage your sent email campaigns</p>
             </div>
+            
+            {sentEmails.length === 0 ? (
+              <div className="email-sent-placeholder">
+                <FaPaperPlane className="email-placeholder-icon" />
+                <h3>No Sent Emails Yet</h3>
+                <p>Your sent emails will appear here once you start sending campaigns</p>
+              </div>
+            ) : (
+              <div className="email-sent-list">
+                {sentEmails.map(email => (
+                  <div key={email.id} className="email-sent-card">
+                    <div className="email-sent-header-card">
+                      <h4>{email.subject || 'No Subject'}</h4>
+                      <div className="email-sent-actions">
+                        <button 
+                          className="email-sent-action-btn"
+                          onClick={() => {
+                            setCurrentDraft({
+                              subject: email.subject,
+                              content: email.content,
+                              recipients: email.recipients || [],
+                              recipientGroups: email.recipientGroups || [],
+                              templateId: email.templateId,
+                              isScheduled: false,
+                              priority: email.priority || 'normal',
+                              trackOpens: email.trackOpens || true,
+                              trackClicks: email.trackClicks || true,
+                              status: 'draft',
+                              createdBy: userProfile?.uid || ''
+                            });
+                            setActiveTab('compose');
+                          }}
+                          title="Resend Email"
+                        >
+                          <FaCopy />
+                        </button>
+                        <button 
+                          className="email-sent-action-btn"
+                          onClick={() => {
+                            const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                            if (previewWindow) {
+                              previewWindow.document.write(`
+                                <html>
+                                  <head><title>Email Preview: ${email.subject}</title></head>
+                                  <body style="font-family: Arial, sans-serif; padding: 20px;">
+                                    <h2>${email.subject}</h2>
+                                    <div>${email.content}</div>
+                                  </body>
+                                </html>
+                              `);
+                            }
+                          }}
+                          title="Preview Email"
+                        >
+                          <FaEye />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="email-sent-content">
+                      <div className="email-sent-meta">
+                        <span className="email-sent-recipients">
+                          <FaUsers /> {email.recipients?.length || 0} recipients
+                        </span>
+                        <span className="email-sent-date">
+                          <FaCalendarAlt /> {email.sentAt?.toLocaleDateString() || 'Unknown date'}
+                        </span>
+                        <span className="email-sent-status">
+                          <FaCheckCircle /> {email.status || 'sent'}
+                        </span>
+                      </div>
+                      
+                      <div className="email-sent-preview">
+                        {email.content ? (
+                          <div dangerouslySetInnerHTML={{ 
+                            __html: email.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' 
+                          }} />
+                        ) : (
+                          <p>No content preview available</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -1454,7 +1583,28 @@ const AdminEmails: React.FC = () => {
                           <FaEdit />
                         </button>
                         <button 
+                          className="email-draft-action-btn"
+                          onClick={() => {
+                            const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                            if (previewWindow) {
+                              previewWindow.document.write(`
+                                <html>
+                                  <head><title>Draft Preview: ${draft.subject}</title></head>
+                                  <body style="font-family: Arial, sans-serif; padding: 20px;">
+                                    <h2>${draft.subject}</h2>
+                                    <div>${draft.content}</div>
+                                  </body>
+                                </html>
+                              `);
+                            }
+                          }}
+                          title="Preview Draft"
+                        >
+                          <FaEye />
+                        </button>
+                        <button 
                           className="email-draft-action-btn email-delete"
+                          onClick={() => handleDeleteDraft(draft.id)}
                           title="Delete Draft"
                         >
                           <FaTrash />
@@ -1466,10 +1616,10 @@ const AdminEmails: React.FC = () => {
                     </div>
                     <div className="email-draft-footer">
                       <span className="email-draft-date">
-                        Updated {draft.updatedAt.toLocaleDateString()}
+                        Updated {draft.updatedAt?.toLocaleDateString() || 'Unknown date'}
                       </span>
                       <span className="email-draft-recipients">
-                        {getTotalRecipients()} recipients
+                        {(draft.recipients?.length || 0) + (draft.recipientGroups?.length || 0)} recipients
                       </span>
                     </div>
                   </div>
@@ -1610,6 +1760,30 @@ const AdminEmails: React.FC = () => {
                   placeholder="Enter email content..."
                   rows={10}
                 />
+              </div>
+              
+              <div className="email-form-group">
+                <label>Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={templateForm.tags?.join(', ') || ''}
+                  onChange={(e) => setTemplateForm(prev => ({ 
+                    ...prev, 
+                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+                  }))}
+                  placeholder="e.g., newsletter, announcement, welcome"
+                />
+              </div>
+              
+              <div className="email-form-group">
+                <label className="email-setting-label">
+                  <input
+                    type="checkbox"
+                    checked={templateForm.isPublic || false}
+                    onChange={(e) => setTemplateForm(prev => ({ ...prev, isPublic: e.target.checked }))}
+                  />
+                  Make this template public (visible to other admins)
+                </label>
               </div>
             </div>
             
