@@ -533,6 +533,74 @@
   font-size: 1rem;
 }
 
+/* Notification */
+.recipient-notification {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 100001;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 300px;
+  animation: recipient-slideIn 0.3s ease-out;
+}
+
+.recipient-notification-success {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #10b981;
+}
+
+.recipient-notification-error {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.recipient-notification-info {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+}
+
+.recipient-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.recipient-notification-close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.recipient-notification-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes recipient-slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* Loading State */
 .recipient-selector-loading {
   display: flex;

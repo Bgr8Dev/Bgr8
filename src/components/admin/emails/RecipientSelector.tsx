@@ -7,7 +7,8 @@ import {
   FaUsers, 
   FaCheck, 
   FaTimes, 
-  FaSpinner
+  FaSpinner,
+  FaInfoCircle
 } from 'react-icons/fa';
 import { EmailService, Recipient } from '../../../services/emailService';
 import { useAuth } from '../../../hooks/useAuth';
@@ -41,6 +42,15 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
   });
   const [isSaving, setIsSaving] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [editingRecipient, setEditingRecipient] = useState<Recipient | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  // Show notification
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   // Load recipients
   const loadRecipients = useCallback(async () => {
@@ -168,8 +178,10 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
       
       // Reload recipients
       await loadRecipients();
+      showNotification('success', 'Recipient added successfully!');
     } catch (error) {
       console.error('Error adding recipient:', error);
+      showNotification('error', 'Failed to add recipient. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -206,17 +218,91 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
         
         // Reload recipients to update the list
         await loadRecipients();
+        showNotification('success', 'Recipient deleted successfully!');
       } catch (error) {
         console.error('Error deleting recipient:', error);
-        alert('Failed to delete recipient. Please try again.');
+        showNotification('error', 'Failed to delete recipient. Please try again.');
       }
     }
   };
 
-  // Edit recipient (placeholder for future implementation)
+  // Edit recipient
   const handleEditRecipient = (recipientId: string) => {
-    // TODO: Implement edit functionality
-    alert('Edit functionality coming soon!');
+    const recipient = recipients.find(r => r.id === recipientId);
+    if (recipient) {
+      setEditingRecipient(recipient);
+      setNewRecipient({
+        email: recipient.email,
+        name: recipient.name || '',
+        firstName: recipient.firstName || '',
+        lastName: recipient.lastName || '',
+        tags: [...recipient.tags],
+        notes: recipient.notes || ''
+      });
+      setIsEditing(true);
+      setShowAddForm(true);
+    }
+  };
+
+  // Save edited recipient
+  const handleSaveEditedRecipient = async () => {
+    if (!editingRecipient || !newRecipient.email) {
+      showNotification('error', 'Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      const updatedRecipient = {
+        ...editingRecipient,
+        email: newRecipient.email,
+        name: newRecipient.name || undefined,
+        firstName: newRecipient.firstName || undefined,
+        lastName: newRecipient.lastName || undefined,
+        tags: newRecipient.tags,
+        notes: newRecipient.notes || undefined
+      };
+
+      await EmailService.updateRecipient(editingRecipient.id, updatedRecipient);
+      
+      // Reset form and editing state
+      setEditingRecipient(null);
+      setIsEditing(false);
+      setNewRecipient({
+        email: '',
+        name: '',
+        firstName: '',
+        lastName: '',
+        tags: [],
+        notes: ''
+      });
+      setShowAddForm(false);
+      
+      // Reload recipients
+      await loadRecipients();
+      showNotification('success', 'Recipient updated successfully!');
+    } catch (error) {
+      console.error('Error updating recipient:', error);
+      showNotification('error', 'Failed to update recipient. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingRecipient(null);
+    setIsEditing(false);
+    setNewRecipient({
+      email: '',
+      name: '',
+      firstName: '',
+      lastName: '',
+      tags: [],
+      notes: ''
+    });
+    setShowAddForm(false);
   };
 
   const modalContent = (
@@ -234,6 +320,25 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
           </div>
         ) : (
           <>
+            {/* Notification */}
+            {notification && (
+              <div className={`recipient-notification recipient-notification-${notification.type}`}>
+                <div className="recipient-notification-content">
+                  {notification.type === 'success' && <FaCheck />}
+                  {notification.type === 'error' && <FaTimes />}
+                  {notification.type === 'info' && <FaInfoCircle />}
+                  <span>{notification.message}</span>
+                </div>
+                <button 
+                  className="recipient-notification-close"
+                  onClick={() => setNotification(null)}
+                  title="Close notification"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            )}
+
             <div className="recipient-selector-header">
               <h3>Select Recipients</h3>
               <button 
@@ -287,10 +392,10 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
             </div>
           )}
 
-          {/* Add New Recipient Form */}
+          {/* Add/Edit Recipient Form */}
           {showAddForm && (
             <div className="recipient-add-form">
-              <h4>Add New Recipient</h4>
+              <h4>{isEditing ? 'Edit Recipient' : 'Add New Recipient'}</h4>
               <div className="recipient-form-grid">
                 <div className="recipient-form-field">
                   <label>Email *</label>
@@ -377,15 +482,15 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
               <div className="recipient-form-actions">
                 <button
                   className="recipient-save-btn"
-                  onClick={handleAddRecipient}
+                  onClick={isEditing ? handleSaveEditedRecipient : handleAddRecipient}
                   disabled={!newRecipient.email || isSaving}
                 >
-                  {isSaving ? <FaSpinner className="recipient-spinner" /> : <FaPlus />}
-                  {isSaving ? 'Adding...' : 'Add Recipient'}
+                  {isSaving ? <FaSpinner className="recipient-spinner" /> : (isEditing ? <FaCheck /> : <FaPlus />)}
+                  {isSaving ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Recipient' : 'Add Recipient')}
                 </button>
                 <button
                   className="recipient-cancel-btn"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={isEditing ? handleCancelEdit : () => setShowAddForm(false)}
                 >
                   Cancel
                 </button>
