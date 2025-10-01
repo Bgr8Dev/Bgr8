@@ -505,6 +505,12 @@
   color: #3b82f6;
 }
 
+.recipient-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
 /* Empty State */
 .recipient-empty {
   display: flex;

@@ -62,13 +62,24 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
     }
   }, []);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open and handle keyboard shortcuts
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    
+    // Handle Escape key to close modal
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [onClose]);
 
   useEffect(() => {
     loadRecipients();
@@ -182,8 +193,39 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
     }));
   };
 
+  // Delete recipient
+  const handleDeleteRecipient = async (recipientId: string) => {
+    if (window.confirm('Are you sure you want to delete this recipient? This action cannot be undone.')) {
+      try {
+        await EmailService.deleteRecipient(recipientId);
+        
+        // Remove from selected recipients if it was selected
+        if (selectedRecipients.includes(recipientId)) {
+          onRecipientsChange(selectedRecipients.filter(id => id !== recipientId));
+        }
+        
+        // Reload recipients to update the list
+        await loadRecipients();
+      } catch (error) {
+        console.error('Error deleting recipient:', error);
+        alert('Failed to delete recipient. Please try again.');
+      }
+    }
+  };
+
+  // Edit recipient (placeholder for future implementation)
+  const handleEditRecipient = (recipientId: string) => {
+    // TODO: Implement edit functionality
+    alert('Edit functionality coming soon!');
+  };
+
   const modalContent = (
-    <div className="recipient-selector-overlay" onClick={onClose}>
+    <div className="recipient-selector-overlay" onClick={(e) => {
+      // Only close if clicking directly on the overlay, not on modal content
+      if (e.target === e.currentTarget) {
+        onClose();
+      }
+    }}>
       <div className="recipient-selector-modal" onClick={(e) => e.stopPropagation()}>
         {isLoading ? (
           <div className="recipient-selector-loading">
@@ -399,12 +441,23 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
                       className="recipient-action-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Implement edit functionality
+                        handleEditRecipient(recipient.id);
                       }}
                       title="Edit recipient"
                       aria-label="Edit recipient"
                     >
                       <FaEdit />
+                    </button>
+                    <button
+                      className="recipient-action-btn recipient-delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteRecipient(recipient.id);
+                      }}
+                      title="Delete recipient"
+                      aria-label="Delete recipient"
+                    >
+                      <FaTimes />
                     </button>
                   </div>
                 </div>
@@ -432,7 +485,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
               Cancel
             </button>
             <button className="recipient-confirm-btn" onClick={onClose}>
-              Confirm Selection
+              Done ({selectedRecipients.length})
             </button>
           </div>
         </div>
