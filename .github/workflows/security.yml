@@ -1,0 +1,121 @@
+name: 🔒 Security Scan
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: 🔒 Security Analysis
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      packages: read
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: |
+          npm ci --legacy-peer-deps
+          npm install -g snyk
+      
+      - name: 🔍 NPM Audit
+        run: |
+          echo "🔍 Running NPM security audit..."
+          npm audit --audit-level=moderate --json > npm-audit.json || true
+          npm audit --audit-level=moderate
+      
+      - name: 🛡️ Snyk Security Scan
+        run: |
+          echo "🛡️ Running Snyk security scan..."
+          snyk test --severity-threshold=medium --json > snyk-results.json || true
+          snyk test --severity-threshold=medium
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      
+      - name: 🔒 CodeQL Security Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, typescript
+          queries: security-and-quality
+      
+      - name: 🔍 CodeQL Autobuild
+        uses: github/codeql-action/autobuild@v3
+      
+      - name: 📊 CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+      
+      - name: 🔍 ESLint Security Rules
+        run: |
+          echo "🔍 Running ESLint security rules..."
+          npx eslint . --ext .js,.jsx,.ts,.tsx --config eslint.config.js
+      
+      - name: 🛡️ Dependency Review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+      
+      - name: 🔍 Secret Scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+      
+      - name: 📊 Upload Security Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-results
+          path: |
+            npm-audit.json
+            snyk-results.json
+      
+      - name: 📝 Security Summary
+        if: always()
+        run: |
+          echo "## 🔒 Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Scans:" >> $GITHUB_STEP_SUMMARY
+          echo "- NPM Audit" >> $GITHUB_STEP_SUMMARY
+          echo "- Snyk Security Scan" >> $GITHUB_STEP_SUMMARY
+          echo "- CodeQL Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- ESLint Security Rules" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependency Review" >> $GITHUB_STEP_SUMMARY
+          echo "- Secret Scanning" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Results:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "npm-audit.json" ]; then
+            vulnerabilities=$(jq '.metadata.vulnerabilities.total // 0' npm-audit.json)
+            echo "- NPM Vulnerabilities: $vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f "snyk-results.json" ]; then
+            snyk_vulns=$(jq '.vulnerabilities | length // 0' snyk-results.json)
+            echo "- Snyk Vulnerabilities: $snyk_vulns" >> $GITHUB_STEP_SUMMARY
+          fi

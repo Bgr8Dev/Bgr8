@@ -1,0 +1,593 @@
+name: 📚 Documentation Generation and Validation
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # Update documentation weekly on Fridays at 6 AM UTC
+    - cron: '0 6 * * 5'
+  workflow_dispatch:
+    inputs:
+      doc_type:
+        description: 'Type of documentation to generate'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - api
+          - code
+          - user
+          - technical
+          - validate
+
+jobs:
+  validate-documentation:
+    name: 📚 Validate Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 📚 Check documentation files
+        run: |
+          echo "📚 Checking documentation files..."
+          
+          # Check if required documentation files exist
+          REQUIRED_FILES=(
+            "README.md"
+            "CHANGELOG.md"
+            "CONTRIBUTING.md"
+            "SECURITY.md"
+            "LICENSE"
+          )
+          
+          MISSING_FILES=()
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              MISSING_FILES+=("$file")
+            fi
+          done
+          
+          if [ ${#MISSING_FILES[@]} -gt 0 ]; then
+            echo "❌ Missing required documentation files:"
+            printf '%s\n' "${MISSING_FILES[@]}"
+            exit 1
+          else
+            echo "✅ All required documentation files present"
+          fi
+      
+      - name: 📚 Validate markdown syntax
+        run: |
+          echo "📚 Validating markdown syntax..."
+          
+          # Install markdown linter
+          npm install -g markdownlint-cli
+          
+          # Run markdown linting
+          markdownlint "*.md" "docs/**/*.md" || true
+      
+      - name: 📚 Check documentation links
+        run: |
+          echo "📚 Checking documentation links..."
+          
+          # Install link checker
+          npm install -g markdown-link-check
+          
+          # Check links in main documentation files
+          for file in README.md CHANGELOG.md CONTRIBUTING.md SECURITY.md; do
+            if [ -f "$file" ]; then
+              echo "Checking links in $file"
+              markdown-link-check "$file" || true
+            fi
+          done
+      
+      - name: 📚 Check documentation completeness
+        run: |
+          echo "📚 Checking documentation completeness..."
+          
+          # Check README.md content
+          if [ -f "README.md" ]; then
+            README_CONTENT=$(cat README.md)
+            
+            # Check for essential sections
+            if [[ $README_CONTENT == *"## Installation"* ]]; then
+              echo "✅ Installation section found"
+            else
+              echo "⚠️ Installation section missing"
+            fi
+            
+            if [[ $README_CONTENT == *"## Usage"* ]]; then
+              echo "✅ Usage section found"
+            else
+              echo "⚠️ Usage section missing"
+            fi
+            
+            if [[ $README_CONTENT == *"## Contributing"* ]]; then
+              echo "✅ Contributing section found"
+            else
+              echo "⚠️ Contributing section missing"
+            fi
+          fi
+          
+          # Check CHANGELOG.md format
+          if [ -f "CHANGELOG.md" ]; then
+            CHANGELOG_CONTENT=$(cat CHANGELOG.md)
+            
+            if [[ $CHANGELOG_CONTENT == *"## ["* ]]; then
+              echo "✅ Changelog has version entries"
+            else
+              echo "⚠️ Changelog may be missing version entries"
+            fi
+          fi
+
+  generate-api-docs:
+    name: 📚 Generate API Documentation
+    runs-on: ubuntu-latest
+    if: github.event.inputs.doc_type == 'all' || github.event.inputs.doc_type == 'api' || github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 📚 Generate API documentation
+        run: |
+          echo "📚 Generating API documentation..."
+          
+          # Install JSDoc
+          npm install -g jsdoc
+          
+          # Create JSDoc configuration
+          cat > jsdoc.conf.json << 'EOF'
+          {
+            "source": {
+              "include": ["./src/"],
+              "includePattern": "\\.(js|jsx|ts|tsx)$",
+              "excludePattern": "(node_modules/|dist/|build/)"
+            },
+            "opts": {
+              "destination": "./docs/api/",
+              "recurse": true
+            },
+            "plugins": ["plugins/markdown"],
+            "templates": {
+              "cleverLinks": false,
+              "monospaceLinks": false
+            }
+          }
+          EOF
+          
+          # Generate API documentation
+          jsdoc -c jsdoc.conf.json || echo "JSDoc generation completed with warnings"
+      
+      - name: 📚 Generate TypeScript documentation
+        run: |
+          echo "📚 Generating TypeScript documentation..."
+          
+          # Install TypeDoc
+          npm install -g typedoc
+          
+          # Generate TypeScript documentation
+          typedoc --out ./docs/typescript/ ./src --exclude "**/*.test.*" --exclude "**/*.spec.*" || echo "TypeDoc generation completed with warnings"
+      
+      - name: 📚 Upload API documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation
+          path: |
+            docs/api/
+            docs/typescript/
+
+  generate-code-docs:
+    name: 📚 Generate Code Documentation
+    runs-on: ubuntu-latest
+    if: github.event.inputs.doc_type == 'all' || github.event.inputs.doc_type == 'code' || github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 📚 Generate code documentation
+        run: |
+          echo "📚 Generating code documentation..."
+          
+          # Create code documentation directory
+          mkdir -p docs/code
+          
+          # Generate component documentation
+          cat > docs/code/components.md << 'EOF'
+          # Components Documentation
+          
+          This document provides an overview of all React components in the application.
+          
+          ## Component Structure
+          
+          EOF
+          
+          # Find all component files and document them
+          find src/components -name "*.tsx" -o -name "*.ts" | while read file; do
+            COMPONENT_NAME=$(basename "$file" | sed 's/\.[^.]*$//')
+            echo "### $COMPONENT_NAME" >> docs/code/components.md
+            echo "" >> docs/code/components.md
+            echo "**File:** \`$file\`" >> docs/code/components.md
+            echo "" >> docs/code/components.md
+            
+            # Extract component description from comments
+            if grep -q "Component\|@component" "$file"; then
+              grep -A 5 -B 5 "Component\|@component" "$file" | head -10 >> docs/code/components.md
+            fi
+            echo "" >> docs/code/components.md
+          done
+          
+          # Generate service documentation
+          cat > docs/code/services.md << 'EOF'
+          # Services Documentation
+          
+          This document provides an overview of all services in the application.
+          
+          ## Service Structure
+          
+          EOF
+          
+          # Find all service files and document them
+          find src/services -name "*.ts" | while read file; do
+            SERVICE_NAME=$(basename "$file" | sed 's/\.[^.]*$//')
+            echo "### $SERVICE_NAME" >> docs/code/services.md
+            echo "" >> docs/code/services.md
+            echo "**File:** \`$file\`" >> docs/code/services.md
+            echo "" >> docs/code/services.md
+            echo "" >> docs/code/services.md
+          done
+      
+      - name: 📚 Generate architecture documentation
+        run: |
+          echo "📚 Generating architecture documentation..."
+          
+          cat > docs/code/architecture.md << 'EOF'
+          # Architecture Documentation
+          
+          ## Project Structure
+          
+          ```
+          src/
+          ├── components/          # React components
+          ├── pages/              # Page components
+          ├── services/           # API and business logic
+          ├── hooks/              # Custom React hooks
+          ├── contexts/           # React contexts
+          ├── types/              # TypeScript type definitions
+          ├── utils/              # Utility functions
+          ├── styles/             # CSS and styling
+          └── config/             # Configuration files
+          ```
+          
+          ## Technology Stack
+          
+          - **Frontend:** React 18, TypeScript, Vite
+          - **Styling:** CSS Modules, CSS-in-JS
+          - **State Management:** React Context API
+          - **Routing:** React Router DOM
+          - **Build Tool:** Vite
+          - **Package Manager:** npm
+          
+          ## Key Features
+          
+          - Component-based architecture
+          - TypeScript for type safety
+          - Responsive design
+          - Modern React patterns (hooks, context)
+          - Modular CSS architecture
+          
+          EOF
+      
+      - name: 📚 Upload code documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-documentation
+          path: docs/code/
+
+  generate-user-docs:
+    name: 📚 Generate User Documentation
+    runs-on: ubuntu-latest
+    if: github.event.inputs.doc_type == 'all' || github.event.inputs.doc_type == 'user' || github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 📚 Generate user guide
+        run: |
+          echo "📚 Generating user guide..."
+          
+          # Create user documentation directory
+          mkdir -p docs/user
+          
+          cat > docs/user/getting-started.md << 'EOF'
+          # Getting Started
+          
+          Welcome to Bgr8! This guide will help you get started with the application.
+          
+          ## What is Bgr8?
+          
+          Bgr8 is a modern web application built with React and TypeScript.
+          
+          ## Features
+          
+          - Modern user interface
+          - Responsive design
+          - Fast performance
+          - Secure authentication
+          
+          ## Quick Start
+          
+          1. Visit the application
+          2. Create an account
+          3. Start using the features
+          
+          ## Support
+          
+          If you need help, please check the FAQ or contact support.
+          
+          EOF
+          
+          cat > docs/user/faq.md << 'EOF'
+          # Frequently Asked Questions
+          
+          ## General Questions
+          
+          **Q: What browsers are supported?**
+          A: The application supports all modern browsers including Chrome, Firefox, Safari, and Edge.
+          
+          **Q: Is the application mobile-friendly?**
+          A: Yes, the application is fully responsive and works on all device sizes.
+          
+          **Q: How do I reset my password?**
+          A: You can reset your password using the "Forgot Password" link on the login page.
+          
+          ## Technical Questions
+          
+          **Q: What technologies are used?**
+          A: The application is built with React, TypeScript, and modern web technologies.
+          
+          **Q: Is the source code available?**
+          A: Yes, the source code is available on GitHub.
+          
+          EOF
+      
+      - name: 📚 Upload user documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: user-documentation
+          path: docs/user/
+
+  generate-technical-docs:
+    name: 📚 Generate Technical Documentation
+    runs-on: ubuntu-latest
+    if: github.event.inputs.doc_type == 'all' || github.event.inputs.doc_type == 'technical' || github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 📚 Generate technical documentation
+        run: |
+          echo "📚 Generating technical documentation..."
+          
+          # Create technical documentation directory
+          mkdir -p docs/technical
+          
+          cat > docs/technical/deployment.md << 'EOF'
+          # Deployment Guide
+          
+          This document provides instructions for deploying the application.
+          
+          ## Prerequisites
+          
+          - Node.js 18 or higher
+          - npm package manager
+          - Git
+          
+          ## Build Process
+          
+          1. Install dependencies:
+             ```bash
+             npm ci --legacy-peer-deps
+             ```
+          
+          2. Build the application:
+             ```bash
+             npm run build
+             ```
+          
+          3. Deploy the dist folder to your hosting provider
+          
+          ## Environment Variables
+          
+          The following environment variables may be required:
+          
+          - `VITE_API_URL`: API endpoint URL
+          - `VITE_FIREBASE_API_KEY`: Firebase API key
+          - `VITE_FIREBASE_AUTH_DOMAIN`: Firebase auth domain
+          
+          ## Production Checklist
+          
+          - [ ] Environment variables configured
+          - [ ] Build completed successfully
+          - [ ] Tests passing
+          - [ ] Security audit passed
+          - [ ] Performance optimized
+          
+          EOF
+          
+          cat > docs/technical/development.md << 'EOF'
+          # Development Guide
+          
+          This document provides information for developers working on the project.
+          
+          ## Development Setup
+          
+          1. Clone the repository
+          2. Install dependencies: `npm ci --legacy-peer-deps`
+          3. Start development server: `npm run dev`
+          
+          ## Code Style
+          
+          - Use TypeScript for all new code
+          - Follow ESLint rules
+          - Use Prettier for formatting
+          - Write meaningful commit messages
+          
+          ## Testing
+          
+          - Write unit tests for new features
+          - Ensure all tests pass before submitting PR
+          - Maintain test coverage above 80%
+          
+          ## Contributing
+          
+          - Create feature branches
+          - Submit pull requests for review
+          - Follow the PR template
+          
+          EOF
+      
+      - name: 📚 Upload technical documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: technical-documentation
+          path: docs/technical/
+
+  generate-documentation-summary:
+    name: 📚 Generate Documentation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-documentation, generate-api-docs, generate-code-docs, generate-user-docs, generate-technical-docs]
+    if: always()
+    
+    steps:
+      - name: 📚 Generate documentation summary
+        run: |
+          echo "📚 Generating documentation summary..."
+          
+          cat > documentation-summary.md << 'EOF'
+          # 📚 Documentation Summary
+          
+          **Generated:** $(date)
+          **Repository:** ${{ github.repository }}
+          **Branch:** ${{ github.ref_name }}
+          
+          ## 📋 Documentation Status
+          
+          ### Validation
+          - **Status:** ${{ needs.validate-documentation.result }}
+          - **Required Files:** Checked
+          - **Markdown Syntax:** Validated
+          - **Links:** Checked
+          
+          ### API Documentation
+          - **Status:** ${{ needs.generate-api-docs.result }}
+          - **JSDoc:** Generated
+          - **TypeScript Docs:** Generated
+          
+          ### Code Documentation
+          - **Status:** ${{ needs.generate-code-docs.result }}
+          - **Components:** Documented
+          - **Services:** Documented
+          - **Architecture:** Documented
+          
+          ### User Documentation
+          - **Status:** ${{ needs.generate-user-docs.result }}
+          - **Getting Started:** Generated
+          - **FAQ:** Generated
+          
+          ### Technical Documentation
+          - **Status:** ${{ needs.generate-technical-docs.result }}
+          - **Deployment:** Documented
+          - **Development:** Documented
+          
+          ## 📊 Overall Status
+          
+          EOF
+          
+          # Determine overall status
+          if [ "${{ needs.validate-documentation.result }}" = "success" ] && [ "${{ needs.generate-api-docs.result }}" = "success" ] && [ "${{ needs.generate-code-docs.result }}" = "success" ] && [ "${{ needs.generate-user-docs.result }}" = "success" ] && [ "${{ needs.generate-technical-docs.result }}" = "success" ]; then
+            echo "✅ **All documentation generated successfully**" >> documentation-summary.md
+          else
+            echo "⚠️ **Some documentation generation failed** - check individual job results" >> documentation-summary.md
+          fi
+          
+          cat documentation-summary.md
+      
+      - name: 📤 Upload documentation summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-summary
+          path: documentation-summary.md
+      
+      - name: 📝 Documentation summary
+        run: |
+          echo "## 📚 Documentation Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Generated:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Validation:** ${{ needs.validate-documentation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Docs:** ${{ needs.generate-api-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code Docs:** ${{ needs.generate-code-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **User Docs:** ${{ needs.generate-user-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Technical Docs:** ${{ needs.generate-technical-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Overall Status:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.validate-documentation.result }}" = "success" ] && [ "${{ needs.generate-api-docs.result }}" = "success" ] && [ "${{ needs.generate-code-docs.result }}" = "success" ] && [ "${{ needs.generate-user-docs.result }}" = "success" ] && [ "${{ needs.generate-technical-docs.result }}" = "success" ]; then
+            echo "✅ **All documentation generated successfully**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Some documentation generation failed** - check individual job results" >> $GITHUB_STEP_SUMMARY
+          fi

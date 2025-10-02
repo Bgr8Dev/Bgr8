@@ -1,0 +1,447 @@
+name: 📊 Monitoring and Alerting
+
+on:
+  schedule:
+    # Run monitoring checks every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of monitoring check'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - uptime
+          - performance
+          - security
+          - dependencies
+          - errors
+
+jobs:
+  uptime-monitoring:
+    name: 🟢 Uptime Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: 🚀 Start application
+        run: |
+          echo "🚀 Starting application for monitoring..."
+          npx serve dist -p 3000 &
+          echo $! > server.pid
+          sleep 10
+      
+      - name: 🟢 Check application uptime
+        run: |
+          echo "🟢 Checking application uptime..."
+          
+          # Check if application is responding
+          for i in {1..5}; do
+            if curl -f -s http://localhost:3000 > /dev/null; then
+              echo "✅ Application is responding (attempt $i)"
+              break
+            else
+              echo "❌ Application not responding (attempt $i)"
+              if [ $i -eq 5 ]; then
+                echo "❌ Application failed to respond after 5 attempts"
+                exit 1
+              fi
+              sleep 5
+            fi
+          done
+      
+      - name: 🔍 Check response time
+        run: |
+          echo "🔍 Checking response time..."
+          
+          # Measure response time
+          RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' http://localhost:3000)
+          echo "Response time: ${RESPONSE_TIME}s"
+          
+          # Check if response time is acceptable (< 2 seconds)
+          if (( $(echo "$RESPONSE_TIME < 2.0" | bc -l) )); then
+            echo "✅ Response time is acceptable"
+          else
+            echo "⚠️ Response time is slow: ${RESPONSE_TIME}s"
+          fi
+      
+      - name: 🔍 Check HTTP status codes
+        run: |
+          echo "🔍 Checking HTTP status codes..."
+          
+          # Check main page
+          MAIN_STATUS=$(curl -o /dev/null -s -w '%{http_code}' http://localhost:3000)
+          echo "Main page status: $MAIN_STATUS"
+          
+          # Check for 404s
+          NOT_FOUND_STATUS=$(curl -o /dev/null -s -w '%{http_code}' http://localhost:3000/nonexistent)
+          echo "404 page status: $NOT_FOUND_STATUS"
+          
+          if [ "$MAIN_STATUS" = "200" ]; then
+            echo "✅ Main page is accessible"
+          else
+            echo "❌ Main page returned status: $MAIN_STATUS"
+            exit 1
+          fi
+      
+      - name: 🛑 Stop application
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) || true
+            rm server.pid
+          fi
+
+  performance-monitoring:
+    name: ⚡ Performance Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: ⚡ Run performance tests
+        run: |
+          echo "⚡ Running performance tests..."
+          
+          # Install Lighthouse
+          npm install -g lighthouse
+          
+          # Start application
+          npx serve dist -p 3000 &
+          SERVER_PID=$!
+          sleep 10
+          
+          # Run Lighthouse performance test
+          lighthouse http://localhost:3000 \
+            --output=json \
+            --output-path=./performance-results.json \
+            --chrome-flags="--headless --no-sandbox --disable-gpu" \
+            --only-categories=performance
+          
+          # Kill server
+          kill $SERVER_PID
+      
+      - name: 📊 Analyze performance results
+        run: |
+          echo "📊 Analyzing performance results..."
+          
+          if [ -f "performance-results.json" ]; then
+            # Extract key metrics
+            PERFORMANCE_SCORE=$(jq '.categories.performance.score * 100' performance-results.json)
+            FCP=$(jq '.audits.first-contentful-paint.numericValue' performance-results.json)
+            LCP=$(jq '.audits.largest-contentful-paint.numericValue' performance-results.json)
+            CLS=$(jq '.audits.cumulative-layout-shift.numericValue' performance-results.json)
+            TTI=$(jq '.audits.interactive.numericValue' performance-results.json)
+            
+            echo "Performance Score: $PERFORMANCE_SCORE"
+            echo "First Contentful Paint: ${FCP}ms"
+            echo "Largest Contentful Paint: ${LCP}ms"
+            echo "Cumulative Layout Shift: $CLS"
+            echo "Time to Interactive: ${TTI}ms"
+            
+            # Check if performance is acceptable
+            if (( $(echo "$PERFORMANCE_SCORE >= 90" | bc -l) )); then
+              echo "✅ Performance score is excellent"
+            elif (( $(echo "$PERFORMANCE_SCORE >= 70" | bc -l) )); then
+              echo "⚠️ Performance score is good but could be improved"
+            else
+              echo "❌ Performance score is poor and needs improvement"
+            fi
+          else
+            echo "❌ Performance test failed"
+            exit 1
+          fi
+
+  security-monitoring:
+    name: 🛡️ Security Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🛡️ Run security audit
+        run: |
+          echo "🛡️ Running security audit..."
+          npm audit --audit-level=moderate --json > security-audit.json || true
+          npm audit --audit-level=moderate
+      
+      - name: 🔍 Check for vulnerabilities
+        run: |
+          echo "🔍 Checking for vulnerabilities..."
+          
+          if [ -f "security-audit.json" ]; then
+            TOTAL_VULNS=$(jq '.metadata.vulnerabilities.total // 0' security-audit.json)
+            HIGH_VULNS=$(jq '.metadata.vulnerabilities.high // 0' security-audit.json)
+            MODERATE_VULNS=$(jq '.metadata.vulnerabilities.moderate // 0' security-audit.json)
+            LOW_VULNS=$(jq '.metadata.vulnerabilities.low // 0' security-audit.json)
+            
+            echo "Total vulnerabilities: $TOTAL_VULNS"
+            echo "High severity: $HIGH_VULNS"
+            echo "Moderate severity: $MODERATE_VULNS"
+            echo "Low severity: $LOW_VULNS"
+            
+            if [ "$HIGH_VULNS" -gt 0 ]; then
+              echo "❌ High severity vulnerabilities found"
+              exit 1
+            elif [ "$MODERATE_VULNS" -gt 5 ]; then
+              echo "⚠️ Many moderate severity vulnerabilities found"
+            else
+              echo "✅ Security status is acceptable"
+            fi
+          else
+            echo "❌ Security audit failed"
+            exit 1
+          fi
+      
+      - name: 🔍 Check for secrets
+        run: |
+          echo "🔍 Checking for secrets in code..."
+          
+          # Check for common secret patterns
+          SECRET_PATTERNS=(
+            "password\s*=\s*['\"][^'\"]+['\"]"
+            "api[_-]?key\s*=\s*['\"][^'\"]+['\"]"
+            "secret\s*=\s*['\"][^'\"]+['\"]"
+            "token\s*=\s*['\"][^'\"]+['\"]"
+          )
+          
+          SECRETS_FOUND=false
+          for pattern in "${SECRET_PATTERNS[@]}"; do
+            if grep -r -i -E "$pattern" --exclude-dir=node_modules --exclude-dir=.git .; then
+              echo "❌ Potential secret found matching pattern: $pattern"
+              SECRETS_FOUND=true
+            fi
+          done
+          
+          if [ "$SECRETS_FOUND" = true ]; then
+            echo "❌ Potential secrets detected in code"
+            exit 1
+          else
+            echo "✅ No secrets detected in code"
+          fi
+
+  dependency-monitoring:
+    name: 📦 Dependency Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 📦 Check for outdated packages
+        run: |
+          echo "📦 Checking for outdated packages..."
+          npm outdated --json > outdated-packages.json || true
+          
+          if [ -f "outdated-packages.json" ]; then
+            OUTDATED_COUNT=$(jq 'length' outdated-packages.json)
+            echo "Outdated packages: $OUTDATED_COUNT"
+            
+            if [ "$OUTDATED_COUNT" -gt 10 ]; then
+              echo "⚠️ Many packages are outdated"
+            elif [ "$OUTDATED_COUNT" -gt 0 ]; then
+              echo "ℹ️ Some packages are outdated"
+            else
+              echo "✅ All packages are up to date"
+            fi
+          else
+            echo "✅ No outdated packages found"
+          fi
+      
+      - name: 📦 Check for deprecated packages
+        run: |
+          echo "📦 Checking for deprecated packages..."
+          npm ls --json > package-tree.json || true
+          
+          if [ -f "package-tree.json" ]; then
+            DEPRECATED_COUNT=$(jq '[.. | objects | select(has("deprecated"))] | length' package-tree.json)
+            echo "Deprecated packages: $DEPRECATED_COUNT"
+            
+            if [ "$DEPRECATED_COUNT" -gt 0 ]; then
+              echo "⚠️ Some packages are deprecated"
+              jq '[.. | objects | select(has("deprecated"))] | .[] | {name: .name, deprecated: .deprecated}' package-tree.json
+            else
+              echo "✅ No deprecated packages found"
+            fi
+          fi
+
+  error-monitoring:
+    name: 🚨 Error Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🚨 Check for build errors
+        run: |
+          echo "🚨 Checking for build errors..."
+          
+          if npm run build 2> build-errors.log; then
+            echo "✅ Build completed successfully"
+          else
+            echo "❌ Build failed with errors"
+            cat build-errors.log
+            exit 1
+          fi
+      
+      - name: 🚨 Check for linting errors
+        run: |
+          echo "🚨 Checking for linting errors..."
+          
+          if npm run lint 2> lint-errors.log; then
+            echo "✅ Linting passed"
+          else
+            echo "⚠️ Linting found issues"
+            cat lint-errors.log
+          fi
+      
+      - name: 🚨 Check for TypeScript errors
+        run: |
+          echo "🚨 Checking for TypeScript errors..."
+          
+          if npx tsc --noEmit 2> ts-errors.log; then
+            echo "✅ TypeScript check passed"
+          else
+            echo "❌ TypeScript errors found"
+            cat ts-errors.log
+            exit 1
+          fi
+
+  generate-monitoring-report:
+    name: 📊 Generate Monitoring Report
+    runs-on: ubuntu-latest
+    needs: [uptime-monitoring, performance-monitoring, security-monitoring, dependency-monitoring, error-monitoring]
+    if: always()
+    
+    steps:
+      - name: 📊 Generate monitoring report
+        run: |
+          echo "📊 Generating monitoring report..."
+          
+          cat > monitoring-report.md << EOF
+          # 📊 Monitoring Report
+          
+          **Report Date:** $(date)
+          **Repository:** ${{ github.repository }}
+          **Branch:** ${{ github.ref_name }}
+          
+          ## 🟢 Uptime Status
+          - **Status:** ${{ needs.uptime-monitoring.result }}
+          - **Response Time:** Checked
+          - **HTTP Status:** Verified
+          
+          ## ⚡ Performance Status
+          - **Status:** ${{ needs.performance-monitoring.result }}
+          - **Lighthouse Score:** Analyzed
+          - **Core Web Vitals:** Measured
+          
+          ## 🛡️ Security Status
+          - **Status:** ${{ needs.security-monitoring.result }}
+          - **Vulnerabilities:** Scanned
+          - **Secrets:** Checked
+          
+          ## 📦 Dependency Status
+          - **Status:** ${{ needs.dependency-monitoring.result }}
+          - **Outdated Packages:** Checked
+          - **Deprecated Packages:** Scanned
+          
+          ## 🚨 Error Status
+          - **Status:** ${{ needs.error-monitoring.result }}
+          - **Build Errors:** Checked
+          - **Linting Errors:** Scanned
+          - **TypeScript Errors:** Verified
+          
+          ## 📋 Summary
+          - **Overall Status:** ${{ needs.uptime-monitoring.result == 'success' && needs.performance-monitoring.result == 'success' && needs.security-monitoring.result == 'success' && needs.dependency-monitoring.result == 'success' && needs.error-monitoring.result == 'success' && '✅ All systems operational' || '⚠️ Some issues detected' }}
+          - **Last Check:** $(date)
+          - **Next Check:** $(date -d '+6 hours')
+          
+          EOF
+          
+          cat monitoring-report.md
+      
+      - name: 📤 Upload monitoring report
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-report-$(date +%Y%m%d_%H%M%S)
+          path: monitoring-report.md
+          retention-days: 7
+      
+      - name: 📝 Monitoring summary
+        run: |
+          echo "## 📊 Monitoring Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Report Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔍 Check Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Uptime:** ${{ needs.uptime-monitoring.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Performance:** ${{ needs.performance-monitoring.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security:** ${{ needs.security-monitoring.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dependencies:** ${{ needs.dependency-monitoring.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Errors:** ${{ needs.error-monitoring.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Overall Status:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.uptime-monitoring.result }}" = "success" ] && [ "${{ needs.performance-monitoring.result }}" = "success" ] && [ "${{ needs.security-monitoring.result }}" = "success" ] && [ "${{ needs.dependency-monitoring.result }}" = "success" ] && [ "${{ needs.error-monitoring.result }}" = "success" ]; then
+            echo "✅ **All systems operational**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Some issues detected** - check individual job results" >> $GITHUB_STEP_SUMMARY
+          fi

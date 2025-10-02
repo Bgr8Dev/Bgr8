@@ -1,0 +1,169 @@
+name: 🧪 Testing Suite
+
+on:
+  push:
+    branches: [ master, main, develop, 'feature/*', 'bugfix/*' ]
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # Run tests daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: 🧪 Run Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20, 21]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🔍 TypeScript Check
+        run: npx tsc --noEmit
+      
+      - name: 🧪 Run Unit Tests
+        run: |
+          echo "🧪 Running unit tests..."
+          # Add your test command here when tests are available
+          # npm run test:unit
+          echo "No unit tests configured yet"
+      
+      - name: 🧪 Run Integration Tests
+        run: |
+          echo "🧪 Running integration tests..."
+          # Add your integration test command here
+          # npm run test:integration
+          echo "No integration tests configured yet"
+      
+      - name: 🧪 Run E2E Tests
+        run: |
+          echo "🧪 Running E2E tests..."
+          # Add your E2E test command here
+          # npm run test:e2e
+          echo "No E2E tests configured yet"
+      
+      - name: 📊 Generate Test Coverage
+        run: |
+          echo "📊 Generating test coverage..."
+          # Add coverage command here
+          # npm run test:coverage
+          echo "No coverage tests configured yet"
+      
+      - name: 📊 Upload Coverage Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: |
+            coverage/
+            test-results/
+      
+      - name: 📝 Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Results - ${{ matrix.os }} (Node ${{ matrix.node-version }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed:" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript compilation check" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit tests (placeholder)" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration tests (placeholder)" >> $GITHUB_STEP_SUMMARY
+          echo "- E2E tests (placeholder)" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage generation (placeholder)" >> $GITHUB_STEP_SUMMARY
+
+  visual-regression:
+    name: 🎨 Visual Regression Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: 🎨 Visual Regression Test
+        run: |
+          echo "🎨 Running visual regression tests..."
+          # Add visual regression testing here
+          # npm run test:visual
+          echo "No visual regression tests configured yet"
+      
+      - name: 📊 Upload Visual Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-test-results
+          path: |
+            visual-test-results/
+            screenshots/
+
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: ⚡ Lighthouse Performance Test
+        run: |
+          echo "⚡ Running Lighthouse performance tests..."
+          # Install Lighthouse
+          npm install -g lighthouse
+          # Run Lighthouse on built app
+          # lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-results.json
+          echo "Lighthouse performance tests not configured yet"
+      
+      - name: 📊 Bundle Size Analysis
+        run: |
+          echo "📊 Analyzing bundle size..."
+          # Add bundle analysis here
+          # npm run analyze
+          echo "Bundle analysis not configured yet"
+      
+      - name: 📊 Upload Performance Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: |
+            lighthouse-results.json
+            bundle-analysis/
