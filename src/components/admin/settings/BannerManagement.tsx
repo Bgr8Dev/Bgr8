@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaFlag, FaTools, FaRocket, FaPlus, FaTrash, FaSave, FaCheck, FaChevronDown, FaChevronRight, FaCog, FaEnvelope, FaChartBar, FaInstagram, FaUsers, FaBell, FaSearch, FaFileAlt, FaUserCheck, FaCalendarAlt, FaHandshake } from 'react-icons/fa';
+import { FaFlag, FaTools, FaRocket, FaPlus, FaTrash, FaSave, FaCheck, FaChevronDown, FaChevronRight, FaCog, FaEnvelope, FaChartBar, FaInstagram, FaUsers, FaBell, FaSearch, FaFileAlt, FaUserCheck, FaCalendarAlt, FaHandshake, FaHome, FaGraduationCap, FaUserTie, FaComments, FaBookOpen, FaVideo, FaCalendar, FaStar, FaEdit, FaThumbsUp, FaQuestionCircle, FaBars } from 'react-icons/fa';
 import { useBanner, BannerSettings } from '../../../contexts/BannerContext';
 import './BannerManagement.css';
 
@@ -21,6 +21,36 @@ const ADMIN_PAGES = [
   { sectionId: 'banner-test', name: 'Banner Test', icon: <FaFlag />, description: 'Test banner functionality' }
 ];
 
+// Home page features configuration
+const HOME_FEATURES = [
+  { featureId: 'hero-section', name: 'Hero Section', icon: <FaHome />, description: 'Main landing area with call-to-action' },
+  { featureId: 'mentor-cards', name: 'Mentor Cards', icon: <FaUserTie />, description: 'Featured mentor profile cards' },
+  { featureId: 'instagram-feed', name: 'Instagram Feed', icon: <FaInstagram />, description: 'Social media content display' },
+  { featureId: 'testimonials', name: 'Testimonials', icon: <FaComments />, description: 'User testimonials and reviews' },
+  { featureId: 'features-grid', name: 'Features Grid', icon: <FaStar />, description: 'Key features and benefits showcase' },
+  { featureId: 'newsletter-signup', name: 'Newsletter Signup', icon: <FaEnvelope />, description: 'Email subscription form' },
+  { featureId: 'cta-buttons', name: 'Call-to-Action Buttons', icon: <FaRocket />, description: 'Primary action buttons' },
+  { featureId: 'navigation-menu', name: 'Navigation Menu', icon: <FaBars />, description: 'Main site navigation' },
+  { featureId: 'footer', name: 'Footer', icon: <FaFlag />, description: 'Site footer with links' },
+  { featureId: 'announcements', name: 'Announcements', icon: <FaBell />, description: 'Site-wide announcements' }
+];
+
+// Mentor Area features configuration
+const MENTOR_AREA_FEATURES = [
+  { featureId: 'mentor-dashboard', name: 'Mentor Dashboard', icon: <FaGraduationCap />, description: 'Main mentor control panel' },
+  { featureId: 'profile-editor', name: 'Profile Editor', icon: <FaEdit />, description: 'Edit mentor profile information' },
+  { featureId: 'session-scheduler', name: 'Session Scheduler', icon: <FaCalendar />, description: 'Schedule mentoring sessions' },
+  { featureId: 'mentee-list', name: 'Mentee List', icon: <FaUsers />, description: 'View assigned mentees' },
+  { featureId: 'resources-library', name: 'Resources Library', icon: <FaBookOpen />, description: 'Educational materials and resources' },
+  { featureId: 'video-calls', name: 'Video Calls', icon: <FaVideo />, description: 'Video conferencing interface' },
+  { featureId: 'feedback-forms', name: 'Feedback Forms', icon: <FaThumbsUp />, description: 'Mentee feedback collection' },
+  { featureId: 'progress-tracking', name: 'Progress Tracking', icon: <FaChartBar />, description: 'Track mentee progress' },
+  { featureId: 'messaging', name: 'Messaging System', icon: <FaComments />, description: 'Direct communication with mentees' },
+  { featureId: 'settings', name: 'Mentor Settings', icon: <FaCog />, description: 'Personal mentor preferences' },
+  { featureId: 'help-support', name: 'Help & Support', icon: <FaQuestionCircle />, description: 'Support and documentation' },
+  { featureId: 'achievements', name: 'Achievements', icon: <FaStar />, description: 'Mentor achievements and badges' }
+];
+
 export const BannerManagement: React.FC = () => {
   const { bannerSettings, updateBannerSettings, isLoading } = useBanner();
   const [isSaving, setIsSaving] = useState(false);
@@ -28,6 +58,8 @@ export const BannerManagement: React.FC = () => {
   const [localSettings, setLocalSettings] = useState<BannerSettings>(bannerSettings);
   const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({
     admin: true,
+    home: false,
+    mentorArea: false,
     general: false
   });
 
@@ -92,14 +124,35 @@ export const BannerManagement: React.FC = () => {
     }
   };
 
-  const toggleAllPages = (bannerType: 'inDevelopment' | 'comingSoon', enable: boolean) => {
+  const toggleAllPages = (bannerType: 'inDevelopment' | 'comingSoon', category: 'admin' | 'home' | 'mentorArea', enable: boolean) => {
     if (enable) {
-      // Add all admin pages
-      const allAdminSections = ADMIN_PAGES.map(page => page.sectionId);
-      updateBannerSetting(bannerType, 'pages', allAdminSections);
+      let allSections: string[] = [];
+      if (category === 'admin') {
+        allSections = ADMIN_PAGES.map(page => page.sectionId);
+      } else if (category === 'home') {
+        allSections = HOME_FEATURES.map(feature => feature.featureId);
+      } else if (category === 'mentorArea') {
+        allSections = MENTOR_AREA_FEATURES.map(feature => feature.featureId);
+      }
+      
+      // Get current pages and add new ones
+      const currentPages = localSettings[bannerType].pages;
+      const newPages = Array.from(new Set([...currentPages, ...allSections]));
+      updateBannerSetting(bannerType, 'pages', newPages);
     } else {
-      // Remove all pages
-      updateBannerSetting(bannerType, 'pages', []);
+      // Remove all pages from this category
+      let sectionsToRemove: string[] = [];
+      if (category === 'admin') {
+        sectionsToRemove = ADMIN_PAGES.map(page => page.sectionId);
+      } else if (category === 'home') {
+        sectionsToRemove = HOME_FEATURES.map(feature => feature.featureId);
+      } else if (category === 'mentorArea') {
+        sectionsToRemove = MENTOR_AREA_FEATURES.map(feature => feature.featureId);
+      }
+      
+      const currentPages = localSettings[bannerType].pages;
+      const newPages = currentPages.filter(page => !sectionsToRemove.includes(page));
+      updateBannerSetting(bannerType, 'pages', newPages);
     }
   };
 
@@ -107,9 +160,16 @@ export const BannerManagement: React.FC = () => {
     return localSettings[bannerType].pages.includes(sectionId);
   };
 
-  const areAllPagesEnabled = (bannerType: 'inDevelopment' | 'comingSoon') => {
+  const areAllPagesEnabled = (bannerType: 'inDevelopment' | 'comingSoon', category: 'admin' | 'home' | 'mentorArea') => {
     const enabledPages = localSettings[bannerType].pages;
-    return ADMIN_PAGES.every(page => enabledPages.includes(page.sectionId));
+    if (category === 'admin') {
+      return ADMIN_PAGES.every(page => enabledPages.includes(page.sectionId));
+    } else if (category === 'home') {
+      return HOME_FEATURES.every(feature => enabledPages.includes(feature.featureId));
+    } else if (category === 'mentorArea') {
+      return MENTOR_AREA_FEATURES.every(feature => enabledPages.includes(feature.featureId));
+    }
+    return false;
   };
 
   const toggleCategory = (category: string) => {
@@ -239,11 +299,11 @@ export const BannerManagement: React.FC = () => {
                         className="toggle-all-btn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleAllPages('inDevelopment', !areAllPagesEnabled('inDevelopment'));
+                          toggleAllPages('inDevelopment', 'admin', !areAllPagesEnabled('inDevelopment', 'admin'));
                         }}
-                        title={areAllPagesEnabled('inDevelopment') ? 'Disable all' : 'Enable all'}
+                        title={areAllPagesEnabled('inDevelopment', 'admin') ? 'Disable all' : 'Enable all'}
                       >
-                        {areAllPagesEnabled('inDevelopment') ? 'Disable All' : 'Enable All'}
+                        {areAllPagesEnabled('inDevelopment', 'admin') ? 'Disable All' : 'Enable All'}
                       </button>
                       {expandedCategories.admin ? <FaChevronDown /> : <FaChevronRight />}
                     </div>
@@ -275,6 +335,124 @@ export const BannerManagement: React.FC = () => {
                   )}
                 </div>
 
+                {/* Home Features */}
+                <div className="page-category">
+                  <div 
+                    className="category-header"
+                    onClick={() => toggleCategory('home')}
+                  >
+                    <div className="category-info">
+                      <FaHome className="category-icon" />
+                      <div className="category-details">
+                        <div className="category-name">Home Features</div>
+                        <div className="category-description">Target specific features on the homepage</div>
+                        <span className="page-count">
+                          ({localSettings.inDevelopment.pages.filter(page => 
+                            HOME_FEATURES.some(feature => feature.featureId === page)
+                          ).length}/{HOME_FEATURES.length})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="category-actions">
+                      <button
+                        className="toggle-all-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleAllPages('inDevelopment', 'home', !areAllPagesEnabled('inDevelopment', 'home'));
+                        }}
+                        title={areAllPagesEnabled('inDevelopment', 'home') ? 'Disable all' : 'Enable all'}
+                      >
+                        {areAllPagesEnabled('inDevelopment', 'home') ? 'Disable All' : 'Enable All'}
+                      </button>
+                      {expandedCategories.home ? <FaChevronDown /> : <FaChevronRight />}
+                    </div>
+                  </div>
+                  
+                  {expandedCategories.home && (
+                    <div className="pages-grid">
+                      {HOME_FEATURES.map((feature) => (
+                        <div key={feature.featureId} className="page-toggle-item">
+                          <div className="page-info">
+                            <div className="page-icon">{feature.icon}</div>
+                            <div className="page-details">
+                              <div className="page-name">{feature.name}</div>
+                              <div className="page-description">{feature.description}</div>
+                              <div className="page-path">{feature.featureId}</div>
+                            </div>
+                          </div>
+                          <label className="page-toggle">
+                            <input
+                              type="checkbox"
+                              checked={isPageEnabled('inDevelopment', feature.featureId)}
+                              onChange={() => togglePage('inDevelopment', feature.featureId)}
+                            />
+                            <span className="toggle-slider"></span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mentor Area Features */}
+                <div className="page-category">
+                  <div 
+                    className="category-header"
+                    onClick={() => toggleCategory('mentorArea')}
+                  >
+                    <div className="category-info">
+                      <FaGraduationCap className="category-icon" />
+                      <div className="category-details">
+                        <div className="category-name">Mentor Area Features</div>
+                        <div className="category-description">Target specific features in the mentor area</div>
+                        <span className="page-count">
+                          ({localSettings.inDevelopment.pages.filter(page => 
+                            MENTOR_AREA_FEATURES.some(feature => feature.featureId === page)
+                          ).length}/{MENTOR_AREA_FEATURES.length})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="category-actions">
+                      <button
+                        className="toggle-all-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleAllPages('inDevelopment', 'mentorArea', !areAllPagesEnabled('inDevelopment', 'mentorArea'));
+                        }}
+                        title={areAllPagesEnabled('inDevelopment', 'mentorArea') ? 'Disable all' : 'Enable all'}
+                      >
+                        {areAllPagesEnabled('inDevelopment', 'mentorArea') ? 'Disable All' : 'Enable All'}
+                      </button>
+                      {expandedCategories.mentorArea ? <FaChevronDown /> : <FaChevronRight />}
+                    </div>
+                  </div>
+                  
+                  {expandedCategories.mentorArea && (
+                    <div className="pages-grid">
+                      {MENTOR_AREA_FEATURES.map((feature) => (
+                        <div key={feature.featureId} className="page-toggle-item">
+                          <div className="page-info">
+                            <div className="page-icon">{feature.icon}</div>
+                            <div className="page-details">
+                              <div className="page-name">{feature.name}</div>
+                              <div className="page-description">{feature.description}</div>
+                              <div className="page-path">{feature.featureId}</div>
+                            </div>
+                          </div>
+                          <label className="page-toggle">
+                            <input
+                              type="checkbox"
+                              checked={isPageEnabled('inDevelopment', feature.featureId)}
+                              onChange={() => togglePage('inDevelopment', feature.featureId)}
+                            />
+                            <span className="toggle-slider"></span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Custom Pages */}
                 <div className="custom-pages-section">
                   <div className="custom-pages-header">
@@ -289,7 +467,11 @@ export const BannerManagement: React.FC = () => {
                   </div>
                   <div className="custom-pages-list">
                     {localSettings.inDevelopment.pages
-                      .filter(page => !ADMIN_PAGES.some(adminPage => adminPage.sectionId === page))
+                      .filter(page => 
+                        !ADMIN_PAGES.some(adminPage => adminPage.sectionId === page) &&
+                        !HOME_FEATURES.some(feature => feature.featureId === page) &&
+                        !MENTOR_AREA_FEATURES.some(feature => feature.featureId === page)
+                      )
                       .map((page, index) => (
                         <div key={index} className="custom-page-item">
                           <span className="page-path">{page}</span>
@@ -374,11 +556,11 @@ export const BannerManagement: React.FC = () => {
                         className="toggle-all-btn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleAllPages('comingSoon', !areAllPagesEnabled('comingSoon'));
+                          toggleAllPages('comingSoon', 'admin', !areAllPagesEnabled('comingSoon', 'admin'));
                         }}
-                        title={areAllPagesEnabled('comingSoon') ? 'Disable all' : 'Enable all'}
+                        title={areAllPagesEnabled('comingSoon', 'admin') ? 'Disable all' : 'Enable all'}
                       >
-                        {areAllPagesEnabled('comingSoon') ? 'Disable All' : 'Enable All'}
+                        {areAllPagesEnabled('comingSoon', 'admin') ? 'Disable All' : 'Enable All'}
                       </button>
                       {expandedCategories.admin ? <FaChevronDown /> : <FaChevronRight />}
                     </div>
@@ -410,6 +592,124 @@ export const BannerManagement: React.FC = () => {
                   )}
                 </div>
 
+                {/* Home Features */}
+                <div className="page-category">
+                  <div 
+                    className="category-header"
+                    onClick={() => toggleCategory('home')}
+                  >
+                    <div className="category-info">
+                      <FaHome className="category-icon" />
+                      <div className="category-details">
+                        <div className="category-name">Home Features</div>
+                        <div className="category-description">Target specific features on the homepage</div>
+                        <span className="page-count">
+                          ({localSettings.comingSoon.pages.filter(page => 
+                            HOME_FEATURES.some(feature => feature.featureId === page)
+                          ).length}/{HOME_FEATURES.length})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="category-actions">
+                      <button
+                        className="toggle-all-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleAllPages('comingSoon', 'home', !areAllPagesEnabled('comingSoon', 'home'));
+                        }}
+                        title={areAllPagesEnabled('comingSoon', 'home') ? 'Disable all' : 'Enable all'}
+                      >
+                        {areAllPagesEnabled('comingSoon', 'home') ? 'Disable All' : 'Enable All'}
+                      </button>
+                      {expandedCategories.home ? <FaChevronDown /> : <FaChevronRight />}
+                    </div>
+                  </div>
+                  
+                  {expandedCategories.home && (
+                    <div className="pages-grid">
+                      {HOME_FEATURES.map((feature) => (
+                        <div key={feature.featureId} className="page-toggle-item">
+                          <div className="page-info">
+                            <div className="page-icon">{feature.icon}</div>
+                            <div className="page-details">
+                              <div className="page-name">{feature.name}</div>
+                              <div className="page-description">{feature.description}</div>
+                              <div className="page-path">{feature.featureId}</div>
+                            </div>
+                          </div>
+                          <label className="page-toggle">
+                            <input
+                              type="checkbox"
+                              checked={isPageEnabled('comingSoon', feature.featureId)}
+                              onChange={() => togglePage('comingSoon', feature.featureId)}
+                            />
+                            <span className="toggle-slider"></span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mentor Area Features */}
+                <div className="page-category">
+                  <div 
+                    className="category-header"
+                    onClick={() => toggleCategory('mentorArea')}
+                  >
+                    <div className="category-info">
+                      <FaGraduationCap className="category-icon" />
+                      <div className="category-details">
+                        <div className="category-name">Mentor Area Features</div>
+                        <div className="category-description">Target specific features in the mentor area</div>
+                        <span className="page-count">
+                          ({localSettings.comingSoon.pages.filter(page => 
+                            MENTOR_AREA_FEATURES.some(feature => feature.featureId === page)
+                          ).length}/{MENTOR_AREA_FEATURES.length})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="category-actions">
+                      <button
+                        className="toggle-all-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleAllPages('comingSoon', 'mentorArea', !areAllPagesEnabled('comingSoon', 'mentorArea'));
+                        }}
+                        title={areAllPagesEnabled('comingSoon', 'mentorArea') ? 'Disable all' : 'Enable all'}
+                      >
+                        {areAllPagesEnabled('comingSoon', 'mentorArea') ? 'Disable All' : 'Enable All'}
+                      </button>
+                      {expandedCategories.mentorArea ? <FaChevronDown /> : <FaChevronRight />}
+                    </div>
+                  </div>
+                  
+                  {expandedCategories.mentorArea && (
+                    <div className="pages-grid">
+                      {MENTOR_AREA_FEATURES.map((feature) => (
+                        <div key={feature.featureId} className="page-toggle-item">
+                          <div className="page-info">
+                            <div className="page-icon">{feature.icon}</div>
+                            <div className="page-details">
+                              <div className="page-name">{feature.name}</div>
+                              <div className="page-description">{feature.description}</div>
+                              <div className="page-path">{feature.featureId}</div>
+                            </div>
+                          </div>
+                          <label className="page-toggle">
+                            <input
+                              type="checkbox"
+                              checked={isPageEnabled('comingSoon', feature.featureId)}
+                              onChange={() => togglePage('comingSoon', feature.featureId)}
+                            />
+                            <span className="toggle-slider"></span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Custom Pages */}
                 <div className="custom-pages-section">
                   <div className="custom-pages-header">
@@ -424,7 +724,11 @@ export const BannerManagement: React.FC = () => {
                   </div>
                   <div className="custom-pages-list">
                     {localSettings.comingSoon.pages
-                      .filter(page => !ADMIN_PAGES.some(adminPage => adminPage.sectionId === page))
+                      .filter(page => 
+                        !ADMIN_PAGES.some(adminPage => adminPage.sectionId === page) &&
+                        !HOME_FEATURES.some(feature => feature.featureId === page) &&
+                        !MENTOR_AREA_FEATURES.some(feature => feature.featureId === page)
+                      )
                       .map((page, index) => (
                         <div key={index} className="custom-page-item">
                           <span className="page-path">{page}</span>
