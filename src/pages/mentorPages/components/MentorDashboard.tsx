@@ -6,6 +6,7 @@ import { VerificationService } from '../../../services/verificationService';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
+import MessagingWidget from '../../../components/widgets/MessagingWidget';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -415,6 +416,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
       {/* Mentee Progress Widget */}
       <MenteeProgress />
+
+      {/* Messaging Widget */}
+      <MessagingWidget />
 
       {/* View Bookings Modal */}
       {showViewBookingsModal && (

@@ -10,6 +10,7 @@ import { DeveloperFeedbackService } from '../../../services/developerFeedbackSer
 import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
+import MessagingWidget from '../../../components/widgets/MessagingWidget';
 import { FaComments, FaStar, FaCode } from 'react-icons/fa';
 
 interface MenteeDashboardProps {
@@ -356,6 +357,9 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
 
       {/* Mentee Progress Widget */}
       <MenteeProgress />
+
+      {/* Messaging Widget */}
+      <MessagingWidget />
 
       {/* Booking History Modal */}
       <MenteeBookingHistoryModal
