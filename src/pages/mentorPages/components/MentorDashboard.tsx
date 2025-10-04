@@ -4,6 +4,8 @@ import { ViewBookingsModal } from './ViewBookingsModal';
 import { VerificationStatus, canAccessPlatform, isUnderReview, isRejected } from '../../../types/verification';
 import { VerificationService } from '../../../services/verificationService';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
+import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
+import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -407,6 +409,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* Resources Library Widget */}
+      <ResourcesLibrary />
+
+      {/* Mentee Progress Widget */}
+      <MenteeProgress />
 
       {/* View Bookings Modal */}
       {showViewBookingsModal && (

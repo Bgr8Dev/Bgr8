@@ -8,6 +8,8 @@ import { useAuth } from '../../../hooks/useAuth';
 import { MentorFeedbackService, MenteeFeedbackSummary } from '../../../services/mentorFeedbackService';
 import { DeveloperFeedbackService } from '../../../services/developerFeedbackService';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
+import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
+import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import { FaComments, FaStar, FaCode } from 'react-icons/fa';
 
 interface MenteeDashboardProps {
@@ -348,6 +350,12 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
           )}
         </div>
       </div>
+
+      {/* Resources Library Widget */}
+      <ResourcesLibrary />
+
+      {/* Mentee Progress Widget */}
+      <MenteeProgress />
 
       {/* Booking History Modal */}
       <MenteeBookingHistoryModal
