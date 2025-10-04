@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
 import InstagramFeed from '../../components/social/InstagramFeed';
@@ -57,36 +58,38 @@ export default function BGr8() {
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       {/* Hero Section with Background Image */}
-      <section className="bgr8-hero">
-        <div className="bgr8-hero-background">
-          <div className="bgr8-hero-overlay">
-            <div className="bgr8-hero-content">
-              <div className="bgr8-hero-text">
-                <h1>Bgr8</h1>
-                <p className="bgr8-hero-subtitle">
-                  From mentorship to community development, to long-term empowerment - 
-                  will you start a regular gift to support communities at every stage of their journey?
-                </p>
-              </div>
-              
-              {/* Navigate to Mentors Page Button */}
-              <div className="bgr8-scroll-button-container">
-                <button 
-                  className="bgr8-scroll-to-mentor-btn"
-                  onClick={navigateToMentors}
-                  aria-label="Navigate to mentors page"
-                >
-                  <span className="bgr8-scroll-btn-text">Find Mentors & Join Network</span>
-                  <span className="bgr8-scroll-btn-arrow">→</span>
-                </button>
-                <p className="bgr8-scroll-btn-description">
-                  Connect with experienced mentors and mentees to create positive change in your community
-                </p>
+      <BannerWrapper sectionId="hero-section" bannerType="element">
+        <section className="bgr8-hero">
+          <div className="bgr8-hero-background">
+            <div className="bgr8-hero-overlay">
+              <div className="bgr8-hero-content">
+                <div className="bgr8-hero-text">
+                  <h1>Bgr8</h1>
+                  <p className="bgr8-hero-subtitle">
+                    From mentorship to community development, to long-term empowerment - 
+                    will you start a regular gift to support communities at every stage of their journey?
+                  </p>
+                </div>
+                
+                {/* Navigate to Mentors Page Button */}
+                <div className="bgr8-scroll-button-container">
+                  <button 
+                    className="bgr8-scroll-to-mentor-btn"
+                    onClick={navigateToMentors}
+                    aria-label="Navigate to mentors page"
+                  >
+                    <span className="bgr8-scroll-btn-text">Find Mentors & Join Network</span>
+                    <span className="bgr8-scroll-btn-arrow">→</span>
+                  </button>
+                  <p className="bgr8-scroll-btn-description">
+                    Connect with experienced mentors and mentees to create positive change in your community
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </BannerWrapper>
 
 
 
@@ -113,10 +116,12 @@ export default function BGr8() {
             community transformation.
           </p>
 
-          <div className="bgr8-cta-bar">
-            <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
-            <span className="bgr8-arrow">→</span>
-          </div>
+          <BannerWrapper sectionId="cta-buttons" bannerType="element">
+            <div className="bgr8-cta-bar">
+              <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
+              <span className="bgr8-arrow">→</span>
+            </div>
+          </BannerWrapper>
         </div>
       </section>
 
@@ -196,67 +201,69 @@ export default function BGr8() {
               </div>
               
               {/* Second Donation Form */}
-              <div className="bgr8-donation-form bgr8-second-form">
-                <div className="bgr8-donation-header">
-                  <span className="bgr8-donation-badge">BGR8 COMMUNITY FUND</span>
-                </div>
-                
-                <div className="bgr8-donation-tabs">
-                  <button 
-                    className={`bgr8-tab ${donationType === 'one-off' ? 'active' : ''}`}
-                    onClick={() => setDonationType('one-off')}
-                  >
-                    One-off
-                  </button>
-                  <button 
-                    className={`bgr8-tab ${donationType === 'monthly' ? 'active' : ''}`}
-                    onClick={() => setDonationType('monthly')}
-                  >
-                    Monthly
-                  </button>
-                </div>
-
-                <div className="bgr8-amount-selection">
-                  <p>Choose an amount to donate</p>
-                  <div className="bgr8-amount-buttons">
+              <BannerWrapper sectionId="donation-form" bannerType="element">
+                <div className="bgr8-donation-form bgr8-second-form">
+                  <div className="bgr8-donation-header">
+                    <span className="bgr8-donation-badge">BGR8 COMMUNITY FUND</span>
+                  </div>
+                  
+                  <div className="bgr8-donation-tabs">
                     <button 
-                      className={`bgr8-amount-btn ${donationAmount === '10' ? 'active' : ''}`}
-                      onClick={() => setDonationAmount('10')}
+                      className={`bgr8-tab ${donationType === 'one-off' ? 'active' : ''}`}
+                      onClick={() => setDonationType('one-off')}
                     >
-                      £10
+                      One-off
                     </button>
                     <button 
-                      className={`bgr8-amount-btn ${donationAmount === '25' ? 'active' : ''}`}
-                      onClick={() => setDonationAmount('25')}
+                      className={`bgr8-tab ${donationType === 'monthly' ? 'active' : ''}`}
+                      onClick={() => setDonationType('monthly')}
                     >
-                      £25
-                    </button>
-                    <button 
-                      className={`bgr8-amount-btn ${donationAmount === '50' ? 'active' : ''}`}
-                      onClick={() => setDonationAmount('50')}
-                    >
-                      £50
+                      Monthly
                     </button>
                   </div>
-                  <div className="bgr8-custom-amount">
-                    <input 
-                      type="text" 
-                      placeholder="£ Other amount"
-                      className="bgr8-amount-input"
-                    />
+
+                  <div className="bgr8-amount-selection">
+                    <p>Choose an amount to donate</p>
+                    <div className="bgr8-amount-buttons">
+                      <button 
+                        className={`bgr8-amount-btn ${donationAmount === '10' ? 'active' : ''}`}
+                        onClick={() => setDonationAmount('10')}
+                      >
+                        £10
+                      </button>
+                      <button 
+                        className={`bgr8-amount-btn ${donationAmount === '25' ? 'active' : ''}`}
+                        onClick={() => setDonationAmount('25')}
+                      >
+                        £25
+                      </button>
+                      <button 
+                        className={`bgr8-amount-btn ${donationAmount === '50' ? 'active' : ''}`}
+                        onClick={() => setDonationAmount('50')}
+                      >
+                        £50
+                      </button>
+                    </div>
+                    <div className="bgr8-custom-amount">
+                      <input 
+                        type="text" 
+                        placeholder="£ Other amount"
+                        className="bgr8-amount-input"
+                      />
+                    </div>
+                  </div>
+
+                  <button className="bgr8-donate-btn">
+                    Donate now
+                  </button>
+
+                  <div className="bgr8-payment-options">
+                    <span>Debit/Credit Card</span>
+                    <span>Apple Pay</span>
+                    <span>PayPal</span>
                   </div>
                 </div>
-
-                <button className="bgr8-donate-btn">
-                  Donate now
-                </button>
-
-                <div className="bgr8-payment-options">
-                  <span>Debit/Credit Card</span>
-                  <span>Apple Pay</span>
-                  <span>PayPal</span>
-                </div>
-              </div>
+              </BannerWrapper>
             </div>
           </div>
         </div>
@@ -316,31 +323,33 @@ export default function BGr8() {
             </div>
           </div>
           
-          <div className="bgr8-about-values">
-            <h4>Our Values</h4>
-            <div className="bgr8-values-grid">
-              <div className="bgr8-value-item">
-                <div className="bgr8-value-icon">🤝</div>
-                <h5>Community First</h5>
-                <p>We prioritize the needs and voices of the communities we serve, ensuring our programs are culturally sensitive and locally relevant.</p>
-              </div>
-              <div className="bgr8-value-item">
-                <div className="bgr8-value-icon">🌱</div>
-                <h5>Sustainable Impact</h5>
-                <p>We focus on creating long-term, sustainable solutions that continue to benefit communities long after our direct involvement.</p>
-              </div>
-              <div className="bgr8-value-item">
-                <div className="bgr8-value-icon">🎓</div>
-                <h5>Education & Mentorship</h5>
-                <p>We believe in the power of education and mentorship to unlock potential and create opportunities for growth.</p>
-              </div>
-              <div className="bgr8-value-item">
-                <div className="bgr8-value-icon">💙</div>
-                <h5>Transparency</h5>
-                <p>We maintain complete transparency in our operations, ensuring donors and partners can see exactly how their support makes a difference.</p>
+          <BannerWrapper sectionId="features-grid" bannerType="element">
+            <div className="bgr8-about-values">
+              <h4>Our Values</h4>
+              <div className="bgr8-values-grid">
+                <div className="bgr8-value-item">
+                  <div className="bgr8-value-icon">🤝</div>
+                  <h5>Community First</h5>
+                  <p>We prioritize the needs and voices of the communities we serve, ensuring our programs are culturally sensitive and locally relevant.</p>
+                </div>
+                <div className="bgr8-value-item">
+                  <div className="bgr8-value-icon">🌱</div>
+                  <h5>Sustainable Impact</h5>
+                  <p>We focus on creating long-term, sustainable solutions that continue to benefit communities long after our direct involvement.</p>
+                </div>
+                <div className="bgr8-value-item">
+                  <div className="bgr8-value-icon">🎓</div>
+                  <h5>Education & Mentorship</h5>
+                  <p>We believe in the power of education and mentorship to unlock potential and create opportunities for growth.</p>
+                </div>
+                <div className="bgr8-value-item">
+                  <div className="bgr8-value-icon">💙</div>
+                  <h5>Transparency</h5>
+                  <p>We maintain complete transparency in our operations, ensuring donors and partners can see exactly how their support makes a difference.</p>
+                </div>
               </div>
             </div>
-          </div>
+          </BannerWrapper>
         </div>
       </section>
 
@@ -400,20 +409,22 @@ export default function BGr8() {
       </section>
 
       {/* Instagram Section */}
-      <section className="bgr8-instagram-section">
-        <div className="bgr8-content-wrapper">
-          <div className="bgr8-instagram-header">
-            <h3>Follow Our Journey</h3>
-            <p>See the real impact of your support through our latest updates and community stories</p>
+      <BannerWrapper sectionId="instagram-feed" bannerType="element">
+        <section className="bgr8-instagram-section">
+          <div className="bgr8-content-wrapper">
+            <div className="bgr8-instagram-header">
+              <h3>Follow Our Journey</h3>
+              <p>See the real impact of your support through our latest updates and community stories</p>
+            </div>
+            <InstagramFeed 
+              accessToken={import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN}
+              maxPosts={6}
+              showProfile={true}
+              className="bgr8-instagram-feed"
+            />
           </div>
-          <InstagramFeed 
-            accessToken={import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN}
-            maxPosts={6}
-            showProfile={true}
-            className="bgr8-instagram-feed"
-          />
-        </div>
-      </section>
+        </section>
+      </BannerWrapper>
 
       {/* Discover More Section */}
       <section className="bgr8-discover-section">
@@ -444,7 +455,9 @@ export default function BGr8() {
         </div>
       </section>
 
-      <Footer />
+      <BannerWrapper sectionId="footer" bannerType="element">
+        <Footer />
+      </BannerWrapper>
     </div>
   );
 }

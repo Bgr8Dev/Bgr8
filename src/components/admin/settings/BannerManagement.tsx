@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaFlag, FaTools, FaRocket, FaPlus, FaTrash, FaSave, FaCheck, FaChevronDown, FaChevronRight, FaCog, FaEnvelope, FaChartBar, FaInstagram, FaUsers, FaBell, FaSearch, FaFileAlt, FaUserCheck, FaCalendarAlt, FaHandshake, FaHome, FaGraduationCap, FaUserTie, FaComments, FaBookOpen, FaVideo, FaCalendar, FaStar, FaEdit, FaThumbsUp, FaQuestionCircle, FaBars } from 'react-icons/fa';
+import { FaFlag, FaTools, FaRocket, FaPlus, FaTrash, FaSave, FaCheck, FaChevronDown, FaChevronRight, FaCog, FaEnvelope, FaChartBar, FaInstagram, FaUsers, FaBell, FaSearch, FaFileAlt, FaUserCheck, FaCalendarAlt, FaHandshake, FaHome, FaGraduationCap, FaComments, FaBookOpen, FaVideo, FaCalendar, FaStar, FaEdit, FaThumbsUp, FaQuestionCircle } from 'react-icons/fa';
 import { useBanner, BannerSettings } from '../../../contexts/BannerContext';
 import './BannerManagement.css';
 
@@ -24,13 +24,12 @@ const ADMIN_PAGES = [
 // Home page features configuration
 const HOME_FEATURES = [
   { featureId: 'hero-section', name: 'Hero Section', icon: <FaHome />, description: 'Main landing area with call-to-action' },
-  { featureId: 'mentor-cards', name: 'Mentor Cards', icon: <FaUserTie />, description: 'Featured mentor profile cards' },
+  { featureId: 'donation-form', name: 'Donation Form', icon: <FaRocket />, description: 'Donation widget and payment form' },
   { featureId: 'instagram-feed', name: 'Instagram Feed', icon: <FaInstagram />, description: 'Social media content display' },
   { featureId: 'testimonials', name: 'Testimonials', icon: <FaComments />, description: 'User testimonials and reviews' },
   { featureId: 'features-grid', name: 'Features Grid', icon: <FaStar />, description: 'Key features and benefits showcase' },
   { featureId: 'newsletter-signup', name: 'Newsletter Signup', icon: <FaEnvelope />, description: 'Email subscription form' },
   { featureId: 'cta-buttons', name: 'Call-to-Action Buttons', icon: <FaRocket />, description: 'Primary action buttons' },
-  { featureId: 'navigation-menu', name: 'Navigation Menu', icon: <FaBars />, description: 'Main site navigation' },
   { featureId: 'footer', name: 'Footer', icon: <FaFlag />, description: 'Site footer with links' },
   { featureId: 'announcements', name: 'Announcements', icon: <FaBell />, description: 'Site-wide announcements' }
 ];
