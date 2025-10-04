@@ -4,6 +4,7 @@ import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } fr
 import { useAuth } from '../../hooks/useAuth';
 import RecipientSelector from '../../components/admin/emails/RecipientSelector';
 import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 
 // Import the new components
 import EmailHeader from '../../components/admin/emails/EmailHeader';
@@ -672,7 +673,7 @@ const AdminEmails: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="email-admin-emails">
+      <BannerWrapper sectionId="emails" className="email-admin-emails">
         <div className="email-loading-container">
           <div className="email-loading-spinner">
             <FaSpinner className="email-spinner-icon" />
@@ -680,12 +681,12 @@ const AdminEmails: React.FC = () => {
             <p>Setting up your email workspace</p>
           </div>
         </div>
-      </div>
+      </BannerWrapper>
     );
   }
 
   return (
-    <div className="email-admin-emails">
+    <BannerWrapper sectionId="emails" className="email-admin-emails">
       {/* Notification */}
       {notification && (
         <div className={`email-notification email-notification-${notification.type}`}>
@@ -829,7 +830,7 @@ const AdminEmails: React.FC = () => {
           onClose={() => setShowRecipientSelector(false)}
         />
       )}
-    </div>
+    </BannerWrapper>
   );
 };
 

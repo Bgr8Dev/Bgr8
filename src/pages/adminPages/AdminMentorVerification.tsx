@@ -15,6 +15,7 @@ import {
 import { VerificationService } from '../../services/verificationService';
 import { VerificationStatus, VerificationStep } from '../../types/verification';
 import { VerificationStatusBadge, VerificationProgress } from '../../components/verification';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import '../../styles/adminStyles/AdminMentorVerification.css';
 
 interface MentorProfile {

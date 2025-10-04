@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { BigTextProvider, useBigText } from './contexts/BigTextContext';
+import { BannerProvider } from './contexts/BannerContext';
 import Navigation from './navigation/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -48,7 +49,9 @@ function App() {
       <Router>
         <AuthProvider>
           <BigTextProvider>
-            <AppContent />
+            <BannerProvider>
+              <AppContent />
+            </BannerProvider>
           </BigTextProvider>
         </AuthProvider>
       </Router>

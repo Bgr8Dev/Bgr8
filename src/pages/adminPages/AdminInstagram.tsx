@@ -6,6 +6,7 @@ import {
   InstagramAdminUser 
 } from '../../services/instagramAdminService';
 import { FaPlus, FaEdit, FaTrash, FaEye, FaEyeSlash, FaUpload, FaSave, FaTimes, FaInstagram } from 'react-icons/fa';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import '../../styles/adminStyles/AdminInstagram.css';
 
 interface PostFormData {
@@ -262,17 +263,17 @@ export default function AdminInstagram() {
 
   if (loading) {
     return (
-      <div className="admin-insta-container">
+      <BannerWrapper sectionId="instagram" className="admin-insta-container">
         <div className="admin-insta-loading-spinner">
           <div className="admin-insta-spinner"></div>
           <p>Loading Instagram data...</p>
         </div>
-      </div>
+      </BannerWrapper>
     );
   }
 
   return (
-    <div className="admin-insta-container">
+    <BannerWrapper sectionId="instagram" className="admin-insta-container">
       <div className="admin-insta-header">
         <h2>
           <FaInstagram /> Homepage Instagram Feed
@@ -606,6 +607,6 @@ export default function AdminInstagram() {
           </div>
         )}
       </div>
-    </div>
+    </BannerWrapper>
   );
 }
