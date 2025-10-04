@@ -14,7 +14,7 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
   if (!open || !mentor) return null;
 
   return (
-    <BannerWrapper sectionId="messaging" bannerType="element">
+    <BannerWrapper sectionId="calcom-integration" bannerType="element">
       <div className="calcom-modal-overlay" onClick={onClose}>
         <div className="calcom-modal" onClick={e => e.stopPropagation()}>
         <div className="calcom-modal-header">

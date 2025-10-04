@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaFlag, FaTools, FaRocket, FaPlus, FaTrash, FaSave, FaCheck, FaChevronDown, FaChevronRight, FaCog, FaEnvelope, FaChartBar, FaInstagram, FaUsers, FaBell, FaSearch, FaFileAlt, FaUserCheck, FaCalendarAlt, FaHandshake, FaHome, FaGraduationCap, FaComments, FaBookOpen, FaVideo, FaCalendar, FaStar, FaEdit, FaThumbsUp, FaQuestionCircle } from 'react-icons/fa';
+import { FaFlag, FaTools, FaRocket, FaPlus, FaTrash, FaSave, FaCheck, FaChevronDown, FaChevronRight, FaCog, FaEnvelope, FaChartBar, FaInstagram, FaUsers, FaBell, FaSearch, FaFileAlt, FaUserCheck, FaCalendarAlt, FaCalendarCheck, FaHandshake, FaHome, FaGraduationCap, FaComments, FaBookOpen, FaVideo, FaCalendar, FaStar, FaEdit, FaThumbsUp, FaQuestionCircle } from 'react-icons/fa';
 import { useBanner, BannerSettings } from '../../../contexts/BannerContext';
 import './BannerManagement.css';
 
@@ -45,6 +45,8 @@ const MENTOR_AREA_FEATURES = [
   { featureId: 'feedback-forms', name: 'Feedback Forms', icon: <FaThumbsUp />, description: 'Mentee feedback collection' },
   { featureId: 'progress-tracking', name: 'Progress Tracking', icon: <FaChartBar />, description: 'Track mentee progress' },
   { featureId: 'messaging', name: 'Messaging System', icon: <FaComments />, description: 'Direct communication with mentees' },
+  { featureId: 'session-booking', name: 'Session Booking', icon: <FaCalendarAlt />, description: 'Book mentoring sessions' },
+  { featureId: 'calcom-integration', name: 'Cal.com Integration', icon: <FaCalendarCheck />, description: 'Calendar integration for scheduling' },
   { featureId: 'settings', name: 'Mentor Settings', icon: <FaCog />, description: 'Personal mentor preferences' },
   { featureId: 'help-support', name: 'Help & Support', icon: <FaQuestionCircle />, description: 'Support and documentation' },
   { featureId: 'achievements', name: 'Achievements', icon: <FaStar />, description: 'Mentor achievements and badges' }

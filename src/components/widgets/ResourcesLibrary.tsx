@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaBook, FaDownload, FaExternalLinkAlt, FaSearch, FaFilter, FaPlus, FaFolder, FaFilePdf, FaFileWord, FaFilePowerpoint, FaVideo, FaImage } from 'react-icons/fa';
+import { FaBook, FaDownload, FaExternalLinkAlt, FaSearch, FaFilter, FaPlus, FaFilePdf, FaFileWord, FaFilePowerpoint, FaVideo, FaImage } from 'react-icons/fa';
 import BannerWrapper from '../ui/BannerWrapper';
 import './ResourcesLibrary.css';
 
@@ -106,7 +106,7 @@ const ResourcesLibrary: React.FC = () => {
   };
 
   return (
-    <BannerWrapper sectionId="resources" bannerType="element">
+    <BannerWrapper sectionId="resources-library" bannerType="element">
       <div className="resources-library-widget">
         <div className="resources-header">
           <div className="resources-title">

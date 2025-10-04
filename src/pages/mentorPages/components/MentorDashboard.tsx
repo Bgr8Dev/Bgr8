@@ -411,15 +411,6 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         )}
       </div>
 
-      {/* Resources Library Widget */}
-      <ResourcesLibrary />
-
-      {/* Mentee Progress Widget */}
-      <MenteeProgress />
-
-      {/* Messaging Widget */}
-      <MessagingWidget />
-
       {/* View Bookings Modal */}
       {showViewBookingsModal && (
         <ViewBookingsModal
@@ -431,6 +422,15 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           onCancelBooking={onCancelBooking}
         />
       )}
+
+      {/* Resources Library Widget */}
+      <ResourcesLibrary />
+
+      {/* Mentee Progress Widget */}
+      <MenteeProgress />
+
+      {/* Messaging Widget */}
+      <MessagingWidget />
       </>
     </BannerWrapper>
   );

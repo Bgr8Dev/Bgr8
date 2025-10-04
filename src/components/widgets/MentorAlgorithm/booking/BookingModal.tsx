@@ -456,7 +456,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   if (!open) return null;
 
   return (
-    <BannerWrapper sectionId="progress-tracking" bannerType="element">
+    <BannerWrapper sectionId="session-booking" bannerType="element">
       <div className="booking-modal-overlay" onClick={onClose}>
         <div className={`booking-modal ${isMobile ? 'booking-modal-mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
         {/* Mobile Header with Step Indicator */}

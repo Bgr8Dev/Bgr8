@@ -352,15 +352,6 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
         </div>
       </div>
 
-      {/* Resources Library Widget */}
-      <ResourcesLibrary />
-
-      {/* Mentee Progress Widget */}
-      <MenteeProgress />
-
-      {/* Messaging Widget */}
-      <MessagingWidget />
-
       {/* Booking History Modal */}
       <MenteeBookingHistoryModal
         isOpen={showHistoryModal}
@@ -382,7 +373,15 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
         isOpen={showDeveloperModal}
         onClose={() => setShowDeveloperModal(false)}
       />
-      
+
+      {/* Resources Library Widget */}
+      <ResourcesLibrary />
+
+      {/* Mentee Progress Widget */}
+      <MenteeProgress />
+
+      {/* Messaging Widget */}
+      <MessagingWidget />
       
       </>
     </BannerWrapper>
