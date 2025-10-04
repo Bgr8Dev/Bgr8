@@ -8,6 +8,7 @@ import { getName, MentorMenteeProfile } from '../algorithm/matchUsers';
 import { CalComService, CalComEventType, CalComTokenManager } from '../CalCom/calComService';
 import { Booking } from '../../../../types/bookings';
 import { SessionsService } from '../../../../services/sessionsService';
+import BannerWrapper from '../../../../components/ui/BannerWrapper';
 import '../MentorProgram.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -455,8 +456,9 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   if (!open) return null;
 
   return (
-    <div className="booking-modal-overlay" onClick={onClose}>
-      <div className={`booking-modal ${isMobile ? 'booking-modal-mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
+    <BannerWrapper sectionId="progress-tracking" bannerType="element">
+      <div className="booking-modal-overlay" onClick={onClose}>
+        <div className={`booking-modal ${isMobile ? 'booking-modal-mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
         {/* Mobile Header with Step Indicator */}
         <div className="booking-modal-header">
           {isMobile && (
@@ -709,8 +711,9 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>
+    </BannerWrapper>
   );
 }
  

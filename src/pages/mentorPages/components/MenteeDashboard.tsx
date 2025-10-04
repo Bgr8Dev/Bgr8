@@ -7,6 +7,7 @@ import { useButtonEmergeModal } from '../../../hooks/useButtonEmergeModal';
 import { useAuth } from '../../../hooks/useAuth';
 import { MentorFeedbackService, MenteeFeedbackSummary } from '../../../services/mentorFeedbackService';
 import { DeveloperFeedbackService } from '../../../services/developerFeedbackService';
+import BannerWrapper from '../../../components/ui/BannerWrapper';
 import { FaComments, FaStar, FaCode } from 'react-icons/fa';
 
 interface MenteeDashboardProps {
@@ -67,9 +68,10 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
   }, [currentUser, userProfile]);
 
   return (
-    <>
-      {/* Dashboard Header */}
-      <div className="dashboard-header">
+    <BannerWrapper sectionId="mentee-dashboard" bannerType="element">
+      <>
+        {/* Dashboard Header */}
+        <div className="dashboard-header">
         <div className="dashboard-title">
           <h1>Mentee Dashboard</h1>
           <p>Connect with experienced professionals who can guide you on your journey to success</p>
@@ -370,6 +372,7 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
       />
       
       
-    </>
+      </>
+    </BannerWrapper>
   );
 };

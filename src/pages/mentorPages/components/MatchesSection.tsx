@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaVideo, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
 import { MentorMenteeProfile, MatchResult } from '../types/mentorTypes';
+import BannerWrapper from '../../../components/ui/BannerWrapper';
 import '../styles/MatchesSection.css';
 
 interface MatchesSectionProps {
@@ -37,7 +38,8 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
   };
 
   return (
-    <div className="ms-matches-section">
+    <BannerWrapper sectionId="mentee-list" bannerType="element">
+      <div className="ms-matches-section">
       <div className="ms-matches-header">
         <div className="ms-matches-header-content">
           <h2>Your Best Matches</h2>
@@ -172,6 +174,7 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </BannerWrapper>
   );
 };

@@ -11,6 +11,7 @@ import ukEducationLevels from '../../../constants/ukEducationLevels';
 import ukCounties from '../../../constants/ukCounties';
 import { useAuth } from '../../../hooks/useAuth';
 import { hasRole } from '../../../utils/userProfile';
+import BannerWrapper from '../../../components/ui/BannerWrapper';
 import '../styles/ProfileEditModal.css';
 
 interface ProfileEditModalProps {
@@ -433,9 +434,10 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   };
 
   return (
-    <>
-      <div className="pem-profile-edit-modal-overlay" onClick={onClose}>
-        <div className="pem-profile-edit-modal" onClick={(e) => e.stopPropagation()}>
+    <BannerWrapper sectionId="profile-editor" bannerType="element">
+      <>
+        <div className="pem-profile-edit-modal-overlay" onClick={onClose}>
+          <div className="pem-profile-edit-modal" onClick={(e) => e.stopPropagation()}>
           {/* Left Sidebar - Progress & Status */}
           <div className="pem-modal-left-sidebar">
             <div className="pem-modal-header-content">
@@ -991,8 +993,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </>
+          </div>
+        )}
+      </>
+    </BannerWrapper>
   );
 };
