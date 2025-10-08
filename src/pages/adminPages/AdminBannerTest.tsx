@@ -9,7 +9,7 @@ const AdminBannerTest: React.FC = () => {
     <BannerWrapper sectionId="banner-test" className="admin-banner-test">
       <div className="banner-test-container">
         <h1>Banner Test Page</h1>
-        <p>This page demonstrates the banner functionality. Configure banners in Admin Settings {'>'} Banner Management.</p>
+        <p>This page demonstrates the banner functionality. Configure banners in Admin Settings &gt; Banner Management.</p>
         
         <div className="banner-examples">
           <h2>Banner Examples</h2>
@@ -48,7 +48,7 @@ const AdminBannerTest: React.FC = () => {
         <div className="instructions">
           <h3>How to Use</h3>
           <ol>
-            <li>Go to Admin Settings {'>'} Banner Management</li>
+            <li>Go to Admin Settings &gt; Banner Management</li>
             <li>Enable the banners you want to show</li>
             <li>Add page paths where banners should appear (e.g., &quot;/admin/banner-test&quot;, &quot;*&quot; for all pages)</li>
             <li>Customize the banner messages and settings</li>
