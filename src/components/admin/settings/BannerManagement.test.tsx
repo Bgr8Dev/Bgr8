@@ -28,10 +28,10 @@ const MockBannerProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
 describe('BannerManagement', () => {
   it('renders with default settings when Firebase document does not exist', async () => {
-    const { onSnapshot } = require('firebase/firestore');
+    const onSnapshot = jest.requireMock('firebase/firestore').onSnapshot;
     
     // Mock onSnapshot to simulate document not existing
-    onSnapshot.mockImplementation((docRef, callback) => {
+    onSnapshot.mockImplementation((docRef: unknown, callback: (doc: { exists: () => boolean; data: () => null }) => void) => {
       // Simulate document not existing
       callback({
         exists: () => false,
@@ -64,9 +64,9 @@ describe('BannerManagement', () => {
   });
 
   it('allows toggling banner settings', async () => {
-    const { onSnapshot } = require('firebase/firestore');
+    const onSnapshot = jest.requireMock('firebase/firestore').onSnapshot;
     
-    onSnapshot.mockImplementation((docRef, callback) => {
+    onSnapshot.mockImplementation((docRef: unknown, callback: (doc: { exists: () => boolean; data: () => null }) => void) => {
       callback({
         exists: () => false,
         data: () => null

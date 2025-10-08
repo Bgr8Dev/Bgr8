@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { firestore } from '../../firebase/firebase';
 import { collection, query, getDocs, orderBy, doc, updateDoc, deleteDoc, Timestamp, addDoc } from 'firebase/firestore';
 import { FaCheck, FaTrash, FaEnvelope, FaUndo, FaArrowLeft, FaTimes, FaPaperPlane } from 'react-icons/fa';
-import BannerWrapper from '../../components/ui/BannerWrapper';
 import '../../styles/adminStyles/AdminEnquiries.css';
 
 interface Enquiry {
