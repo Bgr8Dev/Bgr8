@@ -1,0 +1,421 @@
+name: 📋 Project Management
+
+on:
+  issues:
+    types: [opened, closed, labeled, unlabeled]
+  pull_request:
+    types: [opened, closed, merged, labeled, unlabeled]
+  schedule:
+    # Run project management tasks daily at 8 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  manage-issues:
+    name: 📋 Issue Management
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' || github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📋 Process new issues
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        run: |
+          echo "📋 Processing new issue..."
+          
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          
+          # Auto-label based on content
+          if [[ $ISSUE_TITLE == *"bug"* ]] || [[ $ISSUE_BODY == *"bug"* ]]; then
+            echo "Adding bug label"
+            gh issue edit $ISSUE_NUMBER --add-label "bug"
+          fi
+          
+          if [[ $ISSUE_TITLE == *"feature"* ]] || [[ $ISSUE_BODY == *"feature"* ]]; then
+            echo "Adding feature label"
+            gh issue edit $ISSUE_NUMBER --add-label "enhancement"
+          fi
+          
+          if [[ $ISSUE_TITLE == *"documentation"* ]] || [[ $ISSUE_BODY == *"documentation"* ]]; then
+            echo "Adding documentation label"
+            gh issue edit $ISSUE_NUMBER --add-label "documentation"
+          fi
+          
+          # Add priority based on keywords
+          if [[ $ISSUE_TITLE == *"urgent"* ]] || [[ $ISSUE_TITLE == *"critical"* ]]; then
+            echo "Adding high priority label"
+            gh issue edit $ISSUE_NUMBER --add-label "priority: high"
+          fi
+          
+          # Add good first issue label for simple issues
+          if [[ $ISSUE_TITLE == *"simple"* ]] || [[ $ISSUE_BODY == *"good first issue"* ]]; then
+            echo "Adding good first issue label"
+            gh issue edit $ISSUE_NUMBER --add-label "good first issue"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📋 Process closed issues
+        if: github.event_name == 'issues' && github.event.action == 'closed'
+        run: |
+          echo "📋 Processing closed issue..."
+          
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          
+          # Add resolved label
+          gh issue edit $ISSUE_NUMBER --add-label "resolved"
+          
+          # Remove in-progress label if present
+          gh issue edit $ISSUE_NUMBER --remove-label "in progress"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📋 Generate issue report
+        if: github.event_name == 'schedule'
+        run: |
+          echo "📋 Generating issue report..."
+          
+          # Get open issues
+          OPEN_ISSUES=$(gh issue list --state open --json number,title,labels --jq 'length')
+          BUG_ISSUES=$(gh issue list --state open --label bug --json number --jq 'length')
+          FEATURE_ISSUES=$(gh issue list --state open --label enhancement --json number --jq 'length')
+          DOC_ISSUES=$(gh issue list --state open --label documentation --json number --jq 'length')
+          
+          # Get closed issues this week
+          CLOSED_THIS_WEEK=$(gh issue list --state closed --json number,closedAt --jq '[.[] | select(.closedAt > (now - 604800))] | length')
+          
+          # Create report
+          cat > issue-report.md << EOF
+          # 📋 Issue Report
+          
+          **Date:** $(date)
+          **Repository:** ${{ github.repository }}
+          
+          ## 📊 Issue Statistics
+          
+          - **Open Issues:** $OPEN_ISSUES
+          - **Bug Issues:** $BUG_ISSUES
+          - **Feature Issues:** $FEATURE_ISSUES
+          - **Documentation Issues:** $DOC_ISSUES
+          - **Closed This Week:** $CLOSED_THIS_WEEK
+          
+          ## 🏷️ Issue Labels
+          
+          ### By Type
+          - Bugs: $BUG_ISSUES
+          - Features: $FEATURE_ISSUES
+          - Documentation: $DOC_ISSUES
+          
+          ## 📈 Trends
+          
+          - Issues closed this week: $CLOSED_THIS_WEEK
+          - Open issues: $OPEN_ISSUES
+          
+          EOF
+          
+          cat issue-report.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  manage-pull-requests:
+    name: 🔀 Pull Request Management
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🔀 Process new PRs
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        run: |
+          echo "🔀 Processing new pull request..."
+          
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Auto-label based on content
+          if [[ $PR_TITLE == *"fix"* ]] || [[ $PR_BODY == *"fix"* ]]; then
+            echo "Adding bug fix label"
+            gh pr edit $PR_NUMBER --add-label "bug fix"
+          fi
+          
+          if [[ $PR_TITLE == *"feat"* ]] || [[ $PR_BODY == *"feature"* ]]; then
+            echo "Adding feature label"
+            gh pr edit $PR_NUMBER --add-label "feature"
+          fi
+          
+          if [[ $PR_TITLE == *"docs"* ]] || [[ $PR_BODY == *"documentation"* ]]; then
+            echo "Adding documentation label"
+            gh pr edit $PR_NUMBER --add-label "documentation"
+          fi
+          
+          if [[ $PR_TITLE == *"refactor"* ]]; then
+            echo "Adding refactor label"
+            gh pr edit $PR_NUMBER --add-label "refactor"
+          fi
+          
+          # Add size label based on changes
+          CHANGED_FILES=$(gh pr diff $PR_NUMBER --name-only | wc -l)
+          if [ $CHANGED_FILES -gt 20 ]; then
+            echo "Adding large PR label"
+            gh pr edit $PR_NUMBER --add-label "size: large"
+          elif [ $CHANGED_FILES -gt 10 ]; then
+            echo "Adding medium PR label"
+            gh pr edit $PR_NUMBER --add-label "size: medium"
+          else
+            echo "Adding small PR label"
+            gh pr edit $PR_NUMBER --add-label "size: small"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🔀 Process merged PRs
+        if: github.event_name == 'pull_request' && github.event.action == 'merged'
+        run: |
+          echo "🔀 Processing merged pull request..."
+          
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          # Add merged label
+          gh pr edit $PR_NUMBER --add-label "merged"
+          
+          # Remove in-progress label if present
+          gh pr edit $PR_NUMBER --remove-label "in progress"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🔀 Generate PR report
+        if: github.event_name == 'schedule'
+        run: |
+          echo "🔀 Generating PR report..."
+          
+          # Get open PRs
+          OPEN_PRS=$(gh pr list --state open --json number --jq 'length')
+          MERGED_THIS_WEEK=$(gh pr list --state merged --json number,mergedAt --jq '[.[] | select(.mergedAt > (now - 604800))] | length')
+          CLOSED_THIS_WEEK=$(gh pr list --state closed --json number,closedAt --jq '[.[] | select(.closedAt > (now - 604800))] | length')
+          
+          # Get PRs by size
+          LARGE_PRS=$(gh pr list --state open --label "size: large" --json number --jq 'length')
+          MEDIUM_PRS=$(gh pr list --state open --label "size: medium" --json number --jq 'length')
+          SMALL_PRS=$(gh pr list --state open --label "size: small" --json number --jq 'length')
+          
+          # Create report
+          cat > pr-report.md << EOF
+          # 🔀 Pull Request Report
+          
+          **Date:** $(date)
+          **Repository:** ${{ github.repository }}
+          
+          ## 📊 PR Statistics
+          
+          - **Open PRs:** $OPEN_PRS
+          - **Merged This Week:** $MERGED_THIS_WEEK
+          - **Closed This Week:** $CLOSED_THIS_WEEK
+          
+          ## 📏 PR Sizes
+          
+          - **Large PRs:** $LARGE_PRS
+          - **Medium PRs:** $MEDIUM_PRS
+          - **Small PRs:** $SMALL_PRS
+          
+          ## 📈 Trends
+          
+          - PRs merged this week: $MERGED_THIS_WEEK
+          - PRs closed this week: $CLOSED_THIS_WEEK
+          - Open PRs: $OPEN_PRS
+          
+          EOF
+          
+          cat pr-report.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  project-health-check:
+    name: 📊 Project Health Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📊 Analyze project health
+        run: |
+          echo "📊 Analyzing project health..."
+          
+          # Get repository statistics
+          STARS=$(gh api repos/${{ github.repository }} --jq '.stargazers_count')
+          FORKS=$(gh api repos/${{ github.repository }} --jq '.forks_count')
+          WATCHERS=$(gh api repos/${{ github.repository }} --jq '.watchers_count')
+          
+          # Get recent activity
+          RECENT_COMMITS=$(gh api repos/${{ github.repository }}/commits --jq 'length')
+          RECENT_ISSUES=$(gh issue list --state all --json number,createdAt --jq '[.[] | select(.createdAt > (now - 2592000))] | length')
+          RECENT_PRS=$(gh pr list --state all --json number,createdAt --jq '[.[] | select(.createdAt > (now - 2592000))] | length')
+          
+          # Get workflow status
+          WORKFLOW_RUNS=$(gh api repos/${{ github.repository }}/actions/runs --jq '.workflow_runs | length')
+          SUCCESSFUL_RUNS=$(gh api repos/${{ github.repository }}/actions/runs --jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+          
+          # Calculate success rate
+          if [ $WORKFLOW_RUNS -gt 0 ]; then
+            SUCCESS_RATE=$((SUCCESSFUL_RUNS * 100 / WORKFLOW_RUNS))
+          else
+            SUCCESS_RATE=0
+          fi
+          
+          # Create health report
+          cat > project-health-report.md << EOF
+          # 📊 Project Health Report
+          
+          **Date:** $(date)
+          **Repository:** ${{ github.repository }}
+          
+          ## 📈 Repository Metrics
+          
+          - **Stars:** $STARS
+          - **Forks:** $FORKS
+          - **Watchers:** $WATCHERS
+          
+          ## 🔄 Recent Activity (Last 30 Days)
+          
+          - **Commits:** $RECENT_COMMITS
+          - **Issues:** $RECENT_ISSUES
+          - **Pull Requests:** $RECENT_PRS
+          
+          ## 🚀 Workflow Health
+          
+          - **Total Runs:** $WORKFLOW_RUNS
+          - **Successful Runs:** $SUCCESSFUL_RUNS
+          - **Success Rate:** $SUCCESS_RATE%
+          
+          ## 📊 Health Score
+          
+          EOF
+          
+          # Calculate health score
+          HEALTH_SCORE=0
+          
+          if [ $SUCCESS_RATE -gt 90 ]; then
+            HEALTH_SCORE=$((HEALTH_SCORE + 30))
+          elif [ $SUCCESS_RATE -gt 70 ]; then
+            HEALTH_SCORE=$((HEALTH_SCORE + 20))
+          else
+            HEALTH_SCORE=$((HEALTH_SCORE + 10))
+          fi
+          
+          if [ $RECENT_COMMITS -gt 10 ]; then
+            HEALTH_SCORE=$((HEALTH_SCORE + 25))
+          elif [ $RECENT_COMMITS -gt 5 ]; then
+            HEALTH_SCORE=$((HEALTH_SCORE + 15))
+          else
+            HEALTH_SCORE=$((HEALTH_SCORE + 5))
+          fi
+          
+          if [ $RECENT_ISSUES -gt 0 ]; then
+            HEALTH_SCORE=$((HEALTH_SCORE + 20))
+          fi
+          
+          if [ $RECENT_PRS -gt 0 ]; then
+            HEALTH_SCORE=$((HEALTH_SCORE + 25))
+          fi
+          
+          echo "**Overall Health Score:** $HEALTH_SCORE/100" >> project-health-report.md
+          
+          if [ $HEALTH_SCORE -gt 80 ]; then
+            echo "**Status:** 🟢 Excellent" >> project-health-report.md
+          elif [ $HEALTH_SCORE -gt 60 ]; then
+            echo "**Status:** 🟡 Good" >> project-health-report.md
+          else
+            echo "**Status:** 🔴 Needs Attention" >> project-health-report.md
+          fi
+          
+          cat project-health-report.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📤 Upload health report
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-health-report-$(date +%Y%m%d)
+          path: project-health-report.md
+
+  project-management-summary:
+    name: 📋 Project Management Summary
+    runs-on: ubuntu-latest
+    needs: [manage-issues, manage-pull-requests, project-health-check]
+    if: always()
+    
+    steps:
+      - name: 📋 Generate project management summary
+        run: |
+          echo "📋 Generating project management summary..."
+          
+          cat > project-management-summary.md << 'EOF'
+          # 📋 Project Management Summary
+          
+          **Date:** $(date)
+          **Repository:** ${{ github.repository }}
+          
+          ## 📋 Management Tasks
+          
+          ### Issue Management
+          - **Status:** ${{ needs.manage-issues.result }}
+          - **Auto-labeling:** Enabled
+          - **Issue Reports:** Generated
+          
+          ### Pull Request Management
+          - **Status:** ${{ needs.manage-pull-requests.result }}
+          - **Auto-labeling:** Enabled
+          - **PR Reports:** Generated
+          
+          ### Project Health Check
+          - **Status:** ${{ needs.project-health-check.result }}
+          - **Health Metrics:** Analyzed
+          - **Health Score:** Calculated
+          
+          ## 📊 Overall Status
+          
+          EOF
+          
+          # Determine overall status
+          if [ "${{ needs.manage-issues.result }}" = "success" ] && [ "${{ needs.manage-pull-requests.result }}" = "success" ] && [ "${{ needs.project-health-check.result }}" = "success" ]; then
+            echo "✅ **All project management tasks completed successfully**" >> project-management-summary.md
+          else
+            echo "⚠️ **Some project management tasks failed** - check individual job results" >> project-management-summary.md
+          fi
+          
+          cat project-management-summary.md
+      
+      - name: 📤 Upload project management summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-management-summary-$(date +%Y%m%d)
+          path: project-management-summary.md
+      
+      - name: 📝 Project management summary
+        run: |
+          echo "## 📋 Project Management Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Task Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Issue Management:** ${{ needs.manage-issues.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Management:** ${{ needs.manage-pull-requests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Health Check:** ${{ needs.project-health-check.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Overall Status:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.manage-issues.result }}" = "success" ] && [ "${{ needs.manage-pull-requests.result }}" = "success" ] && [ "${{ needs.project-health-check.result }}" = "success" ]; then
+            echo "✅ **All project management tasks completed successfully**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Some project management tasks failed** - check individual job results" >> $GITHUB_STEP_SUMMARY
+          fi

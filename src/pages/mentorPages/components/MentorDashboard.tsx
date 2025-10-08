@@ -3,6 +3,10 @@ import { MentorMenteeProfile, MentorAvailability } from '../types';
 import { ViewBookingsModal } from './ViewBookingsModal';
 import { VerificationStatus, canAccessPlatform, isUnderReview, isRejected } from '../../../types/verification';
 import { VerificationService } from '../../../services/verificationService';
+import BannerWrapper from '../../../components/ui/BannerWrapper';
+import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
+import MenteeProgress from '../../../components/widgets/MenteeProgress';
+import MessagingWidget from '../../../components/widgets/MessagingWidget';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -181,9 +185,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   }
 
   return (
-    <>
-      {/* Dashboard Header */}
-      <div className="dashboard-header">
+    <BannerWrapper sectionId="mentor-dashboard" bannerType="element">
+      <>
+        {/* Dashboard Header */}
+        <div className="dashboard-header">
         <div className="dashboard-title">
           <h1>Mentor Dashboard</h1>
           <p>Find mentees who can benefit from your knowledge and experience</p>
@@ -417,6 +422,16 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           onCancelBooking={onCancelBooking}
         />
       )}
-    </>
+
+      {/* Resources Library Widget */}
+      <ResourcesLibrary />
+
+      {/* Mentee Progress Widget */}
+      <MenteeProgress />
+
+      {/* Messaging Widget */}
+      <MessagingWidget />
+      </>
+    </BannerWrapper>
   );
 };

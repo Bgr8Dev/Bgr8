@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { MentorBooking } from '../types/mentorTypes';
+import BannerWrapper from '../../../components/ui/BannerWrapper';
 import '../styles/ViewBookingsModal.css';
 
 interface ViewBookingsModalProps {
@@ -142,8 +143,9 @@ export const ViewBookingsModal: React.FC<ViewBookingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="view-bookings-modal-overlay" onClick={onClose}>
-      <div className="view-bookings-modal" onClick={(e) => e.stopPropagation()}>
+    <BannerWrapper sectionId="session-scheduler" bannerType="element">
+      <div className="view-bookings-modal-overlay" onClick={onClose}>
+        <div className="view-bookings-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>All Bookings</h2>
           <button className="close-btn" onClick={onClose}>×</button>
@@ -299,7 +301,8 @@ export const ViewBookingsModal: React.FC<ViewBookingsModalProps> = ({
             Close
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </BannerWrapper>
   );
 };

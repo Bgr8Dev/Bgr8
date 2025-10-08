@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaTimes, FaExternalLinkAlt, FaCalendarAlt } from 'react-icons/fa';
 import { getName, MentorMenteeProfile } from '../algorithm/matchUsers';
+import BannerWrapper from '../../../../components/ui/BannerWrapper';
 import './CalComModal.css';
 
 interface CalComModalProps {
@@ -13,8 +14,9 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
   if (!open || !mentor) return null;
 
   return (
-    <div className="calcom-modal-overlay" onClick={onClose}>
-      <div className="calcom-modal" onClick={e => e.stopPropagation()}>
+    <BannerWrapper sectionId="calcom-integration" bannerType="element">
+      <div className="calcom-modal-overlay" onClick={onClose}>
+        <div className="calcom-modal" onClick={e => e.stopPropagation()}>
         <div className="calcom-modal-header">
           <h3>
             <FaCalendarAlt /> Book with {getName(mentor)}
@@ -56,8 +58,9 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>
+    </BannerWrapper>
   );
 };
 

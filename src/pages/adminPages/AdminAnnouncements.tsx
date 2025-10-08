@@ -28,6 +28,7 @@ import {
 } from 'react-icons/fa';
 import { AnnouncementService, Announcement, AnnouncementAnalytics } from '../../services/announcementService';
 import { useAuth } from '../../hooks/useAuth';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import AnnouncementModal from '../../components/announcements/AnnouncementModal';
 import '../../styles/adminStyles/AdminAnnouncements.css';
 
@@ -288,7 +289,7 @@ const AdminAnnouncements: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="announcement-admin-announcements">
+      <BannerWrapper sectionId="announcements" className="announcement-admin-announcements">
         <div className="announcement-loading-container">
           <div className="announcement-loading-spinner">
             <FaSpinner className="announcement-spinner-icon" />
@@ -296,12 +297,12 @@ const AdminAnnouncements: React.FC = () => {
             <p>Setting up your announcement management workspace</p>
           </div>
         </div>
-      </div>
+      </BannerWrapper>
     );
   }
 
   return (
-    <div className="announcement-admin-announcements">
+    <BannerWrapper sectionId="announcements" className="announcement-admin-announcements">
       {/* Notification */}
       {notification && (
         <div className={`announcement-notification announcement-notification-${notification.type}`}>
@@ -670,7 +671,7 @@ const AdminAnnouncements: React.FC = () => {
         onSave={showCreateModal ? handleCreateAnnouncement : handleUpdateAnnouncement}
         onFormDataChange={setFormData}
       />
-    </div>
+    </BannerWrapper>
   );
 };
 

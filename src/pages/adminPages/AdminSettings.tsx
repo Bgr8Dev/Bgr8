@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle, FaFlag } from 'react-icons/fa';
 import PagePermissionsManager from '../../components/admin/settings/PagePermissionsManager';
 import BlueLocked from '../../components/admin/settings/BlueLocked';
+import BannerManagement from '../../components/admin/settings/BannerManagement';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import { PagePermissionsService } from '../../services/pagePermissionsService';
 import '../../styles/adminStyles/AdminSettings.css';
 
 export function AdminSettings() {
-  const [activeTab, setActiveTab] = useState<'permissions' | 'general'>('permissions');
+  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'banners'>('permissions');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
@@ -25,7 +27,8 @@ export function AdminSettings() {
   };
 
   return (
-    <div className="admin-settings">
+    <BannerWrapper sectionId="settings">
+      <div className="admin-settings">
       <div className="admin-settings-header">
         <h2>Admin Settings</h2>
         <p>Configure system settings and permissions</p>
@@ -45,6 +48,13 @@ export function AdminSettings() {
         >
           <FaCog />
           General Settings
+        </button>
+        <button
+          className={`admin-settings-tab ${activeTab === 'banners' ? 'active' : ''}`}
+          onClick={() => setActiveTab('banners')}
+        >
+          <FaFlag />
+          Banner Management
         </button>
       </div>
 
@@ -83,7 +93,14 @@ export function AdminSettings() {
                   <BlueLocked />
                 </div>
               )}
+
+              {activeTab === 'banners' && (
+                <div className="admin-settings-banners">
+                  <BannerManagement />
+                </div>
+              )}
             </div>
-    </div>
+      </div>
+    </BannerWrapper>
   );
 } 

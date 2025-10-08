@@ -1,0 +1,333 @@
+name: ♿ Accessibility Testing
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # Run accessibility tests weekly on Tuesdays at 5 AM UTC
+    - cron: '0 5 * * 2'
+  workflow_dispatch:
+
+jobs:
+  accessibility-test:
+    name: ♿ Accessibility Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: ♿ Install accessibility tools
+        run: |
+          echo "♿ Installing accessibility testing tools..."
+          npm install -g @axe-core/cli
+          npm install -g pa11y
+          npm install -g lighthouse
+      
+      - name: 🚀 Start application server
+        run: |
+          echo "🚀 Starting application server..."
+          npx serve dist -p 3000 &
+          echo $! > server.pid
+          sleep 10
+      
+      - name: ♿ Run axe-core accessibility tests
+        continue-on-error: true
+        run: |
+          echo "♿ Running axe-core accessibility tests..."
+          npx @axe-core/cli http://localhost:3000 --exit || echo "⚠️ Axe-core found accessibility issues (non-blocking)"
+          npx @axe-core/cli http://localhost:3000 --exit --reporter json > axe-results.json || true
+      
+      - name: ♿ Run pa11y accessibility tests
+        continue-on-error: true
+        run: |
+          echo "♿ Running pa11y accessibility tests..."
+          npx pa11y http://localhost:3000 --reporter json > pa11y-results.json || true
+          npx pa11y http://localhost:3000 --reporter cli || true
+      
+      - name: ♿ Run Lighthouse accessibility audit
+        continue-on-error: true
+        run: |
+          echo "♿ Running Lighthouse accessibility audit..."
+          lighthouse http://localhost:3000 \
+            --output=json \
+            --output-path=./lighthouse-accessibility.json \
+            --only-categories=accessibility \
+            --chrome-flags="--headless --no-sandbox --disable-gpu" || echo "⚠️ Lighthouse audit encountered issues (non-blocking)"
+      
+      - name: ♿ Run WAVE accessibility tests
+        continue-on-error: true
+        run: |
+          echo "♿ Running WAVE accessibility tests..."
+          # Install wave accessibility checker
+          npm install -g wave-accessibility-checker
+          
+          # Run WAVE tests
+          npx wave-accessibility-checker http://localhost:3000 --output wave-results.json || true
+      
+      - name: ♿ Run HTML validation
+        continue-on-error: true
+        run: |
+          echo "♿ Running HTML validation..."
+          # Install HTML validator
+          npm install -g html-validate
+          
+          # Validate HTML files
+          find dist -name "*.html" -exec html-validate {} \; > html-validation-results.txt || true
+      
+      - name: ♿ Run color contrast analysis
+        continue-on-error: true
+        run: |
+          echo "♿ Running color contrast analysis..."
+          # Install color contrast checker
+          npm install -g color-contrast-checker
+          
+          # Create a simple color contrast test
+          cat > color-contrast-test.js << 'EOF'
+          const ColorContrastChecker = require('color-contrast-checker');
+          const ccc = new ColorContrastChecker();
+          
+          // Test common color combinations
+          const tests = [
+            { fg: '#000000', bg: '#ffffff', level: 'AA' },
+            { fg: '#333333', bg: '#ffffff', level: 'AA' },
+            { fg: '#666666', bg: '#ffffff', level: 'AA' },
+            { fg: '#ffffff', bg: '#000000', level: 'AA' }
+          ];
+          
+          const results = tests.map(test => ({
+            ...test,
+            isValid: ccc.isLevelAA(test.fg, test.bg, test.level)
+          }));
+          
+          console.log(JSON.stringify(results, null, 2));
+          EOF
+          
+          node color-contrast-test.js > color-contrast-results.json
+      
+      - name: ♿ Run keyboard navigation tests
+        continue-on-error: true
+        run: |
+          echo "♿ Running keyboard navigation tests..."
+          # Install keyboard navigation tester
+          npm install -g @testing-library/jest-dom
+          
+          # Create keyboard navigation test
+          cat > keyboard-test.js << 'EOF'
+          // Simple keyboard navigation test
+          const puppeteer = require('puppeteer');
+          
+          async function testKeyboardNavigation() {
+            const browser = await puppeteer.launch({ headless: true });
+            const page = await browser.newPage();
+            
+            await page.goto('http://localhost:3000');
+            
+            // Test tab navigation
+            const tabbableElements = await page.$$eval('*', elements => {
+              return elements
+                .filter(el => el.tabIndex >= 0 || el.tagName === 'A' || el.tagName === 'BUTTON' || el.tagName === 'INPUT')
+                .map(el => ({
+                  tagName: el.tagName,
+                  text: el.textContent?.trim().substring(0, 50),
+                  tabIndex: el.tabIndex
+                }));
+            });
+            
+            console.log(JSON.stringify(tabbableElements, null, 2));
+            
+            await browser.close();
+          }
+          
+          testKeyboardNavigation().catch(console.error);
+          EOF
+          
+          # Install puppeteer if not available
+          npm install puppeteer || echo "Puppeteer not available"
+          node keyboard-test.js > keyboard-results.json || echo "Keyboard test not available"
+      
+      - name: 🛑 Stop application server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) || true
+            rm server.pid
+          fi
+      
+      - name: 📊 Upload accessibility results
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-results
+          path: |
+            axe-results.json
+            pa11y-results.json
+            lighthouse-accessibility.json
+            wave-results.json
+            html-validation-results.txt
+            color-contrast-results.json
+            keyboard-results.json
+      
+      - name: 📝 Accessibility Summary
+        run: |
+          echo "## ♿ Accessibility Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 🔍 Axe-core Results:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "axe-results.json" ]; then
+            violations=$(jq '.violations | length' axe-results.json)
+            passes=$(jq '.passes | length' axe-results.json)
+            echo "- Violations: $violations" >> $GITHUB_STEP_SUMMARY
+            echo "- Passes: $passes" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ♿ Pa11y Results:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "pa11y-results.json" ]; then
+            issues=$(jq '.issues | length' pa11y-results.json)
+            echo "- Issues found: $issues" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚡ Lighthouse Accessibility Score:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "lighthouse-accessibility.json" ]; then
+            score=$(jq '.categories.accessibility.score * 100' lighthouse-accessibility.json)
+            echo "- Accessibility Score: $score" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎨 Color Contrast:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "color-contrast-results.json" ]; then
+            echo "Color contrast analysis completed - check artifacts for details" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⌨️ Keyboard Navigation:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "keyboard-results.json" ]; then
+            echo "Keyboard navigation test completed - check artifacts for details" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  accessibility-compliance:
+    name: 📋 Accessibility Compliance Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: ♿ Run comprehensive accessibility check
+        continue-on-error: true
+        run: |
+          echo "♿ Running comprehensive accessibility compliance check..."
+          
+          # Start server
+          npx serve dist -p 3000 &
+          SERVER_PID=$!
+          sleep 10
+          
+          # Run all accessibility tests
+          npx @axe-core/cli http://localhost:3000 --exit --reporter json > compliance-axe.json || true
+          npx pa11y http://localhost:3000 --reporter json > compliance-pa11y.json || true
+          
+          # Kill server
+          kill $SERVER_PID
+      
+      - name: 📊 Check compliance status
+        continue-on-error: true
+        run: |
+          echo "📊 Checking accessibility compliance status..."
+          
+          # Check axe results
+          if [ -f "compliance-axe.json" ]; then
+            violations=$(jq '.violations | length' compliance-axe.json)
+            if [ "$violations" -gt 0 ]; then
+              echo "⚠️ Accessibility violations found: $violations (non-blocking)"
+              echo "ACCESSIBILITY_FAILED=true" >> $GITHUB_ENV
+            else
+              echo "✅ No accessibility violations found"
+              echo "ACCESSIBILITY_FAILED=false" >> $GITHUB_ENV
+            fi
+          fi
+          
+          # Check pa11y results
+          if [ -f "compliance-pa11y.json" ]; then
+            issues=$(jq '.issues | length' compliance-pa11y.json)
+            if [ "$issues" -gt 0 ]; then
+              echo "⚠️ Accessibility issues found: $issues (non-blocking)"
+              echo "ACCESSIBILITY_FAILED=true" >> $GITHUB_ENV
+            else
+              echo "✅ No accessibility issues found"
+            fi
+          fi
+      
+      - name: 📝 Create accessibility report
+        if: always()
+        run: |
+          echo "📝 Creating accessibility compliance report..."
+          
+          cat > accessibility-report.md << 'EOF'
+          # ♿ Accessibility Compliance Report
+          
+          ## Summary
+          This PR has been checked for accessibility compliance using multiple tools.
+          
+          ### Tools Used:
+          - axe-core (automated accessibility testing)
+          - pa11y (command-line accessibility testing)
+          - Lighthouse (accessibility audit)
+          
+          ### Results:
+          EOF
+          
+          if [ -f "compliance-axe.json" ]; then
+            violations=$(jq '.violations | length' compliance-axe.json)
+            echo "- **Axe-core violations:** $violations" >> accessibility-report.md
+          fi
+          
+          if [ -f "compliance-pa11y.json" ]; then
+            issues=$(jq '.issues | length' compliance-pa11y.json)
+            echo "- **Pa11y issues:** $issues" >> accessibility-report.md
+          fi
+          
+          echo "" >> accessibility-report.md
+          echo "### Recommendations:" >> accessibility-report.md
+          echo "- Review all violations and issues found" >> accessibility-report.md
+          echo "- Ensure proper ARIA labels and roles" >> accessibility-report.md
+          echo "- Test with keyboard navigation" >> accessibility-report.md
+          echo "- Verify color contrast ratios" >> accessibility-report.md
+          echo "- Test with screen readers" >> accessibility-report.md
+      
+      - name: 📊 Upload compliance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-compliance-report
+          path: |
+            accessibility-report.md
+            compliance-axe.json
+            compliance-pa11y.json

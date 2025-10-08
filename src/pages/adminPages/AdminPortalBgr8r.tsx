@@ -1,4 +1,5 @@
 import { FaGraduationCap, FaChalkboardTeacher, FaBook, FaUserGraduate, FaPlus, FaEdit, FaTrash, FaEye, FaDollarSign, FaUsers, FaUserCheck } from 'react-icons/fa';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import '../../styles/adminStyles/AdminPortalBgr8r.css';
 import { useState } from 'react';
 
@@ -45,17 +46,20 @@ export function AdminPortalBgr8r({ stats }: AdminPortalBgr8rProps) {
 
   if (loading) {
     return (
-      <div className="bgr8r-admin-container">
-        <div className="bgr8r-loading">
-          <FaGraduationCap className="bgr8r-spinner" />
-          <p>Loading education programs...</p>
+      <BannerWrapper sectionId="users">
+        <div className="bgr8r-admin-container">
+          <div className="bgr8r-loading">
+            <FaGraduationCap className="bgr8r-spinner" />
+            <p>Loading education programs...</p>
+          </div>
         </div>
-      </div>
+      </BannerWrapper>
     );
   }
 
   return (
-    <div className="bgr8r-admin-container">
+    <BannerWrapper sectionId="users">
+      <div className="bgr8r-admin-container">
       <div className="bgr8r-admin-header">
         <h2>Bgr8r Education</h2>
         <div className="bgr8r-admin-actions">
@@ -151,6 +155,7 @@ export function AdminPortalBgr8r({ stats }: AdminPortalBgr8rProps) {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </BannerWrapper>
   );
 } 

@@ -1,4 +1,4 @@
-import { MentorMenteeProfile, UserType, MENTOR, MENTEE, MatchResult } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { MentorMenteeProfile, UserType, MENTOR, MENTEE, MatchResult, getName } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { VerificationData } from '../../../types/verification';
 
 export const MENTEE_MIN_AGE = 15;
@@ -79,4 +79,4 @@ export interface FormProgress {
 }
 
 export type { MentorMenteeProfile, UserType, MatchResult };
-export { MENTOR, MENTEE };
+export { MENTOR, MENTEE, getName };

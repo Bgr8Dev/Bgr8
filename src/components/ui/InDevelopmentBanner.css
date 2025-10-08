@@ -1,0 +1,183 @@
+.in-development-banner {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  color: white;
+  padding: 20px 40px;
+  margin: 0;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%) rotate(-15deg);
+  z-index: 99999;
+  width: 200vw;
+  min-width: 200vw;
+  text-align: center;
+  /* Ensure consistent positioning across all pages */
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 3px solid #ff4500;
+  border-radius: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.in-development-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.1) 10px,
+    rgba(255, 255, 255, 0.1) 20px
+  );
+  animation: diagonal-stripes 3s linear infinite;
+}
+
+@keyframes diagonal-stripes {
+  0% {
+    transform: translateX(-100px);
+  }
+  100% {
+    transform: translateX(100px);
+  }
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.banner-icon {
+  font-size: 32px;
+  opacity: 0.9;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.banner-text {
+  flex: 1;
+  text-align: center;
+}
+
+.banner-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  font-weight: 900;
+  font-size: 24px;
+  margin-bottom: 8px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.warning-icon {
+  font-size: 20px;
+  opacity: 0.9;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+.banner-message {
+  font-size: 16px;
+  opacity: 0.95;
+  line-height: 1.4;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .in-development-banner {
+    padding: 15px 30px;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  
+  .banner-content {
+    gap: 15px;
+  }
+  
+  .banner-icon {
+    font-size: 24px;
+  }
+  
+  .banner-title {
+    font-size: 18px;
+    gap: 10px;
+  }
+  
+  .warning-icon {
+    font-size: 16px;
+  }
+  
+  .banner-message {
+    font-size: 14px;
+  }
+}
+
+/* Admin page specific styling - ensure it appears on all admin pages */
+.admin-page .in-development-banner {
+  /* Keep the fixed diagonal positioning */
+}
+
+/* Compact variant for smaller areas */
+.in-development-banner.compact {
+  padding: 12px 25px;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.in-development-banner.compact .banner-icon {
+  font-size: 20px;
+}
+
+.in-development-banner.compact .banner-title {
+  font-size: 16px;
+  gap: 8px;
+}
+
+.in-development-banner.compact .warning-icon {
+  font-size: 14px;
+}
+
+/* Global positioning override to ensure consistency across all pages */
+.in-development-banner {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translateX(-50%) translateY(-50%) rotate(-15deg) !important;
+  z-index: 99999 !important;
+  width: 200vw !important;
+  min-width: 200vw !important;
+}
+
+.in-development-banner.compact .banner-message {
+  font-size: 12px;
+}

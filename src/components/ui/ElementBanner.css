@@ -1,0 +1,165 @@
+/* Element Banner - For widget/element-level banners */
+.element-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.element-banner-inDevelopment {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.95), rgba(247, 147, 30, 0.95));
+  color: white;
+}
+
+.element-banner-comingSoon {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+  color: white;
+}
+
+.element-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.element-banner-icon {
+  font-size: 24px;
+  opacity: 0.9;
+  flex-shrink: 0;
+  animation: element-banner-pulse 2s infinite;
+}
+
+@keyframes element-banner-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.element-banner-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.element-banner-title {
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+.element-banner-message {
+  font-size: 14px;
+  opacity: 0.95;
+  line-height: 1.3;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .element-banner-content {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+  
+  .element-banner-icon {
+    font-size: 20px;
+  }
+  
+  .element-banner-title {
+    font-size: 14px;
+  }
+  
+  .element-banner-message {
+    font-size: 12px;
+  }
+}
+
+/* Compact variant for smaller elements */
+.element-banner.compact .element-banner-content {
+  padding: 8px 12px;
+  gap: 6px;
+}
+
+.element-banner.compact .element-banner-icon {
+  font-size: 16px;
+}
+
+.element-banner.compact .element-banner-title {
+  font-size: 12px;
+}
+
+.element-banner.compact .element-banner-message {
+  font-size: 10px;
+}
+
+/* Diagonal stripe overlay for more prominent effect */
+.element-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 8px,
+    rgba(255, 255, 255, 0.1) 8px,
+    rgba(255, 255, 255, 0.1) 16px
+  );
+  animation: element-banner-stripes 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes element-banner-stripes {
+  0% {
+    transform: translateX(-100px);
+  }
+  100% {
+    transform: translateX(100px);
+  }
+}
+
+/* Hover effect for interactive elements */
+.element-banner:hover .element-banner-content {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+/* Ensure the banner covers the entire parent element */
+.element-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}

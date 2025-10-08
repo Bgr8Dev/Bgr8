@@ -2,6 +2,7 @@ import React from 'react';
 import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaCalendarAlt } from 'react-icons/fa';
 import { MentorMenteeProfile, MentorAvailability } from '../types/mentorTypes';
 import MatchStrengthDisplay from '../../../components/widgets/MentorAlgorithm/MatchStrengthDisplay';
+import BannerWrapper from '../../../components/ui/BannerWrapper';
 import '../styles/MentorCard.css';
 
 interface MentorCardProps {
@@ -74,10 +75,11 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   };
 
   return (
-    <div 
-      className="mc-mentor-card"
-      onClick={handleCardClick}
-    >
+    <BannerWrapper sectionId="feedback-forms" bannerType="element">
+      <div 
+        className="mc-mentor-card"
+        onClick={handleCardClick}
+      >
       <div className="mc-mentor-card-header">
         <div className="mc-mentor-avatar">
           <img 
@@ -233,6 +235,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
           </button>
         )}
       </div>
-    </div>
+      </div>
+    </BannerWrapper>
   );
 };

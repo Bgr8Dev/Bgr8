@@ -9,14 +9,16 @@ import {
   FaSave,
   FaCheck,
   FaTimes,
-  FaInfoCircle
+  FaInfoCircle,
+  FaFlag
 } from 'react-icons/fa';
 import PagePermissionsManager from './PagePermissionsManager';
+import BannerManagement from './BannerManagement';
 import { PagePermissionsService } from '../../../services/pagePermissionsService';
 import './MobileAdminSettings.css';
 
 export function MobileAdminSettings() {
-  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'notifications' | 'security'>('permissions');
+  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'notifications' | 'security' | 'banners'>('permissions');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
   
@@ -73,7 +75,8 @@ export function MobileAdminSettings() {
     { id: 'permissions', label: 'Permissions', icon: <FaShieldAlt /> },
     { id: 'general', label: 'General', icon: <FaCog /> },
     { id: 'notifications', label: 'Notifications', icon: <FaBell /> },
-    { id: 'security', label: 'Security', icon: <FaLock /> }
+    { id: 'security', label: 'Security', icon: <FaLock /> },
+    { id: 'banners', label: 'Banners', icon: <FaFlag /> }
   ];
 
   return (
@@ -84,7 +87,7 @@ export function MobileAdminSettings() {
           <button
             key={tab.id}
             className={`settings-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id as 'permissions' | 'general' | 'notifications' | 'security')}
+            onClick={() => setActiveTab(tab.id as 'permissions' | 'general' | 'notifications' | 'security' | 'banners')}
           >
             {tab.icon}
             <span>{tab.label}</span>
@@ -408,6 +411,12 @@ export function MobileAdminSettings() {
                 Save Security Settings
               </button>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'banners' && (
+          <div className="settings-section">
+            <BannerManagement />
           </div>
         )}
       </div>

@@ -1,0 +1,101 @@
+.admin-banner-test {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.banner-test-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.banner-test-container h1 {
+  color: #2d3748;
+  margin-bottom: 16px;
+  font-size: 28px;
+}
+
+.banner-test-container > p {
+  color: #718096;
+  margin-bottom: 32px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.banner-examples {
+  margin-bottom: 32px;
+}
+
+.banner-examples h2 {
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-size: 22px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.example-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.example-section h3 {
+  color: #4a5568;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.instructions {
+  background: #edf2f7;
+  padding: 20px;
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+}
+
+.instructions h3 {
+  color: #2d3748;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.instructions ol {
+  color: #4a5568;
+  line-height: 1.6;
+  padding-left: 20px;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .admin-banner-test {
+    padding: 16px;
+  }
+  
+  .banner-test-container {
+    padding: 16px;
+  }
+  
+  .banner-test-container h1 {
+    font-size: 24px;
+  }
+  
+  .banner-examples h2 {
+    font-size: 20px;
+  }
+  
+  .example-section h3 {
+    font-size: 16px;
+  }
+  
+  .instructions {
+    padding: 16px;
+  }
+}

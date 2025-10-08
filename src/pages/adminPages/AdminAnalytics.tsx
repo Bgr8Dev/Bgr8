@@ -1,9 +1,10 @@
 import React from 'react';
+import BannerWrapper from '../../components/ui/BannerWrapper';
 import '../../styles/adminStyles/AdminAnalytics.css';
 
 const AdminAnalytics: React.FC = () => {
   return (
-    <div className="admin-analytics">
+    <BannerWrapper sectionId="analytics" className="admin-analytics">
       <div className="analytics-placeholder">
         <h1>Analytics Dashboard</h1>
         <h2>In Development 🚧</h2>
@@ -12,7 +13,7 @@ const AdminAnalytics: React.FC = () => {
           Please check back soon for advanced analytics and insights!
         </p>
       </div>
-    </div>
+    </BannerWrapper>
   );
 };
 

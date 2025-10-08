@@ -1,0 +1,32 @@
+/* Banner Wrapper Styles */
+.banner-wrapper {
+  position: relative;
+}
+
+/* Element wrapper - for widget-level banners */
+.banner-wrapper.element-wrapper {
+  position: relative;
+}
+
+/* Full page wrapper - for admin page banners */
+.banner-wrapper.full-page-wrapper {
+  position: relative;
+}
+
+/* Ensure element banners are positioned correctly within their containers */
+.element-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Make sure the element banner covers the entire parent element */
+.element-wrapper .element-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}

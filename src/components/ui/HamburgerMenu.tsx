@@ -77,7 +77,7 @@ export default function HamburgerMenu() {
           ) : (
             <div className="mobile-auth-buttons">
               <Link to="/signin" onClick={closeMenu} className="mobile-auth-button signin">Sign In</Link>
-              <Link to="/register" onClick={closeMenu} className="mobile-auth-button register">Register</Link>
+              <Link to="/signin?mode=register" onClick={closeMenu} className="mobile-auth-button register">Register</Link>
             </div>
           )}
         </div>

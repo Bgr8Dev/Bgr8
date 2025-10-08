@@ -1,0 +1,282 @@
+name: ⚡ Performance Testing
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # Run performance tests weekly on Sundays at 4 AM UTC
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    name: ⚡ Performance Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build application
+        run: npm run build
+      
+      - name: 📊 Bundle Size Analysis
+        run: |
+          echo "📊 Analyzing bundle size..."
+          # Install bundle analyzer
+          npm install -g webpack-bundle-analyzer
+          
+          # Analyze bundle size
+          npx vite-bundle-analyzer dist || echo "Bundle analyzer not available"
+          
+          # Get bundle size information
+          du -sh dist/ > bundle-size.txt
+          find dist -name "*.js" -exec du -sh {} \; >> bundle-size.txt
+          find dist -name "*.css" -exec du -sh {} \; >> bundle-size.txt
+          
+          echo "Bundle size analysis completed"
+      
+      - name: ⚡ Lighthouse Performance Test
+        run: |
+          echo "⚡ Running Lighthouse performance tests..."
+          
+          # Install Lighthouse
+          npm install -g lighthouse
+          
+          # Start a simple HTTP server
+          npx serve dist -p 3000 &
+          SERVER_PID=$!
+          
+          # Wait for server to start
+          sleep 10
+          
+          # Run Lighthouse
+          lighthouse http://localhost:3000 \
+            --output=json \
+            --output-path=./lighthouse-results.json \
+            --chrome-flags="--headless --no-sandbox --disable-gpu" \
+            --only-categories=performance,accessibility,best-practices,seo
+          
+          # Kill the server
+          kill $SERVER_PID
+          
+          echo "Lighthouse tests completed"
+      
+      - name: 🚀 Load Testing
+        run: |
+          echo "🚀 Running load tests..."
+          
+          # Install artillery for load testing
+          npm install -g artillery
+          
+          # Create a simple load test config
+          cat > load-test.yml << 'EOF'
+          config:
+            target: 'http://localhost:3000'
+            phases:
+              - duration: 30
+                arrivalRate: 5
+              - duration: 60
+                arrivalRate: 10
+              - duration: 30
+                arrivalRate: 5
+          scenarios:
+            - name: "Homepage Load Test"
+              flow:
+                - get:
+                    url: "/"
+          EOF
+          
+          # Start server and run load test
+          npx serve dist -p 3000 &
+          SERVER_PID=$!
+          sleep 5
+          
+          artillery run load-test.yml --output load-test-results.json || echo "Load test failed"
+          
+          # Kill the server
+          kill $SERVER_PID
+          
+          echo "Load testing completed"
+      
+      - name: 📊 Memory Usage Analysis
+        run: |
+          echo "📊 Analyzing memory usage..."
+          
+          # Start server and monitor memory
+          npx serve dist -p 3000 &
+          SERVER_PID=$!
+          sleep 5
+          
+          # Monitor memory usage
+          ps aux | grep serve > memory-usage.txt
+          free -h >> memory-usage.txt
+          
+          # Kill the server
+          kill $SERVER_PID
+          
+          echo "Memory analysis completed"
+      
+      - name: 🔍 Core Web Vitals Analysis
+        run: |
+          echo "🔍 Analyzing Core Web Vitals..."
+          
+          # Install web-vitals library
+          npm install web-vitals
+          
+          # Create a simple script to measure web vitals
+          cat > measure-vitals.js << 'EOF'
+          const { getCLS, getFID, getFCP, getLCP, getTTFB } = require('web-vitals');
+          
+          function sendToAnalytics(metric) {
+            console.log(JSON.stringify(metric));
+          }
+          
+          getCLS(sendToAnalytics);
+          getFID(sendToAnalytics);
+          getFCP(sendToAnalytics);
+          getLCP(sendToAnalytics);
+          getTTFB(sendToAnalytics);
+          EOF
+          
+          echo "Web vitals measurement script created"
+      
+      - name: 📊 Upload Performance Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            bundle-size.txt
+            lighthouse-results.json
+            load-test-results.json
+            memory-usage.txt
+            measure-vitals.js
+      
+      - name: 📝 Performance Summary
+        run: |
+          echo "## ⚡ Performance Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Bundle Analysis:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "bundle-size.txt" ]; then
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat bundle-size.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚡ Lighthouse Scores:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "lighthouse-results.json" ]; then
+            performance=$(jq '.categories.performance.score * 100' lighthouse-results.json)
+            accessibility=$(jq '.categories.accessibility.score * 100' lighthouse-results.json)
+            best_practices=$(jq '.categories.best-practices.score * 100' lighthouse-results.json)
+            seo=$(jq '.categories.seo.score * 100' lighthouse-results.json)
+            
+            echo "- Performance: $performance" >> $GITHUB_STEP_SUMMARY
+            echo "- Accessibility: $accessibility" >> $GITHUB_STEP_SUMMARY
+            echo "- Best Practices: $best_practices" >> $GITHUB_STEP_SUMMARY
+            echo "- SEO: $seo" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Load Test Results:" >> $GITHUB_STEP_SUMMARY
+          if [ -f "load-test-results.json" ]; then
+            echo "Load test completed - check artifacts for detailed results" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  performance-comparison:
+    name: 📈 Performance Comparison
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 🔍 Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🏗️ Build PR version
+        run: npm run build
+      
+      - name: 📊 Get baseline performance
+        run: |
+          echo "📊 Getting baseline performance from main branch..."
+          git checkout main
+          npm ci --legacy-peer-deps
+          npm run build
+          
+          # Get baseline bundle size
+          du -sh dist/ > baseline-bundle-size.txt
+          
+          # Run baseline lighthouse
+          npx serve dist -p 3000 &
+          SERVER_PID=$!
+          sleep 10
+          
+          lighthouse http://localhost:3000 \
+            --output=json \
+            --output-path=./baseline-lighthouse.json \
+            --chrome-flags="--headless --no-sandbox --disable-gpu"
+          
+          kill $SERVER_PID
+          
+          # Switch back to PR branch
+          git checkout ${{ github.head_ref }}
+      
+      - name: 📊 Compare performance
+        run: |
+          echo "📊 Comparing performance..."
+          
+          # Compare bundle sizes
+          echo "## Bundle Size Comparison" > performance-comparison.md
+          echo "" >> performance-comparison.md
+          echo "### Baseline (main branch):" >> performance-comparison.md
+          if [ -f "baseline-bundle-size.txt" ]; then
+            cat baseline-bundle-size.txt >> performance-comparison.md
+          fi
+          
+          echo "" >> performance-comparison.md
+          echo "### PR Branch:" >> performance-comparison.md
+          du -sh dist/ >> performance-comparison.md
+          
+          # Compare Lighthouse scores
+          echo "" >> performance-comparison.md
+          echo "## Lighthouse Score Comparison" >> performance-comparison.md
+          echo "" >> performance-comparison.md
+          
+          if [ -f "baseline-lighthouse.json" ] && [ -f "lighthouse-results.json" ]; then
+            baseline_perf=$(jq '.categories.performance.score * 100' baseline-lighthouse.json)
+            pr_perf=$(jq '.categories.performance.score * 100' lighthouse-results.json)
+            
+            echo "| Metric | Baseline | PR | Change |" >> performance-comparison.md
+            echo "|--------|----------|----|---------|" >> performance-comparison.md
+            echo "| Performance | $baseline_perf | $pr_perf | $((pr_perf - baseline_perf)) |" >> performance-comparison.md
+          fi
+      
+      - name: 📊 Upload comparison results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-comparison
+          path: |
+            performance-comparison.md
+            baseline-lighthouse.json
+            lighthouse-results.json

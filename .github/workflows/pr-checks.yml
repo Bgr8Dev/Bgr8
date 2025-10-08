@@ -1,0 +1,301 @@
+name: 🔍 Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ master, main, develop ]
+
+jobs:
+  pr-validation:
+    name: 🔍 PR Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🔍 Check PR title format
+        run: |
+          echo "🔍 Checking PR title format..."
+          TITLE="${{ github.event.pull_request.title }}"
+          
+          # Check if title follows conventional commits format
+          if [[ $TITLE =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+ ]]; then
+            echo "✅ PR title follows conventional commits format"
+          else
+            echo "❌ PR title should follow conventional commits format: type(scope): description"
+            echo "Examples: feat: add new feature, fix: resolve bug, docs: update documentation"
+            exit 1
+          fi
+      
+      - name: 🔍 Check PR description
+        run: |
+          echo "🔍 Checking PR description..."
+          DESCRIPTION="${{ github.event.pull_request.body }}"
+          
+          if [ ${#DESCRIPTION} -lt 50 ]; then
+            echo "❌ PR description should be at least 50 characters long"
+            echo "Current length: ${#DESCRIPTION}"
+            exit 1
+          else
+            echo "✅ PR description is sufficient length"
+          fi
+      
+      - name: 🔍 Check for breaking changes
+        run: |
+          echo "🔍 Checking for breaking changes..."
+          
+          # Check if PR title contains breaking change indicator
+          if [[ "${{ github.event.pull_request.title }}" =~ BREAKING\ CHANGE|! ]]; then
+            echo "⚠️ Breaking changes detected in PR title"
+            
+            # Check if description contains breaking change section
+            if [[ "${{ github.event.pull_request.body }}" =~ "BREAKING CHANGE"|"Breaking Changes" ]]; then
+              echo "✅ Breaking changes properly documented"
+            else
+              echo "❌ Breaking changes should be documented in PR description"
+              exit 1
+            fi
+          else
+            echo "✅ No breaking changes detected"
+          fi
+      
+      - name: 🔍 Check file changes
+        run: |
+          echo "🔍 Analyzing file changes..."
+          
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check for large files
+          LARGE_FILES=$(git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | xargs -I {} sh -c 'if [ -f "{}" ]; then size=$(stat -c%s "{}" 2>/dev/null || stat -f%z "{}" 2>/dev/null || echo 0); if [ $size -gt 1048576 ]; then echo "{} ($size bytes)"; fi; fi')
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "⚠️ Large files detected:"
+            echo "$LARGE_FILES"
+            echo "Consider using Git LFS for large files"
+          fi
+          
+          # Check for sensitive files
+          SENSITIVE_FILES=$(echo "$CHANGED_FILES" | grep -E "\.(env|key|pem|p12|pfx)$|secrets|credentials" || true)
+          if [ -n "$SENSITIVE_FILES" ]; then
+            echo "❌ Sensitive files detected in changes:"
+            echo "$SENSITIVE_FILES"
+            echo "Please remove sensitive files from the PR"
+            exit 1
+          fi
+      
+      - name: 🔍 Check commit messages
+        run: |
+          echo "🔍 Checking commit messages..."
+          
+          # Get commit messages
+          COMMITS=$(git log --pretty=format:"%s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          
+          echo "Commit messages:"
+          echo "$COMMITS"
+          
+          # Check if commits follow conventional format
+          while IFS= read -r commit; do
+            if [[ ! $commit =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+ ]]; then
+              echo "❌ Commit message doesn't follow conventional format: $commit"
+              echo "Format should be: type(scope): description"
+              exit 1
+            fi
+          done <<< "$COMMITS"
+          
+          echo "✅ All commit messages follow conventional format"
+
+  code-quality:
+    name: 📊 Code Quality
+    runs-on: ubuntu-latest
+    needs: pr-validation
+    
+    steps:
+      - name: 🔍 Checkout PR code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🔍 Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-results.json || true
+      
+      - name: 🔍 Run TypeScript check
+        run: npx tsc --noEmit --pretty false 2> typescript-results.txt || true
+      
+      - name: 🔍 Run Prettier check
+        run: npx prettier --check . --write false 2> prettier-results.txt || true
+      
+      - name: 📊 Generate code quality report
+        run: |
+          echo "📊 Generating code quality report..."
+          
+          cat > code-quality-report.md << 'EOF'
+          # 📊 Code Quality Report
+          
+          ## ESLint Results
+          EOF
+          
+          if [ -f "eslint-results.json" ]; then
+            ERROR_COUNT=$(jq '[.[] | .errorCount] | add' eslint-results.json)
+            WARNING_COUNT=$(jq '[.[] | .warningCount] | add' eslint-results.json)
+            echo "- Errors: $ERROR_COUNT" >> code-quality-report.md
+            echo "- Warnings: $WARNING_COUNT" >> code-quality-report.md
+          fi
+          
+          echo "" >> code-quality-report.md
+          echo "## TypeScript Check" >> code-quality-report.md
+          if [ -f "typescript-results.txt" ]; then
+            echo "TypeScript compilation check completed" >> code-quality-report.md
+          fi
+          
+          echo "" >> code-quality-report.md
+          echo "## Prettier Check" >> code-quality-report.md
+          if [ -f "prettier-results.txt" ]; then
+            echo "Code formatting check completed" >> code-quality-report.md
+          fi
+      
+      - name: 📊 Upload code quality results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-quality-results
+          path: |
+            code-quality-report.md
+            eslint-results.json
+            typescript-results.txt
+            prettier-results.txt
+
+  security-check:
+    name: 🛡️ Security Check
+    runs-on: ubuntu-latest
+    needs: pr-validation
+    
+    steps:
+      - name: 🔍 Checkout PR code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+      
+      - name: 🛡️ Run security audit
+        run: npm audit --audit-level=moderate --json > security-audit.json || true
+      
+      - name: 🔍 Check for secrets
+        run: |
+          echo "🔍 Checking for secrets in code..."
+          
+          # Check for common secret patterns
+          SECRET_PATTERNS=(
+            "password\s*=\s*['\"][^'\"]+['\"]"
+            "api[_-]?key\s*=\s*['\"][^'\"]+['\"]"
+            "secret\s*=\s*['\"][^'\"]+['\"]"
+            "token\s*=\s*['\"][^'\"]+['\"]"
+            "private[_-]?key\s*=\s*['\"][^'\"]+['\"]"
+          )
+          
+          SECRETS_FOUND=false
+          for pattern in "${SECRET_PATTERNS[@]}"; do
+            if grep -r -i -E "$pattern" --exclude-dir=node_modules --exclude-dir=.git .; then
+              echo "❌ Potential secret found matching pattern: $pattern"
+              SECRETS_FOUND=true
+            fi
+          done
+          
+          if [ "$SECRETS_FOUND" = true ]; then
+            echo "❌ Potential secrets detected in code. Please remove them."
+            exit 1
+          else
+            echo "✅ No secrets detected in code"
+          fi
+      
+      - name: 📊 Generate security report
+        run: |
+          echo "📊 Generating security report..."
+          
+          cat > security-report.md << 'EOF'
+          # 🛡️ Security Report
+          
+          ## Security Audit Results
+          EOF
+          
+          if [ -f "security-audit.json" ]; then
+            VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' security-audit.json)
+            HIGH_VULNS=$(jq '.metadata.vulnerabilities.high // 0' security-audit.json)
+            MODERATE_VULNS=$(jq '.metadata.vulnerabilities.moderate // 0' security-audit.json)
+            
+            echo "- Total vulnerabilities: $VULNERABILITIES" >> security-report.md
+            echo "- High severity: $HIGH_VULNS" >> security-report.md
+            echo "- Moderate severity: $MODERATE_VULNS" >> security-report.md
+          fi
+          
+          echo "" >> security-report.md
+          echo "## Secret Detection" >> security-report.md
+          echo "- No secrets detected in code" >> security-report.md
+      
+      - name: 📊 Upload security results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-results
+          path: |
+            security-report.md
+            security-audit.json
+
+  pr-summary:
+    name: 📝 PR Summary
+    runs-on: ubuntu-latest
+    needs: [pr-validation, code-quality, security-check]
+    if: always()
+    
+    steps:
+      - name: 📝 Generate PR summary
+        run: |
+          echo "## 🔍 Pull Request Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Checks:" >> $GITHUB_STEP_SUMMARY
+          echo "- PR title format validation" >> $GITHUB_STEP_SUMMARY
+          echo "- PR description validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Breaking changes check" >> $GITHUB_STEP_SUMMARY
+          echo "- File changes analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit message validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Code quality checks" >> $GITHUB_STEP_SUMMARY
+          echo "- Security audit" >> $GITHUB_STEP_SUMMARY
+          echo "- Secret detection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Validation:** ${{ needs.pr-validation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code Quality:** ${{ needs.code-quality.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security Check:** ${{ needs.security-check.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review any failed checks" >> $GITHUB_STEP_SUMMARY
+          echo "2. Address code quality issues" >> $GITHUB_STEP_SUMMARY
+          echo "3. Fix security vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          echo "4. Ensure all tests pass" >> $GITHUB_STEP_SUMMARY
+          echo "5. Request review from team members" >> $GITHUB_STEP_SUMMARY

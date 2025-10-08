@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaBullhorn, FaTimes, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle, FaGift } from 'react-icons/fa';
 import { AnnouncementService, Announcement } from '../../services/announcementService';
 import { useAuth } from '../../hooks/useAuth';
+import BannerWrapper from '../ui/BannerWrapper';
 import '../../styles/components/AnnouncementBanner.css';
 
 interface AnnouncementBannerProps {
@@ -329,7 +330,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={containerClasses}>
+    <BannerWrapper sectionId="announcements" bannerType="element">
+      <div className={containerClasses}>
       <div 
         className={bannerClasses}
         style={bannerStyles}
@@ -480,7 +482,8 @@ const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       </div>
 
       </div>
-    </div>
+      </div>
+    </BannerWrapper>
   );
 };
 
