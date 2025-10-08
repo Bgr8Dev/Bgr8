@@ -69,7 +69,6 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
               title="Test email server connection"
               icon={<FaInfoCircle />}
               text="Test Server"
-              testType="server"
               status={testStatuses.server}
             />
           </div>
@@ -91,7 +90,6 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
               title="Test email configuration and Zoho setup"
               icon={<FaExclamationTriangle />}
               text="Test Config"
-              testType="config"
               status={testStatuses.config}
             />
           </div>
@@ -113,7 +111,6 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
               title="Test Zoho API setup and permissions"
               icon={<FaRocket />}
               text="Test Zoho"
-              testType="zoho"
               status={testStatuses.zoho}
             />
           </div>
@@ -135,7 +132,6 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
               title={`Test email sending to ${currentDraftRecipients?.length ? currentDraftRecipients.join(', ') : 'first available recipient'}`}
               icon={<FaPaperPlane />}
               text={`Test Email ${currentDraftRecipients?.length ? `(${currentDraftRecipients.length})` : ''}`}
-              testType="email"
               status={testStatuses.email}
             />
           </div>

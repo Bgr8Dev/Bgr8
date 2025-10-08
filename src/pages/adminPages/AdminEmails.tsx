@@ -70,10 +70,10 @@ const AdminEmails: React.FC = () => {
   
   // Testing status states
   const [testStatuses, setTestStatuses] = useState({
-    server: { status: 'idle', message: '', timestamp: null as Date | null },
-    config: { status: 'idle', message: '', timestamp: null as Date | null },
-    zoho: { status: 'idle', message: '', timestamp: null as Date | null },
-    email: { status: 'idle', message: '', timestamp: null as Date | null }
+    server: { status: 'idle' as 'idle' | 'testing' | 'success' | 'error', message: '', timestamp: null as Date | null },
+    config: { status: 'idle' as 'idle' | 'testing' | 'success' | 'error', message: '', timestamp: null as Date | null },
+    zoho: { status: 'idle' as 'idle' | 'testing' | 'success' | 'error', message: '', timestamp: null as Date | null },
+    email: { status: 'idle' as 'idle' | 'testing' | 'success' | 'error', message: '', timestamp: null as Date | null }
   });
 
   // Initialize email service
@@ -721,7 +721,7 @@ const AdminEmails: React.FC = () => {
       {/* Tabs */}
       <EmailTabs
         activeTab={activeTab}
-        onTabChange={(tab: 'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'developer') => setActiveTab(tab)}
+        onTabChange={(tab) => setActiveTab(tab as 'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'developer')}
         templatesCount={templates.length}
         sentEmailsCount={sentEmails.length}
         draftsCount={drafts.length}
