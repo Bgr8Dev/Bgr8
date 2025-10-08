@@ -16,6 +16,7 @@ The Banner System provides a comprehensive way to display "In Development" and "
 - **Icon Control**: Toggle icons on/off for each banner
 - **Real-time Updates**: Changes are saved to Firebase and update immediately
 - **Responsive Design**: Banners work on both desktop and mobile
+- **Developer Mode**: Development banners are automatically hidden for users with the developer role
 
 ## Components
 
@@ -139,6 +140,16 @@ import ComingSoonBanner from '../../components/ui/ComingSoonBanner';
 - `*` - All pages on the site
 - `/dashboard` - Mentor dashboard only
 
+## Developer Mode
+
+The banner system includes special handling for users with the developer role:
+
+- **Automatic Hiding**: Users with the developer role will not see "In Development" banners
+- **Purpose**: Prevents confusion during testing and development work
+- **Role-Based**: Checks the user's role through the authentication system
+- **Coming Soon Banners**: Still visible to developers (only "In Development" banners are hidden)
+- **Testing**: To test the banner as a developer, you can temporarily remove your developer role or test with a non-developer account
+
 ## Styling
 
 ### CSS Classes
@@ -230,6 +241,7 @@ A test page is available at `/admin/banner-test` that demonstrates:
 2. Verify page path is added to target pages
 3. Check browser console for errors
 4. Ensure BannerProvider is wrapping the app
+5. Note: Development banners are hidden for users with the developer role
 
 ### Styling Issues
 1. Check CSS imports are correct
@@ -247,6 +259,7 @@ A test page is available at `/admin/banner-test` that demonstrates:
 - All changes are logged to Firebase
 - No sensitive data in banner messages
 - Page targeting is validated
+- Development banners are automatically hidden for users with the developer role to prevent confusion during testing
 
 ## Performance
 

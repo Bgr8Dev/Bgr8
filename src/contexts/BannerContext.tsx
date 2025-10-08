@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { firestore } from '../firebase/firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../hooks/useAuth';
+import { hasRole } from '../utils/userProfile';
 
 export interface BannerSettings {
   inDevelopment: {
@@ -42,6 +44,7 @@ const defaultBannerSettings: BannerSettings = {
 };
 
 export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { userProfile } = useAuth();
   const [bannerSettings, setBannerSettings] = useState<BannerSettings>(defaultBannerSettings);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,6 +99,11 @@ export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     if (!banner || typeof banner.enabled !== 'boolean') return false;
     
     if (!banner.enabled) return false;
+    
+    // Hide development banner for developers
+    if (bannerType === 'inDevelopment' && hasRole(userProfile, 'developer')) {
+      return false;
+    }
     
     // Check if the current page is in the pages array
     return banner.pages.includes(pagePath) || banner.pages.includes('*'); // '*' means show on all pages
