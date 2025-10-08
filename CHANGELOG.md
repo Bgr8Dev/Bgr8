@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.10.0] - 2025-10-08
+
+### ✨ Minor Release
+### ✨ Added New features and enhancements
+-  Add package-lock.json for GitHub Actions compatibility
+- ✨ Implement email configuration and API service integration
+- ✨ Add email server configuration and implementation
+- ✨ Enhance AdminEmails styles with new warning message and UI improvements
+- ✨ Add comprehensive email service setup and configuration documentation
+- ✨ Add README documentation for Bgr8 Email Server
+- ✨ Add codebase analysis report for Bgr8Website
+- ✨ Implement recipient deletion and keyboard shortcuts in RecipientSelector
+- ✨ Add notification system to RecipientSelector for user feedback
+- ✨ Enhance AdminEmails with Developer Tools and Testing Features
+- ✨ Introduce new email management components and enhance AdminEmails layout
+- ✨ Implement Email Preview Modal in ComposeTab
+- ✨ Add comprehensive GitHub workflows for project management, testing, security, and deployment
+- ✨ Add comprehensive coding standards and guidelines for project development
+- ✨ Implement Banner System for Admin Portal
+- ✨ Expand Banner Management with Home and Mentor Area Features
+- ✨ Add Mentee Progress and Resources Library Widgets
+- ✨ Enhance Dashboard and Integration Features
+
+### 🐛 Fixed Bug fixes and improvements
+- Fix deployment workflow and resolve linter errors
+
+### 📚 Documentation Documentation updates
+- 🗑️ Remove outdated documentation files for Admin Portal, Quick Reference, and Professionalization Roadmap
+- 🗑️ Remove outdated documentation files related to email service setup and styles
+
+### 🎨 Changed Code style and formatting changes
+- ✨ Update AdminEmails and RichTextEditor styles for improved UI consistency
+- ✨ Refactor Rich Text Editor styles for improved scoping and organization
+- ✨ Enhance Rich Text Editor with cursor position preservation and style improvements
+- ✨ Refactor RoleSelection component and styles for improved clarity and consistency
+- ✨ Refactor UserRoleBadge component styles for improved clarity and consistency
+- ✨ Refactor RoleManagement component and styles for improved clarity and consistency
+- ✨ Refactor RoleManagementModal styles and structure for enhanced clarity and user experience
+- ✨ Update AdminEmails.css to enhance email preview styles
+- ✨ Refactor RoleManagement styles for improved aesthetics and responsiveness
+- ✨ Enhance AdminEmails functionality and styles
+- ✨ Introduce comprehensive coding standards and guidelines for project development
+
+### 🔧 Changed Code refactoring and restructuring
+- ✨ Refactor RichTextEditor key handling for improved shortcut functionality
+- ✨ Refactor Banner System and Introduce Element Banners
+
+### 🔧 Changed Maintenance tasks and chores
+- ✨ Update email configuration and API service for production readiness
+- ✨ Update env.local.example with production and development configurations
+- ✨ Enhance email API and Zoho Mail service with improved type definitions and data structures
+- This isnt working yet but im going to bed and dont want people fucking with it
+- Update AdminEmails tab change handler for type safety
+- Enhance type safety in email components
+- ✨ Enhance SentTab with Search, Filter, and Sort Functionality
+- 🔧 Update HamburgerMenu to redirect registration link with query parameter
+- ✨ Integrate BannerWrapper Across Multiple Components
+- ✨ Introduce Messaging Widget for Enhanced Communication
+- ✨ Enhance Banner System with Developer Mode
+
+### 📦 Changed Dependency updates
+- ✨ Initialize email server with package.json and package-lock.json
+
+**Total Changes:** 46 commits
+**Code Changes:** +35,354 insertions, -4,788 deletions
+
+---
 ## [v0.10.0-Solar-Storm] - 2025-10-01
 
 ### 🔧 Pre-release
@@ -1108,6 +1175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.10.0]: https://github.com/Hum2a/B8/releases/tag/v0.10.0
 [v0.10.0-Solar-Storm]: https://github.com/Hum2a/B8/releases/tag/v0.10.0-Solar-Storm
 [v0.9.0]: https://github.com/Hum2a/B8/releases/tag/v0.9.0
 [v0.8.2]: https://github.com/Hum2a/B8/releases/tag/v0.8.2
