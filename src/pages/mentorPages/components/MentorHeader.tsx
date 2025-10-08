@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaSearch, FaEdit, FaUserFriends, FaCog } from 'react-icons/fa';
-import { MentorMenteeProfile, MENTOR } from '../types/mentorTypes';
+import { MentorMenteeProfile, MENTOR, getName } from '../types/mentorTypes';
 import '../styles/MentorHeader.css';
 
 interface MentorHeaderProps {
@@ -39,7 +39,7 @@ export const MentorHeader: React.FC<MentorHeaderProps> = ({
               <span className={`mheader-profile-role ${currentUserProfile.type === MENTOR ? 'mheader-mentor' : 'mheader-mentee'}`}>
                 {currentUserProfile.type === MENTOR ? 'Mentor' : 'Mentee'}
               </span>
-              <span className="mheader-profile-name">{currentUserProfile.name}</span>
+              <span className="mheader-profile-name">{getName(currentUserProfile)}</span>
             </div>
             <div className="mheader-profile-actions">
               <button onClick={onProfileEdit} className="mheader-profile-edit-btn" title="Edit your profile information" data-tooltip="Edit your profile information">
