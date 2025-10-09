@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useBanner } from '../../contexts/BannerContext';
 import { hasRole } from '../../utils/userProfile';
 import { 
   FaChevronLeft, 
@@ -164,14 +165,15 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
   onClose
 }) => {
   const { userProfile } = useAuth();
+  const { isVisible } = useBanner();
   const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState(0);
   const [showMobileMentorManagement, setShowMobileMentorManagement] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Define sections for mobile navigation
-  const sections = [
+  // Define sections for mobile navigation - filter by visibility
+  const allSections = [
     { id: 'users', name: 'Roles', icon: '👥' },
     { id: 'analytics', name: 'Analytics', icon: '📊' },
     { id: 'enquiries', name: 'Enquiries', icon: '📧' },
@@ -185,6 +187,9 @@ export const MobileAdminPortal: React.FC<MobileAdminPortalProps> = ({
     { id: 'announcements', name: 'Announcements', icon: '📢' },
     { id: 'settings', name: 'Settings', icon: '⚙️' }
   ];
+  
+  // Filter sections based on visibility
+  const sections = allSections.filter(section => isVisible(section.id));
 
   useEffect(() => {
     if (!hasRole(userProfile, 'admin')) {

@@ -37,6 +37,7 @@ const HOME_FEATURES = [
 // Mentor Area features configuration
 const MENTOR_AREA_FEATURES = [
   { featureId: 'mentor-dashboard', name: 'Mentor Dashboard', icon: <FaGraduationCap />, description: 'Main mentor control panel' },
+  { featureId: 'mentee-dashboard', name: 'Mentee Dashboard', icon: <FaUsers />, description: 'Main mentee control panel' },
   { featureId: 'profile-editor', name: 'Profile Editor', icon: <FaEdit />, description: 'Edit mentor profile information' },
   { featureId: 'session-scheduler', name: 'Session Scheduler', icon: <FaCalendar />, description: 'Schedule mentoring sessions' },
   { featureId: 'mentee-list', name: 'Mentee List', icon: <FaUsers />, description: 'View assigned mentees' },
