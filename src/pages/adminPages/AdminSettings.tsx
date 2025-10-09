@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle, FaFlag } from 'react-icons/fa';
+import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle, FaFlag, FaEye } from 'react-icons/fa';
 import PagePermissionsManager from '../../components/admin/settings/PagePermissionsManager';
 import BlueLocked from '../../components/admin/settings/BlueLocked';
 import BannerManagement from '../../components/admin/settings/BannerManagement';
+import VisibilityManagement from '../../components/admin/settings/VisibilityManagement';
 import BannerWrapper from '../../components/ui/BannerWrapper';
 import { PagePermissionsService } from '../../services/pagePermissionsService';
 import '../../styles/adminStyles/AdminSettings.css';
 
 export function AdminSettings() {
-  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'banners'>('permissions');
+  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'banners' | 'visibility'>('permissions');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
@@ -56,6 +57,13 @@ export function AdminSettings() {
           <FaFlag />
           Banner Management
         </button>
+        <button
+          className={`admin-settings-tab ${activeTab === 'visibility' ? 'active' : ''}`}
+          onClick={() => setActiveTab('visibility')}
+        >
+          <FaEye />
+          Visibility Control
+        </button>
       </div>
 
             <div className="admin-settings-content">
@@ -97,6 +105,12 @@ export function AdminSettings() {
               {activeTab === 'banners' && (
                 <div className="admin-settings-banners">
                   <BannerManagement />
+                </div>
+              )}
+
+              {activeTab === 'visibility' && (
+                <div className="admin-settings-visibility">
+                  <VisibilityManagement />
                 </div>
               )}
             </div>

@@ -11,6 +11,9 @@ interface BannerWrapperProps {
   sectionId?: string;
   className?: string;
   bannerType?: 'full-page' | 'element';
+  checkVisibility?: boolean;
+  showPlaceholder?: boolean;
+  placeholderMessage?: string;
 }
 
 export const BannerWrapper: React.FC<BannerWrapperProps> = ({
@@ -18,9 +21,12 @@ export const BannerWrapper: React.FC<BannerWrapperProps> = ({
   pagePath,
   sectionId,
   className = "",
-  bannerType = 'full-page'
+  bannerType = 'full-page',
+  checkVisibility = false,
+  showPlaceholder = false,
+  placeholderMessage = "This section is currently hidden."
 }) => {
-  const { shouldShowBanner, bannerSettings, isLoading } = useBanner();
+  const { shouldShowBanner, bannerSettings, isVisible, isLoading } = useBanner();
 
   if (isLoading) {
     return <div className={className}>{children}</div>;
@@ -32,8 +38,30 @@ export const BannerWrapper: React.FC<BannerWrapperProps> = ({
   const showInDevelopment = shouldShowBanner('inDevelopment', targetPath);
   const showComingSoon = shouldShowBanner('comingSoon', targetPath);
 
+  // Check visibility if enabled
+  const visible = checkVisibility ? isVisible(targetPath) : true;
+
   // Determine which banner component to use
   const useElementBanner = bannerType === 'element';
+
+  // Handle visibility check
+  if (checkVisibility && !visible) {
+    if (showPlaceholder) {
+      return (
+        <div className={className} style={{
+          padding: '20px',
+          textAlign: 'center',
+          color: '#718096',
+          background: '#f7fafc',
+          border: '1px dashed #cbd5e0',
+          borderRadius: '8px'
+        }}>
+          {placeholderMessage}
+        </div>
+      );
+    }
+    return null;
+  }
   
   return (
     <div className={`banner-wrapper ${className} ${useElementBanner ? 'element-wrapper' : 'full-page-wrapper'}`}>
