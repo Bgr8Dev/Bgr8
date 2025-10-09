@@ -4,6 +4,7 @@ import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
 import BannerWrapper from '../../components/ui/BannerWrapper';
+import VisibilityWrapper from '../../components/ui/VisibilityWrapper';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
 import InstagramFeed from '../../components/social/InstagramFeed';
@@ -58,8 +59,9 @@ export default function BGr8() {
       {isMobile ? <HamburgerMenu /> : <Navbar />}
 
       {/* Hero Section with Background Image */}
-      <BannerWrapper sectionId="hero-section" bannerType="element">
-        <section className="bgr8-hero">
+      <VisibilityWrapper sectionId="hero-section">
+        <BannerWrapper sectionId="hero-section" bannerType="element">
+          <section className="bgr8-hero">
           <div className="bgr8-hero-background">
             <div className="bgr8-hero-overlay">
               <div className="bgr8-hero-content">
@@ -89,7 +91,8 @@ export default function BGr8() {
             </div>
           </div>
         </section>
-      </BannerWrapper>
+        </BannerWrapper>
+      </VisibilityWrapper>
 
 
 
@@ -116,12 +119,14 @@ export default function BGr8() {
             community transformation.
           </p>
 
-          <BannerWrapper sectionId="cta-buttons" bannerType="element">
-            <div className="bgr8-cta-bar">
-              <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
-              <span className="bgr8-arrow">→</span>
-            </div>
-          </BannerWrapper>
+          <VisibilityWrapper sectionId="cta-buttons">
+            <BannerWrapper sectionId="cta-buttons" bannerType="element">
+              <div className="bgr8-cta-bar">
+                <span>START A MONTHLY DONATION TO HELP PROVIDE CRITICAL SUPPORT FROM THE FIRST SIGN OF NEED, TO FULL RECOVERY</span>
+                <span className="bgr8-arrow">→</span>
+              </div>
+            </BannerWrapper>
+          </VisibilityWrapper>
         </div>
       </section>
 
@@ -191,17 +196,18 @@ export default function BGr8() {
       </section>
 
       {/* Second Donation Section */}
-      <section className="bgr8-second-donation">
-        <div className="bgr8-second-donation-background">
-          <div className="bgr8-second-donation-overlay">
-            <div className="bgr8-second-donation-content">
-              <div className="bgr8-second-donation-text">
-                <h3>Donate to help provide critical support from the first sign of need, to full recovery</h3>
-                <button className="bgr8-second-donate-btn">DONATE NOW</button>
-              </div>
-              
-              {/* Second Donation Form */}
-              <BannerWrapper sectionId="donation-form" bannerType="element">
+      <VisibilityWrapper sectionId="donation-form">
+        <section className="bgr8-second-donation">
+          <div className="bgr8-second-donation-background">
+            <div className="bgr8-second-donation-overlay">
+              <div className="bgr8-second-donation-content">
+                <div className="bgr8-second-donation-text">
+                  <h3>Donate to help provide critical support from the first sign of need, to full recovery</h3>
+                  <button className="bgr8-second-donate-btn">DONATE NOW</button>
+                </div>
+                
+                {/* Second Donation Form */}
+                <BannerWrapper sectionId="donation-form" bannerType="element">
                 <div className="bgr8-donation-form bgr8-second-form">
                   <div className="bgr8-donation-header">
                     <span className="bgr8-donation-badge">BGR8 COMMUNITY FUND</span>
@@ -267,7 +273,8 @@ export default function BGr8() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      </VisibilityWrapper>
 
       {/* About Us Section */}
       <section className="bgr8-about-section">
@@ -409,8 +416,9 @@ export default function BGr8() {
       </section>
 
       {/* Instagram Section */}
-      <BannerWrapper sectionId="instagram-feed" bannerType="element">
-        <section className="bgr8-instagram-section">
+      <VisibilityWrapper sectionId="instagram-feed">
+        <BannerWrapper sectionId="instagram-feed" bannerType="element">
+          <section className="bgr8-instagram-section">
           <div className="bgr8-content-wrapper">
             <div className="bgr8-instagram-header">
               <h3>Follow Our Journey</h3>
@@ -424,7 +432,8 @@ export default function BGr8() {
             />
           </div>
         </section>
-      </BannerWrapper>
+        </BannerWrapper>
+      </VisibilityWrapper>
 
       {/* Discover More Section */}
       <section className="bgr8-discover-section">
@@ -455,9 +464,11 @@ export default function BGr8() {
         </div>
       </section>
 
-      <BannerWrapper sectionId="footer" bannerType="element">
-        <Footer />
-      </BannerWrapper>
+      <VisibilityWrapper sectionId="footer">
+        <BannerWrapper sectionId="footer" bannerType="element">
+          <Footer />
+        </BannerWrapper>
+      </VisibilityWrapper>
     </div>
   );
 }

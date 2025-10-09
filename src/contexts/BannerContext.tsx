@@ -19,10 +19,17 @@ export interface BannerSettings {
   };
 }
 
+export interface VisibilitySettings {
+  hiddenSections: string[];
+}
+
 interface BannerContextType {
   bannerSettings: BannerSettings;
   updateBannerSettings: (settings: Partial<BannerSettings>) => Promise<void>;
   shouldShowBanner: (bannerType: 'inDevelopment' | 'comingSoon', pagePath: string) => boolean;
+  visibilitySettings: VisibilitySettings;
+  updateVisibilitySettings: (settings: VisibilitySettings) => Promise<void>;
+  isVisible: (sectionId: string) => boolean;
   isLoading: boolean;
 }
 
@@ -43,13 +50,19 @@ const defaultBannerSettings: BannerSettings = {
   }
 };
 
+const defaultVisibilitySettings: VisibilitySettings = {
+  hiddenSections: []
+};
+
 export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { userProfile } = useAuth();
   const [bannerSettings, setBannerSettings] = useState<BannerSettings>(defaultBannerSettings);
+  const [visibilitySettings, setVisibilitySettings] = useState<VisibilitySettings>(defaultVisibilitySettings);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
+    // Subscribe to banner settings
+    const unsubscribeBanner = onSnapshot(
       doc(firestore, 'adminSettings', 'bannerSettings'),
       async (docSnapshot) => {
         if (docSnapshot.exists()) {
@@ -76,7 +89,36 @@ export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
     );
 
-    return () => unsubscribe();
+    // Subscribe to visibility settings
+    const unsubscribeVisibility = onSnapshot(
+      doc(firestore, 'adminSettings', 'visibilitySettings'),
+      async (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data() as VisibilitySettings;
+          setVisibilitySettings(data);
+        } else {
+          // Initialize with default settings if document doesn't exist
+          try {
+            await setDoc(doc(firestore, 'adminSettings', 'visibilitySettings'), defaultVisibilitySettings);
+            setVisibilitySettings(defaultVisibilitySettings);
+          } catch (error) {
+            console.error('Error creating visibility settings document:', error);
+            // Still set default settings locally even if Firebase fails
+            setVisibilitySettings(defaultVisibilitySettings);
+          }
+        }
+      },
+      (error) => {
+        console.error('Error fetching visibility settings:', error);
+        // Set default settings on error
+        setVisibilitySettings(defaultVisibilitySettings);
+      }
+    );
+
+    return () => {
+      unsubscribeBanner();
+      unsubscribeVisibility();
+    };
   }, []);
 
   const updateBannerSettings = async (settings: Partial<BannerSettings>) => {
@@ -88,6 +130,18 @@ export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       console.error('Error updating banner settings:', error);
       // Still update local state even if Firebase fails
       setBannerSettings(prev => ({ ...prev, ...settings }));
+      throw error;
+    }
+  };
+
+  const updateVisibilitySettings = async (settings: VisibilitySettings) => {
+    try {
+      await setDoc(doc(firestore, 'adminSettings', 'visibilitySettings'), settings);
+      setVisibilitySettings(settings);
+    } catch (error) {
+      console.error('Error updating visibility settings:', error);
+      // Still update local state even if Firebase fails
+      setVisibilitySettings(settings);
       throw error;
     }
   };
@@ -109,11 +163,24 @@ export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return banner.pages.includes(pagePath) || banner.pages.includes('*'); // '*' means show on all pages
   };
 
+  const isVisible = (sectionId: string): boolean => {
+    // Developers can always see everything
+    if (hasRole(userProfile, 'developer')) {
+      return true;
+    }
+    
+    // Check if the section is in the hidden sections array
+    return !visibilitySettings.hiddenSections.includes(sectionId);
+  };
+
   return (
     <BannerContext.Provider value={{
       bannerSettings,
       updateBannerSettings,
       shouldShowBanner,
+      visibilitySettings,
+      updateVisibilitySettings,
+      isVisible,
       isLoading
     }}>
       {children}

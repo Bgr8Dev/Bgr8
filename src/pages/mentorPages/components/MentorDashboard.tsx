@@ -185,7 +185,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   }
 
   return (
-    <BannerWrapper sectionId="mentor-dashboard" bannerType="element">
+    <BannerWrapper sectionId="mentor-dashboard" bannerType="element" checkVisibility={true}>
       <>
         {/* Dashboard Header */}
         <div className="dashboard-header">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { usePagePermissions } from '../hooks/usePagePermissions';
+import { useBanner } from '../contexts/BannerContext';
 import { hasRole } from '../utils/userProfile';
 import { FaUsers, FaChartBar, FaCog, FaArrowLeft, FaEnvelope, FaChalkboardTeacher, FaComments, FaCalendarAlt, FaUserCheck, FaBug, FaHandshake, FaMailBulk, FaBullhorn, FaInstagram } from 'react-icons/fa';
 import '../styles/adminStyles/AdminPortal.css';
@@ -26,6 +27,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 export default function AdminPortal() {
   const { userProfile } = useAuth();
   const { getAccessiblePages, canAccessPage, loading: permissionsLoading } = usePagePermissions();
+  const { isVisible } = useBanner();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState('users');
@@ -89,54 +91,56 @@ export default function AdminPortal() {
           {permissionsLoading ? (
             <div className="admin-nav-loading">Loading navigation...</div>
           ) : (
-            getAccessiblePages().map((page) => {
-              const iconMap: Record<string, React.ComponentType> = {
-                'users': FaUsers,
-                'analytics': FaChartBar,
-                'enquiries': FaEnvelope,
-                'mentors': FaChalkboardTeacher,
-                'verification': FaUserCheck,
-                'feedback': FaComments,
-                'testing-feedback': FaBug,
-                'sessions': FaCalendarAlt,
-                'ambassadors': FaHandshake,
-                'emails': FaMailBulk,
-                'announcements': FaBullhorn,
-                'instagram': FaInstagram,
-                'settings': FaCog
-              };
-              
-              const IconComponent = iconMap[page.pageId];
-              
-              return (
-                <button 
-                  key={page.pageId}
-                  className={`admin-nav-item ${activeSection === page.pageId ? 'active' : ''}`}
-                  onClick={() => setActiveSection(page.pageId)}
-                  title={page.description}
-                >
-                  {IconComponent && <IconComponent />} {page.pageName}
-                </button>
-              );
-            })
+            getAccessiblePages()
+              .filter((page) => isVisible(page.pageId)) // Filter out hidden sections
+              .map((page) => {
+                const iconMap: Record<string, React.ComponentType> = {
+                  'users': FaUsers,
+                  'analytics': FaChartBar,
+                  'enquiries': FaEnvelope,
+                  'mentors': FaChalkboardTeacher,
+                  'verification': FaUserCheck,
+                  'feedback': FaComments,
+                  'testing-feedback': FaBug,
+                  'sessions': FaCalendarAlt,
+                  'ambassadors': FaHandshake,
+                  'emails': FaMailBulk,
+                  'announcements': FaBullhorn,
+                  'instagram': FaInstagram,
+                  'settings': FaCog
+                };
+                
+                const IconComponent = iconMap[page.pageId];
+                
+                return (
+                  <button 
+                    key={page.pageId}
+                    className={`admin-nav-item ${activeSection === page.pageId ? 'active' : ''}`}
+                    onClick={() => setActiveSection(page.pageId)}
+                    title={page.description}
+                  >
+                    {IconComponent && <IconComponent />} {page.pageName}
+                  </button>
+                );
+              })
           )}
         </div>
       </div>
 
       <div className="admin-content">
-        {canAccessPage('users') && activeSection === 'users' && <RoleManagement />}
-        {canAccessPage('analytics') && activeSection === 'analytics' && <AdminAnalytics />}
-        {canAccessPage('enquiries') && activeSection === 'enquiries' && <AdminEnquiries />}
-        {canAccessPage('mentors') && activeSection === 'mentors' && <MentorManagement />}
-        {canAccessPage('verification') && activeSection === 'verification' && <AdminMentorVerification />}
-        {canAccessPage('feedback') && activeSection === 'feedback' && <FeedbackAnalytics />}
-        {canAccessPage('testing-feedback') && activeSection === 'testing-feedback' && <AdminTestingFeedback />}
-        {canAccessPage('sessions') && activeSection === 'sessions' && <SessionsManagement />}
-        {canAccessPage('ambassadors') && activeSection === 'ambassadors' && <AmbassadorApplications />}
-        {canAccessPage('emails') && activeSection === 'emails' && <AdminEmails />}
-        {canAccessPage('announcements') && activeSection === 'announcements' && <AdminAnnouncements />}
-        {canAccessPage('instagram') && activeSection === 'instagram' && <AdminInstagram />}
-        {canAccessPage('settings') && activeSection === 'settings' && <AdminSettings />}
+        {canAccessPage('users') && activeSection === 'users' && isVisible('users') && <RoleManagement />}
+        {canAccessPage('analytics') && activeSection === 'analytics' && isVisible('analytics') && <AdminAnalytics />}
+        {canAccessPage('enquiries') && activeSection === 'enquiries' && isVisible('enquiries') && <AdminEnquiries />}
+        {canAccessPage('mentors') && activeSection === 'mentors' && isVisible('mentors') && <MentorManagement />}
+        {canAccessPage('verification') && activeSection === 'verification' && isVisible('verification') && <AdminMentorVerification />}
+        {canAccessPage('feedback') && activeSection === 'feedback' && isVisible('feedback') && <FeedbackAnalytics />}
+        {canAccessPage('testing-feedback') && activeSection === 'testing-feedback' && isVisible('testing-feedback') && <AdminTestingFeedback />}
+        {canAccessPage('sessions') && activeSection === 'sessions' && isVisible('sessions') && <SessionsManagement />}
+        {canAccessPage('ambassadors') && activeSection === 'ambassadors' && isVisible('ambassadors') && <AmbassadorApplications />}
+        {canAccessPage('emails') && activeSection === 'emails' && isVisible('emails') && <AdminEmails />}
+        {canAccessPage('announcements') && activeSection === 'announcements' && isVisible('announcements') && <AdminAnnouncements />}
+        {canAccessPage('instagram') && activeSection === 'instagram' && isVisible('instagram') && <AdminInstagram />}
+        {canAccessPage('settings') && activeSection === 'settings' && isVisible('settings') && <AdminSettings />}
       </div>
     </div>
   );

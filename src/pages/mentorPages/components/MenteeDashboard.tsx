@@ -71,7 +71,7 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
   }, [currentUser, userProfile]);
 
   return (
-    <BannerWrapper sectionId="mentee-dashboard" bannerType="element">
+    <BannerWrapper sectionId="mentee-dashboard" bannerType="element" checkVisibility={true}>
       <>
         {/* Dashboard Header */}
         <div className="dashboard-header">
