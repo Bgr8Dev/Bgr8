@@ -752,21 +752,36 @@ export default function MentorManagement() {
       await Promise.all(availabilityDeletions);
       
       // Delete all bookings for these users (as mentors or mentees)
-      const mentorBookingsQuery = query(
-        collection(firestore, 'bookings'),
-        where('mentorId', 'in', selectedIds)
-      );
-      const mentorBookingsSnapshot = await getDocs(mentorBookingsQuery);
-      const mentorBookingDeletions = mentorBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(mentorBookingDeletions);
+      // Firebase 'in' queries are limited to 10 items, so we need to batch them
+      const batchSize = 10;
+      const batches = [];
       
-      const menteeBookingsQuery = query(
-        collection(firestore, 'bookings'),
-        where('menteeId', 'in', selectedIds)
-      );
-      const menteeBookingsSnapshot = await getDocs(menteeBookingsQuery);
-      const menteeBookingDeletions = menteeBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(menteeBookingDeletions);
+      for (let i = 0; i < selectedIds.length; i += batchSize) {
+        const batch = selectedIds.slice(i, i + batchSize);
+        batches.push(batch);
+      }
+      
+      // Delete mentor bookings in batches
+      for (const batch of batches) {
+        const mentorBookingsQuery = query(
+          collection(firestore, 'bookings'),
+          where('mentorId', 'in', batch)
+        );
+        const mentorBookingsSnapshot = await getDocs(mentorBookingsQuery);
+        const mentorBookingDeletions = mentorBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(mentorBookingDeletions);
+      }
+      
+      // Delete mentee bookings in batches
+      for (const batch of batches) {
+        const menteeBookingsQuery = query(
+          collection(firestore, 'bookings'),
+          where('menteeId', 'in', batch)
+        );
+        const menteeBookingsSnapshot = await getDocs(menteeBookingsQuery);
+        const menteeBookingDeletions = menteeBookingsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(menteeBookingDeletions);
+      }
       
       // Update local state
       setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
