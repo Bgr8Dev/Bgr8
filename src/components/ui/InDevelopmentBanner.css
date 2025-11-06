@@ -143,9 +143,6 @@
 }
 
 /* Admin page specific styling - ensure it appears on all admin pages */
-.admin-page .in-development-banner {
-  /* Keep the fixed diagonal positioning */
-}
 
 /* Compact variant for smaller areas */
 .in-development-banner.compact {

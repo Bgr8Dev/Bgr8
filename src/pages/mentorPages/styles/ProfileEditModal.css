@@ -157,11 +157,6 @@
   }
 }
 
-/* Content animation classes - removed for immediate appearance */
-.pem-modal-content-animated {
-  /* Removed delayed animation for immediate content appearance */
-}
-
 /* Loading state during animation */
 .pem-modal-loading {
   opacity: 0;

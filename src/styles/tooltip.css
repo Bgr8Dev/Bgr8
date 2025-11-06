@@ -158,10 +158,12 @@
   vertical-align: baseline;
 }
 
-/* Debug: Add a border to see tooltip container boundaries */
+/* Debug: Add a border to see tooltip container boundaries 
+Uncomment for debugging
 .tooltip-container {
-  /* border: 1px dashed red; /* Uncomment for debugging */
+  border: 1px dashed red;
 }
+*/
 
 /* Container constraints for tooltips */
 .settings-section {

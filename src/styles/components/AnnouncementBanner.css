@@ -383,10 +383,6 @@
   animation: announcement-fade-in 2s ease-in-out;
 }
 
-.announcement-slide {
-  /* Slide animation is now handled by container */
-}
-
 .announcement-bounce {
   animation: announcement-bounce-in 0.8s ease-out;
 }

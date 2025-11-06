@@ -153,9 +153,6 @@
 }
 
 /* Admin page specific styling - ensure it appears on all admin pages */
-.admin-page .coming-soon-banner {
-  /* Keep the fixed diagonal positioning */
-}
 
 /* Compact variant for smaller areas */
 .coming-soon-banner.compact {

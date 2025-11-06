@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { BannerProvider } from '../../../contexts/BannerContext';
 import BannerManagement from './BannerManagement';
 
@@ -47,20 +48,20 @@ describe('BannerManagement', () => {
     );
 
     // Should show loading initially
-    expect(screen.getByText('Loading banner settings...')).toBeInTheDocument();
+    expect(screen.getByText('Loading banner settings...')).toBeTruthy();
 
     // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.queryByText('Loading banner settings...')).not.toBeInTheDocument();
+      expect(screen.queryByText('Loading banner settings...')).toBeNull();
     });
 
     // Should show first time setup notice
-    expect(screen.getByText(/Welcome! This is your first time setting up banners/)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome! This is your first time setting up banners/)).toBeTruthy();
 
     // Should show banner management interface
-    expect(screen.getByText('Banner Management')).toBeInTheDocument();
-    expect(screen.getByText('In Development Banner')).toBeInTheDocument();
-    expect(screen.getByText('Coming Soon Banner')).toBeInTheDocument();
+    expect(screen.getByText('Banner Management')).toBeTruthy();
+    expect(screen.getByText('In Development Banner')).toBeTruthy();
+    expect(screen.getByText('Coming Soon Banner')).toBeTruthy();
   });
 
   it('allows toggling banner settings', async () => {
@@ -81,7 +82,7 @@ describe('BannerManagement', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText('Loading banner settings...')).not.toBeInTheDocument();
+      expect(screen.queryByText('Loading banner settings...')).toBeNull();
     });
 
     // Find and click the toggle for In Development banner
@@ -89,6 +90,6 @@ describe('BannerManagement', () => {
     fireEvent.click(inDevToggle);
 
     // Should show save button
-    expect(screen.getByText('Save Banner Settings')).toBeInTheDocument();
+    expect(screen.getByText('Save Banner Settings')).toBeTruthy();
   });
 });
