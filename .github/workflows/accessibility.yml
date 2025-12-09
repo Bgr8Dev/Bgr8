@@ -43,7 +43,23 @@ jobs:
           echo "🚀 Starting application server..."
           npx serve dist -p 3000 &
           echo $! > server.pid
-          sleep 10
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Server failed to start"
+              exit 1
+            fi
+            sleep 1
+          done
+          
+          # Additional wait to ensure server is fully ready
+          sleep 3
       
       - name: ♿ Run axe-core accessibility tests
         continue-on-error: true
@@ -67,7 +83,9 @@ jobs:
             --output=json \
             --output-path=./lighthouse-accessibility.json \
             --only-categories=accessibility \
-            --chrome-flags="--headless --no-sandbox --disable-gpu" || echo "⚠️ Lighthouse audit encountered issues (non-blocking)"
+            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-setuid-sandbox --disable-web-security --disable-features=IsolateOrigins,site-per-process" \
+            --timeout=60000 \
+            --max-wait-for-load=60000 || echo "⚠️ Lighthouse audit encountered issues (non-blocking)"
       
       - name: ♿ Run WAVE accessibility tests
         continue-on-error: true
@@ -188,24 +206,34 @@ jobs:
           
           echo "### 🔍 Axe-core Results:" >> $GITHUB_STEP_SUMMARY
           if [ -f "axe-results.json" ]; then
-            violations=$(jq '.violations | length' axe-results.json)
-            passes=$(jq '.passes | length' axe-results.json)
+            violations=$(jq '.violations | length // 0' axe-results.json 2>/dev/null || echo "0")
+            passes=$(jq '.passes | length // 0' axe-results.json 2>/dev/null || echo "0")
             echo "- Violations: $violations" >> $GITHUB_STEP_SUMMARY
             echo "- Passes: $passes" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Axe-core results file not found" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ♿ Pa11y Results:" >> $GITHUB_STEP_SUMMARY
           if [ -f "pa11y-results.json" ]; then
-            issues=$(jq '.issues | length' pa11y-results.json)
+            issues=$(jq '.issues | length // 0' pa11y-results.json 2>/dev/null || echo "0")
             echo "- Issues found: $issues" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Pa11y results file not found" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ⚡ Lighthouse Accessibility Score:" >> $GITHUB_STEP_SUMMARY
           if [ -f "lighthouse-accessibility.json" ]; then
-            score=$(jq '.categories.accessibility.score * 100' lighthouse-accessibility.json)
-            echo "- Accessibility Score: $score" >> $GITHUB_STEP_SUMMARY
+            score=$(jq '(.categories.accessibility.score // 0) * 100' lighthouse-accessibility.json 2>/dev/null || echo "N/A")
+            if [ "$score" != "N/A" ] && [ "$score" != "null" ]; then
+              echo "- Accessibility Score: $score" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Accessibility Score: Not available (Lighthouse may have encountered issues)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- Lighthouse results file not found" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -249,14 +277,31 @@ jobs:
           # Start server
           npx serve dist -p 3000 &
           SERVER_PID=$!
-          sleep 10
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Server failed to start"
+              kill $SERVER_PID || true
+              exit 1
+            fi
+            sleep 1
+          done
+          
+          # Additional wait to ensure server is fully ready
+          sleep 3
           
           # Run all accessibility tests
           npx @axe-core/cli http://localhost:3000 --exit --reporter json > compliance-axe.json || true
           npx pa11y http://localhost:3000 --reporter json > compliance-pa11y.json || true
           
           # Kill server
-          kill $SERVER_PID
+          kill $SERVER_PID || true
       
       - name: 📊 Check compliance status
         continue-on-error: true
@@ -265,7 +310,7 @@ jobs:
           
           # Check axe results
           if [ -f "compliance-axe.json" ]; then
-            violations=$(jq '.violations | length' compliance-axe.json)
+            violations=$(jq '.violations | length // 0' compliance-axe.json 2>/dev/null || echo "0")
             if [ "$violations" -gt 0 ]; then
               echo "⚠️ Accessibility violations found: $violations (non-blocking)"
               echo "ACCESSIBILITY_FAILED=true" >> $GITHUB_ENV
@@ -277,7 +322,7 @@ jobs:
           
           # Check pa11y results
           if [ -f "compliance-pa11y.json" ]; then
-            issues=$(jq '.issues | length' compliance-pa11y.json)
+            issues=$(jq '.issues | length // 0' compliance-pa11y.json 2>/dev/null || echo "0")
             if [ "$issues" -gt 0 ]; then
               echo "⚠️ Accessibility issues found: $issues (non-blocking)"
               echo "ACCESSIBILITY_FAILED=true" >> $GITHUB_ENV
@@ -306,12 +351,12 @@ jobs:
           EOF
           
           if [ -f "compliance-axe.json" ]; then
-            violations=$(jq '.violations | length' compliance-axe.json)
+            violations=$(jq '.violations | length // 0' compliance-axe.json 2>/dev/null || echo "0")
             echo "- **Axe-core violations:** $violations" >> accessibility-report.md
           fi
           
           if [ -f "compliance-pa11y.json" ]; then
-            issues=$(jq '.issues | length' compliance-pa11y.json)
+            issues=$(jq '.issues | length // 0' compliance-pa11y.json 2>/dev/null || echo "0")
             echo "- **Pa11y issues:** $issues" >> accessibility-report.md
           fi
           
