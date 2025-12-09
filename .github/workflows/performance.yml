@@ -58,18 +58,40 @@ jobs:
           npx serve dist -p 3000 &
           SERVER_PID=$!
           
-          # Wait for server to start
-          sleep 10
+          # Wait for server to be ready with health check
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Server failed to start"
+              kill $SERVER_PID
+              exit 1
+            fi
+            sleep 1
+          done
           
-          # Run Lighthouse
+          # Additional wait to ensure server is fully ready
+          sleep 3
+          
+          # Run Lighthouse with improved Chrome flags for headless mode
           lighthouse http://localhost:3000 \
             --output=json \
-            --output-path=./lighthouse-results.json \
-            --chrome-flags="--headless --no-sandbox --disable-gpu" \
-            --only-categories=performance,accessibility,best-practices,seo
+            --output-path=./performance-results.json \
+            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-setuid-sandbox --disable-web-security --disable-features=IsolateOrigins,site-per-process" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --timeout=60000 \
+            --max-wait-for-load=60000 || {
+              echo "Lighthouse test failed, but continuing..."
+              # Kill the server
+              kill $SERVER_PID || true
+              exit 1
+            }
           
           # Kill the server
-          kill $SERVER_PID
+          kill $SERVER_PID || true
           
           echo "Lighthouse tests completed"
       
@@ -158,7 +180,7 @@ jobs:
           name: performance-results
           path: |
             bundle-size.txt
-            lighthouse-results.json
+            performance-results.json
             load-test-results.json
             memory-usage.txt
             measure-vitals.js
@@ -176,11 +198,11 @@ jobs:
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ⚡ Lighthouse Scores:" >> $GITHUB_STEP_SUMMARY
-          if [ -f "lighthouse-results.json" ]; then
-            performance=$(jq '.categories.performance.score * 100' lighthouse-results.json)
-            accessibility=$(jq '.categories.accessibility.score * 100' lighthouse-results.json)
-            best_practices=$(jq '.categories.best-practices.score * 100' lighthouse-results.json)
-            seo=$(jq '.categories.seo.score * 100' lighthouse-results.json)
+          if [ -f "performance-results.json" ]; then
+            performance=$(jq '.categories.performance.score * 100' performance-results.json)
+            accessibility=$(jq '.categories.accessibility.score * 100' performance-results.json)
+            best_practices=$(jq '.categories.best-practices.score * 100' performance-results.json)
+            seo=$(jq '.categories.seo.score * 100' performance-results.json)
             
             echo "- Performance: $performance" >> $GITHUB_STEP_SUMMARY
             echo "- Accessibility: $accessibility" >> $GITHUB_STEP_SUMMARY
@@ -230,14 +252,37 @@ jobs:
           # Run baseline lighthouse
           npx serve dist -p 3000 &
           SERVER_PID=$!
-          sleep 10
+          
+          # Wait for server to be ready with health check
+          echo "Waiting for baseline server to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Baseline server is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Baseline server failed to start"
+              kill $SERVER_PID || true
+              exit 1
+            fi
+            sleep 1
+          done
+          
+          # Additional wait to ensure server is fully ready
+          sleep 3
           
           lighthouse http://localhost:3000 \
             --output=json \
             --output-path=./baseline-lighthouse.json \
-            --chrome-flags="--headless --no-sandbox --disable-gpu"
+            --chrome-flags="--headless --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-setuid-sandbox --disable-web-security --disable-features=IsolateOrigins,site-per-process" \
+            --timeout=60000 \
+            --max-wait-for-load=60000 || {
+              echo "Baseline Lighthouse test failed"
+              kill $SERVER_PID || true
+              exit 1
+            }
           
-          kill $SERVER_PID
+          kill $SERVER_PID || true
           
           # Switch back to PR branch
           git checkout ${{ github.head_ref }}
