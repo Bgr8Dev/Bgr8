@@ -9,10 +9,20 @@ import {
   limit,
   doc,
   getDoc,
-  QueryConstraint
+  startAfter,
+  endAt,
+  startAt,
+  endBefore,
+  limitToLast,
+  documentId,
+  Timestamp,
+  QueryConstraint,
+  CollectionReference,
+  DocumentData
 } from 'firebase/firestore';
 import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
-import { FaPlay, FaHistory, FaCopy, FaDownload, FaTrash, FaLightbulb } from 'react-icons/fa';
+import { FaPlay, FaHistory, FaCopy, FaDownload, FaTrash, FaLightbulb, FaCode, FaBook } from 'react-icons/fa';
+import { formatFirestoreDateTime, formatRoles, convertTimestampToDate } from '../../../utils/firestoreUtils';
 import '../../../styles/adminStyles/QueryTerminal.css';
 
 interface QueryTerminalProps {
@@ -20,81 +30,143 @@ interface QueryTerminalProps {
   queryHistory: QueryResult[];
 }
 
-interface ParsedQuery {
-  collection: string;
-  conditions: { field: string; operator: string; value: string | number | boolean }[];
-  orderByField?: string;
-  orderDirection?: 'asc' | 'desc';
-  limitCount?: number;
-  docId?: string;
-}
-
-// Query presets for quick access
+// Native Firestore query presets
 const QUERY_PRESETS = [
   { 
-    name: 'All Users', 
-    query: 'SELECT * FROM users LIMIT 50',
-    description: 'Fetch all user documents'
+    name: 'Get All Users (limit 50)', 
+    code: `// Fetch first 50 users
+const snapshot = await getDocs(
+  query(collection(db, 'users'), limit(50))
+);
+return snapshot;`,
+    description: 'Basic collection query with limit'
   },
   { 
-    name: 'Recent Bookings', 
-    query: 'SELECT * FROM bookings ORDER BY createdAt DESC LIMIT 20',
-    description: 'Get latest booking records'
+    name: 'Query with Where Clause', 
+    code: `// Find admin users (nested field)
+const snapshot = await getDocs(
+  query(
+    collection(db, 'users'),
+    where('roles.admin', '==', true)
+  )
+);
+return snapshot;`,
+    description: 'Filter documents with conditions'
   },
   { 
-    name: 'Pending Enquiries', 
-    query: "SELECT * FROM enquiries WHERE status == 'pending'",
-    description: 'Find unresolved enquiries'
+    name: 'Order By + Limit', 
+    code: `// Get 20 most recent bookings
+const snapshot = await getDocs(
+  query(
+    collection(db, 'bookings'),
+    orderBy('createdAt', 'desc'),
+    limit(20)
+  )
+);
+return snapshot;`,
+    description: 'Sort and limit results'
   },
   { 
-    name: 'Active Sessions', 
-    query: "SELECT * FROM sessions WHERE status == 'scheduled'",
-    description: 'Get upcoming sessions'
+    name: 'Multiple Where Conditions', 
+    code: `// Find pending enquiries from today
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const snapshot = await getDocs(
+  query(
+    collection(db, 'enquiries'),
+    where('status', '==', 'pending'),
+    where('createdAt', '>=', Timestamp.fromDate(today))
+  )
+);
+return snapshot;`,
+    description: 'Compound queries with multiple filters'
   },
   { 
-    name: 'Feedback Summary', 
-    query: 'SELECT * FROM feedback LIMIT 30',
-    description: 'Recent feedback entries'
+    name: 'Get Single Document', 
+    code: `// Get a specific document by ID
+const docId = 'YOUR_DOCUMENT_ID';
+const docSnap = await getDoc(doc(db, 'users', docId));
+
+if (docSnap.exists()) {
+  return { id: docSnap.id, ...docSnap.data() };
+} else {
+  throw new Error('Document not found');
+}`,
+    description: 'Fetch a single document by ID'
   },
   {
-    name: 'Mentor Applications',
-    query: "SELECT * FROM mentorApplications WHERE status == 'pending'",
-    description: 'Pending mentor applications'
+    name: 'Count Documents',
+    code: `// Count all documents in a collection
+const snapshot = await getDocs(collection(db, 'users'));
+console.log('Total users:', snapshot.size);
+return snapshot;`,
+    description: 'Get document count'
   },
   {
-    name: 'Ambassador Apps',
-    query: 'SELECT * FROM ambassadorApplications LIMIT 20',
-    description: 'Ambassador application data'
+    name: 'Nested Collection Query',
+    code: `// Query a subcollection
+const userId = 'USER_ID_HERE';
+const snapshot = await getDocs(
+  collection(db, 'users', userId, 'mentorProgram')
+);
+return snapshot;`,
+    description: 'Access subcollections'
   },
   {
-    name: 'All Mentors',
-    query: "SELECT * FROM users WHERE mentorProfileRef != null",
-    description: 'Users with mentor profiles'
+    name: 'Range Query',
+    code: `// Find users within age range
+const snapshot = await getDocs(
+  query(
+    collection(db, 'users'),
+    where('age', '>=', 18),
+    where('age', '<=', 30),
+    orderBy('age'),
+    limit(50)
+  )
+);
+return snapshot;`,
+    description: 'Query with range conditions'
   }
 ];
 
 const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHistory }) => {
-  const [queryInput, setQueryInput] = useState('');
+  const [codeInput, setCodeInput] = useState<string>(`// Write your Firestore query here
+// Available: db, collection, getDocs, query, where, orderBy, limit, doc, getDoc, Timestamp
+// Return a QuerySnapshot or data object
+
+const snapshot = await getDocs(
+  query(collection(db, 'users'), limit(10))
+);
+return snapshot;`);
+  
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentResult, setCurrentResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPresets, setShowPresets] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDocs, setShowDocs] = useState(false);
+  const [terminalExpanded, setTerminalExpanded] = useState(false);
+  
+  // New state for table sorting and expansion
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [expandedCells, setExpandedCells] = useState<Set<string>>(new Set());
+  
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
     '╔══════════════════════════════════════════════════════════════╗',
-    '║          BGr8 Analytics Query Terminal v1.0                  ║',
-    '║  Type SQL-like queries to explore your Firestore data        ║',
+    '║       BGr8 Firestore Query Terminal v2.0 (Native JS)        ║',
+    '║   Write native Firestore SDK queries in JavaScript/Node.js  ║',
     '╚══════════════════════════════════════════════════════════════╝',
     '',
-    'Syntax: SELECT * FROM <collection> [WHERE field == value] [ORDER BY field ASC|DESC] [LIMIT n]',
-    'Example: SELECT * FROM users WHERE admin == true LIMIT 10',
+    '📌 Available globals: db, collection, getDocs, query, where, orderBy, limit,',
+    '                      doc, getDoc, Timestamp, startAt, endAt, limitToLast',
     '',
-    'Type "help" for more commands, or click "Presets" for common queries.',
+    '💡 Click "Presets" for example queries or "Docs" for reference.',
     ''
   ]);
   
   const terminalRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-scroll terminal to bottom
   useEffect(() => {
@@ -108,267 +180,328 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
     setTerminalOutput(prev => [...prev, ...newLines]);
   }, []);
 
-  const parseQuery = (queryStr: string): ParsedQuery | null => {
-    const normalized = queryStr.trim().toUpperCase();
+  // Sort data based on column
+  const handleSort = useCallback((key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  }, [sortConfig]);
+
+  // Toggle cell expansion
+  const toggleCellExpansion = useCallback((rowIdx: number, colKey: string) => {
+    const cellId = `${rowIdx}-${colKey}`;
+    setExpandedCells(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cellId)) {
+        newSet.delete(cellId);
+      } else {
+        newSet.add(cellId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Get sorted data
+  const getSortedData = useCallback((data: Record<string, unknown>[]) => {
+    if (!sortConfig) return data;
+
+    const sortedData = [...data].sort((a, b) => {
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
+
+      // Handle null/undefined
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+
+      // Handle different types
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      // String comparison
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+      if (aStr < bStr) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aStr > bStr) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sortedData;
+  }, [sortConfig]);
+
+  // Format cell value for display
+  const formatCellValue = useCallback((value: unknown, rowIdx: number, colKey: string, isExpanded: boolean) => {
+    if (value == null) return <span className="cell-null">null</span>;
     
-    // Handle special commands
-    if (normalized === 'HELP') {
-      addOutput([
-        '',
-        '═══════════════════════════════════════════════════════════════',
-        '                         HELP MENU                              ',
-        '═══════════════════════════════════════════════════════════════',
-        '',
-        'QUERY SYNTAX:',
-        '  SELECT * FROM <collection>                    - Get all documents',
-        '  SELECT * FROM <collection> LIMIT <n>          - Limit results',
-        '  SELECT * FROM <collection> WHERE <condition>  - Filter results',
-        '  SELECT * FROM <collection> ORDER BY <field>   - Sort results',
-        '',
-        'WHERE CONDITIONS:',
-        '  field == value     - Equal to',
-        '  field != value     - Not equal to', 
-        '  field > value      - Greater than',
-        '  field < value      - Less than',
-        '  field >= value     - Greater than or equal',
-        '  field <= value     - Less than or equal',
-        '',
-        'SPECIAL COMMANDS:',
-        '  SHOW COLLECTIONS   - List all available collections',
-        '  DESCRIBE <coll>    - Show sample document structure',
-        '  COUNT <collection> - Count documents in collection',
-        '  CLEAR              - Clear terminal output',
-        '  HELP               - Show this help menu',
-        '',
-        'EXAMPLES:',
-        '  SELECT * FROM users LIMIT 10',
-        '  SELECT * FROM bookings WHERE status == "confirmed"',
-        '  SELECT * FROM sessions ORDER BY createdAt DESC LIMIT 5',
-        '',
-        '═══════════════════════════════════════════════════════════════',
-        ''
-      ]);
-      return null;
-    }
-
-    if (normalized === 'CLEAR') {
-      setTerminalOutput([]);
-      return null;
-    }
-
-    if (normalized === 'SHOW COLLECTIONS') {
-      addOutput([
-        '',
-        '📁 Available Collections:',
-        '   • users              - User profiles and accounts',
-        '   • bookings           - Mentor/mentee booking records',
-        '   • sessions           - Completed/scheduled sessions',
-        '   • feedback           - User feedback submissions',
-        '   • enquiries          - Contact form enquiries',
-        '   • mentorApplications - Mentor verification requests',
-        '   • ambassadorApplications - Ambassador applications',
-        '   • announcements      - System announcements',
-        '   • Generated Mentors  - AI-generated test mentors',
-        '   • Generated Mentees  - AI-generated test mentees',
-        ''
-      ]);
-      return null;
-    }
-
-    if (normalized.startsWith('COUNT ')) {
-      const collectionName = queryStr.substring(6).trim();
-      return { collection: collectionName, conditions: [], limitCount: undefined };
-    }
-
-    if (normalized.startsWith('DESCRIBE ')) {
-      const collectionName = queryStr.substring(9).trim();
-      return { collection: collectionName, conditions: [], limitCount: 1, docId: 'describe' };
-    }
-
-    // Parse SELECT query
-    const selectMatch = queryStr.match(/SELECT\s+\*\s+FROM\s+(\S+)/i);
-    if (!selectMatch) {
-      throw new Error('Invalid query syntax. Use: SELECT * FROM <collection>');
-    }
-
-    const result: ParsedQuery = {
-      collection: selectMatch[1].replace(/['"]/g, ''),
-      conditions: []
-    };
-
-    // Parse WHERE clause
-    const whereMatch = queryStr.match(/WHERE\s+(.+?)(?=\s+ORDER|\s+LIMIT|$)/i);
-    if (whereMatch) {
-      const conditionStr = whereMatch[1];
-      // Support multiple operators
-      const condMatch = conditionStr.match(/(\w+)\s*(==|!=|>=|<=|>|<)\s*(.+)/);
-      if (condMatch) {
-        let value: string | number | boolean = condMatch[3].trim().replace(/['"]/g, '');
-        
-        // Type conversion
-        if (value === 'true') value = true;
-        else if (value === 'false') value = false;
-        else if (value === 'null') value = 'null';
-        else if (!isNaN(Number(value))) value = Number(value);
-        
-        result.conditions.push({
-          field: condMatch[1],
-          operator: condMatch[2],
-          value
+    // Handle Firestore Timestamp objects (for backwards compatibility, though they should be pre-converted)
+    if (typeof value === 'object' && value !== null && 'seconds' in value) {
+      const date = convertTimestampToDate(value);
+      if (date) {
+        return date.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         });
       }
     }
 
-    // Parse ORDER BY clause
-    const orderMatch = queryStr.match(/ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?/i);
-    if (orderMatch) {
-      result.orderByField = orderMatch[1];
-      result.orderDirection = (orderMatch[2]?.toUpperCase() === 'DESC' ? 'desc' : 'asc');
+    // Handle Date objects (for backwards compatibility, though they should be pre-converted)
+    if (value instanceof Date) {
+      return value.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+    
+    // Handle other objects (but not already-formatted strings)
+    if (typeof value === 'object') {
+      const jsonStr = JSON.stringify(value, null, 2);
+      if (isExpanded) {
+        return <pre className="cell-expanded-object">{jsonStr}</pre>;
+      }
+      return jsonStr.substring(0, 50) + (jsonStr.length > 50 ? '...' : '');
     }
 
-    // Parse LIMIT clause
-    const limitMatch = queryStr.match(/LIMIT\s+(\d+)/i);
-    if (limitMatch) {
-      result.limitCount = parseInt(limitMatch[1], 10);
+    const strValue = String(value);
+    if (isExpanded || strValue.length <= 50) {
+      return strValue;
     }
+    return strValue.substring(0, 50) + '...';
+  }, []);
 
-    return result;
-  };
+  // Normalize data: convert Timestamps to UK format and sort columns alphabetically
+  const normalizeData = useCallback((data: Record<string, unknown>[]): Record<string, unknown>[] => {
+    return data.map(row => {
+      const normalized: Record<string, unknown> = {};
+      
+      // Get all keys and sort them alphabetically (except _id which stays first)
+      const keys = Object.keys(row).sort((a, b) => {
+        if (a === '_id') return -1;
+        if (b === '_id') return 1;
+        return a.localeCompare(b);
+      });
+      
+      // Process each field
+      keys.forEach(key => {
+        const value = row[key];
+        
+        // Convert Firestore Timestamps to sortable format using utility
+        if (value && typeof value === 'object' && 'seconds' in value) {
+          normalized[key] = formatFirestoreDateTime(value);
+        }
+        // Convert Date objects to sortable format using utility
+        else if (value instanceof Date) {
+          normalized[key] = formatFirestoreDateTime(value);
+        }
+        // Convert roles object to comma-separated active roles using utility
+        else if (key === 'roles' && value && typeof value === 'object' && !Array.isArray(value)) {
+          normalized[key] = formatRoles(value as Record<string, boolean>);
+        }
+        // Keep other values as-is
+        else {
+          normalized[key] = value;
+        }
+      });
+      
+      return normalized;
+    });
+  }, []);
 
+  // Execute the native Firestore query
   const executeQuery = async () => {
-    if (!queryInput.trim()) return;
+    if (!codeInput.trim()) return;
 
     setIsExecuting(true);
     setError(null);
     const startTime = performance.now();
 
-    addOutput([``, `> ${queryInput}`, ``]);
+    // Show the query being executed
+    addOutput([
+      '',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      '▶ Executing query...',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    ]);
 
     try {
-      const parsed = parseQuery(queryInput);
-      
-      if (!parsed) {
-        setIsExecuting(false);
-        return;
-      }
+      // Create a sandboxed execution context with Firestore methods
+      const executeCode = new Function(
+        'db',
+        'collection',
+        'getDocs',
+        'query',
+        'where',
+        'orderBy',
+        'limit',
+        'doc',
+        'getDoc',
+        'Timestamp',
+        'startAt',
+        'startAfter',
+        'endAt',
+        'endBefore',
+        'limitToLast',
+        'documentId',
+        'console',
+        `
+        return (async () => {
+          ${codeInput}
+        })();
+        `
+      );
 
-      // Handle COUNT query
-      if (queryInput.trim().toUpperCase().startsWith('COUNT ')) {
-        const snapshot = await getDocs(collection(firestore, parsed.collection));
-        addOutput([
-          `📊 Count Result:`,
-          `   Collection: ${parsed.collection}`,
-          `   Documents: ${snapshot.size}`,
-          ``
-        ]);
-        setIsExecuting(false);
-        return;
-      }
-
-      // Handle DESCRIBE query
-      if (parsed.docId === 'describe') {
-        const snapshot = await getDocs(query(collection(firestore, parsed.collection), limit(1)));
-        if (snapshot.empty) {
-          addOutput([`⚠️ Collection "${parsed.collection}" is empty or doesn't exist.`, ``]);
-        } else {
-          const sampleDoc = snapshot.docs[0].data();
-          addOutput([
-            `📋 Structure of "${parsed.collection}":`,
-            `   Fields:`,
-            ...Object.keys(sampleDoc).map(key => `     • ${key}: ${typeof sampleDoc[key]}`),
-            ``
-          ]);
+      // Custom console to capture logs
+      const logs: string[] = [];
+      const customConsole = {
+        log: (...args: unknown[]) => {
+          logs.push(args.map(a => 
+            typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+          ).join(' '));
+        },
+        error: (...args: unknown[]) => {
+          logs.push('ERROR: ' + args.map(a => 
+            typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+          ).join(' '));
+        },
+        warn: (...args: unknown[]) => {
+          logs.push('WARN: ' + args.map(a => 
+            typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+          ).join(' '));
         }
-        setIsExecuting(false);
-        return;
-      }
+      };
 
-      // Build Firestore query
-      const constraints: QueryConstraint[] = [];
+      // Execute the query
+      const result = await executeCode(
+        firestore,
+        collection,
+        getDocs,
+        query,
+        where,
+        orderBy,
+        limit,
+        doc,
+        getDoc,
+        Timestamp,
+        startAt,
+        startAfter,
+        endAt,
+        endBefore,
+        limitToLast,
+        documentId,
+        customConsole
+      );
 
-      // Add WHERE conditions
-      for (const cond of parsed.conditions) {
-        const op = cond.operator === '==' ? '==' :
-                   cond.operator === '!=' ? '!=' :
-                   cond.operator === '>' ? '>' :
-                   cond.operator === '<' ? '<' :
-                   cond.operator === '>=' ? '>=' :
-                   cond.operator === '<=' ? '<=' : '==';
-        constraints.push(where(cond.field, op as any, cond.value));
-      }
-
-      // Add ORDER BY
-      if (parsed.orderByField) {
-        constraints.push(orderBy(parsed.orderByField, parsed.orderDirection || 'asc'));
-      }
-
-      // Add LIMIT
-      if (parsed.limitCount) {
-        constraints.push(limit(parsed.limitCount));
-      }
-
-      // Execute query
-      const collectionRef = collection(firestore, parsed.collection);
-      const q = constraints.length > 0 
-        ? query(collectionRef, ...constraints)
-        : query(collectionRef, limit(100)); // Default limit
-
-      const snapshot = await getDocs(q);
       const endTime = performance.now();
       const executionTime = Math.round(endTime - startTime);
 
-      const data = snapshot.docs.map(doc => ({
-        _id: doc.id,
-        ...doc.data()
-      }));
+      // Output any console logs
+      if (logs.length > 0) {
+        addOutput(['', '📝 Console Output:']);
+        logs.forEach(log => addOutput(`   ${log}`));
+      }
 
-      const result: QueryResult = {
+      // Process the result
+      let data: Record<string, unknown>[] = [];
+      let collectionName = 'query';
+
+      if (result && typeof result === 'object') {
+        // Check if it's a QuerySnapshot
+        if ('docs' in result && Array.isArray(result.docs)) {
+          data = result.docs.map((docSnap: DocumentData) => ({
+            _id: docSnap.id,
+            ...docSnap.data()
+          }));
+          
+          // Try to extract collection name from the query
+          if (result.query && result.query._path) {
+            collectionName = result.query._path.segments.join('/');
+          }
+        } 
+        // Check if it's a single document
+        else if ('id' in result && '_id' in result === false) {
+          data = [{ _id: result.id, ...result }];
+          collectionName = 'document';
+        }
+        // It's a plain object or array
+        else if (Array.isArray(result)) {
+          data = result.map((item, idx) => ({ _id: `item_${idx}`, ...item }));
+        } else {
+          data = [{ _id: 'result', ...result }];
+        }
+      }
+
+      // Normalize the data (convert timestamps, sort columns, format roles)
+      data = normalizeData(data);
+
+      const queryResult: QueryResult = {
         data,
         count: data.length,
         executionTime,
-        collection: parsed.collection,
-        query: queryInput,
+        collection: collectionName,
+        query: codeInput.substring(0, 100) + (codeInput.length > 100 ? '...' : ''),
         timestamp: new Date()
       };
 
-      setCurrentResult(result);
-      onQueryResult(result);
+      setCurrentResult(queryResult);
+      onQueryResult(queryResult);
 
       // Format output
       addOutput([
+        '',
         `✅ Query executed successfully`,
-        `   Collection: ${parsed.collection}`,
-        `   Results: ${data.length} documents`,
-        `   Time: ${executionTime}ms`,
-        ``
+        `   Results: ${data.length} document(s)`,
+        `   Execution time: ${executionTime}ms`,
+        ''
       ]);
 
       if (data.length > 0) {
         addOutput([
-          `📄 Results Preview (showing first ${Math.min(3, data.length)}):`,
-          `─────────────────────────────────────────────────────────────`,
+          `📄 Results Preview (first ${Math.min(3, data.length)}):`,
+          '─────────────────────────────────────────────────────────────',
         ]);
         
-        data.slice(0, 3).forEach((doc, idx) => {
+        data.slice(0, 3).forEach((docData, idx) => {
+          const preview = JSON.stringify(docData, null, 2)
+            .split('\n')
+            .slice(0, 8)
+            .join('\n');
           addOutput([
-            `[${idx + 1}] ID: ${doc._id}`,
-            `    ${JSON.stringify(doc, null, 2).split('\n').slice(1, 6).join('\n    ')}...`,
-            ``
+            `[${idx + 1}] ID: ${docData._id}`,
+            preview,
+            ''
           ]);
         });
 
         if (data.length > 3) {
-          addOutput([`   ... and ${data.length - 3} more results (see Results Panel below)`, ``]);
+          addOutput([`   ... and ${data.length - 3} more results (see Results Panel below)`, '']);
         }
+      } else {
+        addOutput(['📭 No documents found matching your query.', '']);
       }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       addOutput([
+        '',
         `❌ Error: ${errorMessage}`,
-        `   Check your query syntax and try again.`,
-        ``
+        '',
+        '💡 Tips:',
+        '   • Make sure collection names are correct',
+        '   • Check field names exist in your documents',
+        '   • Verify you have proper read permissions',
+        '   • Compound queries may require indexes',
+        ''
       ]);
     } finally {
       setIsExecuting(false);
@@ -376,9 +509,26 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Execute on Ctrl+Enter or Cmd+Enter
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       executeQuery();
+    }
+    
+    // Handle Tab for indentation
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = textareaRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newValue = codeInput.substring(0, start) + '  ' + codeInput.substring(end);
+        setCodeInput(newValue);
+        // Reset cursor position
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+        }, 0);
+      }
     }
   };
 
@@ -389,74 +539,150 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
     }
   };
 
-  const downloadResults = () => {
+  const convertToCSV = (data: Record<string, unknown>[]): string => {
+    if (data.length === 0) return '';
+
+    // Get all unique keys from all objects
+    const allKeys = new Set<string>();
+    data.forEach(row => {
+      Object.keys(row).forEach(key => allKeys.add(key));
+    });
+
+    const headers = Array.from(allKeys);
+    
+    // Helper to escape CSV values
+    const escapeCSV = (value: unknown): string => {
+      if (value == null) return '';
+      
+      let strValue: string;
+      if (typeof value === 'object') {
+        strValue = JSON.stringify(value);
+      } else {
+        strValue = String(value);
+      }
+      
+      // Escape quotes and wrap in quotes if contains comma, quote, or newline
+      if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+        return `"${strValue.replace(/"/g, '""')}"`;
+      }
+      return strValue;
+    };
+
+    // Build CSV
+    const csvRows: string[] = [];
+    
+    // Header row
+    csvRows.push(headers.map(h => escapeCSV(h)).join(','));
+    
+    // Data rows
+    data.forEach(row => {
+      const values = headers.map(header => escapeCSV(row[header]));
+      csvRows.push(values.join(','));
+    });
+
+    return csvRows.join('\n');
+  };
+
+  const downloadJSON = () => {
     if (currentResult) {
       const blob = new Blob([JSON.stringify(currentResult.data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `query-results-${Date.now()}.json`;
+      a.download = `firestore-query-${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      addOutput(['💾 Results downloaded!', '']);
+      addOutput(['💾 Results downloaded as JSON!', '']);
     }
   };
 
-  const applyPreset = (presetQuery: string) => {
-    setQueryInput(presetQuery);
+  const downloadCSV = () => {
+    if (currentResult) {
+      const csv = convertToCSV(currentResult.data);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `firestore-query-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addOutput(['💾 Results downloaded as CSV!', '']);
+    }
+  };
+
+  const downloadResults = downloadJSON; // Keep for backward compatibility
+
+
+  const applyPreset = (preset: typeof QUERY_PRESETS[0]) => {
+    setCodeInput(preset.code);
     setShowPresets(false);
-    inputRef.current?.focus();
+    textareaRef.current?.focus();
+    addOutput([`📝 Loaded preset: ${preset.name}`, '']);
   };
 
   const applyHistoryQuery = (historyItem: QueryResult) => {
-    setQueryInput(historyItem.query);
+    // Try to find the full query from the history
+    setCodeInput(historyItem.query.endsWith('...') 
+      ? `// Previous query (truncated)\n${historyItem.query}`
+      : historyItem.query
+    );
     setShowHistory(false);
-    inputRef.current?.focus();
+    textareaRef.current?.focus();
+  };
+
+  const showDocumentation = () => {
+    setShowDocs(!showDocs);
+    if (!showDocs) {
+      addOutput([
+        '',
+        '═══════════════════════════════════════════════════════════════',
+        '                    FIRESTORE SDK REFERENCE                     ',
+        '═══════════════════════════════════════════════════════════════',
+        '',
+        '📚 AVAILABLE FUNCTIONS:',
+        '',
+        '  collection(db, "collectionName")     - Reference a collection',
+        '  doc(db, "collection", "docId")       - Reference a document',
+        '  getDocs(queryRef)                    - Execute query, get all docs',
+        '  getDoc(docRef)                       - Get single document',
+        '',
+        '  query(collectionRef, ...constraints) - Build a query',
+        '',
+        '📚 QUERY CONSTRAINTS:',
+        '',
+        '  where("field", "==", value)          - Equal to',
+        '  where("field", "!=", value)          - Not equal to',
+        '  where("field", "<", value)           - Less than',
+        '  where("field", "<=", value)          - Less than or equal',
+        '  where("field", ">", value)           - Greater than',
+        '  where("field", ">=", value)          - Greater than or equal',
+        '  where("field", "array-contains", v)  - Array contains',
+        '  where("field", "in", [v1, v2])       - In array',
+        '',
+        '  orderBy("field", "asc"|"desc")       - Sort results',
+        '  limit(n)                             - Limit results',
+        '  limitToLast(n)                       - Last n results',
+        '  startAt(value)                       - Start at value',
+        '  endAt(value)                         - End at value',
+        '',
+        '📚 TIMESTAMP:',
+        '',
+        '  Timestamp.now()                      - Current timestamp',
+        '  Timestamp.fromDate(new Date())       - From JS Date',
+        '',
+        '═══════════════════════════════════════════════════════════════',
+        ''
+      ]);
+    }
   };
 
   return (
     <div className="query-terminal">
-      {/* Terminal Output */}
-      <div className="terminal-window">
-        <div className="terminal-header">
-          <div className="terminal-dots">
-            <span className="dot red"></span>
-            <span className="dot yellow"></span>
-            <span className="dot green"></span>
-          </div>
-          <span className="terminal-title">BGr8 Query Terminal</span>
-          <div className="terminal-actions">
-            <button onClick={() => setShowPresets(!showPresets)} title="Query Presets">
-              <FaLightbulb />
-            </button>
-            <button onClick={() => setShowHistory(!showHistory)} title="Query History">
-              <FaHistory />
-            </button>
-            <button onClick={() => setTerminalOutput([])} title="Clear Terminal">
-              <FaTrash />
-            </button>
-          </div>
-        </div>
-        
-        <div className="terminal-output" ref={terminalRef}>
-          {terminalOutput.map((line, idx) => (
-            <div key={idx} className="terminal-line">
-              {line}
-            </div>
-          ))}
-          {isExecuting && (
-            <div className="terminal-line executing">
-              <span className="loading-dots">Executing query</span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Presets Dropdown */}
       {showPresets && (
         <div className="presets-dropdown">
           <div className="presets-header">
-            <h4>Query Presets</h4>
+            <h4>Query Presets (Native Firestore)</h4>
             <button onClick={() => setShowPresets(false)}>×</button>
           </div>
           <div className="presets-list">
@@ -464,11 +690,11 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
               <div 
                 key={idx} 
                 className="preset-item"
-                onClick={() => applyPreset(preset.query)}
+                onClick={() => applyPreset(preset)}
               >
                 <span className="preset-name">{preset.name}</span>
                 <span className="preset-desc">{preset.description}</span>
-                <code className="preset-query">{preset.query}</code>
+                <code className="preset-query">{preset.code.split('\n').slice(0, 2).join(' ').substring(0, 60)}...</code>
               </div>
             ))}
           </div>
@@ -491,7 +717,7 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
               >
                 <code>{item.query}</code>
                 <span className="history-meta">
-                  {item.count} results • {item.executionTime}ms • {item.timestamp.toLocaleTimeString()}
+                  {item.count} results • {item.executionTime}ms • {item.timestamp.toLocaleTimeString('en-GB')}
                 </span>
               </div>
             ))}
@@ -499,28 +725,95 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
         </div>
       )}
 
-      {/* Query Input */}
-      <div className="query-input-container">
-        <div className="input-wrapper">
-          <span className="input-prompt">{'>'}</span>
+      {/* Code Editor */}
+      <div className="code-editor-container">
+        <div className="editor-header">
+          <div className="editor-title">
+            <FaCode />
+            <span>Query Editor</span>
+          </div>
+          <div className="editor-toolbar">
+            <button 
+              onClick={() => setShowPresets(!showPresets)} 
+              title="Query Presets" 
+              className={`toolbar-btn ${showPresets ? 'active' : ''}`}
+            >
+              <FaLightbulb /> <span>Presets</span>
+            </button>
+            <button 
+              onClick={showDocumentation} 
+              title="SDK Documentation" 
+              className={`toolbar-btn ${showDocs ? 'active' : ''}`}
+            >
+              <FaBook /> <span>Docs</span>
+            </button>
+            <button 
+              onClick={() => setShowHistory(!showHistory)} 
+              title="Query History" 
+              className={`toolbar-btn ${showHistory ? 'active' : ''}`}
+            >
+              <FaHistory /> <span>History</span>
+            </button>
+          </div>
+          <div className="editor-hint">
+            Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to execute
+          </div>
+        </div>
+        <div className="code-editor-wrapper">
+          <div className="line-numbers">
+            {codeInput.split('\n').map((_, idx) => (
+              <span key={idx}>{idx + 1}</span>
+            ))}
+          </div>
           <textarea
-            ref={inputRef}
-            value={queryInput}
-            onChange={(e) => setQueryInput(e.target.value)}
+            ref={textareaRef}
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Enter your query here... (Ctrl+Enter to execute)"
-            rows={3}
-            className="query-input"
+            className="code-editor"
+            spellCheck={false}
+            autoCapitalize="off"
+            autoCorrect="off"
           />
         </div>
-        <div className="input-actions">
+        <div className="editor-actions">
           <button 
             className="execute-btn"
             onClick={executeQuery}
-            disabled={isExecuting || !queryInput.trim()}
+            disabled={isExecuting || !codeInput.trim()}
           >
-            <FaPlay /> Execute
+            <FaPlay /> {isExecuting ? 'Executing...' : 'Execute Query'}
           </button>
+        </div>
+      </div>
+
+      {/* Terminal Output */}
+      <div className={`terminal-window ${terminalExpanded ? 'expanded' : 'collapsed'}`}>
+        <div className="terminal-header">
+          <div className="terminal-left">
+            <span className="terminal-title">Console Output</span>
+          </div>
+          <div className="terminal-actions">
+            <button onClick={() => setTerminalExpanded(!terminalExpanded)} title={terminalExpanded ? "Collapse" : "Expand"}>
+              {terminalExpanded ? '▼' : '▲'}
+            </button>
+            <button onClick={() => setTerminalOutput([])} title="Clear Terminal">
+              <FaTrash />
+            </button>
+          </div>
+        </div>
+        
+        <div className="terminal-output" ref={terminalRef}>
+          {terminalOutput.map((line, idx) => (
+            <div key={idx} className="terminal-line">
+              {line}
+            </div>
+          ))}
+          {isExecuting && (
+            <div className="terminal-line executing">
+              <span className="loading-dots">Executing query</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -535,51 +828,89 @@ const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHisto
               <span>{currentResult.collection}</span>
             </div>
             <div className="results-actions">
-              <button onClick={copyResults} title="Copy to Clipboard">
+              <button onClick={copyResults} title="Copy to Clipboard" className="action-btn copy-btn">
                 <FaCopy /> Copy
               </button>
-              <button onClick={downloadResults} title="Download JSON">
-                <FaDownload /> Export
+              <button onClick={downloadJSON} title="Download as JSON" className="action-btn json-btn">
+                <FaDownload /> JSON
+              </button>
+              <button onClick={downloadCSV} title="Download as CSV" className="action-btn csv-btn">
+                <FaDownload /> CSV
               </button>
             </div>
           </div>
           <div className="results-table-container">
-            <table className="results-table">
+            <table className="results-table sortable-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>ID</th>
+                  <th className="col-index">#</th>
+                  <th 
+                    className={`col-id sortable ${sortConfig?.key === '_id' ? 'sorted-' + sortConfig.direction : ''}`}
+                    onClick={() => handleSort('_id')}
+                    title="Click to sort"
+                  >
+                    ID
+                    <span className="sort-indicator">
+                      {sortConfig?.key === '_id' ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
+                    </span>
+                  </th>
                   {currentResult.data.length > 0 && 
                     Object.keys(currentResult.data[0])
                       .filter(k => k !== '_id')
-                      .slice(0, 6)
-                      .map(key => <th key={key}>{key}</th>)
+                      .map(key => (
+                        <th 
+                          key={key}
+                          className={`sortable ${sortConfig?.key === key ? 'sorted-' + sortConfig.direction : ''}`}
+                          onClick={() => handleSort(key)}
+                          title="Click to sort"
+                        >
+                          {key}
+                          <span className="sort-indicator">
+                            {sortConfig?.key === key ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
+                          </span>
+                        </th>
+                      ))
                   }
                 </tr>
               </thead>
               <tbody>
-                {currentResult.data.slice(0, 20).map((row, idx) => (
+                {getSortedData(currentResult.data).slice(0, 100).map((row, idx) => (
                   <tr key={idx}>
-                    <td>{idx + 1}</td>
-                    <td className="cell-id">{String(row._id).substring(0, 12)}...</td>
+                    <td className="cell-index">{idx + 1}</td>
+                    <td 
+                      className={`cell-id expandable ${expandedCells.has(`${idx}-_id`) ? 'expanded' : ''}`}
+                      onClick={() => toggleCellExpansion(idx, '_id')}
+                      title="Click to expand/collapse"
+                    >
+                      {expandedCells.has(`${idx}-_id`) 
+                        ? String(row._id)
+                        : String(row._id).substring(0, 20) + (String(row._id).length > 20 ? '...' : '')
+                      }
+                    </td>
                     {Object.entries(row)
                       .filter(([k]) => k !== '_id')
-                      .slice(0, 6)
-                      .map(([key, value]) => (
-                        <td key={key} className="cell-value">
-                          {typeof value === 'object' 
-                            ? JSON.stringify(value).substring(0, 30) + '...'
-                            : String(value).substring(0, 30)}
-                        </td>
-                      ))
+                      .map(([key, value]) => {
+                        const cellId = `${idx}-${key}`;
+                        const isExpanded = expandedCells.has(cellId);
+                        return (
+                          <td 
+                            key={key} 
+                            className={`cell-value expandable ${isExpanded ? 'expanded' : ''}`}
+                            onClick={() => toggleCellExpansion(idx, key)}
+                            title="Click to expand/collapse"
+                          >
+                            {formatCellValue(value, idx, key, isExpanded)}
+                          </td>
+                        );
+                      })
                     }
                   </tr>
                 ))}
               </tbody>
             </table>
-            {currentResult.data.length > 20 && (
+            {currentResult.data.length > 100 && (
               <div className="results-overflow">
-                Showing 20 of {currentResult.data.length} results
+                Showing 100 of {currentResult.data.length} results
               </div>
             )}
           </div>

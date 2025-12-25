@@ -3,11 +3,10 @@ import BannerWrapper from '../../components/ui/BannerWrapper';
 import QueryTerminal from '../../components/admin/analytics/QueryTerminal';
 import DataExplorer from '../../components/admin/analytics/DataExplorer';
 import AnalyticsOverview from '../../components/admin/analytics/AnalyticsOverview';
-import ReportsPanel from '../../components/admin/analytics/ReportsPanel';
-import { FaTerminal, FaChartBar, FaDatabase, FaFileAlt, FaExpand, FaCompress } from 'react-icons/fa';
+import { FaTerminal, FaChartBar, FaDatabase, FaExpand, FaCompress } from 'react-icons/fa';
 import '../../styles/adminStyles/AdminAnalytics.css';
 
-type TabType = 'terminal' | 'overview' | 'explorer' | 'reports';
+type TabType = 'terminal' | 'overview' | 'explorer';
 
 export interface QueryResult {
   data: Record<string, unknown>[];
@@ -19,7 +18,7 @@ export interface QueryResult {
 }
 
 const AdminAnalytics: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('terminal');
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [queryHistory, setQueryHistory] = useState<QueryResult[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -28,69 +27,61 @@ const AdminAnalytics: React.FC = () => {
   }, []);
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-    { id: 'terminal', label: 'Query Terminal', icon: <FaTerminal /> },
     { id: 'overview', label: 'Overview', icon: <FaChartBar /> },
     { id: 'explorer', label: 'Data Explorer', icon: <FaDatabase /> },
-    { id: 'reports', label: 'Reports', icon: <FaFileAlt /> },
+    { id: 'terminal', label: 'Query Terminal', icon: <FaTerminal /> },
   ];
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'terminal':
-        return (
+  // Render all tabs but hide inactive ones to preserve state
+  const renderAllTabs = () => {
+    return (
+      <>
+        <div className={`tab-content ${activeTab === 'overview' ? 'active' : ''}`}>
+          <AnalyticsOverview queryHistory={queryHistory} />
+        </div>
+        <div className={`tab-content ${activeTab === 'explorer' ? 'active' : ''}`}>
+          <DataExplorer onQueryResult={handleQueryResult} />
+        </div>
+        <div className={`tab-content ${activeTab === 'terminal' ? 'active' : ''}`}>
           <QueryTerminal 
             onQueryResult={handleQueryResult} 
             queryHistory={queryHistory}
           />
-        );
-      case 'overview':
-        return <AnalyticsOverview queryHistory={queryHistory} />;
-      case 'explorer':
-        return <DataExplorer onQueryResult={handleQueryResult} />;
-      case 'reports':
-        return <ReportsPanel queryHistory={queryHistory} />;
-      default:
-        return null;
-    }
+        </div>
+      </>
+    );
   };
 
   return (
     <BannerWrapper sectionId="analytics" className={`admin-analytics ${isFullscreen ? 'fullscreen' : ''}`}>
       <div className="analytics-container">
-        {/* Header */}
-        <div className="analytics-header">
-          <div className="header-left">
-            <h1>Analytics Dashboard</h1>
-            <span className="header-subtitle">Query and analyze your Firestore data</span>
+        {/* Combined Header + Tabs Bar */}
+        <div className="analytics-toolbar">
+          <h1 className="toolbar-title">Analytics</h1>
+          <div className="analytics-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
-          <div className="header-right">
-            <button 
-              className="fullscreen-btn"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            >
-              {isFullscreen ? <FaCompress /> : <FaExpand />}
-            </button>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="analytics-tabs">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          ))}
+          <button 
+            className="fullscreen-btn"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          >
+            {isFullscreen ? <FaCompress /> : <FaExpand />}
+          </button>
         </div>
 
         {/* Tab Content */}
         <div className="analytics-content">
-          {renderTabContent()}
+          {renderAllTabs()}
         </div>
 
         {/* Status Bar */}

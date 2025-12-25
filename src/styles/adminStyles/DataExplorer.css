@@ -31,6 +31,8 @@
 
 .search-box svg {
   color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  font-size: 0.9rem;
 }
 
 .search-box input {

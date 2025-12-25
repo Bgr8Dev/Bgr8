@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, limit, doc, getDoc } from 'firebase/firestore';
 import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
-import { FaFolder, FaFolderOpen, FaFile, FaSync, FaSearch, FaEye } from 'react-icons/fa';
+import { FaFolder, FaFolderOpen, FaFile, FaSync, FaSearch } from 'react-icons/fa';
+import { formatFirestoreDateTime } from '../../../utils/firestoreUtils';
 import '../../../styles/adminStyles/DataExplorer.css';
 
 interface DataExplorerProps {
@@ -12,9 +13,8 @@ interface DataExplorerProps {
 interface CollectionInfo {
   name: string;
   count: number;
-  sampleFields: string[];
   isExpanded: boolean;
-  documents: { id: string; data: Record<string, unknown> }[];
+  documentIds: string[];
   isLoading: boolean;
 }
 
@@ -47,29 +47,22 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
     try {
       const collectionPromises = KNOWN_COLLECTIONS.map(async (name) => {
         try {
-          const snapshot = await getDocs(query(collection(firestore, name), limit(1)));
-          const sampleFields = snapshot.docs.length > 0 
-            ? Object.keys(snapshot.docs[0].data()).slice(0, 8)
-            : [];
-          
           // Get count
           const fullSnapshot = await getDocs(collection(firestore, name));
           
           return {
             name,
             count: fullSnapshot.size,
-            sampleFields,
             isExpanded: false,
-            documents: [],
+            documentIds: [],
             isLoading: false
           };
         } catch {
           return {
             name,
             count: 0,
-            sampleFields: [],
             isExpanded: false,
-            documents: [],
+            documentIds: [],
             isLoading: false
           };
         }
@@ -88,9 +81,9 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
   const toggleCollection = async (collectionName: string) => {
     setCollections(prev => prev.map(col => {
       if (col.name === collectionName) {
-        if (!col.isExpanded && col.documents.length === 0) {
-          // Need to load documents
-          loadCollectionDocuments(collectionName);
+        if (!col.isExpanded && col.documentIds.length === 0) {
+          // Need to load document IDs
+          loadCollectionDocumentIds(collectionName);
           return { ...col, isExpanded: true, isLoading: true };
         }
         return { ...col, isExpanded: !col.isExpanded };
@@ -99,33 +92,19 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
     }));
   };
 
-  const loadCollectionDocuments = async (collectionName: string) => {
+  const loadCollectionDocumentIds = async (collectionName: string) => {
     try {
-      const snapshot = await getDocs(query(collection(firestore, collectionName), limit(20)));
-      const documents = snapshot.docs.map(doc => ({
-        id: doc.id,
-        data: doc.data()
-      }));
+      const snapshot = await getDocs(collection(firestore, collectionName));
+      const documentIds = snapshot.docs.map(doc => doc.id);
 
       setCollections(prev => prev.map(col => {
         if (col.name === collectionName) {
-          return { ...col, documents, isLoading: false };
+          return { ...col, documentIds, isLoading: false };
         }
         return col;
       }));
-
-      // Also add to query results
-      const result: QueryResult = {
-        data: documents.map(d => ({ _id: d.id, ...d.data })),
-        count: documents.length,
-        executionTime: 0,
-        collection: collectionName,
-        query: `Explored ${collectionName}`,
-        timestamp: new Date()
-      };
-      onQueryResult(result);
     } catch (error) {
-      console.error('Error loading documents:', error);
+      console.error('Error loading document IDs:', error);
       setCollections(prev => prev.map(col => {
         if (col.name === collectionName) {
           return { ...col, isLoading: false };
@@ -135,8 +114,29 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
     }
   };
 
-  const viewDocument = (collectionName: string, docId: string, data: Record<string, unknown>) => {
-    setSelectedDoc({ collection: collectionName, id: docId, data });
+  const viewDocument = async (collectionName: string, docId: string) => {
+    try {
+      const docRef = doc(firestore, collectionName, docId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setSelectedDoc({ collection: collectionName, id: docId, data });
+
+        // Add to query results
+        const result: QueryResult = {
+          data: [{ _id: docId, ...data }],
+          count: 1,
+          executionTime: 0,
+          collection: collectionName,
+          query: `Viewed document ${docId}`,
+          timestamp: new Date()
+        };
+        onQueryResult(result);
+      }
+    } catch (error) {
+      console.error('Error loading document:', error);
+    }
   };
 
   const filteredCollections = collections.filter(col => 
@@ -146,10 +146,20 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
   const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return 'null';
     if (typeof value === 'object') {
-      if (value instanceof Date) return value.toISOString();
+      if (value instanceof Date) {
+        return value.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      // Firestore Timestamp - use utility function
       if ('seconds' in (value as any)) {
-        // Firestore Timestamp
-        return new Date((value as any).seconds * 1000).toISOString();
+        const formatted = formatFirestoreDateTime(value);
+        return formatted || 'Invalid Date';
       }
       return JSON.stringify(value, null, 2);
     }
@@ -203,22 +213,16 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
                       {col.isLoading ? (
                         <div className="loading-docs">Loading...</div>
                       ) : (
-                        col.documents.map(docItem => (
+                        col.documentIds.map(docId => (
                           <div 
-                            key={docItem.id} 
+                            key={docId} 
                             className="tree-document"
-                            onClick={() => viewDocument(col.name, docItem.id, docItem.data)}
+                            onClick={() => viewDocument(col.name, docId)}
                           >
                             <FaFile />
-                            <span className="doc-id">{docItem.id.substring(0, 20)}...</span>
-                            <button className="view-btn" title="View Document">
-                              <FaEye />
-                            </button>
+                            <span className="doc-id">{docId.substring(0, 30)}...</span>
                           </div>
                         ))
-                      )}
-                      {col.documents.length >= 20 && (
-                        <div className="more-docs">+ more documents available</div>
                       )}
                     </div>
                   )}
@@ -250,7 +254,9 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(selectedDoc.data).map(([key, value]) => (
+                    {Object.entries(selectedDoc.data)
+                      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+                      .map(([key, value]) => (
                       <tr key={key}>
                         <td className="field-name">{key}</td>
                         <td className="field-type">{typeof value}</td>
