@@ -502,17 +502,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  gap: 6px;
+  width: auto;
   height: 32px;
-  padding: 0;
+  padding: 0 16px;
   background: rgba(102, 126, 234, 0.15);
   border: 1px solid rgba(102, 126, 234, 0.3);
   border-radius: 6px;
   color: #a5b4fc;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   margin-right: 8px;
+  white-space: nowrap;
 }
 
 .copy-query-btn:hover {

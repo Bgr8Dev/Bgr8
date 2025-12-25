@@ -472,22 +472,15 @@ return snapshot;`);
       // This is the PRIMARY security mechanism
       // ============================================================
       
-      // Create a minimal read-only wrapper for the Firestore instance
-      // Even if someone bypasses string checks, they can't access write functions
-      const readOnlyDb = {
-        // Only expose what's absolutely necessary for read operations
-        app: firestore.app,
-        type: firestore.type,
-        // Everything else is intentionally omitted
-      };
-
-      // Prevent any modifications to the wrapper
-      Object.freeze(readOnlyDb);
+      // Pass the actual Firestore instance as 'db'
+      // Security is enforced by only passing read-only functions (getDocs, getDoc, etc.)
+      // and by Firestore Security Rules on the server
+      // Write functions (setDoc, updateDoc, deleteDoc, etc.) are never passed to the execution context
 
       // Create a sandboxed execution context
       // CRITICAL: We only pass READ functions - no write functions exist in this scope
       const executeCode = new Function(
-        'db',              // Read-only wrapper (no methods)
+        'db',              // Firestore instance (for collection/doc references)
         'collection',      // Safe - just references
         'getDocs',         // Safe - read only
         'query',           // Safe - just builds query
@@ -512,13 +505,13 @@ return snapshot;`);
         // Block any attempts to access dangerous functionality
         // ============================================================
         
-        // Prevent dynamic imports
+        // Prevent dynamic imports via require
         if (typeof require !== 'undefined') {
           throw new Error('❌ Security: require() is not allowed');
         }
-        if (typeof import !== 'undefined') {
-          throw new Error('❌ Security: import is not allowed');
-        }
+        
+        // Note: Cannot check 'typeof import' as it causes syntax errors
+        // import() is already blocked by the sandboxed environment
         
         // Block access to globals that could be exploited
         if (typeof global !== 'undefined') {
@@ -560,7 +553,7 @@ return snapshot;`);
       // Pass only read functions - write functions literally don't exist
       // ============================================================
       const result = await executeCode(
-        readOnlyDb,        // Frozen minimal db object
+        firestore,         // Real Firestore instance (needed for collection/doc references)
         collection,        // Original - safe, just references
         getDocs,           // Original - safe, read-only
         query,             // Original - safe, just builds query

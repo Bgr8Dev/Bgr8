@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { FaUsers, FaCalendarCheck, FaEye, FaUserClock, FaSync, FaSearch, FaTimes, FaChevronDown, FaChevronUp, FaCopy, FaDownload, FaDatabase } from 'react-icons/fa';
+import { FaUsers, FaCalendarCheck, FaEye, FaUserClock, FaSync, FaSearch, FaTimes, FaChevronDown, FaChevronUp, FaCopy, FaDownload, FaDatabase, FaCheck } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { convertTimestampToDate, formatFirestoreDate, convertTimestampFields, isDateInRange, formatFirestoreDateTime, formatRoles } from '../../../utils/firestoreUtils';
 import {
@@ -919,7 +919,7 @@ return results;`;
               </div>
             </div>
             <button className="copy-query-btn" onClick={(e) => { e.stopPropagation(); copyQueryToClipboard(totalUsersQuery); }} title="Copy query to clipboard">
-              {copiedQuery === totalUsersQuery ? '✓' : <FaCopy />}
+              {copiedQuery === totalUsersQuery ? <><FaCheck /> Copied</> : <><FaCopy /> Copy Query</>}
             </button>
             <div className="section-toggle" onClick={() => toggleSection('totalUsers')} style={{ cursor: 'pointer' }}>
               {expandedSections.totalUsers ? <FaChevronUp /> : <FaChevronDown />}
@@ -1120,7 +1120,7 @@ return results;`;
               </div>
             </div>
             <button className="copy-query-btn" onClick={(e) => { e.stopPropagation(); copyQueryToClipboard(activeUsersQuery); }} title="Copy query to clipboard">
-              {copiedQuery === activeUsersQuery ? '✓' : <FaCopy />}
+              {copiedQuery === activeUsersQuery ? <><FaCheck /> Copied</> : <><FaCopy /> Copy Query</>}
             </button>
             <div className="section-toggle" onClick={() => toggleSection('activeUsers')} style={{ cursor: 'pointer' }}>
               {expandedSections.activeUsers ? <FaChevronUp /> : <FaChevronDown />}
@@ -1314,7 +1314,7 @@ return results;`;
               </div>
             </div>
             <button className="copy-query-btn" onClick={(e) => { e.stopPropagation(); copyQueryToClipboard(bookingsQuery); }} title="Copy query to clipboard">
-              {copiedQuery === bookingsQuery ? '✓' : <FaCopy />}
+              {copiedQuery === bookingsQuery ? <><FaCheck /> Copied</> : <><FaCopy /> Copy Query</>}
             </button>
             <div className="section-toggle" onClick={() => toggleSection('bookings')} style={{ cursor: 'pointer' }}>
               {expandedSections.bookings ? <FaChevronUp /> : <FaChevronDown />}
@@ -1514,7 +1514,7 @@ return results;`;
               </div>
             </div>
             <button className="copy-query-btn" onClick={(e) => { e.stopPropagation(); copyQueryToClipboard(profileViewsQuery); }} title="Copy query to clipboard">
-              {copiedQuery === profileViewsQuery ? '✓' : <FaCopy />}
+              {copiedQuery === profileViewsQuery ? <><FaCheck /> Copied</> : <><FaCopy /> Copy Query</>}
             </button>
             <div className="section-toggle" onClick={() => toggleSection('profileViews')} style={{ cursor: 'pointer' }}>
               {expandedSections.profileViews ? <FaChevronUp /> : <FaChevronDown />}
