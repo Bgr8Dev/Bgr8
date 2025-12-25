@@ -5,6 +5,22 @@ import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
 import { FaUsers, FaCalendarCheck, FaEye, FaUserClock, FaSync, FaSearch, FaTimes, FaChevronDown, FaChevronUp, FaCopy } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { convertTimestampToDate, formatFirestoreDate, convertTimestampFields, formatRoles, getNestedProperty, isDateInRange } from '../../../utils/firestoreUtils';
+import {
+  formatDateForInput,
+  formatTimeForInput,
+  formatDate,
+  formatTime,
+  formatTimeRange,
+  parseDateFromInput,
+  parseTimeFromInput,
+  generateTimeBuckets,
+  filterConsecutiveZeros,
+  aggregateDataByTime,
+  convertGranularityToHours,
+  getTimeRangeInDays,
+  validateDateRange,
+  type TimeUnit
+} from '../../../utils/analyticsHelpers';
 import '../../../styles/adminStyles/AnalyticsOverview.css';
 
 interface AnalyticsOverviewProps {
@@ -49,8 +65,20 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
   const defaultStart = new Date();
   defaultStart.setDate(now.getDate() - 7);
   
+  // Applied dates (trigger data fetch)
   const [startDate, setStartDate] = useState<Date>(defaultStart);
   const [endDate, setEndDate] = useState<Date>(now);
+  
+  // Pending dates (user input, not yet applied)
+  const [pendingStartDate, setPendingStartDate] = useState<Date>(defaultStart);
+  const [pendingEndDate, setPendingEndDate] = useState<Date>(now);
+  
+  // Input strings for free-form typing
+  const [startDateInput, setStartDateInput] = useState<string>('');
+  const [startTimeInput, setStartTimeInput] = useState<string>('');
+  const [endDateInput, setEndDateInput] = useState<string>('');
+  const [endTimeInput, setEndTimeInput] = useState<string>('');
+  
   const [sliderValue, setSliderValue] = useState<number>(7);
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -91,7 +119,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
   });
 
   // Custom granularity input state (for user input in days/hours/minutes)
-  const [customGranularityInput, setCustomGranularityInput] = useState<Record<string, { value: string; unit: 'minutes' | 'hours' | 'days' }>>({
+  const [customGranularityInput, setCustomGranularityInput] = useState<Record<string, { value: string; unit: TimeUnit }>>({
     totalUsers: { value: '1', unit: 'days' },
     activeUsers: { value: '1', unit: 'days' },
     bookings: { value: '1', unit: 'days' },
@@ -99,10 +127,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
   });
 
   // Calculate the time range in days
-  const getTimeRangeInDays = (): number => {
-    const diffMs = endDate.getTime() - startDate.getTime();
-    return diffMs / (1000 * 60 * 60 * 24);
-  };
+  const timeRangeInDays = getTimeRangeInDays(startDate, endDate);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -113,92 +138,29 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
   };
 
   // Set custom granularity from user input
-  const setCustomGranularity = (section: string, value: string, unit: 'minutes' | 'hours' | 'days') => {
+  const setCustomGranularity = (section: string, value: string, unit: TimeUnit) => {
     const numValue = parseFloat(value);
-    if (isNaN(numValue) || numValue <= 0) return;
+    // Enforce minimum value of 1 for any unit
+    if (isNaN(numValue) || numValue < 1) return;
 
     // Convert to hours
-    let hours: number;
-    switch (unit) {
-      case 'minutes':
-        hours = numValue / 60;
-        break;
-      case 'hours':
-        hours = numValue;
-        break;
-      case 'days':
-        hours = numValue * 24;
-        break;
-    }
+    const hours = convertGranularityToHours(numValue, unit);
 
     setCustomGranularityInput(prev => ({ ...prev, [section]: { value, unit } }));
     setGranularity(prev => ({ ...prev, [section]: hours }));
   };
 
-  // Generate time buckets based on granularity
-  const generateTimeBuckets = useCallback((start: Date, end: Date, granularityHours: number) => {
-    const buckets: { time: Date; label: string }[] = [];
-    const current = new Date(start);
-    const granularityMs = granularityHours * 60 * 60 * 1000;
-
-    while (current <= end) {
-      buckets.push({
-        time: new Date(current),
-        label: formatTimeLabel(new Date(current), granularityHours)
-      });
-      current.setTime(current.getTime() + granularityMs);
-    }
-
-    return buckets;
-  }, []);
-
-  // Format time label based on granularity
-  const formatTimeLabel = (date: Date, granularityHours: number): string => {
-    if (granularityHours < 24) {
-      // Show hour format
-      return date.toLocaleString('en-GB', { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } else if (granularityHours === 24) {
-      // Show day format
-      return date.toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric'
-      });
-    } else {
-      // Show week/month format
-      return date.toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric'
-      });
-    }
-  };
+  // Generate time buckets based on granularity is now imported from utils
 
   // Aggregate data into time buckets
-  const aggregateDataByTime = useCallback((
+  // Helper function to filter out consecutive zero periods is now imported from utils
+
+  const aggregateDataByTimeCallback = useCallback((
     data: Array<{ timestamp: Date }>,
     granularityHours: number
   ) => {
-    const buckets = generateTimeBuckets(startDate, endDate, granularityHours);
-    const granularityMs = granularityHours * 60 * 60 * 1000;
-
-    const aggregated = buckets.map(bucket => {
-      const bucketEnd = new Date(bucket.time.getTime() + granularityMs);
-      const count = data.filter(item => {
-        return item.timestamp >= bucket.time && item.timestamp < bucketEnd;
-      }).length;
-
-      return {
-        time: bucket.label,
-        count: count
-      };
-    });
-
-    return aggregated;
-  }, [startDate, endDate, generateTimeBuckets]);
+    return aggregateDataByTime(data, startDate, endDate, granularityHours);
+  }, [startDate, endDate]);
 
   // Prepare chart data for total users (cumulative)
   const getTotalUsersChartData = useCallback(() => {
@@ -217,24 +179,24 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
       };
     });
 
-    return data;
-  }, [allUsers, startDate, endDate, granularity.totalUsers, generateTimeBuckets]);
+    return filterConsecutiveZeros(data);
+  }, [allUsers, startDate, endDate, granularity.totalUsers, generateTimeBuckets, filterConsecutiveZeros]);
 
   // Prepare chart data for active users
   const getActiveUsersChartData = useCallback(() => {
     const dataWithTimestamp = activeUsers.map(user => ({
       timestamp: user.lastUpdated || new Date()
     }));
-    return aggregateDataByTime(dataWithTimestamp, granularity.activeUsers);
-  }, [activeUsers, granularity.activeUsers, aggregateDataByTime]);
+    return aggregateDataByTimeCallback(dataWithTimestamp, granularity.activeUsers);
+  }, [activeUsers, granularity.activeUsers, aggregateDataByTimeCallback]);
 
   // Prepare chart data for bookings
   const getBookingsChartData = useCallback(() => {
     const dataWithTimestamp = bookings.map(booking => ({
       timestamp: booking.startTime
     }));
-    return aggregateDataByTime(dataWithTimestamp, granularity.bookings);
-  }, [bookings, granularity.bookings, aggregateDataByTime]);
+    return aggregateDataByTimeCallback(dataWithTimestamp, granularity.bookings);
+  }, [bookings, granularity.bookings, aggregateDataByTimeCallback]);
 
   const filteredAllUsers = allUsers.filter(user => {
     if (!userSearch) return true;
@@ -261,7 +223,28 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
   const filteredBookings = bookings.filter(booking => {
     if (!bookingSearch) return true;
     const search = bookingSearch.toLowerCase();
-    return booking.mentorName?.toLowerCase().includes(search) || booking.menteeName?.toLowerCase().includes(search) || booking.status?.toLowerCase().includes(search);
+    
+    // Safely check each field
+    const mentorNameMatch = booking.mentorName?.toLowerCase().includes(search) || false;
+    const menteeNameMatch = booking.menteeName?.toLowerCase().includes(search) || false;
+    const statusMatch = booking.status?.toLowerCase().includes(search) || false;
+    
+    const matches = mentorNameMatch || menteeNameMatch || statusMatch;
+    
+    // Debug logging (remove after testing)
+    if (bookingSearch && !matches) {
+      console.log('Booking filtered out:', {
+        search,
+        mentorName: booking.mentorName,
+        menteeName: booking.menteeName,
+        status: booking.status,
+        mentorNameMatch,
+        menteeNameMatch,
+        statusMatch
+      });
+    }
+    
+    return matches;
   });
 
   const filteredProfileUsers = allUsers.filter(user => {
@@ -287,39 +270,173 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
     if (selectedProfile) fetchProfileViewsForUser(selectedProfile.uid);
   }, [selectedProfile, fetchProfileViewsForUser]);
 
-  const formatDateForInput = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
+  // Initialize input strings on mount
+  useEffect(() => {
+    setStartDateInput(formatDateForInput(pendingStartDate));
+    setStartTimeInput(formatTimeForInput(pendingStartDate));
+    setEndDateInput(formatDateForInput(pendingEndDate));
+    setEndTimeInput(formatTimeForInput(pendingEndDate));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Date/time formatting and parsing functions are now imported from analyticsHelpers
 
   const handleSliderChange = (value: number) => {
     setSliderValue(value);
     const newStart = new Date();
     newStart.setDate(now.getDate() - value);
-    setStartDate(newStart);
-    setEndDate(new Date());
+    setPendingStartDate(newStart);
+    setPendingEndDate(new Date());
+    // Update input strings
+    setStartDateInput(formatDateForInput(newStart));
+    setStartTimeInput(formatTimeForInput(newStart));
+    setEndDateInput(formatDateForInput(new Date()));
+    setEndTimeInput(formatTimeForInput(new Date()));
   };
 
-  const handlePresetClick = (days: number) => handleSliderChange(days);
+  const handlePresetClick = (days: number) => {
+    handleSliderChange(days);
+    // Only update pending dates, don't apply immediately
+    // User must click refresh to apply
+  };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = new Date(e.target.value);
-    if (!isNaN(newDate.getTime())) {
-      setStartDate(newDate);
-      const daysDiff = Math.round((endDate.getTime() - newDate.getTime()) / (1000 * 60 * 60 * 24));
-      setSliderValue(Math.min(365, Math.max(1, daysDiff)));
+    const dateValue = e.target.value;
+    setStartDateInput(dateValue);
+    
+    // Try to parse and update pending date
+    const parsedDate = parseDateFromInput(dateValue);
+    if (parsedDate) {
+      parsedDate.setHours(pendingStartDate.getHours());
+      parsedDate.setMinutes(pendingStartDate.getMinutes());
+      parsedDate.setSeconds(0);
+      parsedDate.setMilliseconds(0);
+      
+      if (!isNaN(parsedDate.getTime())) {
+        setPendingStartDate(parsedDate);
+      }
+    }
+  };
+
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const timeValue = e.target.value;
+    setStartTimeInput(timeValue);
+    
+    // Try to parse and update pending time
+    const parsedTime = parseTimeFromInput(timeValue);
+    if (parsedTime) {
+      const newDate = new Date(pendingStartDate);
+      newDate.setHours(parsedTime.hours);
+      newDate.setMinutes(parsedTime.minutes);
+      newDate.setSeconds(0);
+      newDate.setMilliseconds(0);
+      
+      if (!isNaN(newDate.getTime())) {
+        setPendingStartDate(newDate);
+      }
     }
   };
 
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = new Date(e.target.value);
-    if (!isNaN(newDate.getTime())) {
-      setEndDate(newDate);
-      const daysDiff = Math.round((newDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const dateValue = e.target.value;
+    setEndDateInput(dateValue);
+    
+    // Try to parse and update pending date
+    const parsedDate = parseDateFromInput(dateValue);
+    if (parsedDate) {
+      parsedDate.setHours(pendingEndDate.getHours());
+      parsedDate.setMinutes(pendingEndDate.getMinutes());
+      parsedDate.setSeconds(0);
+      parsedDate.setMilliseconds(0);
+      
+      if (!isNaN(parsedDate.getTime())) {
+        setPendingEndDate(parsedDate);
+      }
+    }
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const timeValue = e.target.value;
+    setEndTimeInput(timeValue);
+    
+    // Try to parse and update pending time
+    const parsedTime = parseTimeFromInput(timeValue);
+    if (parsedTime) {
+      const newDate = new Date(pendingEndDate);
+      newDate.setHours(parsedTime.hours);
+      newDate.setMinutes(parsedTime.minutes);
+      newDate.setSeconds(0);
+      newDate.setMilliseconds(0);
+      
+      if (!isNaN(newDate.getTime())) {
+        setPendingEndDate(newDate);
+      }
+    }
+  };
+
+  // Apply pending dates and trigger refresh
+  const applyDateChanges = () => {
+    // Try to parse the current input strings
+    const startDateParsed = parseDateFromInput(startDateInput);
+    const startTimeParsed = parseTimeFromInput(startTimeInput);
+    const endDateParsed = parseDateFromInput(endDateInput);
+    const endTimeParsed = parseTimeFromInput(endTimeInput);
+    
+    // Build complete start date
+    let finalStartDate = new Date(pendingStartDate);
+    if (startDateParsed) {
+      finalStartDate = new Date(startDateParsed);
+      if (startTimeParsed) {
+        finalStartDate.setHours(startTimeParsed.hours);
+        finalStartDate.setMinutes(startTimeParsed.minutes);
+      } else {
+        finalStartDate.setHours(pendingStartDate.getHours());
+        finalStartDate.setMinutes(pendingStartDate.getMinutes());
+      }
+    }
+    
+    // Build complete end date
+    let finalEndDate = new Date(pendingEndDate);
+    if (endDateParsed) {
+      finalEndDate = new Date(endDateParsed);
+      if (endTimeParsed) {
+        finalEndDate.setHours(endTimeParsed.hours);
+        finalEndDate.setMinutes(endTimeParsed.minutes);
+      } else {
+        finalEndDate.setHours(pendingEndDate.getHours());
+        finalEndDate.setMinutes(pendingEndDate.getMinutes());
+      }
+    }
+    
+    // Validate date range using helper function
+    const validationError = validateDateRange(finalStartDate, finalEndDate);
+    if (validationError) {
+      console.error(`Cannot apply changes: ${validationError}`);
+      alert(validationError);
+      // Reset input strings to last valid dates
+      setStartDateInput(formatDateForInput(pendingStartDate));
+      setStartTimeInput(formatTimeForInput(pendingStartDate));
+      setEndDateInput(formatDateForInput(pendingEndDate));
+      setEndTimeInput(formatTimeForInput(pendingEndDate));
+      return;
+    }
+    
+    // Update pending dates
+    setPendingStartDate(finalStartDate);
+    setPendingEndDate(finalEndDate);
+    
+    // Apply to actual date filters
+    setStartDate(finalStartDate);
+    setEndDate(finalEndDate);
+    
+    // Sync input strings to the validated dates
+    setStartDateInput(formatDateForInput(finalStartDate));
+    setStartTimeInput(formatTimeForInput(finalStartDate));
+    setEndDateInput(formatDateForInput(finalEndDate));
+    setEndTimeInput(formatTimeForInput(finalEndDate));
+    
+    // Update slider to reflect the applied date range
+    const daysDiff = Math.round((finalEndDate.getTime() - finalStartDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (!isNaN(daysDiff) && daysDiff > 0) {
       setSliderValue(Math.min(365, Math.max(1, daysDiff)));
     }
   };
@@ -567,10 +684,8 @@ return results;`;
 
   // Automatically adjust granularity when time range changes
   useEffect(() => {
-    const timeRangeDays = getTimeRangeInDays();
-    
     // If time range is more than 1 day, enforce minimum granularity of 1 day
-    if (timeRangeDays > 1) {
+    if (timeRangeInDays > 1) {
       // Check each section and update if using minutes or hours
       Object.keys(customGranularityInput).forEach((section) => {
         const input = customGranularityInput[section];
@@ -595,20 +710,7 @@ return results;`;
     }
   }, [startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const formatDate = (date: Date | null | undefined): string => {
-    if (!date) return 'N/A';
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
-
-  const formatTime = (date: Date | null | undefined): string => {
-    if (!date) return 'N/A';
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-  };
-
-  const formatTimeRange = (startTime: Date | null | undefined, endTime: Date | null | undefined): string => {
-    if (!startTime || !endTime) return 'Time TBD';
-    return `${formatTime(startTime)} - ${formatTime(endTime)}`;
-  };
+  // formatDate, formatTime, and formatTimeRange are now imported from analyticsHelpers
 
   return (
     <div className="analytics-overview">
@@ -617,7 +719,7 @@ return results;`;
       </div>
       
       <div className="time-range-controls">
-        <button className="refresh-btn" onClick={fetchAnalytics} disabled={loading} title="Refresh">
+        <button className="refresh-btn" onClick={() => { applyDateChanges(); fetchAnalytics(); }} disabled={loading} title="Refresh">
           <FaSync className={loading ? 'spinning' : ''} />
         </button>
         <div className="preset-buttons">
@@ -630,9 +732,43 @@ return results;`;
           <span className="slider-label">{sliderValue}d</span>
         </div>
         <div className="datetime-inputs">
-          <input type="datetime-local" value={formatDateForInput(startDate)} onChange={handleStartDateChange} className="datetime-input" min="2024-01-01T00:00" />
+          <div className="datetime-group">
+            <input 
+              type="text" 
+              value={startDateInput} 
+              onChange={handleStartDateChange} 
+              className="date-input" 
+              placeholder="DD/MM/YYYY"
+              maxLength={10}
+            />
+            <input 
+              type="text" 
+              value={startTimeInput} 
+              onChange={handleStartTimeChange} 
+              className="time-input" 
+              placeholder="HH:MM"
+              maxLength={5}
+            />
+          </div>
           <span className="datetime-separator">→</span>
-          <input type="datetime-local" value={formatDateForInput(endDate)} onChange={handleEndDateChange} className="datetime-input" min="2024-01-01T00:00" />
+          <div className="datetime-group">
+            <input 
+              type="text" 
+              value={endDateInput} 
+              onChange={handleEndDateChange} 
+              className="date-input" 
+              placeholder="DD/MM/YYYY"
+              maxLength={10}
+            />
+            <input 
+              type="text" 
+              value={endTimeInput} 
+              onChange={handleEndTimeChange} 
+              className="time-input" 
+              placeholder="HH:MM"
+              maxLength={5}
+            />
+          </div>
         </div>
       </div>
 
@@ -661,23 +797,37 @@ return results;`;
                 <label>Granularity:</label>
                 <input 
                   type="number"
-                  min="0.1"
-                  step="0.1"
+                  min="1"
+                  step="1"
                   value={customGranularityInput.totalUsers.value}
                   onChange={(e) => setCustomGranularity('totalUsers', e.target.value, customGranularityInput.totalUsers.unit)}
                   className="granularity-input"
                   style={{ width: '70px', padding: '6px 8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', color: '#e6edf3', fontSize: '0.85rem' }}
                 />
-                <select 
-                  value={customGranularityInput.totalUsers.unit}
-                  onChange={(e) => setCustomGranularity('totalUsers', customGranularityInput.totalUsers.value, e.target.value as 'minutes' | 'hours' | 'days')}
-                  className="granularity-select"
-                  style={{ minWidth: '100px' }}
-                >
-                  {getTimeRangeInDays() <= 1 && <option value="minutes">Minutes</option>}
-                  {getTimeRangeInDays() <= 1 && <option value="hours">Hours</option>}
-                  <option value="days">Days</option>
-                </select>
+                <div className="unit-buttons">
+                  {timeRangeInDays <= 1 && (
+                    <button 
+                      className={`unit-btn ${customGranularityInput.totalUsers.unit === 'minutes' ? 'active' : ''}`}
+                      onClick={() => setCustomGranularity('totalUsers', customGranularityInput.totalUsers.value, 'minutes')}
+                    >
+                      Minutes
+                    </button>
+                  )}
+                  {timeRangeInDays <= 1 && (
+                    <button 
+                      className={`unit-btn ${customGranularityInput.totalUsers.unit === 'hours' ? 'active' : ''}`}
+                      onClick={() => setCustomGranularity('totalUsers', customGranularityInput.totalUsers.value, 'hours')}
+                    >
+                      Hours
+                    </button>
+                  )}
+                  <button 
+                    className={`unit-btn ${customGranularityInput.totalUsers.unit === 'days' ? 'active' : ''}`}
+                    onClick={() => setCustomGranularity('totalUsers', customGranularityInput.totalUsers.value, 'days')}
+                  >
+                    Days
+                  </button>
+                </div>
               </div>
               
               {/* Chart */}
@@ -692,10 +842,16 @@ return results;`;
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      type="category"
+                      allowDataOverflow={false}
                     />
                     <YAxis 
                       stroke="rgba(255,255,255,0.5)"
                       tick={{ fill: 'rgba(255,255,255,0.7)' }}
+                      type="number"
+                      allowDataOverflow={false}
+                      scale="linear"
+                      domain={[0, 'auto']}
                     />
                     <Tooltip 
                       contentStyle={{ 
@@ -768,23 +924,37 @@ return results;`;
                 <label>Granularity:</label>
                 <input 
                   type="number"
-                  min="0.1"
-                  step="0.1"
+                  min="1"
+                  step="1"
                   value={customGranularityInput.activeUsers.value}
                   onChange={(e) => setCustomGranularity('activeUsers', e.target.value, customGranularityInput.activeUsers.unit)}
                   className="granularity-input"
                   style={{ width: '70px', padding: '6px 8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', color: '#e6edf3', fontSize: '0.85rem' }}
                 />
-                <select 
-                  value={customGranularityInput.activeUsers.unit}
-                  onChange={(e) => setCustomGranularity('activeUsers', customGranularityInput.activeUsers.value, e.target.value as 'minutes' | 'hours' | 'days')}
-                  className="granularity-select"
-                  style={{ minWidth: '100px' }}
-                >
-                  {getTimeRangeInDays() <= 1 && <option value="minutes">Minutes</option>}
-                  {getTimeRangeInDays() <= 1 && <option value="hours">Hours</option>}
-                  <option value="days">Days</option>
-                </select>
+                <div className="unit-buttons">
+                  {timeRangeInDays <= 1 && (
+                    <button 
+                      className={`unit-btn ${customGranularityInput.activeUsers.unit === 'minutes' ? 'active' : ''}`}
+                      onClick={() => setCustomGranularity('activeUsers', customGranularityInput.activeUsers.value, 'minutes')}
+                    >
+                      Minutes
+                    </button>
+                  )}
+                  {timeRangeInDays <= 1 && (
+                    <button 
+                      className={`unit-btn ${customGranularityInput.activeUsers.unit === 'hours' ? 'active' : ''}`}
+                      onClick={() => setCustomGranularity('activeUsers', customGranularityInput.activeUsers.value, 'hours')}
+                    >
+                      Hours
+                    </button>
+                  )}
+                  <button 
+                    className={`unit-btn ${customGranularityInput.activeUsers.unit === 'days' ? 'active' : ''}`}
+                    onClick={() => setCustomGranularity('activeUsers', customGranularityInput.activeUsers.value, 'days')}
+                  >
+                    Days
+                  </button>
+                </div>
               </div>
               
               {/* Chart */}
@@ -799,10 +969,16 @@ return results;`;
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      type="category"
+                      allowDataOverflow={false}
                     />
                     <YAxis 
                       stroke="rgba(255,255,255,0.5)"
                       tick={{ fill: 'rgba(255,255,255,0.7)' }}
+                      type="number"
+                      allowDataOverflow={false}
+                      scale="linear"
+                      domain={[0, 'auto']}
                     />
                     <Tooltip 
                       contentStyle={{ 
@@ -875,23 +1051,37 @@ return results;`;
                 <label>Granularity:</label>
                 <input 
                   type="number"
-                  min="0.1"
-                  step="0.1"
+                  min="1"
+                  step="1"
                   value={customGranularityInput.bookings.value}
                   onChange={(e) => setCustomGranularity('bookings', e.target.value, customGranularityInput.bookings.unit)}
                   className="granularity-input"
                   style={{ width: '70px', padding: '6px 8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', color: '#e6edf3', fontSize: '0.85rem' }}
                 />
-                <select 
-                  value={customGranularityInput.bookings.unit}
-                  onChange={(e) => setCustomGranularity('bookings', customGranularityInput.bookings.value, e.target.value as 'minutes' | 'hours' | 'days')}
-                  className="granularity-select"
-                  style={{ minWidth: '100px' }}
-                >
-                  {getTimeRangeInDays() <= 1 && <option value="minutes">Minutes</option>}
-                  {getTimeRangeInDays() <= 1 && <option value="hours">Hours</option>}
-                  <option value="days">Days</option>
-                </select>
+                <div className="unit-buttons">
+                  {timeRangeInDays <= 1 && (
+                    <button 
+                      className={`unit-btn ${customGranularityInput.bookings.unit === 'minutes' ? 'active' : ''}`}
+                      onClick={() => setCustomGranularity('bookings', customGranularityInput.bookings.value, 'minutes')}
+                    >
+                      Minutes
+                    </button>
+                  )}
+                  {timeRangeInDays <= 1 && (
+                    <button 
+                      className={`unit-btn ${customGranularityInput.bookings.unit === 'hours' ? 'active' : ''}`}
+                      onClick={() => setCustomGranularity('bookings', customGranularityInput.bookings.value, 'hours')}
+                    >
+                      Hours
+                    </button>
+                  )}
+                  <button 
+                    className={`unit-btn ${customGranularityInput.bookings.unit === 'days' ? 'active' : ''}`}
+                    onClick={() => setCustomGranularity('bookings', customGranularityInput.bookings.value, 'days')}
+                  >
+                    Days
+                  </button>
+                </div>
               </div>
               
               {/* Chart */}
@@ -906,10 +1096,16 @@ return results;`;
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      type="category"
+                      allowDataOverflow={false}
                     />
                     <YAxis 
                       stroke="rgba(255,255,255,0.5)"
                       tick={{ fill: 'rgba(255,255,255,0.7)' }}
+                      type="number"
+                      allowDataOverflow={false}
+                      scale="linear"
+                      domain={[0, 'auto']}
                     />
                     <Tooltip 
                       contentStyle={{ 

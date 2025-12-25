@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, limit, doc, getDoc } from 'firebase/firestore';
 import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
-import { FaFolder, FaFolderOpen, FaFile, FaSync, FaSearch } from 'react-icons/fa';
+import { FaFolder, FaFolderOpen, FaFile, FaSync } from 'react-icons/fa';
 import { formatFirestoreDateTime } from '../../../utils/firestoreUtils';
 import '../../../styles/adminStyles/DataExplorer.css';
 
@@ -35,7 +35,6 @@ const KNOWN_COLLECTIONS = [
 const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
   const [collections, setCollections] = useState<CollectionInfo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedDoc, setSelectedDoc] = useState<{ collection: string; id: string; data: Record<string, unknown> } | null>(null);
 
   useEffect(() => {
@@ -139,10 +138,6 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
     }
   };
 
-  const filteredCollections = collections.filter(col => 
-    col.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return 'null';
     if (typeof value === 'object') {
@@ -170,15 +165,6 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
     <div className="data-explorer">
       {/* Toolbar */}
       <div className="explorer-toolbar">
-        <div className="search-box">
-          <FaSearch />
-          <input
-            type="text"
-            placeholder="Search collections..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
         <button className="refresh-btn" onClick={loadCollections} disabled={loading}>
           <FaSync className={loading ? 'spinning' : ''} />
           Refresh
@@ -197,7 +183,7 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ onQueryResult }) => {
             <div className="tree-loading">Loading collections...</div>
           ) : (
             <div className="tree-list">
-              {filteredCollections.map(col => (
+              {collections.map(col => (
                 <div key={col.name} className="tree-item">
                   <div 
                     className={`tree-collection ${col.isExpanded ? 'expanded' : ''}`}
