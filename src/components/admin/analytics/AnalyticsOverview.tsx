@@ -21,7 +21,7 @@ import {
 } from '../../../utils/analyticsHelpers';
 import '../../../styles/adminStyles/AnalyticsOverview.css';
 
-// Empty interface kept for future extensibility
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface AnalyticsOverviewProps {
   // Reserved for future props
 }
