@@ -2,14 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
-import { FaUsers, FaCalendarCheck, FaEye, FaUserClock, FaSync, FaSearch, FaTimes, FaChevronDown, FaChevronUp, FaCopy } from 'react-icons/fa';
+import { FaUsers, FaCalendarCheck, FaEye, FaUserClock, FaSync, FaSearch, FaTimes, FaChevronDown, FaChevronUp, FaCopy, FaDownload, FaDatabase } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { convertTimestampToDate, formatFirestoreDate, convertTimestampFields, formatRoles, getNestedProperty, isDateInRange } from '../../../utils/firestoreUtils';
+import { convertTimestampToDate, formatFirestoreDate, convertTimestampFields, isDateInRange, formatFirestoreDateTime, formatRoles } from '../../../utils/firestoreUtils';
 import {
   formatDateForInput,
   formatTimeForInput,
   formatDate,
-  formatTime,
   formatTimeRange,
   parseDateFromInput,
   parseTimeFromInput,
@@ -59,6 +58,37 @@ const TIME_PRESETS = [
   { label: '1y', days: 365 },
 ];
 
+/**
+ * AnalyticsOverview Component
+ * 
+ * STRUCTURE GUIDE - Each metric section follows this pattern:
+ * 
+ * 1. Section Comment Block - Describes data source and features
+ * 2. Section Container - <div className="metric-section">
+ * 3. Section Header - Title, icon, count, expand/collapse controls
+ * 4. Section Content (when expanded):
+ *    a. Chart Controls - Granularity settings (minutes/hours/days)
+ *    b. Chart - Recharts LineChart component
+ *    c. Data Preview - Toggleable table with download buttons
+ *    d. Search Bar - Filter results
+ *    e. List - Scrollable list of items
+ * 
+ * TO ADD A NEW METRIC SECTION:
+ * 1. Copy an existing section block (Total Users is most complete)
+ * 2. Update the comment block with new metric details
+ * 3. Change colors (borderLeftColor, gradient colors)
+ * 4. Update state variable names (allUsers -> yourData)
+ * 5. Create a new data extraction function (e.g., getYourMetricData)
+ * 6. Add your section key to getDataForSection's switch statement
+ * 7. Create corresponding chart data function (getTotalUsersChartData -> getYourChartData)
+ * 8. Customize search/filter logic in useMemo
+ * 
+ * DATA EXTRACTION PATTERN:
+ * - Each metric has its own dedicated data extraction function
+ * - Functions are named: get[SectionName]Data()
+ * - All return Record<string, unknown>[] for consistent typing
+ * - getDataForSection() routes to the correct function via switch
+ */
 const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) => {
   const [loading, setLoading] = useState(true);
   const now = new Date();
@@ -82,6 +112,13 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
   const [sliderValue, setSliderValue] = useState<number>(7);
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    totalUsers: false,
+    activeUsers: false,
+    bookings: false,
+    profileViews: false
+  });
+  
+  const [showDataPreview, setShowDataPreview] = useState<Record<string, boolean>>({
     totalUsers: false,
     activeUsers: false,
     bookings: false,
@@ -131,10 +168,6 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  const setGranularityForSection = (section: string, hours: number) => {
-    setGranularity(prev => ({ ...prev, [section]: hours }));
   };
 
   // Set custom granularity from user input
@@ -230,19 +263,6 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
     const statusMatch = booking.status?.toLowerCase().includes(search) || false;
     
     const matches = mentorNameMatch || menteeNameMatch || statusMatch;
-    
-    // Debug logging (remove after testing)
-    if (bookingSearch && !matches) {
-      console.log('Booking filtered out:', {
-        search,
-        mentorName: booking.mentorName,
-        menteeName: booking.menteeName,
-        status: booking.status,
-        mentorNameMatch,
-        menteeNameMatch,
-        statusMatch
-      });
-    }
     
     return matches;
   });
@@ -567,6 +587,114 @@ return results;`;
     });
   };
 
+  const downloadDataAsJSON = (data: unknown[], filename: string) => {
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${filename}_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadDataAsCSV = (data: Record<string, unknown>[], filename: string) => {
+    if (data.length === 0) return;
+    
+    // Get all unique keys
+    const keys = Array.from(new Set(data.flatMap(obj => Object.keys(obj))));
+    
+    // Create CSV header
+    const header = keys.join(',');
+    
+    // Create CSV rows
+    const rows = data.map(obj => 
+      keys.map(key => {
+        const value = obj[key];
+        if (value === null || value === undefined) return '';
+        const str = String(value);
+        // Escape quotes and wrap in quotes if contains comma or newline
+        if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }).join(',')
+    );
+    
+    const csvContent = [header, ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const toggleDataPreview = (section: string) => {
+    setShowDataPreview(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // ========================================
+  // DATA EXTRACTION FUNCTIONS
+  // Each function transforms filtered data for a specific metric section
+  // ========================================
+  
+  const getTotalUsersData = (): Record<string, unknown>[] => {
+    return filteredAllUsers.map(u => ({
+      uid: u.uid,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email,
+      dateCreated: u.dateCreated ? formatFirestoreDateTime(u.dateCreated) : 'N/A',
+      roles: formatRoles(u.roles || {})
+    }));
+  };
+
+  const getActiveUsersData = (): Record<string, unknown>[] => {
+    return filteredActiveUsers.map(u => ({
+      uid: u.uid,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email,
+      lastUpdated: u.lastUpdated ? formatFirestoreDateTime(u.lastUpdated) : 'N/A',
+      roles: formatRoles(u.roles || {})
+    }));
+  };
+
+  const getBookingsData = (): Record<string, unknown>[] => {
+    return filteredBookings.map(b => ({
+      bookingId: b.bookingId,
+      mentorName: b.mentorName,
+      menteeName: b.menteeName,
+      status: b.status,
+      startTime: formatFirestoreDateTime(b.startTime),
+      endTime: formatFirestoreDateTime(b.endTime),
+      createdAt: formatFirestoreDateTime(b.createdAt)
+    }));
+  };
+
+  const getProfileViewsData = (): Record<string, unknown>[] => {
+    return selectedProfile ? [{
+      profileId: selectedProfile.uid,
+      profileName: `${selectedProfile.firstName} ${selectedProfile.lastName}`,
+      email: selectedProfile.email,
+      totalViews: profileViews,
+      dateRange: `${formatDate(startDate)} - ${formatDate(endDate)}`
+    }] : [];
+  };
+
+  // Helper function to route to the correct data extraction function
+  const getDataForSection = (section: string): Record<string, unknown>[] => {
+    switch (section) {
+      case 'totalUsers': return getTotalUsersData();
+      case 'activeUsers': return getActiveUsersData();
+      case 'bookings': return getBookingsData();
+      case 'profileViews': return getProfileViewsData();
+      default: return [];
+    }
+  };
+
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
@@ -773,7 +901,14 @@ return results;`;
       </div>
 
       <div className="metric-sections">
-        {/* Total Users */}
+        
+        {/* ========================================
+            METRIC SECTION: TOTAL USERS
+            - Data Source: allUsers state
+            - Chart: Line chart showing user growth over time
+            - Data Preview: User details with roles and creation dates
+            - Search: Filter by name/email
+        ======================================== */}
         <div className={`metric-section ${expandedSections.totalUsers ? 'expanded' : ''}`}>
           <div className="section-header" style={{ borderLeftColor: '#22c55e' }}>
             <div onClick={() => toggleSection('totalUsers')} style={{ display: 'flex', alignItems: 'center', flex: 1, cursor: 'pointer' }}>
@@ -875,6 +1010,74 @@ return results;`;
                 </ResponsiveContainer>
               </div>
               
+              {/* Data Preview & Download */}
+              <div className="data-preview-section">
+                <button 
+                  className="data-preview-toggle"
+                  onClick={() => toggleDataPreview('totalUsers')}
+                >
+                  <FaDatabase />
+                  <span>{showDataPreview.totalUsers ? 'Hide' : 'Show'} Data ({filteredAllUsers.length} records)</span>
+                  {showDataPreview.totalUsers ? <FaChevronUp /> : <FaChevronDown />}
+                </button>
+                
+                {showDataPreview.totalUsers && (
+                  <div className="data-preview-content">
+                    <div className="data-preview-actions">
+                      <button 
+                        className="download-btn"
+                        onClick={() => downloadDataAsJSON(getDataForSection('totalUsers'), 'total-users')}
+                        title="Download as JSON"
+                      >
+                        <FaDownload /> JSON
+                      </button>
+                      <button 
+                        className="download-btn"
+                        onClick={() => downloadDataAsCSV(getDataForSection('totalUsers'), 'total-users')}
+                        title="Download as CSV"
+                      >
+                        <FaDownload /> CSV
+                      </button>
+                    </div>
+                    <div className="data-preview-table-wrapper">
+                      {(() => {
+                        const previewData = getDataForSection('totalUsers').slice(0, 10);
+                        if (previewData.length === 0) return <div className="empty-preview">No data available</div>;
+                        
+                        const columns = Object.keys(previewData[0]);
+                        return (
+                          <table className="data-preview-table">
+                            <thead>
+                              <tr>
+                                {columns.map(col => (
+                                  <th key={col}>{col}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {previewData.map((row, idx) => (
+                                <tr key={idx}>
+                                  {columns.map(col => (
+                                    <td key={col}>
+                                      {row[col] == null ? <span className="null-value">null</span> : String(row[col])}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        );
+                      })()}
+                    </div>
+                    {filteredAllUsers.length > 10 && (
+                      <div className="data-preview-more">
+                        ... and {filteredAllUsers.length - 10} more records (download to see all)
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
               <div className="section-search">
                 <FaSearch />
                 <input type="text" placeholder="Search users..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} />
@@ -899,7 +1102,13 @@ return results;`;
           )}
         </div>
 
-        {/* Active Users */}
+        {/* ========================================
+            METRIC SECTION: ACTIVE USERS
+            - Data Source: activeUsers state (users with lastUpdated in date range)
+            - Chart: Line chart showing active user count over time
+            - Data Preview: Active user details with last updated timestamps
+            - Search: Filter by name/email
+        ======================================== */}
         <div className={`metric-section ${expandedSections.activeUsers ? 'expanded' : ''}`}>
           <div className="section-header" style={{ borderLeftColor: '#3b82f6' }}>
             <div onClick={() => toggleSection('activeUsers')} style={{ display: 'flex', alignItems: 'center', flex: 1, cursor: 'pointer' }}>
@@ -1002,6 +1211,67 @@ return results;`;
                 </ResponsiveContainer>
               </div>
               
+              {/* Data Preview Section */}
+              <div className="data-preview-section">
+                <button 
+                  className="data-preview-toggle"
+                  onClick={() => toggleDataPreview('activeUsers')}
+                >
+                  <FaDatabase />
+                  <span>{showDataPreview.activeUsers ? 'Hide' : 'Show'} Data ({filteredActiveUsers.length} records)</span>
+                  {showDataPreview.activeUsers ? <FaChevronUp /> : <FaChevronDown />}
+                </button>
+                {showDataPreview.activeUsers && (
+                  <div className="data-preview-content">
+                    <div className="data-preview-actions">
+                      <button className="download-btn" onClick={() => downloadDataAsJSON(getDataForSection('activeUsers'), 'active-users')}>
+                        <FaDownload /> Download JSON
+                      </button>
+                      <button className="download-btn" onClick={() => downloadDataAsCSV(getDataForSection('activeUsers'), 'active-users')}>
+                        <FaDownload /> Download CSV
+                      </button>
+                    </div>
+                    <div className="data-preview-table-wrapper">
+                      {(() => {
+                        const data = getDataForSection('activeUsers');
+                        const previewData = data.slice(0, 10);
+                        if (previewData.length === 0) {
+                          return <div className="empty-preview">No data available</div>;
+                        }
+                        const columns = Object.keys(previewData[0]);
+                        return (
+                          <table className="data-preview-table">
+                            <thead>
+                              <tr>
+                                {columns.map(col => (
+                                  <th key={col}>{col}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {previewData.map((row, idx) => (
+                                <tr key={idx}>
+                                  {columns.map(col => (
+                                    <td key={col}>
+                                      {row[col] == null ? <span className="null-value">null</span> : String(row[col])}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        );
+                      })()}
+                    </div>
+                    {filteredActiveUsers.length > 10 && (
+                      <div className="data-preview-more">
+                        ... and {filteredActiveUsers.length - 10} more records (download to see all)
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
               <div className="section-search">
                 <FaSearch />
                 <input type="text" placeholder="Search active users..." value={activeUserSearch} onChange={(e) => setActiveUserSearch(e.target.value)} />
@@ -1026,7 +1296,13 @@ return results;`;
           )}
         </div>
 
-        {/* Bookings */}
+        {/* ========================================
+            METRIC SECTION: BOOKINGS
+            - Data Source: bookings state (mentor-mentee sessions)
+            - Chart: Line chart showing booking count over time
+            - Data Preview: Booking details with mentor/mentee names, status, times
+            - Search: Filter by mentor, mentee, or status
+        ======================================== */}
         <div className={`metric-section ${expandedSections.bookings ? 'expanded' : ''}`}>
           <div className="section-header" style={{ borderLeftColor: '#a855f7' }}>
             <div onClick={() => toggleSection('bookings')} style={{ display: 'flex', alignItems: 'center', flex: 1, cursor: 'pointer' }}>
@@ -1129,6 +1405,67 @@ return results;`;
                 </ResponsiveContainer>
               </div>
               
+              {/* Data Preview Section */}
+              <div className="data-preview-section">
+                <button 
+                  className="data-preview-toggle"
+                  onClick={() => toggleDataPreview('bookings')}
+                >
+                  <FaDatabase />
+                  <span>{showDataPreview.bookings ? 'Hide' : 'Show'} Data ({filteredBookings.length} records)</span>
+                  {showDataPreview.bookings ? <FaChevronUp /> : <FaChevronDown />}
+                </button>
+                {showDataPreview.bookings && (
+                  <div className="data-preview-content">
+                    <div className="data-preview-actions">
+                      <button className="download-btn" onClick={() => downloadDataAsJSON(getDataForSection('bookings'), 'bookings')}>
+                        <FaDownload /> Download JSON
+                      </button>
+                      <button className="download-btn" onClick={() => downloadDataAsCSV(getDataForSection('bookings'), 'bookings')}>
+                        <FaDownload /> Download CSV
+                      </button>
+                    </div>
+                    <div className="data-preview-table-wrapper">
+                      {(() => {
+                        const data = getDataForSection('bookings');
+                        const previewData = data.slice(0, 10);
+                        if (previewData.length === 0) {
+                          return <div className="empty-preview">No data available</div>;
+                        }
+                        const columns = Object.keys(previewData[0]);
+                        return (
+                          <table className="data-preview-table">
+                            <thead>
+                              <tr>
+                                {columns.map(col => (
+                                  <th key={col}>{col}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {previewData.map((row, idx) => (
+                                <tr key={idx}>
+                                  {columns.map(col => (
+                                    <td key={col}>
+                                      {row[col] == null ? <span className="null-value">null</span> : String(row[col])}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        );
+                      })()}
+                    </div>
+                    {filteredBookings.length > 10 && (
+                      <div className="data-preview-more">
+                        ... and {filteredBookings.length - 10} more records (download to see all)
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
               <div className="section-search">
                 <FaSearch />
                 <input type="text" placeholder="Search by mentor, mentee, or status..." value={bookingSearch} onChange={(e) => setBookingSearch(e.target.value)} />
@@ -1160,13 +1497,18 @@ return results;`;
           )}
         </div>
 
-        {/* Profile Views */}
+        {/* ========================================
+            METRIC SECTION: PROFILE VIEWS
+            - Data Source: profileViews collection (total count only)
+            - Status: WIP - Currently Broken
+            - Note: No chart or data preview yet (needs data structure update)
+        ======================================== */}
         <div className={`metric-section ${expandedSections.profileViews ? 'expanded' : ''}`}>
           <div className="section-header" style={{ borderLeftColor: '#f59e0b' }}>
             <div onClick={() => toggleSection('profileViews')} style={{ display: 'flex', alignItems: 'center', flex: 1, cursor: 'pointer' }}>
               <div className="section-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}><FaEye /></div>
               <div className="section-info">
-                <h3>Profile Views</h3>
+                <h3>Profile Views <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 'normal', marginLeft: '8px' }}>(WIP - Currently Broken)</span></h3>
                 <span className="section-count">{totalProfileViews.toLocaleString()}</span>
                 <span className="section-subtitle">{startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} - {endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
               </div>

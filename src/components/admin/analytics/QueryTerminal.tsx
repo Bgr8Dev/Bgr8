@@ -16,8 +16,6 @@ import {
   limitToLast,
   documentId,
   Timestamp,
-  QueryConstraint,
-  CollectionReference,
   DocumentData
 } from 'firebase/firestore';
 import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
@@ -127,6 +125,36 @@ const snapshot = await getDocs(
 );
 return snapshot;`,
     description: 'Query with range conditions'
+  },
+  {
+    name: 'Mentor/Mentee Profile Information',
+    code: `// Collate all mentor profiles from users
+const allProfiles = [];
+const usersSnap = await getDocs(collection(db, 'users'));
+
+for (const userDoc of usersSnap.docs) {
+  const userId = userDoc.id;
+  
+  try {
+    // Get the 'profile' document from mentorProgram subcollection
+    const profileDocRef = doc(db, 'users', userId, 'mentorProgram', 'profile');
+    const profileDoc = await getDoc(profileDocRef);
+    
+    if (profileDoc.exists()) {
+      allProfiles.push({
+        ...profileDoc.data(),
+        _userId: userId,
+        _path: \`users/\${userId}/mentorProgram/profile\`
+      });
+    }
+  } catch (error) {
+    // Skip users without mentor profiles
+  }
+}
+
+console.log(\`Found \${allProfiles.length} mentor profiles\`);
+return allProfiles;`,
+    description: 'Get all mentor/mentee profile data from nested collections'
   }
 ];
 
@@ -237,7 +265,7 @@ return snapshot;`);
     if (value == null) return <span className="cell-null">null</span>;
     
     // Handle Firestore Timestamp objects (for backwards compatibility, though they should be pre-converted)
-    if (typeof value === 'object' && value !== null && 'seconds' in value) {
+    if (value != null && typeof value === 'object' && 'seconds' in value) {
       const date = convertTimestampToDate(value);
       if (date) {
         return date.toLocaleString('en-GB', {
@@ -609,9 +637,6 @@ return snapshot;`);
       addOutput(['💾 Results downloaded as CSV!', '']);
     }
   };
-
-  const downloadResults = downloadJSON; // Keep for backward compatibility
-
 
   const applyPreset = (preset: typeof QUERY_PRESETS[0]) => {
     setCodeInput(preset.code);

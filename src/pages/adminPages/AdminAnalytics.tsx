@@ -1,12 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import BannerWrapper from '../../components/ui/BannerWrapper';
 import QueryTerminal from '../../components/admin/analytics/QueryTerminal';
-import DataExplorer from '../../components/admin/analytics/DataExplorer';
 import AnalyticsOverview from '../../components/admin/analytics/AnalyticsOverview';
-import { FaTerminal, FaChartBar, FaDatabase, FaExpand, FaCompress } from 'react-icons/fa';
+import { FaTerminal, FaChartBar, FaExpand, FaCompress } from 'react-icons/fa';
 import '../../styles/adminStyles/AdminAnalytics.css';
 
-type TabType = 'terminal' | 'overview' | 'explorer';
+type TabType = 'terminal' | 'overview';
 
 export interface QueryResult {
   data: Record<string, unknown>[];
@@ -28,7 +27,6 @@ const AdminAnalytics: React.FC = () => {
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Overview', icon: <FaChartBar /> },
-    { id: 'explorer', label: 'Data Explorer', icon: <FaDatabase /> },
     { id: 'terminal', label: 'Query Terminal', icon: <FaTerminal /> },
   ];
 
@@ -38,9 +36,6 @@ const AdminAnalytics: React.FC = () => {
       <>
         <div className={`tab-content ${activeTab === 'overview' ? 'active' : ''}`}>
           <AnalyticsOverview queryHistory={queryHistory} />
-        </div>
-        <div className={`tab-content ${activeTab === 'explorer' ? 'active' : ''}`}>
-          <DataExplorer onQueryResult={handleQueryResult} />
         </div>
         <div className={`tab-content ${activeTab === 'terminal' ? 'active' : ''}`}>
           <QueryTerminal 
