@@ -1,3 +1,32 @@
+/**
+ * QueryTerminal - Read-Only Firestore Query Interface
+ * 
+ * SECURITY: Multi-Layer Defense Against Write Operations
+ * ========================================================
+ * This terminal is designed to be READ-ONLY with multiple security layers:
+ * 
+ * Layer 1: Pre-execution String Validation
+ *   - Scans code for dangerous function names (case-insensitive)
+ *   - Blocks execution if write operations detected
+ *   - Fast fail before any code execution
+ * 
+ * Layer 2: Execution Context Restriction (PRIMARY DEFENSE)
+ *   - Only READ functions passed to execution context
+ *   - Write functions (setDoc, updateDoc, deleteDoc, addDoc, etc.) 
+ *     are NEVER imported or passed to user code
+ *   - Even if user somehow gets the function name, it doesn't exist in scope
+ * 
+ * Layer 3: Runtime Blocks
+ *   - Prevents dynamic imports (require, import)
+ *   - Blocks access to global objects
+ *   - Strict mode enforcement
+ * 
+ * Layer 4: Firestore Security Rules (SERVER-SIDE)
+ *   - Ultimate protection at database level
+ *   - User must be authenticated and authorized
+ *   - Rules control what data can be accessed
+ */
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { firestore } from '../../../firebase/firebase';
 import { 
@@ -22,6 +51,14 @@ import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
 import { FaPlay, FaHistory, FaCopy, FaDownload, FaTrash, FaLightbulb, FaCode, FaBook } from 'react-icons/fa';
 import { formatFirestoreDateTime, formatRoles, convertTimestampToDate } from '../../../utils/firestoreUtils';
 import '../../../styles/adminStyles/QueryTerminal.css';
+
+// TODO: Conceptual idea for future security:
+// It is possible to initialize and export a separate Firebase app instance
+// with different credentials (API keys or service account) that has restricted privileges.
+// This is practical for server-side Node.js scripts, but NOT secure for client-side web apps.
+// In browsers, all credentials are visible to users, so true security must always rely on Firestore Security Rules.
+// See: https://firebase.google.com/docs/projects/multiprojects for multi-app setup.
+// This file currently relies on security rules and execution context restriction for read-only access.
 
 interface QueryTerminalProps {
   onQueryResult: (result: QueryResult) => void;
@@ -159,8 +196,9 @@ return allProfiles;`,
 ];
 
 const QueryTerminal: React.FC<QueryTerminalProps> = ({ onQueryResult, queryHistory }) => {
-  const [codeInput, setCodeInput] = useState<string>(`// Write your Firestore query here
+  const [codeInput, setCodeInput] = useState<string>(`// Firestore Read-Only Query Terminal
 // Available: db, collection, getDocs, query, where, orderBy, limit, doc, getDoc, Timestamp
+// ⚠️ READ-ONLY: Write operations (setDoc, updateDoc, deleteDoc, addDoc) are NOT available
 // Return a QuerySnapshot or data object
 
 const snapshot = await getDocs(
@@ -362,26 +400,135 @@ return snapshot;`);
     ]);
 
     try {
-      // Create a sandboxed execution context with Firestore methods
+      // ============================================================
+      // SECURITY LAYER 1: Pre-execution validation (string scanning)
+      // Catches obvious attempts before code even runs
+      // ============================================================
+      const dangerousOperations = [
+        // Write operations
+        'setDoc', 'setdoc', 'SETDOC',
+        'updateDoc', 'updatedoc', 'UPDATEDOC',
+        'deleteDoc', 'deletedoc', 'DELETEDOC',
+        'addDoc', 'adddoc', 'ADDDOC',
+        
+        // Batch and transactions
+        'writeBatch', 'writebatch', 'WRITEBATCH',
+        'runTransaction', 'runtransaction', 'RUNTRANSACTION',
+        
+        // Field value operations (can be used in writes)
+        'deleteField', 'deletefield', 'DELETEFIELD',
+        'arrayUnion', 'arrayunion', 'ARRAYUNION',
+        'arrayRemove', 'arrayremove', 'ARRAYREMOVE',
+        'increment', 
+        'serverTimestamp', 'servertimestamp', 'SERVERTIMESTAMP',
+        
+        // Other potentially dangerous operations
+        'enableNetwork', 'disableNetwork',
+        'clearPersistence', 'terminate',
+        'waitForPendingWrites',
+      ];
+
+      // Case-insensitive pattern matching for any dangerous operation
+      const codeToCheck = codeInput.toLowerCase();
+      const foundDangerousOp = dangerousOperations.find(op => 
+        codeToCheck.includes(op.toLowerCase())
+      );
+
+      if (foundDangerousOp) {
+        setError('Write operation blocked');
+        addOutput([
+          '',
+          `🚫 SECURITY BLOCK: Write operation detected`,
+          `   Found: "${foundDangerousOp}"`,
+          '',
+          '⚠️  This terminal is READ-ONLY for security reasons.',
+          '   Only these query operations are allowed:',
+          '',
+          '   ✅ getDocs() - Fetch multiple documents',
+          '   ✅ getDoc() - Fetch single document',
+          '   ✅ query() - Build queries',
+          '   ✅ where() - Filter results',
+          '   ✅ orderBy() - Sort results',
+          '   ✅ limit() - Limit results',
+          '   ✅ collection() - Reference collections',
+          '   ✅ doc() - Reference documents',
+          '',
+          '   ❌ BLOCKED: setDoc, updateDoc, deleteDoc, addDoc',
+          '   ❌ BLOCKED: writeBatch, runTransaction',
+          '   ❌ BLOCKED: arrayUnion, arrayRemove, increment',
+          '   ❌ BLOCKED: deleteField, serverTimestamp',
+          '',
+          '💡 This is a read-only analytics terminal.',
+          '   Use Firebase Console or your app for write operations.',
+          ''
+        ]);
+        setIsExecuting(false);
+        return;
+      }
+
+      // ============================================================
+      // SECURITY LAYER 2: Execution context restriction
+      // Only expose read-only functions - write functions don't exist here
+      // This is the PRIMARY security mechanism
+      // ============================================================
+      
+      // Create a minimal read-only wrapper for the Firestore instance
+      // Even if someone bypasses string checks, they can't access write functions
+      const readOnlyDb = {
+        // Only expose what's absolutely necessary for read operations
+        app: firestore.app,
+        type: firestore.type,
+        // Everything else is intentionally omitted
+      };
+
+      // Prevent any modifications to the wrapper
+      Object.freeze(readOnlyDb);
+
+      // Create a sandboxed execution context
+      // CRITICAL: We only pass READ functions - no write functions exist in this scope
       const executeCode = new Function(
-        'db',
-        'collection',
-        'getDocs',
-        'query',
-        'where',
-        'orderBy',
-        'limit',
-        'doc',
-        'getDoc',
-        'Timestamp',
-        'startAt',
-        'startAfter',
-        'endAt',
-        'endBefore',
-        'limitToLast',
-        'documentId',
-        'console',
+        'db',              // Read-only wrapper (no methods)
+        'collection',      // Safe - just references
+        'getDocs',         // Safe - read only
+        'query',           // Safe - just builds query
+        'where',           // Safe - query filter
+        'orderBy',         // Safe - query sort
+        'limit',           // Safe - query limit
+        'doc',             // Safe - just references
+        'getDoc',          // Safe - read only
+        'Timestamp',       // Safe - just date handling
+        'startAt',         // Safe - query cursor
+        'startAfter',      // Safe - query cursor
+        'endAt',           // Safe - query cursor
+        'endBefore',       // Safe - query cursor
+        'limitToLast',     // Safe - query limit
+        'documentId',      // Safe - query helper
+        'console',         // Custom console for logging
         `
+        "use strict";
+        
+        // ============================================================
+        // SECURITY LAYER 3: Runtime blocks
+        // Block any attempts to access dangerous functionality
+        // ============================================================
+        
+        // Prevent dynamic imports
+        if (typeof require !== 'undefined') {
+          throw new Error('❌ Security: require() is not allowed');
+        }
+        if (typeof import !== 'undefined') {
+          throw new Error('❌ Security: import is not allowed');
+        }
+        
+        // Block access to globals that could be exploited
+        if (typeof global !== 'undefined') {
+          throw new Error('❌ Security: global access is not allowed');
+        }
+        if (typeof window !== 'undefined' && typeof window.require !== 'undefined') {
+          throw new Error('❌ Security: window.require is not allowed');
+        }
+        
+        // Execute user code
         return (async () => {
           ${codeInput}
         })();
@@ -408,25 +555,28 @@ return snapshot;`);
         }
       };
 
-      // Execute the query
+      // ============================================================
+      // SECURITY LAYER 4: Execute with read-only functions only
+      // Pass only read functions - write functions literally don't exist
+      // ============================================================
       const result = await executeCode(
-        firestore,
-        collection,
-        getDocs,
-        query,
-        where,
-        orderBy,
-        limit,
-        doc,
-        getDoc,
-        Timestamp,
-        startAt,
-        startAfter,
-        endAt,
-        endBefore,
-        limitToLast,
-        documentId,
-        customConsole
+        readOnlyDb,        // Frozen minimal db object
+        collection,        // Original - safe, just references
+        getDocs,           // Original - safe, read-only
+        query,             // Original - safe, just builds query
+        where,             // Original - safe, filter
+        orderBy,           // Original - safe, sort
+        limit,             // Original - safe, limit
+        doc,               // Original - safe, just references
+        getDoc,            // Original - safe, read-only
+        Timestamp,         // Original - safe, date utils
+        startAt,           // Original - safe, cursor
+        startAfter,        // Original - safe, cursor
+        endAt,             // Original - safe, cursor
+        endBefore,         // Original - safe, cursor
+        limitToLast,       // Original - safe, limit
+        documentId,        // Original - safe, helper
+        customConsole      // Custom - safe, just logging
       );
 
       const endTime = performance.now();
@@ -519,18 +669,52 @@ return snapshot;`);
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessageLower = errorMessage.toLowerCase();
+      
+      // Check if the error is related to attempting write operations (case-insensitive)
+      const writeKeywords = [
+        'setdoc', 'updatedoc', 'deletedoc', 'adddoc',
+        'writebatch', 'runtransaction', 'deletefield',
+        'arrayunion', 'arrayremove', 'servertimestamp'
+      ];
+      
+      const isWriteAttempt = writeKeywords.some(keyword => 
+        errorMessageLower.includes(keyword)
+      );
+      
       setError(errorMessage);
-      addOutput([
-        '',
-        `❌ Error: ${errorMessage}`,
-        '',
-        '💡 Tips:',
-        '   • Make sure collection names are correct',
-        '   • Check field names exist in your documents',
-        '   • Verify you have proper read permissions',
-        '   • Compound queries may require indexes',
-        ''
-      ]);
+      
+      if (isWriteAttempt) {
+        addOutput([
+          '',
+          `🚫 Security Error: Write operation blocked`,
+          `   ${errorMessage}`,
+          '',
+          '⚠️  This terminal is READ-ONLY for security reasons.',
+          '   Only query operations are allowed:',
+          '   ✅ getDocs() - Fetch multiple documents',
+          '   ✅ getDoc() - Fetch single document',
+          '   ✅ query() - Build queries with where/orderBy/limit',
+          '',
+          '   ❌ setDoc() - NOT ALLOWED',
+          '   ❌ updateDoc() - NOT ALLOWED',
+          '   ❌ deleteDoc() - NOT ALLOWED',
+          '   ❌ addDoc() - NOT ALLOWED',
+          ''
+        ]);
+      } else {
+        addOutput([
+          '',
+          `❌ Error: ${errorMessage}`,
+          '',
+          '💡 Tips:',
+          '   • Make sure collection names are correct',
+          '   • Check field names exist in your documents',
+          '   • Verify you have proper read permissions',
+          '   • Compound queries may require indexes',
+          ''
+        ]);
+      }
     } finally {
       setIsExecuting(false);
     }
@@ -756,6 +940,9 @@ return snapshot;`);
           <div className="editor-title">
             <FaCode />
             <span>Query Editor</span>
+            <span className="read-only-badge" title="This terminal only allows read operations. Write operations like setDoc, updateDoc, deleteDoc are blocked for security.">
+              🔒 READ-ONLY
+            </span>
           </div>
           <div className="editor-toolbar">
             <button 

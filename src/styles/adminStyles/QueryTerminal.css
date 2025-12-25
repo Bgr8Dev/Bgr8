@@ -375,6 +375,29 @@
   flex-shrink: 0;
 }
 
+.read-only-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(255, 165, 0, 0.15);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 12px;
+  color: #ffa500;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-left: 12px;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.read-only-badge:hover {
+  background: rgba(255, 165, 0, 0.25);
+  border-color: rgba(255, 165, 0, 0.5);
+  transform: translateY(-1px);
+}
+
 .editor-toolbar {
   display: flex;
   align-items: center;
