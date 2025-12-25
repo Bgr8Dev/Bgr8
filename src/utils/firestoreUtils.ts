@@ -3,6 +3,13 @@
  * Helper functions for converting and formatting Firestore data types
  */
 
+// Type for Firestore Timestamp
+interface FirestoreTimestamp {
+  seconds: number;
+  nanoseconds?: number;
+  toDate?: () => Date;
+}
+
 /**
  * Convert a Firestore Timestamp to a JavaScript Date
  * @param timestamp - Firestore Timestamp object with seconds/nanoseconds, or a Date, or null
@@ -10,24 +17,28 @@
  * @returns JavaScript Date object or fallback
  */
 export const convertTimestampToDate = (
-  timestamp: any,
+  timestamp: unknown,
   fallbackDate: Date | null = null
 ): Date | null => {
   if (!timestamp) return fallbackDate;
   
   // Check if it's a Firestore Timestamp (has seconds property)
-  if (typeof timestamp === 'object' && 'seconds' in timestamp) {
-    return new Date(timestamp.seconds * 1000);
+  if (typeof timestamp === 'object' && timestamp !== null && 'seconds' in timestamp) {
+    const ts = timestamp as FirestoreTimestamp;
+    return new Date(ts.seconds * 1000);
   }
   
   // Check if it has a toDate method (Firestore Timestamp)
-  if (timestamp.toDate && typeof timestamp.toDate === 'function') {
-    return timestamp.toDate();
+  if (typeof timestamp === 'object' && timestamp !== null && 'toDate' in timestamp) {
+    const ts = timestamp as FirestoreTimestamp;
+    if (ts.toDate && typeof ts.toDate === 'function') {
+      return ts.toDate();
+    }
   }
   
   // Try to convert as a regular date
   try {
-    const date = new Date(timestamp);
+    const date = new Date(timestamp as string | number | Date);
     return isNaN(date.getTime()) ? fallbackDate : date;
   } catch {
     return fallbackDate;
@@ -41,7 +52,7 @@ export const convertTimestampToDate = (
  * @returns Formatted date string or 'N/A'
  */
 export const formatFirestoreDate = (
-  timestamp: any,
+  timestamp: unknown,
   options: Intl.DateTimeFormatOptions = { 
     day: '2-digit', 
     month: 'short', 
@@ -59,7 +70,7 @@ export const formatFirestoreDate = (
  * @param timestamp - Firestore Timestamp, Date, or null
  * @returns Formatted datetime string (YYYY-MM-DD HH:MM:SS) or empty string
  */
-export const formatFirestoreDateTime = (timestamp: any): string => {
+export const formatFirestoreDateTime = (timestamp: unknown): string => {
   const date = convertTimestampToDate(timestamp);
   if (!date) return '';
   
@@ -80,7 +91,7 @@ export const formatFirestoreDateTime = (timestamp: any): string => {
  * @param fallbackDate - Optional fallback date for failed conversions
  * @returns New object with converted Date fields
  */
-export const convertTimestampFields = <T extends Record<string, any>>(
+export const convertTimestampFields = <T extends Record<string, unknown>>(
   data: T,
   timestampFields: (keyof T)[],
   fallbackDate: Date | null = null
@@ -89,7 +100,7 @@ export const convertTimestampFields = <T extends Record<string, any>>(
   
   timestampFields.forEach(field => {
     if (field in converted) {
-      converted[field] = convertTimestampToDate(converted[field], fallbackDate) as any;
+      converted[field] = convertTimestampToDate(converted[field], fallbackDate) as T[keyof T];
     }
   });
   
@@ -105,7 +116,7 @@ export const formatRoles = (roles: Record<string, boolean> | null | undefined): 
   if (!roles || typeof roles !== 'object') return '';
   
   return Object.entries(roles)
-    .filter(([_, isActive]) => isActive === true)
+    .filter(([, isActive]) => isActive === true)
     .map(([role]) => role)
     .sort()
     .join(', ');
@@ -119,16 +130,16 @@ export const formatRoles = (roles: Record<string, boolean> | null | undefined): 
  * @returns The value at the path or default value
  */
 export const getNestedProperty = (
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   path: string,
-  defaultValue: any = null
-): any => {
+  defaultValue: unknown = null
+): unknown => {
   const keys = path.split('.');
-  let current = data;
+  let current: Record<string, unknown> | unknown = data;
   
   for (const key of keys) {
-    if (current && typeof current === 'object' && key in current) {
-      current = current[key];
+    if (current && typeof current === 'object' && current !== null && key in current) {
+      current = (current as Record<string, unknown>)[key];
     } else {
       return defaultValue;
     }

@@ -35,7 +35,7 @@ const AdminAnalytics: React.FC = () => {
     return (
       <>
         <div className={`tab-content ${activeTab === 'overview' ? 'active' : ''}`}>
-          <AnalyticsOverview queryHistory={queryHistory} />
+          <AnalyticsOverview />
         </div>
         <div className={`tab-content ${activeTab === 'terminal' ? 'active' : ''}`}>
           <QueryTerminal 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { QueryResult } from '../../../pages/adminPages/AdminAnalytics';
 import { FaUsers, FaCalendarCheck, FaEye, FaUserClock, FaSync, FaSearch, FaTimes, FaChevronDown, FaChevronUp, FaCopy, FaDownload, FaDatabase } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { convertTimestampToDate, formatFirestoreDate, convertTimestampFields, isDateInRange, formatFirestoreDateTime, formatRoles } from '../../../utils/firestoreUtils';
@@ -22,8 +21,9 @@ import {
 } from '../../../utils/analyticsHelpers';
 import '../../../styles/adminStyles/AnalyticsOverview.css';
 
+// Empty interface kept for future extensibility
 interface AnalyticsOverviewProps {
-  queryHistory: QueryResult[];
+  // Reserved for future props
 }
 
 interface UserData {
@@ -89,7 +89,7 @@ const TIME_PRESETS = [
  * - All return Record<string, unknown>[] for consistent typing
  * - getDataForSection() routes to the correct function via switch
  */
-const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) => {
+const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = () => {
   const [loading, setLoading] = useState(true);
   const now = new Date();
   const defaultStart = new Date();
@@ -213,7 +213,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ queryHistory }) =
     });
 
     return filterConsecutiveZeros(data);
-  }, [allUsers, startDate, endDate, granularity.totalUsers, generateTimeBuckets, filterConsecutiveZeros]);
+  }, [allUsers, startDate, endDate, granularity.totalUsers]);
 
   // Prepare chart data for active users
   const getActiveUsersChartData = useCallback(() => {
@@ -821,8 +821,8 @@ return results;`;
         // If currently using minutes or hours, switch to days
         if (input.unit === 'minutes' || input.unit === 'hours') {
           // Convert current granularity to days
-          let currentHours = granularity[section];
-          let daysValue = Math.max(1, Math.round(currentHours / 24 * 10) / 10); // Round to 1 decimal
+          const currentHours = granularity[section];
+          const daysValue = Math.max(1, Math.round(currentHours / 24 * 10) / 10); // Round to 1 decimal
           
           setCustomGranularityInput(prev => ({
             ...prev,
