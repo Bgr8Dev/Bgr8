@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaVideo, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import { MentorMenteeProfile, MatchResult } from '../types/mentorTypes';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
 import '../styles/MatchesSection.css';
@@ -78,14 +79,21 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
           <div key={index} className="ms-match-card">
             <div className="ms-match-header">
               <div className="ms-match-avatar">
-                <img 
-                  src={Array.isArray(match.user.profilePicture) 
-                    ? match.user.profilePicture[0] || `https://ui-avatars.com/api/?name=${match.user.firstName || 'User'}&background=random`
-                    : typeof match.user.profilePicture === 'string' 
-                      ? match.user.profilePicture 
-                      : `https://ui-avatars.com/api/?name=${match.user.firstName || 'User'}&background=random`
-                  }
+                <ProfilePicture
+                  src={typeof match.user.profilePicture === 'string' || Array.isArray(match.user.profilePicture) ? match.user.profilePicture : null}
                   alt={match.user.firstName || 'User'}
+                  role={
+                    match.user.isMentor === true
+                      ? 'mentor'
+                      : match.user.isMentee === true
+                      ? 'mentee'
+                      : typeof match.user.type === 'string' && match.user.type.toLowerCase() === 'mentor'
+                      ? 'mentor'
+                      : typeof match.user.type === 'string' && match.user.type.toLowerCase() === 'mentee'
+                      ? 'mentee'
+                      : null
+                  }
+                  size={80}
                 />
               </div>
               <div className="ms-match-info">

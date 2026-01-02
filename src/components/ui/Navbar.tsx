@@ -24,6 +24,13 @@ export default function Navbar() {
     }
   };
 
+  // Get profile picture: use uploaded photo if available, otherwise use Google photo
+  const getProfilePicture = () => {
+    return userProfile?.photoURL || currentUser?.photoURL || null;
+  };
+
+  const profilePicture = getProfilePicture();
+
   return (
     <header className="header">
       <h1 className="logo">
@@ -48,9 +55,9 @@ export default function Navbar() {
               aria-haspopup="true"
               aria-label="User menu"
             >
-              {currentUser.photoURL ? (
+              {profilePicture ? (
                 <img 
-                  src={currentUser.photoURL} 
+                  src={profilePicture} 
                   alt={`${currentUser.displayName || 'User'} profile`}
                   className="user-avatar"
                 />

@@ -29,6 +29,13 @@ export default function HamburgerMenu() {
     setIsOpen(false);
   };
 
+  // Get profile picture: use uploaded photo if available, otherwise use Google photo
+  const getProfilePicture = () => {
+    return userProfile?.photoURL || currentUser?.photoURL || null;
+  };
+
+  const profilePicture = getProfilePicture();
+
   return (
     <div className="hamburger-menu">
       <div className="hamburger-header">
@@ -51,9 +58,9 @@ export default function HamburgerMenu() {
           {currentUser ? (
             <div className="mobile-user-menu">
               <div className="mobile-user-info">
-                {currentUser.photoURL ? (
+                {profilePicture ? (
                   <img 
-                    src={currentUser.photoURL} 
+                    src={profilePicture} 
                     alt="Profile" 
                     className="mobile-user-avatar"
                   />

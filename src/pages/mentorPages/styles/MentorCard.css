@@ -29,7 +29,9 @@
   flex-shrink: 0;
 }
 
-.mc-mentor-avatar img {
+.mc-mentor-avatar img,
+.mc-mentor-avatar .profile-picture,
+.mc-mentor-avatar .profile-picture-placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;

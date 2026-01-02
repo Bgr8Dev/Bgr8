@@ -3,6 +3,7 @@ import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, F
 import { MentorMenteeProfile, MentorAvailability } from '../types/mentorTypes';
 import MatchStrengthDisplay from '../../../components/widgets/MentorAlgorithm/MatchStrengthDisplay';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import '../styles/MentorCard.css';
 
 interface MentorCardProps {
@@ -64,14 +65,21 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   };
 
 
-  const getProfileImageSrc = () => {
-    if (Array.isArray(mentor.profilePicture)) {
-      return mentor.profilePicture[0] || `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+  // Determine role from mentor profile
+  const getRole = (): 'mentor' | 'mentee' | null => {
+    if (mentor.isMentor === true) {
+      return 'mentor';
     }
-    if (typeof mentor.profilePicture === 'string') {
-      return mentor.profilePicture;
+    if (mentor.isMentee === true) {
+      return 'mentee';
     }
-    return `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+    if (typeof mentor.type === 'string' && mentor.type.toLowerCase() === 'mentor') {
+      return 'mentor';
+    }
+    if (typeof mentor.type === 'string' && mentor.type.toLowerCase() === 'mentee') {
+      return 'mentee';
+    }
+    return null;
   };
 
   return (
@@ -82,9 +90,12 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       >
       <div className="mc-mentor-card-header">
         <div className="mc-mentor-avatar">
-          <img 
-            src={getProfileImageSrc()}
+          <ProfilePicture
+            src={typeof mentor.profilePicture === 'string' || Array.isArray(mentor.profilePicture) ? mentor.profilePicture : null}
             alt={getDisplayName()}
+            role={getRole()}
+            size={80}
+            className="mc-mentor-avatar-img"
           />
         </div>
         

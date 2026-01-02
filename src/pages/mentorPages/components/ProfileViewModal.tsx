@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaEnvelope, FaPhone, FaLinkedin, FaVideo } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../types/mentorTypes';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import '../styles/ProfileViewModal.css';
 
 interface ProfileViewModalProps {
@@ -36,14 +37,21 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
     return currentUserRole === 'mentee' ? 'Mentor' : 'Mentee';
   };
 
-  const getProfileImageSrc = () => {
-    if (Array.isArray(profile.profilePicture)) {
-      return profile.profilePicture[0] || `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+  // Determine role from profile
+  const getRole = (): 'mentor' | 'mentee' | null => {
+    if (profile.isMentor === true) {
+      return 'mentor';
     }
-    if (typeof profile.profilePicture === 'string') {
-      return profile.profilePicture;
+    if (profile.isMentee === true) {
+      return 'mentee';
     }
-    return `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+    if (typeof profile.type === 'string' && profile.type.toLowerCase() === 'mentor') {
+      return 'mentor';
+    }
+    if (typeof profile.type === 'string' && profile.type.toLowerCase() === 'mentee') {
+      return 'mentee';
+    }
+    return null;
   };
 
   const renderPersonalInformation = () => (
@@ -55,7 +63,12 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
       <div className="pvm-section-content">
         <div className="pvm-profile-header">
           <div className="pvm-avatar">
-            <img src={getProfileImageSrc()} alt={getDisplayName()} />
+            <ProfilePicture
+              src={typeof profile.profilePicture === 'string' || Array.isArray(profile.profilePicture) ? profile.profilePicture : null}
+              alt={getDisplayName()}
+              role={getRole()}
+              size={120}
+            />
             {profile.isGenerated && (
               <div className="pvm-generated-badge" title="Generated Profile">
                 🎲 Generated
