@@ -22,7 +22,7 @@ interface MobileProfileEditModalProps {
   onDelete: () => Promise<boolean>;
   validationErrors: ValidationErrors;
   formProgress: FormProgress;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   onArrayChange: (field: keyof ProfileFormData, value: string[]) => void;
   onPastProfessionChange: (index: number, value: string) => void;
   onAddPastProfession: () => void;
@@ -107,6 +107,7 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
       firstName: 'Enter your legal first name as it appears on official documents',
       lastName: 'Enter your legal last name as it appears on official documents',
       email: 'We\'ll use this to send you important updates and match notifications',
+      aboutMe: 'Tell us a little bit about yourself',
       phone: 'Your phone number helps mentors/mentees contact you for sessions',
       age: 'Your age helps us ensure appropriate matches',
       degree: (profile.isMentor ? 'Tell us about your highest qualification or what you\'re currently studying'
@@ -437,6 +438,35 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
                   <p className="mpem-validation-error">{validationErrors.email}</p>
                 )}
               </div>
+
+              <div className="mpem-input-group">
+            <label htmlFor="aboutMe" className="mpem-field-label">
+              About Me
+              <FaInfoCircle
+                className="mpem-info-icon"
+                data-tooltip={getFieldTooltip('aboutMe')}
+              />
+            </label>
+
+            <textarea
+              id="aboutMe"
+              name="aboutMe"
+              value={profile.aboutMe || ''}
+              onChange={onFormChange}
+              placeholder="Tell us about yourself, your background, and what you’re looking for..."
+              rows={5}
+              maxLength={800}
+              className={validationErrors.aboutMe ? 'error' : ''}
+              style={{ resize: 'vertical' }}
+            />
+
+            {validationErrors.aboutMe && (
+              <p className="mpem-validation-error">
+                {validationErrors.aboutMe}
+              </p>
+            )}
+          </div>
+
 
               <div className="mpem-input-group">
                 <label htmlFor="phone" className="mpem-field-label">
