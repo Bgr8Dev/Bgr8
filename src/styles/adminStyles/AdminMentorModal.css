@@ -243,6 +243,7 @@
 }
 
 .amm-form-group input,
+.amm-form-group textarea,
 .amm-form-group select {
   padding: 12px 16px;
   border: 2px solid var(--gray-200);

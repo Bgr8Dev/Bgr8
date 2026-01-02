@@ -29,7 +29,6 @@ interface SettingsState {
   // Profile Settings
   profile: {
     displayName: string;
-    bio: string;
     profilePicture: string;
     timezone: string;
     language: string;
@@ -215,7 +214,6 @@ export default function Settings() {
   const [settings, setSettings] = useState<SettingsState>({
     profile: {
       displayName: '',
-      bio: '',
       profilePicture: '',
       timezone: 'UTC',
       language: 'en',
@@ -457,22 +455,6 @@ export default function Settings() {
           value={settings.profile.displayName}
           onChange={(e) => setSettings({...settings, profile: {...settings.profile, displayName: e.target.value}})}
           placeholder="Enter your display name"
-        />
-      </div>
-      
-      <div className="settings-form-group">
-        <Tooltip 
-          content="Write a brief description about yourself, your experience, and what you can offer as a mentor or what you're looking for as a mentee."
-          position="top"
-          delay={300}
-        >
-          <label className="font-size-label">Bio</label>
-        </Tooltip>
-        <textarea 
-          value={settings.profile.bio}
-          onChange={(e) => setSettings({...settings, profile: {...settings.profile, bio: e.target.value}})}
-          placeholder="Tell us about yourself..."
-          rows={4}
         />
       </div>
       

@@ -12,6 +12,7 @@ export interface MentorMenteeProfile {
   firstName: string;
   lastName: string;
   email: string;
+  aboutMe: string;
   phone: string;
   age: string;
   degree: string;
@@ -35,6 +36,7 @@ export interface MentorMenteeProfile {
   verification?: VerificationData;
   
   [key: string]: string | string[] | boolean | VerificationData | undefined;
+  
 }
 
 export interface MatchResult {

@@ -90,6 +90,7 @@ export default function MentorProfile() {
         industries: profile.industries || [],
         isMentor: profile.isMentor || false,
         isMentee: profile.isMentee || false,
+        aboutMe: profile.aboutMe || ''
       };
 
       await updateDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'), profileData);
@@ -169,9 +170,43 @@ export default function MentorProfile() {
                         placeholder="Last Name"
                         disabled={!isEditing}
                       />
+  <textarea
+    name="aboutMe"
+    value={profile.aboutMe || ''}
+    onChange={(e) =>
+      setProfile(prev =>
+        prev ? { ...prev, aboutMe: e.target.value } : null
+      )
+    }
+    placeholder={
+      profile.isMentor
+        ? 'Tell mentees about your background, experience, and how you like to help...'
+        : 'Tell mentors about your goals, interests, and what you hope to learn...'
+    }
+    rows={5}
+    maxLength={800}
+    style={{
+      resize: 'vertical',
+      lineHeight: 1.5,
+    }}
+  />
+  {isEditing && (
+    <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: 4 }}>
+      {profile.aboutMe?.length || 0}/800 characters
+    </div>
+  )}
                     </>
                   ) : (
-                    <p className="mentor-profile-value">{profile.firstName || 'no name provided'} {profile.lastName || ''}</p>
+                      <>
+                        <p className="mentor-profile-value">
+                          {profile.firstName || 'no name provided'} {profile.lastName || ''}
+                        </p>
+                        <p className="mentor-profile-value mentor-profile-about">
+                          {profile.aboutMe
+                            ? profile.aboutMe
+                            : 'No description provided.'}
+                        </p>
+                      </>
                   )}
                 </div>
                 <div className="mentor-profile-field">

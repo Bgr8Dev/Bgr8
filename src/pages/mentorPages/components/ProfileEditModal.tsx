@@ -23,7 +23,7 @@ interface ProfileEditModalProps {
   validationErrors: ValidationErrors;
   formProgress: FormProgress;
   sectionStatus: SectionStatus;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   onArrayChange: (field: keyof ProfileFormData, value: string[]) => void;
   onPastProfessionChange: (index: number, value: string) => void;
   onAddPastProfession: () => void;
@@ -171,6 +171,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
       firstName: 'Enter your legal first name as it appears on official documents',
       lastName: 'Enter your legal last name as it appears on official documents',
       email: 'We\'ll use this to send you important updates and match notifications',
+      aboutMe: 'Tell us a little bit about yourself',
       phone: 'Your phone number helps mentors/mentees contact you for sessions',
       age: 'Your age helps us ensure appropriate matches',
       degree: (profile.isMentor ? 'Tell us about your highest qualification or what you\'re currently studying'
@@ -665,6 +666,39 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     <div className="pem-validation-error">{validationErrors.email}</div>
                   )}
                 </div>
+
+          <div className="pem-form-row">
+            <div className="pem-input-group">
+              <label htmlFor="edit-aboutMe" className="pem-field-label">
+                About Me
+                <FaInfoCircle
+                  className="pem-info-icon"
+                  data-tooltip={getFieldTooltip('aboutMe')}
+                />
+              </label>
+
+              <textarea
+                id="edit-aboutMe"
+                name="aboutMe"
+                value={profile.aboutMe || ''}
+                onChange={onFormChange}
+                className={validationErrors.aboutMe ? 'error' : ''}
+                placeholder="Tell us about yourself, your background, and what you’re looking for..."
+                rows={5}
+                maxLength={800}
+                style={{ resize: 'vertical' }}
+                data-tooltip={getFieldTooltip('aboutMe')}
+              />
+
+              {validationErrors.aboutMe && (
+                <div className="pem-validation-error">
+                  {validationErrors.aboutMe}
+                </div>
+              )}
+            </div>
+          </div>
+
+
                 <div className="pem-input-group">
                   <label htmlFor="edit-phone" className="pem-field-label">
                     Phone Number *

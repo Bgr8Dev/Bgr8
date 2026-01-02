@@ -287,6 +287,48 @@
   box-sizing: border-box;
 }
 
+/* Textarea (About Me, etc.) */
+.prf-registration-form textarea {
+  width: 100%;
+  padding: 18px 20px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  font-size: 16px;
+  max-width: 600px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--white);
+  transition: all 0.2s ease;
+  outline: none;
+  min-height: 120px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* Focus state */
+.prf-registration-form textarea:focus {
+  border-color: var(--mentor);
+  box-shadow: 0 0 0 4px rgba(224, 106, 92, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Placeholder */
+.prf-registration-form textarea::placeholder {
+  color: var(--gray-500);
+  font-weight: 400;
+}
+
+/* Validation */
+.prf-registration-form textarea:invalid {
+  border-color: var(--error);
+}
+
+.prf-registration-form textarea:valid {
+  border-color: var(--success);
+}
+
 .prf-registration-form input:focus,
 .prf-registration-form select:focus {
   border-color: var(--mentor);
