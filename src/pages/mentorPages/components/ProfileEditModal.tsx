@@ -4,7 +4,7 @@ import { MentorMenteeProfile, ProfileFormData, ValidationErrors, FormProgress, S
 import { degreePlaceholders } from '../types/mentorConstants';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import industriesList from '../../../constants/industries';
-import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import hobbiesList from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
@@ -80,6 +80,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   }, [devMode, isDevModeExiting]);
 
   if (!isOpen) return null;
+
+  // Helper function to handle local form changes
+  const handleLocalFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setLocalFormData(prev => ({ ...prev, [name]: value }));
+    // Also call the parent handler to keep parent state in sync
+    onFormChange(e);
+  };
 
   // Helper function to handle local array changes
   const handleLocalArrayChange = (field: keyof ProfileFormData, value: string[]) => {
@@ -313,40 +321,35 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   );
 
   const renderHobbiesSelection = () => (
-    <div className="pem-hobbies-selection-container">
+    <div className="pem-skills-selection-container">
       <label className="pem-field-label">
         Hobbies & Interests *
         <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('hobbies')} />
       </label>
-      <div className="pem-hobbies-tags-container">
-        {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
-          <div key={category} className="pem-hobby-category-section">
-            <h5 className="pem-category-title">{category}</h5>
-            <div className="pem-tags-grid">
-              {hobbies.map((hobby) => (
-                <button
-                  key={hobby}
-                  type="button"
-                  className={`pem-hobby-tag-selectable ${
-                    localFormData.hobbies?.includes(hobby) ? 'selected' : ''
-                  }`}
-                  onClick={() => {
-                    const currentHobbies = localFormData.hobbies || [];
-                    const newHobbies = currentHobbies.includes(hobby)
-                      ? currentHobbies.filter(h => h !== hobby)
-                      : [...currentHobbies, hobby];
-                    handleLocalArrayChange('hobbies', newHobbies);
-                  }}
-                >
-                  {hobby}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="pem-skills-tags-container">
+        <div className="pem-tags-grid">
+          {hobbiesList.map((hobby) => (
+            <button
+              key={hobby}
+              type="button"
+              className={`pem-skill-tag-selectable ${
+                localFormData.hobbies?.includes(hobby) ? 'selected' : ''
+              }`}
+              onClick={() => {
+                const currentHobbies = localFormData.hobbies || [];
+                const newHobbies = currentHobbies.includes(hobby)
+                  ? currentHobbies.filter(h => h !== hobby)
+                  : [...currentHobbies, hobby];
+                handleLocalArrayChange('hobbies', newHobbies);
+              }}
+            >
+              {hobby}
+            </button>
+          ))}
+        </div>
       </div>
       {localFormData.hobbies && localFormData.hobbies.length > 0 && (
-        <div className="pem-selected-hobbies-summary">
+        <div className="pem-selected-skills-summary">
           <span className="pem-summary-label">Selected hobbies:</span>
           <div className="pem-selected-tags">
             {localFormData.hobbies.map((hobby, index) => (
@@ -614,8 +617,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="text"
                     id="edit-firstName"
                     name="firstName"
-                    value={profile.firstName || ''}
-                    onChange={onFormChange}
+                    value={localFormData.firstName || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.firstName ? 'error' : ''}
                     placeholder="Enter your first name"
                     data-tooltip={getFieldTooltip('firstName')}
@@ -633,8 +636,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="text"
                     id="edit-lastName"
                     name="lastName"
-                    value={profile.lastName || ''}
-                    onChange={onFormChange}
+                    value={localFormData.lastName || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.lastName ? 'error' : ''}
                     placeholder="Enter your last name"
                     data-tooltip={getFieldTooltip('lastName')}
@@ -655,8 +658,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="email"
                     id="edit-email"
                     name="email"
-                    value={profile.email || ''}
-                    onChange={onFormChange}
+                    value={localFormData.email || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.email ? 'error' : ''}
                     placeholder="your.email@example.com"
                     data-tooltip={getFieldTooltip('email')}
@@ -674,8 +677,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="tel"
                     id="edit-phone"
                     name="phone"
-                    value={profile.phone || ''}
-                    onChange={onFormChange}
+                    value={localFormData.phone || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.phone ? 'error' : ''}
                     placeholder="+44 123 456 7890"
                     data-tooltip={getFieldTooltip('phone')}
@@ -696,8 +699,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="number"
                     id="edit-age"
                     name="age"
-                    value={profile.age || ''}
-                    onChange={onFormChange}
+                    value={localFormData.age || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.age ? 'error' : ''}
                     placeholder="Enter your age"
                     data-tooltip={getFieldTooltip('age')}
@@ -714,8 +717,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   <select
                     id="edit-county"
                     name="county"
-                    value={profile.county || ''}
-                    onChange={onFormChange}
+                    value={localFormData.county || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.county ? 'error' : ''}
                     data-tooltip={getFieldTooltip('county')}
                   >
@@ -744,11 +747,11 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="text"
                     id="edit-degree"
                     name="degree"
-                    value={profile.degree || ''}
-                    onChange={onFormChange}
+                    value={localFormData.degree || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.degree ? 'error' : ''}
-                    placeholder={profile.isMentor 
-                      ? (degreePlaceholders[profile.educationLevel || ''] || "e.g., BSc Computer Science")
+                    placeholder={localFormData.isMentor 
+                      ? (degreePlaceholders[localFormData.educationLevel || ''] || "e.g., BSc Computer Science")
                       : "e.g., A-Levels, GCSEs, or what you're currently studying"
                     }
                     data-tooltip={getFieldTooltip('degree')}
@@ -765,8 +768,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   <select
                     id="edit-educationLevel"
                     name="educationLevel"
-                    value={profile.educationLevel || ''}
-                    onChange={onFormChange}
+                    value={localFormData.educationLevel || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.educationLevel ? 'error' : ''}
                     data-tooltip={getFieldTooltip('educationLevel')}
                   >
@@ -791,10 +794,10 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="text"
                     id="edit-profession"
                     name="profession"
-                    value={profile.profession || ''}
-                    onChange={onFormChange}
+                    value={localFormData.profession || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.profession ? 'error' : ''}
-                    placeholder={profile.isMentor 
+                    placeholder={localFormData.isMentor 
                       ? "e.g., Software Developer, Teacher" 
                       : "e.g., Software Developer, Doctor, Engineer"
                     }
@@ -813,8 +816,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     type="url"
                     id="edit-linkedin"
                     name="linkedin"
-                    value={profile.linkedin || ''}
-                    onChange={onFormChange}
+                    value={localFormData.linkedin || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.linkedin ? 'error' : ''}
                     placeholder="https://linkedin.com/in/yourprofile"
                     data-tooltip={getFieldTooltip('linkedin')}
@@ -837,8 +840,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                       type="url"
                       id="edit-calCom"
                       name="calCom"
-                      value={profile.calCom || ''}
-                      onChange={onFormChange}
+                      value={localFormData.calCom || ''}
+                      onChange={handleLocalFormChange}
                       placeholder="https://cal.com/yourusername"
                       data-tooltip={getFieldTooltip('calCom')}
                     />
@@ -853,16 +856,21 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                     Past Professions *
                     <FaInfoCircle className="pem-info-icon" data-tooltip={getFieldTooltip('pastProfessions')} />
                   </label>
-                  {(profile.pastProfessions || ['']).map((profession, index) => (
+                  {(localFormData.pastProfessions || ['']).map((profession, index) => (
                     <div key={index} className="pem-profession-input-row">
                       <input
                         type="text"
                         value={profession}
-                        onChange={(e) => onPastProfessionChange(index, e.target.value)}
+                        onChange={(e) => {
+                          const newPastProfessions = [...(localFormData.pastProfessions || [''])];
+                          newPastProfessions[index] = e.target.value;
+                          setLocalFormData(prev => ({ ...prev, pastProfessions: newPastProfessions }));
+                          onPastProfessionChange(index, e.target.value);
+                        }}
                         placeholder={`Past profession ${index + 1}`}
                         data-tooltip={getFieldTooltip('pastProfessions')}
                       />
-                      {(profile.pastProfessions || []).length > 1 && (
+                      {(localFormData.pastProfessions || []).length > 1 && (
                         <button
                           type="button"
                           className="pem-remove-profession-btn"
@@ -907,8 +915,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   <select
                     id="edit-ethnicity"
                     name="ethnicity"
-                    value={profile.ethnicity || ''}
-                    onChange={onFormChange}
+                    value={localFormData.ethnicity || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.ethnicity ? 'error' : ''}
                     data-tooltip={getFieldTooltip('ethnicity')}
                   >
@@ -929,8 +937,8 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   <select
                     id="edit-religion"
                     name="religion"
-                    value={profile.religion || ''}
-                    onChange={onFormChange}
+                    value={localFormData.religion || ''}
+                    onChange={handleLocalFormChange}
                     className={validationErrors.religion ? 'error' : ''}
                     data-tooltip={getFieldTooltip('religion')}
                   >
