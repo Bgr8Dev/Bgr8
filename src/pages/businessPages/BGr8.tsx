@@ -66,10 +66,9 @@ export default function BGr8() {
             <div className="bgr8-hero-overlay">
               <div className="bgr8-hero-content">
                 <div className="bgr8-hero-text">
-                  <h1>Bgr8</h1>
+                  <h1>Welcome to Bgr8</h1>
                   <p className="bgr8-hero-subtitle">
-                    From mentorship to community development, to long-term empowerment - 
-                    will you start a regular gift to support communities at every stage of their journey?
+                    Bgr8 is a non-profit organisation dedicated to help 16-19 year-olds discover new opportunities and build a brighter future.
                   </p>
                 </div>
                 

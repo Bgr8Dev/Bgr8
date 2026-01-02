@@ -67,6 +67,7 @@
   margin-bottom: 30px;
   line-height: 1.1;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 1s ease-out 0.2s both;
 }
 
 .bgr8-hero-subtitle {
@@ -75,6 +76,19 @@
   max-width: 600px;
   opacity: 0.95;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Scroll to Mentor Section Button */
