@@ -190,11 +190,9 @@ export default function MentorProfile() {
       lineHeight: 1.5,
     }}
   />
-  {isEditing && (
-    <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: 4 }}>
-      {profile.aboutMe?.length || 0}/800 characters
-    </div>
-  )}
+  <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: 4 }}>
+    {profile.aboutMe?.length || 0}/800 characters
+  </div>
                     </>
                   ) : (
                       <>
