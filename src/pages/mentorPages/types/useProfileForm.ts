@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
 import { UserType, MENTOR, MENTEE, ProfileFormData, ValidationErrors, SectionStatus, FormProgress } from '../types/mentorTypes';
-import { profile } from 'console';
 // import ukEducationLevels from '../../../constants/ukEducationLevels';
 
 export const useProfileForm = (selectedRole: UserType | null) => {
