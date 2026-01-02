@@ -603,19 +603,21 @@ export default function MentorPage() {
       
              {/* Main Content with Sidebar Layout */}
        <div className="mentor-page-content">
-         {/* Sidebar Toggle Button */}
-         <button 
-           className="sidebar-toggle-btn"
-           onClick={toggleSidebar}
-           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-         >
-           {isSidebarCollapsed ? '▶' : '◀'}
-         </button>
+         {/* Sidebar Toggle Button - Only show for mentees */}
+         {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+           <button 
+             className="sidebar-toggle-btn"
+             onClick={toggleSidebar}
+             title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+           >
+             {isSidebarCollapsed ? '▶' : '◀'}
+           </button>
+         )}
          
-         {/* Left Sidebar */}
-         <div className={`mentor-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
-          {/* Search Container - Only show for mentees */}
-          {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+         {/* Left Sidebar - Only show for mentees */}
+         {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
+           <div className={`mentor-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+            {/* Search Container */}
             <div className="search-container">
               <div className="search-bar">
                <div 
@@ -628,7 +630,7 @@ export default function MentorPage() {
                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                  </svg>
                </div>
-                             <input
+               <input
                  type="text"
                  placeholder={
                    typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee'
@@ -643,7 +645,7 @@ export default function MentorPage() {
                  }}
                />
               
-                             {/* Search Suggestions Dropdown - Only show for mentees */}
+               {/* Search Suggestions Dropdown - Only show for mentees */}
                {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && showSearchDropdown && searchSuggestions.length > 0 && (
                  <div className="search-suggestions-dropdown">
                    {searchSuggestions.map((suggestion, index) => (
@@ -659,32 +661,30 @@ export default function MentorPage() {
                )}
             </div>
             
-                         {/* Profile Type Legend - Only show for mentees */}
-             {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && searchFilteredMentors.some(m => m.isGenerated) && (
-               <div className="profile-legend">
-                 <span className="legend-item">
-                   <span className="legend-icon real">👥</span>
-                   <span className="legend-text">Real Profiles</span>
-                 </span>
-                 <span className="legend-item">
-                   <span className="legend-icon generated">🎲</span>
-                   <span className="legend-text">Generated Profiles</span>
-                 </span>
-               </div>
-             )}
+            {/* Profile Type Legend - Only show for mentees */}
+            {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && searchFilteredMentors.some(m => m.isGenerated) && (
+              <div className="profile-legend">
+                <span className="legend-item">
+                  <span className="legend-icon real">👥</span>
+                  <span className="legend-text">Real Profiles</span>
+                </span>
+                <span className="legend-item">
+                  <span className="legend-icon generated">🎲</span>
+                  <span className="legend-text">Generated Profiles</span>
+                </span>
+              </div>
+            )}
             </div>
-          )}
 
-          {/* Filters - Only show for mentees */}
-           {typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' && (
-             <MentorFilters
-               selectedFilter={selectedFilter}
-               onFilterChange={setSelectedFilter}
-               getFilterCount={getFilterCount}
-               totalMentors={availableProfiles.length}
-             />
-           )}
-        </div>
+            {/* Filters */}
+            <MentorFilters
+              selectedFilter={selectedFilter}
+              onFilterChange={setSelectedFilter}
+              getFilterCount={getFilterCount}
+              totalMentors={availableProfiles.length}
+            />
+           </div>
+         )}
 
         {/* Right Main Content */}
         <div className="mentor-main-content">
