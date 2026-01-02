@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaStar, FaHandshake, FaChartLine, FaCalendarAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
@@ -17,6 +18,8 @@ export default function BGr8() {
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
   const [ambassadorCount, setAmbassadorCount] = useState(500); // Default fallback value
+  const [showMentorDef, setShowMentorDef] = useState(false);
+  const [showMenteeDef, setShowMenteeDef] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -280,7 +283,7 @@ export default function BGr8() {
         <div className="bgr8-content-wrapper">
           <div className="bgr8-about-header">
             <h3>About BGr8</h3>
-            <p>Empowering communities through mentorship, education, and sustainable development</p>
+            <p>Learn more about our mission, values, and the impact we strive to make.</p>
           </div>
           
           <div className="bgr8-about-content">
@@ -288,43 +291,86 @@ export default function BGr8() {
               <div className="bgr8-about-story">
                 <h4>Our Story</h4>
                 <p>
-                  Founded with a vision to create lasting positive change, BGr8 has been at the forefront 
-                  of community development and mentorship programs. We believe that sustainable growth 
-                  comes from empowering individuals and communities to reach their full potential.
-                </p>
-                <p>
-                  Through our comprehensive approach that spans from crisis prevention to long-term 
-                  empowerment, we've helped thousands of people build better futures for themselves 
-                  and their communities.
+                  We are a charity made by young people for young people.
                 </p>
               </div>
               
-              <div className="bgr8-about-mission">
-                <h4>Our Mission</h4>
+              <div className="bgr8-about-challenge">
+                <h4>The Challenge</h4>
                 <p>
-                  To provide critical support from the first sign of need to full community transformation, 
-                  ensuring that no one is left behind in the journey toward sustainable development and 
-                  lasting positive change.
+                  Many young people face barriers such as lack of direction, low confidence, limited access to opportunities.
                 </p>
+                <p>
+                  At Bgr8, we recognise that every young person has potential, some just need support to unlock it.
+                </p>
+              </div>
+
+              <div className="bgr8-about-offer">
+                <h4>What we offer</h4>
+                <ul>
+                  <li>
+                    <strong>National Mentorship Programme:</strong> Connect with experienced professionals and passionate mentors across the UK who are committed to supporting your growth and development.
+                  </li>
+                  <li>
+                    <strong>Personalised Matching:</strong> Our intelligent 
+                    <span 
+                      className="bgr8-mentor-link"
+                      onClick={() => {
+                        setShowMentorDef(!showMentorDef);
+                        setShowMenteeDef(false);
+                      }}
+                      onMouseEnter={() => setShowMentorDef(true)}
+                      onMouseLeave={() => setShowMentorDef(false)}
+                    >
+                      Mentor
+                      {showMentorDef && (
+                        <div className="bgr8-definition-tooltip bgr8-mentor-tooltip">
+                          <strong>Mentor:</strong> An experienced professional who shares their expertise, knowledge, and insights to guide and support your personal and professional development journey.
+                        </div>
+                      )}
+                    </span>
+                    {' × '}
+                    <span 
+                      className="bgr8-mentee-link"
+                      onClick={() => {
+                        setShowMenteeDef(!showMenteeDef);
+                        setShowMentorDef(false);
+                      }}
+                      onMouseEnter={() => setShowMenteeDef(true)}
+                      onMouseLeave={() => setShowMenteeDef(false)}
+                    >
+                      Mentee
+                      {showMenteeDef && (
+                        <div className="bgr8-definition-tooltip bgr8-mentee-tooltip">
+                          <strong>Mentee:</strong> A young person aged 16-19 seeking guidance, inspiration, and support from experienced role models to explore career paths, develop skills, and unlock their full potential.
+                        </div>
+                      )}
+                    </span>
+                    {' '}pairing system uses advanced algorithms to match you with the most compatible mentor or mentee based on your interests, goals, and aspirations.
+                  </li>
+                  <li>
+                    <strong>Structured Support Framework:</strong> Benefit from our proven mentorship methodology designed to foster meaningful connections, set clear objectives, and track your progress towards achieving your goals.
+                  </li>
+                </ul>
               </div>
             </div>
             
             <div className="bgr8-about-stats">
               <div className="bgr8-stat-card">
-                <div className="bgr8-stat-number">10,000+</div>
-                <div className="bgr8-stat-label">Lives Impacted</div>
+                <div className="bgr8-stat-number">15</div>
+                <div className="bgr8-stat-label">Committee Members</div>
               </div>
               <div className="bgr8-stat-card">
                 <div className="bgr8-stat-number">50+</div>
-                <div className="bgr8-stat-label">Communities Served</div>
+                <div className="bgr8-stat-label">Schools Visited</div>
               </div>
               <div className="bgr8-stat-card">
-                <div className="bgr8-stat-number">5</div>
-                <div className="bgr8-stat-label">Years of Service</div>
+                <div className="bgr8-stat-number">100+</div>
+                <div className="bgr8-stat-label">Mentors</div>
               </div>
               <div className="bgr8-stat-card">
-                <div className="bgr8-stat-number">95%</div>
-                <div className="bgr8-stat-label">Success Rate</div>
+                <div className="bgr8-stat-number">100+</div>
+                <div className="bgr8-stat-label">Mentees</div>
               </div>
             </div>
           </div>
@@ -334,24 +380,24 @@ export default function BGr8() {
               <h4>Our Values</h4>
               <div className="bgr8-values-grid">
                 <div className="bgr8-value-item">
-                  <div className="bgr8-value-icon">🤝</div>
-                  <h5>Community First</h5>
-                  <p>We prioritize the needs and voices of the communities we serve, ensuring our programs are culturally sensitive and locally relevant.</p>
+                  <div className="bgr8-value-icon">🧭</div>
+                  <h5>Guiding Young People</h5>
+                  <p>We are dedicated to guiding young people, empowering them with the mentorship, resources, and encouragement needed to unlock their potential and confidently shape their futures.</p>
                 </div>
                 <div className="bgr8-value-item">
-                  <div className="bgr8-value-icon">🌱</div>
-                  <h5>Sustainable Impact</h5>
-                  <p>We focus on creating long-term, sustainable solutions that continue to benefit communities long after our direct involvement.</p>
+                  <div className="bgr8-value-icon">🚀</div>
+                  <h5>Potential Beyond Circumstances</h5>
+                  <p>We believe anyone can achieve success, no matter where they start. Your background doesn't decide your future. With the right support, you can accomplish your goals.</p>
                 </div>
                 <div className="bgr8-value-item">
-                  <div className="bgr8-value-icon">🎓</div>
-                  <h5>Education & Mentorship</h5>
-                  <p>We believe in the power of education and mentorship to unlock potential and create opportunities for growth.</p>
+                  <div className="bgr8-value-icon">🌐</div>
+                  <h5>Learning Should Be Free and Accessible</h5>
+                  <p>Our platform is designed to be free for everyone, and we will never charge for our services.</p>
                 </div>
                 <div className="bgr8-value-item">
-                  <div className="bgr8-value-icon">💙</div>
-                  <h5>Transparency</h5>
-                  <p>We maintain complete transparency in our operations, ensuring donors and partners can see exactly how their support makes a difference.</p>
+                  <div className="bgr8-value-icon">🛡️</div>
+                  <h5>Safeguarding and Accountability</h5>
+                  <p>We are committed to safeguarding the welfare of young people and ensuring that our platform is used responsibly and ethically.</p>
                 </div>
               </div>
             </div>
@@ -364,7 +410,7 @@ export default function BGr8() {
         <div className="bgr8-content-wrapper">
           <div className="bgr8-ambassador-content">
             <div className="bgr8-ambassador-text">
-              <h3>Become a BGr8 Ambassador</h3>
+              <h3>Become a Bgr8 Ambassador</h3>
               <p>
                 Join our network of passionate advocates who are making a real difference in their communities. 
                 As a BGr8 Ambassador, you'll help spread our mission, connect with like-minded individuals, 
@@ -372,19 +418,31 @@ export default function BGr8() {
               </p>
               <div className="bgr8-ambassador-benefits">
                 <div className="bgr8-benefit-item">
-                  <div className="bgr8-benefit-icon">🌟</div>
-                  <h4>Make an Impact</h4>
-                  <p>Be part of meaningful change in communities worldwide</p>
+                  <div className="bgr8-benefit-icon">
+                    <FaStar />
+                  </div>
+                  <div className="bgr8-benefit-content">
+                    <h4>Make an Impact</h4>
+                    <p>Be part of meaningful change in communities worldwide</p>
+                  </div>
                 </div>
                 <div className="bgr8-benefit-item">
-                  <div className="bgr8-benefit-icon">🤝</div>
-                  <h4>Build Connections</h4>
-                  <p>Connect with mentors, mentees, and fellow ambassadors</p>
+                  <div className="bgr8-benefit-icon">
+                    <FaHandshake />
+                  </div>
+                  <div className="bgr8-benefit-content">
+                    <h4>Build Connections</h4>
+                    <p>Connect with mentors, mentees, and fellow ambassadors</p>
+                  </div>
                 </div>
                 <div className="bgr8-benefit-item">
-                  <div className="bgr8-benefit-icon">📈</div>
-                  <h4>Grow Personally</h4>
-                  <p>Develop leadership skills and expand your network</p>
+                  <div className="bgr8-benefit-icon">
+                    <FaChartLine />
+                  </div>
+                  <div className="bgr8-benefit-content">
+                    <h4>Grow Personally</h4>
+                    <p>Develop skills you can apply to your CV and expand your network</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -404,8 +462,8 @@ export default function BGr8() {
                     <span className="bgr8-stat-label">Active Ambassadors</span>
                   </div>
                   <div className="bgr8-ambassador-stat">
-                    <span className="bgr8-stat-number">50+</span>
-                    <span className="bgr8-stat-label">Countries</span>
+                    <span className="bgr8-stat-number">18</span>
+                    <span className="bgr8-stat-label">Schools Visited</span>
                   </div>
                 </div>
               </div>
@@ -434,18 +492,36 @@ export default function BGr8() {
         </BannerWrapper>
       </VisibilityWrapper>
 
-      {/* Discover More Section */}
-      <section className="bgr8-discover-section">
+      {/* Upcoming Events Section */}
+      <section className="bgr8-events-section">
         <div className="bgr8-content-wrapper">
-          <h3>DISCOVER MORE</h3>
-          <div className="bgr8-discover-cards">
-            <div className="bgr8-discover-card">
-              <h4>Community Programs</h4>
-              <p>Learn about our comprehensive approach to community development and how we're creating lasting positive change.</p>
-            </div>
-            <div className="bgr8-discover-card">
-              <h4>How to leave a gift in your Will</h4>
-              <p>Discover how you can create a lasting legacy by including BGr8 in your estate planning.</p>
+          <div className="bgr8-events-header">
+            <h3>Upcoming Events</h3>
+            <p>Join us at our upcoming events and be part of the Bgr8 community</p>
+          </div>
+          <div className="bgr8-events-grid">
+            <div className="bgr8-event-card">
+              <div className="bgr8-event-date">
+                <FaCalendarAlt className="bgr8-event-date-icon" />
+                <div className="bgr8-event-date-content">
+                  <span className="bgr8-event-day">TBC</span>
+                  <span className="bgr8-event-month">TBC</span>
+                </div>
+              </div>
+              <div className="bgr8-event-content">
+                <h4>Bgr8 Launch</h4>
+                <p>Join us for the official launch of Bgr8! Celebrate with us as we kickstart our mission to empower young people through mentorship.</p>
+                <div className="bgr8-event-details">
+                  <div className="bgr8-event-detail">
+                    <FaClock className="bgr8-event-detail-icon" />
+                    <span>6:00 PM - 9:00 PM</span>
+                  </div>
+                  <div className="bgr8-event-detail">
+                    <FaMapMarkerAlt className="bgr8-event-detail-icon" />
+                    <span>London, UK</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
