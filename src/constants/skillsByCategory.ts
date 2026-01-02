@@ -37,16 +37,14 @@ const skillsByCategory: { [category: string]: string[] } = {
   ],
   'Business & Professional': [
     'Accounting', 'Business Analysis', 'Business Strategy',
-    'Business Writing', 'Consulting', 'Digital Marketing',
+    'Consulting', 'Digital Marketing',
     'Entrepreneurship', 'Finance', 'Human Resources',
-    'Leadership', 'Marketing', 'Negotiation', 'Project Management',
-    'Public Relations', 'Public Speaking', 'Sales',
-    'Social Media Marketing', 'Team Management'
+    'Marketing', 'Project Management',
+    'Public Relations', 'Sales',
   ],
   'Creative Arts': [
-    '3D Modeling', 'Animation', 'Content Creation', 'Creative Writing',
-    'Drawing', 'Film Making', 'Graphic Design', 'Music Production',
-    'Music Theory', 'Painting', 'Photography', 'Songwriting',
+    '3D Modeling/CAD', 'Animation', 'Content Creation', 'Creative Writing',
+    'Drawing', 'Film Making', 'Graphic Design', 'Music', 'Painting', 'Photography', 'Songwriting',
     'Video Editing', 'Web Design'
   ],
   'Languages': [
@@ -55,7 +53,7 @@ const skillsByCategory: { [category: string]: string[] } = {
   ],
   'Soft Skills': [
     'Adaptability', 'Emotional Intelligence', 'Conflict Resolution',
-    'Critical Thinking', 'Problem Solving',
+    'Critical Thinking', 'Leadership', 'Problem Solving',
     'Stress Management', 'Time Management', 'Work Ethics'
   ]
 };

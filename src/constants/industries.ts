@@ -16,7 +16,6 @@ const industries = [
   'Hospitality', 
   'Insurance',
   'Legal', 
-  'Locomotive', 
   'Logistics', 
   'Manufacturing', 
   'Marketing', 
