@@ -644,7 +644,14 @@
   }
 }
 
-.user-menu-trigger span {
+.user-menu-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.user-name {
   color: var(--white);
   font-weight: 500;
   font-size: 0.95rem;
@@ -652,10 +659,40 @@
   transition: all 0.3s ease;
 }
 
-.user-menu-trigger:hover span {
+.user-menu-trigger:hover .user-name {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5),
                0 0 10px rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
+}
+
+.user-status-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.user-status-tag.status-tag-verified {
+  background-color: var(--success);
+}
+
+.user-status-tag.status-tag-unverified {
+  background-color: #fca5a5;
+}
+
+.user-status-tag.status-tag-mentee {
+  background-color: var(--mentee);
+}
+
+.user-menu-trigger:hover .user-status-tag {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .user-menu {

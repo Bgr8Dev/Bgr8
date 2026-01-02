@@ -136,6 +136,20 @@
   margin-bottom: 1rem;
 }
 
+.mobile-user-info-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 1;
+}
+
+.mobile-user-name {
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
 .mobile-user-avatar {
   width: 40px;
   height: 40px;
@@ -155,6 +169,31 @@
   font-weight: bold;
   text-transform: uppercase;
   font-size: 1.1rem;
+}
+
+.mobile-user-status-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-user-status-tag.status-tag-verified {
+  background-color: var(--success);
+}
+
+.mobile-user-status-tag.status-tag-unverified {
+  background-color: #fca5a5;
+}
+
+.mobile-user-status-tag.status-tag-mentee {
+  background-color: var(--mentee);
 }
 
 .mobile-user-actions {
