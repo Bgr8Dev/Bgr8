@@ -9,8 +9,6 @@ interface VerificationProgressProps {
 
 const verificationSteps: VerificationStep[] = [
   'profile_submitted',
-  'document_review',
-  'background_check',
   'interview_scheduled',
   'interview_completed',
   'final_review',
@@ -19,8 +17,6 @@ const verificationSteps: VerificationStep[] = [
 
 const stepLabels: Record<VerificationStep, string> = {
   profile_submitted: 'Profile Submitted',
-  document_review: 'Document Review',
-  background_check: 'Background Check',
   interview_scheduled: 'Interview Scheduled',
   interview_completed: 'Interview Completed',
   final_review: 'Final Review',

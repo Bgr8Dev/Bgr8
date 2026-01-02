@@ -12,6 +12,8 @@ import {
   FaExclamationTriangle,
   FaChartBar
 } from 'react-icons/fa';
+import { doc, getDoc } from 'firebase/firestore';
+import { firestore } from '../../firebase/firebase';
 import { VerificationService } from '../../services/verificationService';
 import { VerificationStatus, VerificationStep } from '../../types/verification';
 import { VerificationStatusBadge, VerificationProgress } from '../../components/verification';
@@ -120,6 +122,115 @@ export const AdminMentorVerification: React.FC = () => {
     }
   };
 
+  const handleStatusChange = async (
+    mentorUid: string,
+    newStatus: VerificationStatus,
+    newStep: VerificationStep,
+    e?: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    const originalMentor = mentors.find(m => m.uid === mentorUid);
+    if (!originalMentor) {
+      setError('Mentor not found');
+      return;
+    }
+    
+    try {
+      setActionLoading(mentorUid);
+      
+      const currentUser = 'admin'; // In real app, get from auth context
+
+      // Update stats optimistically
+      const updateStats = (statusChange: { from: VerificationStatus; to: VerificationStatus }) => {
+        setStats(prevStats => {
+          if (!prevStats) return prevStats;
+          
+          const statusToProperty: Record<VerificationStatus, keyof VerificationStats> = {
+            'pending': 'pending',
+            'under_review': 'underReview',
+            'approved': 'approved',
+            'rejected': 'rejected',
+            'suspended': 'suspended',
+            'revoked': 'rejected'
+          };
+          
+          const fromProperty = statusToProperty[statusChange.from];
+          const toProperty = statusToProperty[statusChange.to];
+          
+          return {
+            ...prevStats,
+            [fromProperty]: Math.max(0, prevStats[fromProperty] - 1),
+            [toProperty]: prevStats[toProperty] + 1
+          };
+        });
+      };
+
+      // Update via service first
+      await VerificationService.updateVerificationStatus(
+        mentorUid,
+        newStatus,
+        newStep,
+        currentUser,
+        `Status changed to ${newStatus}, step changed to ${newStep}`
+      );
+
+      // Update mentor in state after successful Firebase update
+      const updatedMentor = {
+        ...originalMentor,
+        verification: {
+          ...originalMentor.verification,
+          status: newStatus,
+          currentStep: newStep,
+          lastUpdated: new Date()
+        }
+      };
+
+      setMentors(prevMentors => 
+        prevMentors.map(mentor => 
+          mentor.uid === mentorUid ? updatedMentor : mentor
+        )
+      );
+
+      // Update selectedMentor if it's the one being changed
+      if (selectedMentor && selectedMentor.uid === mentorUid) {
+        setSelectedMentor(updatedMentor);
+      }
+
+      if (originalMentor.verification.status !== newStatus) {
+        updateStats({ from: originalMentor.verification.status, to: newStatus });
+      }
+
+      setSuccessMessage(`Status updated to ${newStatus.replace('_', ' ')}`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(`Failed to update status: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      // Revert optimistic update on error by reloading just this mentor's data
+      const profileRef = doc(firestore, 'users', mentorUid, 'mentorProgram', 'profile');
+      const profileDoc = await getDoc(profileRef);
+      if (profileDoc.exists()) {
+        const profileData = profileDoc.data();
+        const revertedMentor = {
+          ...originalMentor,
+          verification: profileData.verification
+        };
+        setMentors(prevMentors => 
+          prevMentors.map(mentor => 
+            mentor.uid === mentorUid ? revertedMentor : mentor
+          )
+        );
+        if (selectedMentor && selectedMentor.uid === mentorUid) {
+          setSelectedMentor(revertedMentor);
+        }
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleVerificationAction = async (
     mentorUid: string, 
     action: 'approve' | 'reject' | 'suspend' | 'move_to_review',
@@ -201,9 +312,9 @@ export const AdminMentorVerification: React.FC = () => {
           await VerificationService.suspendMentor(mentorUid, currentUser, reason, notes);
           break;
         case 'move_to_review':
-          updateMentorInState({ status: 'under_review', currentStep: 'document_review' });
+          updateMentorInState({ status: 'under_review', currentStep: 'final_review' });
           updateStats({ from: originalMentor.verification.status, to: 'under_review' });
-          await VerificationService.moveToUnderReview(mentorUid, currentUser, 'document_review', notes);
+          await VerificationService.moveToUnderReview(mentorUid, currentUser, 'final_review', notes);
           break;
       }
       
@@ -643,6 +754,119 @@ export const AdminMentorVerification: React.FC = () => {
               <div className="admin-mentor-verification__modal-section">
                 <h4>Verification Status</h4>
                 <VerificationProgress verificationData={selectedMentor.verification} />
+              </div>
+              
+              <div className="admin-mentor-verification__modal-section">
+                <h4>Change Verification Status</h4>
+                <div className="admin-mentor-verification__status-buttons">
+                  <div className="admin-mentor-verification__status-group">
+                    <label>Status:</label>
+                    <div className="admin-mentor-verification__button-grid">
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__status-btn ${selectedMentor.verification.status === 'pending' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'pending', selectedMentor.verification.currentStep, e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Pending
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__status-btn ${selectedMentor.verification.status === 'under_review' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'under_review', selectedMentor.verification.currentStep, e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Under Review
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__status-btn ${selectedMentor.verification.status === 'approved' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'approved', 'approved', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Approved
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__status-btn ${selectedMentor.verification.status === 'rejected' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'rejected', 'rejected', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Rejected
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__status-btn ${selectedMentor.verification.status === 'suspended' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'suspended', selectedMentor.verification.currentStep, e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Suspended
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__status-btn ${selectedMentor.verification.status === 'revoked' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'revoked', 'rejected', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Revoked
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="admin-mentor-verification__status-group">
+                    <label>Step:</label>
+                    <div className="admin-mentor-verification__button-grid">
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__step-btn ${selectedMentor.verification.currentStep === 'profile_submitted' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, selectedMentor.verification.status, 'profile_submitted', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Profile Submitted
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__step-btn ${selectedMentor.verification.currentStep === 'interview_scheduled' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, selectedMentor.verification.status, 'interview_scheduled', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Interview Scheduled
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__step-btn ${selectedMentor.verification.currentStep === 'interview_completed' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, selectedMentor.verification.status, 'interview_completed', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Interview Completed
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__step-btn ${selectedMentor.verification.currentStep === 'final_review' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, selectedMentor.verification.status, 'final_review', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Final Review
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__step-btn ${selectedMentor.verification.currentStep === 'approved' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'approved', 'approved', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Approved
+                      </button>
+                      <button
+                        type="button"
+                        className={`admin-mentor-verification__step-btn ${selectedMentor.verification.currentStep === 'rejected' ? 'active' : ''}`}
+                        onClick={(e) => handleStatusChange(selectedMentor.uid, 'rejected', 'rejected', e)}
+                        disabled={actionLoading === selectedMentor.uid}
+                      >
+                        Rejected
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               
               <div className="admin-mentor-verification__modal-actions">
