@@ -5,7 +5,7 @@ import { MentorMenteeProfile, ProfileFormData, ValidationErrors, FormProgress } 
 import { degreePlaceholders } from '../types/mentorConstants';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import industriesList from '../../../constants/industries';
-import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import hobbiesList from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
@@ -257,40 +257,35 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
   );
 
   const renderHobbiesSelection = () => (
-    <div className="mpem-hobbies-selection-container">
+    <div className="mpem-skills-selection-container">
       <label className="mpem-field-label">
         Hobbies & Interests *
         <FaInfoCircle className="mpem-info-icon" data-tooltip={getFieldTooltip('hobbies')} />
       </label>
-      <div className="mpem-hobbies-tags-container">
-        {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
-          <div key={category} className="mpem-hobby-category-section">
-            <h5 className="mpem-category-title">{category}</h5>
-            <div className="mpem-tags-grid">
-              {hobbies.map((hobby) => (
-                <button
-                  key={hobby}
-                  type="button"
-                  className={`mpem-hobby-tag-selectable ${
-                    localFormData.hobbies?.includes(hobby) ? 'selected' : ''
-                  }`}
-                  onClick={() => {
-                    const currentHobbies = localFormData.hobbies || [];
-                    const newHobbies = currentHobbies.includes(hobby)
-                      ? currentHobbies.filter(h => h !== hobby)
-                      : [...currentHobbies, hobby];
-                    handleLocalArrayChange('hobbies', newHobbies);
-                  }}
-                >
-                  {hobby}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="mpem-skills-tags-container">
+        <div className="mpem-tags-grid">
+          {hobbiesList.map((hobby) => (
+            <button
+              key={hobby}
+              type="button"
+              className={`mpem-skill-tag-selectable ${
+                localFormData.hobbies?.includes(hobby) ? 'selected' : ''
+              }`}
+              onClick={() => {
+                const currentHobbies = localFormData.hobbies || [];
+                const newHobbies = currentHobbies.includes(hobby)
+                  ? currentHobbies.filter(h => h !== hobby)
+                  : [...currentHobbies, hobby];
+                handleLocalArrayChange('hobbies', newHobbies);
+              }}
+            >
+              {hobby}
+            </button>
+          ))}
+        </div>
       </div>
       {localFormData.hobbies && localFormData.hobbies.length > 0 && (
-        <div className="mpem-selected-hobbies-summary">
+        <div className="mpem-selected-skills-summary">
           <span className="mpem-summary-label">Selected hobbies:</span>
           <div className="mpem-selected-tags">
             {localFormData.hobbies.map((hobby, index) => (

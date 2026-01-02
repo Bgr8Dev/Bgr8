@@ -17,7 +17,7 @@ import ukCounties from '../../../constants/ukCounties';
 import {ethnicityOptions} from '../../../constants/ethnicityOptions';
 import {religionOptions} from '../../../constants/religionOptions';
 import industriesList from '../../../constants/industries';
-import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import hobbiesList from '../../../constants/hobbiesByCategory';
 import MatchStrengthRing from './MatchStrengthRing';
 
 const MENTEE_MIN_AGE = 15;
@@ -831,55 +831,48 @@ export default function MentorProgram() {
                                 padding: '0.5rem 0',
                               }}
                             >
-                              {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
-                                <div key={category} style={{ marginBottom: 8 }}>
-                                  <div style={{ fontWeight: 700, color: 'var(--warning)', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>
-                                    {category.replace(/([A-Z])/g, ' $1').trim()}
-                                  </div>
-                                  {hobbies.map(hobby => (
-                                    <label
-                                      key={hobby}
-                                      style={{
-                                        display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
-                                        background: form.hobbies.includes(hobby) ? 'rgba(255,179,0,0.13)' : 'transparent',
-                                        color: form.hobbies.includes(hobby) ? 'var(--warning)' : 'var(--text)',
-                                        fontWeight: form.hobbies.includes(hobby) ? 700 : 400,
-                                        borderRadius: 6,
-                                        marginBottom: 0,
-                                        transition: 'background 0.15s, color 0.15s',
-                                        fontSize: '1.08rem',
-                                      }}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={form.hobbies.includes(hobby)}
-                                        onChange={() => {
-                                          if (!hobby || hobby.trim() === '') return;
-                                          setForm(prev => {
-                                            const isSelected = prev.hobbies.includes(hobby);
-                                            const updated = isSelected
-                                              ? prev.hobbies.filter(h => h !== hobby)
-                                              : [...prev.hobbies, hobby];
+                              {hobbiesList.map(hobby => (
+                                <label
+                                  key={hobby}
+                                  style={{
+                                    display: 'flex', alignItems: 'center', gap: 16, padding: '0.5rem 1rem', cursor: 'pointer',
+                                    background: form.hobbies.includes(hobby) ? 'rgba(255,179,0,0.13)' : 'transparent',
+                                    color: form.hobbies.includes(hobby) ? 'var(--warning)' : 'var(--text)',
+                                    fontWeight: form.hobbies.includes(hobby) ? 700 : 400,
+                                    borderRadius: 6,
+                                    marginBottom: 0,
+                                    transition: 'background 0.15s, color 0.15s',
+                                    fontSize: '1.08rem',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={form.hobbies.includes(hobby)}
+                                    onChange={() => {
+                                      if (!hobby || hobby.trim() === '') return;
+                                      setForm(prev => {
+                                        const isSelected = prev.hobbies.includes(hobby);
+                                        const updated = isSelected
+                                          ? prev.hobbies.filter(h => h !== hobby)
+                                          : [...prev.hobbies, hobby];
 
-                                            return {
-                                              ...prev,
-                                              hobbies: updated.filter(h => h && h.trim() !== '') // Sanitize
-                                            };
-                                          });
-                                        }}
-                                        style={{
-                                          accentColor: 'var(--warning)',
-                                          marginRight: 0,
-                                          width: 16,
-                                          height: 16,
-                                          flexShrink: 0,
-                                          verticalAlign: 'middle'
-                                        }}
-                                      />
-                                      <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{hobby}</span>
-                                    </label>
-                                  ))}
-                                </div>
+                                        return {
+                                          ...prev,
+                                          hobbies: updated.filter(h => h && h.trim() !== '') // Sanitize
+                                        };
+                                      });
+                                    }}
+                                    style={{
+                                      accentColor: 'var(--warning)',
+                                      marginRight: 0,
+                                      width: 16,
+                                      height: 16,
+                                      flexShrink: 0,
+                                      verticalAlign: 'middle'
+                                    }}
+                                  />
+                                  <span style={{ flex: 1, textAlign: 'left', fontSize: '1.08rem', letterSpacing: 0.2 }}>{hobby}</span>
+                                </label>
                               ))}
                             </div>
                           )}

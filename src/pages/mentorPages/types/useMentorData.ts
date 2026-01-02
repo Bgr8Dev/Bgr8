@@ -320,9 +320,14 @@ export const useMentorData = () => {
       const user = currentUser;
       if (!user) throw new Error('No authenticated user');
 
+      // Remove undefined values to prevent Firebase errors
+      const cleanProfileData = Object.fromEntries(
+        Object.entries(profileData).filter(([_, value]) => value !== undefined)
+      ) as Partial<MentorMenteeProfile>;
+
       const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
       const newProfile = {
-        ...profileData,
+        ...cleanProfileData,
         id: user.uid,
         uid: user.uid,
         createdAt: new Date().toISOString(),
@@ -361,13 +366,18 @@ export const useMentorData = () => {
       const user = currentUser;
       if (!user) throw new Error('No authenticated user');
 
+      // Remove undefined values to prevent Firebase errors
+      const cleanProfileData = Object.fromEntries(
+        Object.entries(profileData).filter(([_, value]) => value !== undefined)
+      ) as Partial<MentorMenteeProfile>;
+
       const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
       const updateData = {
-        ...profileData,
+        ...cleanProfileData,
         updatedAt: new Date().toISOString(),
         // Ensure boolean fields are set based on type
-        isMentor: typeof profileData.type === 'string' ? profileData.type.toLowerCase() === 'mentor' : false,
-        isMentee: typeof profileData.type === 'string' ? profileData.type.toLowerCase() === 'mentee' : false
+        isMentor: typeof cleanProfileData.type === 'string' ? cleanProfileData.type.toLowerCase() === 'mentor' : false,
+        isMentee: typeof cleanProfileData.type === 'string' ? cleanProfileData.type.toLowerCase() === 'mentee' : false
       };
 
       await updateDoc(profileRef, updateData);

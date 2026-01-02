@@ -5,7 +5,7 @@ import { firestore } from '../../../firebase/firebase';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import './MentorProgram.css';
 import industriesList from '../../../constants/industries';
-import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import hobbiesList from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
@@ -513,19 +513,8 @@ export default function MentorProfile() {
               {skillsTab === 'hobbies' && (
                 <div className="mentor-profile-list mentor-profile-chips mentor-profile-hobbies-chips" style={{ flexWrap: 'wrap', gap: 8, fontSize: '0.95rem' }}>
                   {profile.hobbies && profile.hobbies.length > 0 ? (
-                    Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
-                      <React.Fragment key={category}>
-                        {profile.hobbies.some(hobby => hobbies.includes(hobby)) && (
-                          <div style={{ marginBottom: 4 }}>
-                            <div style={{ fontWeight: 700, color: 'var(--warning)', fontSize: '1.02rem', margin: '0.5rem 0 0.2rem 0.7rem' }}>{category.replace(/([A-Z])/g, ' $1').trim()}</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                              {hobbies.filter(hobby => profile.hobbies.includes(hobby)).map((hobby, idx) => (
-                                <span className="mentor-profile-chip mentor-profile-hobby-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s`, padding: '4px 10px', fontSize: '0.95rem' }} key={hobby}>{hobby}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </React.Fragment>
+                    profile.hobbies.map((hobby, idx) => (
+                      <span className="mentor-profile-chip mentor-profile-hobby-chip mentor-profile-chip-animate" style={{ animationDelay: `${0.05 * idx + 0.1}s`, padding: '4px 10px', fontSize: '0.95rem' }} key={hobby}>{hobby}</span>
                     ))
                   ) : (
                     <p className="mentor-profile-value">Not specified</p>

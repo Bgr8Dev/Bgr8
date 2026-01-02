@@ -4,7 +4,7 @@ import { UserType, MENTOR, MENTEE, ProfileFormData, ValidationErrors, FormProgre
 import { degreePlaceholders } from '../types/mentorConstants';
 import skillsByCategory from '../../../constants/skillsByCategory';
 import industriesList from '../../../constants/industries';
-import hobbiesByCategory from '../../../constants/hobbiesByCategory';
+import hobbiesList from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';
@@ -150,7 +150,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     
     const skills = Object.values(skillsByCategory).flat();
     const industries = industriesList;
-    const hobbies = Object.values(hobbiesByCategory).flat();
+    const hobbies = hobbiesList;
     const counties = ukCounties;
     const ethnicities = ethnicityOptions;
     const religions = religionOptions;
@@ -239,15 +239,15 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
         // Handle past professions array
         value.forEach((profession, index) => {
           if (index === 0) {
-            onPastProfessionChange(0, profession);
+            onPastProfessionChange(0, profession as string);
           } else {
             onAddPastProfession();
-            onPastProfessionChange(index, profession);
+            onPastProfessionChange(index, profession as string);
           }
         });
       } else if (Array.isArray(value)) {
         // Handle array fields (skills, industries, hobbies, lookingFor)
-        onArrayChange(key as keyof ProfileFormData, value);
+        onArrayChange(key as keyof ProfileFormData, value as string[]);
       } else {
         // Handle string fields
         const syntheticEvent = {
@@ -407,39 +407,34 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
   );
 
   const renderHobbiesSelection = () => (
-    <div className="prf-hobbies-selection-container">
+    <div className="prf-skills-selection-container">
       <label className="field-label">
         Hobbies & Interests *
         <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('hobbies')} />
       </label>
-      <div className="hobbies-tags-container">
-        {Object.entries(hobbiesByCategory).map(([category, hobbies]) => (
-          <div key={category} className="hobby-category-section">
-            <h5 className="prf-category-title">{category}</h5>
-            <div className="prf-tags-grid">
-              {hobbies.map((hobby) => (
-                <button
-                  key={hobby}
-                  type="button"
-                  className={`prf-hobby-tag-selectable ${
-                    profileForm.hobbies.includes(hobby) ? 'selected' : ''
-                  }`}
-                  onClick={() => {
-                    const newHobbies = profileForm.hobbies.includes(hobby)
-                      ? profileForm.hobbies.filter(h => h !== hobby)
-                      : [...profileForm.hobbies, hobby];
-                    onArrayChange('hobbies', newHobbies);
-                  }}
-                >
-                  {hobby}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="skills-tags-container">
+        <div className="prf-tags-grid">
+          {hobbiesList.map((hobby) => (
+            <button
+              key={hobby}
+              type="button"
+              className={`prf-skill-tag-selectable ${
+                profileForm.hobbies.includes(hobby) ? 'selected' : ''
+              }`}
+              onClick={() => {
+                const newHobbies = profileForm.hobbies.includes(hobby)
+                  ? profileForm.hobbies.filter(h => h !== hobby)
+                  : [...profileForm.hobbies, hobby];
+                onArrayChange('hobbies', newHobbies);
+              }}
+            >
+              {hobby}
+            </button>
+          ))}
+        </div>
       </div>
       {profileForm.hobbies.length > 0 && (
-        <div className="prf-selected-hobbies-summary">
+        <div className="prf-selected-skills-summary">
           <span className="prf-summary-label">Selected hobbies:</span>
           <div className="prf-selected-tags">
             {profileForm.hobbies.map((hobby, index) => (
