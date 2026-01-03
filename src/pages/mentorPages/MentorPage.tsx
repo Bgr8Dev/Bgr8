@@ -229,15 +229,6 @@ export default function MentorPage() {
     return success;
   };
 
-  const handleAvailabilityManage = () => {
-    // Only mentors can manage availability
-    if (typeof currentUserProfile?.type !== 'string' || currentUserProfile.type.toLowerCase() !== 'mentor') {
-      console.warn('Only mentors can manage availability');
-      return;
-    }
-    setShowAvailabilityModal(true);
-  };
-
   const handleViewAllBookings = () => {
     setShowViewBookingsModal(true);
   };
@@ -319,27 +310,6 @@ export default function MentorPage() {
     fetchMentorBookings(mentor.uid);
   };
 
-  const handleBooking = (mentor: MentorMenteeProfile) => {
-    console.log('Booking clicked for:', mentor.firstName, mentor.lastName);
-    
-    // Close any other open modals first
-    if (showProfileViewModal || showBookingModal || showCalComModal) {
-      console.log('Closing other modals before opening booking modal');
-      setShowProfileViewModal(false);
-      setShowBookingModal(false);
-      setShowCalComModal(false);
-      // Small delay to ensure state updates before opening new modal
-      setTimeout(() => {
-        setSelectedMentor(mentor);
-        setShowBookingModal(true);
-      }, 100);
-      return;
-    }
-    
-    setSelectedMentor(mentor);
-    setShowBookingModal(true);
-    console.log('Booking not yet implemented for:', mentor.firstName);
-  };
 
   const handleCalCom = (mentor: MentorMenteeProfile) => {
     console.log('Cal.com clicked for:', mentor.firstName, mentor.lastName);
@@ -693,10 +663,8 @@ export default function MentorPage() {
             typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? (
               <MentorDashboard
                 currentUserProfile={currentUserProfile}
-                mentorAvailability={mentorAvailability}
                 mentorBookings={mentorBookings}
                 onProfileEdit={handleProfileEdit}
-                onAvailabilityManage={handleAvailabilityManage}
                 onViewAllBookings={handleViewAllBookings}
                 onAcceptBooking={handleAcceptBooking}
                 onRejectBooking={handleRejectBooking}
@@ -717,7 +685,6 @@ export default function MentorPage() {
                 bestMatches={bestMatches}
                 currentUserProfile={currentUserProfile}
                 onProfileClick={handleProfileCardClick}
-                onBooking={handleBooking}
                 onCalCom={handleCalCom}
               />
             </div>
@@ -773,7 +740,6 @@ export default function MentorPage() {
                           mentorAvailability={mentorAvailability}
                           currentUserRole="mentee"
                           onProfileClick={handleProfileCardClick}
-                          onBooking={handleBooking}
                           onCalCom={handleCalCom}
                           matchScore={getMatchScore(profile)}
                         />
@@ -871,7 +837,6 @@ export default function MentorPage() {
               profile={selectedMentor}
               onClose={handleCloseProfileViewModal}
               currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
-              onBooking={handleBooking}
               onCalCom={handleCalCom}
             />
           </div>

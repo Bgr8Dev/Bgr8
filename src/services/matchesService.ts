@@ -13,7 +13,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   updateDoc,
   serverTimestamp,
   Timestamp
@@ -44,30 +43,38 @@ export class MatchesService {
     currentUserId: string,
     matchedUserId: string
   ): Promise<string> {
-    // Check if match already exists
+    // Check if match already exists for current user
     const existingMatch = await this.getMatch(currentUserId, matchedUserId);
     if (existingMatch) {
+      // Also check if reverse match exists, create it if missing
+      const reverseMatch = await this.getMatch(matchedUserId, currentUserId);
+      if (!reverseMatch) {
+        // Create reverse match if it doesn't exist
+        await this.createReverseMatch(matchedUserId, currentUserId);
+      }
       return existingMatch.id;
     }
 
-    // Get matched user's profile for name/email
-    const matchedUserProfileRef = doc(
-      firestore,
-      'users',
-      matchedUserId,
-      'mentorProgram',
-      'profile'
-    );
-    const matchedUserProfileDoc = await getDoc(matchedUserProfileRef);
+    // Get both users' profiles for names/emails
+    const [matchedUserProfileDoc, currentUserProfileDoc] = await Promise.all([
+      getDoc(doc(firestore, 'users', matchedUserId, 'mentorProgram', 'profile')),
+      getDoc(doc(firestore, 'users', currentUserId, 'mentorProgram', 'profile'))
+    ]);
+
     const matchedUserData = matchedUserProfileDoc.data() as MentorMenteeProfile | undefined;
+    const currentUserData = currentUserProfileDoc.data() as MentorMenteeProfile | undefined;
 
     const matchedUserName = matchedUserData
       ? `${matchedUserData.firstName || ''} ${matchedUserData.lastName || ''}`.trim() || 'User'
       : 'User';
     const matchedUserEmail = matchedUserData?.email;
 
+    const currentUserName = currentUserData
+      ? `${currentUserData.firstName || ''} ${currentUserData.lastName || ''}`.trim() || 'User'
+      : 'User';
+    const currentUserEmail = currentUserData?.email;
+
     // Create match in current user's matches collection
-    // Matches are stored as a subcollection of the profile document
     const currentUserMatchesRef = collection(
       firestore,
       'users',
@@ -87,9 +94,7 @@ export class MatchesService {
       unreadCount: 0
     };
 
-    const matchRef = await addDoc(currentUserMatchesRef, matchData);
-    
-    // Also create a reverse match entry (bidirectional)
+    // Create match in matched user's matches collection (reverse match)
     const matchedUserMatchesRef = collection(
       firestore,
       'users',
@@ -99,11 +104,42 @@ export class MatchesService {
       this.MATCHES_COLLECTION
     );
 
-    // Get current user's profile for reverse match
+    const reverseMatchData = {
+      matchedUserId: currentUserId,
+      matchedUserName: currentUserName,
+      matchedUserEmail: currentUserEmail,
+      matchedAt: serverTimestamp(),
+      status: 'active' as const,
+      initiatorId: currentUserId,
+      unreadCount: 0
+    };
+
+    // Create both matches in parallel to ensure both are created
+    const [matchRef, reverseMatchRef] = await Promise.all([
+      addDoc(currentUserMatchesRef, matchData),
+      addDoc(matchedUserMatchesRef, reverseMatchData)
+    ]);
+
+    // Verify both matches were created successfully
+    if (!matchRef || !reverseMatchRef) {
+      throw new Error('Failed to create bidirectional matches');
+    }
+
+    return matchRef.id;
+  }
+
+  /**
+   * Helper method to create a reverse match (used when fixing missing reverse matches)
+   */
+  private static async createReverseMatch(
+    userId: string,
+    matchedUserId: string
+  ): Promise<void> {
+    // Get current user's profile for the reverse match
     const currentUserProfileRef = doc(
       firestore,
       'users',
-      currentUserId,
+      matchedUserId,
       'mentorProgram',
       'profile'
     );
@@ -115,17 +151,24 @@ export class MatchesService {
       : 'User';
     const currentUserEmail = currentUserData?.email;
 
+    const matchedUserMatchesRef = collection(
+      firestore,
+      'users',
+      userId,
+      'mentorProgram',
+      'profile',
+      this.MATCHES_COLLECTION
+    );
+
     await addDoc(matchedUserMatchesRef, {
-      matchedUserId: currentUserId,
+      matchedUserId,
       matchedUserName: currentUserName,
       matchedUserEmail: currentUserEmail,
       matchedAt: serverTimestamp(),
       status: 'active' as const,
-      initiatorId: currentUserId,
+      initiatorId: matchedUserId,
       unreadCount: 0
     });
-
-    return matchRef.id;
   }
 
   /**
@@ -178,10 +221,11 @@ export class MatchesService {
       this.MATCHES_COLLECTION
     );
 
+    // Query only by status to avoid index requirement
+    // We'll sort in memory instead
     const q = query(
       matchesRef,
-      where('status', '==', 'active'),
-      orderBy('matchedAt', 'desc')
+      where('status', '==', 'active')
     );
 
     const snapshot = await getDocs(q);
@@ -221,6 +265,21 @@ export class MatchesService {
         unreadCount: data.unreadCount || 0
       } as Match);
     }
+
+    // Sort by matchedAt in descending order (most recent first)
+    matches.sort((a, b) => {
+      const dateA = a.matchedAt instanceof Timestamp 
+        ? a.matchedAt.toMillis() 
+        : a.matchedAt instanceof Date 
+        ? a.matchedAt.getTime() 
+        : new Date(a.matchedAt).getTime();
+      const dateB = b.matchedAt instanceof Timestamp 
+        ? b.matchedAt.toMillis() 
+        : b.matchedAt instanceof Date 
+        ? b.matchedAt.getTime() 
+        : new Date(b.matchedAt).getTime();
+      return dateB - dateA; // Descending order
+    });
 
     return matches;
   }

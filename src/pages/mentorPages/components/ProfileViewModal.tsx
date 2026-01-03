@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaLinkedin, FaVideo, FaCheck, FaCalendarAlt } from 'react-icons/fa';
+import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaLinkedin, FaVideo, FaCheck, FaComments } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../types/mentorTypes';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import { useAuth } from '../../../hooks/useAuth';
@@ -58,6 +58,17 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
     } finally {
       setIsMatching(false);
     }
+  };
+
+  // Handle message button click
+  const handleMessage = () => {
+    if (!isMatched || !profile.uid) return;
+    
+    // Open messaging widget with this user
+    const event = new CustomEvent('openMessaging', {
+      detail: { userId: profile.uid }
+    });
+    window.dispatchEvent(event);
   };
 
   if (!isOpen) return null;
@@ -152,14 +163,14 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
             </button>
           )}
 
-          {onBooking && (
+          {isMatched && (
             <button 
-              className="pvm-action-button booking-button"
-              onClick={() => onBooking(profile)}
-              title={currentUserRole === 'mentee' ? 'Book a mentoring session' : 'Connect with this mentee'}
+              className="pvm-action-button message-button"
+              onClick={handleMessage}
+              title={currentUserRole === 'mentee' ? 'Message this mentor' : 'Message this mentee'}
             >
-              <FaCalendarAlt />
-              {currentUserRole === 'mentee' ? 'Book Session' : 'Connect'}
+              <FaComments />
+              {currentUserRole === 'mentee' ? 'Message Mentor' : 'Message Mentee'}
             </button>
           )}
 

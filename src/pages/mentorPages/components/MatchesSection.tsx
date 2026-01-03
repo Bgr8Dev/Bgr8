@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaVideo, FaMapMarkerAlt, FaGraduationCap, FaHeart, FaCheck } from 'react-icons/fa';
+import { FaVideo, FaMapMarkerAlt, FaGraduationCap, FaHeart, FaCheck, FaComments } from 'react-icons/fa';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import { MentorMenteeProfile, MatchResult } from '../types/mentorTypes';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
@@ -11,7 +11,6 @@ interface MatchesSectionProps {
   bestMatches: MatchResult[];
   currentUserProfile: MentorMenteeProfile | null;
   onProfileClick: (profile: MentorMenteeProfile) => void;
-  onBooking: (profile: MentorMenteeProfile) => void;
   onCalCom: (profile: MentorMenteeProfile) => void;
 }
 
@@ -19,7 +18,6 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
   bestMatches,
   currentUserProfile,
   onProfileClick,
-  onBooking,
   onCalCom
 }) => {
   const { currentUser } = useAuth();
@@ -67,6 +65,16 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
         return next;
       });
     }
+  };
+
+  const handleMessage = (profile: MentorMenteeProfile) => {
+    if (!profile.uid) return;
+    
+    // Open messaging widget with this user
+    const event = new CustomEvent('openMessaging', {
+      detail: { userId: profile.uid }
+    });
+    window.dispatchEvent(event);
   };
 
   if (!currentUserProfile || bestMatches.length === 0) {
@@ -226,17 +234,20 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
               >
                 View Full Profile
               </button>
-              <button 
-                className="ms-action-button secondary"
-                onClick={() => onBooking(match.user)}
-                title={
-                  currentUserProfile?.type === 'mentee' 
-                    ? 'Book a mentoring session' 
-                    : 'Connect with this mentee'
-                }
-              >
-                {currentUserProfile?.type === 'mentee' ? 'Book Session' : 'Connect'}
-              </button>
+              {matchedUserIds.has(match.user.uid || '') && (
+                <button 
+                  className="ms-action-button secondary"
+                  onClick={() => handleMessage(match.user)}
+                  title={
+                    currentUserProfile?.type === 'mentee' 
+                      ? 'Message this mentor' 
+                      : 'Message this mentee'
+                  }
+                >
+                  <FaComments />
+                  {currentUserProfile?.type === 'mentee' ? 'Message Mentor' : 'Message Mentee'}
+                </button>
+              )}
               {match.user.calCom && (
                 <button 
                   className="ms-action-button tertiary"

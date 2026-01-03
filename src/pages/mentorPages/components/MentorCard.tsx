@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaCalendarAlt, FaHeart, FaCheck } from 'react-icons/fa';
+import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaHeart, FaCheck, FaComments } from 'react-icons/fa';
 import { MentorMenteeProfile, MentorAvailability } from '../types/mentorTypes';
 import MatchStrengthDisplay from '../../../components/widgets/MentorAlgorithm/MatchStrengthDisplay';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
@@ -13,9 +13,8 @@ interface MentorCardProps {
   mentorAvailability: MentorAvailability;
   currentUserRole?: 'mentor' | 'mentee';
   onProfileClick: (mentor: MentorMenteeProfile) => void;
-  onBooking: (mentor: MentorMenteeProfile) => void;
   onCalCom: (mentor: MentorMenteeProfile) => void;
-  matchScore?: number; // Add match score prop
+  matchScore?: number;
 }
 
 export const MentorCard: React.FC<MentorCardProps> = ({
@@ -23,7 +22,6 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   mentorAvailability,
   currentUserRole,
   onProfileClick,
-  onBooking,
   onCalCom,
   matchScore
 }) => {
@@ -88,16 +86,22 @@ export const MentorCard: React.FC<MentorCardProps> = ({
     onProfileClick(mentor);
   };
 
-  // Handle booking button click
-  const handleBookingClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onBooking(mentor);
-  };
-
   // Handle Cal.com button click
   const handleCalComClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onCalCom(mentor);
+  };
+
+  // Handle message button click
+  const handleMessageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isMatched || !mentor.uid) return;
+    
+    // Open messaging widget with this user
+    const event = new CustomEvent('openMessaging', {
+      detail: { userId: mentor.uid }
+    });
+    window.dispatchEvent(event);
   };
 
 
@@ -269,23 +273,25 @@ export const MentorCard: React.FC<MentorCardProps> = ({
           </button>
         )}
 
-        <button 
-          className="mc-action-button primary"
-          onClick={handleBookingClick}
-          title={
-            currentUserRole === 'mentee' 
-              ? "Book a mentoring session with this mentor"
-              : "Connect with this mentee"
-          }
-          data-tooltip={
-            currentUserRole === 'mentee' 
-              ? "Book a mentoring session with this mentor"
-              : "Connect with this mentee"
-          }
-        >
-          <FaCalendarAlt />
-          {currentUserRole === 'mentee' ? 'Book Session' : 'Connect'}
-        </button>
+        {isMatched && (
+          <button 
+            className="mc-action-button primary"
+            onClick={handleMessageClick}
+            title={
+              currentUserRole === 'mentee' 
+                ? "Message this mentor"
+                : "Message this mentee"
+            }
+            data-tooltip={
+              currentUserRole === 'mentee' 
+                ? "Message this mentor"
+                : "Message this mentee"
+            }
+          >
+            <FaComments />
+            {currentUserRole === 'mentee' ? 'Message Mentor' : 'Message Mentee'}
+          </button>
+        )}
         
         {mentor.calCom && (
           <button 

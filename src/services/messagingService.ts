@@ -17,7 +17,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   limit,
   updateDoc,
   serverTimestamp,
@@ -112,8 +111,9 @@ export class MessagingService {
 
   /**
    * Get or create a conversation between two users
+   * Public method to allow external components to get/create conversations
    */
-  private static async getOrCreateConversation(
+  static async getOrCreateConversation(
     currentUserId: string,
     otherUserId: string
   ): Promise<string> {
@@ -352,13 +352,12 @@ export class MessagingService {
 
   /**
    * Get messages for a conversation
+   * Note: We query without orderBy to avoid index requirements, then sort in memory
    */
   static async getMessages(conversationId: string, limitCount: number = 50): Promise<Message[]> {
     const messagesQuery = query(
       collection(firestore, this.MESSAGES_COLLECTION),
-      where('conversationId', '==', conversationId),
-      orderBy('timestamp', 'desc'),
-      limit(limitCount)
+      where('conversationId', '==', conversationId)
     );
 
     const snapshot = await getDocs(messagesQuery);
@@ -383,12 +382,28 @@ export class MessagingService {
       });
     });
 
-    // Reverse to get chronological order
-    return messages.reverse();
+    // Sort by timestamp in descending order (most recent first), then reverse for chronological
+    messages.sort((a, b) => {
+      const dateA = a.timestamp instanceof Timestamp 
+        ? a.timestamp.toMillis() 
+        : a.timestamp instanceof Date 
+        ? a.timestamp.getTime() 
+        : new Date(a.timestamp).getTime();
+      const dateB = b.timestamp instanceof Timestamp 
+        ? b.timestamp.toMillis() 
+        : b.timestamp instanceof Date 
+        ? b.timestamp.getTime() 
+        : new Date(b.timestamp).getTime();
+      return dateB - dateA; // Descending order (most recent first)
+    });
+
+    // Limit and reverse to get chronological order (oldest first)
+    return messages.slice(0, limitCount).reverse();
   }
 
   /**
    * Subscribe to messages in a conversation (real-time updates)
+   * Note: We query without orderBy to avoid index requirements, then sort in memory
    */
   static subscribeToMessages(
     conversationId: string,
@@ -396,8 +411,7 @@ export class MessagingService {
   ): Unsubscribe {
     const messagesQuery = query(
       collection(firestore, this.MESSAGES_COLLECTION),
-      where('conversationId', '==', conversationId),
-      orderBy('timestamp', 'asc')
+      where('conversationId', '==', conversationId)
     );
 
     return onSnapshot(messagesQuery, (snapshot) => {
@@ -420,7 +434,28 @@ export class MessagingService {
           attachments: data.attachments || []
         });
       });
+      
+      // Sort by timestamp in ascending order (oldest first) for display
+      messages.sort((a, b) => {
+        const dateA = a.timestamp instanceof Timestamp 
+          ? a.timestamp.toMillis() 
+          : a.timestamp instanceof Date 
+          ? a.timestamp.getTime() 
+          : new Date(a.timestamp).getTime();
+        const dateB = b.timestamp instanceof Timestamp 
+          ? b.timestamp.toMillis() 
+          : b.timestamp instanceof Date 
+          ? b.timestamp.getTime() 
+          : new Date(b.timestamp).getTime();
+        return dateA - dateB; // Ascending order (oldest first)
+      });
+      
       callback(messages);
+    }, (error) => {
+      // Handle errors gracefully (e.g., missing index)
+      console.error('Error in message subscription:', error);
+      // Still call callback with empty array to prevent UI errors
+      callback([]);
     });
   }
 

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaComments, FaPaperPlane, FaSearch, FaPlus, FaCheck, FaCheckDouble, FaEllipsisV, FaInfoCircle } from 'react-icons/fa';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, getDoc, doc } from 'firebase/firestore';
 import BannerWrapper from '../ui/BannerWrapper';
 import Modal from '../ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
 import { MessagingService, Message, Conversation, GDPR_INTRO_MESSAGE } from '../../services/messagingService';
+import { MentorMenteeProfile } from '../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { firestore } from '../../firebase/firebase';
 import './MessagingWidget.css';
 
 const MessagingWidget: React.FC = () => {
@@ -24,6 +26,93 @@ const MessagingWidget: React.FC = () => {
   const [errorModalMessage, setErrorModalMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  // Listen for openMessaging events from Message buttons
+  useEffect(() => {
+    const handleOpenMessaging = async (event: Event) => {
+      const customEvent = event as CustomEvent<{ userId: string }>;
+      const targetUserId = customEvent.detail?.userId;
+      
+      if (!targetUserId || !currentUser) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Expand the widget if not already expanded
+        if (!isExpanded) {
+          setIsExpanded(true);
+        }
+        
+        // Load conversations if not already loaded
+        let convos = conversations;
+        if (convos.length === 0) {
+          convos = await MessagingService.getConversations(currentUser.uid);
+          setConversations(convos);
+        }
+        
+        // Find existing conversation with this user
+        let conversation = convos.find(
+          conv => conv.participantId === targetUserId
+        );
+        
+        if (!conversation) {
+          // Create conversation if it doesn't exist
+          const conversationId = await MessagingService.getOrCreateConversation(
+            currentUser.uid,
+            targetUserId
+          );
+          
+          // Get user profile for name and avatar
+          const targetUserProfile = await getDoc(
+            doc(firestore, 'users', targetUserId, 'mentorProgram', 'profile')
+          );
+          
+          const targetUserData = targetUserProfile.data() as MentorMenteeProfile | undefined;
+          const targetUserName = targetUserData
+            ? `${targetUserData.firstName} ${targetUserData.lastName}`
+            : 'User';
+          
+          // Get profile picture, ensuring it's a string
+          const profilePicture = targetUserData?.profilePicture;
+          const participantAvatar = typeof profilePicture === 'string' ? profilePicture : undefined;
+          
+          // Create a temporary conversation object
+          conversation = {
+            id: conversationId,
+            participantId: targetUserId,
+            participantName: targetUserName,
+            participantAvatar,
+            lastMessage: null,
+            unreadCount: 0,
+            isOnline: false,
+            isPinned: false,
+            isArchived: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+        }
+        
+        if (conversation) {
+          setSelectedConversation(conversation);
+        }
+      } catch (err) {
+        console.error('Error opening conversation:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to open conversation';
+        setError(errorMessage);
+        setErrorModalMessage(errorMessage);
+        setShowErrorModal(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    window.addEventListener('openMessaging', handleOpenMessaging);
+    
+    return () => {
+      window.removeEventListener('openMessaging', handleOpenMessaging);
+    };
+  }, [currentUser, isExpanded, conversations]);
 
   // Load conversations on mount and when expanded
   useEffect(() => {

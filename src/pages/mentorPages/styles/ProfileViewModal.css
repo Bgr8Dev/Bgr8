@@ -182,29 +182,28 @@
   min-width: 140px;
   padding: 12px 20px;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .pvm-action-button.match-button {
-  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  background: #e91e63;
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+  border: 1px solid #e91e63;
 }
 
 .pvm-action-button.match-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c44569 0%, #ff6b9d 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+  background: #c2185b;
+  border-color: #c2185b;
 }
 
 .pvm-action-button.match-button:disabled {
@@ -213,34 +212,32 @@
 }
 
 .pvm-action-button.matched-button {
-  background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+  background: #4caf50;
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(0, 230, 118, 0.3);
+  border: 1px solid #4caf50;
   cursor: default;
 }
 
-.pvm-action-button.booking-button {
-  background: linear-gradient(135deg, var(--mentor) 0%, var(--mentor-dark) 100%);
+.pvm-action-button.message-button {
+  background: var(--mentor);
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(29, 213, 209, 0.3);
+  border: 1px solid var(--mentor);
 }
 
-.pvm-action-button.booking-button:hover {
-  background: linear-gradient(135deg, var(--mentor-dark) 0%, var(--mentor) 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(29, 213, 209, 0.4);
+.pvm-action-button.message-button:hover {
+  background: var(--mentor-dark);
+  border-color: var(--mentor-dark);
 }
 
 .pvm-action-button.calcom-button {
-  background: linear-gradient(135deg, var(--mentee) 0%, var(--mentee-dark) 100%);
+  background: var(--mentee);
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border: 1px solid var(--mentee);
 }
 
 .pvm-action-button.calcom-button:hover {
-  background: linear-gradient(135deg, var(--mentee-dark) 0%, var(--mentee) 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  background: var(--mentee-dark);
+  border-color: var(--mentee-dark);
 }
 
 .pvm-avatar {

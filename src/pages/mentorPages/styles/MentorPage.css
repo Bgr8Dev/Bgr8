@@ -289,211 +289,62 @@ html, body {
   margin: 0;
 }
 
-/* 🚀 ENHANCED MENTEE DASHBOARD BUTTONS - ULTRA PREMIUM STYLES 🚀 */
+/* Professional Dashboard Buttons */
 
 .profile-edit-btn,
 .availability-manage-btn {
-  position: relative;
-  padding: 14px 28px;
+  padding: 12px 20px;
   font-size: 0.9rem;
-  font-weight: 700;
-  border: none;
-  border-radius: 20px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s ease;
   white-space: nowrap;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-/* ✨ Profile Edit Button - Black & White Elegant Style */
+/* Profile Edit Button - Professional Style */
 .profile-edit-btn {
-  background: linear-gradient(135deg, 
-    rgba(0, 0, 0, 0.9) 0%, 
-    rgba(0, 0, 0, 0.7) 50%,
-    rgba(0, 0, 0, 0.9) 100%);
+  background: #1a1a1a;
   color: var(--white);
-  border: 2px solid transparent;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(0, 0, 0, 0.4);
-  /* Text outline for better readability */
-  text-shadow: 
-    1px 1px 0 rgba(0, 0, 0, 0.8),
-    -1px -1px 0 rgba(0, 0, 0, 0.8),
-    1px -1px 0 rgba(0, 0, 0, 0.8),
-    -1px 1px 0 rgba(0, 0, 0, 0.8),
-    0 0 4px rgba(0, 0, 0, 0.6);
-  /* Counter-pulse animation for text */
-  animation: textCounterPulse 6s ease-in-out infinite;
-}
-
-/* Animated black & white border effect */
-.profile-edit-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 2px;
-  background: linear-gradient(45deg, 
-    #000000 0%, 
-    #ffffff 25%, 
-    #000000 50%, 
-    #ffffff 75%, 
-    #000000 100%);
-  background-size: 400% 400%;
-  animation: blackWhitePulse 6s ease-in-out infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: xor;
-  z-index: -1;
-}
-
-/* Elegant particle effect */
-.profile-edit-btn::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.6s ease;
-  z-index: -1;
+  border: 1px solid #1a1a1a;
 }
 
 .profile-edit-btn:hover {
-  transform: translateY(-4px) scale(1.08);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 30px rgba(255, 255, 255, 0.6);
-  background: linear-gradient(135deg, 
-    rgba(0, 0, 0, 1) 0%, 
-    rgba(0, 0, 0, 0.8) 50%,
-    rgba(0, 0, 0, 1) 100%);
+  background: #2d2d2d;
+  border-color: #2d2d2d;
 }
 
-.profile-edit-btn:hover::after {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-}
-
-/* ✨ Availability Manage Button - Black & White Elegant Style */
+/* Availability Manage Button - Professional Style */
 .availability-manage-btn {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.9) 0%, 
-    rgba(255, 255, 255, 0.7) 50%,
-    rgba(255, 255, 255, 0.9) 100%);
+  background: var(--white);
   color: var(--black);
-  border: 2px solid transparent;
-  box-shadow: 
-    0 8px 32px rgba(255, 255, 255, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(255, 255, 255, 0.4);
-  /* Text outline for better readability */
-  text-shadow: 
-    1px 1px 0 rgba(255, 255, 255, 0.8),
-    -1px -1px 0 rgba(255, 255, 255, 0.8),
-    1px -1px 0 rgba(255, 255, 255, 0.8),
-    -1px 1px 0 rgba(255, 255, 255, 0.8),
-    0 0 4px rgba(255, 255, 255, 0.6);
-  /* Counter-pulse animation for text */
-  animation: textCounterPulseWhite 6s ease-in-out infinite;
-}
-
-/* Holographic shimmer effect */
-.availability-manage-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(0, 0, 0, 0.4) 50%, 
-    transparent 100%);
-  transition: left 0.6s ease;
-  z-index: 1;
-}
-
-.availability-manage-btn::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.6s ease;
-  z-index: -1;
+  border: 1px solid #e2e8f0;
 }
 
 .availability-manage-btn:hover {
-  transform: translateY(-4px) scale(1.08);
-  box-shadow: 
-    0 20px 40px rgba(255, 255, 255, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(0, 0, 0, 0.6);
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 1) 0%, 
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 1) 100%);
-}
-
-.availability-manage-btn:hover::before {
-  left: 100%;
-}
-
-.availability-manage-btn:hover::after {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, transparent 70%);
+  background: #f8f9fa;
+  border-color: #cbd5e0;
 }
 
 /* Active states */
 .profile-edit-btn:active,
 .availability-manage-btn:active {
-  transform: translateY(-2px) scale(1.04);
+  transform: translateY(0);
   transition: all 0.1s ease;
 }
 
 /* Focus states for accessibility */
 .profile-edit-btn:focus,
 .availability-manage-btn:focus {
-  outline: none;
-  box-shadow: 
-    0 8px 32px rgba(29, 213, 209, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(29, 213, 209, 0.4),
-    0 0 0 4px rgba(29, 213, 209, 0.3);
+  outline: 2px solid var(--mentee);
+  outline-offset: 2px;
 }
 
 /* Neon pulse animation */
@@ -719,184 +570,57 @@ html, body {
 /* 🎨 ENHANCED BOOKING ACTION BUTTONS - PREMIUM INTERACTIVE STYLES 🎨 */
 
 .booking-action-btn {
-  position: relative;
-  padding: 16px 32px;
+  padding: 12px 20px;
   font-size: 14px;
-  font-weight: 700;
-  border: none;
-  border-radius: 16px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s ease;
   min-width: 160px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  gap: 8px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-/* 🌟 Primary Booking Button - Liquid Metal Style */
+/* Primary Booking Button - Professional Style */
 .booking-action-btn.primary {
-  background: linear-gradient(135deg, 
-    rgba(29, 213, 209, 0.9) 0%, 
-    rgba(29, 213, 209, 0.7) 50%,
-    rgba(29, 213, 209, 0.9) 100%);
+  background: var(--mentee);
   color: var(--white);
-  border: 2px solid transparent;
-  box-shadow: 
-    0 8px 32px rgba(29, 213, 209, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(29, 213, 209, 0.4);
-}
-
-/* Liquid metal flowing effect */
-.booking-action-btn.primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    transparent 100%);
-  transition: left 0.8s ease;
-  z-index: 1;
-}
-
-/* Ripple effect */
-.booking-action-btn.primary::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(29, 213, 209, 0.4) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.6s ease;
-  z-index: -1;
+  border: 1px solid var(--mentee);
 }
 
 .booking-action-btn.primary:hover {
-  background: linear-gradient(135deg, 
-    rgba(29, 213, 209, 1) 0%, 
-    rgba(29, 213, 209, 0.8) 50%,
-    rgba(29, 213, 209, 1) 100%);
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 
-    0 20px 40px rgba(29, 213, 209, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 30px rgba(29, 213, 209, 0.6);
+  background: var(--mentee-dark);
+  border-color: var(--mentee-dark);
 }
 
-.booking-action-btn.primary:hover::before {
-  left: 100%;
-}
-
-.booking-action-btn.primary:hover::after {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(29, 213, 209, 0.2) 0%, transparent 70%);
-}
-
-/* 💎 Secondary Booking Button - Crystal Glass Style */
+/* Secondary Booking Button - Professional Style */
 .booking-action-btn.secondary {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.9) 0%, 
-    rgba(255, 255, 255, 0.7) 50%,
-    rgba(255, 255, 255, 0.9) 100%);
+  background: var(--white);
   color: var(--mentee-dark);
-  border: 2px solid transparent;
-  box-shadow: 
-    0 8px 32px rgba(29, 213, 209, 0.2),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-/* Crystal refraction effect */
-.booking-action-btn.secondary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 16px;
-  padding: 2px;
-  background: linear-gradient(45deg, 
-    var(--mentee) 0%, 
-    var(--mentee-light) 25%, 
-    var(--mentee-dark) 50%, 
-    var(--mentee) 75%, 
-    var(--mentee) 100%);
-  background-size: 300% 300%;
-  animation: crystalShimmer 3s ease infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: xor;
-  z-index: -1;
-}
-
-/* Sparkle effect */
-.booking-action-btn.secondary::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(29, 213, 209, 0.3) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.6s ease;
-  z-index: -1;
+  border: 1px solid #e2e8f0;
 }
 
 .booking-action-btn.secondary:hover {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 1) 0%, 
-    rgba(255, 255, 255, 0.9) 50%,
-    rgba(255, 255, 255, 1) 100%);
-  color: var(--mentee-dark);
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 
-    0 20px 40px rgba(29, 213, 209, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.booking-action-btn.secondary:hover::after {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(29, 213, 209, 0.15) 0%, transparent 70%);
+  background: #f8f9fa;
+  border-color: #cbd5e0;
 }
 
 /* Active states */
 .booking-action-btn:active {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(0);
   transition: all 0.1s ease;
 }
 
 /* Focus states for accessibility */
 .booking-action-btn:focus {
-  outline: none;
-  box-shadow: 
-    0 8px 32px rgba(29, 213, 209, 0.3),
+  outline: 2px solid var(--mentee);
+  outline-offset: 2px;
     0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     0 0 20px rgba(29, 213, 209, 0.4),

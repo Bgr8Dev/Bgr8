@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { MentorMenteeProfile, MentorAvailability } from '../types';
+import { MentorMenteeProfile } from '../types';
 import { ViewBookingsModal } from './ViewBookingsModal';
 import { VerificationStatus, canAccessPlatform, isUnderReview, isRejected } from '../../../types/verification';
 import { VerificationService } from '../../../services/verificationService';
+import { MatchesService, Match } from '../../../services/matchesService';
+import { useAuth } from '../../../hooks/useAuth';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
+import { FaComments, FaUser, FaHeart } from 'react-icons/fa';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
@@ -24,10 +28,8 @@ interface MentorBookings {
 
 interface MentorDashboardProps {
   currentUserProfile: MentorMenteeProfile;
-  mentorAvailability: MentorAvailability;
   mentorBookings: MentorBookings;
   onProfileEdit: (event?: React.MouseEvent<HTMLElement>) => void;
-  onAvailabilityManage: () => void;
   onViewAllBookings: () => void;
   onAcceptBooking: (bookingId: string) => void;
   onRejectBooking: (bookingId: string) => void;
@@ -36,19 +38,20 @@ interface MentorDashboardProps {
 
 export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   currentUserProfile,
-  mentorAvailability,
   mentorBookings,
   onProfileEdit,
-  onAvailabilityManage,
   onViewAllBookings,
   onAcceptBooking,
   onRejectBooking,
   onCancelBooking
 }) => {
+  const { currentUser } = useAuth();
   const [isProfileCardExpanded, setIsProfileCardExpanded] = useState(false);
-  const [isAvailabilityCardExpanded, setIsAvailabilityCardExpanded] = useState(false);
+  const [isMatchesCardExpanded, setIsMatchesCardExpanded] = useState(false);
   const [isBookingWidgetMinimized, setIsBookingWidgetMinimized] = useState(false);
   const [showViewBookingsModal, setShowViewBookingsModal] = useState(false);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   
   // Verification state
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
@@ -101,6 +104,25 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
     fetchVerificationStatus();
   }, [currentUserProfile?.uid, currentUserProfile?.calCom]);
+
+  // Fetch matches for the mentor
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (!currentUser?.uid) return;
+      
+      try {
+        setMatchesLoading(true);
+        const userMatches = await MatchesService.getMatches(currentUser.uid);
+        setMatches(userMatches);
+      } catch (error) {
+        console.error('Error fetching matches:', error);
+      } finally {
+        setMatchesLoading(false);
+      }
+    };
+
+    fetchMatches();
+  }, [currentUser?.uid]);
   
   // Handle Cal.com setup completion
   const handleCalComSetupComplete = () => {
@@ -243,10 +265,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         <div className="generated-profiles-info">
           <p className="info-text">
             💡 <strong>Welcome to your Mentor Dashboard!</strong> Here you can manage your profile, 
-            set your availability, and view your upcoming sessions with mentees.
-          </p>
-          <p className="info-text" style={{ marginTop: '8px', fontSize: '0.9rem', opacity: '0.9' }}>
-            📅 <strong>Availability:</strong> Keep your schedule updated to receive more booking requests from mentees.
+            view mentees who have matched with you, and see your upcoming sessions.
           </p>
         </div>
       </div>
@@ -309,49 +328,100 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           <div className="profile-card-header">
             <div className="profile-info">
               <div className="profile-role mentor">Mentor</div>
-              <div className="profile-name">Availability Management</div>
+              <div className="profile-name">Matched Mentees</div>
             </div>
             <div className="profile-card-actions">
               <button 
-                className="mentor-availability-manage-btn"
-                onClick={onAvailabilityManage}
-                data-tooltip="Manage your availability schedule"
-              >
-                Manage Availability
-              </button>
-              <button 
                 className="expand-toggle-btn"
-                onClick={() => setIsAvailabilityCardExpanded(!isAvailabilityCardExpanded)}
-                title={isAvailabilityCardExpanded ? "Collapse availability details" : "Expand availability details"}
+                onClick={() => setIsMatchesCardExpanded(!isMatchesCardExpanded)}
+                title={isMatchesCardExpanded ? "Collapse matches" : "Expand matches"}
               >
-                {isAvailabilityCardExpanded ? '▼' : '▶'}
+                {isMatchesCardExpanded ? '▼' : '▶'}
               </button>
             </div>
           </div>
           
-          {/* Expandable Availability Content */}
-          {isAvailabilityCardExpanded && (
+          {/* Expandable Matches Content */}
+          {isMatchesCardExpanded && (
             <div className="profile-card-content">
-              <div className="availability-summary">
-                <div className="availability-stat">
-                  <span className="stat-number">
-                    {Object.keys(mentorAvailability).length}
-                  </span>
-                  <span className="stat-label">Available Days</span>
+              {matchesLoading ? (
+                <div className="matches-loading">
+                  <p>Loading matches...</p>
                 </div>
-                <div className="availability-stat">
-                  <span className="stat-number">
-                    {Object.values(mentorAvailability).flat().length}
-                  </span>
-                  <span className="stat-label">Time Slots</span>
+              ) : matches.length === 0 ? (
+                <div className="no-matches">
+                  <FaHeart style={{ fontSize: '2rem', color: '#ccc', marginBottom: '12px' }} />
+                  <p>No mentees have matched with you yet.</p>
+                  <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '8px' }}>
+                    Once mentees match with you, they'll appear here.
+                  </p>
                 </div>
-                <div className="availability-stat">
-                  <span className="stat-number">
-                    {getUpcomingBookings().length}
-                  </span>
-                  <span className="stat-label">Upcoming Sessions</span>
+              ) : (
+                <div className="matches-list">
+                  {matches.map((match) => (
+                    <div key={match.id} className="match-item">
+                      <div className="match-item-header">
+                        <div className="match-avatar">
+                          <ProfilePicture
+                            src={
+                              match.matchedUserProfile?.profilePicture
+                                ? (typeof match.matchedUserProfile.profilePicture === 'string'
+                                    ? match.matchedUserProfile.profilePicture
+                                    : Array.isArray(match.matchedUserProfile.profilePicture)
+                                    ? match.matchedUserProfile.profilePicture[0]
+                                    : null)
+                                : null
+                            }
+                            alt={match.matchedUserName}
+                            role="mentee"
+                            size={48}
+                          />
+                        </div>
+                        <div className="match-info">
+                          <h4>{match.matchedUserName}</h4>
+                          <p>
+                            {match.matchedUserProfile?.profession ||
+                              match.matchedUserProfile?.educationLevel ||
+                              'Mentee'}
+                          </p>
+                          {match.matchedUserProfile?.county && (
+                            <p className="match-location">{match.matchedUserProfile.county}</p>
+                          )}
+                        </div>
+                        {match.unreadCount && match.unreadCount > 0 && (
+                          <div className="match-unread-badge">{match.unreadCount}</div>
+                        )}
+                      </div>
+                      <div className="match-actions">
+                        <button
+                          className="match-action-btn message-btn"
+                          onClick={() => {
+                            const event = new CustomEvent('openMessaging', {
+                              detail: { userId: match.matchedUserId }
+                            });
+                            window.dispatchEvent(event);
+                          }}
+                          title="Message this mentee"
+                        >
+                          <FaComments />
+                          Message
+                        </button>
+                        <button
+                          className="match-action-btn profile-btn"
+                          onClick={() => {
+                            // Could open profile modal here if needed
+                            console.log('View profile:', match.matchedUserId);
+                          }}
+                          title="View profile"
+                        >
+                          <FaUser />
+                          Profile
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

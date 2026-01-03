@@ -671,14 +671,31 @@ export default function MentorManagement() {
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
-      // Delete the user profile
-      await deleteDoc(doc(firestore, 'users', user.id, 'mentorProgram', 'profile'));
-      
-      // Delete all availability data for this user from subcollections
-      const availabilityDeletions = [
-        deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'))
-      ];
-      await Promise.all(availabilityDeletions);
+      // Delete the user profile - check if it's generated or real
+      if (user.isGenerated) {
+        // Delete from Generated Mentors or Generated Mentees collection
+        const collectionName = user.isMentor ? 'Generated Mentors' : 'Generated Mentees';
+        await deleteDoc(doc(firestore, collectionName, user.id));
+        
+        // Delete from Generated Availability collection if it exists
+        try {
+          await deleteDoc(doc(firestore, 'Generated Availability', user.id));
+        } catch (error) {
+          // Ignore if it doesn't exist
+          console.log(`No availability data found for generated profile ${user.id}`);
+        }
+      } else {
+        // Delete from users collection subcollection
+        await deleteDoc(doc(firestore, 'users', user.id, 'mentorProgram', 'profile'));
+        
+        // Delete all availability data for this user from subcollections
+        try {
+          await deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'));
+        } catch (error) {
+          // Ignore if it doesn't exist
+          console.log(`No availability data found for user ${user.id}`);
+        }
+      }
       
       // Delete all bookings for this user (as mentor or mentee)
       const bookingsQuery = query(
@@ -746,14 +763,43 @@ export default function MentorManagement() {
     if (!confirmed) return;
     setDeleteStatus(null);
     try {
-      // Delete all user profiles
-      await Promise.all(selectedIds.map(id => deleteDoc(doc(firestore, 'users', id, 'mentorProgram', 'profile'))));
+      // Get the user objects to check if they're generated
+      const selectedUsers = users.filter(u => selectedIds.includes(u.id));
       
-      // Delete all availability data for these users from subcollections
-      const availabilityDeletions = selectedIds.map(id => 
-        deleteDoc(doc(firestore, 'users', id, 'availabilities', 'default'))
+      // Separate generated and real users
+      const generatedUsers = selectedUsers.filter(u => u.isGenerated);
+      const realUsers = selectedUsers.filter(u => !u.isGenerated);
+      
+      // Delete generated profiles from their respective collections
+      const generatedProfileDeletions = generatedUsers.map(user => {
+        const collectionName = user.isMentor ? 'Generated Mentors' : 'Generated Mentees';
+        return deleteDoc(doc(firestore, collectionName, user.id));
+      });
+      await Promise.all(generatedProfileDeletions);
+      
+      // Delete generated availability data
+      const generatedAvailabilityDeletions = generatedUsers.map(user => 
+        deleteDoc(doc(firestore, 'Generated Availability', user.id)).catch(error => {
+          // Ignore if it doesn't exist
+          console.log(`No availability data found for generated profile ${user.id}`);
+        })
       );
-      await Promise.all(availabilityDeletions);
+      await Promise.all(generatedAvailabilityDeletions);
+      
+      // Delete real user profiles from users collection
+      const realProfileDeletions = realUsers.map(user => 
+        deleteDoc(doc(firestore, 'users', user.id, 'mentorProgram', 'profile'))
+      );
+      await Promise.all(realProfileDeletions);
+      
+      // Delete all availability data for real users from subcollections
+      const realAvailabilityDeletions = realUsers.map(user => 
+        deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default')).catch(error => {
+          // Ignore if it doesn't exist
+          console.log(`No availability data found for user ${user.id}`);
+        })
+      );
+      await Promise.all(realAvailabilityDeletions);
       
       // Delete all bookings for these users (as mentors or mentees)
       // Firebase 'in' queries are limited to 10 items, so we need to batch them
@@ -787,10 +833,13 @@ export default function MentorManagement() {
         await Promise.all(menteeBookingDeletions);
       }
       
+      // Save count before clearing
+      const deletedCount = selectedIds.length;
+      
       // Update local state
       setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
       setSelectedIds([]);
-      setDeleteStatus(`Deleted ${selectedIds.length} user(s) and all related data successfully.`);
+      setDeleteStatus(`Deleted ${deletedCount} user(s) and all related data successfully.`);
     } catch (error) {
       console.error('Error bulk deleting users:', error);
       setDeleteStatus('Failed to delete selected users and related data.');
