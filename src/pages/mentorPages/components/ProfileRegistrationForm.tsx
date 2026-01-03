@@ -38,7 +38,7 @@ const MissingFieldsModal: React.FC<{
   if (!isOpen) return null;
 
   const getFieldSection = (fieldName: string): string => {
-    const personalFields = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Age', 'County'];
+    const personalFields = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Age', 'County', 'How did you find out about us?'];
     const educationFields = ['Degree/Qualification', 'Education Level', 'Profession', 'LinkedIn Profile'];
     const skillsFields = ['Skills', 'Industries', 'Hobbies & Interests'];
     const additionalFields = ['Ethnicity', 'Religion'];
@@ -226,7 +226,8 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       hobbies: randomHobbies,
       lookingFor: randomLookingFor,
       ethnicity: randomEthnicity,
-      religion: randomReligion
+      religion: randomReligion,
+      howDidYouHearAboutUs: 'recommended'
     };
   };
 
@@ -286,7 +287,8 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       hobbies: 'Your interests help create better matches and conversation starters',
       ethnicity: 'This helps us create diverse and inclusive mentoring relationships',
       religion: 'This helps us respect your beliefs when making matches',
-      lookingFor: 'What specific skills or knowledge are you looking to gain?'
+      lookingFor: 'What specific skills or knowledge are you looking to gain?',
+      howDidYouHearAboutUs: 'Help us understand how you discovered our mentoring platform'
     };
     return tooltips[fieldName] || '';
   };
@@ -534,6 +536,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     if (!profileForm.phone) requiredFields.push('Phone Number');
     if (!profileForm.age) requiredFields.push('Age');
     if (!profileForm.county) requiredFields.push('County');
+    if (!profileForm.howDidYouHearAboutUs) requiredFields.push('How did you find out about us?');
 
     if (selectedRole === MENTOR) {
       if (!profileForm.degree) requiredFields.push('Degree/Qualification');
@@ -575,6 +578,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       'Phone Number': 'phone',
       'Age': 'age',
       'County': 'county',
+      'How did you find out about us?': 'howDidYouHearAboutUs',
       'Degree/Qualification': 'degree',
       'Education Level': 'educationLevel',
       'Current Profession': 'profession',
@@ -783,6 +787,35 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
               </select>
               {validationErrors.county && (
                 <div className="validation-error">{validationErrors.county}</div>
+              )}
+            </div>
+          </div>
+
+          <div className="prf-form-row">
+            <div className="input-group">
+              <label htmlFor="howDidYouHearAboutUs" className="field-label">
+                How did you find out about us? *
+                <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('howDidYouHearAboutUs')} />
+              </label>
+              <select
+                id="howDidYouHearAboutUs"
+                name="howDidYouHearAboutUs"
+                value={profileForm.howDidYouHearAboutUs}
+                onChange={onFormChange}
+                className={validationErrors.howDidYouHearAboutUs ? 'error' : ''}
+                data-tooltip={getFieldTooltip('howDidYouHearAboutUs')}
+              >
+                <option value="">Select an option</option>
+                <option value="recommended">Recommended by a friend/family</option>
+                <option value="google">Google search</option>
+                <option value="social-media">Social media (Instagram, Facebook, Twitter, etc.)</option>
+                <option value="advert">Advertisement</option>
+                <option value="school-college">School or College</option>
+                <option value="event">Event or workshop</option>
+                <option value="other">Other</option>
+              </select>
+              {validationErrors.howDidYouHearAboutUs && (
+                <div className="validation-error">{validationErrors.howDidYouHearAboutUs}</div>
               )}
             </div>
           </div>

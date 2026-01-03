@@ -22,6 +22,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     skills: [],
     lookingFor: [],
     industries: [],
+    howDidYouHearAboutUs: '',
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
@@ -39,6 +40,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     if (!profileForm.phone.trim()) errors.phone = 'Phone number is required';
     if (!profileForm.age.trim()) errors.age = 'Age is required';
     if (!profileForm.county.trim()) errors.county = 'County is required';
+    if (!profileForm.howDidYouHearAboutUs.trim()) errors.howDidYouHearAboutUs = 'Please tell us how you found out about us';
     
     // Education & Career
     if (!profileForm.degree.trim()) errors.degree = 'Degree/Qualification is required';
@@ -172,6 +174,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     if (!profileForm.phone.trim()) missingFields.push('Phone Number');
     if (!profileForm.age.trim()) missingFields.push('Age');
     if (!profileForm.county.trim()) missingFields.push('County');
+    if (!profileForm.howDidYouHearAboutUs.trim()) missingFields.push('How did you find out about us?');
     if (!profileForm.degree.trim()) missingFields.push('Degree/Qualification');
     if (!profileForm.educationLevel.trim()) missingFields.push('Education Level');
     if (!profileForm.profession.trim()) missingFields.push('Profession');
@@ -203,8 +206,9 @@ export const useProfileForm = (selectedRole: UserType | null) => {
       'Personal Information': {
         completed: Boolean(profileForm.firstName.trim() && profileForm.lastName.trim() && 
                    profileForm.email.trim() && profileForm.phone.trim() && 
-                   profileForm.age.trim() && profileForm.county.trim()),
-        total: 6
+                   profileForm.age.trim() && profileForm.county.trim() &&
+                   profileForm.howDidYouHearAboutUs.trim()),
+        total: 7
       },
       'Education & Career': {
         completed: selectedRole === MENTOR 
@@ -268,6 +272,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
       skills: [],
       lookingFor: [],
       industries: [],
+      howDidYouHearAboutUs: '',
     });
     setValidationErrors({});
   };
