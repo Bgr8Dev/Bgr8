@@ -3,9 +3,11 @@ import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, where, Timestamp } from 'firebase/firestore';
 import { getDisplayName, getName, MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../../widgets/MentorAlgorithm/CalCom/calComService';
+import { loggers } from '../../../utils/logger';
 import { Booking } from '../../../types/bookings';
 import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck, FaPoundSign } from 'react-icons/fa';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AdminMentorModal from './AdminMentorModal';
 import '../../../styles/adminStyles/MentorManagement.css';
 import BookingsTable from './BookingsTable';
@@ -54,44 +56,322 @@ interface ExtendedBooking extends Booking {
   bookingMethod?: string;
 }
 
-// Inline BookingAnalytics component
+// Enhanced BookingAnalytics component with charts and tables
 const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
   const analytics = useMemo(() => {
-    // Only count Cal.com bookings (internal booking system removed)
     const calComBookings = bookings.filter(b => b.isCalComBooking);
     const totalBookings = calComBookings.length;
     const confirmedBookings = calComBookings.filter(b => b.status === 'confirmed').length;
+    const pendingBookings = calComBookings.filter(b => b.status === 'pending').length;
+    const cancelledBookings = calComBookings.filter(b => b.status === 'cancelled').length;
     const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
     const totalRevenue = calComBookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
+    const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
+    
+    // Get unique mentors and mentees
+    const uniqueMentors = new Set(calComBookings.map(b => b.mentorId)).size;
+    const uniqueMentees = new Set(calComBookings.map(b => b.menteeId)).size;
+    
+    // Top mentors by bookings
+    const mentorStats = new Map<string, { name: string; bookings: number; revenue: number }>();
+    calComBookings.forEach(booking => {
+      const existing = mentorStats.get(booking.mentorId) || { name: booking.mentorName, bookings: 0, revenue: 0 };
+      existing.bookings += 1;
+      existing.revenue += booking.revenue || 0;
+      mentorStats.set(booking.mentorId, existing);
+    });
+    const topMentors = Array.from(mentorStats.values())
+      .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 10);
+    
+    // Top mentees by bookings
+    const menteeStats = new Map<string, { name: string; bookings: number }>();
+    calComBookings.forEach(booking => {
+      const existing = menteeStats.get(booking.menteeId) || { name: booking.menteeName, bookings: 0 };
+      existing.bookings += 1;
+      menteeStats.set(booking.menteeId, existing);
+    });
+    const topMentees = Array.from(menteeStats.values())
+      .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 10);
+    
+    // Monthly trends
+    const monthlyData = new Map<string, { bookings: number; confirmed: number; revenue: number }>();
+    calComBookings.forEach(booking => {
+      if (!booking.sessionDate) return;
+      let date: Date;
+      if (booking.sessionDate instanceof Date) {
+        date = booking.sessionDate;
+      } else if (isFirestoreTimestamp(booking.sessionDate)) {
+        date = booking.sessionDate.toDate();
+      } else {
+        date = new Date(booking.sessionDate);
+      }
+      if (isNaN(date.getTime())) return;
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const existing = monthlyData.get(monthKey) || { bookings: 0, confirmed: 0, revenue: 0 };
+      existing.bookings += 1;
+      if (booking.status === 'confirmed') existing.confirmed += 1;
+      existing.revenue += booking.revenue || 0;
+      monthlyData.set(monthKey, existing);
+    });
+    const monthlyTrends = Array.from(monthlyData.entries())
+      .map(([month, data]) => ({
+        month: new Date(month + '-01').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+        bookings: data.bookings,
+        confirmed: data.confirmed,
+        revenue: data.revenue
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+    
+    // Status breakdown for pie chart
+    const statusData = [
+      { name: 'Confirmed', value: confirmedBookings, color: '#00e676' },
+      { name: 'Pending', value: pendingBookings, color: '#ffb300' },
+      { name: 'Cancelled', value: cancelledBookings, color: '#ff4444' }
+    ];
+    
+    // Recent bookings (last 10)
+    const recentBookings = [...calComBookings]
+      .filter(booking => booking.sessionDate)
+      .sort((a, b) => {
+        if (!a.sessionDate || !b.sessionDate) return 0;
+        const dateA = a.sessionDate instanceof Date ? a.sessionDate : 
+                     isFirestoreTimestamp(a.sessionDate) ? a.sessionDate.toDate() : new Date(a.sessionDate);
+        const dateB = b.sessionDate instanceof Date ? b.sessionDate :
+                     isFirestoreTimestamp(b.sessionDate) ? b.sessionDate.toDate() : new Date(b.sessionDate);
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
+        return dateB.getTime() - dateA.getTime();
+      })
+      .slice(0, 10);
 
-    return { totalBookings, confirmedBookings, calComBookings: totalBookings, completionRate, totalRevenue };
+    return {
+      totalBookings,
+      confirmedBookings,
+      pendingBookings,
+      cancelledBookings,
+      completionRate,
+      totalRevenue,
+      averageBookingValue,
+      uniqueMentors,
+      uniqueMentees,
+      topMentors,
+      topMentees,
+      monthlyTrends,
+      statusData,
+      recentBookings
+    };
   }, [bookings]);
 
   return (
-    <div>
-      <h2 style={{ color: '#ffb300', marginBottom: 16 }}>Booking Analytics Dashboard</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+    <div style={{ padding: '20px' }}>
+      <h2 style={{ color: '#ffb300', marginBottom: 24, fontSize: 28 }}>Booking Analytics Dashboard</h2>
+      
+      {/* Key Metrics Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(255,179,0,0.3)' }}>
           <FaCalendarAlt style={{ fontSize: 24, color: '#ffb300', marginBottom: 8 }} />
           <h3 style={{ color: '#ffb300', fontSize: 16, marginBottom: 4 }}>Total Bookings</h3>
-          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{analytics.totalBookings}</p>
+          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.totalBookings}</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,230,118,0.3)' }}>
           <FaCheck style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
           <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Completion Rate</h3>
-          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{analytics.completionRate.toFixed(1)}%</p>
+          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.completionRate.toFixed(1)}%</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,230,118,0.3)' }}>
           <FaPoundSign style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
           <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Total Revenue</h3>
-          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>£{analytics.totalRevenue}</p>
+          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>£{analytics.totalRevenue.toFixed(2)}</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center' }}>
-          <FaClock style={{ fontSize: 24, color: '#00eaff', marginBottom: 8 }} />
-          <h3 style={{ color: '#00eaff', fontSize: 16, marginBottom: 4 }}>Cal.com Bookings</h3>
-          <p style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{analytics.calComBookings}</p>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,234,255,0.3)' }}>
+          <FaPoundSign style={{ fontSize: 24, color: '#00eaff', marginBottom: 8 }} />
+          <h3 style={{ color: '#00eaff', fontSize: 16, marginBottom: 4 }}>Avg Booking Value</h3>
+          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>£{analytics.averageBookingValue.toFixed(2)}</p>
+        </div>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(255,179,0,0.3)' }}>
+          <FaUser style={{ fontSize: 24, color: '#ffb300', marginBottom: 8 }} />
+          <h3 style={{ color: '#ffb300', fontSize: 16, marginBottom: 4 }}>Active Mentors</h3>
+          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.uniqueMentors}</p>
+        </div>
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,230,118,0.3)' }}>
+          <FaUser style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
+          <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Active Mentees</h3>
+          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.uniqueMentees}</p>
         </div>
       </div>
+
+      {/* Charts Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 24 }}>
+        {/* Monthly Trends Line Chart */}
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(255,179,0,0.3)' }}>
+          <h3 style={{ color: '#ffb300', marginBottom: 16 }}>Monthly Booking Trends</h3>
+          {analytics.monthlyTrends.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={analytics.monthlyTrends}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="month" stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
+                <YAxis stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)' }} />
+                <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,179,0,0.5)', borderRadius: '8px', color: '#fff' }} />
+                <Legend />
+                <Line type="monotone" dataKey="bookings" stroke="#ffb300" strokeWidth={2} name="Total Bookings" />
+                <Line type="monotone" dataKey="confirmed" stroke="#00e676" strokeWidth={2} name="Confirmed" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ textAlign: 'center', color: '#888', padding: 40 }}>No booking data available</div>
+          )}
+        </div>
+
+        {/* Status Breakdown Pie Chart */}
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(0,230,118,0.3)' }}>
+          <h3 style={{ color: '#00e676', marginBottom: 16 }}>Booking Status</h3>
+          {analytics.statusData.some(s => s.value > 0) ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={analytics.statusData.filter(s => s.value > 0)}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {analytics.statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(0,230,118,0.5)', borderRadius: '8px', color: '#fff' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ textAlign: 'center', color: '#888', padding: 40 }}>No booking data available</div>
+          )}
+        </div>
+      </div>
+
+      {/* Top Mentors Bar Chart */}
+      {analytics.topMentors.length > 0 && (
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, marginBottom: 24, border: '1px solid rgba(0,234,255,0.3)' }}>
+          <h3 style={{ color: '#00eaff', marginBottom: 16 }}>Top 10 Mentors by Bookings</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={analytics.topMentors.slice(0, 10)}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }} angle={-45} textAnchor="end" height={100} />
+              <YAxis stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)' }} />
+              <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(0,234,255,0.5)', borderRadius: '8px', color: '#fff' }} />
+              <Legend />
+              <Bar dataKey="bookings" fill="#00eaff" name="Bookings" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Tables Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+        {/* Top Mentors Table */}
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(255,179,0,0.3)' }}>
+          <h3 style={{ color: '#ffb300', marginBottom: 16 }}>Top Mentors</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <th style={{ padding: '12px', textAlign: 'left', color: '#ffb300' }}>Mentor</th>
+                  <th style={{ padding: '12px', textAlign: 'right', color: '#ffb300' }}>Bookings</th>
+                  <th style={{ padding: '12px', textAlign: 'right', color: '#ffb300' }}>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.topMentors.slice(0, 10).map((mentor, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '12px', color: '#fff' }}>{mentor.name}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', color: '#fff' }}>{mentor.bookings}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', color: '#00e676' }}>£{mentor.revenue.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Mentees Table */}
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(0,230,118,0.3)' }}>
+          <h3 style={{ color: '#00e676', marginBottom: 16 }}>Top Mentees</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <th style={{ padding: '12px', textAlign: 'left', color: '#00e676' }}>Mentee</th>
+                  <th style={{ padding: '12px', textAlign: 'right', color: '#00e676' }}>Bookings</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.topMentees.slice(0, 10).map((mentee, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '12px', color: '#fff' }}>{mentee.name}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', color: '#fff' }}>{mentee.bookings}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Bookings Table */}
+      {analytics.recentBookings.length > 0 && (
+        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(0,234,255,0.3)' }}>
+          <h3 style={{ color: '#00eaff', marginBottom: 16 }}>Recent Bookings</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <th style={{ padding: '12px', textAlign: 'left', color: '#00eaff' }}>Date</th>
+                  <th style={{ padding: '12px', textAlign: 'left', color: '#00eaff' }}>Mentor</th>
+                  <th style={{ padding: '12px', textAlign: 'left', color: '#00eaff' }}>Mentee</th>
+                  <th style={{ padding: '12px', textAlign: 'center', color: '#00eaff' }}>Status</th>
+                  <th style={{ padding: '12px', textAlign: 'right', color: '#00eaff' }}>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.recentBookings.map((booking, idx) => {
+                  if (!booking.sessionDate) return null;
+                  const date = booking.sessionDate instanceof Date ? booking.sessionDate :
+                              isFirestoreTimestamp(booking.sessionDate) ? booking.sessionDate.toDate() :
+                              new Date(booking.sessionDate);
+                  const statusColor = booking.status === 'confirmed' ? '#00e676' :
+                                    booking.status === 'pending' ? '#ffb300' : '#ff4444';
+                  if (isNaN(date.getTime())) return null;
+                  return (
+                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <td style={{ padding: '12px', color: '#fff' }}>
+                        {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td style={{ padding: '12px', color: '#fff' }}>{booking.mentorName}</td>
+                      <td style={{ padding: '12px', color: '#fff' }}>{booking.menteeName}</td>
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <span style={{ 
+                          background: statusColor, 
+                          color: '#181818', 
+                          padding: '4px 12px', 
+                          borderRadius: '6px', 
+                          fontWeight: 700,
+                          fontSize: '0.85rem'
+                        }}>
+                          {booking.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', textAlign: 'right', color: '#00e676' }}>£{(booking.revenue || 0).toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -313,6 +593,13 @@ export default function MentorManagement() {
               if (mentorData.isMentor) {
                 const mentorPromise = (async () => {
                   try {
+                    // Check if mentor has Cal.com API key before attempting to fetch bookings
+                    const hasApiKey = await CalComTokenManager.hasApiKey(userDoc.id);
+                    if (!hasApiKey) {
+                      // Mentor doesn't have Cal.com integration - skip silently
+                      return [];
+                    }
+                    
                     const calComBookings = await CalComService.getBookings(userDoc.id);
                     return calComBookings.map((calBooking: CalComBookingResponse) => {
                       const startDate = new Date(calBooking.startTime);
@@ -357,7 +644,11 @@ export default function MentorManagement() {
                       } as Booking;
                     });
                   } catch (error) {
-                    console.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, error);
+                    // Only log unexpected errors, not missing API keys (which are handled above)
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    if (!errorMessage.includes('No Cal.com API key')) {
+                      loggers.api.error(`Error fetching Cal.com bookings for mentor ${userDoc.id}:`, error);
+                    }
                     return [];
                   }
                 })();
@@ -365,7 +656,7 @@ export default function MentorManagement() {
               }
             }
           } catch (error) {
-            console.error(`Error checking mentor program for user ${userDoc.id}:`, error);
+            loggers.api.error(`Error checking mentor program for user ${userDoc.id}:`, error);
           }
         }
         
@@ -373,7 +664,7 @@ export default function MentorManagement() {
         const allCalComBookings = calComResults.flat();
         results.push(...allCalComBookings);
       } catch (error) {
-        console.error('Error fetching Cal.com bookings:', error);
+        loggers.api.error('Error fetching Cal.com bookings:', error);
         // Continue with Firestore bookings only
       }
 
