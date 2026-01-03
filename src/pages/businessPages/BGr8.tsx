@@ -9,23 +9,76 @@ import VisibilityWrapper from '../../components/ui/VisibilityWrapper';
 import '../../styles/businessStyles/BGr8.css';
 import ContactForm from '../../components/ui/ContactForm';
 import InstagramFeed from '../../components/social/InstagramFeed';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '../../firebase/firebase';
+import { useAuth } from '../../hooks/useAuth';
+
+interface MentorMenteeProfile {
+  isMentor?: boolean;
+  isMentee?: boolean;
+  type?: string;
+  verification?: {
+    status?: string;
+  };
+}
 
 export default function BGr8() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
   const [ambassadorCount, setAmbassadorCount] = useState(500); // Default fallback value
   const [showMentorDef, setShowMentorDef] = useState(false);
   const [showMenteeDef, setShowMenteeDef] = useState(false);
+  const [userRole, setUserRole] = useState<'mentor' | 'mentee' | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Fetch user role and verification status from mentorProgram profile
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!currentUser?.uid) {
+        setUserRole(null);
+        setVerificationStatus(null);
+        return;
+      }
+      
+      try {
+        const mentorProgramDoc = await getDoc(
+          doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile')
+        );
+        
+        if (mentorProgramDoc.exists()) {
+          const profileData = mentorProgramDoc.data() as MentorMenteeProfile;
+          if (profileData.isMentor === true || profileData.type?.toLowerCase() === 'mentor') {
+            setUserRole('mentor');
+            setVerificationStatus(profileData.verification?.status || null);
+          } else if (profileData.isMentee === true || profileData.type?.toLowerCase() === 'mentee') {
+            setUserRole('mentee');
+            setVerificationStatus(null);
+          } else {
+            setUserRole(null);
+            setVerificationStatus(null);
+          }
+        } else {
+          setUserRole(null);
+          setVerificationStatus(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+        setUserRole(null);
+        setVerificationStatus(null);
+      }
+    };
+
+    fetchUserRole();
+  }, [currentUser]);
 
   // Fetch ambassador count (non-blocking)
   useEffect(() => {
@@ -57,6 +110,21 @@ export default function BGr8() {
     navigate('/dashboard');
   };
 
+  // Get CTA button text based on user role and verification status
+  const getCTAButtonText = (): string => {
+    if (userRole === 'mentee') {
+      return 'View Your Dashboard';
+    } else if (userRole === 'mentor') {
+      if (verificationStatus !== 'approved') {
+        return 'Check Verification Status';
+      } else {
+        return 'Go to Mentor Dashboard';
+      }
+    }
+    // Default text for users without a role
+    return 'Find Mentors & Join Network';
+  };
+
   return (
     <div className="bgr8-page">
       {isMobile ? <HamburgerMenu /> : <Navbar />}
@@ -82,7 +150,7 @@ export default function BGr8() {
                     onClick={navigateToMentors}
                     aria-label="Navigate to mentors page"
                   >
-                    <span className="bgr8-scroll-btn-text">Find Mentors & Join Network</span>
+                    <span className="bgr8-scroll-btn-text">{getCTAButtonText()}</span>
                     <span className="bgr8-scroll-btn-arrow">→</span>
                   </button>
                   <p className="bgr8-scroll-btn-description">
