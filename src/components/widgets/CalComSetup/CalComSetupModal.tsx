@@ -9,11 +9,15 @@ import {
   FaUserPlus,
   FaLink,
   FaCopy,
-  FaCheck
+  FaCheck,
+  FaKey,
+  FaEye,
+  FaEyeSlash
 } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { firestore } from '../../../firebase/firebase';
+import { CalComTokenManager } from '../../widgets/MentorAlgorithm/CalCom/calComService';
 import Modal from '../../ui/Modal';
 import './CalComSetupModal.css';
 
@@ -22,12 +26,15 @@ interface CalComSetupModalProps {
   onComplete: () => void;
 }
 
-type TutorialStep = 1 | 2 | 3 | 4 | 5;
+type TutorialStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete }) => {
   const { currentUser } = useAuth();
   const [currentStep, setCurrentStep] = useState<TutorialStep>(1);
   const [calComUrl, setCalComUrl] = useState('');
+  const [calComApiKey, setCalComApiKey] = useState('');
+  const [calComUsername, setCalComUsername] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasAccount, setHasAccount] = useState<boolean | null>(null);
@@ -37,6 +44,30 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
     // Validate Cal.com URL format
     const calComPattern = /^https?:\/\/(.*\.)?cal\.com\/[^/]+/i;
     return calComPattern.test(url);
+  };
+
+  const extractUsernameFromUrl = (url: string): string | null => {
+    try {
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0) {
+        return pathParts[0];
+      }
+      // Check for subdomain format (username.cal.com)
+      const hostname = urlObj.hostname;
+      if (hostname.includes('.cal.com')) {
+        return hostname.split('.cal.com')[0];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const validateApiKey = (key: string): boolean => {
+    // Cal.com API keys are typically long alphanumeric strings
+    // They usually start with 'cal_' and are at least 40 characters
+    return key.trim().length >= 20 && (key.startsWith('cal_') || key.length >= 40);
   };
 
   const handleNext = () => {
@@ -57,6 +88,13 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
     } else if (currentStep === 4) {
       // After getting URL, go to enter URL
       setCurrentStep(5);
+    } else if (currentStep === 5) {
+      // After entering URL, extract username and go to API key step
+      const username = extractUsernameFromUrl(calComUrl.trim());
+      if (username) {
+        setCalComUsername(username);
+      }
+      setCurrentStep(6);
     }
     setError(null);
   };
@@ -70,6 +108,8 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
       setCurrentStep(3);
     } else if (currentStep === 5) {
       setCurrentStep(4);
+    } else if (currentStep === 6) {
+      setCurrentStep(5);
     }
     setError(null);
   };
@@ -92,10 +132,34 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
       return;
     }
 
+    if (!calComApiKey.trim()) {
+      setError('Please enter your Cal.com API key');
+      return;
+    }
+
+    if (!validateApiKey(calComApiKey.trim())) {
+      setError('Please enter a valid Cal.com API key. It should be a long string (usually starts with "cal_" or is at least 40 characters)');
+      return;
+    }
+
+    // Extract username if not already set
+    const username = calComUsername || extractUsernameFromUrl(calComUrl.trim());
+    if (!username) {
+      setError('Could not extract username from URL. Please check your URL format.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
+      // Store API key securely using CalComTokenManager
+      await CalComTokenManager.storeApiKey(
+        currentUser.uid,
+        calComApiKey.trim(),
+        username
+      );
+
       // Update the mentor profile with Cal.com URL
       const profileRef = doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile');
       const profileDoc = await getDoc(profileRef);
@@ -111,8 +175,8 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
       // Success - close modal and allow dashboard access
       onComplete();
     } catch (err) {
-      console.error('Error saving Cal.com URL:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save Cal.com URL. Please try again.');
+      console.error('Error saving Cal.com setup:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save Cal.com setup. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +190,7 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
     });
   };
 
-  const totalSteps = 5;
+  const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
 
   const renderStepContent = () => {
@@ -266,11 +330,11 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
         return (
           <div className="calcom-tutorial-step">
             <div className="calcom-step-icon">
-              <FaCheckCircle />
+              <FaLink />
             </div>
             <h3>Step 4: Enter Your Cal.com URL</h3>
             <p className="calcom-step-description">
-              Paste your Cal.com booking URL below to complete the setup.
+              Paste your Cal.com booking URL below.
             </p>
             {error && (
               <div className="calcom-setup-error">
@@ -278,7 +342,7 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
                 <span>{error}</span>
               </div>
             )}
-            <form onSubmit={handleSubmit} className="calcom-setup-form">
+            <form className="calcom-setup-form">
               <div className="calcom-setup-input-group">
                 <label htmlFor="calcom-url">
                   Your Cal.com Public Page URL <span className="required">*</span>
@@ -290,6 +354,11 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
                   onChange={(e) => {
                     setCalComUrl(e.target.value);
                     setError(null);
+                    // Auto-extract username when URL is entered
+                    const username = extractUsernameFromUrl(e.target.value);
+                    if (username) {
+                      setCalComUsername(username);
+                    }
                   }}
                   placeholder="https://cal.com/yourusername"
                   disabled={isLoading}
@@ -301,7 +370,78 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
               </div>
             </form>
             <div className="calcom-step-note">
-              <FaCheckCircle /> You can update this URL later in your profile settings if needed.
+              <FaCheckCircle /> We'll use this to extract your username for API access.
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="calcom-tutorial-step">
+            <div className="calcom-step-icon">
+              <FaKey />
+            </div>
+            <h3>Step 5: Get Your Cal.com API Key</h3>
+            <p className="calcom-step-description">
+              To automatically sync bookings, we need your Cal.com API key. Don't worry - it's stored securely!
+            </p>
+            <div className="calcom-instruction-box">
+              <ol className="calcom-instruction-list">
+                <li>In Cal.com, go to <strong>Settings</strong> → <strong>Developer</strong> → <strong>API Keys</strong></li>
+                <li>Click <strong>"Create API Key"</strong> or use an existing one</li>
+                <li>Give it a name (e.g., "Bgr8 Integration")</li>
+                <li>Copy the API key (it will look like: <code>cal_xxxxxxxxxxxxx</code> or a long string)</li>
+                <li>Paste it in the field below</li>
+              </ol>
+              <a
+                href="https://cal.com/settings/developer/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="calcom-action-link"
+              >
+                <FaExternalLinkAlt /> Open Cal.com API Keys Settings
+              </a>
+            </div>
+            {error && (
+              <div className="calcom-setup-error">
+                <FaExclamationTriangle />
+                <span>{error}</span>
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="calcom-setup-form">
+              <div className="calcom-setup-input-group">
+                <label htmlFor="calcom-api-key">
+                  Your Cal.com API Key <span className="required">*</span>
+                </label>
+                <div className="calcom-api-key-input-wrapper">
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    id="calcom-api-key"
+                    value={calComApiKey}
+                    onChange={(e) => {
+                      setCalComApiKey(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="cal_xxxxxxxxxxxxx or your API key"
+                    disabled={isLoading}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="calcom-api-key-toggle"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    title={showApiKey ? 'Hide API key' : 'Show API key'}
+                  >
+                    {showApiKey ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                <small className="calcom-setup-hint">
+                  Your API key is encrypted and stored securely. It's only used to sync bookings automatically.
+                </small>
+              </div>
+            </form>
+            <div className="calcom-step-note">
+              <FaCheckCircle /> Your API key is stored securely and encrypted. You can revoke it anytime in Cal.com settings.
             </div>
           </div>
         );
@@ -352,7 +492,7 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
               <FaArrowLeft /> Back
             </button>
           )}
-          {currentStep < 5 ? (
+          {currentStep < 6 ? (
             <button
               type="button"
               onClick={handleNext}
@@ -370,7 +510,7 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
               type="button"
               onClick={handleSubmit}
               className="calcom-nav-btn calcom-nav-btn-complete"
-              disabled={isLoading || !calComUrl.trim()}
+              disabled={isLoading || !calComUrl.trim() || !calComApiKey.trim()}
             >
               {isLoading ? (
                 <>Saving...</>

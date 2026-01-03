@@ -362,6 +362,43 @@
   font-size: 0.85rem;
 }
 
+/* API Key Input Styles */
+.calcom-api-key-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.calcom-api-key-input-wrapper input {
+  padding-right: 45px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+.calcom-api-key-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary, #d0d0d0);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.calcom-api-key-toggle:hover {
+  color: var(--text, #fff);
+}
+
+.calcom-api-key-toggle:focus {
+  outline: none;
+  color: var(--primary-color, #ff2a2a);
+}
+
 /* Navigation */
 .calcom-navigation {
   display: flex;
