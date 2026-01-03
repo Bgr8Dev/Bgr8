@@ -670,7 +670,6 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   )}
                 </div>
 
-          <div className="pem-form-row">
             <div className="pem-input-group">
               <label htmlFor="edit-aboutMe" className="pem-field-label">
                 About Me
@@ -699,7 +698,6 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
 
 
                 <div className="pem-input-group">
