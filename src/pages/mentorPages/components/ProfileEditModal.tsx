@@ -82,7 +82,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   if (!isOpen) return null;
 
   // Helper function to handle local form changes
-  const handleLocalFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleLocalFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setLocalFormData(prev => ({ ...prev, [name]: value }));
     // Also call the parent handler to keep parent state in sync
@@ -682,10 +682,10 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               <textarea
                 id="edit-aboutMe"
                 name="aboutMe"
-                value={profile.aboutMe || ''}
-                onChange={onFormChange}
+                value={localFormData.aboutMe || ''}
+                onChange={handleLocalFormChange}
                 className={validationErrors.aboutMe ? 'error' : ''}
-                placeholder="Tell us about yourself, your background, and what you’re looking for..."
+                placeholder="Tell us about yourself, your background, and what you're looking for..."
                 rows={5}
                 maxLength={800}
                 style={{ resize: 'vertical' }}

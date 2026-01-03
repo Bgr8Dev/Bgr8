@@ -131,6 +131,14 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
     return tooltips[fieldName] || '';
   };
 
+  // Helper function to handle local form changes
+  const handleLocalFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setLocalFormData(prev => ({ ...prev, [name]: value }));
+    // Also call the parent handler to keep parent state in sync
+    onFormChange(e);
+  };
+
   const handleLocalArrayChange = (field: keyof ProfileFormData, value: string[]) => {
     setLocalFormData(prev => ({ ...prev, [field]: value }));
     onArrayChange(field, value);
@@ -451,9 +459,9 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
             <textarea
               id="aboutMe"
               name="aboutMe"
-              value={profile.aboutMe || ''}
-              onChange={onFormChange}
-              placeholder="Tell us about yourself, your background, and what you’re looking for..."
+              value={localFormData.aboutMe || ''}
+              onChange={handleLocalFormChange}
+              placeholder="Tell us about yourself, your background, and what you're looking for..."
               rows={5}
               maxLength={800}
               className={validationErrors.aboutMe ? 'error' : ''}
