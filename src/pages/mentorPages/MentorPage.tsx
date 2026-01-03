@@ -43,6 +43,7 @@ import './styles/ProfileRegistrationForm.css';
 import './styles/ProfileEditModal.css';
 import { useButtonEmergeModal } from '../../hooks/useButtonEmergeModal';
 import './styles/MentorFilters.css';
+import { loggers } from '../../utils/logger';
 
 export default function MentorPage() {
   const { currentUser, userProfile } = useAuth();
@@ -133,25 +134,25 @@ export default function MentorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('MentorPage handleSubmit called');
-    console.log('Profile form data:', profileForm);
-    console.log('Selected role:', selectedRole);
+    loggers.info.log('MentorPage handleSubmit called');
+    loggers.info.log('Profile form data:', profileForm);
+    loggers.info.log('Selected role:', selectedRole);
     
     const errors = validateProfileForm();
-    console.log('Validation errors:', errors);
+    loggers.info.log('Validation errors:', errors);
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation failed, setting errors');
+      loggers.info.log('Validation failed, setting errors');
       setValidationErrors(errors);
       return;
     }
 
     if (!selectedRole) {
-      console.log('No selected role, returning');
+      loggers.warn.warn('No selected role, returning');
       return;
     }
 
-    console.log('Creating profile with data:', {
+    loggers.info.log('Creating profile with data:', {
       ...profileForm,
       type: selectedRole,
       uid: currentUser?.uid || '',
@@ -173,16 +174,16 @@ export default function MentorPage() {
       isMentee: selectedRole.toLowerCase() === 'mentee'
     };
 
-    console.log('Calling createProfile...');
+    loggers.info.log('Calling createProfile...');
     const success = await createProfile(profileData);
-    console.log('createProfile result:', success);
+    loggers.info.log('createProfile result:', success);
     
     if (success) {
-      console.log('Profile created successfully, resetting form');
+      loggers.info.log('Profile created successfully, resetting form');
       setSelectedRole(null);
       resetForm();
     } else {
-      console.log('Profile creation failed');
+      loggers.error.error('Profile creation failed');
     }
   };
 
@@ -242,55 +243,55 @@ export default function MentorPage() {
   };
 
   const handleAcceptBooking = (bookingId: string) => {
-    console.log('Accepting booking:', bookingId);
+    loggers.booking.log('Accepting booking:', bookingId);
     // TODO: Implement booking acceptance logic
   };
 
   const handleRejectBooking = (bookingId: string) => {
-    console.log('Rejecting booking:', bookingId);
+    loggers.booking.log('Rejecting booking:', bookingId);
     // TODO: Implement booking rejection logic
   };
 
   const handleCancelBooking = (bookingId: string) => {
-    console.log('Cancelling booking:', bookingId);
+    loggers.booking.log('Cancelling booking:', bookingId);
     // TODO: Implement booking cancellation logic
   };
 
   // Helper function to close profile view modal
   const handleCloseProfileViewModal = () => {
-    console.log('Closing profile view modal');
+    loggers.info.log('Closing profile view modal');
     setShowProfileViewModal(false);
     setSelectedMentor(null);
   };
 
   // Helper function to close booking modal
   const handleCloseBookingModal = () => {
-    console.log('Closing booking modal');
+    loggers.booking.log('Closing booking modal');
     setShowBookingModal(false);
     setSelectedMentor(null);
   };
 
   // Helper function to close Cal.com modal
   const handleCloseCalComModal = () => {
-    console.log('Closing Cal.com modal');
+    loggers.booking.log('Closing Cal.com modal');
     setShowCalComModal(false);
     setSelectedMentor(null);
   };
 
   const handleProfileCardClick = (mentor: MentorMenteeProfile) => {
-    console.log('=== PROFILE CARD CLICKED ===');
-    console.log('Mentor:', mentor.firstName, mentor.lastName, mentor.uid);
-    console.log('Current modal states:', {
+    loggers.debug.debug('=== PROFILE CARD CLICKED ===');
+    loggers.debug.debug('Mentor:', mentor.firstName, mentor.lastName, mentor.uid);
+    loggers.debug.debug('Current modal states:', {
       showProfileViewModal,
       showBookingModal,
       showCalComModal
     });
-    console.log('Stack trace:', new Error().stack);
-    console.log('==========================');
+    loggers.debug.debug('Stack trace:', new Error().stack);
+    loggers.debug.debug('==========================');
     
     // Close any other open modals first
     if (showProfileViewModal || showBookingModal || showCalComModal) {
-      console.log('Closing other modals before opening profile view modal');
+      loggers.info.log('Closing other modals before opening profile view modal');
       setShowProfileViewModal(false);
       setShowBookingModal(false);
       setShowCalComModal(false);
@@ -312,11 +313,11 @@ export default function MentorPage() {
 
 
   const handleCalCom = (mentor: MentorMenteeProfile) => {
-    console.log('Cal.com clicked for:', mentor.firstName, mentor.lastName);
+    loggers.booking.log('Cal.com clicked for:', mentor.firstName, mentor.lastName);
     
     // Close any other open modals first
     if (showProfileViewModal || showBookingModal || showCalComModal) {
-      console.log('Closing other modals before opening Cal.com modal');
+      loggers.booking.log('Closing other modals before opening Cal.com modal');
       setShowProfileViewModal(false);
       setShowBookingModal(false);
       setShowCalComModal(false);
@@ -330,7 +331,6 @@ export default function MentorPage() {
     
     setSelectedMentor(mentor);
     setShowCalComModal(true);
-    console.log('Cal.com integration not yet implemented for:', mentor.firstName);
   };
 
   // Helper function to extract match score from profile
@@ -361,25 +361,32 @@ export default function MentorPage() {
     setFilteredMentors(searchFilteredMentors);
   }, [searchFilteredMentors, setFilteredMentors]);
 
+  // Fetch bookings for current user when dashboard loads
+  useEffect(() => {
+    if (currentUserProfile?.uid && typeof currentUserProfile.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor') {
+      fetchMentorBookings(currentUserProfile.uid);
+    }
+  }, [currentUserProfile?.uid, currentUserProfile?.type, fetchMentorBookings]);
+
   // Debug modal state changes
   useEffect(() => {
-    console.log('Modal state changed - showProfileViewModal:', showProfileViewModal);
+    loggers.info.log('Modal state changed - showProfileViewModal:', showProfileViewModal);
     if (showProfileViewModal && selectedMentor) {
-      console.log('Opening profile view modal for:', selectedMentor.firstName, selectedMentor.lastName);
+      loggers.info.log('Opening profile view modal for:', selectedMentor.firstName, selectedMentor.lastName);
     }
   }, [showProfileViewModal, selectedMentor]);
 
   useEffect(() => {
-    console.log('Modal state changed - showBookingModal:', showBookingModal);
+    loggers.info.log('Modal state changed - showBookingModal:', showBookingModal);
     if (showBookingModal && selectedMentor) {
-      console.log('Opening booking modal for:', selectedMentor.firstName, selectedMentor.lastName);
+      loggers.booking.log('Opening booking modal for:', selectedMentor.firstName, selectedMentor.lastName);
     }
   }, [showBookingModal, selectedMentor]);
 
   useEffect(() => {
-    console.log('Modal state changed - showCalComModal:', showCalComModal);
+    loggers.info.log('Modal state changed - showCalComModal:', showCalComModal);
     if (showCalComModal && selectedMentor) {
-      console.log('Opening Cal.com modal for:', selectedMentor.firstName, selectedMentor.lastName);
+      loggers.booking.log('Opening Cal.com modal for:', selectedMentor.firstName, selectedMentor.lastName);
     }
   }, [showCalComModal, selectedMentor]);
 
@@ -387,7 +394,7 @@ export default function MentorPage() {
   useEffect(() => {
     const openModals = [showProfileViewModal, showBookingModal, showCalComModal, showProfileEdit, showAvailabilityModal, showViewBookingsModal].filter(Boolean);
     if (openModals.length > 1) {
-      console.warn('Multiple modals detected as open, closing all except the last one');
+      loggers.warn.warn('Multiple modals detected as open, closing all except the last one');
       // Keep only the last opened modal
       if (showViewBookingsModal) {
         setShowProfileViewModal(false);
@@ -438,16 +445,16 @@ export default function MentorPage() {
       const duplicates = bestMatchUids.filter(uid => searchUids.includes(uid));
       
       if (duplicates.length > 0) {
-        console.warn('🚨 DUPLICATE MENTORS DETECTED! 🚨');
-        console.warn('These mentors appear in BOTH bestMatches AND searchFilteredMentors:');
+        loggers.warn.warn('🚨 DUPLICATE MENTORS DETECTED! 🚨');
+        loggers.warn.warn('These mentors appear in BOTH bestMatches AND searchFilteredMentors:');
         duplicates.forEach(uid => {
           const bestMatch = bestMatches.find(match => match.user.uid === uid);
           const searchMentor = searchFilteredMentors.find(mentor => mentor.uid === uid);
-          console.warn(`- ${bestMatch?.user.firstName} ${bestMatch?.user.lastName} (${uid})`);
-          console.warn('  BestMatch score:', bestMatch?.score);
-          console.warn('  SearchMentor generated:', searchMentor?.isGenerated);
+          loggers.warn.warn(`- ${bestMatch?.user.firstName} ${bestMatch?.user.lastName} (${uid})`);
+          loggers.warn.warn('  BestMatch score:', bestMatch?.score);
+          loggers.warn.warn('  SearchMentor generated:', searchMentor?.isGenerated);
         });
-        console.warn('This could cause double modal opening!');
+        loggers.warn.warn('This could cause double modal opening!');
       }
     }
   }, [bestMatches, searchFilteredMentors]);
@@ -455,48 +462,48 @@ export default function MentorPage() {
   // Debug: Track ProfileViewModal rendering
   useEffect(() => {
     if (showProfileViewModal && selectedMentor) {
-      console.log('🎭 ProfileViewModal RENDERED for:', selectedMentor.firstName, selectedMentor.lastName);
-      console.log('🎭 Modal state:', { showProfileViewModal, selectedMentor: selectedMentor.uid });
+      loggers.debug.debug('🎭 ProfileViewModal RENDERED for:', selectedMentor.firstName, selectedMentor.lastName);
+      loggers.debug.debug('🎭 Modal state:', { showProfileViewModal, selectedMentor: selectedMentor.uid });
       
       // Check DOM for multiple modal overlays
       setTimeout(() => {
         const modalOverlays = document.querySelectorAll('.profile-view-modal-overlay');
         const modalContent = document.querySelectorAll('.profile-view-modal');
-        console.log('🔍 DOM Check - Modal overlays found:', modalOverlays.length);
-        console.log('🔍 DOM Check - Modal content found:', modalContent.length);
+        loggers.debug.debug('🔍 DOM Check - Modal overlays found:', modalOverlays.length);
+        loggers.debug.debug('🔍 DOM Check - Modal content found:', modalContent.length);
         
         if (modalOverlays.length > 1) {
-          console.error('🚨 MULTIPLE MODAL OVERLAYS IN DOM! 🚨');
+          loggers.error.error('🚨 MULTIPLE MODAL OVERLAYS IN DOM! 🚨');
           modalOverlays.forEach((overlay, index) => {
-            console.error(`Overlay ${index}:`, overlay);
+            loggers.error.error(`Overlay ${index}:`, overlay);
           });
         }
         
         if (modalContent.length > 1) {
-          console.error('🚨 MULTIPLE MODAL CONTENT IN DOM! 🚨');
+          loggers.error.error('🚨 MULTIPLE MODAL CONTENT IN DOM! 🚨');
           modalContent.forEach((content, index) => {
-            console.error(`Content ${index}:`, content);
+            loggers.error.error(`Content ${index}:`, content);
           });
         }
       }, 100);
       
       return () => {
-        console.log('🎭 ProfileViewModal UNMOUNTED for:', selectedMentor.firstName, selectedMentor.lastName);
+        loggers.debug.debug('🎭 ProfileViewModal UNMOUNTED for:', selectedMentor.firstName, selectedMentor.lastName);
       };
     }
   }, [showProfileViewModal, selectedMentor]);
 
   // Debug: Track ProfileEditModal rendering
   useEffect(() => {
-    console.log('🔧 ProfileEditModal state changed:', { 
+    loggers.debug.debug('🔧 ProfileEditModal state changed:', { 
       showProfileEdit, 
       hasProfile, 
       currentUserProfile: currentUserProfile ? 'exists' : 'null' 
     });
     
     if (showProfileEdit && currentUserProfile) {
-      console.log('🔧 ProfileEditModal should be visible');
-      console.log('🔧 currentUserProfile type:', currentUserProfile.type);
+      loggers.debug.debug('🔧 ProfileEditModal should be visible');
+      loggers.debug.debug('🔧 currentUserProfile type:', currentUserProfile.type);
     }
   }, [showProfileEdit, hasProfile, currentUserProfile]);
 
