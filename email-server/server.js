@@ -39,8 +39,38 @@ const db = admin.apps.length > 0 ? admin.firestore() : null;
 
 // Middleware
 app.use(helmet());
+
+// CORS configuration - allow multiple origins for development and production
+const allowedOrigins = [
+  'https://bgr8.uk',
+  'https://www.bgr8.uk',
+  'http://bgr8.uk',
+  'http://www.bgr8.uk',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5174'
+];
+
+// Add FRONTEND_URL from env if provided and not already in the list
+if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
