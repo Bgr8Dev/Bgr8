@@ -6,6 +6,8 @@
  * The frontend only needs the API URL and API key to communicate with the backend.
  */
 
+import { loggers } from '../utils/logger';
+
 export interface EmailConfig {
   apiBaseUrl: string;
   apiKey: string;
@@ -19,8 +21,8 @@ export const emailConfig: EmailConfig = {
   apiKey: import.meta.env.VITE_EMAIL_API_KEY || 'your_api_key_here',
 };
 
-// Debug logging
-console.log('🔧 Email Config Debug:', {
+// Debug logging (using logger utility - respects console config)
+loggers.config.log('🔧 Email Config Debug:', {
   env: import.meta.env.MODE,
   isProd: import.meta.env.PROD,
   viteEmailApiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL,
@@ -32,19 +34,19 @@ console.log('🔧 Email Config Debug:', {
 
 // Override for localhost development
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  console.log('🏠 Localhost detected - forcing local email server URL');
+  loggers.config.log('🏠 Localhost detected - forcing local email server URL');
   emailConfig.apiBaseUrl = 'http://localhost:3001';
 } else if (window.location.hostname.includes('dev') || window.location.hostname.includes('local')) {
-  console.log('🏠 Development environment detected - forcing local email server URL');
+  loggers.config.log('🏠 Development environment detected - forcing local email server URL');
   emailConfig.apiBaseUrl = 'http://localhost:3001';
 }
 
 // Manual override for development (uncomment to force localhost)
 // emailConfig.apiBaseUrl = 'http://localhost:3001';
-// console.log('🔧 Manual override: Forcing localhost email server');
+// loggers.config.log('🔧 Manual override: Forcing localhost email server');
 
 // Final debug log
-console.log('🎯 Final Email Config:', {
+loggers.config.log('🎯 Final Email Config:', {
   apiBaseUrl: emailConfig.apiBaseUrl,
   apiKey: emailConfig.apiKey ? '***configured***' : 'NOT CONFIGURED'
 });
