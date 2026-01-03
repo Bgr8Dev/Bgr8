@@ -342,6 +342,7 @@ async function sendZohoEmail(emailData) {
 
   const accessToken = await getZohoAccessToken();
   
+  // Zoho Mail API expects different field names
   const zohoEmailData = {
     fromAddress: process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
     toAddress: emailData.to.join(','),
@@ -350,6 +351,18 @@ async function sendZohoEmail(emailData) {
     subject: emailData.subject,
     content: emailData.content,
     mailFormat: emailData.contentType === 'text/html' ? 'html' : 'text',
+    attachments: emailData.attachments || []
+  };
+  
+  // Alternative format that Zoho API might expect
+  const zohoEmailDataAlt = {
+    from: process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
+    to: emailData.to,
+    cc: emailData.cc || [],
+    bcc: emailData.bcc || [],
+    subject: emailData.subject,
+    htmlbody: emailData.contentType === 'text/html' ? emailData.content : undefined,
+    textbody: emailData.contentType === 'text/plain' ? emailData.content : undefined,
     attachments: emailData.attachments || []
   };
 
@@ -388,15 +401,23 @@ async function sendZohoEmail(emailData) {
   const apiEndpoints = [
     {
       url: `${mailApiBase}/accounts/${accountPath}/messages`,
-      data: zohoEmailData
+      data: zohoEmailData,
+      description: 'Standard messages endpoint'
+    },
+    {
+      url: `${mailApiBase}/accounts/${accountPath}/messages`,
+      data: zohoEmailDataAlt,
+      description: 'Standard messages endpoint (alt format)'
     },
     {
       url: `${mailApiBase}/accounts/${accountPath}/messages/send`,
-      data: zohoEmailData
+      data: zohoEmailData,
+      description: 'Send endpoint'
     },
     {
       url: `${mailApiBase}/accounts/${accountPath}/messages/sendMail`,
-      data: zohoEmailData
+      data: zohoEmailData,
+      description: 'SendMail endpoint'
     }
   ];
 
@@ -405,17 +426,25 @@ async function sendZohoEmail(emailData) {
 
   for (const endpoint of apiEndpoints) {
     try {
-      console.log(`📧 Trying Zoho API endpoint: ${endpoint.url}`);
-      console.log(`📧 With data:`, endpoint.data);
+      console.log(`📧 Trying Zoho API endpoint: ${endpoint.url} (${endpoint.description})`);
+      console.log(`📧 With data:`, JSON.stringify(endpoint.data, null, 2));
+      
+      // Add timeout to API calls (30 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
       
       response = await fetch(endpoint.url, {
         method: 'POST',
         headers: {
           'Authorization': `Zoho-oauthtoken ${accessToken}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(endpoint.data),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       console.log(`📧 Endpoint ${endpoint.url} response status:`, response.status);
       
@@ -424,12 +453,17 @@ async function sendZohoEmail(emailData) {
         break;
       } else {
         const errorText = await response.text();
-        console.log(`❌ Endpoint ${endpoint.url} failed:`, errorText);
+        console.log(`❌ Endpoint ${endpoint.url} failed (${response.status}):`, errorText);
         lastError = errorText;
       }
     } catch (error) {
-      console.log(`❌ Endpoint ${endpoint.url} error:`, error.message);
-      lastError = error.message;
+      if (error.name === 'AbortError') {
+        console.log(`⏱️ Endpoint ${endpoint.url} timed out after 30 seconds`);
+        lastError = 'Request timeout';
+      } else {
+        console.log(`❌ Endpoint ${endpoint.url} error:`, error.message);
+        lastError = error.message;
+      }
     }
   }
 
@@ -780,27 +814,24 @@ app.post('/api/email/send', emailLimiter, async (req, res) => {
       });
     }
 
-    // Try SMTP first, fall back to API if SMTP fails (e.g., ports blocked on Render.com)
+    // Use Zoho API directly (SMTP ports are blocked on Render.com)
+    // The API test passed, so we know the API works
     let result;
     try {
-      console.log('📧 Attempting SMTP sending...');
-      result = await sendSMTPEmail(value);
-      console.log('✅ SMTP sending successful');
-    } catch (smtpError) {
-      console.log('❌ SMTP failed:', smtpError.message);
+      console.log('📧 Using Zoho Mail API (SMTP ports blocked on Render.com)...');
+      result = await sendZohoEmail(value);
+      console.log('✅ Email sent successfully via Zoho Mail API');
+    } catch (apiError) {
+      console.log('❌ Zoho API failed:', apiError.message);
       
-      // If SMTP fails due to connection issues, try Zoho API as fallback
-      if (smtpError.message.includes('timeout') || smtpError.message.includes('ECONNREFUSED') || smtpError.message.includes('ETIMEDOUT')) {
-        console.log('📧 SMTP ports appear blocked, falling back to Zoho Mail API...');
-        try {
-          result = await sendZohoEmail(value);
-          console.log('✅ Email sent successfully via Zoho API (fallback)');
-        } catch (apiError) {
-          console.log('❌ Zoho API fallback also failed:', apiError.message);
-          throw new Error(`Email sending failed. SMTP: ${smtpError.message}. API fallback: ${apiError.message}`);
-        }
-      } else {
-        throw new Error(`Email sending failed: ${smtpError.message}`);
+      // If API fails, try SMTP as fallback (in case API has issues but SMTP works elsewhere)
+      console.log('📧 Trying SMTP as fallback...');
+      try {
+        result = await sendSMTPEmail(value);
+        console.log('✅ Email sent successfully via SMTP (fallback)');
+      } catch (smtpError) {
+        console.log('❌ SMTP fallback also failed:', smtpError.message);
+        throw new Error(`Email sending failed. API: ${apiError.message}. SMTP fallback: ${smtpError.message}`);
       }
     }
     
