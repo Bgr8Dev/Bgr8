@@ -16,8 +16,8 @@ export interface EmailConfig {
 // Frontend email configuration
 export const emailConfig: EmailConfig = {
   // Backend API configuration (only these are needed in frontend)
-  apiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL || 
-    (import.meta.env.PROD ? 'https://bgr8-email-server.onrender.com' : 'http://localhost:3001'),
+  // Always use the live email server - can be overridden via VITE_EMAIL_API_BASE_URL env var if needed
+  apiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL || 'https://bgr8-email-server.onrender.com',
   apiKey: import.meta.env.VITE_EMAIL_API_KEY || 'your_api_key_here',
 };
 
@@ -32,18 +32,8 @@ loggers.config.log('🔧 Email Config Debug:', {
   isLocalhost: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 });
 
-// Override for localhost development
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  loggers.config.log('🏠 Localhost detected - forcing local email server URL');
-  emailConfig.apiBaseUrl = 'http://localhost:3001';
-} else if (window.location.hostname.includes('dev') || window.location.hostname.includes('local')) {
-  loggers.config.log('🏠 Development environment detected - forcing local email server URL');
-  emailConfig.apiBaseUrl = 'http://localhost:3001';
-}
-
-// Manual override for development (uncomment to force localhost)
-// emailConfig.apiBaseUrl = 'http://localhost:3001';
-// loggers.config.log('🔧 Manual override: Forcing localhost email server');
+// Note: Always using live email server (https://bgr8-email-server.onrender.com)
+// To use localhost for development, set VITE_EMAIL_API_BASE_URL=http://localhost:3001 in .env.local
 
 // Final debug log
 loggers.config.log('🎯 Final Email Config:', {
