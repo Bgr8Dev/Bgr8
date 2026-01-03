@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaEnvelope, FaPhone, FaLinkedin, FaVideo } from 'react-icons/fa';
+import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaLinkedin, FaVideo } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../types/mentorTypes';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import '../styles/ProfileViewModal.css';
@@ -87,14 +87,6 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
         </div>
         
         <div className="pvm-info-grid">
-          <div className="pvm-info-item">
-            <FaEnvelope className="pvm-info-icon" />
-            <span>{profile.email || 'Not provided'}</span>
-          </div>
-          <div className="pvm-info-item">
-            <FaPhone className="pvm-info-icon" />
-            <span>{profile.phone || 'Not provided'}</span>
-          </div>
           <div className="pvm-info-item">
             <FaMapMarkerAlt className="pvm-info-icon" />
             <span>{profile.county || 'Location not specified'}</span>

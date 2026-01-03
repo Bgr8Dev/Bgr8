@@ -174,24 +174,30 @@ export default function MentorProfile() {
                     <p className="mentor-profile-value">{profile.firstName || 'no name provided'} {profile.lastName || ''}</p>
                   )}
                 </div>
-                <div className="mentor-profile-field">
-                  <label>Email</label>
-                  <p className="mentor-profile-value">{profile.email}</p>
-                </div>
-                <div className="mentor-profile-field">
-                  <label>Phone</label>
-                  {isEditing ? (
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={profile.phone || ''}
-                      onChange={handleChange}
-                      required
-                    />
-                  ) : (
-                    <p className="mentor-profile-value">{profile.phone}</p>
-                  )}
-                </div>
+                {isEditing && (
+                  <>
+                    <div className="mentor-profile-field">
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={profile.email || ''}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="mentor-profile-field">
+                      <label>Phone</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={profile.phone || ''}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
                 <div className="mentor-profile-field">
                   <label>Age</label>
                   {isEditing ? (

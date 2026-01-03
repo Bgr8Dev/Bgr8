@@ -133,10 +133,6 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
             <div className="profile-card-content">
               <div className="profile-details">
                 <div className="detail-item">
-                  <span className="detail-label">Email:</span>
-                  <span className="detail-value">{currentUserProfile.email || 'Not provided'}</span>
-                </div>
-                <div className="detail-item">
                   <span className="detail-label">Industry:</span>
                   <span className="detail-value">{(currentUserProfile.industry  || 'Not specified') as string}</span>
                 </div>

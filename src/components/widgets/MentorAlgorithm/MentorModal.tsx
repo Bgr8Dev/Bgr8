@@ -83,38 +83,6 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
             </>
           ) : (
             <>
-              <div
-                className="copyable-field"
-                tabIndex={0}
-                onClick={() => handleCopy(user.email, 'email')}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleCopy(user.email, 'email'); }}
-                title="Click to copy email"
-              >
-                <b>Email:</b> <span className="field-value">{user.email}</span>
-                <button
-                  className="copy-btn"
-                  onClick={e => { e.stopPropagation(); handleCopy(user.email, 'email'); }}
-                  title="Copy email"
-                  type="button"
-                >📋</button>
-                {copiedField === 'email' && <span className="copied-feedback">Copied!</span>}
-              </div>
-              <div
-                className="copyable-field"
-                tabIndex={0}
-                onClick={() => handleCopy(user.phone, 'phone')}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleCopy(user.phone, 'phone'); }}
-                title="Click to copy phone"
-              >
-                <b>Phone:</b> <span className="field-value">{user.phone}</span>
-                <button
-                  className="copy-btn"
-                  onClick={e => { e.stopPropagation(); handleCopy(user.phone, 'phone'); }}
-                  title="Copy phone"
-                  type="button"
-                >📋</button>
-                {copiedField === 'phone' && <span className="copied-feedback">Copied!</span>}
-              </div>
               <div><b>County:</b> <span className="field-value">{user.county}</span></div>
             </>
           )}
