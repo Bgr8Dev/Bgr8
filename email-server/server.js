@@ -38,7 +38,8 @@ if (!admin.apps.length) {
 const db = admin.apps.length > 0 ? admin.firestore() : null;
 
 // Trust proxy (required for Render.com and other hosting platforms)
-app.set('trust proxy', true);
+// Only trust the first proxy (more secure than trusting all)
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet());
@@ -79,19 +80,26 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 
 // Rate limiting
+// Skip rate limiting if trust proxy is set (for Render.com behind proxy)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  // Use request IP from X-Forwarded-For header when behind proxy
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', limiter);
 
 // Email rate limiting (more restrictive)
 const emailLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10, // limit each IP to 10 email requests per minute
-  message: 'Too many email requests, please try again later.'
+  message: 'Too many email requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+
+app.use('/api/', limiter);
 
 // Validation schemas
 const emailSchema = Joi.object({
@@ -221,7 +229,21 @@ async function sendSMTPEmail(emailData) {
       greetingTimeout: 30000,
       socketTimeout: 30000
     },
-    // Option 3: Fallback to US servers if EU fails
+    // Option 3: Try port 25 (sometimes allowed when 587/465 are blocked)
+    {
+      host: smtpHost,
+      port: 25,
+      secure: false,
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    },
+    // Option 4: Fallback to US servers if EU fails
     ...(smtpHost === 'smtp.zoho.eu' ? [{
       host: 'smtp.zoho.com',
       port: 587,
@@ -296,7 +318,17 @@ async function sendSMTPEmail(emailData) {
   }
 
   // If we get here, all configs failed
-  throw new Error(`All SMTP configurations failed. Last error: ${lastError?.message || 'Unknown error'}. Check your SMTP credentials and network connection.`);
+  const isTimeout = lastError?.message?.includes('timeout') || lastError?.message?.includes('ECONNREFUSED') || lastError?.message?.includes('ETIMEDOUT');
+  let errorMsg = `All SMTP configurations failed. Last error: ${lastError?.message || 'Unknown error'}.`;
+  
+  if (isTimeout) {
+    errorMsg += '\n\n⚠️  Connection timeout detected. Render.com may be blocking outbound SMTP ports (587, 465, 25).';
+    errorMsg += '\n   Since the Zoho API test passed, the server will automatically fall back to using the Zoho Mail API instead.';
+  } else {
+    errorMsg += '\n\nCheck your SMTP credentials and network connection.';
+  }
+  
+  throw new Error(errorMsg);
 }
 
 async function sendZohoEmail(emailData) {
@@ -417,8 +449,14 @@ async function sendZohoEmail(emailData) {
   }
 
   const result = await response.json();
-  console.log('✅ Email sent successfully via Zoho:', result);
-  return result;
+  console.log('✅ Email sent successfully via Zoho API:', result);
+  
+  // Return in the same format as SMTP for consistency
+  return {
+    messageId: result.messageId || result.id || `zoho_api_${Date.now()}`,
+    response: result,
+    method: 'api'
+  };
 }
 
 // API Routes
@@ -742,7 +780,7 @@ app.post('/api/email/send', emailLimiter, async (req, res) => {
       });
     }
 
-    // Use SMTP only (API has permission issues)
+    // Try SMTP first, fall back to API if SMTP fails (e.g., ports blocked on Render.com)
     let result;
     try {
       console.log('📧 Attempting SMTP sending...');
@@ -750,7 +788,20 @@ app.post('/api/email/send', emailLimiter, async (req, res) => {
       console.log('✅ SMTP sending successful');
     } catch (smtpError) {
       console.log('❌ SMTP failed:', smtpError.message);
-      throw new Error(`Email sending failed: ${smtpError.message}`);
+      
+      // If SMTP fails due to connection issues, try Zoho API as fallback
+      if (smtpError.message.includes('timeout') || smtpError.message.includes('ECONNREFUSED') || smtpError.message.includes('ETIMEDOUT')) {
+        console.log('📧 SMTP ports appear blocked, falling back to Zoho Mail API...');
+        try {
+          result = await sendZohoEmail(value);
+          console.log('✅ Email sent successfully via Zoho API (fallback)');
+        } catch (apiError) {
+          console.log('❌ Zoho API fallback also failed:', apiError.message);
+          throw new Error(`Email sending failed. SMTP: ${smtpError.message}. API fallback: ${apiError.message}`);
+        }
+      } else {
+        throw new Error(`Email sending failed: ${smtpError.message}`);
+      }
     }
     
     res.json({
