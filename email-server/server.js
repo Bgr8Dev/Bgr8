@@ -501,13 +501,14 @@ app.get('/api/zoho-test', async (req, res) => {
         
         res.json({
           success: true,
-          message: 'Zoho API is working! The issue is with the email sending endpoint.',
+          message: 'Zoho API is working! Your server uses SMTP for sending emails (which is more reliable and doesn\'t require API URL rules).',
           accountData: accountData,
+          note: 'The "Email Sending" test uses SMTP, not the API, so it will work regardless of API URL rules configuration.',
           nextSteps: [
-            '1. Check if your Zoho Mail account has API access enabled',
+            '1. Your email sending should work fine with SMTP',
             '2. Verify the sender email (info@bgr8.uk) is verified in Zoho',
             '3. Check if your domain has proper DNS records (SPF, DKIM)',
-            '4. Ensure the Zoho app has email sending permissions'
+            '4. Test the "Email Sending" button to verify SMTP is working'
           ]
         });
       } else {
@@ -549,14 +550,23 @@ app.get('/api/zoho-test', async (req, res) => {
           const description = parsedError.status?.description || accountResponse.statusText;
           
           if (errorCode === 'URL_RULE_NOT_CONFIGURED') {
-            errorMessage = 'Zoho Mail API URL rules not configured';
+            errorMessage = 'Zoho Mail API requires URL rules configuration (or use SMTP instead)';
             nextSteps = [
-              '1. Log in to Zoho Mail Admin Console (https://mailadmin.zoho.com)',
-              '2. Navigate to Settings → API → URL Rules',
-              '3. Add a new URL rule for your API endpoint',
-              '4. Allow the endpoint: https://mail.zoho.com/api/accounts/self',
-              '5. Save the configuration and try again',
-              '6. If URL Rules section is not visible, contact Zoho support to enable API access for your account'
+              'OPTION 1 - Use SMTP (Recommended, no URL rules needed):',
+              '  • Your server already uses SMTP for sending emails',
+              '  • SMTP does NOT require URL rules configuration',
+              '  • The "Email Sending" test will work with SMTP',
+              '  • You can ignore this API test if you\'re using SMTP',
+              '',
+              'OPTION 2 - Configure URL Rules (if you need API access):',
+              '  1. Log in to Zoho Mail Admin Console (https://mailadmin.zoho.com or https://mailadmin.zoho.eu)',
+              '  2. Navigate to Settings → API → URL Rules',
+              '  3. Add a new URL rule for your API endpoint',
+              `  4. Allow the endpoint: ${mailApiBase}/accounts/self`,
+              '  5. Save the configuration and try again',
+              '  6. If URL Rules section is not visible, contact Zoho support to enable API access',
+              '',
+              'Note: Most email sending works fine with SMTP without needing API URL rules.'
             ];
           } else if (errorCode === 'INVALID_OAUTH') {
             errorMessage = 'Invalid OAuth credentials';
@@ -585,7 +595,8 @@ app.get('/api/zoho-test', async (req, res) => {
           parsedError: parsedError,
           status: accountResponse.status,
           statusText: accountResponse.statusText,
-          nextSteps: nextSteps
+          nextSteps: nextSteps,
+          note: 'This test checks the Zoho Mail API. Your server uses SMTP for sending emails, which does NOT require URL rules. The "Email Sending" test will work even if this API test fails.'
         });
       }
     } catch (error) {
