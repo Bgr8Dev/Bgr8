@@ -6,12 +6,18 @@ import { VerificationService } from '../../../services/verificationService';
 import { MatchesService, Match } from '../../../services/matchesService';
 import { useAuth } from '../../../hooks/useAuth';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
-import { FaComments, FaUser, FaHeart } from 'react-icons/fa';
+import { FaComments, FaUser, FaHeart, FaSync } from 'react-icons/fa';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import MessagingWidget from '../../../components/widgets/MessagingWidget';
 import CalComSetupModal from '../../../components/widgets/CalComSetup/CalComSetupModal';
+import { CalComService, CalComTokenManager, CalComBookingResponse } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
+import { collection, query, where, getDocs, addDoc, Timestamp } from 'firebase/firestore';
+import { firestore } from '../../../firebase/firebase';
+import { SessionsService } from '../../../services/sessionsService';
+import { getName } from '../types/mentorTypes';
+import { loggers } from '../../../utils/logger';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -61,6 +67,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   // Cal.com setup state
   const [showCalComSetup, setShowCalComSetup] = useState(false);
   const [calComSetupLoading, setCalComSetupLoading] = useState(true);
+  
+  // Sync bookings state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   // Fetch verification status and check Cal.com setup on component mount
   useEffect(() => {
@@ -94,7 +105,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           setShowCalComSetup(false);
         }
       } catch (error) {
-        console.error('Error fetching verification status:', error);
+        loggers.error.error('Error fetching verification status:', error);
         setVerificationError('Failed to load verification status');
       } finally {
         setVerificationLoading(false);
@@ -115,7 +126,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         const userMatches = await MatchesService.getMatches(currentUser.uid);
         setMatches(userMatches);
       } catch (error) {
-        console.error('Error fetching matches:', error);
+        loggers.error.error('Error fetching matches:', error);
       } finally {
         setMatchesLoading(false);
       }
@@ -139,23 +150,265 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
     onViewAllBookings();
   };
 
+  // Helper function to parse session date safely
+  const parseSessionDate = (sessionDate: string): Date => {
+    if (!sessionDate) return new Date(0); // Return epoch date if missing
+    
+    try {
+      // Try parsing as ISO string first
+      const date = new Date(sessionDate);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+      // Try parsing as date string
+      const date2 = new Date(sessionDate);
+      return isNaN(date2.getTime()) ? new Date(0) : date2;
+    } catch {
+      return new Date(0);
+    }
+  };
+
   // Helper function to get all bookings from the object
   const getAllBookings = (): MentorBooking[] => {
-    return Object.values(mentorBookings).flat();
+    const allBookings = Object.values(mentorBookings).flat();
+    // Filter out bookings with invalid dates and ensure proper formatting
+    return allBookings.filter(booking => {
+      if (!booking.sessionDate) return false;
+      const date = parseSessionDate(booking.sessionDate);
+      return date.getTime() !== 0; // Filter out invalid dates
+    });
   };
 
   // Helper function to get upcoming bookings
   const getUpcomingBookings = (): MentorBooking[] => {
-    return getAllBookings().filter(booking => 
-      new Date(booking.sessionDate) > new Date()
-    );
+    const now = new Date();
+    return getAllBookings().filter(booking => {
+      const bookingDate = parseSessionDate(booking.sessionDate);
+      return bookingDate > now;
+    });
   };
 
   // Helper function to get completed bookings
   const getCompletedBookings = (): MentorBooking[] => {
-    return getAllBookings().filter(booking => 
-      new Date(booking.sessionDate) <= new Date()
-    );
+    const now = new Date();
+    return getAllBookings().filter(booking => {
+      const bookingDate = parseSessionDate(booking.sessionDate);
+      return bookingDate <= now;
+    });
+  };
+
+  // Sync bookings from Cal.com
+  const syncCalComBookings = async () => {
+    if (!currentUser || !currentUserProfile?.uid) {
+      setSyncError('You must be logged in to sync bookings');
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncError(null);
+    setSyncMessage(null);
+
+    try {
+      const mentorId = String(currentUserProfile.uid || currentUserProfile.id || '');
+      
+      // Check if mentor has Cal.com API key
+      const hasApiKey = await CalComTokenManager.hasApiKey(mentorId);
+      if (!hasApiKey) {
+        setSyncError('Cal.com API key not configured. Please set up your Cal.com integration first.');
+        setIsSyncing(false);
+        return;
+      }
+
+      loggers.booking.log('🔄 Starting Cal.com bookings sync...', { mentorId });
+
+      // Fetch bookings from Cal.com (last 90 days to next 90 days)
+      const startDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      const endDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+      
+      const calComBookings = await CalComService.getBookings(
+        mentorId,
+        startDate.toISOString(),
+        endDate.toISOString()
+      );
+
+      loggers.booking.log(`📋 Found ${calComBookings.length} bookings from Cal.com`);
+
+      if (calComBookings.length === 0) {
+        setSyncMessage('No bookings found in Cal.com. All bookings are up to date.');
+        setIsSyncing(false);
+        return;
+      }
+
+      let newBookingsCount = 0;
+      let existingBookingsCount = 0;
+      let errorCount = 0;
+
+      // Process each booking
+      for (const calBooking of calComBookings) {
+        const bookingId = calBooking.id?.toString() || calBooking.uid;
+        if (!bookingId) {
+          loggers.booking.warn('⚠️ Booking missing ID, skipping:', calBooking);
+          continue;
+        }
+
+        try {
+          // Check if booking already exists in Firestore
+          const existingQuery = query(
+            collection(firestore, 'bookings'),
+            where('calComBookingId', '==', bookingId)
+          );
+          const existingSnapshot = await getDocs(existingQuery);
+
+          if (!existingSnapshot.empty) {
+            existingBookingsCount++;
+            continue;
+          }
+
+          // Save new booking to Firebase
+          await saveBookingToFirebase(calBooking, currentUserProfile);
+          newBookingsCount++;
+          loggers.booking.log(`✅ Saved new booking: ${bookingId}`);
+        } catch (error) {
+          errorCount++;
+          loggers.booking.error(`❌ Error saving booking ${bookingId}:`, error);
+        }
+      }
+
+      // Show success message
+      if (newBookingsCount > 0) {
+        setSyncMessage(`Successfully synced ${newBookingsCount} new booking${newBookingsCount > 1 ? 's' : ''} from Cal.com!`);
+        // Refresh the page after a short delay to show updated bookings
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else if (existingBookingsCount > 0) {
+        setSyncMessage(`All ${existingBookingsCount} booking${existingBookingsCount > 1 ? 's' : ''} are already synced.`);
+      } else {
+        setSyncMessage('No new bookings to sync.');
+      }
+
+      if (errorCount > 0) {
+        setSyncError(`${errorCount} booking${errorCount > 1 ? 's' : ''} failed to sync. Please try again.`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      loggers.booking.error('Error syncing Cal.com bookings:', error);
+      setSyncError(`Failed to sync bookings: ${errorMessage}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Save a Cal.com booking to Firebase (similar to CalComModal)
+  const saveBookingToFirebase = async (calBooking: CalComBookingResponse, mentor: MentorMenteeProfile) => {
+    if (!currentUser || !mentor) return;
+
+    try {
+      const startDate = new Date(calBooking.startTime);
+      const endDate = new Date(calBooking.endTime);
+      
+      // Find mentee from attendees (the one who isn't the mentor)
+      const mentee = calBooking.attendees?.find(att => 
+        att.email?.toLowerCase() !== mentor.email?.toLowerCase()
+      ) || calBooking.attendees?.[0];
+
+      // Try to find mentee ID by email
+      let menteeId = currentUser.uid; // Default to current user
+      if (mentee?.email) {
+        try {
+          const usersSnapshot = await getDocs(collection(firestore, 'users'));
+          for (const userDoc of usersSnapshot.docs) {
+            const userData = userDoc.data();
+            if (userData.email?.toLowerCase() === mentee.email.toLowerCase()) {
+              menteeId = userDoc.id;
+              break;
+            }
+          }
+        } catch (error) {
+          loggers.booking.error('Error finding mentee by email:', error);
+        }
+      }
+
+      const mentorId = String(mentor.uid || mentor.id || '');
+      
+      // Extract meeting URL from references
+      let meetingUrl = '';
+      if (calBooking.references && Array.isArray(calBooking.references)) {
+        const videoRef = calBooking.references.find(ref => 
+          ref.type === 'daily_video' && ref.meetingUrl
+        ) || calBooking.references.find(ref => 
+          ref.type === 'zoom_video' && ref.meetingUrl
+        ) || calBooking.references.find(ref => 
+          ref.type === 'google_meet' && ref.meetingUrl
+        ) || calBooking.references.find(ref => 
+          ref.meetingUrl && ref.meetingUrl.trim() !== ''
+        );
+        if (videoRef?.meetingUrl) {
+          meetingUrl = videoRef.meetingUrl;
+        }
+      }
+      if (!meetingUrl && calBooking.metadata?.videoCallUrl) {
+        const metaUrl = calBooking.metadata.videoCallUrl;
+        if (!metaUrl.includes('app.cal.com/video')) {
+          meetingUrl = metaUrl;
+        }
+      }
+      
+      // Create booking data
+      const bookingData = {
+        mentorId: mentorId,
+        menteeId: menteeId,
+        mentorName: getName(mentor),
+        menteeName: mentee?.name || currentUser.displayName || 'Unknown',
+        mentorEmail: String(mentor.email || ''),
+        menteeEmail: mentee?.email || currentUser.email || '',
+        day: startDate.toISOString().split('T')[0],
+        startTime: startDate.toTimeString().split(' ')[0].substring(0, 5),
+        endTime: endDate.toTimeString().split(' ')[0].substring(0, 5),
+        status: calBooking.status === 'ACCEPTED' ? 'confirmed' as const : 
+                calBooking.status === 'PENDING' ? 'pending' as const : 'cancelled' as const,
+        createdAt: Timestamp.now(),
+        sessionDate: Timestamp.fromDate(startDate),
+        sessionStartTime: Timestamp.fromDate(startDate),
+        sessionEndTime: Timestamp.fromDate(endDate),
+        calComBookingId: calBooking.id?.toString() || calBooking.uid,
+        calComBookingUid: calBooking.uid || calBooking.id?.toString(),
+        eventTypeId: calBooking.eventType?.id,
+        eventTypeTitle: calBooking.eventType?.title || '',
+        bookingMethod: 'calcom',
+        isCalComBooking: true,
+        sessionLink: meetingUrl,
+        sessionLocation: calBooking.location || 'Virtual',
+        calComAttendees: calBooking.attendees || []
+      };
+
+      // Save booking to Firestore
+      await addDoc(collection(firestore, 'bookings'), bookingData);
+
+      // Create session
+      try {
+        const sessionData = {
+          bookingId: calBooking.id?.toString() || calBooking.uid,
+          mentorId: mentorId,
+          menteeId: menteeId,
+          sessionDate: Timestamp.fromDate(startDate),
+          startTime: Timestamp.fromDate(startDate),
+          endTime: Timestamp.fromDate(endDate),
+          sessionLink: meetingUrl,
+          sessionLocation: calBooking.location || 'Virtual',
+          status: 'scheduled' as const,
+          feedbackSubmitted_mentor: false,
+          feedbackSubmitted_mentee: false
+        };
+        await SessionsService.createSession(sessionData);
+      } catch (sessionError) {
+        loggers.booking.error('Failed to create session:', sessionError);
+        // Don't throw - booking is already saved
+      }
+    } catch (error) {
+      loggers.booking.error('Error saving booking to Firebase:', error);
+      throw error;
+    }
   };
 
   // Show Cal.com setup if verified but Cal.com not set up
@@ -410,7 +663,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
                           className="match-action-btn profile-btn"
                           onClick={() => {
                             // Could open profile modal here if needed
-                            console.log('View profile:', match.matchedUserId);
+                            loggers.info.log('View profile:', match.matchedUserId);
                           }}
                           title="View profile"
                         >
@@ -436,19 +689,45 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         >
           <div className="bookings-widget-title">
             <h2>Your Bookings</h2>
-            <button 
-              className="minimize-toggle-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleBookingWidget();
-              }}
-              title={isBookingWidgetMinimized ? "Expand widget" : "Minimize widget"}
-            >
-              {isBookingWidgetMinimized ? '▼' : '▲'}
-            </button>
+            <div className="bookings-widget-actions">
+              <button 
+                className="sync-calcom-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  syncCalComBookings();
+                }}
+                disabled={isSyncing}
+                title="Sync bookings from Cal.com"
+              >
+                <FaSync className={isSyncing ? 'spinning' : ''} />
+                {isSyncing ? 'Syncing...' : 'Sync Cal.com'}
+              </button>
+              <button 
+                className="minimize-toggle-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleBookingWidget();
+                }}
+                title={isBookingWidgetMinimized ? "Expand widget" : "Minimize widget"}
+              >
+                {isBookingWidgetMinimized ? '▼' : '▲'}
+              </button>
+            </div>
           </div>
           {!isBookingWidgetMinimized && (
-            <p>Manage and view all your scheduled sessions</p>
+            <>
+              <p>Manage and view all your scheduled sessions</p>
+              {syncMessage && (
+                <div className="sync-message success">
+                  {syncMessage}
+                </div>
+              )}
+              {syncError && (
+                <div className="sync-message error">
+                  {syncError}
+                </div>
+              )}
+            </>
           )}
         </div>
         
@@ -478,37 +757,55 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
             <div className="bookings-list">
               {getAllBookings().length > 0 ? (
                 getAllBookings()
-                  .sort((a: MentorBooking, b: MentorBooking) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime())
+                  .sort((a: MentorBooking, b: MentorBooking) => {
+                    const dateA = parseSessionDate(a.sessionDate);
+                    const dateB = parseSessionDate(b.sessionDate);
+                    return dateA.getTime() - dateB.getTime();
+                  })
                   .slice(0, 5)
-                  .map((booking: MentorBooking, index) => (
-                    <div key={index} className="booking-item">
-                      <div className="booking-info">
-                        <div className="booking-header">
-                          <h4>{booking.menteeName || 'Mentee'}</h4>
-                          <span className={`booking-status ${booking.status || 'pending'}`}>
-                            {booking.status || 'Pending'}
-                          </span>
+                  .map((booking: MentorBooking, index) => {
+                    const bookingDate = parseSessionDate(booking.sessionDate);
+                    const formattedDate = bookingDate.getTime() !== 0 
+                      ? bookingDate.toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })
+                      : 'Date TBD';
+                    
+                    return (
+                      <div key={booking.id || index} className="booking-item">
+                        <div className="booking-info">
+                          <div className="booking-header">
+                            <h4>{booking.menteeName || 'Mentee'}</h4>
+                            <span className={`booking-status ${(booking.status || 'pending').toLowerCase()}`}>
+                              {(booking.status || 'Pending').charAt(0).toUpperCase() + (booking.status || 'Pending').slice(1)}
+                            </span>
+                          </div>
+                          <div className="booking-details">
+                            <span className="booking-date">
+                              {formattedDate}
+                            </span>
+                            <span className="booking-time">
+                              {booking.startTime || 'Time TBD'}
+                            </span>
+                          </div>
                         </div>
-                        <div className="booking-details">
-                          <span className="booking-date">
-                            {new Date(booking.sessionDate).toLocaleDateString()}
-                          </span>
-                          <span className="booking-time">
-                            {booking.startTime || 'Time TBD'}
-                          </span>
+                        <div className="booking-actions">
+                          <button className="booking-action-btn view">View Details</button>
+                          {(booking.status || 'pending').toLowerCase() === 'pending' && (
+                            <button className="booking-action-btn accept">Accept</button>
+                          )}
                         </div>
                       </div>
-                      <div className="booking-actions">
-                        <button className="booking-action-btn view">View Details</button>
-                        {booking.status === 'pending' && (
-                          <button className="booking-action-btn accept">Accept</button>
-                        )}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
               ) : (
                 <div className="no-bookings">
                   <p>No bookings yet. Your scheduled sessions will appear here.</p>
+                  <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
+                    Use the "Sync Cal.com" button above to import bookings from your Cal.com calendar.
+                  </p>
                 </div>
               )}
             </div>

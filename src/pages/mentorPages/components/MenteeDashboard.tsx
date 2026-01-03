@@ -11,7 +11,9 @@ import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import MessagingWidget from '../../../components/widgets/MessagingWidget';
-import { FaComments, FaStar, FaCode } from 'react-icons/fa';
+import { FaComments, FaStar, FaCode, FaSync } from 'react-icons/fa';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { firestore } from '../../../firebase/firebase';
 import { loggers } from '../../../utils/logger';
 
 interface MenteeDashboardProps {
@@ -34,6 +36,20 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
   const [showDeveloperModal, setShowDeveloperModal] = useState(false);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
   const [developerMode, setDeveloperMode] = useState(false);
+  
+  // Bookings state
+  const [bookings, setBookings] = useState<Array<{
+    id: string;
+    mentorName: string;
+    sessionDate: string;
+    startTime: string;
+    status: string;
+    endTime?: string;
+    sessionLink?: string;
+  }>>([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
   
   // Use button-emerge modal hook for booking history
   const { 
@@ -77,7 +93,109 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
 
     loadFeedbackSummary();
     checkDeveloperMode();
-  }, [currentUser, userProfile]);
+    fetchMenteeBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.uid, currentUserProfile?.uid]);
+
+  // Fetch mentee bookings from Firebase
+  const fetchMenteeBookings = async () => {
+    if (!currentUser?.uid) return;
+    
+    try {
+      setLoadingBookings(true);
+      const bookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('menteeId', '==', currentUser.uid)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
+      
+      const fetchedBookings = bookingsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        
+        // Handle Timestamp conversion for sessionDate
+        let sessionDate: string = '';
+        if (data.sessionDate) {
+          if (data.sessionDate.toDate && typeof data.sessionDate.toDate === 'function') {
+            sessionDate = data.sessionDate.toDate().toISOString();
+          } else if (data.sessionDate instanceof Date) {
+            sessionDate = data.sessionDate.toISOString();
+          } else if (typeof data.sessionDate === 'string') {
+            sessionDate = data.sessionDate;
+          } else if (data.sessionDate.seconds) {
+            sessionDate = new Date(data.sessionDate.seconds * 1000).toISOString();
+          }
+        } else if (data.day) {
+          sessionDate = new Date(data.day).toISOString();
+        }
+        
+        return {
+          id: doc.id,
+          mentorName: data.mentorName || 'Unknown Mentor',
+          sessionDate: sessionDate,
+          startTime: data.startTime || '',
+          endTime: data.endTime || '',
+          status: data.status || 'pending',
+          sessionLink: data.sessionLink || data.meetLink || ''
+        };
+      });
+      
+      setBookings(fetchedBookings);
+      loggers.booking.log(`📋 Loaded ${fetchedBookings.length} bookings for mentee ${currentUser.uid}`);
+    } catch (error) {
+      loggers.booking.error('Error fetching mentee bookings:', error);
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  // Refresh bookings
+  const refreshBookings = async () => {
+    setIsRefreshing(true);
+    setRefreshMessage(null);
+    await fetchMenteeBookings();
+    setRefreshMessage('Bookings refreshed successfully!');
+    setIsRefreshing(false);
+    setTimeout(() => setRefreshMessage(null), 3000);
+  };
+
+  // Helper function to parse session date safely
+  const parseSessionDate = (sessionDate: string): Date => {
+    if (!sessionDate) return new Date(0);
+    try {
+      const date = new Date(sessionDate);
+      return isNaN(date.getTime()) ? new Date(0) : date;
+    } catch {
+      return new Date(0);
+    }
+  };
+
+  // Helper functions for booking stats
+  const getAllBookings = () => {
+    return bookings.filter(booking => {
+      const date = parseSessionDate(booking.sessionDate);
+      return date.getTime() !== 0;
+    });
+  };
+
+  const getUpcomingBookings = () => {
+    const now = new Date();
+    return getAllBookings().filter(booking => {
+      const bookingDate = parseSessionDate(booking.sessionDate);
+      return bookingDate > now;
+    });
+  };
+
+  const getConfirmedBookings = () => {
+    return getAllBookings().filter(booking => 
+      (booking.status || '').toLowerCase() === 'confirmed'
+    );
+  };
+
+  const getPendingBookings = () => {
+    return getAllBookings().filter(booking => 
+      (booking.status || '').toLowerCase() === 'pending'
+    );
+  };
 
   return (
     <BannerWrapper sectionId="mentee-dashboard" bannerType="element" checkVisibility={true}>
@@ -189,14 +307,40 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
                              <div className="profile-name">Session Bookings</div>
             </div>
             <div className="profile-card-actions">
-                             <button 
-                 className="profile-edit-btn"
-                 onClick={openHistoryModal}
-                 disabled={isAnimating}
-                 data-tooltip="View your booking history"
-               >
-                 {isAnimating ? 'Opening...' : 'View History'}
-               </button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button 
+                  className="sync-calcom-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    refreshBookings();
+                  }}
+                  disabled={isRefreshing}
+                  title="Refresh bookings from database"
+                  style={{ 
+                    background: 'rgba(255, 255, 255, 0.2)', 
+                    color: 'var(--white)', 
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: isRefreshing ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <FaSync className={isRefreshing ? 'spinning' : ''} style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
+                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+                <button 
+                  className="profile-edit-btn"
+                  onClick={openHistoryModal}
+                  disabled={isAnimating}
+                  data-tooltip="View your booking history"
+                >
+                  {isAnimating ? 'Opening...' : 'View History'}
+                </button>
+              </div>
               <button 
                 className="expand-toggle-btn"
                 onClick={() => setIsBookingCardExpanded(!isBookingCardExpanded)}
@@ -210,42 +354,130 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
           {/* Expandable Booking Content */}
           {isBookingCardExpanded && (
             <div className="profile-card-content">
-                             <div className="booking-summary">
-                 <div className="booking-stat">
-                   <span className="stat-number">
-                     📚
-                   </span>
-                   <span className="stat-label">Total Bookings</span>
-                 </div>
-                 <div className="booking-stat">
-                   <span className="stat-number">
-                     ✅
-                   </span>
-                   <span className="stat-label">Confirmed</span>
-                 </div>
-                 <div className="booking-stat">
-                   <span className="stat-number">
-                     ⏳
-                   </span>
-                   <span className="stat-label">Pending</span>
-                 </div>
-               </div>
+              {refreshMessage && (
+                <div className="sync-message success" style={{ marginBottom: '1rem', padding: '0.75rem', borderRadius: '8px', background: 'rgba(76, 175, 80, 0.2)', color: '#4caf50', border: '1px solid rgba(76, 175, 80, 0.3)' }}>
+                  {refreshMessage}
+                </div>
+              )}
               
-              <div className="booking-actions">
-                                 <button 
-                   className="booking-action-btn primary"
-                   onClick={openHistoryModal}
-                   disabled={isAnimating}
-                 >
-                   📊 {isAnimating ? 'Opening...' : 'View Full History'}
-                 </button>
-                <button 
-                  className="booking-action-btn secondary"
-                  onClick={() => {/* TODO: Export booking data */}}
-                >
-                  📥 Export Data
-                </button>
-              </div>
+              {loadingBookings ? (
+                <div className="loading-state">
+                  <div className="loading-spinner"></div>
+                  <p>Loading bookings...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="booking-summary">
+                    <div className="booking-stat">
+                      <span className="stat-number">
+                        {getAllBookings().length}
+                      </span>
+                      <span className="stat-label">Total Bookings</span>
+                    </div>
+                    <div className="booking-stat">
+                      <span className="stat-number">
+                        {getConfirmedBookings().length}
+                      </span>
+                      <span className="stat-label">Confirmed</span>
+                    </div>
+                    <div className="booking-stat">
+                      <span className="stat-number">
+                        {getPendingBookings().length}
+                      </span>
+                      <span className="stat-label">Pending</span>
+                    </div>
+                    <div className="booking-stat">
+                      <span className="stat-number">
+                        {getUpcomingBookings().length}
+                      </span>
+                      <span className="stat-label">Upcoming</span>
+                    </div>
+                  </div>
+                  
+                  {getAllBookings().length > 0 ? (
+                    <div className="bookings-list" style={{ marginTop: '1.5rem' }}>
+                      {getAllBookings()
+                        .sort((a, b) => {
+                          const dateA = parseSessionDate(a.sessionDate);
+                          const dateB = parseSessionDate(b.sessionDate);
+                          return dateA.getTime() - dateB.getTime();
+                        })
+                        .slice(0, 5)
+                        .map((booking) => {
+                          const bookingDate = parseSessionDate(booking.sessionDate);
+                          const formattedDate = bookingDate.getTime() !== 0 
+                            ? bookingDate.toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })
+                            : 'Date TBD';
+                          
+                          return (
+                            <div key={booking.id} className="booking-item" style={{ 
+                              padding: '1rem', 
+                              marginBottom: '0.75rem', 
+                              background: 'var(--white)', 
+                              borderRadius: '8px',
+                              border: '1px solid #e0e0e0'
+                            }}>
+                              <div className="booking-info">
+                                <div className="booking-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>{booking.mentorName}</h4>
+                                  <span className={`booking-status ${(booking.status || 'pending').toLowerCase()}`} style={{
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '12px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '500',
+                                    background: booking.status === 'confirmed' ? '#4caf50' : booking.status === 'pending' ? '#ff9800' : '#f44336',
+                                    color: 'white'
+                                  }}>
+                                    {(booking.status || 'Pending').charAt(0).toUpperCase() + (booking.status || 'Pending').slice(1)}
+                                  </span>
+                                </div>
+                                <div className="booking-details" style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#666' }}>
+                                  <span className="booking-date">
+                                    📅 {formattedDate}
+                                  </span>
+                                  <span className="booking-time">
+                                    🕐 {booking.startTime || 'Time TBD'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  ) : (
+                    <div className="no-bookings" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                      <p>No bookings yet. Your scheduled sessions will appear here.</p>
+                      <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                        Book a session with a mentor to get started!
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="booking-actions" style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem' }}>
+                    <button 
+                      className="booking-action-btn primary"
+                      onClick={openHistoryModal}
+                      disabled={isAnimating}
+                      style={{
+                        flex: 1,
+                        padding: '0.75rem 1.5rem',
+                        background: 'var(--coral-primary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
+                    >
+                      📊 {isAnimating ? 'Opening...' : 'View Full History'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
