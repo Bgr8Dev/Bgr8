@@ -37,6 +37,9 @@ if (!admin.apps.length) {
 
 const db = admin.apps.length > 0 ? admin.firestore() : null;
 
+// Trust proxy (required for Render.com and other hosting platforms)
+app.set('trust proxy', true);
+
 // Middleware
 app.use(helmet());
 
@@ -163,12 +166,25 @@ async function sendSMTPEmail(emailData) {
     contentType: emailData.contentType,
     fromEmail: process.env.ZOHO_FROM_EMAIL
   });
+  // Check all possible password environment variables
+  const smtpPassword = process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD;
+  const smtpEmail = process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk';
+  
   console.log('📧 SMTP credentials check:', {
-    user: process.env.ZOHO_FROM_EMAIL,
-    hasPassword: !!process.env.ZOHO_PASSWORD,
-    passwordLength: process.env.ZOHO_PASSWORD?.length || 0,
-    passwordPreview: process.env.ZOHO_PASSWORD ? process.env.ZOHO_PASSWORD.substring(0, 8) + '...' : 'undefined'
+    user: smtpEmail,
+    hasPassword: !!smtpPassword,
+    passwordLength: smtpPassword?.length || 0,
+    passwordPreview: smtpPassword ? smtpPassword.substring(0, 8) + '...' : 'undefined',
+    envVarsChecked: {
+      ZOHO_SMTP_PASSWORD: !!process.env.ZOHO_SMTP_PASSWORD,
+      ZOHO_APP_PASSWORD: !!process.env.ZOHO_APP_PASSWORD,
+      ZOHO_PASSWORD: !!process.env.ZOHO_PASSWORD
+    }
   });
+  
+  if (!smtpPassword) {
+    throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables (Render.com dashboard → Environment). You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
+  }
 
   // Determine SMTP host based on region
   const smtpHost = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
@@ -183,8 +199,8 @@ async function sendSMTPEmail(emailData) {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
-        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
+        user: smtpEmail,
+        pass: smtpPassword
       },
       tls: { rejectUnauthorized: false },
       connectionTimeout: 30000, // 30 seconds
@@ -197,8 +213,8 @@ async function sendSMTPEmail(emailData) {
       port: 465,
       secure: true,
       auth: {
-        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
-        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
+        user: smtpEmail,
+        pass: smtpPassword
       },
       tls: { rejectUnauthorized: false },
       connectionTimeout: 30000, // 30 seconds
@@ -211,8 +227,8 @@ async function sendSMTPEmail(emailData) {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
-        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
+        user: smtpEmail,
+        pass: smtpPassword
       },
       tls: { rejectUnauthorized: false },
       connectionTimeout: 30000,
@@ -230,8 +246,8 @@ async function sendSMTPEmail(emailData) {
     throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables. You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
   }
 
-  // Email options
-  const fromEmail = process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk';
+  // Email options (smtpEmail already set above)
+  const fromEmail = smtpEmail;
   const mailOptions = {
     from: `"${process.env.ZOHO_FROM_NAME || 'Bgr8 Team'}" <${fromEmail}>`,
     to: emailData.to.join(', '),
