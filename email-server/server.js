@@ -120,7 +120,15 @@ async function getZohoAccessToken() {
     throw new Error('Missing Zoho configuration. Please check ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, and ZOHO_REFRESH_TOKEN environment variables.');
   }
 
-  const response = await fetch('https://accounts.zoho.com/oauth/v2/token', {
+  // Use EU endpoint if ZOHO_REGION is set to 'eu', otherwise try US first
+  const zohoRegion = process.env.ZOHO_REGION || 'auto';
+  let tokenEndpoint = 'https://accounts.zoho.com/oauth/v2/token';
+  
+  if (zohoRegion === 'eu' || zohoRegion === 'EU') {
+    tokenEndpoint = 'https://accounts.zoho.eu/oauth/v2/token';
+  }
+  
+  const response = await fetch(tokenEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -382,8 +390,13 @@ app.get('/api/config-test', async (req, res) => {
       config.accessTokenLength = accessToken ? accessToken.length : 0;
       
       // Test a simple API call to check permissions
+      // Use EU endpoint if region is EU
+      const mailApiBase = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+        ? 'https://mail.zoho.eu/api' 
+        : 'https://mail.zoho.com/api';
+      
       try {
-        const testResponse = await fetch('https://mail.zoho.com/api/accounts/self', {
+        const testResponse = await fetch(`${mailApiBase}/accounts/self`, {
           headers: {
             'Authorization': `Zoho-oauthtoken ${accessToken}`,
           },
@@ -468,8 +481,13 @@ app.get('/api/zoho-test', async (req, res) => {
     }
     
     // Test 1: Check if we can access the account info
+    // Use EU endpoint if region is EU
+    const mailApiBase = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+      ? 'https://mail.zoho.eu/api' 
+      : 'https://mail.zoho.com/api';
+    
     try {
-      const accountResponse = await fetch('https://mail.zoho.com/api/accounts/self', {
+      const accountResponse = await fetch(`${mailApiBase}/accounts/self`, {
         headers: {
           'Authorization': `Zoho-oauthtoken ${accessToken}`,
         },
