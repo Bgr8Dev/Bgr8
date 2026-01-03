@@ -57,20 +57,20 @@ export interface MentorProfile {
 export class VerificationService {
   /**
    * Creates initial verification data for a new mentor
-   * Mentors are now automatically approved upon signup
+   * Mentors start with pending status and require manual verification
    */
   static async createInitialVerification(mentorUid: string): Promise<VerificationData> {
     const verificationData: VerificationData = {
-      status: 'approved',
-      currentStep: 'approved',
+      status: 'pending',
+      currentStep: 'profile_submitted',
       submittedAt: new Date(),
       lastUpdated: new Date(),
       history: [{
         id: `initial_${Date.now()}`,
-        status: 'approved',
-        step: 'approved',
+        status: 'pending',
+        step: 'profile_submitted',
         timestamp: new Date(),
-        notes: 'Your profile has been reviewed'
+        notes: 'Profile submitted for verification'
       }]
     };
 

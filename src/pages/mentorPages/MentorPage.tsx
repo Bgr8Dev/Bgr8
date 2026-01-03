@@ -538,10 +538,10 @@ export default function MentorPage() {
         <div className="loading-spinner">
           <div className="pl">
             <svg className="pl__ring" viewBox="0 0 128 128" width="128" height="128">
-              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray="377" strokeDashoffset="377"></circle>
             </svg>
             <svg className="pl__worm" viewBox="0 0 128 128" width="128" height="128">
-              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeDasharray="377" strokeDashoffset="377"></circle>
             </svg>
           </div>
           <p className="loading-text">Loading...</p>

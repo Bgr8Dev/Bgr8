@@ -7,6 +7,7 @@ import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import MessagingWidget from '../../../components/widgets/MessagingWidget';
+import CalComSetupModal from '../../../components/widgets/CalComSetup/CalComSetupModal';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -53,28 +54,60 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  
+  // Cal.com setup state
+  const [showCalComSetup, setShowCalComSetup] = useState(false);
+  const [calComSetupLoading, setCalComSetupLoading] = useState(true);
 
-  // Fetch verification status on component mount
+  // Fetch verification status and check Cal.com setup on component mount
   useEffect(() => {
     const fetchVerificationStatus = async () => {
       if (!currentUserProfile?.uid) return;
       
       try {
         setVerificationLoading(true);
+        setCalComSetupLoading(true);
         setVerificationError(null);
         
         const verificationData = await VerificationService.getVerificationData(currentUserProfile.uid);
-        setVerificationStatus(verificationData?.status || null);
+        const status = verificationData?.status || null;
+        setVerificationStatus(status);
+        
+        // Only show Cal.com setup if verification status is 'approved' (manually verified)
+        // This ensures Cal.com setup comes AFTER verification, not immediately after signup
+        if (status === 'approved') {
+          // Check if Cal.com is already set up
+          const hasCalCom = currentUserProfile.calCom && 
+                           currentUserProfile.calCom.trim() !== '' &&
+                           currentUserProfile.calCom !== 'Connect your Cal.com public page to enable video call scheduling' &&
+                           !currentUserProfile.calCom.includes('Connect your Cal.com');
+          
+          // Only show setup if verified AND Cal.com not set up
+          if (!hasCalCom) {
+            setShowCalComSetup(true);
+          }
+        } else {
+          // If not approved yet, don't show Cal.com setup
+          setShowCalComSetup(false);
+        }
       } catch (error) {
         console.error('Error fetching verification status:', error);
         setVerificationError('Failed to load verification status');
       } finally {
         setVerificationLoading(false);
+        setCalComSetupLoading(false);
       }
     };
 
     fetchVerificationStatus();
-  }, [currentUserProfile?.uid]);
+  }, [currentUserProfile?.uid, currentUserProfile?.calCom]);
+  
+  // Handle Cal.com setup completion
+  const handleCalComSetupComplete = () => {
+    setShowCalComSetup(false);
+    // Reload the page to refresh the profile data
+    window.location.reload();
+  };
 
   const toggleBookingWidget = () => {
     setIsBookingWidgetMinimized(!isBookingWidgetMinimized);
@@ -102,6 +135,18 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       new Date(booking.sessionDate) <= new Date()
     );
   };
+
+  // Show Cal.com setup if verified but Cal.com not set up
+  if (showCalComSetup && verificationStatus === 'approved' && !calComSetupLoading) {
+    return (
+      <>
+        <CalComSetupModal 
+          isOpen={true} 
+          onComplete={handleCalComSetupComplete}
+        />
+      </>
+    );
+  }
 
   // Show verification status if not approved
   if (verificationLoading) {

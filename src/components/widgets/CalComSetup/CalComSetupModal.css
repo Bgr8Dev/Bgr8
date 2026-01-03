@@ -1,0 +1,451 @@
+.calcom-setup-content {
+  padding: 1.5rem;
+}
+
+/* Override global modal text color rules for Cal.com setup modal */
+/* These need to be more specific than .modal-overlay .modal-content * */
+.modal-overlay .modal-content .calcom-setup-content .calcom-option-btn,
+.modal-overlay .modal-content .calcom-setup-content .calcom-option-btn *,
+.modal-overlay .modal-content .calcom-option-btn,
+.modal-overlay .modal-content .calcom-option-btn * {
+  color: #ffffff !important;
+}
+
+.modal-overlay .modal-content .calcom-setup-content .calcom-instruction-box,
+.modal-overlay .modal-content .calcom-setup-content .calcom-instruction-box *,
+.modal-overlay .modal-content .calcom-instruction-box,
+.modal-overlay .modal-content .calcom-instruction-box * {
+  color: #ffffff !important;
+}
+
+.modal-overlay .modal-content .calcom-setup-content .calcom-instruction-list,
+.modal-overlay .modal-content .calcom-setup-content .calcom-instruction-list li,
+.modal-overlay .modal-content .calcom-instruction-list,
+.modal-overlay .modal-content .calcom-instruction-list li {
+  color: #ffffff !important;
+}
+
+.modal-overlay .modal-content .calcom-setup-content .calcom-tip-box,
+.modal-overlay .modal-content .calcom-setup-content .calcom-tip-box *,
+.modal-overlay .modal-content .calcom-tip-box,
+.modal-overlay .modal-content .calcom-tip-box * {
+  color: #ffffff !important;
+}
+
+/* Progress Bar */
+.calcom-progress-container {
+  margin-bottom: 2rem;
+}
+
+.calcom-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--card-background, #2a2a2a);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.calcom-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color, #ff2a2a) 60%, #a80000 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.calcom-progress-text {
+  text-align: center;
+  color: var(--text-secondary, #e0e0e0);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Tutorial Content */
+.calcom-tutorial-content {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.calcom-tutorial-step {
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calcom-step-icon {
+  font-size: 4rem;
+  color: var(--primary-color, #ff2a2a);
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.calcom-tutorial-step h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text, #fff);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.calcom-step-description {
+  color: var(--text-secondary, #e0e0e0);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  font-size: 1rem;
+}
+
+/* Account Question */
+.calcom-account-question {
+  margin-top: 2rem;
+}
+
+.calcom-question-text {
+  color: var(--text, #fff);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.calcom-account-options {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.calcom-option-btn {
+  flex: 1;
+  min-width: 200px;
+  padding: 1.25rem 1.5rem;
+  background: var(--card-background, #2a2a2a);
+  border: 2px solid var(--input-border, #444);
+  border-radius: 12px;
+  color: #ffffff !important;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.2s;
+}
+
+.calcom-option-btn:hover {
+  border-color: var(--primary-color, #ff2a2a);
+  background: rgba(255, 42, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.calcom-option-btn.selected {
+  background: rgba(255, 42, 42, 0.2);
+  border-color: var(--primary-color, #ff2a2a);
+  color: #ffffff !important;
+}
+
+.calcom-option-btn svg {
+  font-size: 1.2rem;
+  color: #ffffff !important;
+}
+
+.calcom-option-btn.selected svg {
+  color: #ffffff !important;
+}
+
+/* Instruction Box */
+.calcom-instruction-box {
+  background: var(--card-background, #2a2a2a);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  text-align: left;
+  border: 1px solid var(--input-border, #444);
+  color: #ffffff !important;
+}
+
+.calcom-instruction-list {
+  margin: 0 0 1.5rem 0;
+  padding-left: 1.5rem;
+  color: #ffffff !important;
+  line-height: 2;
+}
+
+.calcom-instruction-list li {
+  margin-bottom: 0.75rem;
+  color: #ffffff !important;
+}
+
+.calcom-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(90deg, var(--primary-color, #ff2a2a) 60%, #a80000 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 1rem;
+}
+
+.calcom-action-link:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.calcom-tip-box {
+  background: rgba(255, 42, 42, 0.1);
+  border-left: 3px solid var(--primary-color, #ff2a2a);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  color: #ffffff !important;
+  line-height: 1.6;
+}
+
+.calcom-tip-box strong {
+  color: #ffffff !important;
+}
+
+/* URL Examples */
+.calcom-url-example {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--input-border, #444);
+}
+
+.calcom-url-example p {
+  color: var(--text-secondary, #e0e0e0);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.calcom-url-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.calcom-url-code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: var(--input-background, #1a1a1a);
+  border: 1px solid var(--input-border, #444);
+  border-radius: 8px;
+  color: var(--text, #fff);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 0.5rem;
+}
+
+.calcom-url-code:hover {
+  border-color: var(--primary-color, #ff2a2a);
+  background: rgba(255, 42, 42, 0.05);
+}
+
+.calcom-url-code .copy-icon,
+.calcom-url-code .copied-icon {
+  font-size: 0.85rem;
+  color: var(--primary-color, #ff2a2a);
+  flex-shrink: 0;
+}
+
+.calcom-copied-message {
+  display: block;
+  color: #00ff00;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Step Note */
+.calcom-step-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 42, 42, 0.1);
+  border-radius: 8px;
+  color: var(--text-secondary, #e0e0e0);
+  font-size: 0.9rem;
+}
+
+.calcom-step-note svg {
+  color: var(--primary-color, #ff2a2a);
+  flex-shrink: 0;
+}
+
+/* Error Message */
+.calcom-setup-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 42, 42, 0.1);
+  border: 1px solid #ff2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #ff2a2a;
+}
+
+.calcom-setup-error svg {
+  flex-shrink: 0;
+}
+
+/* Form */
+.calcom-setup-form {
+  margin: 1.5rem 0;
+}
+
+.calcom-setup-input-group {
+  margin-bottom: 1.5rem;
+}
+
+.calcom-setup-input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text, #fff);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.calcom-setup-input-group .required {
+  color: #ff2a2a;
+}
+
+.calcom-setup-input-group input {
+  width: 100%;
+  padding: 0.875rem;
+  border: 1px solid var(--input-border, #444);
+  border-radius: 8px;
+  background: var(--input-background, #1a1a1a);
+  color: var(--text, #fff);
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.calcom-setup-input-group input:focus {
+  outline: none;
+  border-color: var(--primary-color, #ff2a2a);
+}
+
+.calcom-setup-input-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.calcom-setup-hint {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--text-secondary, #d0d0d0);
+  font-size: 0.85rem;
+}
+
+/* Navigation */
+.calcom-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color, #333);
+}
+
+.calcom-nav-btn {
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: none;
+}
+
+.calcom-nav-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.calcom-nav-btn-back {
+  background: transparent;
+  color: var(--text-secondary, #e0e0e0);
+  border: 1px solid var(--input-border, #444);
+}
+
+.calcom-nav-btn-back:hover:not(:disabled) {
+  background: var(--card-background, #2a2a2a);
+  color: var(--text, #fff);
+  border-color: var(--text, #fff);
+}
+
+.calcom-nav-btn-next {
+  background: linear-gradient(90deg, var(--primary-color, #ff2a2a) 60%, #a80000 100%);
+  color: #fff;
+  margin-left: auto;
+}
+
+.calcom-nav-btn-next:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.calcom-nav-btn-complete {
+  background: linear-gradient(90deg, #00ff00 60%, #00cc00 100%);
+  color: #000;
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.calcom-nav-btn-complete:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .calcom-account-options {
+    flex-direction: column;
+  }
+
+  .calcom-option-btn {
+    min-width: 100%;
+  }
+
+  .calcom-navigation {
+    flex-direction: column;
+  }
+
+  .calcom-nav-btn {
+    width: 100%;
+  }
+
+  .calcom-nav-btn-next,
+  .calcom-nav-btn-complete {
+    margin-left: 0;
+  }
+}

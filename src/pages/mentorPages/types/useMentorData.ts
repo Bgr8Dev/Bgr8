@@ -320,10 +320,27 @@ export const useMentorData = () => {
       const user = currentUser;
       if (!user) throw new Error('No authenticated user');
 
-      // Remove undefined values to prevent Firebase errors
-      const cleanProfileData = Object.fromEntries(
-        Object.entries(profileData).filter(([_, value]) => value !== undefined)
-      ) as Partial<MentorMenteeProfile>;
+      // Recursively remove undefined values to prevent Firebase errors
+      const removeUndefined = (obj: unknown): unknown => {
+        if (obj === null || obj === undefined) {
+          return null;
+        }
+        if (Array.isArray(obj)) {
+          return obj.map(removeUndefined).filter(item => item !== undefined);
+        }
+        if (typeof obj === 'object') {
+          const cleaned: Record<string, unknown> = {};
+          for (const [key, value] of Object.entries(obj)) {
+            if (value !== undefined) {
+              cleaned[key] = removeUndefined(value);
+            }
+          }
+          return cleaned;
+        }
+        return obj;
+      };
+
+      const cleanProfileData = removeUndefined(profileData) as Partial<MentorMenteeProfile>;
 
       const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
       const newProfile = {
@@ -334,7 +351,10 @@ export const useMentorData = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      await setDoc(profileRef, newProfile);
+      // Final cleanup to ensure no undefined values
+      const finalProfile = removeUndefined(newProfile);
+
+      await setDoc(profileRef, finalProfile);
       
       // If this is a mentor profile, create initial verification data
       if (profileData.isMentor && profileData.type === 'mentor') {
@@ -368,7 +388,7 @@ export const useMentorData = () => {
 
       // Remove undefined values to prevent Firebase errors
       const cleanProfileData = Object.fromEntries(
-        Object.entries(profileData).filter(([_, value]) => value !== undefined)
+        Object.entries(profileData).filter(([, value]) => value !== undefined)
       ) as Partial<MentorMenteeProfile>;
 
       const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');

@@ -203,11 +203,6 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     // Generate random LinkedIn URL
     const randomLinkedin = `https://linkedin.com/in/${randomFirstName.toLowerCase()}-${randomLastName.toLowerCase()}`;
     
-    // Generate random Cal.com URL (for mentors only)
-    const randomCalCom = selectedRole === MENTOR 
-      ? `https://cal.com/${randomFirstName.toLowerCase()}-${randomLastName.toLowerCase()}`
-      : '';
-    
     return {
       firstName: randomFirstName,
       lastName: randomLastName,
@@ -221,7 +216,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       profession: randomProfession,
       pastProfessions: randomPastProfessions,
       linkedin: randomLinkedin,
-      calCom: randomCalCom,
+      calCom: '',
       skills: randomSkills,
       industries: randomIndustries,
       hobbies: randomHobbies,
@@ -946,26 +941,6 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
               )}
             </div>
           </div>
-
-          {selectedRole === MENTOR && (
-            <div className="prf-form-row">
-              <div className="input-group">
-                <label htmlFor="calCom" className="field-label">
-                  Cal.com Public Page Link
-                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('calCom')} />
-                </label>
-                <input
-                  type="url"
-                  id="calCom"
-                  name="calCom"
-                  value={profileForm.calCom}
-                  onChange={onFormChange}
-                  placeholder="https://cal.com/yourusername"
-                  data-tooltip={getFieldTooltip('calCom')}
-                />
-              </div>
-            </div>
-          )}
 
           {/* Past Professions - Only for Mentors */}
           {selectedRole === MENTOR && (
