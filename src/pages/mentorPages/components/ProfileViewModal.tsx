@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaLinkedin, FaVideo } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaLinkedin, FaVideo, FaCheck, FaCalendarAlt } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../types/mentorTypes';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
+import { useAuth } from '../../../hooks/useAuth';
+import { MatchesService } from '../../../services/matchesService';
 import '../styles/ProfileViewModal.css';
 
 interface ProfileViewModalProps {
@@ -9,15 +11,54 @@ interface ProfileViewModalProps {
   profile: MentorMenteeProfile;
   onClose: () => void;
   currentUserRole?: 'mentor' | 'mentee';
+  onBooking?: (profile: MentorMenteeProfile) => void;
+  onCalCom?: (profile: MentorMenteeProfile) => void;
 }
 
 export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
   isOpen,
   profile,
   onClose,
-  currentUserRole
+  currentUserRole,
+  onBooking,
+  onCalCom
 }) => {
+  const { currentUser } = useAuth();
   const [activeSection, setActiveSection] = useState('personal');
+  const [isMatched, setIsMatched] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
+
+  // Check if already matched
+  useEffect(() => {
+    const checkMatch = async () => {
+      if (!currentUser || !profile.uid) return;
+      try {
+        const matched = await MatchesService.areMatched(currentUser.uid, profile.uid);
+        setIsMatched(matched);
+      } catch (error) {
+        console.error('Error checking match status:', error);
+      }
+    };
+    if (isOpen) {
+      checkMatch();
+    }
+  }, [currentUser, profile.uid, isOpen]);
+
+  // Handle match button click
+  const handleMatch = async () => {
+    if (!currentUser || !profile.uid || isMatching || isMatched) return;
+
+    setIsMatching(true);
+    try {
+      await MatchesService.createMatch(currentUser.uid, profile.uid);
+      setIsMatched(true);
+    } catch (error) {
+      console.error('Error creating match:', error);
+      alert('Failed to create match. Please try again.');
+    } finally {
+      setIsMatching(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -84,6 +125,54 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
               {profile.profession || profile.educationLevel || 'Professional'}
             </p>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="pvm-action-buttons">
+          {!isMatched && currentUserRole === 'mentee' && (
+            <button 
+              className="pvm-action-button match-button"
+              onClick={handleMatch}
+              disabled={isMatching}
+              title="Match with this mentor to start messaging"
+            >
+              <FaHeart />
+              {isMatching ? 'Matching...' : 'Match'}
+            </button>
+          )}
+          
+          {isMatched && (
+            <button 
+              className="pvm-action-button matched-button"
+              disabled
+              title="You are matched with this user"
+            >
+              <FaCheck />
+              Matched
+            </button>
+          )}
+
+          {onBooking && (
+            <button 
+              className="pvm-action-button booking-button"
+              onClick={() => onBooking(profile)}
+              title={currentUserRole === 'mentee' ? 'Book a mentoring session' : 'Connect with this mentee'}
+            >
+              <FaCalendarAlt />
+              {currentUserRole === 'mentee' ? 'Book Session' : 'Connect'}
+            </button>
+          )}
+
+          {onCalCom && profile.calCom && (
+            <button 
+              className="pvm-action-button calcom-button"
+              onClick={() => onCalCom(profile)}
+              title={currentUserRole === 'mentee' ? 'Schedule a video call' : 'Schedule a video call with this mentee'}
+            >
+              <FaVideo />
+              {currentUserRole === 'mentee' ? 'Schedule Call' : 'Video Call'}
+            </button>
+          )}
         </div>
         
         <div className="pvm-info-grid">

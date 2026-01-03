@@ -871,6 +871,8 @@ export default function MentorPage() {
               profile={selectedMentor}
               onClose={handleCloseProfileViewModal}
               currentUserRole={typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentor' ? 'mentor' : typeof currentUserProfile?.type === 'string' && currentUserProfile.type.toLowerCase() === 'mentee' ? 'mentee' : undefined}
+              onBooking={handleBooking}
+              onCalCom={handleCalCom}
             />
           </div>
         </div>

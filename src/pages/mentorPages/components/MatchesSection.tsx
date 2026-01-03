@@ -1,8 +1,10 @@
-import React from 'react';
-import { FaVideo, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaVideo, FaMapMarkerAlt, FaGraduationCap, FaHeart, FaCheck } from 'react-icons/fa';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import { MentorMenteeProfile, MatchResult } from '../types/mentorTypes';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
+import { useAuth } from '../../../hooks/useAuth';
+import { MatchesService } from '../../../services/matchesService';
 import '../styles/MatchesSection.css';
 
 interface MatchesSectionProps {
@@ -20,6 +22,53 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
   onBooking,
   onCalCom
 }) => {
+  const { currentUser } = useAuth();
+  const [matchedUserIds, setMatchedUserIds] = useState<Set<string>>(new Set());
+  const [matchingUserIds, setMatchingUserIds] = useState<Set<string>>(new Set());
+
+  // Check match status for all matches
+  useEffect(() => {
+    const checkMatches = async () => {
+      if (!currentUser) return;
+      
+      const matched = new Set<string>();
+      for (const match of bestMatches) {
+        if (match.user.uid) {
+          try {
+            const isMatched = await MatchesService.areMatched(currentUser.uid, match.user.uid);
+            if (isMatched) {
+              matched.add(match.user.uid);
+            }
+          } catch (error) {
+            console.error('Error checking match status:', error);
+          }
+        }
+      }
+      setMatchedUserIds(matched);
+    };
+
+    checkMatches();
+  }, [currentUser, bestMatches]);
+
+  const handleMatch = async (profile: MentorMenteeProfile) => {
+    if (!currentUser || !profile.uid || matchingUserIds.has(profile.uid) || matchedUserIds.has(profile.uid)) return;
+
+    setMatchingUserIds(prev => new Set(prev).add(profile.uid));
+    try {
+      await MatchesService.createMatch(currentUser.uid, profile.uid);
+      setMatchedUserIds(prev => new Set(prev).add(profile.uid));
+    } catch (error) {
+      console.error('Error creating match:', error);
+      alert('Failed to create match. Please try again.');
+    } finally {
+      setMatchingUserIds(prev => {
+        const next = new Set(prev);
+        next.delete(profile.uid);
+        return next;
+      });
+    }
+  };
+
   if (!currentUserProfile || bestMatches.length === 0) {
     return null;
   }
@@ -147,6 +196,29 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
             </div>
 
             <div className="ms-match-actions">
+              {!matchedUserIds.has(match.user.uid || '') && currentUserProfile?.type === 'mentee' && (
+                <button 
+                  className="ms-action-button match-button"
+                  onClick={() => handleMatch(match.user)}
+                  disabled={matchingUserIds.has(match.user.uid || '')}
+                  title="Match with this mentor to start messaging"
+                >
+                  <FaHeart />
+                  {matchingUserIds.has(match.user.uid || '') ? 'Matching...' : 'Match'}
+                </button>
+              )}
+              
+              {matchedUserIds.has(match.user.uid || '') && (
+                <button 
+                  className="ms-action-button matched-button"
+                  disabled
+                  title="You are matched with this user"
+                >
+                  <FaCheck />
+                  Matched
+                </button>
+              )}
+
               <button 
                 className="ms-action-button primary"
                 onClick={() => onProfileClick(match.user)}

@@ -86,10 +86,16 @@ export class MessagingService {
 
   /**
    * Check if two users are matched
+   * Now checks both algorithm matches and user-initiated matches
    */
   private static async areUsersMatched(userId1: string, userId2: string): Promise<boolean> {
     try {
-      // Get matches for user1
+      // First check user-initiated matches (new system)
+      const { MatchesService } = await import('./matchesService');
+      const isUserMatched = await MatchesService.areMatched(userId1, userId2);
+      if (isUserMatched) return true;
+
+      // Fallback to algorithm matches (legacy)
       const matches1 = await getBestMatchesForUser(userId1);
       const isMatched = matches1.some(match => match.user.uid === userId2);
       
@@ -204,6 +210,17 @@ export class MessagingService {
       type,
       attachments: attachments || []
     });
+
+    // Update match's last message timestamp (if matched)
+    try {
+      const { MatchesService } = await import('./matchesService');
+      await MatchesService.updateLastMessageAt(senderId, recipientId);
+      // Increment unread count for recipient
+      await MatchesService.incrementUnreadCount(recipientId, senderId);
+    } catch (error) {
+      console.error('Error updating match timestamp:', error);
+      // Don't fail the message send if this fails
+    }
 
     // Update conversation with last message
     const conversationRef = doc(firestore, this.CONVERSATIONS_COLLECTION, conversationId);

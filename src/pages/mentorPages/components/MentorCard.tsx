@@ -1,9 +1,11 @@
-import React from 'react';
-import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaCalendarAlt, FaHeart, FaCheck } from 'react-icons/fa';
 import { MentorMenteeProfile, MentorAvailability } from '../types/mentorTypes';
 import MatchStrengthDisplay from '../../../components/widgets/MentorAlgorithm/MatchStrengthDisplay';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
+import { useAuth } from '../../../hooks/useAuth';
+import { MatchesService } from '../../../services/matchesService';
 import '../styles/MentorCard.css';
 
 interface MentorCardProps {
@@ -25,6 +27,40 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   onCalCom,
   matchScore
 }) => {
+  const { currentUser } = useAuth();
+  const [isMatched, setIsMatched] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
+
+  // Check if already matched
+  useEffect(() => {
+    const checkMatch = async () => {
+      if (!currentUser || !mentor.uid) return;
+      try {
+        const matched = await MatchesService.areMatched(currentUser.uid, mentor.uid);
+        setIsMatched(matched);
+      } catch (error) {
+        console.error('Error checking match status:', error);
+      }
+    };
+    checkMatch();
+  }, [currentUser, mentor.uid]);
+
+  // Handle match button click
+  const handleMatchClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUser || !mentor.uid || isMatching || isMatched) return;
+
+    setIsMatching(true);
+    try {
+      await MatchesService.createMatch(currentUser.uid, mentor.uid);
+      setIsMatched(true);
+    } catch (error) {
+      console.error('Error creating match:', error);
+      alert('Failed to create match. Please try again.');
+    } finally {
+      setIsMatching(false);
+    }
+  };
   // Helper function to get the best available name
   const getDisplayName = () => {
     // First try to construct from firstName + lastName
@@ -208,6 +244,31 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       </div>
 
       <div className="mc-mentor-actions" onClick={(e) => e.stopPropagation()}>
+        {!isMatched && currentUserRole === 'mentee' && (
+          <button 
+            className="mc-action-button match-button"
+            onClick={handleMatchClick}
+            disabled={isMatching}
+            title="Match with this mentor to start messaging"
+            data-tooltip="Match with this mentor to start messaging"
+          >
+            <FaHeart />
+            {isMatching ? 'Matching...' : 'Match'}
+          </button>
+        )}
+        
+        {isMatched && (
+          <button 
+            className="mc-action-button matched-button"
+            disabled
+            title="You are matched with this user"
+            data-tooltip="You are matched with this user"
+          >
+            <FaCheck />
+            Matched
+          </button>
+        )}
+
         <button 
           className="mc-action-button primary"
           onClick={handleBookingClick}
