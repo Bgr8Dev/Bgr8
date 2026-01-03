@@ -635,6 +635,58 @@
   font-size: 0.9rem;
 }
 
+/* Fix booking time and date text colors for white background in mentee dashboard */
+.profile-card .booking-time,
+.profile-card .booking-date {
+  color: #333 !important;
+  font-weight: 600 !important;
+}
+
+.profile-card .booking-time {
+  padding: 4px 8px;
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-radius: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #1e40af !important;
+}
+
+.profile-card .booking-date {
+  color: #333 !important;
+}
+
+/* Fix booking stat text colors for white background */
+.profile-card .booking-stat .stat-number {
+  color: #333 !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.profile-card .booking-stat .stat-label {
+  color: #666 !important;
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Ensure booking details text is dark */
+.profile-card .booking-details {
+  color: #333 !important;
+}
+
+.profile-card .booking-details span {
+  color: #333 !important;
+}
+
+/* Ensure booking header text is dark */
+.profile-card .booking-header h4 {
+  color: #333 !important;
+}
+
+/* Ensure booking info text is dark */
+.profile-card .booking-info {
+  color: #333 !important;
+}
+
 .booking-actions {
   display: flex;
   gap: 0.5rem;

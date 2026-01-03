@@ -11,10 +11,12 @@ import BannerWrapper from '../../../components/ui/BannerWrapper';
 import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import MessagingWidget from '../../../components/widgets/MessagingWidget';
-import { FaComments, FaStar, FaCode, FaSync } from 'react-icons/fa';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { FaComments, FaStar, FaCode, FaSync, FaUserFriends, FaVideo, FaExternalLinkAlt, FaCalendarAlt, FaClock, FaUser } from 'react-icons/fa';
+import { collection, query, getDocs } from 'firebase/firestore';
 import { firestore } from '../../../firebase/firebase';
 import { loggers } from '../../../utils/logger';
+import { MatchesService, Match } from '../../../services/matchesService';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 
 interface MenteeDashboardProps {
   currentUserProfile: MentorMenteeProfile;
@@ -50,6 +52,11 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
+  
+  // Matched mentors state
+  const [matchedMentors, setMatchedMentors] = useState<Match[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
+  const [isMatchesCardExpanded, setIsMatchesCardExpanded] = useState(false);
   
   // Use button-emerge modal hook for booking history
   const { 
@@ -94,20 +101,147 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
     loadFeedbackSummary();
     checkDeveloperMode();
     fetchMenteeBookings();
+    fetchMatchedMentors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.uid, currentUserProfile?.uid]);
 
-  // Fetch mentee bookings from Firebase
-  const fetchMenteeBookings = async () => {
+  // Fetch matched mentors
+  const fetchMatchedMentors = async () => {
     if (!currentUser?.uid) return;
     
     try {
+      setLoadingMatches(true);
+      const matches = await MatchesService.getMatches(currentUser.uid);
+      // Filter to only show mentors (since mentees can match with mentors)
+      const mentorMatches = matches.filter(match => {
+        // If we have the profile, check if they're a mentor
+        if (match.matchedUserProfile) {
+          return match.matchedUserProfile.isMentor === true;
+        }
+        // Otherwise, assume they're mentors (since mentees match with mentors)
+        return true;
+      });
+      setMatchedMentors(mentorMatches);
+      loggers.info.log(`📋 Loaded ${mentorMatches.length} matched mentors for mentee ${currentUser.uid}`);
+    } catch (error) {
+      loggers.error.error('Error fetching matched mentors:', error);
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
+
+  // Fetch mentee bookings from Firebase
+  const fetchMenteeBookings = async () => {
+    if (!currentUser?.uid) {
+      loggers.booking.warn('No currentUser.uid available for fetching mentee bookings');
+      return;
+    }
+    
+    try {
       setLoadingBookings(true);
-      const bookingsQuery = query(
-        collection(firestore, 'bookings'),
-        where('menteeId', '==', currentUser.uid)
-      );
-      const bookingsSnapshot = await getDocs(bookingsQuery);
+      const userEmail = currentUser.email || '';
+      const userDisplayName = currentUser.displayName || '';
+      const userNameParts = userDisplayName.toLowerCase().split(' ').filter(p => p.length > 0);
+      
+      loggers.booking.log(`🔍 Fetching bookings for mentee: ${currentUser.uid}, email: ${userEmail}, name: ${userDisplayName}`);
+      
+      // Get all bookings and filter in memory (most reliable method)
+      // This handles cases where menteeId/menteeEmail don't match but user is in calComAttendees
+      loggers.booking.log(`🔍 Fetching all bookings to check multiple matching criteria...`);
+      const allBookingsQuery = query(collection(firestore, 'bookings'));
+      const allBookingsSnapshot = await getDocs(allBookingsQuery);
+      
+      loggers.booking.log(`📊 Total bookings in database: ${allBookingsSnapshot.docs.length}`);
+      
+      const matchedBookings: typeof allBookingsSnapshot.docs = [];
+      const matchReasons: string[] = [];
+      
+      allBookingsSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        let isMatch = false;
+        let matchReason = '';
+        
+        // Check 1: menteeId matches
+        if (data.menteeId === currentUser.uid) {
+          isMatch = true;
+          matchReason = 'menteeId';
+        }
+        // Check 2: menteeEmail matches
+        else if (userEmail && data.menteeEmail === userEmail) {
+          isMatch = true;
+          matchReason = 'menteeEmail';
+        }
+        // Check 3: Check calComAttendees array
+        else if (Array.isArray(data.calComAttendees) && data.calComAttendees.length > 0) {
+          const attendeeMatch = data.calComAttendees.some((attendee: { 
+            email?: string; 
+            name?: string; 
+            id?: number | string;
+            user?: { 
+              email?: string; 
+              name?: string; 
+            };
+          }) => {
+            // Match by email
+            if (userEmail && attendee.email && attendee.email.toLowerCase() === userEmail.toLowerCase()) {
+              matchReason = 'calComAttendees.email';
+              return true;
+            }
+            // Match by attendee.user.email (nested email)
+            if (userEmail && attendee.user?.email && attendee.user.email.toLowerCase() === userEmail.toLowerCase()) {
+              matchReason = 'calComAttendees.user.email';
+              return true;
+            }
+            // Match by name (if display name matches)
+            if (userDisplayName && attendee.name) {
+              const attendeeNameLower = attendee.name.toLowerCase();
+              const userDisplayNameLower = userDisplayName.toLowerCase();
+              // Exact match
+              if (attendeeNameLower === userDisplayNameLower) {
+                matchReason = 'calComAttendees.name';
+                return true;
+              }
+              // Partial match (check if all name parts are present)
+              if (userNameParts.length > 0) {
+                const attendeeNameParts = attendeeNameLower.split(' ').filter((p: string) => p.length > 0);
+                const allPartsMatch = userNameParts.every(part => 
+                  attendeeNameParts.some((ap: string) => ap.includes(part) || part.includes(ap))
+                );
+                if (allPartsMatch && attendeeNameParts.length === userNameParts.length) {
+                  matchReason = 'calComAttendees.name.partial';
+                  return true;
+                }
+              }
+            }
+            // Match by attendee.user.name (nested name)
+            if (userDisplayName && attendee.user?.name) {
+              const attendeeUserNameLower = attendee.user.name.toLowerCase();
+              const userDisplayNameLower = userDisplayName.toLowerCase();
+              if (attendeeUserNameLower === userDisplayNameLower) {
+                matchReason = 'calComAttendees.user.name';
+                return true;
+              }
+            }
+            return false;
+          });
+          
+          if (attendeeMatch) {
+            isMatch = true;
+          }
+        }
+        
+        if (isMatch) {
+          matchedBookings.push(doc);
+          matchReasons.push(`${doc.id}: ${matchReason}`);
+        }
+      });
+      
+      loggers.booking.log(`📊 Found ${matchedBookings.length} matching bookings`);
+      if (matchedBookings.length > 0) {
+        loggers.booking.debug('Match reasons:', matchReasons.slice(0, 5)); // Log first 5
+      }
+      
+      const bookingsSnapshot = { docs: matchedBookings };
       
       const fetchedBookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
@@ -140,9 +274,65 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
       });
       
       setBookings(fetchedBookings);
-      loggers.booking.log(`📋 Loaded ${fetchedBookings.length} bookings for mentee ${currentUser.uid}`);
+      loggers.booking.log(`📋 Loaded ${fetchedBookings.length} bookings for mentee ${currentUser.uid} (expected: 16)`);
+      
+      // Log details if count doesn't match
+      if (fetchedBookings.length !== 16) {
+        loggers.booking.warn(`⚠️ Expected 16 bookings but found ${fetchedBookings.length}. Checking booking data...`);
+        loggers.booking.debug('Sample booking data:', bookingsSnapshot.docs[0]?.data());
+      }
     } catch (error) {
       loggers.booking.error('Error fetching mentee bookings:', error);
+      // If query fails due to missing index, try a simpler approach
+      if (error instanceof Error && error.message.includes('index')) {
+        loggers.booking.warn('⚠️ Firestore index missing, trying alternative query method...');
+        try {
+          // Fallback: Get all bookings and filter in memory
+          const allBookingsQuery = query(collection(firestore, 'bookings'));
+          const allBookingsSnapshot = await getDocs(allBookingsQuery);
+          
+          const filteredBookings = allBookingsSnapshot.docs
+            .filter(doc => {
+              const data = doc.data();
+              return data.menteeId === currentUser.uid || 
+                     data.menteeEmail === currentUser.email ||
+                     (Array.isArray(data.calComAttendees) && 
+                      data.calComAttendees.some((att: { email?: string }) => att.email === currentUser.email));
+            })
+            .map(doc => {
+              const data = doc.data();
+              let sessionDate: string = '';
+              if (data.sessionDate) {
+                if (data.sessionDate.toDate && typeof data.sessionDate.toDate === 'function') {
+                  sessionDate = data.sessionDate.toDate().toISOString();
+                } else if (data.sessionDate instanceof Date) {
+                  sessionDate = data.sessionDate.toISOString();
+                } else if (typeof data.sessionDate === 'string') {
+                  sessionDate = data.sessionDate;
+                } else if (data.sessionDate.seconds) {
+                  sessionDate = new Date(data.sessionDate.seconds * 1000).toISOString();
+                }
+              } else if (data.day) {
+                sessionDate = new Date(data.day).toISOString();
+              }
+              
+              return {
+                id: doc.id,
+                mentorName: data.mentorName || 'Unknown Mentor',
+                sessionDate: sessionDate,
+                startTime: data.startTime || '',
+                endTime: data.endTime || '',
+                status: data.status || 'pending',
+                sessionLink: data.sessionLink || data.meetLink || ''
+              };
+            });
+          
+          setBookings(filteredBookings);
+          loggers.booking.log(`📋 Loaded ${filteredBookings.length} bookings using fallback method`);
+        } catch (fallbackError) {
+          loggers.booking.error('Fallback query also failed:', fallbackError);
+        }
+      }
     } finally {
       setLoadingBookings(false);
     }
@@ -369,28 +559,28 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
                 <>
                   <div className="booking-summary">
                     <div className="booking-stat">
-                      <span className="stat-number">
+                      <span className="stat-number" style={{ color: '#333' }}>
                         {getAllBookings().length}
                       </span>
-                      <span className="stat-label">Total Bookings</span>
+                      <span className="stat-label" style={{ color: '#333' }}>Total Bookings</span>
                     </div>
                     <div className="booking-stat">
-                      <span className="stat-number">
+                      <span className="stat-number" style={{ color: '#333' }}>
                         {getConfirmedBookings().length}
                       </span>
-                      <span className="stat-label">Confirmed</span>
+                      <span className="stat-label" style={{ color: '#333' }}>Confirmed</span>
                     </div>
                     <div className="booking-stat">
-                      <span className="stat-number">
+                      <span className="stat-number" style={{ color: '#333' }}>
                         {getPendingBookings().length}
                       </span>
-                      <span className="stat-label">Pending</span>
+                      <span className="stat-label" style={{ color: '#333' }}>Pending</span>
                     </div>
                     <div className="booking-stat">
-                      <span className="stat-number">
+                      <span className="stat-number" style={{ color: '#333' }}>
                         {getUpcomingBookings().length}
                       </span>
-                      <span className="stat-label">Upcoming</span>
+                      <span className="stat-label" style={{ color: '#333' }}>Upcoming</span>
                     </div>
                   </div>
                   
@@ -415,43 +605,141 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
                           
                           return (
                             <div key={booking.id} className="booking-item" style={{ 
-                              padding: '1rem', 
+                              padding: '0.875rem 1rem', 
                               marginBottom: '0.75rem', 
                               background: 'var(--white)', 
                               borderRadius: '8px',
-                              border: '1px solid #e0e0e0'
+                              border: '1px solid #e0e0e0',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.75rem'
                             }}>
-                              <div className="booking-info">
-                                <div className="booking-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>{booking.mentorName}</h4>
-                                  <span className={`booking-status ${(booking.status || 'pending').toLowerCase()}`} style={{
-                                    padding: '0.25rem 0.75rem',
-                                    borderRadius: '12px',
-                                    fontSize: '0.75rem',
-                                    fontWeight: '500',
-                                    background: booking.status === 'confirmed' ? '#4caf50' : booking.status === 'pending' ? '#ff9800' : '#f44336',
-                                    color: 'white'
+                              {/* Header with mentor name and status */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                                  <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, var(--coral-primary) 0%, var(--coral-accent) 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontWeight: '600',
+                                    fontSize: '0.875rem',
+                                    flexShrink: 0
                                   }}>
-                                    {(booking.status || 'Pending').charAt(0).toUpperCase() + (booking.status || 'Pending').slice(1)}
-                                  </span>
+                                    <FaUser />
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <h4 style={{ 
+                                      margin: 0, 
+                                      fontSize: '0.95rem', 
+                                      fontWeight: '600', 
+                                      color: '#333',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis'
+                                    }}>
+                                      {booking.mentorName}
+                                    </h4>
+                                  </div>
                                 </div>
-                                <div className="booking-details" style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#666' }}>
-                                  <span className="booking-date">
-                                    📅 {formattedDate}
-                                  </span>
-                                  <span className="booking-time">
-                                    🕐 {booking.startTime || 'Time TBD'}
-                                  </span>
+                                <span className={`booking-status ${(booking.status || 'pending').toLowerCase()}`} style={{
+                                  padding: '0.35rem 0.75rem',
+                                  borderRadius: '12px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: '600',
+                                  background: booking.status === 'confirmed' ? '#4caf50' : booking.status === 'pending' ? '#ff9800' : '#f44336',
+                                  color: 'white',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px',
+                                  flexShrink: 0,
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {(booking.status || 'Pending').charAt(0).toUpperCase() + (booking.status || 'Pending').slice(1)}
+                                </span>
+                              </div>
+
+                              {/* Date and Time in a compact row */}
+                              <div style={{ 
+                                display: 'flex', 
+                                gap: '1rem', 
+                                alignItems: 'center',
+                                flexWrap: 'wrap'
+                              }}>
+                                <div style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: '0.5rem',
+                                  fontSize: '0.8rem',
+                                  color: '#666'
+                                }}>
+                                  <FaCalendarAlt style={{ fontSize: '0.75rem', color: '#888' }} />
+                                  <span style={{ color: '#333', fontWeight: '500' }}>{formattedDate}</span>
+                                </div>
+                                <div style={{ 
+                                  display: 'inline-flex',
+                                  alignItems: 'center', 
+                                  gap: '0.5rem',
+                                  fontSize: '0.8rem',
+                                  padding: '0.35rem 0.65rem',
+                                  background: 'rgba(59, 130, 246, 0.1)',
+                                  borderRadius: '6px',
+                                  border: '1px solid rgba(59, 130, 246, 0.2)'
+                                }}>
+                                  <FaClock style={{ fontSize: '0.7rem', color: '#3b82f6' }} />
+                                  <span style={{ color: '#1e40af', fontWeight: '600' }}>{booking.startTime || 'Time TBD'}</span>
                                 </div>
                               </div>
+
+                              {/* Meeting Link */}
+                              {booking.sessionLink && (
+                                <a 
+                                  href={booking.sessionLink} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem',
+                                    color: '#3b82f6',
+                                    textDecoration: 'none',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '600',
+                                    padding: '0.6rem 1rem',
+                                    background: 'rgba(59, 130, 246, 0.1)',
+                                    borderRadius: '6px',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    transition: 'all 0.2s ease',
+                                    width: '100%'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                  }}
+                                >
+                                  <FaVideo style={{ fontSize: '0.875rem' }} />
+                                  <span>Join Meeting</span>
+                                  <FaExternalLinkAlt style={{ fontSize: '0.7rem', opacity: 0.7 }} />
+                                </a>
+                              )}
                             </div>
                           );
                         })}
                     </div>
                   ) : (
-                    <div className="no-bookings" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-                      <p>No bookings yet. Your scheduled sessions will appear here.</p>
-                      <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                    <div className="no-bookings" style={{ textAlign: 'center', padding: '2rem', color: '#333' }}>
+                      <p style={{ color: '#333' }}>No bookings yet. Your scheduled sessions will appear here.</p>
+                      <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: '#666' }}>
                         Book a session with a mentor to get started!
                       </p>
                     </div>
@@ -477,6 +765,158 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
                     </button>
                   </div>
                 </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Matched Mentors Card */}
+        <div className="profile-card">
+          <div className="profile-card-header">
+            <div className="profile-info">
+              <div className="profile-role mentee">Mentee</div>
+              <div className="profile-name">Matched Mentors</div>
+            </div>
+            <div className="profile-card-actions">
+              <button 
+                className="expand-toggle-btn"
+                onClick={() => setIsMatchesCardExpanded(!isMatchesCardExpanded)}
+                title={isMatchesCardExpanded ? "Collapse matched mentors" : "Expand matched mentors"}
+              >
+                {isMatchesCardExpanded ? '▼' : '▶'}
+              </button>
+            </div>
+          </div>
+          
+          {/* Expandable Matched Mentors Content */}
+          {isMatchesCardExpanded && (
+            <div className="profile-card-content">
+              {loadingMatches ? (
+                <div className="loading-state">
+                  <div className="loading-spinner"></div>
+                  <p style={{ color: '#333' }}>Loading matched mentors...</p>
+                </div>
+              ) : matchedMentors.length > 0 ? (
+                <>
+                  <div style={{ marginBottom: '1rem', color: '#333' }}>
+                    <p style={{ fontSize: '0.9rem', margin: 0, color: '#666' }}>
+                      You have matched with {matchedMentors.length} mentor{matchedMentors.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  
+                  <div className="bookings-list" style={{ marginTop: '1rem' }}>
+                    {matchedMentors.slice(0, 6).map((match) => {
+                      const mentor = match.matchedUserProfile;
+                      const mentorName = mentor 
+                        ? `${mentor.firstName || ''} ${mentor.lastName || ''}`.trim() || 'Unknown Mentor'
+                        : match.matchedUserName || 'Unknown Mentor';
+                      const mentorIndustry = (mentor && mentor.industry && typeof mentor.industry === 'string') 
+                        ? mentor.industry 
+                        : 'Not specified';
+                      const mentorSkills = (mentor && Array.isArray(mentor.skills)) 
+                        ? mentor.skills.filter((s): s is string => typeof s === 'string')
+                        : [];
+                      const mentorPhotoURL = (mentor && mentor.photoURL && typeof mentor.photoURL === 'string')
+                        ? mentor.photoURL
+                        : undefined;
+                      
+                      return (
+                        <div key={match.id} className="booking-item" style={{ 
+                          padding: '1rem', 
+                          marginBottom: '0.75rem', 
+                          background: 'var(--white)', 
+                          borderRadius: '8px',
+                          border: '1px solid #e0e0e0'
+                        }}>
+                          <div className="booking-info" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ flexShrink: 0 }}>
+                              <ProfilePicture
+                                src={mentorPhotoURL}
+                                alt={mentorName}
+                                size={50}
+                              />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div className="booking-header" style={{ marginBottom: '0.5rem' }}>
+                                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: '#333' }}>
+                                  {mentorName}
+                                </h4>
+                              </div>
+                              <div className="booking-details" style={{ fontSize: '0.875rem', color: '#666' }}>
+                                <div style={{ marginBottom: '0.25rem' }}>
+                                  <strong style={{ color: '#333' }}>Industry:</strong> {mentorIndustry}
+                                </div>
+                                {mentorSkills.length > 0 && (
+                                  <div>
+                                    <strong style={{ color: '#333' }}>Skills:</strong> {mentorSkills.slice(0, 3).join(', ')}
+                                    {mentorSkills.length > 3 && ` +${mentorSkills.length - 3} more`}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              <button 
+                                className="booking-action-btn view"
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  background: 'var(--coral-primary)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.875rem',
+                                  fontWeight: '500'
+                                }}
+                                onClick={() => {
+                                  // Navigate to mentor profile or open messaging
+                                  loggers.info.log('View mentor profile:', match.matchedUserId);
+                                }}
+                              >
+                                View Profile
+                              </button>
+                              <button 
+                                className="booking-action-btn view"
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  background: 'transparent',
+                                  color: 'var(--coral-primary)',
+                                  border: '1px solid var(--coral-primary)',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.875rem',
+                                  fontWeight: '500'
+                                }}
+                                onClick={() => {
+                                  // Open messaging with this mentor
+                                  loggers.info.log('Message mentor:', match.matchedUserId);
+                                }}
+                              >
+                                <FaComments style={{ marginRight: '0.25rem' }} />
+                                Message
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {matchedMentors.length > 6 && (
+                    <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                      <p style={{ color: '#666', fontSize: '0.875rem' }}>
+                        Showing 6 of {matchedMentors.length} matched mentors
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-bookings" style={{ textAlign: 'center', padding: '2rem', color: '#333' }}>
+                  <FaUserFriends style={{ fontSize: '3rem', color: '#ccc', marginBottom: '1rem' }} />
+                  <p style={{ color: '#333', marginBottom: '0.5rem' }}>No matched mentors yet</p>
+                  <p style={{ fontSize: '0.875rem', color: '#666' }}>
+                    Browse mentors and create matches to see them here!
+                  </p>
+                </div>
               )}
             </div>
           )}
