@@ -573,11 +573,65 @@
     </script>
     
     <!-- Google Tag Manager -->
-    <script nonce="csp-nonce-12345">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+    <script nonce="csp-nonce-12345">
+      // Suppress Google Analytics debug logs if analytics logging is disabled
+      (function() {
+        const analyticsLogsEnabled = localStorage.getItem('analytics_logs_enabled') !== 'false' && 
+          (typeof import !== 'undefined' ? import.meta?.env?.VITE_CONSOLE_LOGS_ANALYTICS === 'true' : true);
+        
+        if (!analyticsLogsEnabled) {
+          // Override console methods to filter Google Analytics logs
+          const originalLog = console.log;
+          const originalInfo = console.info;
+          const originalDebug = console.debug;
+          
+          console.log = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('dataLayer') || 
+                message.includes('gtag') || 
+                message.includes('GTAG') ||
+                message.includes('Processing') ||
+                message.includes('Tag fired') ||
+                message.includes('Sending event') ||
+                message.includes('Request parameters') ||
+                message.includes('Event parameters') ||
+                message.includes('Shared parameters') ||
+                message.includes('G-T3M4QVLC02')) {
+              return; // Suppress Google Analytics logs
+            }
+            originalLog.apply(console, args);
+          };
+          
+          console.info = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('dataLayer') || 
+                message.includes('gtag') || 
+                message.includes('GTAG') ||
+                message.includes('G-T3M4QVLC02')) {
+              return; // Suppress Google Analytics logs
+            }
+            originalInfo.apply(console, args);
+          };
+          
+          console.debug = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('dataLayer') || 
+                message.includes('gtag') || 
+                message.includes('GTAG') ||
+                message.includes('G-T3M4QVLC02')) {
+              return; // Suppress Google Analytics logs
+            }
+            originalDebug.apply(console, args);
+          };
+        }
+      })();
+      
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-XXXXXXX');
+    </script>
     
     <!-- =========================================== -->
     <!-- PERFORMANCE MONITORING -->
@@ -587,13 +641,25 @@
      <script nonce="csp-nonce-12345">
        // Web Vitals Monitoring (simplified version)
        function sendToAnalytics(metric) {
+         // Check if analytics logs are enabled
+         const analyticsLogsEnabled = localStorage.getItem('analytics_logs_enabled') !== 'false';
+         
          if (typeof gtag !== 'undefined') {
-           gtag('event', metric.name, {
+           // Suppress debug mode for Google Analytics
+           const config = {
              event_category: 'Web Vitals',
              event_label: metric.id,
              value: Math.round(metric.value),
              non_interaction: true,
-           });
+             debug_mode: false // Disable debug mode
+           };
+           
+           gtag('event', metric.name, config);
+           
+           // Only log if analytics logging is enabled
+           if (analyticsLogsEnabled && typeof window.loggers !== 'undefined' && window.loggers.analytics) {
+             window.loggers.analytics.log('Web Vitals:', metric);
+           }
          }
        }
 
