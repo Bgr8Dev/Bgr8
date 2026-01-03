@@ -5,7 +5,12 @@ import './index.css'
 import './config/consoleConfig'
 // Suppress Google Analytics debug logs if analytics logging is disabled
 import './utils/analyticsSuppression'
+// Initialize automatic booking completion tracking
+import { BookingCompletionService } from './services/bookingCompletionService'
 import App from './App'
+
+// Initialize automatic booking completion tracking
+BookingCompletionService.initializeAutoCompletion();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

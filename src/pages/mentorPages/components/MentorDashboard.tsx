@@ -18,6 +18,7 @@ import { firestore } from '../../../firebase/firebase';
 import { SessionsService } from '../../../services/sessionsService';
 import { getName } from '../types/mentorTypes';
 import { loggers } from '../../../utils/logger';
+import { BookingCompletionService } from '../../../services/bookingCompletionService';
 import '../styles/MentorDashboard.css';
 
 interface MentorBooking {
@@ -274,6 +275,9 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
         }
       }
 
+      // Check for completed bookings after sync
+      await BookingCompletionService.checkAndMarkCompletedBookings();
+      
       // Show success message
       if (newBookingsCount > 0) {
         setSyncMessage(`Successfully synced ${newBookingsCount} new booking${newBookingsCount > 1 ? 's' : ''} from Cal.com!`);

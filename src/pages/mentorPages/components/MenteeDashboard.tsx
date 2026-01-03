@@ -17,6 +17,7 @@ import { firestore } from '../../../firebase/firebase';
 import { loggers } from '../../../utils/logger';
 import { MatchesService, Match } from '../../../services/matchesService';
 import { ProfilePicture } from '../../../components/ui/ProfilePicture';
+import { BookingCompletionService } from '../../../services/bookingCompletionService';
 
 interface MenteeDashboardProps {
   currentUserProfile: MentorMenteeProfile;
@@ -102,6 +103,10 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
     checkDeveloperMode();
     fetchMenteeBookings();
     fetchMatchedMentors();
+    
+    // Check for completed bookings when dashboard loads
+    BookingCompletionService.checkAndMarkCompletedBookings();
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.uid, currentUserProfile?.uid]);
 
@@ -281,6 +286,9 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
         loggers.booking.warn(`⚠️ Expected 16 bookings but found ${fetchedBookings.length}. Checking booking data...`);
         loggers.booking.debug('Sample booking data:', bookingsSnapshot.docs[0]?.data());
       }
+      
+      // Check for completed bookings after fetching
+      BookingCompletionService.checkAndMarkCompletedBookings();
     } catch (error) {
       loggers.booking.error('Error fetching mentee bookings:', error);
       // If query fails due to missing index, try a simpler approach
