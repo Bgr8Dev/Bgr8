@@ -88,9 +88,15 @@ export class MentorFeedbackService {
       }
 
       return eligibleMentors;
-    } catch (error) {
-      console.error('Error fetching mentee feedback eligibility:', error);
-      throw new Error('Failed to fetch feedback eligibility');
+    } catch (error: any) {
+      // Handle missing Firestore index error gracefully
+      if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+        console.warn('Firestore index not yet created for feedback queries. Returning empty results. Please create the index:', error?.message);
+        return []; // Return empty array instead of throwing
+      }
+      // Log other errors but don't throw - return empty array to prevent UI errors
+      console.warn('Error fetching mentee feedback eligibility:', error);
+      return [];
     }
   }
 
@@ -112,8 +118,14 @@ export class MentorFeedbackService {
         pendingFeedback
       };
     } catch (error) {
-      console.error('Error fetching mentee feedback summary:', error);
-      throw new Error('Failed to fetch feedback summary');
+      // Return default summary instead of throwing to prevent UI errors
+      console.warn('Error fetching mentee feedback summary:', error);
+      return {
+        totalCompletedSessions: 0,
+        eligibleForFeedback: [],
+        feedbackSubmitted: 0,
+        pendingFeedback: 0
+      };
     }
   }
 

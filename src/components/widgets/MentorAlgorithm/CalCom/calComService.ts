@@ -27,7 +27,7 @@ export interface CalComBookingRequest {
 
 // Interface for Cal.com booking response
 export interface CalComBookingResponse {
-  id: string;
+  id: string | number;
   uid: string;
   startTime: string;
   endTime: string;
@@ -47,6 +47,18 @@ export interface CalComBookingResponse {
     reason?: string;
   };
   createdAt: string;
+  metadata?: {
+    videoCallUrl?: string;
+    [key: string]: unknown;
+  };
+  references?: Array<{
+    type: string;
+    meetingUrl?: string;
+    meetingId?: string;
+    meetingPassword?: string;
+    [key: string]: unknown;
+  }>;
+  location?: string;
 }
 
 // Interface for Cal.com event types

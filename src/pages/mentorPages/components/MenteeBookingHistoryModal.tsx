@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../firebase/firebase';
 import { Booking } from '../../../types/bookings';
 import { MentorMenteeProfile } from '../types';
@@ -20,7 +20,8 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('all');
 
-  // Fetch mentee's booking history from Firebase
+  // Fetch mentee's Cal.com booking history from Firestore
+  // (Bookings are saved to Firestore via Cal.com polling mechanism)
   useEffect(() => {
     if (!isOpen || !currentUserProfile?.uid) return;
 
@@ -29,11 +30,12 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
         setLoading(true);
         setError(null);
 
+        // Fetch only Cal.com bookings for this mentee
         const bookingsRef = collection(firestore, 'bookings');
         const q = query(
           bookingsRef,
           where('menteeId', '==', currentUserProfile.uid),
-          orderBy('sessionDate', 'desc')
+          where('isCalComBooking', '==', true)
         );
 
         const querySnapshot = await getDocs(q);
@@ -44,15 +46,29 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
           fetchedBookings.push({
             id: doc.id,
             ...data,
-            sessionDate: data.sessionDate || data.day ? Timestamp.fromDate(new Date(data.sessionDate || data.day)) : undefined,
+            sessionDate: data.sessionDate || (data.day ? Timestamp.fromDate(new Date(data.day)) : undefined),
             createdAt: data.createdAt || Timestamp.now()
           } as Booking);
         });
 
+        // Sort by session date (most recent first)
+        fetchedBookings.sort((a, b) => {
+          const dateA = a.sessionDate?.toMillis() || 0;
+          const dateB = b.sessionDate?.toMillis() || 0;
+          return dateB - dateA;
+        });
+
         setBookings(fetchedBookings);
-      } catch (err) {
-        console.error('Error fetching bookings:', err);
-        setError('Failed to load booking history. Please try again.');
+      } catch (err: unknown) {
+        // Handle missing index error gracefully
+        if (err?.code === 'failed-precondition' || err?.message?.includes('index')) {
+          console.warn('Firestore index not yet created for bookings query. Returning empty results.');
+          setBookings([]);
+          setError('Booking history is being set up. Please check back soon or view your bookings in Cal.com.');
+        } else {
+          console.error('Error fetching bookings:', err);
+          setError('Failed to load booking history. Please try again.');
+        }
       } finally {
         setLoading(false);
       }

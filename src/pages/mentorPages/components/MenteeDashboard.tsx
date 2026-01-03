@@ -54,7 +54,15 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
         const summary = await MentorFeedbackService.getMenteeFeedbackSummary(currentUser.uid);
         setFeedbackSummary(summary);
       } catch (error) {
-        console.error('Error loading feedback summary:', error);
+        // Error is already handled gracefully in the service, but log a warning if needed
+        console.warn('Feedback summary unavailable:', error);
+        // Set default empty summary to prevent UI errors
+        setFeedbackSummary({
+          totalCompletedSessions: 0,
+          eligibleForFeedback: [],
+          feedbackSubmitted: 0,
+          pendingFeedback: 0
+        });
       } finally {
         setLoadingFeedback(false);
       }

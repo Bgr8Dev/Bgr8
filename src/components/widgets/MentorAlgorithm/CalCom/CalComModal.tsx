@@ -143,6 +143,25 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
 
       const mentorId = String(mentor.uid || mentor.id || '');
       
+      // Extract meeting URL from references (daily_video, zoom, etc.) or metadata
+      let meetingUrl = '';
+      if (calBooking.references && Array.isArray(calBooking.references)) {
+        // Find daily_video or other video meeting reference
+        const videoRef = calBooking.references.find(ref => 
+          ref.type === 'daily_video' || 
+          ref.type === 'zoom_video' || 
+          ref.type === 'google_meet' ||
+          ref.meetingUrl
+        );
+        if (videoRef?.meetingUrl) {
+          meetingUrl = videoRef.meetingUrl;
+        }
+      }
+      // Fallback to metadata videoCallUrl
+      if (!meetingUrl && calBooking.metadata?.videoCallUrl) {
+        meetingUrl = calBooking.metadata.videoCallUrl;
+      }
+      
       // Create booking data
       const bookingData = {
         mentorId: mentorId,
@@ -166,8 +185,8 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
         eventTypeTitle: calBooking.eventType?.title || '',
         bookingMethod: 'calcom',
         isCalComBooking: true,
-        sessionLink: '', // Cal.com will provide this later
-        sessionLocation: 'Virtual',
+        sessionLink: meetingUrl,
+        sessionLocation: calBooking.location || 'Virtual',
         calComAttendees: calBooking.attendees || []
       };
 
@@ -183,8 +202,8 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
           sessionDate: Timestamp.fromDate(startDate),
           startTime: Timestamp.fromDate(startDate),
           endTime: Timestamp.fromDate(endDate),
-          sessionLink: '',
-          sessionLocation: 'Virtual',
+          sessionLink: meetingUrl,
+          sessionLocation: calBooking.location || 'Virtual',
           status: 'scheduled' as const,
           feedbackSubmitted_mentor: false,
           feedbackSubmitted_mentee: false

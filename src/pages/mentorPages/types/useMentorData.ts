@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { CalComService } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
+import { CalComService, CalComTokenManager } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
 import { getBestMatchesForUser, MatchResult, calculateMatchScore } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { 
   MentorMenteeProfile, 
@@ -236,7 +236,17 @@ export const useMentorData = () => {
   };
 
   const checkMentorAvailability = async (mentor: MentorMenteeProfile) => {
-    if (!mentor.calCom) return false;
+    // Return early if mentor doesn't have Cal.com URL
+    if (!mentor.calCom) {
+      return { available: false, nextSlot: 'No availability' };
+    }
+    
+    // Check if mentor has Cal.com API key before attempting to fetch availability
+    const hasApiKey = await CalComTokenManager.hasApiKey(mentor.uid);
+    if (!hasApiKey) {
+      // Silently skip mentors without API keys - this is expected for mentors who haven't completed setup
+      return { available: false, nextSlot: 'No availability' };
+    }
     
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -265,7 +275,11 @@ export const useMentorData = () => {
       
       return { available: hasAvailabilityToday, nextSlot };
     } catch (error) {
-      console.error('Error checking availability for mentor:', mentor.uid, error);
+      // Only log actual errors (not missing API key errors, which we already handled)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (!errorMessage.includes('No Cal.com API key')) {
+        console.error('Error checking availability for mentor:', mentor.uid, error);
+      }
       return { available: false, nextSlot: 'Unable to check' };
     }
   };
