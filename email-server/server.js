@@ -224,28 +224,10 @@ async function sendSMTPEmail(emailData) {
   let transporter;
   let lastError;
 
-  // Try different SMTP configurations
-  for (const config of smtpConfigs) {
-    try {
-      console.log(`📧 Trying SMTP config: ${config.host}:${config.port} (secure: ${config.secure})`);
-      transporter = nodemailer.createTransport(config);
-      
-      // Test the connection
-      await transporter.verify();
-      console.log(`✅ SMTP connection successful with ${config.host}:${config.port}`);
-      break;
-    } catch (error) {
-      console.log(`❌ SMTP config failed: ${config.host}:${config.port} - ${error.message}`);
-      lastError = error;
-    }
-  }
-
-  if (!transporter) {
-    const hasPassword = !!(process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD);
-    if (!hasPassword) {
-      throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables. You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
-    }
-    throw new Error(`All SMTP configurations failed. Last error: ${lastError?.message || 'Unknown error'}. Check your SMTP credentials and network connection.`);
+  // Check if password is configured
+  const hasPassword = !!(process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD);
+  if (!hasPassword) {
+    throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables. You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
   }
 
   // Email options
@@ -269,17 +251,36 @@ async function sendSMTPEmail(emailData) {
     hasText: !!mailOptions.text
   });
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully via SMTP:', info.messageId);
-    return {
-      messageId: info.messageId,
-      response: info.response
-    };
-  } catch (error) {
-    console.error('❌ SMTP error:', error);
-    throw new Error(`SMTP error: ${error.message}`);
+  // Try each SMTP configuration until one works
+  for (const config of smtpConfigs) {
+    try {
+      console.log(`📧 Trying SMTP config: ${config.host}:${config.port} (secure: ${config.secure})`);
+      transporter = nodemailer.createTransport(config);
+      
+      // Add timeout wrapper for sendMail (45 seconds)
+      const sendMailWithTimeout = Promise.race([
+        transporter.sendMail(mailOptions),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('SMTP sendMail timeout after 45 seconds')), 45000)
+        )
+      ]);
+      
+      const info = await sendMailWithTimeout;
+      console.log(`✅ Email sent successfully via SMTP (${config.host}:${config.port}):`, info.messageId);
+      return {
+        messageId: info.messageId,
+        response: info.response
+      };
+    } catch (error) {
+      console.log(`❌ SMTP config failed (${config.host}:${config.port}):`, error.message);
+      lastError = error;
+      // Continue to next config
+      continue;
+    }
   }
+
+  // If we get here, all configs failed
+  throw new Error(`All SMTP configurations failed. Last error: ${lastError?.message || 'Unknown error'}. Check your SMTP credentials and network connection.`);
 }
 
 async function sendZohoEmail(emailData) {
