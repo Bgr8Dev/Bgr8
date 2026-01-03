@@ -533,6 +533,34 @@
   cursor: not-allowed;
 }
 
+/* GDPR Introductory Message Banner */
+.gdpr-intro-banner {
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: #1e40af;
+}
+
+.gdpr-intro-banner svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.gdpr-intro-banner p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.gdpr-intro-banner strong {
+  font-weight: 600;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .conversation-item {

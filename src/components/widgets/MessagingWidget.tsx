@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaComments, FaPaperPlane, FaSearch, FaPlus, FaCheck, FaCheckDouble, FaEllipsisV } from 'react-icons/fa';
+import { FaComments, FaPaperPlane, FaSearch, FaPlus, FaCheck, FaCheckDouble, FaEllipsisV, FaInfoCircle } from 'react-icons/fa';
 import { Timestamp } from 'firebase/firestore';
 import BannerWrapper from '../ui/BannerWrapper';
 import Modal from '../ui/Modal';
 import { useAuth } from '../../hooks/useAuth';
-import { MessagingService, Message, Conversation } from '../../services/messagingService';
+import { MessagingService, Message, Conversation, GDPR_INTRO_MESSAGE } from '../../services/messagingService';
 import './MessagingWidget.css';
 
 const MessagingWidget: React.FC = () => {
@@ -360,6 +360,16 @@ const MessagingWidget: React.FC = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* GDPR Introductory Message Banner */}
+                {selectedConversation && (
+                  <div className="gdpr-intro-banner">
+                    <FaInfoCircle />
+                    <p>
+                      <strong>Privacy Notice:</strong> {GDPR_INTRO_MESSAGE}
+                    </p>
+                  </div>
+                )}
 
                 <div className="messages-container">
                   <div className="messages-list">

@@ -228,15 +228,12 @@ html, body {
   gap: 12px;
 }
 
-/* 🎯 ENHANCED EXPAND TOGGLE BUTTON - FLOATING ORB STYLE 🎯 */
+/* Expand Toggle Button - Static Gray Arrow on Black Background */
 .expand-toggle-btn {
   position: relative;
-  background: linear-gradient(135deg, 
-    rgba(59, 167, 242, 0.1) 0%, 
-    rgba(255, 255, 255, 0.9) 50%,
-    rgba(59, 167, 242, 0.1) 100%);
-  color: var(--accent);
-  border: 2px solid transparent;
+  background: #000000;
+  color: #808080;
+  border: none;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -244,85 +241,25 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease;
   font-size: 16px;
   font-weight: 700;
-  overflow: hidden;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(59, 167, 242, 0.2),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* Floating particles around the button */
-.expand-toggle-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(59, 167, 242, 0.3) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.6s ease;
-  z-index: -1;
-}
-
-/* Rotating gradient border */
+.expand-toggle-btn::before,
 .expand-toggle-btn::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--accent) 0deg,
-    var(--mentor) 90deg,
-    var(--mentee) 180deg,
-    var(--accent) 270deg,
-    var(--accent) 360deg
-  );
-  animation: rotateBorder 3s linear infinite;
-  z-index: -1;
+  display: none;
 }
 
 .expand-toggle-btn:hover {
-  background: linear-gradient(135deg, 
-    rgba(59, 167, 242, 0.2) 0%, 
-    rgba(255, 255, 255, 1) 50%,
-    rgba(59, 167, 242, 0.2) 100%);
-  color: var(--accent-dark);
-  transform: scale(1.15) rotate(180deg);
-  box-shadow: 
-    0 12px 40px rgba(59, 167, 242, 0.3),
-    0 6px 20px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.expand-toggle-btn:hover::before {
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle, rgba(59, 167, 242, 0.1) 0%, transparent 70%);
+  background: #1a1a1a;
+  color: #a0a0a0;
+  transform: scale(1.1);
 }
 
 .expand-toggle-btn:active {
-  transform: scale(1.05) rotate(180deg);
+  transform: scale(1.05);
   transition: all 0.1s ease;
-}
-
-/* Rotating border animation */
-@keyframes rotateBorder {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 .profile-role {
@@ -2048,9 +1985,9 @@ html, body {
 }
 
 .minimize-toggle-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--white);
+  background: #000000;
+  border: none;
+  color: #808080;
   width: 32px;
   height: 32px;
   border-radius: var(--radius-full);
@@ -2064,7 +2001,8 @@ html, body {
 }
 
 .minimize-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #1a1a1a;
+  color: #a0a0a0;
   transform: scale(1.1);
 }
 
