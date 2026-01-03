@@ -4,10 +4,38 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 const nodemailer = require('nodemailer');
+const admin = require('firebase-admin');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  try {
+    // Initialize with service account if available, otherwise use default credentials
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+    } else if (process.env.FIREBASE_PROJECT_ID) {
+      // Use default credentials (for environments like Google Cloud Run, etc.)
+      admin.initializeApp({
+        projectId: process.env.FIREBASE_PROJECT_ID
+      });
+    } else {
+      console.warn('⚠️  Firebase Admin not initialized - webhook functionality will not work');
+      console.warn('⚠️  Set FIREBASE_SERVICE_ACCOUNT or FIREBASE_PROJECT_ID environment variable');
+    }
+  } catch (error) {
+    console.error('❌ Error initializing Firebase Admin:', error.message);
+    console.warn('⚠️  Webhook functionality will not work without Firebase Admin');
+  }
+}
+
+const db = admin.apps.length > 0 ? admin.firestore() : null;
 
 // Middleware
 app.use(helmet());
@@ -570,6 +598,320 @@ app.get('/api/email/stats', async (req, res) => {
     });
   } catch (error) {
     console.error('Error getting email stats:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Cal.com Webhook endpoint
+// This endpoint receives webhook events from Cal.com when bookings are created
+app.post('/api/webhooks/calcom', async (req, res) => {
+  try {
+    // Verify webhook signature if secret is configured
+    if (process.env.CALCOM_WEBHOOK_SECRET) {
+      const signature = req.headers['calcom-signature'] || req.headers['x-calcom-signature'];
+      if (!signature) {
+        console.warn('⚠️  Cal.com webhook received without signature');
+        // Continue processing but log warning
+      } else {
+        // Verify signature (Cal.com uses HMAC SHA256)
+        const expectedSignature = crypto
+          .createHmac('sha256', process.env.CALCOM_WEBHOOK_SECRET)
+          .update(JSON.stringify(req.body))
+          .digest('hex');
+        
+        if (signature !== expectedSignature) {
+          console.error('❌ Invalid Cal.com webhook signature');
+          return res.status(401).json({
+            success: false,
+            error: 'Invalid signature'
+          });
+        }
+      }
+    }
+
+    const webhookData = req.body;
+    const eventType = webhookData.triggerEvent || webhookData.type || 'BOOKING_CREATED';
+    
+    console.log('📅 Cal.com webhook received:', eventType);
+    console.log('📅 Webhook data:', JSON.stringify(webhookData, null, 2));
+
+    // Only process booking creation events
+    if (eventType !== 'BOOKING_CREATED' && eventType !== 'booking.created') {
+      console.log(`ℹ️  Ignoring webhook event type: ${eventType}`);
+      return res.json({
+        success: true,
+        message: `Event type ${eventType} ignored`
+      });
+    }
+
+    if (!db) {
+      console.error('❌ Firestore not initialized - cannot save booking');
+      return res.status(500).json({
+        success: false,
+        error: 'Database not initialized'
+      });
+    }
+
+    // Extract booking information from webhook
+    const booking = webhookData.payload?.booking || webhookData.booking || webhookData;
+    const organizer = booking.organizer || booking.user || {};
+    const attendees = booking.attendees || [];
+    const eventTypeData = booking.eventType || {};
+
+    // Get organizer's Cal.com username/URL
+    const organizerUsername = organizer.username || organizer.slug || '';
+    const organizerEmail = organizer.email || '';
+    
+    // Find the first attendee (usually the mentee)
+    const attendee = attendees[0] || {};
+    const attendeeEmail = attendee.email || '';
+    const attendeeName = attendee.name || '';
+
+    console.log('📅 Processing booking:', {
+      organizerUsername,
+      organizerEmail,
+      attendeeEmail,
+      attendeeName,
+      bookingId: booking.id || booking.uid
+    });
+
+    // Find mentor by Cal.com URL
+    let mentorId = null;
+    let mentorData = null;
+    
+    try {
+      // Query all users to find mentor with matching Cal.com URL
+      const usersSnapshot = await db.collection('users').get();
+      
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProfileRef = db.collection('users').doc(userDoc.id)
+            .collection('mentorProgram').doc('profile');
+          const mentorProfileDoc = await mentorProfileRef.get();
+          
+          if (mentorProfileDoc.exists()) {
+            const profileData = mentorProfileDoc.data();
+            
+            // Check if this is a mentor and if Cal.com URL matches
+            if ((profileData.isMentor === true || profileData.type === 'mentor') && profileData.calCom) {
+              const calComUrl = profileData.calCom;
+              
+              // Extract username from Cal.com URL
+              let calComUsername = '';
+              try {
+                const url = new URL(calComUrl);
+                const pathParts = url.pathname.split('/').filter(Boolean);
+                calComUsername = pathParts[0] || '';
+              } catch (e) {
+                // If URL parsing fails, try to extract from string
+                const match = calComUrl.match(/cal\.com\/([^\/]+)/i);
+                if (match) calComUsername = match[1];
+              }
+              
+              // Match by username or check if URL contains the username
+              if (calComUsername && (
+                calComUsername.toLowerCase() === organizerUsername.toLowerCase() ||
+                calComUrl.toLowerCase().includes(organizerUsername.toLowerCase())
+              )) {
+                mentorId = userDoc.id;
+                mentorData = profileData;
+                console.log('✅ Found mentor:', mentorId, profileData.firstName, profileData.lastName);
+                break;
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error checking user ${userDoc.id}:`, error.message);
+        }
+      }
+      
+      if (!mentorId) {
+        console.warn('⚠️  Could not find mentor with Cal.com URL matching:', organizerUsername);
+        // Still return success to Cal.com, but log the issue
+        return res.json({
+          success: true,
+          warning: 'Mentor not found - booking not saved to system'
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error finding mentor:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Error finding mentor: ' + error.message
+      });
+    }
+
+    // Find mentee by email
+    let menteeId = null;
+    let menteeData = null;
+    
+    try {
+      if (attendeeEmail) {
+        const usersSnapshot = await db.collection('users').get();
+        
+        for (const userDoc of usersSnapshot.docs) {
+          try {
+            const userData = userDoc.data();
+            
+            // Check if email matches
+            if (userData.email && userData.email.toLowerCase() === attendeeEmail.toLowerCase()) {
+              // Verify this is a mentee
+              const menteeProfileRef = db.collection('users').doc(userDoc.id)
+                .collection('mentorProgram').doc('profile');
+              const menteeProfileDoc = await menteeProfileRef.get();
+              
+              if (menteeProfileDoc.exists()) {
+                const profileData = menteeProfileDoc.data();
+                if (profileData.isMentee === true || profileData.type === 'mentee') {
+                  menteeId = userDoc.id;
+                  menteeData = profileData;
+                  console.log('✅ Found mentee:', menteeId, profileData.firstName, profileData.lastName);
+                  break;
+                }
+              }
+            }
+          } catch (error) {
+            console.error(`Error checking user ${userDoc.id} for mentee:`, error.message);
+          }
+        }
+      }
+      
+      if (!menteeId) {
+        console.warn('⚠️  Could not find mentee with email:', attendeeEmail);
+        // Still create booking but with limited info
+      }
+    } catch (error) {
+      console.error('❌ Error finding mentee:', error);
+      // Continue anyway - we can still save the booking
+    }
+
+    // Extract booking details
+    const startTime = booking.startTime || booking.start || '';
+    const endTime = booking.endTime || booking.end || '';
+    const bookingId = booking.id?.toString() || booking.uid || '';
+    const bookingUid = booking.uid || booking.id?.toString() || '';
+    const eventTypeId = eventTypeData.id || null;
+    const eventTypeTitle = eventTypeData.title || eventTypeData.slug || '';
+
+    // Parse dates
+    const sessionDate = startTime ? new Date(startTime) : new Date();
+    const sessionStartTime = startTime ? new Date(startTime) : new Date();
+    const sessionEndTime = endTime ? new Date(endTime) : new Date();
+
+    // Extract time strings for day/startTime/endTime format
+    const day = sessionDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const startTimeStr = sessionStartTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+    const endTimeStr = sessionEndTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+
+    // Get names
+    const mentorName = mentorData ? 
+      `${mentorData.firstName || ''} ${mentorData.lastName || ''}`.trim() || mentorData.name || 'Unknown' :
+      organizer.name || 'Unknown';
+    const menteeName = menteeData ?
+      `${menteeData.firstName || ''} ${menteeData.lastName || ''}`.trim() || menteeData.name || 'Unknown' :
+      attendeeName || 'Unknown';
+
+    // Check if booking already exists
+    let existingBooking = null;
+    if (bookingId) {
+      try {
+        const bookingsSnapshot = await db.collection('bookings')
+          .where('calComBookingId', '==', bookingId)
+          .limit(1)
+          .get();
+        
+        if (!bookingsSnapshot.empty) {
+          existingBooking = bookingsSnapshot.docs[0];
+          console.log('ℹ️  Booking already exists:', existingBooking.id);
+        }
+      } catch (error) {
+        console.error('Error checking for existing booking:', error);
+      }
+    }
+
+    if (existingBooking) {
+      console.log('ℹ️  Booking already saved, skipping duplicate');
+      return res.json({
+        success: true,
+        message: 'Booking already exists',
+        bookingId: existingBooking.id
+      });
+    }
+
+    // Create booking data
+    const bookingData = {
+      mentorId: mentorId || '',
+      menteeId: menteeId || '',
+      mentorName: mentorName,
+      menteeName: menteeName,
+      mentorEmail: organizerEmail || '',
+      menteeEmail: attendeeEmail || '',
+      day: day,
+      startTime: startTimeStr,
+      endTime: endTimeStr,
+      status: 'confirmed', // Cal.com bookings are confirmed immediately
+      createdAt: admin.firestore.Timestamp.now(),
+      sessionDate: admin.firestore.Timestamp.fromDate(sessionDate),
+      sessionStartTime: admin.firestore.Timestamp.fromDate(sessionStartTime),
+      sessionEndTime: admin.firestore.Timestamp.fromDate(sessionEndTime),
+      calComBookingId: bookingId,
+      calComBookingUid: bookingUid,
+      eventTypeId: eventTypeId,
+      eventTypeTitle: eventTypeTitle,
+      bookingMethod: 'calcom',
+      isCalComBooking: true,
+      sessionLink: booking.locationUrl || booking.videoCallUrl || booking.meetingUrl || '',
+      sessionLocation: booking.location || 'Virtual',
+      calComAttendees: attendees.map(att => ({
+        name: att.name || '',
+        email: att.email || '',
+        timeZone: att.timeZone || ''
+      }))
+    };
+
+    // Save booking to Firestore
+    const bookingRef = await db.collection('bookings').add(bookingData);
+    console.log('✅ Booking saved to Firestore:', bookingRef.id);
+
+    // Create session from booking
+    if (mentorId && menteeId) {
+      try {
+        const sessionData = {
+          bookingId: bookingId,
+          mentorId: mentorId,
+          menteeId: menteeId,
+          sessionDate: admin.firestore.Timestamp.fromDate(sessionDate),
+          startTime: admin.firestore.Timestamp.fromDate(sessionStartTime),
+          endTime: admin.firestore.Timestamp.fromDate(sessionEndTime),
+          sessionLink: bookingData.sessionLink,
+          sessionLocation: bookingData.sessionLocation,
+          status: 'scheduled',
+          feedbackSubmitted_mentor: false,
+          feedbackSubmitted_mentee: false,
+          createdAt: admin.firestore.Timestamp.now(),
+          updatedAt: admin.firestore.Timestamp.now()
+        };
+
+        await db.collection('sessions').add(sessionData);
+        console.log('✅ Session created from booking');
+      } catch (sessionError) {
+        console.error('⚠️  Failed to create session:', sessionError);
+        // Don't fail the webhook if session creation fails
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Booking saved successfully',
+      bookingId: bookingRef.id,
+      calComBookingId: bookingId
+    });
+
+  } catch (error) {
+    console.error('❌ Error processing Cal.com webhook:', error);
     res.status(500).json({
       success: false,
       error: error.message
