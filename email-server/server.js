@@ -756,21 +756,29 @@ app.post('/api/webhooks/calcom', async (req, res) => {
           try {
             const userData = userDoc.data();
             
-            // Check if email matches
+            // Check if email matches (case-insensitive)
             if (userData.email && userData.email.toLowerCase() === attendeeEmail.toLowerCase()) {
-              // Verify this is a mentee
+              // Check profile to see if they're a mentee
               const menteeProfileRef = db.collection('users').doc(userDoc.id)
                 .collection('mentorProgram').doc('profile');
               const menteeProfileDoc = await menteeProfileRef.get();
               
               if (menteeProfileDoc.exists()) {
                 const profileData = menteeProfileDoc.data();
-                if (profileData.isMentee === true || profileData.type === 'mentee') {
+                // Accept if they're a mentee OR if they don't have a profile type set (could be new user)
+                if (profileData.isMentee === true || profileData.type === 'mentee' || (!profileData.isMentor && !profileData.isMentee)) {
                   menteeId = userDoc.id;
                   menteeData = profileData;
-                  console.log('✅ Found mentee:', menteeId, profileData.firstName, profileData.lastName);
+                  console.log('✅ Found mentee:', menteeId, profileData.firstName || profileData.name || 'Unknown');
                   break;
                 }
+              } else {
+                // If no profile exists but email matches, use this user as mentee
+                // This handles cases where the user hasn't completed their profile yet
+                menteeId = userDoc.id;
+                menteeData = { name: userData.displayName || attendeeName || 'Unknown' };
+                console.log('✅ Found user by email (no profile yet):', menteeId);
+                break;
               }
             }
           } catch (error) {
@@ -781,7 +789,8 @@ app.post('/api/webhooks/calcom', async (req, res) => {
       
       if (!menteeId) {
         console.warn('⚠️  Could not find mentee with email:', attendeeEmail);
-        // Still create booking but with limited info
+        console.warn('⚠️  Booking will be saved but may need manual mentee assignment');
+        // Still create booking but with limited info - webhook will save what it can
       }
     } catch (error) {
       console.error('❌ Error finding mentee:', error);
