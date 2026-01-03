@@ -126,9 +126,9 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
     
     // Status breakdown for pie chart
     const statusData = [
-      { name: 'Confirmed', value: confirmedBookings, color: '#00e676' },
-      { name: 'Pending', value: pendingBookings, color: '#ffb300' },
-      { name: 'Cancelled', value: cancelledBookings, color: '#ff4444' }
+      { name: 'Confirmed', value: confirmedBookings, color: '#5b8a7a' },
+      { name: 'Pending', value: pendingBookings, color: '#b8956a' },
+      { name: 'Cancelled', value: cancelledBookings, color: '#8b6f6f' }
     ];
     
     // Recent bookings (last 10)
@@ -164,68 +164,131 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
   }, [bookings]);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2 style={{ color: '#ffb300', marginBottom: 24, fontSize: 28 }}>Booking Analytics Dashboard</h2>
+    <div style={{ padding: '32px', background: '#0f0f0f', minHeight: '100vh' }}>
+      <h2 style={{ color: '#e8e8e8', marginBottom: 32, fontSize: 32, fontWeight: 300, letterSpacing: '0.5px' }}>Booking Analytics Dashboard</h2>
       
       {/* Key Metrics Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(255,179,0,0.3)' }}>
-          <FaCalendarAlt style={{ fontSize: 24, color: '#ffb300', marginBottom: 8 }} />
-          <h3 style={{ color: '#ffb300', fontSize: 16, marginBottom: 4 }}>Total Bookings</h3>
-          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.totalBookings}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          textAlign: 'center', 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+        }}>
+          <FaCalendarAlt style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
+          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Total Bookings</h3>
+          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>{analytics.totalBookings}</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,230,118,0.3)' }}>
-          <FaCheck style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
-          <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Completion Rate</h3>
-          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.completionRate.toFixed(1)}%</p>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          textAlign: 'center', 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <FaCheck style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
+          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Completion Rate</h3>
+          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>{analytics.completionRate.toFixed(1)}%</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,230,118,0.3)' }}>
-          <FaPoundSign style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
-          <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Total Revenue</h3>
-          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>£{analytics.totalRevenue.toFixed(2)}</p>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          textAlign: 'center', 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <FaPoundSign style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
+          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Total Revenue</h3>
+          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>£{analytics.totalRevenue.toFixed(2)}</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,234,255,0.3)' }}>
-          <FaPoundSign style={{ fontSize: 24, color: '#00eaff', marginBottom: 8 }} />
-          <h3 style={{ color: '#00eaff', fontSize: 16, marginBottom: 4 }}>Avg Booking Value</h3>
-          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>£{analytics.averageBookingValue.toFixed(2)}</p>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          textAlign: 'center', 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <FaPoundSign style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
+          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Avg Booking Value</h3>
+          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>£{analytics.averageBookingValue.toFixed(2)}</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(255,179,0,0.3)' }}>
-          <FaUser style={{ fontSize: 24, color: '#ffb300', marginBottom: 8 }} />
-          <h3 style={{ color: '#ffb300', fontSize: 16, marginBottom: 4 }}>Active Mentors</h3>
-          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.uniqueMentors}</p>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          textAlign: 'center', 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <FaUser style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
+          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Active Mentors</h3>
+          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>{analytics.uniqueMentors}</p>
         </div>
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, textAlign: 'center', border: '1px solid rgba(0,230,118,0.3)' }}>
-          <FaUser style={{ fontSize: 24, color: '#00e676', marginBottom: 8 }} />
-          <h3 style={{ color: '#00e676', fontSize: 16, marginBottom: 4 }}>Active Mentees</h3>
-          <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>{analytics.uniqueMentees}</p>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          textAlign: 'center', 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <FaUser style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
+          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Active Mentees</h3>
+          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>{analytics.uniqueMentees}</p>
         </div>
       </div>
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24, marginBottom: 32 }}>
         {/* Monthly Trends Line Chart */}
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(255,179,0,0.3)' }}>
-          <h3 style={{ color: '#ffb300', marginBottom: 16 }}>Monthly Booking Trends</h3>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <h3 style={{ color: '#d0d0d0', marginBottom: 20, fontSize: 16, fontWeight: 400, letterSpacing: '0.5px' }}>Monthly Booking Trends</h3>
           {analytics.monthlyTrends.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={analytics.monthlyTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="month" stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
-                <YAxis stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)' }} />
-                <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,179,0,0.5)', borderRadius: '8px', color: '#fff' }} />
-                <Legend />
-                <Line type="monotone" dataKey="bookings" stroke="#ffb300" strokeWidth={2} name="Total Bookings" />
-                <Line type="monotone" dataKey="confirmed" stroke="#00e676" strokeWidth={2} name="Confirmed" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} />
+                <YAxis stroke="rgba(255,255,255,0.4)" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(15,15,15,0.95)', 
+                    border: '1px solid rgba(255,255,255,0.15)', 
+                    borderRadius: '6px', 
+                    color: '#e8e8e8',
+                    padding: '12px'
+                  }} 
+                />
+                <Legend wrapperStyle={{ color: '#b8b8b8', fontSize: '12px' }} />
+                <Line type="monotone" dataKey="bookings" stroke="#7a9fb5" strokeWidth={2.5} name="Total Bookings" dot={{ fill: '#7a9fb5', r: 3 }} />
+                <Line type="monotone" dataKey="confirmed" stroke="#5b8a7a" strokeWidth={2.5} name="Confirmed" dot={{ fill: '#5b8a7a', r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ textAlign: 'center', color: '#888', padding: 40 }}>No booking data available</div>
+            <div style={{ textAlign: 'center', color: '#666', padding: 60, fontSize: 14 }}>No booking data available</div>
           )}
         </div>
 
         {/* Status Breakdown Pie Chart */}
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(0,230,118,0.3)' }}>
-          <h3 style={{ color: '#00e676', marginBottom: 16 }}>Booking Status</h3>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <h3 style={{ color: '#d0d0d0', marginBottom: 20, fontSize: 16, fontWeight: 400, letterSpacing: '0.5px' }}>Booking Status</h3>
           {analytics.statusData.some(s => s.value > 0) ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -243,52 +306,81 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(0,230,118,0.5)', borderRadius: '8px', color: '#fff' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(15,15,15,0.95)', 
+                    border: '1px solid rgba(255,255,255,0.15)', 
+                    borderRadius: '6px', 
+                    color: '#e8e8e8',
+                    padding: '12px'
+                  }} 
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ textAlign: 'center', color: '#888', padding: 40 }}>No booking data available</div>
+            <div style={{ textAlign: 'center', color: '#666', padding: 60, fontSize: 14 }}>No booking data available</div>
           )}
         </div>
       </div>
 
       {/* Top Mentors Bar Chart */}
       {analytics.topMentors.length > 0 && (
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, marginBottom: 24, border: '1px solid rgba(0,234,255,0.3)' }}>
-          <h3 style={{ color: '#00eaff', marginBottom: 16 }}>Top 10 Mentors by Bookings</h3>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          marginBottom: 32, 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <h3 style={{ color: '#d0d0d0', marginBottom: 20, fontSize: 16, fontWeight: 400, letterSpacing: '0.5px' }}>Top 10 Mentors by Bookings</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={analytics.topMentors.slice(0, 10)}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }} angle={-45} textAnchor="end" height={100} />
-              <YAxis stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.7)' }} />
-              <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(0,234,255,0.5)', borderRadius: '8px', color: '#fff' }} />
-              <Legend />
-              <Bar dataKey="bookings" fill="#00eaff" name="Bookings" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+              <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} angle={-45} textAnchor="end" height={100} />
+              <YAxis stroke="rgba(255,255,255,0.4)" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgba(15,15,15,0.95)', 
+                  border: '1px solid rgba(255,255,255,0.15)', 
+                  borderRadius: '6px', 
+                  color: '#e8e8e8',
+                  padding: '12px'
+                }} 
+              />
+              <Legend wrapperStyle={{ color: '#b8b8b8', fontSize: '12px' }} />
+              <Bar dataKey="bookings" fill="#7a9fb5" name="Bookings" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
 
       {/* Tables Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
         {/* Top Mentors Table */}
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(255,179,0,0.3)' }}>
-          <h3 style={{ color: '#ffb300', marginBottom: 16 }}>Top Mentors</h3>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <h3 style={{ color: '#d0d0d0', marginBottom: 20, fontSize: 16, fontWeight: 400, letterSpacing: '0.5px' }}>Top Mentors</h3>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', color: '#ffb300' }}>Mentor</th>
-                  <th style={{ padding: '12px', textAlign: 'right', color: '#ffb300' }}>Bookings</th>
-                  <th style={{ padding: '12px', textAlign: 'right', color: '#ffb300' }}>Revenue</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentor</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Bookings</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Revenue</th>
                 </tr>
               </thead>
               <tbody>
                 {analytics.topMentors.slice(0, 10).map((mentor, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '12px', color: '#fff' }}>{mentor.name}</td>
-                    <td style={{ padding: '12px', textAlign: 'right', color: '#fff' }}>{mentor.bookings}</td>
-                    <td style={{ padding: '12px', textAlign: 'right', color: '#00e676' }}>£{mentor.revenue.toFixed(2)}</td>
+                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td style={{ padding: '14px 12px', color: '#d8d8d8', fontSize: 14 }}>{mentor.name}</td>
+                    <td style={{ padding: '14px 12px', textAlign: 'right', color: '#d8d8d8', fontSize: 14 }}>{mentor.bookings}</td>
+                    <td style={{ padding: '14px 12px', textAlign: 'right', color: '#5b8a7a', fontSize: 14, fontWeight: 400 }}>£{mentor.revenue.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -297,21 +389,27 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
         </div>
 
         {/* Top Mentees Table */}
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(0,230,118,0.3)' }}>
-          <h3 style={{ color: '#00e676', marginBottom: 16 }}>Top Mentees</h3>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <h3 style={{ color: '#d0d0d0', marginBottom: 20, fontSize: 16, fontWeight: 400, letterSpacing: '0.5px' }}>Top Mentees</h3>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', color: '#00e676' }}>Mentee</th>
-                  <th style={{ padding: '12px', textAlign: 'right', color: '#00e676' }}>Bookings</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentee</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Bookings</th>
                 </tr>
               </thead>
               <tbody>
                 {analytics.topMentees.slice(0, 10).map((mentee, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '12px', color: '#fff' }}>{mentee.name}</td>
-                    <td style={{ padding: '12px', textAlign: 'right', color: '#fff' }}>{mentee.bookings}</td>
+                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td style={{ padding: '14px 12px', color: '#d8d8d8', fontSize: 14 }}>{mentee.name}</td>
+                    <td style={{ padding: '14px 12px', textAlign: 'right', color: '#d8d8d8', fontSize: 14 }}>{mentee.bookings}</td>
                   </tr>
                 ))}
               </tbody>
@@ -322,17 +420,23 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
 
       {/* Recent Bookings Table */}
       {analytics.recentBookings.length > 0 && (
-        <div style={{ background: 'rgba(40,0,0,0.25)', borderRadius: 12, padding: 20, border: '1px solid rgba(0,234,255,0.3)' }}>
-          <h3 style={{ color: '#00eaff', marginBottom: 16 }}>Recent Bookings</h3>
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
+          borderRadius: 8, 
+          padding: 24, 
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          <h3 style={{ color: '#d0d0d0', marginBottom: 20, fontSize: 16, fontWeight: 400, letterSpacing: '0.5px' }}>Recent Bookings</h3>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', color: '#00eaff' }}>Date</th>
-                  <th style={{ padding: '12px', textAlign: 'left', color: '#00eaff' }}>Mentor</th>
-                  <th style={{ padding: '12px', textAlign: 'left', color: '#00eaff' }}>Mentee</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#00eaff' }}>Status</th>
-                  <th style={{ padding: '12px', textAlign: 'right', color: '#00eaff' }}>Revenue</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Date</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentor</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentee</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'center', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Revenue</th>
                 </tr>
               </thead>
               <tbody>
@@ -341,29 +445,33 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
                   const date = booking.sessionDate instanceof Date ? booking.sessionDate :
                               isFirestoreTimestamp(booking.sessionDate) ? booking.sessionDate.toDate() :
                               new Date(booking.sessionDate);
-                  const statusColor = booking.status === 'confirmed' ? '#00e676' :
-                                    booking.status === 'pending' ? '#ffb300' : '#ff4444';
+                  const statusColor = booking.status === 'confirmed' ? '#5b8a7a' :
+                                    booking.status === 'pending' ? '#b8956a' : '#8b6f6f';
+                  const statusTextColor = booking.status === 'confirmed' ? '#e8e8e8' :
+                                         booking.status === 'pending' ? '#e8e8e8' : '#e8e8e8';
                   if (isNaN(date.getTime())) return null;
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '12px', color: '#fff' }}>
+                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td style={{ padding: '14px 12px', color: '#d8d8d8', fontSize: 14 }}>
                         {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
-                      <td style={{ padding: '12px', color: '#fff' }}>{booking.mentorName}</td>
-                      <td style={{ padding: '12px', color: '#fff' }}>{booking.menteeName}</td>
-                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <td style={{ padding: '14px 12px', color: '#d8d8d8', fontSize: 14 }}>{booking.mentorName}</td>
+                      <td style={{ padding: '14px 12px', color: '#d8d8d8', fontSize: 14 }}>{booking.menteeName}</td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center' }}>
                         <span style={{ 
                           background: statusColor, 
-                          color: '#181818', 
-                          padding: '4px 12px', 
-                          borderRadius: '6px', 
-                          fontWeight: 700,
-                          fontSize: '0.85rem'
+                          color: statusTextColor, 
+                          padding: '5px 14px', 
+                          borderRadius: '4px', 
+                          fontWeight: 500,
+                          fontSize: '11px',
+                          letterSpacing: '0.5px',
+                          textTransform: 'uppercase'
                         }}>
-                          {booking.status.toUpperCase()}
+                          {booking.status}
                         </span>
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'right', color: '#00e676' }}>£{(booking.revenue || 0).toFixed(2)}</td>
+                      <td style={{ padding: '14px 12px', textAlign: 'right', color: '#5b8a7a', fontSize: 14, fontWeight: 400 }}>£{(booking.revenue || 0).toFixed(2)}</td>
                     </tr>
                   );
                 })}
