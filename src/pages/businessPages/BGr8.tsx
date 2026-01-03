@@ -29,6 +29,8 @@ export default function BGr8() {
   const [donationType, setDonationType] = useState('monthly');
   const [donationAmount, setDonationAmount] = useState('25');
   const [ambassadorCount, setAmbassadorCount] = useState(500); // Default fallback value
+  const [mentorCount, setMentorCount] = useState(0); // Default fallback value
+  const [menteeCount, setMenteeCount] = useState(0); // Default fallback value
   const [showMentorDef, setShowMentorDef] = useState(false);
   const [showMenteeDef, setShowMenteeDef] = useState(false);
   const [userRole, setUserRole] = useState<'mentor' | 'mentee' | null>(null);
@@ -104,6 +106,53 @@ export default function BGr8() {
 
     // Run this in the background without blocking the UI
     fetchAmbassadorCount();
+  }, []);
+
+  // Fetch mentor and mentee counts (non-blocking)
+  useEffect(() => {
+    const fetchMentorMenteeCounts = async () => {
+      try {
+        const usersCollection = collection(firestore, 'users');
+        const usersSnapshot = await getDocs(usersCollection);
+        
+        let mentors = 0;
+        let mentees = 0;
+        
+        // Check each user's mentorProgram profile
+        for (const userDoc of usersSnapshot.docs) {
+          try {
+            const mentorProgramDoc = await getDoc(
+              doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile')
+            );
+            
+            if (mentorProgramDoc.exists()) {
+              const profileData = mentorProgramDoc.data() as MentorMenteeProfile;
+              
+              // Check if mentor
+              if (profileData.isMentor === true || profileData.type?.toLowerCase() === 'mentor') {
+                mentors++;
+              }
+              // Check if mentee
+              else if (profileData.isMentee === true || profileData.type?.toLowerCase() === 'mentee') {
+                mentees++;
+              }
+            }
+          } catch (error) {
+            // Skip individual user errors, continue with next user
+            console.error(`Error fetching profile for user ${userDoc.id}:`, error);
+          }
+        }
+        
+        setMentorCount(mentors);
+        setMenteeCount(mentees);
+      } catch (error) {
+        console.error('Error fetching mentor/mentee counts:', error);
+        // Keep the default fallback values on error
+      }
+    };
+
+    // Run this in the background without blocking the UI
+    fetchMentorMenteeCounts();
   }, []);
 
   const navigateToMentors = () => {
@@ -433,11 +482,11 @@ export default function BGr8() {
                 <div className="bgr8-stat-label">Schools Visited</div>
               </div>
               <div className="bgr8-stat-card">
-                <div className="bgr8-stat-number">100+</div>
+                <div className="bgr8-stat-number">{mentorCount}+</div>
                 <div className="bgr8-stat-label">Mentors</div>
               </div>
               <div className="bgr8-stat-card">
-                <div className="bgr8-stat-number">100+</div>
+                <div className="bgr8-stat-number">{menteeCount}+</div>
                 <div className="bgr8-stat-label">Mentees</div>
               </div>
             </div>
