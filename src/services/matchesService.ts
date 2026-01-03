@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { MentorMenteeProfile } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { loggers } from '../utils/logger';
 
 export interface Match {
   id: string;
@@ -249,7 +250,7 @@ export class MatchesService {
           matchedUserProfile = profileDoc.data() as MentorMenteeProfile;
         }
       } catch (error) {
-        console.error('Error fetching matched user profile:', error);
+        loggers.error.error('Error fetching matched user profile:', error);
       }
 
       matches.push({

@@ -8,6 +8,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { UserProfile, hasRole } from '../utils/userProfile';
+import { loggers } from '../utils/logger';
 
 export interface DeveloperMentor {
   mentorId: string;
@@ -44,7 +45,7 @@ export class DeveloperFeedbackService {
       const usersSnapshot = await getDocs(usersQuery);
       const mentors: DeveloperMentor[] = [];
       
-      console.log(`DeveloperFeedbackService: Found ${usersSnapshot.docs.length} users to check`);
+      loggers.debug.debug(`DeveloperFeedbackService: Found ${usersSnapshot.docs.length} users to check`);
 
       for (const userDoc of usersSnapshot.docs) {
         try {
@@ -53,7 +54,7 @@ export class DeveloperFeedbackService {
           
           if (mentorProgramDoc.exists()) {
             const mentorData = mentorProgramDoc.data();
-            console.log(`DeveloperFeedbackService: Checking user ${userDoc.id}, profile type: ${mentorData.type}, isMentor: ${mentorData.isMentor}`);
+            loggers.debug.debug(`DeveloperFeedbackService: Checking user ${userDoc.id}, profile type: ${mentorData.type}, isMentor: ${mentorData.isMentor}`);
             
             // Check if this is a mentor profile
             if (mentorData.type === 'mentor' || mentorData.isMentor === true) {

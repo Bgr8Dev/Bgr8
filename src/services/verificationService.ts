@@ -25,6 +25,7 @@ import {
   VerificationHistory,
   canAccessPlatform
 } from '../types/verification';
+import { loggers } from '../utils/logger';
 
 export interface MentorProfile {
   uid: string;
@@ -148,10 +149,10 @@ export class VerificationService {
         null
     };
 
-    console.log('Original verification data:', currentVerification);
-    console.log('Safe verification data:', safeVerification);
-    console.log('Safe verification keys:', Object.keys(safeVerification));
-    console.log('Safe verification values:', Object.values(safeVerification));
+    loggers.config.debug('Original verification data:', currentVerification);
+    loggers.config.debug('Safe verification data:', safeVerification);
+    loggers.config.debug('Safe verification keys:', Object.keys(safeVerification));
+    loggers.config.debug('Safe verification values:', Object.values(safeVerification));
 
     // Create new history entry
     const historyEntry: VerificationHistory = {
@@ -222,7 +223,7 @@ export class VerificationService {
     };
 
     const cleanedVerification = cleanVerification(updatedVerification);
-    console.log('Cleaned verification object:', cleanedVerification);
+    loggers.config.debug('Cleaned verification object:', cleanedVerification);
 
     // Prepare update data, ensuring no undefined values
     const updateData: Record<string, unknown> = {
@@ -237,10 +238,10 @@ export class VerificationService {
       }
     });
 
-    console.log('Updated verification object:', updatedVerification);
-    console.log('Updated verification keys:', Object.keys(updatedVerification));
-    console.log('Updated verification values:', Object.values(updatedVerification));
-    console.log('Updating verification with data:', updateData);
+    loggers.config.debug('Updated verification object:', updatedVerification);
+    loggers.config.debug('Updated verification keys:', Object.keys(updatedVerification));
+    loggers.config.debug('Updated verification values:', Object.values(updatedVerification));
+    loggers.config.debug('Updating verification with data:', updateData);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await updateDoc(profileRef, updateData as { [x: string]: any });
   }
@@ -309,14 +310,14 @@ export class VerificationService {
             }
           }
         } catch (error) {
-          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          loggers.warn.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
           // Continue with other users
         }
       }
       
       return mentors;
     } catch (error) {
-      console.error('Error fetching mentors by verification status:', error);
+      loggers.error.error('Error fetching mentors by verification status:', error);
       return [];
     }
   }
@@ -369,14 +370,14 @@ export class VerificationService {
             }
           }
         } catch (error) {
-          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          loggers.warn.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
           // Continue with other users
         }
       }
       
       return mentors;
     } catch (error) {
-      console.error('Error fetching all mentors:', error);
+      loggers.error.error('Error fetching all mentors:', error);
       return [];
     }
   }
@@ -430,14 +431,14 @@ export class VerificationService {
             }
           }
         } catch (error) {
-          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          loggers.warn.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
           // Continue with other users
         }
       }
       
       return mentors;
     } catch (error) {
-      console.error('Error fetching pending mentors:', error);
+      loggers.error.error('Error fetching pending mentors:', error);
       return [];
     }
   }
@@ -491,7 +492,7 @@ export class VerificationService {
 
       return stats;
     } catch (error) {
-      console.error('Error calculating verification stats:', error);
+      loggers.error.error('Error calculating verification stats:', error);
       return {
         total: 0,
         pending: 0,

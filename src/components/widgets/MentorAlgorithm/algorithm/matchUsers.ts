@@ -1,6 +1,7 @@
 import { firestore } from '../../../../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { VerificationData } from '../../../../types/verification';
+import { loggers } from '../../../../utils/logger';
 
 export type UserType = 'mentor' | 'mentee';
 export const MENTOR = 'mentor';
@@ -233,15 +234,15 @@ function getProfessionalScore(
 
 // Main matching function
 export async function getBestMatchesForUser(uid: string, olderMentorPreferred: boolean = true): Promise<MatchResult[]> {
-  console.log('Algorithm: Starting matching process for user:', uid);
+  loggers.debug.debug('Algorithm: Starting matching process for user:', uid);
   
   // Get current user's profile from subcollection
   const userDoc = await getDoc(doc(firestore, 'users', uid, 'mentorProgram', 'profile'));
   if (!userDoc.exists()) throw new Error('User profile not found');
   const currentUser = userDoc.data() as MentorMenteeProfile;
   
-  console.log('Algorithm: Current user profile:', currentUser);
-  console.log('Algorithm: Current user isMentor:', currentUser.isMentor, 'isMentee:', currentUser.isMentee);
+  loggers.debug.debug('Algorithm: Current user profile:', currentUser);
+  loggers.debug.debug('Algorithm: Current user isMentor:', currentUser.isMentor, 'isMentee:', currentUser.isMentee);
 
   // Get all users and check their mentorProgram subcollections
   const allUsersDocs = await getDocs(collection(firestore, 'users'));
@@ -256,18 +257,18 @@ export async function getBestMatchesForUser(uid: string, olderMentorPreferred: b
           allUsers.push({ ...data, uid: userDoc.id });
         }
       } catch (error) {
-        console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+        loggers.error.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
       }
     }
   }
 
-  console.log('Algorithm: Found', allUsers.length, 'total users with profiles');
+  loggers.debug.debug('Algorithm: Found', allUsers.length, 'total users with profiles');
 
   // Determine who to match with
   const candidates = allUsers.filter(u => u.isMentor === !currentUser.isMentor);
   
-  console.log('Algorithm: Found', candidates.length, 'candidates for matching');
-  console.log('Algorithm: Candidates:', candidates.map(c => ({ 
+  loggers.debug.debug('Algorithm: Found', candidates.length, 'candidates for matching');
+  loggers.debug.debug('Algorithm: Candidates:', candidates.map(c => ({ 
     uid: c.uid, 
     name: `${c.firstName} ${c.lastName}`, 
     isMentor: c.isMentor, 
@@ -287,7 +288,7 @@ export async function getBestMatchesForUser(uid: string, olderMentorPreferred: b
   // Filter out very low matches (below 10%) to avoid showing irrelevant results
   const filteredResults = results.filter(result => result.percentage >= 10);
   
-  console.log('Algorithm: Final results with percentages:', filteredResults.map(r => ({ 
+  loggers.debug.debug('Algorithm: Final results with percentages:', filteredResults.map(r => ({ 
     name: `${r.user.firstName} ${r.user.lastName}`, 
     score: r.score,
     percentage: r.percentage,
@@ -343,7 +344,7 @@ export async function calculateMatchScore(
     reasons.push(`${industryMatches} ${industriesReasonIDs[1]}`);
   score += industryMatches * SCORE_WEIGHTINGS['industries'];
 
-  console.log(`Algorithm: Candidate ${candidate.firstName} ${candidate.lastName} scored ${score} with reasons:`, reasons);
+  loggers.debug.debug(`Algorithm: Candidate ${candidate.firstName} ${candidate.lastName} scored ${score} with reasons:`, reasons);
 
   // Calculate maximum possible score for percentage calculation
   const maxPossibleScore = Object.values(SCORE_WEIGHTINGS).reduce((sum, weight) => sum + weight, 0);

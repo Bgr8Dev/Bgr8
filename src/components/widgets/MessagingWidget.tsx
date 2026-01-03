@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { MessagingService, Message, Conversation, GDPR_INTRO_MESSAGE } from '../../services/messagingService';
 import { MentorMenteeProfile } from '../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { firestore } from '../../firebase/firebase';
+import { loggers } from '../../utils/logger';
 import './MessagingWidget.css';
 
 const MessagingWidget: React.FC = () => {
@@ -97,7 +98,7 @@ const MessagingWidget: React.FC = () => {
           setSelectedConversation(conversation);
         }
       } catch (err) {
-        console.error('Error opening conversation:', err);
+        loggers.error.error('Error opening conversation:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to open conversation';
         setError(errorMessage);
         setErrorModalMessage(errorMessage);
@@ -125,7 +126,7 @@ const MessagingWidget: React.FC = () => {
         const convos = await MessagingService.getConversations(currentUser.uid);
         setConversations(convos);
       } catch (err) {
-        console.error('Error loading conversations:', err);
+        loggers.error.error('Error loading conversations:', err);
         const errorMessage = 'Failed to load conversations';
         setError(errorMessage);
         setErrorModalMessage(errorMessage);
@@ -171,7 +172,7 @@ const MessagingWidget: React.FC = () => {
           }
         );
       } catch (err) {
-        console.error('Error loading messages:', err);
+        loggers.error.error('Error loading messages:', err);
         const errorMessage = 'Failed to load messages';
         setError(errorMessage);
         setErrorModalMessage(errorMessage);

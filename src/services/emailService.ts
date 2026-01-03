@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import { EmailApiService, EmailApiMessage } from './emailApiService';
+import { loggers } from '../utils/logger';
 
 export interface EmailTemplate {
   id: string;
@@ -144,7 +145,7 @@ export class EmailService {
         } as EmailTemplate;
       });
     } catch (error) {
-      console.error('Error getting templates:', error);
+      loggers.email.error('Error getting templates:', error);
       throw new Error('Failed to load email templates');
     }
   }
@@ -168,7 +169,7 @@ export class EmailService {
       }
       return null;
     } catch (error) {
-      console.error('Error getting template:', error);
+      loggers.email.error('Error getting template:', error);
       throw new Error('Failed to load email template');
     }
   }
@@ -193,7 +194,7 @@ export class EmailService {
       });
       return docRef.id;
     } catch (error) {
-      console.error('Error saving template:', error);
+      loggers.email.error('Error saving template:', error);
       throw new Error('Failed to save email template');
     }
   }
@@ -209,7 +210,7 @@ export class EmailService {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
-      console.error('Error updating template:', error);
+      loggers.email.error('Error updating template:', error);
       throw new Error('Failed to update email template');
     }
   }
@@ -222,7 +223,7 @@ export class EmailService {
       const templateRef = doc(firestore, this.TEMPLATES_COLLECTION, templateId);
       await deleteDoc(templateRef);
     } catch (error) {
-      console.error('Error deleting template:', error);
+      loggers.email.error('Error deleting template:', error);
       throw new Error('Failed to delete email template');
     }
   }
@@ -239,7 +240,7 @@ export class EmailService {
         });
       }
     } catch (error) {
-      console.error('Error incrementing template usage:', error);
+      loggers.email.error('Error incrementing template usage:', error);
     }
   }
 
@@ -263,7 +264,7 @@ export class EmailService {
         } as EmailDraft;
       });
     } catch (error) {
-      console.error('Error getting drafts:', error);
+      loggers.email.error('Error getting drafts:', error);
       throw new Error('Failed to load email drafts');
     }
   }
@@ -287,7 +288,7 @@ export class EmailService {
       });
       return docRef.id;
     } catch (error) {
-      console.error('Error saving draft:', error);
+      loggers.email.error('Error saving draft:', error);
       throw new Error('Failed to save email draft');
     }
   }
@@ -303,7 +304,7 @@ export class EmailService {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
-      console.error('Error updating draft:', error);
+      loggers.email.error('Error updating draft:', error);
       throw new Error('Failed to update email draft');
     }
   }
@@ -316,7 +317,7 @@ export class EmailService {
       const draftRef = doc(firestore, this.DRAFTS_COLLECTION, draftId);
       await deleteDoc(draftRef);
     } catch (error) {
-      console.error('Error deleting draft:', error);
+      loggers.email.error('Error deleting draft:', error);
       throw new Error('Failed to delete email draft');
     }
   }
@@ -339,7 +340,7 @@ export class EmailService {
         } as SentEmail;
       });
     } catch (error) {
-      console.error('Error getting sent emails:', error);
+      loggers.email.error('Error getting sent emails:', error);
       throw new Error('Failed to load sent emails');
     }
   }
@@ -359,7 +360,7 @@ export class EmailService {
       const docRef = await addDoc(sentRef, cleanSentEmail);
       return docRef.id;
     } catch (error) {
-      console.error('Error saving sent email:', error);
+      loggers.email.error('Error saving sent email:', error);
       throw new Error('Failed to save sent email record');
     }
   }
@@ -378,7 +379,7 @@ export class EmailService {
         lastActive: doc.data().lastActive?.toDate()
       })) as unknown as RecipientGroup[];
     } catch (error) {
-      console.error('Error getting recipient groups:', error);
+      loggers.email.error('Error getting recipient groups:', error);
       // Return default groups if Firebase fails
       return this.getDefaultRecipientGroups();
     }
@@ -419,7 +420,7 @@ export class EmailService {
         fromName: 'Bgr8 Team'
       };
 
-      console.log('📧 Final email message being sent:', {
+      loggers.email.log('📧 Final email message being sent:', {
         to: emailMessage.to,
         subject: emailMessage.subject,
         contentLength: emailMessage.content?.length || 0,
@@ -474,7 +475,7 @@ export class EmailService {
         return { success: false, error: result.error || 'Failed to send email' };
       }
     } catch (error) {
-      console.error('Error sending email:', error);
+      loggers.email.error('Error sending email:', error);
       
       // Save failed email record
       try {
@@ -493,7 +494,7 @@ export class EmailService {
           unsubscribeCount: 0
         });
       } catch (saveError) {
-        console.error('Error saving failed email record:', saveError);
+        loggers.email.error('Error saving failed email record:', saveError);
       }
 
       return { success: false, error: 'Failed to send email' };
@@ -504,7 +505,7 @@ export class EmailService {
    * Get all recipients from individual emails and groups
    */
   private static async getAllRecipients(individualRecipients: string[], recipientGroups: string[]): Promise<string[]> {
-    console.log('🔍 Getting all recipients:', {
+    loggers.email.log('🔍 Getting all recipients:', {
       individualRecipients,
       recipientGroups
     });
@@ -514,7 +515,7 @@ export class EmailService {
     // Get recipients from groups
     for (const groupId of recipientGroups) {
       const group = await this.getRecipientGroupById(groupId);
-      console.log(`📋 Group ${groupId}:`, group);
+      loggers.email.log(`📋 Group ${groupId}:`, group);
       if (group && group.recipients) {
         allRecipients.push(...group.recipients);
       }
@@ -522,7 +523,7 @@ export class EmailService {
     
     // Remove duplicates
     const uniqueRecipients = Array.from(new Set(allRecipients));
-    console.log('✅ Final recipients list:', uniqueRecipients);
+    loggers.email.log('✅ Final recipients list:', uniqueRecipients);
     
     return uniqueRecipients;
   }
@@ -576,7 +577,7 @@ export class EmailService {
         bounceRate: Math.round(bounceRate * 100) / 100
       };
     } catch (error) {
-      console.error('Error getting email analytics:', error);
+      loggers.email.error('Error getting email analytics:', error);
       return {
         totalSent: 0,
         totalOpens: 0,
@@ -612,7 +613,7 @@ export class EmailService {
         } as Recipient;
       });
     } catch (error) {
-      console.error('Error getting recipients:', error);
+      loggers.email.error('Error getting recipients:', error);
       throw new Error('Failed to load recipients');
     }
   }
@@ -638,7 +639,7 @@ export class EmailService {
       
       return null;
     } catch (error) {
-      console.error('Error getting recipient:', error);
+      loggers.email.error('Error getting recipient:', error);
       throw new Error('Failed to load recipient');
     }
   }
@@ -662,7 +663,7 @@ export class EmailService {
       });
       return docRef.id;
     } catch (error) {
-      console.error('Error saving recipient:', error);
+      loggers.email.error('Error saving recipient:', error);
       throw new Error('Failed to save recipient');
     }
   }
@@ -684,7 +685,7 @@ export class EmailService {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
-      console.error('Error updating recipient:', error);
+      loggers.email.error('Error updating recipient:', error);
       throw new Error('Failed to update recipient');
     }
   }
@@ -697,7 +698,7 @@ export class EmailService {
       const recipientRef = doc(firestore, this.RECIPIENTS_COLLECTION, recipientId);
       await deleteDoc(recipientRef);
     } catch (error) {
-      console.error('Error deleting recipient:', error);
+      loggers.email.error('Error deleting recipient:', error);
       throw new Error('Failed to delete recipient');
     }
   }
@@ -718,7 +719,7 @@ export class EmailService {
         recipient.tags.some(tag => tag.toLowerCase().includes(term))
       );
     } catch (error) {
-      console.error('Error searching recipients:', error);
+      loggers.email.error('Error searching recipients:', error);
       throw new Error('Failed to search recipients');
     }
   }
@@ -733,7 +734,7 @@ export class EmailService {
         tags.some(tag => recipient.tags.includes(tag))
       );
     } catch (error) {
-      console.error('Error getting recipients by tags:', error);
+      loggers.email.error('Error getting recipients by tags:', error);
       throw new Error('Failed to get recipients by tags');
     }
   }
@@ -748,7 +749,7 @@ export class EmailService {
         recipient.groups.includes(groupId)
       );
     } catch (error) {
-      console.error('Error getting recipients by group:', error);
+      loggers.email.error('Error getting recipients by group:', error);
       throw new Error('Failed to get recipients by group');
     }
   }
@@ -769,7 +770,7 @@ export class EmailService {
         });
       }
     } catch (error) {
-      console.error('Error adding recipient to group:', error);
+      loggers.email.error('Error adding recipient to group:', error);
       throw new Error('Failed to add recipient to group');
     }
   }
@@ -788,7 +789,7 @@ export class EmailService {
         groups: recipient.groups.filter(id => id !== groupId)
       });
     } catch (error) {
-      console.error('Error removing recipient from group:', error);
+      loggers.email.error('Error removing recipient from group:', error);
       throw new Error('Failed to remove recipient from group');
     }
   }
@@ -802,7 +803,7 @@ export class EmailService {
         lastUsed: new Date()
       });
     } catch (error) {
-      console.error('Error updating recipient last used:', error);
+      loggers.email.error('Error updating recipient last used:', error);
       // Don't throw error for this as it's not critical
     }
   }
