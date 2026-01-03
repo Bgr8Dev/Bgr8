@@ -473,31 +473,35 @@ export default function MobileSignInPage() {
                 <span>or</span>
               </div>
               
-              <button 
-                type="button" 
-                onClick={handleGoogleSignIn} 
-                className="mobile-google-sign-in"
-                disabled={isBlocked}
-              >
-                <FcGoogle size={20} />
-                {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
-              </button>
+              <div className="mobile-google-sign-in-container">
+                <button 
+                  type="button" 
+                  onClick={handleGoogleSignIn} 
+                  className="mobile-google-sign-in"
+                  disabled={isBlocked}
+                >
+                  <FcGoogle size={20} />
+                  {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
+                </button>
+              </div>
             </form>
             
-            <div className="mobile-auth-links">
-              {isSignIn && <Link to="/forgot-password">Forgot Password?</Link>}
-              {isSignIn && (
-                <p>
-                  Don't have an account? 
-                  <button 
-                    type="button" 
-                    className="mobile-auth-link-btn"
-                    onClick={() => setIsSignIn(false)}
-                  >
-                    Register
-                  </button>
-                </p>
-              )}
+            <div className="mobile-auth-links-container">
+              <div className="mobile-auth-links">
+                {isSignIn && <Link to="/forgot-password">Forgot Password?</Link>}
+                {isSignIn && (
+                  <p>
+                    Don't have an account? 
+                    <button 
+                      type="button" 
+                      className="mobile-auth-link-btn"
+                      onClick={() => setIsSignIn(false)}
+                    >
+                      Register
+                    </button>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

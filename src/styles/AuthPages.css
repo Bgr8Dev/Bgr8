@@ -168,10 +168,11 @@
   border: 1px solid var(--gray-200);
   height: auto;
   min-height: auto;
-  max-height: 90vh;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
 }
 
 .signin-form-header {
@@ -182,7 +183,7 @@
 }
 
 .signin-form-content {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 8px;
@@ -191,8 +192,8 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  max-height: calc(90vh - 200px);
   animation: fadeIn 0.3s ease-in-out;
+  gap: 16px;
 }
 
 @keyframes fadeIn {
@@ -261,6 +262,7 @@
   box-shadow: var(--shadow-sm);
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 1;
+  pointer-events: none;
 }
 
 .auth-mode-toggle.register-active::before {
@@ -279,8 +281,9 @@
   transition: all 0.3s ease;
   color: var(--gray-600);
   position: relative;
-  z-index: 2;
+  z-index: 3;
   transform: scale(1);
+  pointer-events: auto;
 }
 
 .auth-mode-btn:hover {
@@ -489,11 +492,21 @@
   background: var(--button-primary-hover-bg);
 }
 
-.auth-links {
-  margin-top: 1.5rem;
-  text-align: center;
+.auth-links-container {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gray-200, #e5e7eb);
   flex-shrink: 0;
-  padding-top: 10px;
+  padding-bottom: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-links {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .auth-links p {
@@ -505,6 +518,9 @@
   color: var(--link-color, var(--accent));
   text-decoration: none;
   transition: color 0.3s ease;
+  position: relative;
+  z-index: 3;
+  display: inline-block;
 }
 
 .auth-links a:hover {
@@ -526,11 +542,7 @@
 
   .signin-form-card {
     padding: 35px;
-    max-height: 85vh;
-  }
-
-  .signin-form-content {
-    max-height: calc(85vh - 200px);
+    max-height: 90vh;
   }
 }
 
@@ -542,11 +554,7 @@
 
   .signin-form-card {
     padding: 30px 25px;
-    max-height: 88vh;
-  }
-
-  .signin-form-content {
-    max-height: calc(88vh - 190px);
+    max-height: 90vh;
   }
 
   .signin-form-header {
@@ -572,11 +580,7 @@
   .signin-form-card {
     max-width: 100%;
     padding: 30px;
-    max-height: 85vh;
-  }
-
-  .signin-form-content {
-    max-height: calc(85vh - 180px);
+    max-height: 90vh;
   }
 
   .signin-form-header {
@@ -603,11 +607,7 @@
 
   .signin-form-card {
     padding: 25px 20px;
-    max-height: 90vh;
-  }
-
-  .signin-form-content {
-    max-height: calc(90vh - 160px);
+    max-height: 95vh;
   }
 
   .signin-form-header {
@@ -669,10 +669,6 @@
   .signin-form-card {
     padding: 20px 15px;
     max-height: 95vh;
-  }
-
-  .signin-form-content {
-    max-height: calc(95vh - 140px);
   }
 
   .signin-form-header {
@@ -778,6 +774,15 @@
   font-size: 14px;
 }
 
+.google-sign-in-container {
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
 .google-sign-in {
   width: 100%;
   padding: 0.75rem;
@@ -792,7 +797,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 1.5rem;
+  margin: 0;
 }
 
 .google-sign-in:hover {
