@@ -1,9 +1,8 @@
 import { firestore } from '../../../../firebase/firebase';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 
-// Use local proxy for Cal.com API in development, production proxy for production
-const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-const CALCOM_API_BASE = isLocal ? 'http://localhost:4000' : 'https://bgr8-cal-server.onrender.com';
+// Always use production Cal.com proxy server
+const CALCOM_API_BASE = 'https://bgr8-cal-server.onrender.com';
 
 // Interface for Cal.com API key storage
 export interface CalComApiKeyData {
@@ -211,13 +210,9 @@ export class CalComService {
   static async getEventTypes(mentorUid: string): Promise<CalComEventType[]> {
     try {
       const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      let url = `${CALCOM_API_BASE}/event-types?username=${calComUsername}`;
-      if (isLocal) url += `&apiKey=${encodeURIComponent(apiKey)}`;
+      const url = `${CALCOM_API_BASE}/event-types?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
       const response = await fetch(url, {
-        headers: isLocal ? {
-          'Content-Type': 'application/json'
-        } : {
-          'Authorization': `Bearer ${apiKey}`,
+        headers: {
           'Content-Type': 'application/json'
         }
       });
@@ -295,15 +290,11 @@ export class CalComService {
   ): Promise<CalComBookingResponse[]> {
     try {
       const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      let url = `${CALCOM_API_BASE}/bookings?username=${calComUsername}`;
+      let url = `${CALCOM_API_BASE}/bookings?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
       if (startTime) url += `&startTime=${encodeURIComponent(startTime)}`;
       if (endTime) url += `&endTime=${encodeURIComponent(endTime)}`;
-      if (isLocal) url += `&apiKey=${encodeURIComponent(apiKey)}`;
       const response = await fetch(url, {
-        headers: isLocal ? {
-          'Content-Type': 'application/json'
-        } : {
-          'Authorization': `Bearer ${apiKey}`,
+        headers: {
           'Content-Type': 'application/json'
         }
       });
@@ -333,14 +324,10 @@ export class CalComService {
       // Get availability for each event type
       const availabilityPromises = eventTypes.map(async (eventType) => {
         try {
-          let url = `${CALCOM_API_BASE}/availability?username=${calComUsername}&dateFrom=${dateFrom}&dateTo=${dateTo}&eventTypeId=${eventType.id}`;
-          if (isLocal) url += `&apiKey=${encodeURIComponent(apiKey)}`;
+          const url = `${CALCOM_API_BASE}/availability?username=${calComUsername}&dateFrom=${dateFrom}&dateTo=${dateTo}&eventTypeId=${eventType.id}&apiKey=${encodeURIComponent(apiKey)}`;
           
           const response = await fetch(url, {
-            headers: isLocal ? {
-              'Content-Type': 'application/json'
-            } : {
-              'Authorization': `Bearer ${apiKey}`,
+            headers: {
               'Content-Type': 'application/json'
             }
           });
@@ -379,14 +366,10 @@ export class CalComService {
   static async getSchedules(mentorUid: string): Promise<CalComSchedule[]> {
     try {
       const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      let url = `${CALCOM_API_BASE}/schedules?username=${calComUsername}`;
-      if (isLocal) url += `&apiKey=${encodeURIComponent(apiKey)}`;
+      const url = `${CALCOM_API_BASE}/schedules?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
       
       const response = await fetch(url, {
-        headers: isLocal ? {
-          'Content-Type': 'application/json'
-        } : {
-          'Authorization': `Bearer ${apiKey}`,
+        headers: {
           'Content-Type': 'application/json'
         }
       });
