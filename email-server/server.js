@@ -418,8 +418,54 @@ app.get('/api/zoho-test', async (req, res) => {
   try {
     console.log('🔍 Testing Zoho API setup...');
     
-    const accessToken = await getZohoAccessToken();
-    console.log('✅ Access token obtained');
+    // Check environment variables first
+    const envCheck = {
+      hasClientId: !!process.env.ZOHO_CLIENT_ID,
+      hasClientSecret: !!process.env.ZOHO_CLIENT_SECRET,
+      hasRefreshToken: !!process.env.ZOHO_REFRESH_TOKEN,
+    };
+    
+    console.log('🔧 Environment check:', envCheck);
+    
+    if (!envCheck.hasClientId || !envCheck.hasClientSecret || !envCheck.hasRefreshToken) {
+      const missing = [];
+      if (!envCheck.hasClientId) missing.push('ZOHO_CLIENT_ID');
+      if (!envCheck.hasClientSecret) missing.push('ZOHO_CLIENT_SECRET');
+      if (!envCheck.hasRefreshToken) missing.push('ZOHO_REFRESH_TOKEN');
+      
+      return res.json({
+        success: false,
+        message: 'Missing Zoho configuration',
+        error: `Missing required environment variables: ${missing.join(', ')}`,
+        envCheck: envCheck,
+        nextSteps: [
+          '1. Check your Render.com environment variables',
+          '2. Ensure ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, and ZOHO_REFRESH_TOKEN are set',
+          '3. Verify the values are correct and not expired'
+        ]
+      });
+    }
+    
+    let accessToken;
+    try {
+      accessToken = await getZohoAccessToken();
+      console.log('✅ Access token obtained');
+    } catch (tokenError) {
+      console.error('❌ Failed to get access token:', tokenError);
+      return res.json({
+        success: false,
+        message: 'Failed to authenticate with Zoho',
+        error: tokenError.message,
+        envCheck: envCheck,
+        nextSteps: [
+          '1. Verify your ZOHO_CLIENT_ID is correct',
+          '2. Verify your ZOHO_CLIENT_SECRET is correct',
+          '3. Check if your ZOHO_REFRESH_TOKEN is still valid (they can expire)',
+          '4. Generate a new refresh token from Zoho Developer Console if needed',
+          '5. Ensure the OAuth app has the correct scopes (ZohoMail.messages.CREATE)'
+        ]
+      });
+    }
     
     // Test 1: Check if we can access the account info
     try {
@@ -447,33 +493,104 @@ app.get('/api/zoho-test', async (req, res) => {
           ]
         });
       } else {
-        const errorText = await accountResponse.text();
-        console.log('❌ Account API failed:', errorText);
+        let errorText;
+        let parsedError = null;
+        
+        try {
+          errorText = await accountResponse.text();
+          // Try to parse the error JSON
+          try {
+            parsedError = JSON.parse(errorText);
+          } catch (parseErr) {
+            // If it's not JSON, keep the text
+          }
+        } catch (textError) {
+          errorText = `Status ${accountResponse.status}: ${accountResponse.statusText}`;
+        }
+        
+        console.error('❌ Account API failed:', {
+          status: accountResponse.status,
+          statusText: accountResponse.statusText,
+          error: errorText,
+          parsedError: parsedError
+        });
+        
+        // Handle specific Zoho error codes
+        let errorMessage = 'Zoho API access failed';
+        let nextSteps = [
+          '1. Check your Zoho API credentials',
+          '2. Verify the app has the right permissions',
+          '3. Check if the Zoho Mail API is enabled for your account',
+          '4. Ensure the OAuth app has the correct scopes',
+          '5. Try regenerating the refresh token'
+        ];
+        
+        if (parsedError && parsedError.data && parsedError.data.errorCode) {
+          const errorCode = parsedError.data.errorCode;
+          const statusCode = parsedError.status?.code || accountResponse.status;
+          const description = parsedError.status?.description || accountResponse.statusText;
+          
+          if (errorCode === 'URL_RULE_NOT_CONFIGURED') {
+            errorMessage = 'Zoho Mail API URL rules not configured';
+            nextSteps = [
+              '1. Log in to Zoho Mail Admin Console (https://mailadmin.zoho.com)',
+              '2. Navigate to Settings → API → URL Rules',
+              '3. Add a new URL rule for your API endpoint',
+              '4. Allow the endpoint: https://mail.zoho.com/api/accounts/self',
+              '5. Save the configuration and try again',
+              '6. If URL Rules section is not visible, contact Zoho support to enable API access for your account'
+            ];
+          } else if (errorCode === 'INVALID_OAUTH') {
+            errorMessage = 'Invalid OAuth credentials';
+            nextSteps = [
+              '1. Verify your ZOHO_CLIENT_ID is correct',
+              '2. Verify your ZOHO_CLIENT_SECRET is correct',
+              '3. Check if your ZOHO_REFRESH_TOKEN is still valid (they can expire)',
+              '4. Generate a new refresh token from Zoho Developer Console',
+              '5. Ensure the OAuth app has the correct scopes (ZohoMail.messages.CREATE, ZohoMail.accounts.READ)'
+            ];
+          } else if (statusCode === 401 || statusCode === 403) {
+            errorMessage = 'Zoho API authentication failed';
+            nextSteps = [
+              '1. Check if your refresh token has expired',
+              '2. Verify your OAuth credentials are correct',
+              '3. Ensure the OAuth app has the required permissions',
+              '4. Try regenerating the refresh token'
+            ];
+          }
+        }
         
         res.json({
           success: false,
-          message: 'Zoho API access failed',
+          message: errorMessage,
           error: errorText,
-          nextSteps: [
-            '1. Check your Zoho API credentials',
-            '2. Verify the app has the right permissions',
-            '3. Check if the Zoho Mail API is enabled for your account'
-          ]
+          parsedError: parsedError,
+          status: accountResponse.status,
+          statusText: accountResponse.statusText,
+          nextSteps: nextSteps
         });
       }
     } catch (error) {
-      console.log('❌ Account API error:', error.message);
+      console.error('❌ Account API error:', error);
       res.json({
         success: false,
         message: 'Failed to connect to Zoho API',
-        error: error.message
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        nextSteps: [
+          '1. Check your internet connection',
+          '2. Verify Zoho API endpoints are accessible',
+          '3. Check for firewall or network restrictions'
+        ]
       });
     }
   } catch (error) {
-    console.error('Zoho test failed:', error);
+    console.error('❌ Zoho test failed:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      message: 'Unexpected error during Zoho test',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });

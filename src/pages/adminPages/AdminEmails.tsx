@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import RecipientSelector from '../../components/admin/emails/RecipientSelector';
 import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
 import BannerWrapper from '../../components/ui/BannerWrapper';
+import { loggers } from '../../utils/logger';
 
 // Import the new components
 import EmailHeader from '../../components/admin/emails/EmailHeader';
@@ -186,27 +187,107 @@ const AdminEmails: React.FC = () => {
   const testZohoSetup = async () => {
     try {
       updateTestStatus('zoho', 'testing', 'Testing Zoho API setup...');
+      loggers.email.log('🔍 Testing Zoho API setup...');
+      
       const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${emailConfig.apiKey}` },
       });
 
+      loggers.email.log('📡 Zoho test response status:', response.status, response.statusText);
+
       if (response.ok) {
         const data = await response.json();
+        loggers.email.log('📦 Zoho test response data:', data);
+        
         if (data.success) {
           updateTestStatus('zoho', 'success', 'Zoho API is working!');
           showNotification('success', `Zoho API is working! ${data.message}`);
         } else {
-          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}`);
-          showNotification('error', `Zoho API issue: ${data.message}`);
+          // Parse error details if available
+          let parsedError = null;
+          let errorCode = null;
+          
+          if (data.error) {
+            try {
+              if (typeof data.error === 'string') {
+                parsedError = JSON.parse(data.error);
+              } else {
+                parsedError = data.error;
+              }
+              
+              if (parsedError?.data?.errorCode) {
+                errorCode = parsedError.data.errorCode;
+              }
+            } catch {
+              // Error is not JSON, keep as string
+            }
+          }
+          
+          // Build detailed error message
+          let errorMessage = data.message || 'Zoho API access failed';
+          
+          if (errorCode) {
+            errorMessage += ` (Error Code: ${errorCode})`;
+          }
+          
+          // Include parsed error details in logs
+          loggers.email.error('❌ Zoho API test failed:', {
+            message: data.message,
+            errorCode: errorCode,
+            error: data.error,
+            parsedError: parsedError,
+            status: data.status,
+            statusText: data.statusText,
+            nextSteps: data.nextSteps
+          });
+          
+          // Log next steps prominently
+          if (data.nextSteps && Array.isArray(data.nextSteps) && data.nextSteps.length > 0) {
+            loggers.email.warn('📋 Zoho API - Next Steps to Fix:');
+            data.nextSteps.forEach((step: string) => {
+              loggers.email.warn(`   ${step}`);
+            });
+            
+            // Build a more detailed notification message with next steps
+            const stepsSummary = data.nextSteps.slice(0, 2).join(' | ');
+            errorMessage += ` - ${stepsSummary}`;
+          }
+          
+          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}${errorCode ? ` (${errorCode})` : ''}`);
+          showNotification('error', errorMessage);
         }
       } else {
-        updateTestStatus('zoho', 'error', `Test failed: ${response.status} ${response.statusText}`);
-        showNotification('error', `Zoho test failed: ${response.status} ${response.statusText}`);
+        // Try to parse error response
+        let errorDetails = `${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          loggers.email.error('❌ Zoho test HTTP error:', errorData);
+          if (errorData.error) {
+            errorDetails = errorData.error;
+          } else if (errorData.message) {
+            errorDetails = errorData.message;
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, try text
+          loggers.email.warn('⚠️ Failed to parse error as JSON, trying text:', parseError);
+          try {
+            const errorText = await response.text();
+            loggers.email.error('❌ Zoho test error text:', errorText);
+            errorDetails = errorText || errorDetails;
+          } catch (textError) {
+            loggers.email.error('❌ Failed to parse error response:', textError);
+          }
+        }
+        
+        updateTestStatus('zoho', 'error', `Test failed: ${errorDetails}`);
+        showNotification('error', `Zoho test failed: ${errorDetails}`);
       }
     } catch (error) {
-      updateTestStatus('zoho', 'error', `Test failed: ${error}`);
-      showNotification('error', `Failed to test Zoho: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      loggers.email.error('❌ Zoho test exception:', error);
+      updateTestStatus('zoho', 'error', `Test failed: ${errorMessage}`);
+      showNotification('error', `Failed to test Zoho: ${errorMessage}`);
     }
   };
 
