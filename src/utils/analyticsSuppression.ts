@@ -48,7 +48,7 @@ export function suppressAnalyticsLogs(): void {
   ];
   
   // Check if a message matches GA patterns
-  const isGALog = (args: any[]): boolean => {
+  const isGALog = (args: unknown[]): boolean => {
     const message = args.map(arg => {
       if (typeof arg === 'string') return arg;
       if (typeof arg === 'object') return JSON.stringify(arg);
@@ -59,41 +59,45 @@ export function suppressAnalyticsLogs(): void {
   };
   
   // Override console.log
-  console.log = function(...args: any[]) {
+  console.log = function(...args: unknown[]) {
     if (!isGALog(args)) {
       originalLog.apply(console, args);
     }
   };
   
   // Override console.info
-  console.info = function(...args: any[]) {
+  console.info = function(...args: unknown[]) {
     if (!isGALog(args)) {
       originalInfo.apply(console, args);
     }
   };
   
   // Override console.debug
-  console.debug = function(...args: any[]) {
+  console.debug = function(...args: unknown[]) {
     if (!isGALog(args)) {
       originalDebug.apply(console, args);
     }
   };
   
   // Override console.warn (some GA logs use warn)
-  console.warn = function(...args: any[]) {
+  console.warn = function(...args: unknown[]) {
     if (!isGALog(args)) {
       originalWarn.apply(console, args);
     }
   };
   
   // Also suppress gtag debug mode if gtag is available
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    const originalGtag = (window as any).gtag;
-    (window as any).gtag = function(...args: any[]) {
+  interface WindowWithGtag extends Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+  
+  if (typeof window !== 'undefined' && (window as WindowWithGtag).gtag) {
+    const originalGtag = (window as WindowWithGtag).gtag!;
+    (window as WindowWithGtag).gtag = function(...args: unknown[]) {
       // Disable debug mode in config calls
-      if (args[0] === 'config' && args[2]) {
+      if (args[0] === 'config' && args[2] && typeof args[2] === 'object') {
         args[2] = {
-          ...args[2],
+          ...args[2] as Record<string, unknown>,
           debug_mode: false
         };
       }

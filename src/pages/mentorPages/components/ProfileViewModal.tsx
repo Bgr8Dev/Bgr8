@@ -20,7 +20,6 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
   profile,
   onClose,
   currentUserRole,
-  onBooking,
   onCalCom
 }) => {
   const { currentUser } = useAuth();

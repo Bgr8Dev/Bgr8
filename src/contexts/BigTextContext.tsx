@@ -120,6 +120,7 @@ export function BigTextProvider({ children }: BigTextProviderProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useBigText() {
   const context = useContext(BigTextContext);
   if (context === undefined) {

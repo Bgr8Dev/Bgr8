@@ -5,7 +5,6 @@ import { firestore } from '../../../firebase/firebase';
 import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import './MentorProgram.css';
 import industriesList from '../../../constants/industries';
-import hobbiesList from '../../../constants/hobbiesByCategory';
 import ethnicityOptions from '../../../constants/ethnicityOptions';
 import religionOptions from '../../../constants/religionOptions';
 import ukEducationLevels from '../../../constants/ukEducationLevels';

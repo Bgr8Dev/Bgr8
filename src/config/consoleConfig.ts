@@ -178,7 +178,7 @@ export function initializeConsoleConfig(): void {
   // Log the configuration (only if config category is enabled)
   if (isLoggingEnabled('config')) {
     // Use native console to avoid circular dependency
-    const originalConsole = (window as any).__originalConsole || console;
+    const originalConsole = (window as Window & { __originalConsole?: Console }).__originalConsole || console;
     originalConsole.log(
       '%c🔧 Console Log Configuration',
       'color: #4CAF50; font-weight: bold; font-size: 12px;',

@@ -11,15 +11,15 @@ import { isLoggingEnabled, LogCategory } from '../config/consoleConfig';
  * Logger interface matching console methods
  */
 export interface Logger {
-  log: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-  info: (...args: any[]) => void;
-  debug: (...args: any[]) => void;
+  log: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  debug: (...args: unknown[]) => void;
   group: (label?: string) => void;
   groupEnd: () => void;
   groupCollapsed: (label?: string) => void;
-  table: (data: any) => void;
+  table: (data: unknown) => void;
   time: (label: string) => void;
   timeEnd: (label: string) => void;
 }
@@ -32,31 +32,31 @@ export function createLogger(category: LogCategory = 'other'): Logger {
   const originalConsole = console;
   
   return {
-    log: (...args: any[]) => {
+    log: (...args: unknown[]) => {
       if (isLoggingEnabled(category) && isLoggingEnabled('log')) {
         originalConsole.log(...args);
       }
     },
     
-    error: (...args: any[]) => {
+    error: (...args: unknown[]) => {
       if (isLoggingEnabled(category) && isLoggingEnabled('error')) {
         originalConsole.error(...args);
       }
     },
     
-    warn: (...args: any[]) => {
+    warn: (...args: unknown[]) => {
       if (isLoggingEnabled(category) && isLoggingEnabled('warn')) {
         originalConsole.warn(...args);
       }
     },
     
-    info: (...args: any[]) => {
+    info: (...args: unknown[]) => {
       if (isLoggingEnabled(category) && isLoggingEnabled('info')) {
         originalConsole.info(...args);
       }
     },
     
-    debug: (...args: any[]) => {
+    debug: (...args: unknown[]) => {
       if (isLoggingEnabled(category) && isLoggingEnabled('debug')) {
         originalConsole.debug(...args);
       }
@@ -80,7 +80,7 @@ export function createLogger(category: LogCategory = 'other'): Logger {
       }
     },
     
-    table: (data: any) => {
+    table: (data: unknown) => {
       if (isLoggingEnabled(category)) {
         originalConsole.table(data);
       }
@@ -126,7 +126,7 @@ export const loggers = {
 /**
  * Convenience function for logging with a specific category
  */
-export function log(category: LogCategory, ...args: any[]): void {
+export function log(category: LogCategory, ...args: unknown[]): void {
   const categoryLogger = createLogger(category);
   categoryLogger.log(...args);
 }
@@ -134,7 +134,7 @@ export function log(category: LogCategory, ...args: any[]): void {
 /**
  * Convenience function for error logging with a specific category
  */
-export function logError(category: LogCategory, ...args: any[]): void {
+export function logError(category: LogCategory, ...args: unknown[]): void {
   const categoryLogger = createLogger(category);
   categoryLogger.error(...args);
 }
@@ -142,7 +142,7 @@ export function logError(category: LogCategory, ...args: any[]): void {
 /**
  * Convenience function for warning logging with a specific category
  */
-export function logWarn(category: LogCategory, ...args: any[]): void {
+export function logWarn(category: LogCategory, ...args: unknown[]): void {
   const categoryLogger = createLogger(category);
   categoryLogger.warn(...args);
 }
@@ -150,7 +150,7 @@ export function logWarn(category: LogCategory, ...args: any[]): void {
 /**
  * Convenience function for info logging with a specific category
  */
-export function logInfo(category: LogCategory, ...args: any[]): void {
+export function logInfo(category: LogCategory, ...args: unknown[]): void {
   const categoryLogger = createLogger(category);
   categoryLogger.info(...args);
 }
@@ -158,7 +158,7 @@ export function logInfo(category: LogCategory, ...args: any[]): void {
 /**
  * Convenience function for debug logging with a specific category
  */
-export function logDebug(category: LogCategory, ...args: any[]): void {
+export function logDebug(category: LogCategory, ...args: unknown[]): void {
   const categoryLogger = createLogger(category);
   categoryLogger.debug(...args);
 }

@@ -13,7 +13,6 @@ interface MentorModalProps {
 }
 
 const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode = false, onSave }) => {
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<MentorMenteeProfile | null>(user);
 
   useEffect(() => {
@@ -28,12 +27,6 @@ const MentorModal: React.FC<MentorModalProps> = ({ open, onClose, user, editMode
   useEffect(() => {
     if (editMode && user) setEditUser(user);
   }, [editMode, user]);
-
-  const handleCopy = (value: string, field: string) => {
-    navigator.clipboard.writeText(value);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 1200);
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
