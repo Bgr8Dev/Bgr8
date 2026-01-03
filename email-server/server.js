@@ -277,29 +277,48 @@ async function sendZohoEmail(emailData) {
 
   console.log('📧 Zoho email payload:', zohoEmailData);
 
+  // Determine mail API base URL based on region
+  const mailApiBase = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+    ? 'https://mail.zoho.eu/api' 
+    : 'https://mail.zoho.com/api';
+  
+  // First, get the account ID from /api/accounts
+  let accountId;
+  try {
+    const accountsResponse = await fetch(`${mailApiBase}/accounts`, {
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${accessToken}`,
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (accountsResponse.ok) {
+      const accountsData = await accountsResponse.json();
+      // Get the first account's ID
+      if (accountsData.data && accountsData.data.length > 0) {
+        accountId = accountsData.data[0].accountId || accountsData.data[0].id;
+        console.log('📧 Found account ID:', accountId);
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️ Could not fetch account ID, will try default endpoints:', err.message);
+  }
+  
   // Try different Zoho API endpoints and formats
+  // Use accountId if available, otherwise fall back to 'self'
+  const accountPath = accountId ? accountId : 'self';
   const apiEndpoints = [
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages',
+      url: `${mailApiBase}/accounts/${accountPath}/messages`,
       data: zohoEmailData
     },
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages/send',
+      url: `${mailApiBase}/accounts/${accountPath}/messages/send`,
       data: zohoEmailData
     },
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages/sendMail',
+      url: `${mailApiBase}/accounts/${accountPath}/messages/sendMail`,
       data: zohoEmailData
-    },
-    {
-      url: 'https://mail.zoho.com/api/accounts/self/messages',
-      data: {
-        fromAddress: zohoEmailData.fromAddress,
-        toAddress: zohoEmailData.toAddress,
-        subject: zohoEmailData.subject,
-        content: zohoEmailData.content,
-        mailFormat: zohoEmailData.mailFormat
-      }
     }
   ];
 
@@ -396,9 +415,11 @@ app.get('/api/config-test', async (req, res) => {
         : 'https://mail.zoho.com/api';
       
       try {
-        const testResponse = await fetch(`${mailApiBase}/accounts/self`, {
+        // Use /api/accounts (not /api/accounts/self) - correct Zoho Mail API endpoint
+        const testResponse = await fetch(`${mailApiBase}/accounts`, {
           headers: {
             'Authorization': `Zoho-oauthtoken ${accessToken}`,
+            'Accept': 'application/json',
           },
         });
         config.apiPermissionsTest = testResponse.ok ? 'success' : 'failed';
@@ -487,9 +508,11 @@ app.get('/api/zoho-test', async (req, res) => {
       : 'https://mail.zoho.com/api';
     
     try {
-      const accountResponse = await fetch(`${mailApiBase}/accounts/self`, {
+      // Use /api/accounts (not /api/accounts/self) - returns authenticated user's accounts
+      const accountResponse = await fetch(`${mailApiBase}/accounts`, {
         headers: {
           'Authorization': `Zoho-oauthtoken ${accessToken}`,
+          'Accept': 'application/json',
         },
       });
       
@@ -562,7 +585,7 @@ app.get('/api/zoho-test', async (req, res) => {
               '  1. Log in to Zoho Mail Admin Console (https://mailadmin.zoho.com or https://mailadmin.zoho.eu)',
               '  2. Navigate to Settings → API → URL Rules',
               '  3. Add a new URL rule for your API endpoint',
-              `  4. Allow the endpoint: ${mailApiBase}/accounts/self`,
+              `  4. Use the correct endpoint: ${mailApiBase}/accounts (not /accounts/self)`,
               '  5. Save the configuration and try again',
               '  6. If URL Rules section is not visible, contact Zoho support to enable API access',
               '',
