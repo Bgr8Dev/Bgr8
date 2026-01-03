@@ -146,20 +146,28 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
       // Extract meeting URL from references (daily_video, zoom, etc.) or metadata
       let meetingUrl = '';
       if (calBooking.references && Array.isArray(calBooking.references)) {
-        // Find daily_video or other video meeting reference
+        // Prioritize daily_video, then zoom, then google_meet, then any with meetingUrl
         const videoRef = calBooking.references.find(ref => 
-          ref.type === 'daily_video' || 
-          ref.type === 'zoom_video' || 
-          ref.type === 'google_meet' ||
-          ref.meetingUrl
+          ref.type === 'daily_video' && ref.meetingUrl
+        ) || calBooking.references.find(ref => 
+          ref.type === 'zoom_video' && ref.meetingUrl
+        ) || calBooking.references.find(ref => 
+          ref.type === 'google_meet' && ref.meetingUrl
+        ) || calBooking.references.find(ref => 
+          ref.meetingUrl && ref.meetingUrl.trim() !== ''
         );
         if (videoRef?.meetingUrl) {
           meetingUrl = videoRef.meetingUrl;
         }
       }
-      // Fallback to metadata videoCallUrl
+      // Fallback to metadata videoCallUrl only if it's not Cal.com's own video interface
+      // (Cal.com video URLs are like https://app.cal.com/video/...)
       if (!meetingUrl && calBooking.metadata?.videoCallUrl) {
-        meetingUrl = calBooking.metadata.videoCallUrl;
+        const metaUrl = calBooking.metadata.videoCallUrl;
+        // Only use metadata URL if it's not Cal.com's video interface
+        if (!metaUrl.includes('app.cal.com/video')) {
+          meetingUrl = metaUrl;
+        }
       }
       
       // Create booking data
