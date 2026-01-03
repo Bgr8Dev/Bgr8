@@ -12,6 +12,7 @@ import ResourcesLibrary from '../../../components/widgets/ResourcesLibrary';
 import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import MessagingWidget from '../../../components/widgets/MessagingWidget';
 import { FaComments, FaStar, FaCode } from 'react-icons/fa';
+import { loggers } from '../../../utils/logger';
 
 interface MenteeDashboardProps {
   currentUserProfile: MentorMenteeProfile;
@@ -55,7 +56,7 @@ export const MenteeDashboard: React.FC<MenteeDashboardProps> = ({
         setFeedbackSummary(summary);
       } catch (error) {
         // Error is already handled gracefully in the service, but log a warning if needed
-        console.warn('Feedback summary unavailable:', error);
+        loggers.warn.warn('Feedback summary unavailable:', error);
         // Set default empty summary to prevent UI errors
         setFeedbackSummary({
           totalCompletedSessions: 0,

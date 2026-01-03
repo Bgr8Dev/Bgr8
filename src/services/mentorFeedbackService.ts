@@ -10,6 +10,7 @@ import {
 import { firestore } from '../firebase/firebase';
 import { Session } from '../types/sessions';
 import { Booking } from '../types/bookings';
+import { loggers } from '../utils/logger';
 
 export interface MentorFeedbackEligibility {
   mentorId: string;
@@ -73,7 +74,7 @@ export class MentorFeedbackService {
             mentorName = bookingData.mentorName;
           }
         } catch {
-          console.warn('Could not fetch mentor name for session:', sessionData.bookingId);
+          loggers.warn.warn('Could not fetch mentor name for session:', sessionData.bookingId);
         }
 
         eligibleMentors.push({
@@ -88,14 +89,15 @@ export class MentorFeedbackService {
       }
 
       return eligibleMentors;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle missing Firestore index error gracefully
-      if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
-        console.warn('Firestore index not yet created for feedback queries. Returning empty results. Please create the index:', error?.message);
+      const err = error as { code?: string; message?: string };
+      if (err?.code === 'failed-precondition' || err?.message?.includes('index')) {
+        loggers.warn.warn('Firestore index not yet created for feedback queries. Returning empty results. Please create the index:', err?.message);
         return []; // Return empty array instead of throwing
       }
       // Log other errors but don't throw - return empty array to prevent UI errors
-      console.warn('Error fetching mentee feedback eligibility:', error);
+      loggers.warn.warn('Error fetching mentee feedback eligibility:', error);
       return [];
     }
   }
@@ -119,7 +121,7 @@ export class MentorFeedbackService {
       };
     } catch (error) {
       // Return default summary instead of throwing to prevent UI errors
-      console.warn('Error fetching mentee feedback summary:', error);
+      loggers.warn.warn('Error fetching mentee feedback summary:', error);
       return {
         totalCompletedSessions: 0,
         eligibleForFeedback: [],
@@ -141,7 +143,7 @@ export class MentorFeedbackService {
         !mentor.feedbackAlreadySubmitted
       );
     } catch (error) {
-      console.error('Error checking mentee feedback eligibility:', error);
+      loggers.error.error('Error checking mentee feedback eligibility:', error);
       return false;
     }
   }
@@ -160,7 +162,7 @@ export class MentorFeedbackService {
       // Return the most recent session
       return mentorSessions.length > 0 ? mentorSessions[0] : null;
     } catch (error) {
-      console.error('Error fetching recent session for feedback:', error);
+      loggers.error.error('Error fetching recent session for feedback:', error);
       return null;
     }
   }

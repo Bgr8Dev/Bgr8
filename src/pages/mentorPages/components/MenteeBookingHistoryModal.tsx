@@ -3,6 +3,7 @@ import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore
 import { firestore } from '../../../firebase/firebase';
 import { Booking } from '../../../types/bookings';
 import { MentorMenteeProfile } from '../types';
+import { loggers } from '../../../utils/logger';
 
 interface MenteeBookingHistoryModalProps {
   isOpen: boolean;
@@ -61,12 +62,13 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
         setBookings(fetchedBookings);
       } catch (err: unknown) {
         // Handle missing index error gracefully
-        if (err?.code === 'failed-precondition' || err?.message?.includes('index')) {
-          console.warn('Firestore index not yet created for bookings query. Returning empty results.');
+        const error = err as { code?: string; message?: string };
+        if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+          loggers.booking.warn('Firestore index not yet created for bookings query. Returning empty results.');
           setBookings([]);
           setError('Booking history is being set up. Please check back soon or view your bookings in Cal.com.');
         } else {
-          console.error('Error fetching bookings:', err);
+          loggers.booking.error('Error fetching bookings:', err);
           setError('Failed to load booking history. Please try again.');
         }
       } finally {

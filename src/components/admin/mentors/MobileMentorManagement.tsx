@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { firestore } from '../../../firebase/firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 import { getDisplayName, getName, MentorMenteeProfile } from '../../widgets/MentorAlgorithm/algorithm/matchUsers';
 import { CalComAvailability } from '../../widgets/MentorAlgorithm/CalCom/calComService';
 import { Booking } from '../../../types/bookings';
@@ -200,8 +200,12 @@ export const MobileMentorManagement: React.FC<MobileMentorManagementProps> = ({
     try {
       const results: Booking[] = [];
       
-      // Fetch Firestore bookings
-      const bookingsSnapshot = await getDocs(collection(firestore, 'bookings'));
+      // Fetch Firestore bookings (only Cal.com bookings - internal system removed)
+      const bookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('isCalComBooking', '==', true)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
       const firestoreBookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
         return {

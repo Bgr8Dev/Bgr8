@@ -57,14 +57,14 @@ interface ExtendedBooking extends Booking {
 // Inline BookingAnalytics component
 const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
   const analytics = useMemo(() => {
-    const totalBookings = bookings.length;
-    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
-    const calComBookings = bookings.filter(b => b.isCalComBooking).length;
-    const internalBookings = bookings.filter(b => !b.isCalComBooking).length;
+    // Only count Cal.com bookings (internal booking system removed)
+    const calComBookings = bookings.filter(b => b.isCalComBooking);
+    const totalBookings = calComBookings.length;
+    const confirmedBookings = calComBookings.filter(b => b.status === 'confirmed').length;
     const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
-    const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
+    const totalRevenue = calComBookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
 
-    return { totalBookings, confirmedBookings, calComBookings, internalBookings, completionRate, totalRevenue };
+    return { totalBookings, confirmedBookings, calComBookings: totalBookings, completionRate, totalRevenue };
   }, [bookings]);
 
   return (
@@ -122,7 +122,7 @@ export default function MentorManagement() {
   const [actionLoading, setActionLoading] = useState(false);
   // Add new state for booking filters
   const [bookingGeneratedFilter, setBookingGeneratedFilter] = useState<'all' | 'generated' | 'real'>('all');
-  const [bookingMethodFilter, setBookingMethodFilter] = useState<'all' | 'internal' | 'calcom'>('all');
+  const [bookingMethodFilter, setBookingMethodFilter] = useState<'all' | 'calcom'>('all');
   // Availability state
   const [availabilityData, setAvailabilityData] = useState<MentorAvailabilityWithProfile[]>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
@@ -262,8 +262,12 @@ export default function MentorManagement() {
     try {
       const results: Booking[] = [];
       
-      // Fetch Firestore bookings
-      const bookingsSnapshot = await getDocs(collection(firestore, 'bookings'));
+      // Fetch Firestore bookings (only Cal.com bookings - internal system removed)
+      const bookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('isCalComBooking', '==', true)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
       const firestoreBookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -872,9 +876,12 @@ export default function MentorManagement() {
         if (bookingGeneratedFilter === 'real' && hasGeneratedProfile) return false;
       }
       
-      // Filter by booking method
+      // Filter by booking method (only Cal.com bookings now - internal system removed)
+      // Only show Cal.com bookings
+      if (!extendedBooking.isCalComBooking) return false;
+      
       if (bookingMethodFilter !== 'all') {
-        const method = extendedBooking.bookingMethod || 'internal';
+        const method = extendedBooking.bookingMethod || 'calcom';
         if (method !== bookingMethodFilter) return false;
       }
       
@@ -1163,13 +1170,13 @@ export default function MentorManagement() {
 
   // Booking statistics helper functions
   const getBookingStats = () => {
-    const totalBookings = bookings.length;
-    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
-    const pendingBookings = bookings.filter(b => b.status === 'pending').length;
-    const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
-    const calComBookings = bookings.filter(b => b.isCalComBooking).length;
-    const internalBookings = bookings.filter(b => !b.isCalComBooking).length;
-    const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
+    // Only count Cal.com bookings (internal booking system removed)
+    const calComBookings = bookings.filter(b => b.isCalComBooking);
+    const totalBookings = calComBookings.length;
+    const confirmedBookings = calComBookings.filter(b => b.status === 'confirmed').length;
+    const pendingBookings = calComBookings.filter(b => b.status === 'pending').length;
+    const cancelledBookings = calComBookings.filter(b => b.status === 'cancelled').length;
+    const totalRevenue = calComBookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
     const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
     
     // Get unique mentors and mentees
@@ -1212,8 +1219,7 @@ export default function MentorManagement() {
       confirmedBookings,
       pendingBookings,
       cancelledBookings,
-      calComBookings,
-      internalBookings,
+      calComBookings: totalBookings, // All bookings are Cal.com now
       totalRevenue,
       completionRate,
       uniqueMentors,
@@ -1548,10 +1554,6 @@ export default function MentorManagement() {
                       <p style={{ color: '#00eaff' }}>{stats.calComBookings}</p>
                     </div>
                     <div className="stat-card">
-                      <h3>Internal Bookings</h3>
-                      <p style={{ color: '#ffb300' }}>{stats.internalBookings}</p>
-                    </div>
-                    <div className="stat-card">
                       <h3>Active Mentors</h3>
                       <p style={{ color: '#ffb300' }}>{stats.uniqueMentors}</p>
                     </div>
@@ -1598,12 +1600,11 @@ export default function MentorManagement() {
             </select>
             <select 
               value={bookingMethodFilter} 
-              onChange={e => setBookingMethodFilter(e.target.value as 'all' | 'internal' | 'calcom')} 
+              onChange={e => setBookingMethodFilter(e.target.value as 'all' | 'calcom')} 
               style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
             >
-              <option value="all">All Methods</option>
-              <option value="internal">Internal Bookings</option>
-              <option value="calcom">Cal.com Bookings</option>
+              <option value="all">All Bookings</option>
+              <option value="calcom">Cal.com Bookings Only</option>
             </select>
             <div style={{ fontSize: '12px', color: '#888', marginLeft: '8px' }}>
               🎲 = Generated Profile | 📅 = Cal.com

@@ -1,5 +1,6 @@
 import { firestore } from '../../../../firebase/firebase';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { loggers } from '../../../../utils/logger';
 
 // Always use production Cal.com proxy server
 const CALCOM_API_BASE = 'https://bgr8-cal-server.onrender.com';
@@ -152,9 +153,9 @@ export class CalComTokenManager {
         updatedAt: Timestamp.now()
       };
       await setDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), apiKeyData);
-      console.log(`Cal.com API key stored for mentor: ${mentorUid}`);
+      loggers.booking.log(`Cal.com API key stored for mentor: ${mentorUid}`);
     } catch (error) {
-      console.error('Error storing Cal.com API key:', error);
+      loggers.booking.error('Error storing Cal.com API key:', error);
       throw new Error('Failed to store Cal.com API key securely');
     }
   }
@@ -168,7 +169,7 @@ export class CalComTokenManager {
       }
       return apiKeyDoc.data() as CalComApiKeyData;
     } catch (error) {
-      console.error('Error retrieving Cal.com API key:', error);
+      loggers.booking.error('Error retrieving Cal.com API key:', error);
       return null;
     }
   }
@@ -183,9 +184,9 @@ export class CalComTokenManager {
         apiKey,
         updatedAt: Timestamp.now()
       });
-      console.log(`Cal.com API key updated for mentor: ${mentorUid}`);
+      loggers.booking.log(`Cal.com API key updated for mentor: ${mentorUid}`);
     } catch (error) {
-      console.error('Error updating Cal.com API key:', error);
+      loggers.booking.error('Error updating Cal.com API key:', error);
       throw new Error('Failed to update Cal.com API key');
     }
   }
@@ -194,9 +195,9 @@ export class CalComTokenManager {
   static async removeApiKey(mentorUid: string): Promise<void> {
     try {
       await deleteDoc(doc(firestore, this.COLLECTION_NAME, mentorUid));
-      console.log(`Cal.com API key removed for mentor: ${mentorUid}`);
+      loggers.booking.log(`Cal.com API key removed for mentor: ${mentorUid}`);
     } catch (error) {
-      console.error('Error removing Cal.com API key:', error);
+      loggers.booking.error('Error removing Cal.com API key:', error);
       throw new Error('Failed to remove Cal.com API key');
     }
   }
@@ -234,7 +235,7 @@ export class CalComService {
       const data = await response.json();
       return data.event_types || [];
     } catch (error) {
-      console.error('Error fetching Cal.com event types:', error);
+      loggers.booking.error('Error fetching Cal.com event types:', error);
       throw error;
     }
   }
@@ -264,7 +265,7 @@ export class CalComService {
       const data = await response.json();
       return data.booking;
     } catch (error) {
-      console.error('Error creating Cal.com booking:', error);
+      loggers.booking.error('Error creating Cal.com booking:', error);
       throw error;
     }
   }
@@ -289,7 +290,7 @@ export class CalComService {
         throw new Error(`Cal.com cancellation failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error canceling Cal.com booking:', error);
+      loggers.booking.error('Error canceling Cal.com booking:', error);
       throw error;
     }
   }
@@ -316,7 +317,7 @@ export class CalComService {
       const data = await response.json();
       return data.bookings || [];
     } catch (error) {
-      console.error('Error fetching Cal.com bookings:', error);
+      loggers.booking.error('Error fetching Cal.com bookings:', error);
       throw error;
     }
   }
@@ -345,7 +346,7 @@ export class CalComService {
           });
           
           if (!response.ok) {
-            console.warn(`Failed to get availability for event type ${eventType.id}: ${response.status}`);
+            loggers.booking.warn(`Failed to get availability for event type ${eventType.id}: ${response.status}`);
             return null;
           }
           
@@ -361,7 +362,7 @@ export class CalComService {
           
           return availability;
         } catch (error) {
-          console.error(`Error fetching availability for event type ${eventType.id}:`, error);
+          loggers.booking.error(`Error fetching availability for event type ${eventType.id}:`, error);
           return null;
         }
       });
@@ -369,7 +370,7 @@ export class CalComService {
       const availabilities = await Promise.all(availabilityPromises);
       return availabilities.filter(Boolean).flat() as CalComAvailability[];
     } catch (error) {
-      console.error('Error fetching Cal.com availability:', error);
+      loggers.booking.error('Error fetching Cal.com availability:', error);
       throw error;
     }
   }
@@ -393,7 +394,7 @@ export class CalComService {
       const data = await response.json();
       return data.schedules || [];
     } catch (error) {
-      console.error('Error fetching Cal.com schedules:', error);
+      loggers.booking.error('Error fetching Cal.com schedules:', error);
       throw error;
     }
   }
@@ -463,7 +464,7 @@ export const CalComUtils = {
       const pathParts = url.pathname.split('/').filter(Boolean);
       return pathParts[0] || null;
     } catch (error) {
-      console.error('Error extracting Cal.com username:', error);
+      loggers.booking.error('Error extracting Cal.com username:', error);
       return null;
     }
   },

@@ -8,6 +8,7 @@ import { CalComService, CalComBookingResponse } from './calComService';
 import { SessionsService } from '../../../../services/sessionsService';
 import BannerWrapper from '../../../../components/ui/BannerWrapper';
 import Modal from '../../../ui/Modal';
+import { loggers } from '../../../../utils/logger';
 import './CalComModal.css';
 
 interface CalComModalProps {
@@ -44,7 +45,7 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
           snapshot.docs.map(doc => doc.data().calComBookingId).filter(Boolean)
         );
       } catch (error) {
-        console.error('Error initializing existing bookings:', error);
+        loggers.booking.error('Error initializing existing bookings:', error);
       }
     };
 
@@ -53,15 +54,21 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
     // Start polling for new bookings
     const checkForNewBookings = async () => {
       const mentorId = String(mentor.uid || mentor.id || '');
-      if (!mentorId) return;
+      if (!mentorId) {
+        loggers.booking.warn('⚠️ Cannot check bookings: mentorId is missing');
+        return;
+      }
       
       try {
+        loggers.booking.log('🔍 Polling Cal.com for bookings...', { mentorId });
         // Fetch bookings from Cal.com API
         const calComBookings = await CalComService.getBookings(
           mentorId,
           new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Last 24 hours
           new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // Next 30 days
         );
+
+        loggers.booking.log(`📋 Found ${calComBookings.length} Cal.com bookings to check`);
 
         // Check for new bookings
         for (const calBooking of calComBookings) {
@@ -86,11 +93,19 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
           }
 
           // This is a new booking - save it
+          loggers.booking.log('🆕 New Cal.com booking detected, saving to Firebase:', {
+            calComBookingId: bookingId,
+            startTime: calBooking.startTime,
+            status: calBooking.status,
+            mentorId: mentor.uid,
+            menteeEmail: calBooking.attendees?.[0]?.email
+          });
           await saveBookingToFirebase(calBooking, mentor);
           lastCheckedBookingsRef.current.add(bookingId);
+          loggers.booking.log('✅ Booking processing complete');
         }
       } catch (error) {
-        console.error('Error checking for new bookings:', error);
+        loggers.booking.error('Error checking for new bookings:', error);
         // Don't show error to user - just log it
       }
     };
@@ -137,7 +152,7 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
             }
           }
         } catch (error) {
-          console.error('Error finding mentee by email:', error);
+          loggers.booking.error('Error finding mentee by email:', error);
         }
       }
 
@@ -198,10 +213,23 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
         calComAttendees: calBooking.attendees || []
       };
 
-      // Save booking
-      await addDoc(collection(firestore, 'bookings'), bookingData);
+      // Save booking to Firestore collection: /bookings/{documentId}
+      loggers.booking.log('💾 Saving booking to Firebase collection: bookings', {
+        calComBookingId: bookingData.calComBookingId,
+        mentorId: bookingData.mentorId,
+        menteeId: bookingData.menteeId,
+        meetingUrl: bookingData.sessionLink
+      });
+      
+      const bookingRef = await addDoc(collection(firestore, 'bookings'), bookingData);
+      loggers.booking.log('✅ Booking saved to Firebase:', {
+        firestoreDocumentId: bookingRef.id,
+        collection: 'bookings',
+        path: `bookings/${bookingRef.id}`,
+        calComBookingId: bookingData.calComBookingId
+      });
 
-      // Create session
+      // Create session in Firestore collection: /sessions/{documentId}
       try {
         const sessionData = {
           bookingId: calBooking.id?.toString() || calBooking.uid,
@@ -217,14 +245,25 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
           feedbackSubmitted_mentee: false
         };
 
-        await SessionsService.createSession(sessionData);
-      } catch (sessionError) {
-        console.error('Failed to create session:', sessionError);
-      }
+        loggers.booking.log('💾 Creating session in Firebase collection: sessions', {
+          bookingId: sessionData.bookingId,
+          mentorId: sessionData.mentorId,
+          menteeId: sessionData.menteeId
+        });
 
-      console.log('✅ Booking saved to Firebase:', calBooking.id);
+        const sessionId = await SessionsService.createSession(sessionData);
+        loggers.booking.log('✅ Session created in Firebase:', {
+          firestoreDocumentId: sessionId,
+          collection: 'sessions',
+          path: `sessions/${sessionId}`,
+          bookingId: sessionData.bookingId
+        });
+      } catch (sessionError) {
+        loggers.booking.error('❌ Failed to create session:', sessionError);
+        // Don't throw - booking is already saved
+      }
     } catch (error) {
-      console.error('Error saving booking to Firebase:', error);
+      loggers.booking.error('Error saving booking to Firebase:', error);
       throw error;
     }
   };
@@ -258,7 +297,7 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
         setBookingMessage('No recent bookings found. If you just completed a booking, it should appear shortly. The system automatically checks for new bookings every 10 seconds.');
       }
     } catch (error) {
-      console.error('Error verifying booking:', error);
+      loggers.booking.error('Error verifying booking:', error);
       setBookingStatus('error');
       setBookingMessage('Unable to verify booking status. Please check your bookings page.');
     }

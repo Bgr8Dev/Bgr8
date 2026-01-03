@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useIsMobile } from '../../../../hooks/useIsMobile';
-import { doc, getDoc, collection, addDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../../firebase/firebase';
 import { FaClock, FaTimes, FaCalendarAlt, FaExternalLinkAlt, FaListUl, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { getName, MentorMenteeProfile } from '../algorithm/matchUsers';
 import { CalComService, CalComEventType, CalComTokenManager } from '../CalCom/calComService';
-import { Booking } from '../../../../types/bookings';
 import { SessionsService } from '../../../../services/sessionsService';
 import BannerWrapper from '../../../../components/ui/BannerWrapper';
+import { loggers } from '../../../../utils/logger';
 import '../MentorProgram.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -77,7 +77,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           setAvailability(availabilityDoc.data() as MentorAvailability);
         }
       } catch (error) {
-        console.error('Error loading availability:', error);
+        loggers.booking.error('Error loading availability:', error);
       }
     };
 
@@ -109,7 +109,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
               const eventTypes = await CalComService.getEventTypes(mentor.uid);
               setCalComEventTypes(eventTypes);
             } catch (eventTypesError) {
-              console.error('Error fetching Cal.com event types:', eventTypesError);
+              loggers.booking.error('Error fetching Cal.com event types:', eventTypesError);
               // Don't show error to user, just disable Cal.com option
             } finally {
               setLoadingEventTypes(false);
@@ -117,7 +117,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           }
         } catch (err) {
           setError('Failed to load mentor data');
-          console.error('Error fetching mentor data:', err);
+          loggers.booking.error('Error fetching mentor data:', err);
         } finally {
           setLoading(false);
         }
@@ -168,15 +168,15 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   };
 
   const handleBooking = async () => {
-    console.log('=== BOOKING BUTTON CLICKED ===');
-    console.log('Current user:', currentUser);
-    console.log('Selected slot:', selectedSlot);
-    console.log('Session date:', sessionDate);
-    console.log('Selected event type:', selectedEventType);
-    console.log('=============================');
+    loggers.booking.log('=== BOOKING BUTTON CLICKED ===');
+    loggers.booking.log('Current user:', currentUser);
+    loggers.booking.log('Selected slot:', selectedSlot);
+    loggers.booking.log('Session date:', sessionDate);
+    loggers.booking.log('Selected event type:', selectedEventType);
+    loggers.booking.log('=============================');
     
     if (!currentUser || !selectedSlot || !sessionDate) {
-      console.error('Missing required data for booking:', { currentUser, selectedSlot, sessionDate });
+      loggers.booking.error('Missing required data for booking:', { currentUser, selectedSlot, sessionDate });
       setError('Missing required data for booking. Please try again.');
       return;
     }
@@ -188,7 +188,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     }
 
     // Debug log
-    console.log('mentor.email:', mentor.email, 'currentUser.email:', currentUser.email);
+    loggers.booking.log('mentor.email:', mentor.email, 'currentUser.email:', currentUser.email);
 
     let mentorEmail = mentor.email;
     let menteeEmail = currentUser.email;
@@ -202,7 +202,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           mentorEmail = mentorData.email || '';
         }
       } catch (err) {
-        console.error('Error fetching mentor profile for email fallback:', err);
+        loggers.booking.error('Error fetching mentor profile for email fallback:', err);
       }
     }
 
@@ -215,12 +215,12 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           menteeEmail = menteeData.email || '';
         }
       } catch (err) {
-        console.error('Error fetching mentee profile for email fallback:', err);
+        loggers.booking.error('Error fetching mentee profile for email fallback:', err);
       }
     }
 
     // Final debug log
-    console.log('Final mentorEmail:', mentorEmail, 'Final menteeEmail:', menteeEmail);
+    loggers.booking.log('Final mentorEmail:', mentorEmail, 'Final menteeEmail:', menteeEmail);
 
     if (!mentorEmail || !menteeEmail) {
       setError('Mentor or mentee email is missing. Cannot create booking.');
@@ -251,7 +251,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create booking. Please try again.');
-      console.error('Error creating booking:', err);
+      loggers.booking.error('Error creating booking:', err);
     } finally {
       setBooking(false);
     }
@@ -352,7 +352,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
       await SessionsService.createSession(sessionData);
     } catch (sessionError) {
-      console.error('Failed to create session:', sessionError);
+      loggers.booking.error('Failed to create session:', sessionError);
       // Don't fail the booking if session creation fails
     }
     
