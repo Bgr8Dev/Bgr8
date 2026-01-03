@@ -9,6 +9,7 @@ export interface ProfileFormData {
   firstName: string;
   lastName: string;
   email: string;
+  aboutMe: string;
   phone: string;
   age: string;
   degree: string;

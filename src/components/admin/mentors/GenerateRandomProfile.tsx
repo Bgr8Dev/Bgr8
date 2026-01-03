@@ -967,6 +967,7 @@ export default function GenerateRandomProfile() {
     lastName?: string;
     name?: string;
     email?: string;
+    aboutMe?: string;
     phone?: string;
     age?: string;
     degree?: string;
@@ -996,6 +997,7 @@ export default function GenerateRandomProfile() {
       lastName: data.lastName || '',
       name: data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'Unknown',
       email: data.email || '',
+      aboutMe: data.aboutMe || '',
       phone: data.phone || '',
       age: data.age || '',
       degree: data.degree || '',
@@ -1283,6 +1285,7 @@ export default function GenerateRandomProfile() {
         isMentee: type === 'mentee',
         type: type,
         isGenerated: true,
+        aboutMe: `I am a ${type} looking to ${type === 'mentor' ? 'help others grow' : 'learn and develop'} in my field.`,
       };
     }
     
@@ -1329,6 +1332,7 @@ export default function GenerateRandomProfile() {
       isMentee: selectedArchetype.type === 'mentee',
       type: selectedArchetype.type,
       isGenerated: true,
+      aboutMe: `I am a ${selectedArchetype.type} looking to ${selectedArchetype.type === 'mentor' ? 'help others grow' : 'learn and develop'} in my field.`,
     };
   };
 

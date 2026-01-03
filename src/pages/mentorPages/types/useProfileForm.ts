@@ -7,6 +7,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     firstName: '',
     lastName: '',
     email: '',
+    aboutMe: '',
     phone: '',
     age: '',
     degree: '',
@@ -37,6 +38,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     if (!profileForm.firstName.trim()) errors.firstName = 'First name is required';
     if (!profileForm.lastName.trim()) errors.lastName = 'Last name is required';
     if (!profileForm.email.trim()) errors.email = 'Email is required';
+    // if (!profileForm.aboutMe.trim()) errors.email = 'About Me is required'; // TODO: Uncomment if About Me becomes required
     if (!profileForm.phone.trim()) errors.phone = 'Phone number is required';
     if (!profileForm.age.trim()) errors.age = 'Age is required';
     if (!profileForm.county.trim()) errors.county = 'County is required';
@@ -123,10 +125,11 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     let totalFields = 0;
     
     // Personal Information (6 fields)
-    totalFields += 6;
+    totalFields += 7;
     if (profileForm.firstName.trim()) completedFields++;
     if (profileForm.lastName.trim()) completedFields++;
     if (profileForm.email.trim()) completedFields++;
+    if (profileForm.aboutMe.trim()) completedFields++;
     if (profileForm.phone.trim()) completedFields++;
     if (profileForm.age.trim()) completedFields++;
     if (profileForm.county.trim()) completedFields++;
@@ -257,6 +260,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
       firstName: '',
       lastName: '',
       email: '',
+      aboutMe: '',
       phone: '',
       age: '',
       degree: '',

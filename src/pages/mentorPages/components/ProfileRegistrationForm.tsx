@@ -20,7 +20,7 @@ interface ProfileRegistrationFormProps {
   sectionStatus: SectionStatus;
   userProfile?: UserProfile | null;
   onBack: () => void;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   onArrayChange: (field: keyof ProfileFormData, value: string[]) => void;
   onPastProfessionChange: (index: number, value: string) => void;
   onAddPastProfession: () => void;
@@ -212,6 +212,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       firstName: randomFirstName,
       lastName: randomLastName,
       email: randomEmail,
+      aboutMe: `Hello, I'm randomly generated`,
       phone: randomPhone,
       age: randomAge,
       degree: randomDegree,
@@ -267,6 +268,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       firstName: 'Enter your legal first name as it appears on official documents',
       lastName: 'Enter your legal last name as it appears on official documents',
       email: 'We\'ll use this to send you important updates and match notifications',
+      aboutMe: 'Tell us a little bit about yourself',
       phone: 'Your phone number helps mentors/mentees contact you for sessions',
       age: `Mentees must be between 16-19 years old. Mentors must be 18 or older`,
       degree: selectedRole === MENTOR 
@@ -575,6 +577,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       'First Name': 'firstName',
       'Last Name': 'lastName',
       'Email': 'email',
+      'About Me': 'aboutMe',
       'Phone Number': 'phone',
       'Age': 'age',
       'County': 'county',
@@ -724,6 +727,38 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
                 <div className="validation-error">{validationErrors.email}</div>
               )}
             </div>
+            
+            {selectedRole === MENTOR && (
+              <div className="input-group">
+                <label htmlFor="aboutMe" className="field-label">
+                  About Me
+                  <FaInfoCircle
+                    className="info-icon"
+                    data-tooltip={getFieldTooltip('aboutMe')}
+                  />
+                </label>
+
+                <textarea
+                  id="aboutMe"
+                  name="aboutMe"
+                  value={profileForm.aboutMe || ''}
+                  onChange={onFormChange}
+                  className={validationErrors.aboutMe ? 'error' : ''}
+                  placeholder="Tell us about yourself, your background, and what you’re looking for..."
+                  rows={5}
+                  maxLength={800}
+                  style={{ resize: 'vertical' }}
+                  data-tooltip={getFieldTooltip('aboutMe')}
+                />
+
+                {validationErrors.aboutMe && (
+                  <div className="validation-error">
+                    {validationErrors.aboutMe}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="input-group">
               <label htmlFor="phone" className="field-label">
                 Phone Number *

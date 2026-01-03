@@ -47,7 +47,7 @@ const AdminMentorModal: React.FC<AdminMentorModalProps> = ({
     }
   }, [user]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditUser((prev) => {
       if (!prev) return null;
@@ -211,6 +211,26 @@ const AdminMentorModal: React.FC<AdminMentorModalProps> = ({
               <div className="amm-field-value">{editUser?.email || 'Not provided'}</div>
             )}
           </div>
+
+          <div className="amm-form-group">
+          <label>About Me</label>
+          {mode === 'edit' ? (
+            <textarea
+              name="aboutMe"
+              value={editUser?.aboutMe || ''}
+              onChange={handleInputChange}
+              placeholder="Tell us a little bit about yourself..."
+              rows={4}
+              maxLength={800}
+              style={{ resize: 'vertical' }}
+            />
+          ) : (
+            <div className="amm-field-value">
+              {editUser?.aboutMe || 'Not provided'}
+            </div>
+          )}
+        </div>
+
 
           <div className="amm-form-group">
             <label>Phone</label>

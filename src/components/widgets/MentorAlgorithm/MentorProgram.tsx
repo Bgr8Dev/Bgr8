@@ -30,6 +30,7 @@ export default function MentorProgram() {
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
+    aboutMe: '',
     email: '',
     phone: '',
     age: '',
@@ -257,6 +258,7 @@ export default function MentorProgram() {
       userRef: `users/${currentUser.uid}`, // Two-way key reference to user document
       firstName: form.firstName || 'no name provided',
       lastName: form.lastName || 'no name provided',
+      aboutMe: form.aboutMe || '',
       email: form.email,
       phone: form.phone,
       age: form.age,
@@ -300,7 +302,7 @@ export default function MentorProgram() {
         setMentees(prev => [...prev, user]);
       }
       setForm({
-        firstName: '', lastName: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
+        firstName: '', lastName: '', email: '', aboutMe: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], industries: [],
       });
@@ -320,7 +322,7 @@ export default function MentorProgram() {
       setShowForm(true);
       setSwipeDirection(null);
       setForm({
-        firstName: '', lastName: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
+        firstName: '', lastName: '', email: '', aboutMe: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
         profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
         skills: [], lookingFor: [], industries: [],
       });
@@ -333,7 +335,7 @@ export default function MentorProgram() {
     setSelectedRole(null);
     setShowForm(false);
     setForm({
-      firstName: '', lastName: '', email: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
+      firstName: '', lastName: '', email: '', aboutMe: '', phone: '', age: '', degree: '', educationLevel: '', county: '',
       profession: '', pastProfessions: [''], linkedin: '', calCom: '', hobbies: [''], ethnicity: '', religion: '',
       skills: [], lookingFor: [], industries: [],
     });
@@ -525,6 +527,7 @@ export default function MentorProgram() {
                       <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required />
                       <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required />
                       <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required type="email" />
+                      <input name="aboutMe" value={form.aboutMe} onChange={handleChange} placeholder="About Me" />
                       <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" required type="tel" />
                       <input name="age" value={form.age} onChange={handleChange} placeholder="Age" required type="number" min="10" max="100" />
                       <select name="county" value={form.county} onChange={handleChange} required className="mentor-form-select">
