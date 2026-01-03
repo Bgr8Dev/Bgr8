@@ -490,8 +490,30 @@ const AdminEmails: React.FC = () => {
     }
   };
 
+  // Helper function to check if HTML content has actual text
+  const hasTextContent = (html: string | undefined): boolean => {
+    if (!html) return false;
+    // Create a temporary div to parse HTML and extract text
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    // Check if there's actual text (not just whitespace)
+    return textContent.trim().length > 0;
+  };
+
+  // Handle draft changes - merge updates with existing state
+  const handleDraftChange = useCallback((updates: Partial<EmailDraft>) => {
+    setCurrentDraft(prev => ({
+      ...prev,
+      ...updates
+    }));
+  }, []);
+
   const handleSaveDraft = async () => {
-    if (!currentDraft.subject || !currentDraft.content) {
+    const subject = currentDraft.subject?.trim() || '';
+    const hasContent = hasTextContent(currentDraft.content);
+    
+    if (!subject || !hasContent) {
       showNotification('error', 'Please fill in subject and content');
       return;
     }
@@ -521,7 +543,7 @@ const AdminEmails: React.FC = () => {
       
       showNotification('success', 'Draft saved successfully!');
     } catch (error) {
-      console.error('Error saving draft:', error);
+      loggers.error.error('Error saving draft:', error);
       showNotification('error', 'Failed to save draft');
     } finally {
       setIsSaving(false);
@@ -529,7 +551,10 @@ const AdminEmails: React.FC = () => {
   };
 
   const handleSendEmail = async () => {
-    if (!currentDraft.subject || !currentDraft.content) {
+    const subject = currentDraft.subject?.trim() || '';
+    const hasContent = hasTextContent(currentDraft.content);
+    
+    if (!subject || !hasContent) {
       showNotification('error', 'Please fill in subject and content');
       return;
     }
@@ -822,7 +847,7 @@ const AdminEmails: React.FC = () => {
             bulkEmailInput={bulkEmailInput}
             isSaving={isSaving}
             isSending={isSending}
-            onDraftChange={setCurrentDraft}
+            onDraftChange={handleDraftChange}
             onSaveDraft={handleSaveDraft}
             onSendEmail={handleSendEmail}
             onTogglePreview={() => setShowPreview(!showPreview)}
