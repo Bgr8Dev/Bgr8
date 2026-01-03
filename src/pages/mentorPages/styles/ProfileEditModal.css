@@ -477,6 +477,7 @@
 .pem-form-select,
 .pem-form-textarea,
 .pem-input-group input,
+.pem-input-group textarea,
 .pem-input-group select {
   padding: 14px 18px;
   border: 2px solid var(--gray-200);
@@ -514,6 +515,7 @@
 .pem-form-input:focus,
 .pem-form-select:focus,
 .pem-form-textarea:focus,
+.pem-input-group textarea:focus,
 .pem-input-group input:focus,
 .pem-input-group select:focus {
   outline: none;
@@ -526,6 +528,7 @@
 .pem-form-select.error,
 .pem-form-textarea.error,
 .pem-input-group input.error,
+.pem-input-group textarea.error,
 .pem-input-group select.error {
   border-color: var(--error);
 }
@@ -2244,6 +2247,7 @@
   .pem-form-select,
   .pem-form-textarea,
   .pem-input-group input,
+  .pem-input-group textarea,
   .pem-input-group select {
     padding: 10px 12px;
     font-size: 14px;
@@ -2494,6 +2498,7 @@
   .pem-form-input:focus,
   .pem-form-select:focus,
   .pem-form-textarea:focus,
+  .pem-input-group textarea:focus,
   .pem-input-group input:focus,
   .pem-input-group select:focus {
     transform: none;
@@ -2557,6 +2562,7 @@
 .pem-form-select,
 .pem-form-textarea,
 .pem-input-group input,
+.pem-input-group textarea,
 .pem-input-group select {
   color: coral;
 }
@@ -2566,6 +2572,7 @@
 .pem-form-select::placeholder,
 .pem-form-textarea::placeholder,
 .pem-input-group input::placeholder,
+.pem-input-group textarea::placeholder,
 .pem-input-group select::placeholder {
   color: coral;
   opacity: 0.7;
