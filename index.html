@@ -636,7 +636,30 @@
     
     <!-- Error Tracking -->
     <script nonce="csp-nonce-12345">
+      // Suppress Sentry errors blocked by ad blockers (harmless)
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const errorMessage = args.join(' ');
+        // Filter out Sentry errors blocked by ad blockers
+        if (errorMessage.includes('sentry.io') || 
+            errorMessage.includes('ERR_BLOCKED_BY_ADBLOCKER') ||
+            errorMessage.includes('net::ERR_BLOCKED_BY_CLIENT')) {
+          return; // Silently ignore these harmless errors
+        }
+        originalConsoleError.apply(console, args);
+      };
+      
       window.addEventListener('error', (event) => {
+        // Ignore Sentry-related network errors blocked by ad blockers
+        if (event.message && (
+          event.message.includes('sentry.io') ||
+          event.message.includes('ERR_BLOCKED_BY_ADBLOCKER') ||
+          event.message.includes('ERR_BLOCKED_BY_CLIENT')
+        )) {
+          event.preventDefault(); // Prevent error from showing in console
+          return;
+        }
+        
         if (typeof gtag !== 'undefined') {
           gtag('event', 'exception', {
             description: event.error?.message || 'Unknown error',
@@ -646,9 +669,18 @@
       });
       
       window.addEventListener('unhandledrejection', (event) => {
+        // Ignore Sentry-related promise rejections
+        const reason = event.reason?.message || String(event.reason || '');
+        if (reason.includes('sentry.io') || 
+            reason.includes('ERR_BLOCKED_BY_ADBLOCKER') ||
+            reason.includes('ERR_BLOCKED_BY_CLIENT')) {
+          event.preventDefault(); // Prevent error from showing in console
+          return;
+        }
+        
         if (typeof gtag !== 'undefined') {
           gtag('event', 'exception', {
-            description: event.reason?.message || 'Unhandled promise rejection',
+            description: reason || 'Unhandled promise rejection',
             fatal: false
           });
         }
