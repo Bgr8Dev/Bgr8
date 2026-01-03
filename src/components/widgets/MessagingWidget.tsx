@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaComments, FaPaperPlane, FaSearch, FaPlus, FaCheck, FaCheckDouble, FaEllipsisV, FaInfoCircle } from 'react-icons/fa';
+import { FaComments, FaPaperPlane, FaSearch, FaPlus, FaCheck, FaCheckDouble, FaEllipsisV, FaInfoCircle, FaTrash, FaDownload } from 'react-icons/fa';
 import { Timestamp, getDoc, doc } from 'firebase/firestore';
 import BannerWrapper from '../ui/BannerWrapper';
 import Modal from '../ui/Modal';
@@ -270,6 +270,60 @@ const MessagingWidget: React.FC = () => {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!currentUser) return;
+    
+    if (!window.confirm('Are you sure you want to delete this message? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await MessagingService.deleteMessage(messageId, currentUser.uid);
+      // Refresh messages to show deleted state
+      if (selectedConversation) {
+        const msgs = await MessagingService.getMessages(selectedConversation.id);
+        setMessages(msgs);
+      }
+    } catch (err) {
+      console.error('Error deleting message:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete message';
+      setError(errorMessage);
+      setErrorModalMessage(errorMessage);
+      setShowErrorModal(true);
+    }
+  };
+
+  const handleExportConversation = async () => {
+    if (!selectedConversation || !currentUser) return;
+    
+    try {
+      setLoading(true);
+      const exportData = await MessagingService.exportConversationData(
+        currentUser.uid,
+        selectedConversation.id
+      );
+      
+      // Create download link
+      const blob = new Blob([exportData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `conversation-${selectedConversation.id}-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting conversation:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to export conversation';
+      setError(errorMessage);
+      setErrorModalMessage(errorMessage);
+      setShowErrorModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleConversationClick = (conversation: Conversation) => {
     setSelectedConversation(conversation);
     setMessages([]); // Clear messages when switching conversations
@@ -444,6 +498,14 @@ const MessagingWidget: React.FC = () => {
                     </div>
                   </div>
                   <div className="conversation-actions">
+                    <button 
+                      className="action-btn" 
+                      onClick={handleExportConversation}
+                      title="Export conversation data (GDPR)"
+                      aria-label="Export conversation"
+                    >
+                      <FaDownload />
+                    </button>
                     <button className="action-btn" title="More options" aria-label="More options">
                       <FaEllipsisV />
                     </button>
@@ -494,11 +556,16 @@ const MessagingWidget: React.FC = () => {
                             )}
                             <div className="message-content">
                               <div className={`message-bubble ${isSystem ? 'system-message' : ''}`}>
-                                <p>{message.content}</p>
+                                <p style={{ 
+                                  fontStyle: message.isDeleted ? 'italic' : 'normal',
+                                  opacity: message.isDeleted ? 0.6 : 1
+                                }}>
+                                  {message.isDeleted ? '[Message deleted]' : message.content}
+                                </p>
                                 <span className="message-time">
                                   {formatTimestamp(message.timestamp)}
                                 </span>
-                                {isSent && (
+                                {isSent && !message.isDeleted && (
                                   <span className="message-status">
                                     {message.isRead ? (
                                       <FaCheckDouble className="read-indicator" />
@@ -506,6 +573,16 @@ const MessagingWidget: React.FC = () => {
                                       <FaCheck className="delivered-indicator" />
                                     )}
                                   </span>
+                                )}
+                                {isSent && !message.isDeleted && (
+                                  <button
+                                    className="message-delete-btn"
+                                    onClick={() => handleDeleteMessage(message.id)}
+                                    title="Delete message"
+                                    aria-label="Delete message"
+                                  >
+                                    <FaTrash />
+                                  </button>
                                 )}
                               </div>
                             </div>

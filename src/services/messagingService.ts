@@ -28,6 +28,7 @@ import {
 import { firestore } from '../firebase/firebase';
 import { getBestMatchesForUser } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { MentorMenteeProfile } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { loggers } from '../utils/logger';
 
 export interface Message {
   id: string;
@@ -43,6 +44,7 @@ export interface Message {
   isDelivered: boolean;
   type: 'text' | 'image' | 'file' | 'system';
   attachments?: MessageAttachment[];
+  isDeleted?: boolean;
 }
 
 export interface MessageAttachment {
@@ -69,7 +71,7 @@ export interface Conversation {
 }
 
 // GDPR-compliant introductory message
-export const GDPR_INTRO_MESSAGE = "Do not share sensitive personal information (ID documents, health data, criminal history, safeguarding disclosures). This chat is logged for support and safety purposes.";
+export const GDPR_INTRO_MESSAGE = "Privacy Notice: Your messages are stored securely and may be reviewed for support and safety purposes. You can delete your own messages at any time and export your conversation data. Do not share sensitive personal information such as ID documents, health data, criminal history, or safeguarding disclosures. By continuing, you acknowledge this privacy notice.";
 
 export class MessagingService {
   private static readonly MESSAGES_COLLECTION = 'messages';
@@ -104,7 +106,7 @@ export class MessagingService {
       const matches2 = await getBestMatchesForUser(userId2);
       return matches2.some(match => match.user.uid === userId1);
     } catch (error) {
-      console.error('Error checking if users are matched:', error);
+      loggers.error.error('Error checking if users are matched:', error);
       return false;
     }
   }
@@ -218,7 +220,7 @@ export class MessagingService {
       // Increment unread count for recipient
       await MatchesService.incrementUnreadCount(recipientId, senderId);
     } catch (error) {
-      console.error('Error updating match timestamp:', error);
+      loggers.error.error('Error updating match timestamp:', error);
       // Don't fail the message send if this fails
     }
 
@@ -453,7 +455,7 @@ export class MessagingService {
       callback(messages);
     }, (error) => {
       // Handle errors gracefully (e.g., missing index)
-      console.error('Error in message subscription:', error);
+      loggers.error.error('Error in message subscription:', error);
       // Still call callback with empty array to prevent UI errors
       callback([]);
     });
@@ -531,6 +533,78 @@ export class MessagingService {
       type: 'system',
       attachments: []
     });
+  }
+
+  /**
+   * Delete a message (only if user is the sender) - GDPR Article 17 (Right to Erasure)
+   * Uses soft delete to maintain conversation integrity
+   */
+  static async deleteMessage(messageId: string, userId: string): Promise<void> {
+    const messageRef = doc(firestore, this.MESSAGES_COLLECTION, messageId);
+    const messageDoc = await getDoc(messageRef);
+    
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+    
+    const messageData = messageDoc.data();
+    if (messageData.senderId !== userId) {
+      throw new Error('You can only delete your own messages');
+    }
+    
+    // Soft delete - mark as deleted rather than removing (maintains conversation flow)
+    await updateDoc(messageRef, {
+      content: '[Message deleted]',
+      isDeleted: true,
+      deletedAt: serverTimestamp(),
+      deletedBy: userId
+    });
+  }
+
+  /**
+   * Export conversation data for GDPR compliance - Article 15 (Right of Access) & Article 20 (Data Portability)
+   */
+  static async exportConversationData(userId: string, conversationId: string): Promise<string> {
+    // Get all messages in the conversation
+    const messages = await this.getMessages(conversationId, 1000); // Get up to 1000 messages
+    
+    // Filter to only messages where user is sender or recipient
+    const userMessages = messages.filter(msg => 
+      msg.senderId === userId || msg.recipientId === userId
+    );
+    
+    // Get conversation details
+    const conversationRef = doc(firestore, this.CONVERSATIONS_COLLECTION, conversationId);
+    const conversationDoc = await getDoc(conversationRef);
+    const conversationData = conversationDoc.exists() ? conversationDoc.data() : null;
+    
+    // Format as JSON
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      userId,
+      conversationId,
+      conversation: conversationData,
+      messages: userMessages.map(msg => ({
+        id: msg.id,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        recipientId: msg.recipientId,
+        recipientName: msg.recipientName,
+        content: msg.content,
+        timestamp: msg.timestamp instanceof Date 
+          ? msg.timestamp.toISOString() 
+          : msg.timestamp instanceof Timestamp 
+          ? msg.timestamp.toDate().toISOString()
+          : new Date(msg.timestamp).toISOString(),
+        type: msg.type,
+        isRead: msg.isRead,
+        isDelivered: msg.isDelivered
+      })),
+      totalMessages: userMessages.length,
+      privacyNotice: "This export contains your personal messaging data as required by GDPR Article 15 (Right of Access) and Article 20 (Data Portability)."
+    };
+    
+    return JSON.stringify(exportData, null, 2);
   }
 }
 
