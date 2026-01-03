@@ -170,10 +170,43 @@ async function sendSMTPEmail(emailData) {
     passwordPreview: process.env.ZOHO_PASSWORD ? process.env.ZOHO_PASSWORD.substring(0, 8) + '...' : 'undefined'
   });
 
+  // Determine SMTP host based on region
+  const smtpHost = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+    ? 'smtp.zoho.eu' 
+    : 'smtp.zoho.com';
+  
   // Create SMTP transporter with multiple options
   const smtpConfigs = [
-    // Option 1: Standard SMTP
+    // Option 1: Standard SMTP (TLS)
     {
+      host: smtpHost,
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
+        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000, // 30 seconds
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    },
+    // Option 2: Secure SMTP (SSL)
+    {
+      host: smtpHost,
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
+        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000, // 30 seconds
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    },
+    // Option 3: Fallback to US servers if EU fails
+    ...(smtpHost === 'smtp.zoho.eu' ? [{
       host: 'smtp.zoho.com',
       port: 587,
       secure: false,
@@ -181,19 +214,11 @@ async function sendSMTPEmail(emailData) {
         user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
         pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
       },
-      tls: { rejectUnauthorized: false }
-    },
-    // Option 2: Secure SMTP
-    {
-      host: 'smtp.zoho.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
-        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
-      },
-      tls: { rejectUnauthorized: false }
-    }
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    }] : [])
   ];
 
   let transporter;
@@ -216,7 +241,11 @@ async function sendSMTPEmail(emailData) {
   }
 
   if (!transporter) {
-    throw new Error(`All SMTP configurations failed. Last error: ${lastError.message}`);
+    const hasPassword = !!(process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD);
+    if (!hasPassword) {
+      throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables. You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
+    }
+    throw new Error(`All SMTP configurations failed. Last error: ${lastError?.message || 'Unknown error'}. Check your SMTP credentials and network connection.`);
   }
 
   // Email options

@@ -149,7 +149,8 @@ export class EmailApiService {
         },
         body: JSON.stringify(message),
         // Add timeout and credentials for production
-        signal: AbortSignal.timeout(30000), // 30 second timeout
+        // Increased timeout for SMTP which can take longer
+        signal: AbortSignal.timeout(60000), // 60 second timeout (SMTP can be slow)
         mode: 'cors', // Ensure CORS is handled properly
         credentials: 'omit', // Don't send cookies
       });
