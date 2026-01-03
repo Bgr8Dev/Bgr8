@@ -311,14 +311,41 @@ export const useMentorData = () => {
       const bookingsSnapshot = await getDocs(bookingsQuery);
       const bookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
+        
+        // Handle Timestamp conversion for sessionDate
+        let sessionDate: string = '';
+        if (data.sessionDate) {
+          if (data.sessionDate.toDate && typeof data.sessionDate.toDate === 'function') {
+            // It's a Firestore Timestamp
+            sessionDate = data.sessionDate.toDate().toISOString();
+          } else if (data.sessionDate instanceof Date) {
+            sessionDate = data.sessionDate.toISOString();
+          } else if (typeof data.sessionDate === 'string') {
+            sessionDate = data.sessionDate;
+          } else if (data.sessionDate.seconds) {
+            // Timestamp object with seconds property
+            sessionDate = new Date(data.sessionDate.seconds * 1000).toISOString();
+          }
+        } else if (data.day) {
+          // Fallback to day field if sessionDate is missing
+          sessionDate = new Date(data.day).toISOString();
+        }
+        
         return {
           id: doc.id,
           menteeName: data.menteeName || 'Unknown',
-          sessionDate: data.sessionDate || '',
+          sessionDate: sessionDate,
           startTime: data.startTime || '',
-          status: data.status || 'unknown'
+          status: data.status || 'pending',
+          endTime: data.endTime || '',
+          mentorId: data.mentorId || mentorId,
+          menteeId: data.menteeId || '',
+          sessionLink: data.sessionLink || data.meetLink || '',
+          isCalComBooking: data.isCalComBooking || false
         };
       });
+      
+      loggers.log.log(`📋 Fetched ${bookings.length} bookings for mentor ${mentorId}`);
       
       setMentorBookings(prev => ({
         ...prev,
