@@ -128,8 +128,6 @@ export default function MentorManagement() {
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [availabilitySearch, setAvailabilitySearch] = useState('');
-  const [availabilityStatusFilter, setAvailabilityStatusFilter] = useState<'all' | 'available' | 'booked'>('all');
-  const [availabilityTypeFilter, setAvailabilityTypeFilter] = useState<'all' | 'recurring' | 'specific'>('all');
 
   // Add state for sorting and searching
   const [userSortField, setUserSortField] = useState<'name' | 'type' | 'email' | 'profession' | 'education' | 'county'>('name');
@@ -647,9 +645,9 @@ export default function MentorManagement() {
     fetchUsers();
   }, []);
 
-  // Only fetch bookings when tab is switched to 'bookings'
+  // Fetch bookings when tab is switched to 'bookings' or 'analytics'
   useEffect(() => {
-    if (tab === 'bookings') {
+    if (tab === 'bookings' || tab === 'analytics') {
       fetchBookings();
     }
   }, [tab]);
@@ -680,7 +678,7 @@ export default function MentorManagement() {
         // Delete from Generated Availability collection if it exists
         try {
           await deleteDoc(doc(firestore, 'Generated Availability', user.id));
-        } catch (error) {
+        } catch {
           // Ignore if it doesn't exist
           console.log(`No availability data found for generated profile ${user.id}`);
         }
@@ -689,12 +687,12 @@ export default function MentorManagement() {
         await deleteDoc(doc(firestore, 'users', user.id, 'mentorProgram', 'profile'));
         
         // Delete all availability data for this user from subcollections
-        try {
-          await deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'));
-        } catch (error) {
-          // Ignore if it doesn't exist
-          console.log(`No availability data found for user ${user.id}`);
-        }
+              try {
+                await deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default'));
+              } catch {
+                // Ignore if it doesn't exist
+                console.log(`No availability data found for user ${user.id}`);
+              }
       }
       
       // Delete all bookings for this user (as mentor or mentee)
@@ -779,7 +777,7 @@ export default function MentorManagement() {
       
       // Delete generated availability data
       const generatedAvailabilityDeletions = generatedUsers.map(user => 
-        deleteDoc(doc(firestore, 'Generated Availability', user.id)).catch(error => {
+        deleteDoc(doc(firestore, 'Generated Availability', user.id)).catch(() => {
           // Ignore if it doesn't exist
           console.log(`No availability data found for generated profile ${user.id}`);
         })
@@ -794,7 +792,7 @@ export default function MentorManagement() {
       
       // Delete all availability data for real users from subcollections
       const realAvailabilityDeletions = realUsers.map(user => 
-        deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default')).catch(error => {
+        deleteDoc(doc(firestore, 'users', user.id, 'availabilities', 'default')).catch(() => {
           // Ignore if it doesn't exist
           console.log(`No availability data found for user ${user.id}`);
         })
@@ -895,23 +893,9 @@ export default function MentorManagement() {
         return false;
       }
       
-      // Filter by status
-      if (availabilityStatusFilter !== 'all') {
-        const hasMatchingStatus = availability.timeSlots.some(slot => 
-          availabilityStatusFilter === 'available' ? slot.isAvailable : !slot.isAvailable
-        );
-        if (!hasMatchingStatus) return false;
-      }
-      
-      // Filter by type
-      if (availabilityTypeFilter !== 'all') {
-        const hasMatchingType = availability.timeSlots.some(slot => slot.type === availabilityTypeFilter);
-        if (!hasMatchingType) return false;
-      }
-      
       return true;
     });
-  }, [availabilityData, availabilitySearch, availabilityStatusFilter, availabilityTypeFilter]);
+  }, [availabilityData, availabilitySearch]);
 
   // Filter and sort bookings data
   const filteredBookings = useMemo(() => {
@@ -969,18 +953,6 @@ export default function MentorManagement() {
     return availability.mentorProfile?.email || 'No email';
   };
 
-  const getTotalSlots = (availability: MentorAvailabilityWithProfile) => {
-    return availability.timeSlots.length;
-  };
-
-  const getAvailableSlots = (availability: MentorAvailabilityWithProfile) => {
-    return availability.timeSlots.filter(slot => slot.isAvailable).length;
-  };
-
-  const getBookedSlots = (availability: MentorAvailabilityWithProfile) => {
-    return availability.timeSlots.filter(slot => !slot.isAvailable).length;
-  };
-
   // Cal.com availability helper functions
   const getCalComTotalSlots = (availability: MentorAvailabilityWithProfile) => {
     if (!availability.calComAvailability) return 0;
@@ -999,223 +971,6 @@ export default function MentorManagement() {
       total + day.slots.filter(slot => !slot.available).length, 0);
   };
 
-  // Function to wipe all availability data from the database
-  const handleWipeAllAvailability = async () => {
-    const confirmed = window.confirm(
-      'DANGER: WIPE ALL AVAILABILITY DATA\n\n' +
-      'This will permanently delete ALL availability data from the database!\n\n' +
-      'This includes:\n' +
-      '• All mentor time slots\n' +
-      '• All recurring availability patterns\n' +
-      '• All specific date availability\n' +
-      '• All availability history\n\n' +
-      'This action CANNOT be undone!\n\n' +
-      'Are you absolutely sure you want to proceed?\n\n' +
-      'Type "WIPE" to confirm:'
-    );
-    
-    if (!confirmed) return;
-    
-    // Additional confirmation - user must type "WIPE"
-    const userInput = prompt('To confirm deletion, please type "WIPE" (case-sensitive):');
-    if (userInput !== 'WIPE') {
-      alert('Deletion cancelled. You did not type "WIPE" correctly.');
-      return;
-    }
-    
-    try {
-      // Get all users and check their mentorProgram subcollections to find mentors
-      const usersSnapshot = await getDocs(collection(firestore, 'users'));
-      let deletedCount = 0;
-      
-      // Delete availability from each mentor's subcollection
-      for (const userDoc of usersSnapshot.docs) {
-        try {
-          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
-          if (mentorProgramDoc.exists()) {
-            const userData = mentorProgramDoc.data();
-            if (userData.isMentor) {
-              try {
-                await deleteDoc(doc(firestore, 'users', userDoc.id, 'availabilities', 'default'));
-                deletedCount++;
-              } catch (error) {
-                console.error(`Error deleting availability for user ${userDoc.id}:`, error);
-              }
-            }
-          }
-        } catch (error) {
-          console.error(`Error checking mentor program for user ${userDoc.id}:`, error);
-        }
-      }
-      
-      // Refresh the availability data
-      await fetchAvailability();
-      
-      alert(`SUCCESS: Wiped availability data for ${deletedCount} mentors from the database!\n\nAll mentor availability data has been permanently removed.`);
-    } catch (error) {
-      console.error('Error wiping availability data:', error);
-      alert('Error deleting availability data. Please check the console for details.');
-    }
-  };
-
-  // Function to generate availability for generated profiles only
-  const generateAvailabilityForGeneratedProfiles = async () => {
-    try {
-      setActionLoading(true);
-      
-      // Get all generated profiles
-      const generatedProfiles: MentorMenteeProfileWithId[] = [];
-      
-      // Fetch generated mentors
-      try {
-        const generatedMentorsSnapshot = await getDocs(collection(firestore, 'Generated Mentors'));
-        generatedMentorsSnapshot.docs.forEach(doc => {
-          const mentorData = doc.data();
-          generatedProfiles.push({
-            ...mentorData,
-            id: doc.id,
-            isGenerated: true
-          } as MentorMenteeProfileWithId);
-        });
-      } catch (error) {
-        console.error('Error fetching generated mentors:', error);
-      }
-      
-      // Fetch generated mentees
-      try {
-        const generatedMenteesSnapshot = await getDocs(collection(firestore, 'Generated Mentees'));
-        generatedMenteesSnapshot.docs.forEach(doc => {
-          const menteeData = doc.data();
-          generatedProfiles.push({
-            ...menteeData,
-            id: doc.id,
-            isGenerated: true
-          } as MentorMenteeProfileWithId);
-        });
-      } catch (error) {
-        console.error('Error fetching generated mentees:', error);
-      }
-      
-      // Filter only generated mentors (since only mentors need availability)
-      const generatedMentors = generatedProfiles.filter(profile => profile.isMentor);
-      
-      if (generatedMentors.length === 0) {
-        alert('No generated mentor profiles found to generate availability for.');
-        return;
-      }
-      
-      let generatedCount = 0;
-      
-      // Generate availability for each generated mentor
-      for (const mentor of generatedMentors) {
-        try {
-          // Create a unique ID for the generated profile
-          const mentorId = mentor.id || `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-          
-          // Generate random availability data
-          const availabilityData = {
-            mentorId: mentorId,
-            timeSlots: generateRandomTimeSlots(mentorId),
-            lastUpdated: new Date()
-          };
-          
-          // Store availability in the generated profile's subcollection
-          // Since these are generated profiles, we'll store them in a special collection
-          await setDoc(doc(firestore, 'Generated Availability', mentorId), availabilityData);
-          
-          generatedCount++;
-        } catch (error) {
-          console.error(`Error generating availability for generated mentor ${mentor.id}:`, error);
-        }
-      }
-      
-      // Refresh availability data
-      await fetchAvailability();
-      
-      alert(`SUCCESS: Generated availability data for ${generatedCount} generated mentor profiles!`);
-    } catch (error) {
-      console.error('Error generating availability for generated profiles:', error);
-      alert('Error generating availability data. Please check the console for details.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Helper function to generate random time slots
-  const generateRandomTimeSlots = (mentorId: string) => {
-    const timeSlots: TimeSlot[] = [];
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    
-    // Generate recurring availability for weekdays
-    for (let i = 0; i < 5; i++) {
-      const day = days[i];
-      const startHour = 9 + Math.floor(Math.random() * 4); // 9 AM to 1 PM
-      const endHour = startHour + 2 + Math.floor(Math.random() * 4); // 2-6 hour slots
-      
-      timeSlots.push({
-        id: `${mentorId}-${day}-recurring`,
-        day: day,
-        startTime: `${startHour.toString().padStart(2, '0')}:00`,
-        endTime: `${endHour.toString().padStart(2, '0')}:00`,
-        isAvailable: Math.random() > 0.3, // 70% chance of being available
-        type: 'recurring'
-      });
-    }
-    
-    // Generate some specific date availability for the next 2 weeks
-    const today = new Date();
-    for (let i = 0; i < 10; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      
-      if (date.getDay() !== 0 && date.getDay() !== 6) { // Skip weekends
-        const startHour = 10 + Math.floor(Math.random() * 6); // 10 AM to 4 PM
-        const endHour = startHour + 1 + Math.floor(Math.random() * 3); // 1-4 hour slots
-        
-        timeSlots.push({
-          id: `${mentorId}-${date.toISOString().split('T')[0]}-specific`,
-          date: date.toISOString().split('T')[0],
-          startTime: `${startHour.toString().padStart(2, '0')}:00`,
-          endTime: `${endHour.toString().padStart(2, '0')}:00`,
-          isAvailable: Math.random() > 0.4, // 60% chance of being available
-          type: 'specific'
-        });
-      }
-    }
-    
-    return timeSlots;
-  };
-
-  // Function to clear availability for generated profiles only
-  const clearGeneratedProfileAvailability = async () => {
-    const confirmed = window.confirm(
-      'Clear Availability for Generated Profiles\n\n' +
-      'This will delete availability data for ALL generated profiles only.\n\n' +
-      'Real user profiles will not be affected.\n\n' +
-      'Are you sure you want to proceed?'
-    );
-    
-    if (!confirmed) return;
-    
-    try {
-      setActionLoading(true);
-      
-      // Delete all documents from the Generated Availability collection
-      const generatedAvailabilitySnapshot = await getDocs(collection(firestore, 'Generated Availability'));
-      const deletePromises = generatedAvailabilitySnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
-      
-      // Refresh availability data
-      await fetchAvailability();
-      
-      alert(`SUCCESS: Cleared availability data for ${generatedAvailabilitySnapshot.docs.length} generated profiles!`);
-    } catch (error) {
-      console.error('Error clearing generated profile availability:', error);
-      alert('Error clearing availability data. Please check the console for details.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
 
   // Booking statistics helper functions
   const getBookingStats = () => {
@@ -1694,24 +1449,6 @@ export default function MentorManagement() {
                   placeholder="Search mentor name or email..." 
                   style={{ padding: '6px 12px', borderRadius: 8, border: '1.5px solid #3a0a0a', background: '#181818', color: '#fff', fontSize: 15, minWidth: 180 }} 
                 />
-                <select 
-                  value={availabilityStatusFilter} 
-                  onChange={e => setAvailabilityStatusFilter(e.target.value as 'all' | 'available' | 'booked')} 
-                  style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
-                >
-                  <option value="all">All Statuses</option>
-                  <option value="available">Available</option>
-                  <option value="booked">Booked</option>
-                </select>
-                <select 
-                  value={availabilityTypeFilter} 
-                  onChange={e => setAvailabilityTypeFilter(e.target.value as 'all' | 'recurring' | 'specific')} 
-                  style={{ padding: '6px 12px', borderRadius: 8, background: '#222', color: '#fff', fontWeight: 600 }}
-                >
-                  <option value="all">All Types</option>
-                  <option value="recurring">Recurring</option>
-                  <option value="specific">One-off</option>
-                </select>
                 <button
                   className="refresh-button"
                   onClick={fetchAvailability}
@@ -1719,30 +1456,6 @@ export default function MentorManagement() {
                 >
                   <FaSync className={loadingAvailability ? 'spinning' : ''} /> Refresh
                 </button>
-                                 <button
-                   className="refresh-button"
-                   onClick={handleWipeAllAvailability}
-                   disabled={loadingAvailability}
-                   style={{ background: '#ff2a2a', color: '#fff', border: '1.5px solid #ff2a2a' }}
-                 >
-                   🗑️ Wipe All Availability
-                 </button>
-                 <button
-                   className="refresh-button"
-                   onClick={generateAvailabilityForGeneratedProfiles}
-                   disabled={loadingAvailability || actionLoading}
-                   style={{ background: '#00e676', color: '#181818', border: '1.5px solid #00e676' }}
-                 >
-                   🎲 Generate Generated Profile Availability
-                 </button>
-                 <button
-                   className="refresh-button"
-                   onClick={clearGeneratedProfileAvailability}
-                   disabled={loadingAvailability || actionLoading}
-                   style={{ background: '#ff6b35', color: '#fff', border: '1.5px solid #ff6b35' }}
-                 >
-                   🧹 Clear Generated Profile Availability
-                 </button>
               </div>
             </div>
           </div>
@@ -1752,10 +1465,6 @@ export default function MentorManagement() {
             <div className="stat-card">
               <h3>Total Mentors with Availability</h3>
               <p>{filteredAvailability.length}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Internal Time Slots</h3>
-              <p>{filteredAvailability.reduce((total, availability) => total + getTotalSlots(availability), 0)}</p>
             </div>
             <div className="stat-card">
               <h3>Cal.com Time Slots</h3>
@@ -1779,9 +1488,6 @@ export default function MentorManagement() {
                   <tr>
                     <th>Mentor</th>
                     <th>Email</th>
-                    <th>Internal Slots</th>
-                    <th>Internal Available</th>
-                    <th>Internal Booked</th>
                     <th>Cal.com Integration</th>
                     <th>Cal.com Slots</th>
                     <th>Cal.com Available</th>
@@ -1805,21 +1511,6 @@ export default function MentorManagement() {
                         </div>
                       </td>
                       <td>{getMentorEmail(availability)}</td>
-                      <td>
-                        <span style={{ background: '#ffb300', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
-                          {getTotalSlots(availability)}
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ background: '#00e676', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
-                          {getAvailableSlots(availability)}
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ background: '#ff4444', color: '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
-                          {getBookedSlots(availability)}
-                        </span>
-                      </td>
                       <td>
                         {availability.hasCalComIntegration ? (
                           <span style={{ background: '#00eaff', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>
@@ -1881,8 +1572,8 @@ export default function MentorManagement() {
               </table>
               {filteredAvailability.length === 0 && (
                 <div style={{ marginTop: 24, color: '#ffb300', textAlign: 'center' }}>
-                  {availabilitySearch || availabilityStatusFilter !== 'all' || availabilityTypeFilter !== 'all' 
-                    ? 'No availability data matches your filters.' 
+                  {availabilitySearch 
+                    ? 'No availability data matches your search.' 
                     : 'No availability data found.'}
                 </div>
               )}
@@ -1896,38 +1587,16 @@ export default function MentorManagement() {
             <button onClick={() => setDetailsModalOpen(false)} style={{ position: 'absolute', top: 12, right: 12, background: '#ff4444', color: '#fff', border: 'none', borderRadius: 8, padding: '0.3rem 1rem', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Close</button>
             <h2 style={{ marginBottom: 8 }}>Availability Details</h2>
             <div><b>Mentor:</b> {getMentorName(selectedAvailability)} ({getMentorEmail(selectedAvailability)})</div>
-            <div style={{ margin: '1rem 0 1.5rem 0', color: '#ffb300' }}>
-              <b>Internal Slots:</b> {getTotalSlots(selectedAvailability)} | <b>Available:</b> {getAvailableSlots(selectedAvailability)} | <b>Booked:</b> {getBookedSlots(selectedAvailability)}
-            </div>
             {selectedAvailability.hasCalComIntegration && (
-              <div style={{ margin: '0 0 1.5rem 0', color: '#00eaff' }}>
+              <div style={{ margin: '1rem 0 1.5rem 0', color: '#00eaff' }}>
                 <b>Cal.com Integration:</b> ✅ Connected | <b>Cal.com Slots:</b> {getCalComTotalSlots(selectedAvailability)} | <b>Available:</b> {getCalComAvailableSlots(selectedAvailability)} | <b>Booked:</b> {getCalComBookedSlots(selectedAvailability)}
               </div>
             )}
-            <table style={{ width: '100%', background: 'rgba(24,24,24,0.95)', borderRadius: 8, marginTop: 8 }}>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Day</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedAvailability.timeSlots.length === 0 ? (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', color: '#888', padding: 24 }}>No internal slots found.</td></tr>
-                ) : selectedAvailability.timeSlots.map(slot => (
-                  <tr key={slot.id} style={{ background: !slot.isAvailable ? 'rgba(255,68,68,0.07)' : undefined }}>
-                    <td><span style={{ background: slot.type === 'recurring' ? '#00eaff' : '#ff6b35', color: '#181818', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{slot.type === 'recurring' ? 'Recurring' : 'One-off'}</span></td>
-                    <td>{slot.day || '-'}</td>
-                    <td>{slot.date || '-'}</td>
-                    <td>{slot.startTime} - {slot.endTime}</td>
-                    <td><span style={{ background: slot.isAvailable ? '#00e676' : '#ff4444', color: slot.isAvailable ? '#181818' : '#fff', borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{slot.isAvailable ? 'Available' : 'Booked'}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {!selectedAvailability.hasCalComIntegration && (
+              <div style={{ margin: '1rem 0 1.5rem 0', color: '#888' }}>
+                <b>Cal.com Integration:</b> ❌ Not Connected
+              </div>
+            )}
             
             {/* Cal.com Availability Section */}
             {selectedAvailability.hasCalComIntegration && selectedAvailability.calComAvailability && (
@@ -1971,7 +1640,7 @@ export default function MentorManagement() {
           ) : bookingsError ? (
             <div className="mentor-management-error">{bookingsError}</div>
           ) : (
-            <BookingAnalytics bookings={filteredBookings} />
+            <BookingAnalytics bookings={bookings.filter(b => b.isCalComBooking)} />
           )}
         </div>
       )}

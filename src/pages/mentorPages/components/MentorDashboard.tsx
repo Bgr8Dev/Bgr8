@@ -13,7 +13,7 @@ import MenteeProgress from '../../../components/widgets/MenteeProgress';
 import MessagingWidget from '../../../components/widgets/MessagingWidget';
 import CalComSetupModal from '../../../components/widgets/CalComSetup/CalComSetupModal';
 import { CalComService, CalComTokenManager, CalComBookingResponse } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
-import { collection, query, where, getDocs, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../firebase/firebase';
 import { SessionsService } from '../../../services/sessionsService';
 import { getName } from '../types/mentorTypes';
@@ -234,7 +234,42 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
 
       loggers.booking.log(`📋 Found ${calComBookings.length} bookings from Cal.com`);
 
-      if (calComBookings.length === 0) {
+      // Create a set of Cal.com booking IDs from the API response
+      const calComBookingIds = new Set<string>();
+      calComBookings.forEach(calBooking => {
+        const bookingId = calBooking.id?.toString() || calBooking.uid;
+        if (bookingId) {
+          calComBookingIds.add(bookingId);
+        }
+      });
+
+      // Get all existing Firebase bookings for this mentor that are Cal.com bookings
+      const existingFirebaseBookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('mentorId', '==', mentorId),
+        where('isCalComBooking', '==', true)
+      );
+      const existingFirebaseBookings = await getDocs(existingFirebaseBookingsQuery);
+
+      // Check for bookings that exist in Firebase but not in Cal.com (deleted bookings)
+      let deletedBookingsCount = 0;
+      for (const firebaseBookingDoc of existingFirebaseBookings.docs) {
+        const firebaseBookingData = firebaseBookingDoc.data();
+        const calComBookingId = firebaseBookingData.calComBookingId;
+        
+        if (calComBookingId && !calComBookingIds.has(calComBookingId)) {
+          // This booking was deleted from Cal.com, remove it from Firebase
+          try {
+            await deleteDoc(firebaseBookingDoc.ref);
+            deletedBookingsCount++;
+            loggers.booking.log(`🗑️ Deleted booking ${calComBookingId} - no longer exists in Cal.com`);
+          } catch (error) {
+            loggers.booking.error(`Error deleting booking ${calComBookingId}:`, error);
+          }
+        }
+      }
+
+      if (calComBookings.length === 0 && deletedBookingsCount === 0) {
         setSyncMessage('No bookings found in Cal.com. All bookings are up to date.');
         setIsSyncing(false);
         return;
@@ -244,7 +279,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       let existingBookingsCount = 0;
       let errorCount = 0;
 
-      // Process each booking
+      // Process each booking from Cal.com
       for (const calBooking of calComBookings) {
         const bookingId = calBooking.id?.toString() || calBooking.uid;
         if (!bookingId) {
@@ -279,8 +314,15 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       await BookingCompletionService.checkAndMarkCompletedBookings();
       
       // Show success message
+      const messages: string[] = [];
       if (newBookingsCount > 0) {
-        setSyncMessage(`Successfully synced ${newBookingsCount} new booking${newBookingsCount > 1 ? 's' : ''} from Cal.com!`);
+        messages.push(`Synced ${newBookingsCount} new booking${newBookingsCount > 1 ? 's' : ''}`);
+      }
+      if (deletedBookingsCount > 0) {
+        messages.push(`Removed ${deletedBookingsCount} deleted booking${deletedBookingsCount > 1 ? 's' : ''}`);
+      }
+      if (messages.length > 0) {
+        setSyncMessage(`Successfully ${messages.join(', ')} from Cal.com!`);
         // Refresh the page after a short delay to show updated bookings
         setTimeout(() => {
           window.location.reload();
