@@ -6,7 +6,7 @@ import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenMa
 import { loggers } from '../../../utils/logger';
 import { Booking } from '../../../types/bookings';
 import GenerateRandomProfile from './GenerateRandomProfile';
-import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck, FaPoundSign } from 'react-icons/fa';
+import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck } from 'react-icons/fa';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AdminMentorModal from './AdminMentorModal';
 import '../../../styles/adminStyles/MentorManagement.css';
@@ -65,19 +65,16 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
     const pendingBookings = calComBookings.filter(b => b.status === 'pending').length;
     const cancelledBookings = calComBookings.filter(b => b.status === 'cancelled').length;
     const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
-    const totalRevenue = calComBookings.reduce((sum, booking) => sum + (booking.revenue || 0), 0);
-    const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
     
     // Get unique mentors and mentees
     const uniqueMentors = new Set(calComBookings.map(b => b.mentorId)).size;
     const uniqueMentees = new Set(calComBookings.map(b => b.menteeId)).size;
     
     // Top mentors by bookings
-    const mentorStats = new Map<string, { name: string; bookings: number; revenue: number }>();
+    const mentorStats = new Map<string, { name: string; bookings: number }>();
     calComBookings.forEach(booking => {
-      const existing = mentorStats.get(booking.mentorId) || { name: booking.mentorName, bookings: 0, revenue: 0 };
+      const existing = mentorStats.get(booking.mentorId) || { name: booking.mentorName, bookings: 0 };
       existing.bookings += 1;
-      existing.revenue += booking.revenue || 0;
       mentorStats.set(booking.mentorId, existing);
     });
     const topMentors = Array.from(mentorStats.values())
@@ -96,7 +93,7 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
       .slice(0, 10);
     
     // Monthly trends
-    const monthlyData = new Map<string, { bookings: number; confirmed: number; revenue: number }>();
+    const monthlyData = new Map<string, { bookings: number; confirmed: number }>();
     calComBookings.forEach(booking => {
       if (!booking.sessionDate) return;
       let date: Date;
@@ -109,18 +106,16 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
       }
       if (isNaN(date.getTime())) return;
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const existing = monthlyData.get(monthKey) || { bookings: 0, confirmed: 0, revenue: 0 };
+      const existing = monthlyData.get(monthKey) || { bookings: 0, confirmed: 0 };
       existing.bookings += 1;
       if (booking.status === 'confirmed') existing.confirmed += 1;
-      existing.revenue += booking.revenue || 0;
       monthlyData.set(monthKey, existing);
     });
     const monthlyTrends = Array.from(monthlyData.entries())
       .map(([month, data]) => ({
         month: new Date(month + '-01').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
         bookings: data.bookings,
-        confirmed: data.confirmed,
-        revenue: data.revenue
+        confirmed: data.confirmed
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
     
@@ -151,8 +146,6 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
       pendingBookings,
       cancelledBookings,
       completionRate,
-      totalRevenue,
-      averageBookingValue,
       uniqueMentors,
       uniqueMentees,
       topMentors,
@@ -193,30 +186,6 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
           <FaCheck style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
           <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Completion Rate</h3>
           <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>{analytics.completionRate.toFixed(1)}%</p>
-        </div>
-        <div style={{ 
-          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
-          borderRadius: 8, 
-          padding: 24, 
-          textAlign: 'center', 
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-        }}>
-          <FaPoundSign style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
-          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Total Revenue</h3>
-          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>£{analytics.totalRevenue.toFixed(2)}</p>
-        </div>
-        <div style={{ 
-          background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
-          borderRadius: 8, 
-          padding: 24, 
-          textAlign: 'center', 
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-        }}>
-          <FaPoundSign style={{ fontSize: 22, color: '#a8a8a8', marginBottom: 12, opacity: 0.8 }} />
-          <h3 style={{ color: '#b8b8b8', fontSize: 13, marginBottom: 8, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Avg Booking Value</h3>
-          <p style={{ fontSize: 32, fontWeight: 300, margin: 0, color: '#e8e8e8', letterSpacing: '-0.5px' }}>£{analytics.averageBookingValue.toFixed(2)}</p>
         </div>
         <div style={{ 
           background: 'linear-gradient(135deg, rgba(30,30,30,0.8) 0%, rgba(20,20,20,0.9) 100%)', 
@@ -372,7 +341,6 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentor</th>
                   <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Bookings</th>
-                  <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Revenue</th>
                 </tr>
               </thead>
               <tbody>
@@ -380,7 +348,6 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
                   <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <td style={{ padding: '14px 12px', color: '#d8d8d8', fontSize: 14 }}>{mentor.name}</td>
                     <td style={{ padding: '14px 12px', textAlign: 'right', color: '#d8d8d8', fontSize: 14 }}>{mentor.bookings}</td>
-                    <td style={{ padding: '14px 12px', textAlign: 'right', color: '#5b8a7a', fontSize: 14, fontWeight: 400 }}>£{mentor.revenue.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -436,7 +403,6 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
                   <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentor</th>
                   <th style={{ padding: '14px 12px', textAlign: 'left', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Mentee</th>
                   <th style={{ padding: '14px 12px', textAlign: 'center', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '14px 12px', textAlign: 'right', color: '#a8a8a8', fontSize: 12, fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Revenue</th>
                 </tr>
               </thead>
               <tbody>
@@ -471,7 +437,6 @@ const BookingAnalytics = ({ bookings }: { bookings: Booking[] }) => {
                           {booking.status}
                         </span>
                       </td>
-                      <td style={{ padding: '14px 12px', textAlign: 'right', color: '#5b8a7a', fontSize: 14, fontWeight: 400 }}>£{(booking.revenue || 0).toFixed(2)}</td>
                     </tr>
                   );
                 })}
