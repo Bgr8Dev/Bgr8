@@ -680,7 +680,7 @@ const AdminEmails: React.FC = () => {
 
   const handleRecipientSelection = async (selectedRecipientIds: string[]) => {
     try {
-      console.log('🔍 Selected recipient IDs:', selectedRecipientIds);
+      loggers.email.log('🔍 Selected recipient IDs:', selectedRecipientIds);
       
       if (selectedRecipientIds.length === 0) {
         return;
@@ -696,20 +696,44 @@ const AdminEmails: React.FC = () => {
       }
       
       if (selectedEmails.length > 0) {
-        setCurrentDraft(prev => ({
-          ...prev,
-          recipients: [...(prev.recipients || []), ...selectedEmails]
-        }));
+        // Filter out duplicates
+        setCurrentDraft(prev => {
+          const existingEmails = prev.recipients || [];
+          const newEmails = selectedEmails.filter(email => !existingEmails.includes(email));
+          return {
+            ...prev,
+            recipients: [...existingEmails, ...newEmails]
+          };
+        });
         
         setShowRecipientSelector(false);
-        showNotification('success', `${selectedEmails.length} recipients added`);
+        showNotification('success', `${selectedEmails.length} recipient${selectedEmails.length !== 1 ? 's' : ''} added`);
       } else {
         showNotification('error', 'No valid recipients found');
       }
     } catch (error) {
-      console.error('Error fetching recipient emails:', error);
+      loggers.error.error('Error fetching recipient emails:', error);
       showNotification('error', 'Failed to load recipient emails');
     }
+  };
+
+  const handleUserEmailsSelected = (selectedEmails: string[]) => {
+    if (selectedEmails.length === 0) {
+      return;
+    }
+
+    // Filter out duplicates
+    setCurrentDraft(prev => {
+      const existingEmails = prev.recipients || [];
+      const newEmails = selectedEmails.filter(email => !existingEmails.includes(email));
+      return {
+        ...prev,
+        recipients: [...existingEmails, ...newEmails]
+      };
+    });
+    
+    setShowRecipientSelector(false);
+    showNotification('success', `${selectedEmails.length} user${selectedEmails.length !== 1 ? 's' : ''} added`);
   };
 
   const handleBulkImport = () => {
@@ -931,6 +955,7 @@ const AdminEmails: React.FC = () => {
         <RecipientSelector
           selectedRecipients={[]}
           onRecipientsChange={handleRecipientSelection}
+          onUserEmailsSelected={handleUserEmailsSelected}
           onClose={() => setShowRecipientSelector(false)}
         />
       )}
