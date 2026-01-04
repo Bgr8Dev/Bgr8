@@ -187,11 +187,21 @@ export async function verifyEmailToken(
     
     // Increment attempts
     const attempts = (tokenData.attempts || 0) + 1;
-    await updateDoc(tokenRef, {
+    // Build update object, only including ipAddress if it's defined
+    const updateData: {
+      attempts: number;
+      lastAttemptAt: ReturnType<typeof serverTimestamp>;
+      ipAddress?: string;
+    } = {
       attempts,
-      lastAttemptAt: serverTimestamp(),
-      ipAddress: ipAddress || tokenData.ipAddress
-    });
+      lastAttemptAt: serverTimestamp()
+    };
+    if (ipAddress) {
+      updateData.ipAddress = ipAddress;
+    } else if (tokenData.ipAddress) {
+      updateData.ipAddress = tokenData.ipAddress;
+    }
+    await updateDoc(tokenRef, updateData);
     
     // Mark token as used
     await updateDoc(tokenRef, {
@@ -200,7 +210,7 @@ export async function verifyEmailToken(
     });
     
     // Update user profile to mark email as verified
-    await markEmailAsVerified(tokenData.userId, tokenData.email);
+    await markEmailAsVerified(tokenData.userId);
     
     loggers.auth.log(`Email verified successfully for user ${tokenData.userId}, email ${tokenData.email}`);
     
@@ -221,7 +231,7 @@ export async function verifyEmailToken(
 /**
  * Mark email as verified in user profile
  */
-async function markEmailAsVerified(userId: string, _email: string): Promise<void> {
+async function markEmailAsVerified(userId: string): Promise<void> {
   try {
     const userRef = doc(firestore, 'users', userId);
     await updateDoc(userRef, {
