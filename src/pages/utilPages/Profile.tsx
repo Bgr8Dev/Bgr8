@@ -591,7 +591,50 @@ export default function Profile() {
                 />
               </div>
               <h3>{userProfile?.displayName}</h3>
-              <p>{userProfile?.email}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <p>{userProfile?.email}</p>
+                {userProfile?.emailVerified ? (
+                  <span 
+                    style={{ 
+                      color: '#198754', 
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
+                    title="Email verified"
+                  >
+                    ✓ Verified
+                  </span>
+                ) : (
+                  <span 
+                    style={{ 
+                      color: '#dc3545', 
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
+                    title="Email not verified"
+                  >
+                    ⚠ Not Verified
+                  </span>
+                )}
+              </div>
+              {!userProfile?.emailVerified && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <Link 
+                    to="/verify-email?prompt=true" 
+                    style={{ 
+                      color: '#3b9ff2', 
+                      textDecoration: 'underline',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    Verify your email address
+                  </Link>
+                </div>
+              )}
             </div>
 
             <div className="profile-details">

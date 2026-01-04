@@ -11,6 +11,7 @@
     "/feedback/*": "index.html",
     "/signin*": "index.html",
     "/forgot-password*": "index.html",
+    "/verify-email*": "index.html",
     "/success*": "index.html",
     "/cancel*": "index.html",
     "/privacy-policy*": "index.html",

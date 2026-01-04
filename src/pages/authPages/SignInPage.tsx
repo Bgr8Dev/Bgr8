@@ -15,6 +15,7 @@ import { checkRateLimit, updateLastActivity, handleError, validatePassword, calc
 import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
 import MobileSignInPage from './MobileSignInPage';
 import { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } from '../../services/emailHelpers';
+import { sendVerificationEmail } from '../../services/emailVerificationService';
 import { loggers } from '../../utils/logger';
 // import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 
@@ -546,6 +547,19 @@ export default function SignInPage() {
         // Clear draft on successful registration
         clearDraft();
 
+        // Send verification email (mandatory)
+        const verificationResult = await sendVerificationEmail(
+          userCredential.user.uid,
+          formData.email,
+          formData.firstName
+        );
+
+        if (!verificationResult.success) {
+          loggers.email.error(`Failed to send verification email: ${verificationResult.error}`);
+          // Still allow registration, but show warning
+          setError('Account created, but verification email could not be sent. Please check your email or contact support.');
+        }
+
         // Send welcome emails (non-blocking - don't fail registration if email fails)
         sendRegistrationWelcomeEmail(formData.email, formData.firstName, formData.lastName)
           .then(result => {
@@ -571,15 +585,23 @@ export default function SignInPage() {
             loggers.email.error('Error sending account created email:', error);
           });
 
-        // Show success message
+        // Show success message with verification prompt
         setIsLoading(false);
-        setSuccessMessage(`Account created successfully! Welcome, ${formData.firstName}!`);
-        
-        // Clear form and redirect after 2 seconds
-        setTimeout(() => {
-          updateLastActivity();
-          navigate('/');
-        }, 2000);
+        if (verificationResult.success) {
+          setSuccessMessage(`Account created successfully! Please check your email to verify your account.`);
+          // Redirect to verification prompt page after 3 seconds
+          setTimeout(() => {
+            updateLastActivity();
+            navigate('/verify-email?prompt=true');
+          }, 3000);
+        } else {
+          setSuccessMessage(`Account created successfully! Welcome, ${formData.firstName}!`);
+          // Still redirect but show warning
+          setTimeout(() => {
+            updateLastActivity();
+            navigate('/');
+          }, 2000);
+        }
       }
     } catch (err: unknown) {
       const firebaseError = err as FirebaseErrorWithCode;
