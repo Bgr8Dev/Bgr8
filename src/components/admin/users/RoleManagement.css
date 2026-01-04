@@ -478,6 +478,50 @@
   font-weight: 500;
 }
 
+.rm-user-mentor-mentee {
+  min-width: 120px;
+}
+
+.rm-mentor-mentee-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.rm-mentor-badge {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+}
+
+.rm-mentor-badge:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 4px 16px rgba(49, 130, 206, 0.4);
+}
+
+.rm-mentee-badge {
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+}
+
+.rm-mentee-badge:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 4px 16px rgba(56, 161, 105, 0.4);
+}
+
+.rm-no-mentor-mentee {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 .rm-user-roles {
   min-width: 200px;
 }

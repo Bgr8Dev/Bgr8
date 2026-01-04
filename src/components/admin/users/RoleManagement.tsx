@@ -47,6 +47,7 @@ interface UserData {
   isProtected?: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
+  mentorMenteeStatus?: 'mentor' | 'mentee' | null;
   [key: string]: unknown;
 }
 
@@ -197,9 +198,10 @@ export default function RoleManagement() {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      querySnapshot.forEach((doc) => {
-        const user = doc.data() as UserData;
-        
+      // Fetch all users and their mentor/mentee status
+      for (const userDoc of querySnapshot.docs) {
+        const user = userDoc.data() as UserData;
+        user.uid = userDoc.id;
         
         // Ensure roles object exists with default values
         if (!user.roles) {
@@ -218,6 +220,28 @@ export default function RoleManagement() {
           };
         }
 
+        // Check mentor/mentee status by fetching mentorProgram/profile
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const profileData = mentorProgramDoc.data();
+            // Determine status - check isMentor, isMentee, and type fields
+            if (profileData.isMentor === true || profileData.type?.toLowerCase() === 'mentor') {
+              user.mentorMenteeStatus = 'mentor';
+            } else if (profileData.isMentee === true || profileData.type?.toLowerCase() === 'mentee') {
+              user.mentorMenteeStatus = 'mentee';
+            } else {
+              user.mentorMenteeStatus = null;
+            }
+          } else {
+            user.mentorMenteeStatus = null;
+          }
+        } catch (error) {
+          // If error fetching mentorProgram profile, set status to null
+          user.mentorMenteeStatus = null;
+          loggers.error.error(`Error fetching mentorProgram profile for user ${userDoc.id}:`, error);
+        }
+
         userData.push(user);
         stats.total++;
         
@@ -234,7 +258,7 @@ export default function RoleManagement() {
         if (user.roles.tester === true) stats.tester++;
         
         if (user.dateCreated?.toDate() > thirtyDaysAgo) stats.newThisMonth++;
-      });
+      }
 
       
       
@@ -794,6 +818,7 @@ export default function RoleManagement() {
             <tr>
               <th>User</th>
               <th>Email</th>
+              <th>Mentor/Mentee</th>
               <th>Roles</th>
               <th>Date Created</th>
               <th>Actions</th>
@@ -815,6 +840,21 @@ export default function RoleManagement() {
                   </div>
                 </td>
                 <td className="rm-user-email">{user.email}</td>
+                <td className="rm-user-mentor-mentee">
+                  {user.mentorMenteeStatus === 'mentor' && (
+                    <span className="rm-mentor-mentee-badge rm-mentor-badge" title="Mentor">
+                      Mentor
+                    </span>
+                  )}
+                  {user.mentorMenteeStatus === 'mentee' && (
+                    <span className="rm-mentor-mentee-badge rm-mentee-badge" title="Mentee">
+                      Mentee
+                    </span>
+                  )}
+                  {!user.mentorMenteeStatus && (
+                    <span className="rm-no-mentor-mentee">-</span>
+                  )}
+                </td>
                 <td className="rm-user-roles">
                   <div className="rm-role-badges">
                     {getUserRoles(user).map(role => (
