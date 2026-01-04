@@ -305,6 +305,44 @@ export default function SignInPage() {
       return () => clearTimeout(timeoutId);
     }
     
+    // Real-time password matching validation
+    if (fieldName === 'password' || fieldName === 'confirmPassword') {
+      // If confirmPassword field has been touched or has a value, check match immediately
+      if (fieldName === 'password') {
+        // When password changes, re-validate confirmPassword if it has a value
+        if (formData.confirmPassword) {
+          const confirmError = formData.confirmPassword !== value 
+            ? 'Passwords do not match' 
+            : '';
+          setFieldErrors(prev => {
+            if (confirmError) {
+              return { ...prev, confirmPassword: confirmError };
+            } else {
+              const newErrors = { ...prev };
+              delete newErrors.confirmPassword;
+              return newErrors;
+            }
+          });
+        }
+      } else if (fieldName === 'confirmPassword') {
+        // When confirmPassword changes, check if it matches password immediately
+        const passwordMatch = value === formData.password;
+        if (value && !passwordMatch) {
+          setFieldErrors(prev => ({
+            ...prev,
+            confirmPassword: 'Passwords do not match'
+          }));
+        } else if (value && passwordMatch) {
+          // Clear error if passwords match
+          setFieldErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors.confirmPassword;
+            return newErrors;
+          });
+        }
+      }
+    }
+    
     // Validate if field has been touched
     if (touchedFields.has(fieldName)) {
       const error = validateField(fieldName, value);
@@ -931,11 +969,23 @@ export default function SignInPage() {
                             required
                             disabled={isBlocked || isLoading}
                             {...(fieldErrors.confirmPassword ? { 'aria-invalid': true } : {})}
-                            aria-describedby={fieldErrors.confirmPassword ? 'confirmPassword-error' : undefined}
+                            aria-describedby={
+                              fieldErrors.confirmPassword 
+                                ? 'confirmPassword-error' 
+                                : (formData.confirmPassword && formData.confirmPassword === formData.password && formData.password ? 'confirmPassword-success' : undefined)
+                            }
                           />
                           {fieldErrors.confirmPassword && (
                             <span id="confirmPassword-error" className="field-error" role="alert">
                               {fieldErrors.confirmPassword}
+                            </span>
+                          )}
+                          {formData.confirmPassword && 
+                           formData.confirmPassword === formData.password && 
+                           !fieldErrors.confirmPassword && 
+                           formData.password && (
+                            <span id="confirmPassword-success" className="password-match-indicator" role="status" aria-live="polite">
+                              ✓ Passwords match
                             </span>
                           )}
                         </div>

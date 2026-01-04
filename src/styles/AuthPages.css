@@ -1032,6 +1032,27 @@
   font-weight: 500;
 }
 
+/* Password match indicator */
+.password-match-indicator {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--success, #198754);
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   .auth-mode-toggle::before,

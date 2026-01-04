@@ -10,8 +10,6 @@ import PasswordInput from '../../components/ui/PasswordInput';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/MobileAuthPages.css';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
-import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
-import { loggers } from '../../utils/logger';
 // import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 
 // Simple inline PasswordStrengthMeter component
@@ -83,6 +81,7 @@ export default function MobileSignInPage() {
   const [error, setError] = useState('');
   const [isBlocked, setIsBlocked] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   // Handle URL parameters to set initial tab
@@ -107,8 +106,52 @@ export default function MobileSignInPage() {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
-    setFormData({ ...formData, password: newPassword });
+    setFormData(prev => ({ ...prev, password: newPassword }));
     updatePasswordRequirements(newPassword);
+    
+    // Real-time password matching: if confirmPassword has a value, check match
+    if (formData.confirmPassword) {
+      const confirmError = formData.confirmPassword !== newPassword 
+        ? 'Passwords do not match' 
+        : '';
+      setFieldErrors(prev => {
+        if (confirmError) {
+          return { ...prev, confirmPassword: confirmError };
+        } else {
+          const newErrors = { ...prev };
+          delete newErrors.confirmPassword;
+          return newErrors;
+        }
+      });
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const confirmPassword = e.target.value;
+    setFormData(prev => ({ ...prev, confirmPassword }));
+    
+    // Real-time password matching validation
+    const passwordMatch = confirmPassword === formData.password;
+    if (confirmPassword && !passwordMatch) {
+      setFieldErrors(prev => ({
+        ...prev,
+        confirmPassword: 'Passwords do not match'
+      }));
+    } else if (confirmPassword && passwordMatch) {
+      // Clear error if passwords match
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.confirmPassword;
+        return newErrors;
+      });
+    } else {
+      // Clear error when field is empty
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.confirmPassword;
+        return newErrors;
+      });
+    }
   };
 
   const validateForm = (): boolean => {
@@ -487,11 +530,30 @@ export default function MobileSignInPage() {
                       id="mobile-confirmPassword"
                       label="Confirm Password"
                       value={formData.confirmPassword}
-                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      onChange={handleConfirmPasswordChange}
                       placeholder="Confirm your password"
                       required
                       disabled={isBlocked}
+                      {...(fieldErrors.confirmPassword ? { 'aria-invalid': true } : {})}
+                      aria-describedby={
+                        fieldErrors.confirmPassword 
+                          ? 'mobile-confirmPassword-error' 
+                          : (formData.confirmPassword && formData.confirmPassword === formData.password && formData.password ? 'mobile-confirmPassword-success' : undefined)
+                      }
                     />
+                    {fieldErrors.confirmPassword && (
+                      <span id="mobile-confirmPassword-error" className="field-error" role="alert">
+                        {fieldErrors.confirmPassword}
+                      </span>
+                    )}
+                    {formData.confirmPassword && 
+                     formData.confirmPassword === formData.password && 
+                     !fieldErrors.confirmPassword && 
+                     formData.password && (
+                      <span id="mobile-confirmPassword-success" className="password-match-indicator" role="status" aria-live="polite">
+                        ✓ Passwords match
+                      </span>
+                    )}
                   </div>
                 </>
               )}
