@@ -47,14 +47,14 @@ export function generateDeviceFingerprint(): string {
         ctx.fillText('Device fingerprint', 2, 2);
         components.push(canvas.toDataURL().substring(0, 100)); // First 100 chars
       }
-    } catch (e) {
+    } catch {
       // Canvas not available
     }
 
     // WebGL fingerprint (if available)
     try {
       const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
       if (gl) {
         const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
         if (debugInfo) {
@@ -62,7 +62,7 @@ export function generateDeviceFingerprint(): string {
           components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '');
         }
       }
-    } catch (e) {
+    } catch {
       // WebGL not available
     }
 

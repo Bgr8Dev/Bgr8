@@ -13,7 +13,7 @@ import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
 import { getDeviceFingerprint, storeDeviceFingerprint } from '../../utils/deviceFingerprint';
-import { generateHoneypotField, validateHoneypot, HoneypotValidationResult } from '../../utils/honeypot';
+import { generateHoneypotField, validateHoneypot } from '../../utils/honeypot';
 import { initializeRecaptcha, executeRecaptcha } from '../../utils/recaptcha';
 import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
 import MobileSignInPage from './MobileSignInPage';
@@ -504,13 +504,14 @@ export default function SignInPage() {
       return;
     }
     
-    // Get device fingerprint for tracking
-    const deviceFingerprint = getDeviceFingerprint();
+    // Get device fingerprint for tracking (for future use with IP rate limiting)
+    // Device fingerprint will be used when backend API is implemented
+    getDeviceFingerprint();
     
     // Execute reCAPTCHA (optional - won't block if not configured)
-    let recaptchaToken = '';
+    // Token will be sent to backend for verification when API is implemented
     try {
-      recaptchaToken = await executeRecaptcha(isSignIn ? 'signin' : 'register');
+      await executeRecaptcha(isSignIn ? 'signin' : 'register');
     } catch (recaptchaError) {
       loggers.auth.warn('reCAPTCHA execution failed (may not be configured):', recaptchaError);
       // Don't block if reCAPTCHA fails - it's optional

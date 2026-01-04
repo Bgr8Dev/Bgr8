@@ -79,10 +79,19 @@ export function sanitizeText(input: string, options: {
   let sanitized = input.trim();
 
   // Remove control characters (except newlines if allowed)
+  // Using character code filtering to avoid linter warnings about control characters
   if (allowNewlines) {
-    sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    sanitized = sanitized.split('').filter(char => {
+      const code = char.charCodeAt(0);
+      // Allow newline (10), carriage return (13), and printable characters (32-126, 128+)
+      return code === 10 || code === 13 || (code >= 32 && code !== 127) || code >= 128;
+    }).join('');
   } else {
-    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+    sanitized = sanitized.split('').filter(char => {
+      const code = char.charCodeAt(0);
+      // Only allow printable characters (32-126, 128+)
+      return (code >= 32 && code !== 127) || code >= 128;
+    }).join('');
   }
 
   // Remove HTML tags if present (for text fields)
@@ -252,23 +261,23 @@ export function sanitizeObject<T extends Record<string, unknown>>(
   const sanitized = {} as T;
 
   for (const [key, value] of Object.entries(obj)) {
+    const sanitizedObj = sanitized as Record<string, unknown>;
     if (typeof value === 'string') {
-      sanitized[key as keyof T] = (shouldSanitizeHtml 
+      sanitizedObj[key] = shouldSanitizeHtml 
         ? sanitizeHtml(value) 
-        : sanitizeText(value, { maxLength: maxStringLength })
-      ) as T[keyof T];
+        : sanitizeText(value, { maxLength: maxStringLength });
     } else if (Array.isArray(value)) {
-      sanitized[key as keyof T] = value.map(item => 
+      sanitizedObj[key] = value.map(item => 
         typeof item === 'string' 
           ? (shouldSanitizeHtml ? sanitizeHtml(item) : sanitizeText(item, { maxLength: maxStringLength }))
           : typeof item === 'object' && item !== null
           ? sanitizeObject(item as Record<string, unknown>, options)
           : item
-      ) as T[keyof T];
+      );
     } else if (typeof value === 'object' && value !== null) {
-      sanitized[key as keyof T] = sanitizeObject(value as Record<string, unknown>, options) as T[keyof T];
+      sanitizedObj[key] = sanitizeObject(value as Record<string, unknown>, options);
     } else {
-      sanitized[key as keyof T] = value;
+      sanitizedObj[key] = value;
     }
   }
 
