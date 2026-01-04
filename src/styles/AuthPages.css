@@ -941,6 +941,16 @@
   vertical-align: middle;
 }
 
+.spinner-small {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid rgba(59, 159, 242, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary, #3b9ff2);
+  animation: spin 0.6s linear infinite;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -955,6 +965,71 @@
 
 .signin-submit-btn[aria-busy="true"] {
   position: relative;
+}
+
+/* Email validation styles */
+.email-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.email-input-wrapper input {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
+.email-checking-indicator {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.email-suggestions {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--info-light, #e7f3ff);
+  border: 1px solid var(--info, #0dcaf0);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.875rem;
+}
+
+.email-suggestions strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--info-dark, #0a58ca);
+}
+
+.email-suggestion-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  background-color: var(--white, #fff);
+  border: 1px solid var(--info, #0dcaf0);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--primary, #3b9ff2);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.email-suggestion-link:hover {
+  background-color: var(--info-light, #e7f3ff);
+  border-color: var(--primary, #3b9ff2);
+}
+
+.email-valid-indicator {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--success, #198754);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 /* Accessibility improvements */

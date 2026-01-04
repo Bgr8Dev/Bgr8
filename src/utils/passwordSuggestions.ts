@@ -99,7 +99,7 @@ export const generatePassphraseSuggestions = (count: number = 2): PasswordSugges
     // Pattern: word1-word2-word3-word41234!
     const password = `${word1}-${word2}-${word3}-${word4}${num}${special}`;
     const hint = `Four words with dashes + 4-digit number + symbol`;
-    const strength: 'Very Strong' = 'Very Strong';
+    const strength = 'Very Strong' as const;
     
     suggestions.push({ password, hint, strength });
   }
@@ -111,8 +111,7 @@ export const generatePassphraseSuggestions = (count: number = 2): PasswordSugges
  * Get contextual password suggestion based on user's input
  */
 export const getContextualSuggestion = (
-  currentPassword: string,
-  userInfo?: { firstName?: string; lastName?: string }
+  currentPassword: string
 ): string => {
   // Don't suggest if password is already strong
   if (currentPassword.length >= 12) {
@@ -125,7 +124,7 @@ export const getContextualSuggestion = (
   const hasNumber = /\d/.test(currentPassword);
   const hasSpecial = /[@$!%*?&#]/.test(currentPassword);
   
-  let suggestion = 'Try adding: ';
+  const suggestion = 'Try adding: ';
   const suggestions: string[] = [];
   
   if (currentPassword.length < 12) {

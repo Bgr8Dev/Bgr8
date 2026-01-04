@@ -75,7 +75,7 @@ export const checkPasswordBreach = async (password: string): Promise<boolean> =>
       const [hash, count] = line.split(':');
       return hash === suffix && parseInt(count) > 0;
     });
-  } catch (error) {
+  } catch {
     // If API call fails, fall back to local common passwords check
     return isCommonPassword(password);
   }

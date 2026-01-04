@@ -12,6 +12,7 @@ import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
+import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
 import MobileSignInPage from './MobileSignInPage';
 import { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } from '../../services/emailHelpers';
 import { loggers } from '../../utils/logger';
@@ -97,6 +98,8 @@ export default function SignInPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [emailValidation, setEmailValidation] = useState<EmailValidationResult | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const navigate = useNavigate();
 
   // Handle URL parameters to set initial tab
@@ -193,8 +196,11 @@ export default function SignInPage() {
       }
       case 'email': {
         if (!value.trim()) return 'Email is required';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) return 'Please enter a valid email address';
+        // Use quick format validation for real-time feedback
+        const formatResult = validateEmailFormat(value);
+        if (!formatResult.isValid) {
+          return formatResult.error || 'Please enter a valid email address';
+        }
         return '';
       }
       case 'password': {
@@ -213,11 +219,43 @@ export default function SignInPage() {
   };
 
   // Handle field blur (mark as touched and validate)
-  const handleFieldBlur = (fieldName: string) => {
+  const handleFieldBlur = async (fieldName: string) => {
     setTouchedFields(prev => new Set(Array.from(prev).concat(fieldName)));
     const value = formData[fieldName as keyof typeof formData];
-    const error = validateField(fieldName, value);
-    setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    
+    // Special handling for email - comprehensive validation
+    if (fieldName === 'email' && value.trim()) {
+      setIsCheckingEmail(true);
+      try {
+        const result = await validateEmail(value, {
+          checkAvailability: !isSignIn, // Only check availability for registration
+          checkDisposable: true,
+          checkTypo: true,
+          normalize: true
+        });
+        
+        setEmailValidation(result);
+        
+        if (!result.isValid) {
+          setFieldErrors(prev => ({ ...prev, [fieldName]: result.error || 'Invalid email' }));
+        } else if (result.normalized && result.normalized !== value) {
+          // Auto-correct email if normalization changed it
+          setFormData(prev => ({ ...prev, [fieldName]: result.normalized || value }));
+        }
+      } catch (error) {
+        loggers.error.error('Error validating email:', error);
+        const formatResult = validateEmailFormat(value);
+        setEmailValidation(formatResult);
+        if (!formatResult.isValid) {
+          setFieldErrors(prev => ({ ...prev, [fieldName]: formatResult.error || 'Invalid email' }));
+        }
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    } else {
+      const error = validateField(fieldName, value);
+      setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    }
   };
 
   // Handle field change with real-time validation
@@ -231,6 +269,40 @@ export default function SignInPage() {
         delete newErrors[fieldName];
         return newErrors;
       });
+    }
+    
+    // Special handling for email field - real-time validation
+    if (fieldName === 'email') {
+      setEmailValidation(null);
+      // Debounce email validation
+      const timeoutId = setTimeout(async () => {
+        if (value.trim()) {
+          const formatResult = validateEmailFormat(value);
+          setEmailValidation(formatResult);
+          
+          // If format is valid and field is touched, check availability (only for registration)
+          if (formatResult.isValid && touchedFields.has('email') && !isSignIn) {
+            setIsCheckingEmail(true);
+            try {
+              const availabilityResult = await checkEmailAvailability(value);
+              if (!availabilityResult.available) {
+                setEmailValidation({
+                  ...formatResult,
+                  isValid: false,
+                  error: availabilityResult.error || 'Email already in use'
+                });
+                setFieldErrors(prev => ({ ...prev, email: availabilityResult.error || 'Email already in use' }));
+              }
+            } catch (error) {
+              loggers.error.error('Error checking email availability:', error);
+            } finally {
+              setIsCheckingEmail(false);
+            }
+          }
+        }
+      }, 500); // 500ms debounce
+      
+      return () => clearTimeout(timeoutId);
     }
     
     // Validate if field has been touched
@@ -318,7 +390,37 @@ export default function SignInPage() {
 
     // Validate all fields
     const errors: Record<string, string> = {};
+    
+    // Special handling for email - comprehensive validation
+    if (formData.email.trim()) {
+      try {
+        const emailResult = await validateEmail(formData.email, {
+          checkAvailability: !isSignIn,
+          checkDisposable: true,
+          checkTypo: true,
+          normalize: true
+        });
+        
+        if (!emailResult.isValid) {
+          errors.email = emailResult.error || 'Invalid email address';
+        } else if (emailResult.normalized && emailResult.normalized !== formData.email) {
+          // Update email with normalized version
+          setFormData(prev => ({ ...prev, email: emailResult.normalized || prev.email }));
+        }
+      } catch (error) {
+        loggers.error.error('Error validating email on submit:', error);
+        const formatResult = validateEmailFormat(formData.email);
+        if (!formatResult.isValid) {
+          errors.email = formatResult.error || 'Invalid email address';
+        }
+      }
+    } else {
+      errors.email = 'Email is required';
+    }
+    
+    // Validate other fields
     allFields.forEach(field => {
+      if (field === 'email') return; // Already handled above
       const value = formData[field as keyof typeof formData];
       const error = validateField(field, value);
       if (error) errors[field] = error;
@@ -730,23 +832,54 @@ export default function SignInPage() {
                         Email Address
                         <span className="required-indicator" aria-label="required">*</span>
                       </label>
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={(e) => handleFieldChange('email', e.target.value)}
-                        onBlur={() => handleFieldBlur('email')}
-                        required
-                        disabled={isBlocked || isLoading}
-                        aria-required="true"
-                        {...(fieldErrors.email ? { 'aria-invalid': true } : {})}
-                        aria-describedby={fieldErrors.email ? 'email-error' : undefined}
-                        autoComplete="email"
-                      />
+                      <div className="email-input-wrapper">
+                        <input
+                          id="email"
+                          type="email"
+                          placeholder="Enter your email"
+                          value={formData.email}
+                          onChange={(e) => handleFieldChange('email', e.target.value)}
+                          onBlur={() => handleFieldBlur('email')}
+                          required
+                          disabled={isBlocked || isLoading}
+                          aria-required="true"
+                          {...(fieldErrors.email ? { 'aria-invalid': true } : {})}
+                          aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+                          autoComplete="email"
+                        />
+                        {isCheckingEmail && (
+                          <span className="email-checking-indicator" aria-label="Checking email availability">
+                            <span className="spinner-small" aria-hidden="true" />
+                          </span>
+                        )}
+                      </div>
                       {fieldErrors.email && (
                         <span id="email-error" className="field-error" role="alert">
                           {fieldErrors.email}
+                        </span>
+                      )}
+                      {emailValidation && emailValidation.suggestions && emailValidation.suggestions.length > 0 && (
+                        <div className="email-suggestions" role="alert">
+                          <strong>Did you mean?</strong>
+                          {emailValidation.suggestions.map((suggestion, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              className="email-suggestion-link"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, email: suggestion }));
+                                handleFieldChange('email', suggestion);
+                                handleFieldBlur('email');
+                              }}
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {emailValidation && emailValidation.isValid && !isSignIn && !isCheckingEmail && (
+                        <span className="email-valid-indicator" role="status" aria-live="polite">
+                          ✓ Email is available
                         </span>
                       )}
                     </div>

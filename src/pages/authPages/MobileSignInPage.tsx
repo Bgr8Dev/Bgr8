@@ -10,6 +10,8 @@ import PasswordInput from '../../components/ui/PasswordInput';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/MobileAuthPages.css';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
+import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
+import { loggers } from '../../utils/logger';
 // import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 
 // Simple inline PasswordStrengthMeter component
