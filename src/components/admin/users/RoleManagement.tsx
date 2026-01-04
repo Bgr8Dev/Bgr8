@@ -5,6 +5,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { hasRole } from '../../../utils/userProfile';
 import { loggers } from '../../../utils/logger';
 import { PasswordHistoryService } from '../../../services/passwordHistoryService';
+import { emailConfig } from '../../../config/emailConfig';
 import { 
   FaUsers, 
   FaChartBar, 
@@ -614,9 +615,33 @@ export default function RoleManagement() {
       await batch.commit();
       loggers.log.log(`Batch deletion committed: ${deletedCount} documents deleted`);
 
-      // 10. Finally, delete the main user document
+      // 10. Delete the main user document from Firestore
       await deleteDoc(doc(firestore, 'users', userId));
-      loggers.log.log('User document deleted');
+      loggers.log.log('User document deleted from Firestore');
+
+      // 11. Delete user from Firebase Auth (using backend API)
+      try {
+        loggers.log.log(`Deleting user ${userId} from Firebase Auth...`);
+        const deleteAuthResponse = await fetch(`${emailConfig.apiBaseUrl}/api/users/delete/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const deleteAuthResult = await deleteAuthResponse.json();
+        
+        if (deleteAuthResponse.ok && deleteAuthResult.success) {
+          loggers.log.log(`User ${userId} deleted from Firebase Auth`);
+        } else {
+          // Log warning but don't fail the entire deletion if Auth deletion fails
+          loggers.warn.warn(`Warning: Failed to delete user from Firebase Auth: ${deleteAuthResult.error || 'Unknown error'}`);
+        }
+      } catch (authError) {
+        // Log error but don't fail the entire deletion if Auth deletion fails
+        loggers.error.error('Error deleting user from Firebase Auth (Firestore data already deleted):', authError);
+        loggers.warn.warn('Note: User Firestore data has been deleted, but Firebase Auth deletion may have failed. You may need to delete the user from Firebase Auth manually.');
+      }
 
       // Update local state
       setUsers(prev => prev.filter(u => u.uid !== userId));

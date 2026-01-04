@@ -1255,6 +1255,57 @@ app.post('/api/webhooks/calcom', async (req, res) => {
   }
 });
 
+// Delete user from Firebase Auth
+// This endpoint deletes a user from Firebase Authentication
+app.delete('/api/users/delete/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    if (!uid) {
+      return res.status(400).json({
+        success: false,
+        error: 'User ID is required'
+      });
+    }
+
+    if (!admin.apps.length) {
+      return res.status(500).json({
+        success: false,
+        error: 'Firebase Admin not initialized'
+      });
+    }
+
+    try {
+      // Delete user from Firebase Auth using Admin SDK
+      await admin.auth().deleteUser(uid);
+      console.log(`✅ User ${uid} deleted from Firebase Auth`);
+      
+      res.json({
+        success: true,
+        message: `User ${uid} deleted from Firebase Authentication`
+      });
+    } catch (authError) {
+      // Handle specific Firebase Auth errors
+      if (authError.code === 'auth/user-not-found') {
+        console.log(`⚠️  User ${uid} not found in Firebase Auth (may have already been deleted)`);
+        return res.json({
+          success: true,
+          message: `User ${uid} not found in Firebase Auth (may have already been deleted)`,
+          warning: 'User not found in Firebase Auth'
+        });
+      }
+      
+      throw authError;
+    }
+  } catch (error) {
+    console.error('❌ Error deleting user from Firebase Auth:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to delete user from Firebase Authentication'
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
