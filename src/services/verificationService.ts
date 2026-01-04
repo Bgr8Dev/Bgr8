@@ -82,7 +82,7 @@ export class VerificationService {
       updatedAt: serverTimestamp()
     });
 
-    // Send profile submitted email
+    // Send profile submitted email to mentor
     try {
       const { getUserProfile } = await import('../utils/userProfile');
       const { sendMentorProfileSubmittedEmail } = await import('./emailHelpers');
@@ -103,6 +103,59 @@ export class VerificationService {
       }
     } catch (emailError) {
       loggers.email.error('Error in profile submitted email integration:', emailError);
+    }
+
+    // Send notification email to all Vetting Officers
+    try {
+      const { getUsersByRole } = await import('../utils/getUsersByRole');
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendAdminNewMentorSubmissionEmail } = await import('./emailHelpers');
+      
+      const mentorProfile = await getUserProfile(mentorUid);
+      const profileDataDoc = await getDoc(profileRef);
+      const profileData = profileDataDoc.exists() ? profileDataDoc.data() : null;
+      
+      if (mentorProfile && mentorProfile.email) {
+        const vettingOfficers = await getUsersByRole('vetting-officer');
+        const mentorName = mentorProfile.firstName ? `${mentorProfile.firstName} ${mentorProfile.lastName || ''}`.trim() : mentorProfile.email;
+        const mentorEmail = mentorProfile.email;
+        const mentorExpertise = profileData?.profession || profileData?.degree || 'Not specified';
+        const submissionDate = new Date().toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+        const profileUrl = `https://bgr8.uk/admin/mentor-verification?mentor=${mentorUid}`;
+        
+        // Send email to each vetting officer
+        const emailPromises = vettingOfficers.map(vettingOfficer => {
+          if (vettingOfficer.email) {
+            return sendAdminNewMentorSubmissionEmail(
+              vettingOfficer.email,
+              mentorName,
+              mentorEmail,
+              mentorExpertise,
+              submissionDate,
+              profileUrl
+            ).then(result => {
+              if (result.success) {
+                loggers.email.log(`Mentor submission notification sent to vetting officer: ${vettingOfficer.email}`);
+              } else {
+                loggers.email.error(`Failed to send notification to vetting officer ${vettingOfficer.email}: ${result.error}`);
+              }
+            }).catch(error => {
+              loggers.email.error(`Error sending notification to vetting officer ${vettingOfficer.email}:`, error);
+            });
+          }
+          return Promise.resolve();
+        });
+        
+        await Promise.all(emailPromises);
+        loggers.email.log(`Sent mentor submission notifications to ${vettingOfficers.length} vetting officer(s)`);
+      }
+    } catch (emailError) {
+      loggers.email.error('Error sending notifications to vetting officers:', emailError);
+      // Don't fail the verification creation if email fails
     }
 
     return verificationData;
