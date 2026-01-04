@@ -83,6 +83,7 @@ export async function createVerificationToken(
     
     // Store token in Firestore
     const tokenRef = doc(firestore, 'emailVerificationTokens', token);
+    // Build tokenData object, only including ipAddress if it's defined (Firestore doesn't allow undefined)
     const tokenData: VerificationToken = {
       token,
       userId,
@@ -90,8 +91,8 @@ export async function createVerificationToken(
       createdAt: serverTimestamp() as Timestamp,
       expiresAt: Timestamp.fromDate(expiresAt),
       used: false,
-      ipAddress,
-      attempts: 0
+      attempts: 0,
+      ...(ipAddress && { ipAddress }) // Only include ipAddress if it's defined
     };
     
     await setDoc(tokenRef, tokenData);
@@ -220,7 +221,7 @@ export async function verifyEmailToken(
 /**
  * Mark email as verified in user profile
  */
-async function markEmailAsVerified(userId: string, email: string): Promise<void> {
+async function markEmailAsVerified(userId: string, _email: string): Promise<void> {
   try {
     const userRef = doc(firestore, 'users', userId);
     await updateDoc(userRef, {
@@ -250,7 +251,7 @@ export async function sendVerificationEmail(
 ): Promise<{ success: boolean; error?: string; token?: string }> {
   try {
     // Create verification token
-    const { token, expiresAt } = await createVerificationToken(userId, email, ipAddress);
+    const { token } = await createVerificationToken(userId, email, ipAddress);
     
     // Build verification URL
     const baseUrl = window.location.origin;

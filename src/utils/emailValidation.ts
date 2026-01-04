@@ -307,12 +307,10 @@ export const validateEmail = async (
   }
 
   // Check email availability (if requested)
-  let isAvailable = true;
   if (checkAvailability) {
     try {
       const signInMethods = await fetchSignInMethodsForEmail(auth, normalizedEmail);
       if (signInMethods.length > 0) {
-        isAvailable = false;
         return {
           isValid: false,
           error: 'An account with this email already exists',
