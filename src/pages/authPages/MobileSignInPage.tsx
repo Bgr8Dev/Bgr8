@@ -352,12 +352,6 @@ export default function MobileSignInPage() {
       
       {/* Mobile Header */}
       <div className="mobile-signin-header">
-        <div className="mobile-signin-logo">
-          <span className="mobile-logo-slash">/</span>
-          <span className="mobile-logo-b">B</span>
-          <span className="mobile-logo-gr">gr</span>
-          <span className="mobile-logo-eight">8</span>
-        </div>
         <h1>Welcome Back</h1>
         <p>Connect with mentors and mentees to create positive change</p>
       </div>

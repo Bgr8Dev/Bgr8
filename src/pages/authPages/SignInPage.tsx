@@ -367,12 +367,6 @@ export default function SignInPage() {
             <div className="signin-hero-content">
               {/* Left Content */}
               <div className="signin-hero-text">
-                <div className="signin-logo">
-                  <span className="signin-logo-slash">/</span>
-                  <span className="signin-logo-b">B</span>
-                  <span className="signin-logo-gr">gr</span>
-                  <span className="signin-logo-eight">8</span>
-                </div>
                 <h1>Welcome Back</h1>
                 <p className="signin-hero-subtitle">
                   Connect with mentors and mentees to create positive change in your community. 
