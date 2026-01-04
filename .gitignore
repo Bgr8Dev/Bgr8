@@ -32,8 +32,14 @@ pnpm-lock.yaml
 secrets.*
 *secret*
 *password*
+!**/PasswordInput.css
+!**/commonPasswords.ts
+!**/passwordSuggestions.ts
+!**/security.ts
+!**/userProfile.ts
 !**/passwordHistoryService.ts
 !**/passwordService.ts
+!**/PasswordInput.tsx
 *credential*
 *key*
 *token*
