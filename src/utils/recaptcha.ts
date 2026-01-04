@@ -15,7 +15,7 @@ const RECAPTCHA_SCORE_THRESHOLD = 0.5; // Score threshold (0.0 = bot, 1.0 = huma
 export function loadRecaptchaScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     // Check if script already loaded
-    if (window.grecaptcha && window.grecaptcha.ready) {
+    if (window.grecaptcha) {
       resolve();
       return;
     }
@@ -25,7 +25,7 @@ export function loadRecaptchaScript(): Promise<void> {
     if (existingScript) {
       // Wait for script to load
       const checkInterval = setInterval(() => {
-        if (window.grecaptcha && window.grecaptcha.ready) {
+        if (window.grecaptcha) {
           clearInterval(checkInterval);
           resolve();
         }

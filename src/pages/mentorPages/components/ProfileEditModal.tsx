@@ -57,11 +57,17 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   const isDeveloper = hasRole(userProfile, 'developer');
   
   // Local form state for editing
-  const [localFormData, setLocalFormData] = useState<ProfileFormData>(profile);
+  const [localFormData, setLocalFormData] = useState<ProfileFormData>({
+    ...profile,
+    howDidYouHearAboutUs: (profile as any).howDidYouHearAboutUs || ''
+  });
 
   // Sync local form data with profile prop when it changes
   useEffect(() => {
-    setLocalFormData(profile);
+    setLocalFormData({
+      ...profile,
+      howDidYouHearAboutUs: (profile as any).howDidYouHearAboutUs || ''
+    });
   }, [profile]);
 
   // Handle dev mode exit animation

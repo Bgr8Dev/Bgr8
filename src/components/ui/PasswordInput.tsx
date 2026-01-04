@@ -94,10 +94,9 @@ export default function PasswordInput({
       {showSuggestionsList && showSuggestions && onUseSuggestion && (
         <PasswordSuggestions onUseSuggestion={onUseSuggestion} />
       )}
-      {showStrengthMeter && passwordStrength && (
+      {showStrengthMeter && (
         <div className="password-strength-container">
           {/* Password strength meter is rendered by the parent component */}
-          {null}
         </div>
       )}
     </div>

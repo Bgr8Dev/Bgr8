@@ -28,7 +28,6 @@ const COMMON_TYPOS: Record<string, string> = {
   'yahooo.com': 'yahoo.com',
   'yaho.com': 'yahoo.com',
   'yahoo.co': 'yahoo.com',
-  'yaho.com': 'yahoo.com',
   'outlok.com': 'outlook.com',
   'outlook.co': 'outlook.com',
   'outlok.co': 'outlook.com',
@@ -161,7 +160,7 @@ export const normalizeEmail = (email: string): string => {
 /**
  * Check if email domain is a common typo
  */
-const checkTypo = (domain: string): { isTypo: boolean; suggestedDomain?: string } => {
+const checkEmailTypo = (domain: string): { isTypo: boolean; suggestedDomain?: string } => {
   const lowerDomain = domain.toLowerCase();
   if (COMMON_TYPOS[lowerDomain]) {
     return {
@@ -285,7 +284,7 @@ export const validateEmail = async (
   let isTypo = false;
   let suggestedDomain: string | undefined;
   if (checkTypo) {
-    const typoCheck = checkTypo(domain);
+    const typoCheck = checkEmailTypo(domain);
     if (typoCheck.isTypo && typoCheck.suggestedDomain) {
       isTypo = true;
       suggestedDomain = typoCheck.suggestedDomain;
@@ -364,7 +363,7 @@ export const validateEmailFormat = (email: string): EmailValidationResult => {
   const domain = parts[1];
   
   // Quick typo check
-  const typoCheck = checkTypo(domain);
+    const typoCheck = checkEmailTypo(domain);
   if (typoCheck.isTypo && typoCheck.suggestedDomain) {
     const suggestedEmail = `${parts[0]}@${typoCheck.suggestedDomain}`;
     return {

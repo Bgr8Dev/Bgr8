@@ -214,7 +214,13 @@ export class IPRateLimitService {
     attemptsRemaining: number;
     suspiciousActivity: boolean;
   }> {
-    return await this.checkIPRateLimit(ipAddress, deviceFingerprint);
+    const result = await this.checkIPRateLimit(ipAddress, deviceFingerprint);
+    return {
+      isBlocked: !result.allowed,
+      blockedUntil: result.blockedUntil,
+      attemptsRemaining: result.attemptsRemaining,
+      suspiciousActivity: result.suspiciousActivity
+    };
   }
 
   /**
