@@ -5,7 +5,6 @@ import { getDisplayName, getName, MentorMenteeProfile } from '../../widgets/Ment
 import { CalComService, CalComBookingResponse, CalComAvailability, CalComTokenManager } from '../../widgets/MentorAlgorithm/CalCom/calComService';
 import { loggers } from '../../../utils/logger';
 import { Booking } from '../../../types/bookings';
-import GenerateRandomProfile from './GenerateRandomProfile';
 import { FaSync, FaClock, FaUser, FaCalendarAlt, FaChartBar, FaCheck } from 'react-icons/fa';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AdminMentorModal from './AdminMentorModal';
@@ -911,28 +910,6 @@ export default function MentorManagement() {
        const availabilityResults = await Promise.all(availabilityPromises);
        const allAvailabilityData = availabilityResults.filter(Boolean) as MentorAvailabilityWithProfile[];
        
-       // Also fetch availability data from Generated Availability collection
-       try {
-         const generatedAvailabilitySnapshot = await getDocs(collection(firestore, 'Generated Availability'));
-         generatedAvailabilitySnapshot.docs.forEach(doc => {
-           const generatedAvailabilityData = doc.data();
-           const generatedAvailability: MentorAvailabilityWithProfile = {
-             ...generatedAvailabilityData,
-             mentorId: doc.id,
-             mentorProfile: usersData.find(user => user.id === doc.id) || undefined,
-             timeSlots: generatedAvailabilityData.timeSlots || [],
-             lastUpdated: generatedAvailabilityData.lastUpdated
-               ? (isFirestoreTimestamp(generatedAvailabilityData.lastUpdated)
-                   ? generatedAvailabilityData.lastUpdated.toDate()
-                   : new Date(generatedAvailabilityData.lastUpdated))
-               : new Date()
-           };
-           allAvailabilityData.push(generatedAvailability);
-         });
-       } catch (error) {
-         console.error('Error fetching generated availability:', error);
-       }
-       
        // Fetch mentor profiles and Cal.com availability to enrich the data
        const enrichedData = await Promise.all(
          allAvailabilityData.map(async (availability) => {
@@ -1038,14 +1015,6 @@ export default function MentorManagement() {
         // Delete from Generated Mentors or Generated Mentees collection
         const collectionName = user.isMentor ? 'Generated Mentors' : 'Generated Mentees';
         await deleteDoc(doc(firestore, collectionName, user.id));
-        
-        // Delete from Generated Availability collection if it exists
-        try {
-          await deleteDoc(doc(firestore, 'Generated Availability', user.id));
-        } catch {
-          // Ignore if it doesn't exist
-          console.log(`No availability data found for generated profile ${user.id}`);
-        }
       } else {
         // Delete from users collection subcollection
         await deleteDoc(doc(firestore, 'users', user.id, 'mentorProgram', 'profile'));
@@ -1138,15 +1107,6 @@ export default function MentorManagement() {
         return deleteDoc(doc(firestore, collectionName, user.id));
       });
       await Promise.all(generatedProfileDeletions);
-      
-      // Delete generated availability data
-      const generatedAvailabilityDeletions = generatedUsers.map(user => 
-        deleteDoc(doc(firestore, 'Generated Availability', user.id)).catch(() => {
-          // Ignore if it doesn't exist
-          console.log(`No availability data found for generated profile ${user.id}`);
-        })
-      );
-      await Promise.all(generatedAvailabilityDeletions);
       
       // Delete real user profiles from users collection
       const realProfileDeletions = realUsers.map(user => 
@@ -1518,8 +1478,6 @@ export default function MentorManagement() {
               </div>
             </div>
           </div>
-
-          <GenerateRandomProfile />
 
           {/* Profile Source Summary */}
           <div style={{ 
