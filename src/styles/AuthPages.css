@@ -499,21 +499,27 @@
   background: var(--button-primary-hover-bg);
 }
 
+.auth-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
 .auth-links-container {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--gray-200, #e5e7eb);
   flex-shrink: 0;
-  padding-bottom: 8px;
   position: relative;
   z-index: 2;
 }
 
 .auth-links {
-  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  align-items: flex-end;
+  text-align: right;
 }
 
 .auth-links p {
@@ -719,15 +725,27 @@
     margin: 1.25rem 0 0 0;
   }
 
+  .auth-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
   .google-sign-in {
     padding: 0.65rem;
-    margin-top: 1.25rem;
+    margin-top: 0;
     font-size: 0.95rem;
   }
 
+  .google-sign-in-container {
+    width: 100%;
+  }
+
   .auth-links {
-    margin-top: 1.25rem;
+    margin-top: 0;
     font-size: 0.9rem;
+    align-items: center;
+    text-align: center;
   }
 
   .signin-feature {
@@ -782,9 +800,8 @@
 }
 
 .google-sign-in-container {
-  width: 100%;
-  margin-top: 1.5rem;
-  margin-bottom: 0;
+  flex: 1;
+  min-width: 200px;
   flex-shrink: 0;
   position: relative;
   z-index: 1;

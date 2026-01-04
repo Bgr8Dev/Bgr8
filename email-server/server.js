@@ -312,15 +312,53 @@ async function sendSMTPEmail(emailData) {
 
   // Email options (smtpEmail already set above)
   const fromEmail = smtpEmail;
+  const fromName = process.env.ZOHO_FROM_NAME || 'Bgr8 Team';
+  
+  // Generate plain text version from HTML if needed
+  let textContent = emailData.contentType === 'text/plain' ? emailData.content : undefined;
+  if (emailData.contentType === 'text/html' && !textContent) {
+    // Simple HTML to text conversion (remove HTML tags)
+    textContent = emailData.content
+      .replace(/<style[^>]*>.*?<\/style>/gis, '')
+      .replace(/<script[^>]*>.*?<\/script>/gis, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  
   const mailOptions = {
-    from: `"${process.env.ZOHO_FROM_NAME || 'Bgr8 Team'}" <${fromEmail}>`,
+    from: `"${fromName}" <${fromEmail}>`,
+    replyTo: fromEmail, // Important for deliverability
     to: emailData.to.join(', '),
     cc: emailData.cc?.join(', ') || '',
     bcc: emailData.bcc?.join(', ') || '',
     subject: emailData.subject,
     html: emailData.contentType === 'text/html' ? emailData.content : undefined,
-    text: emailData.contentType === 'text/plain' ? emailData.content : undefined,
-    attachments: emailData.attachments || []
+    text: textContent, // Always include text version
+    attachments: emailData.attachments || [],
+    // Add headers to improve deliverability
+    headers: {
+      'X-Mailer': 'Bgr8 Email Service',
+      'X-Priority': '3', // Normal priority
+      'List-Unsubscribe': `<mailto:${fromEmail}?subject=unsubscribe>`, // Unsubscribe header (required for some providers)
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click', // One-click unsubscribe
+      'X-Auto-Response-Suppress': 'All', // Suppress auto-responses
+      'Auto-Submitted': 'auto-generated', // Mark as automated (helps with deliverability)
+      'Return-Path': fromEmail, // Bounce handling
+      'Message-ID': `<${Date.now()}-${Math.random().toString(36).substring(7)}@bgr8.uk>`, // Unique message ID
+      'X-Entity-Ref-ID': `${Date.now()}-${Math.random().toString(36).substring(7)}`, // Additional tracking ID
+    },
+    // Add envelope for better deliverability
+    envelope: {
+      from: fromEmail,
+      to: emailData.to
+    }
   };
 
   console.log('📧 SMTP mail options:', {

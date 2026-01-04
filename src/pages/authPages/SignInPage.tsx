@@ -1050,37 +1050,39 @@ export default function SignInPage() {
                       <span>or</span>
                     </div>
                     
-                    <div className="google-sign-in-container">
-                      <button 
-                        type="button" 
-                        onClick={handleGoogleSignIn} 
-                        className="google-sign-in"
-                        disabled={isBlocked || isLoading}
-                        aria-label={isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
-                      >
-                        <FcGoogle size={20} aria-hidden="true" />
-                        {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
-                      </button>
-                    </div>
-                  </form>
-                  
-                  <div className="auth-links-container">
-                    <div className="auth-links">
-                      {isSignIn && <Link to="/forgot-password">Forgot Password?</Link>}
+                    <div className="auth-actions-row">
+                      <div className="google-sign-in-container">
+                        <button 
+                          type="button" 
+                          onClick={handleGoogleSignIn} 
+                          className="google-sign-in"
+                          disabled={isBlocked || isLoading}
+                          aria-label={isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
+                        >
+                          <FcGoogle size={20} aria-hidden="true" />
+                          {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
+                        </button>
+                      </div>
+                      
                       {isSignIn && (
-                        <p>
-                          Don't have an account? 
-                          <button 
-                            type="button" 
-                            className="auth-link-btn"
-                            onClick={() => setIsSignIn(false)}
-                          >
-                            Register
-                          </button>
-                        </p>
+                        <div className="auth-links-container">
+                          <div className="auth-links">
+                            <Link to="/forgot-password">Forgot Password?</Link>
+                            <p>
+                              Don't have an account? 
+                              <button 
+                                type="button" 
+                                className="auth-link-btn"
+                                onClick={() => setIsSignIn(false)}
+                              >
+                                Register
+                              </button>
+                            </p>
+                          </div>
+                        </div>
                       )}
                     </div>
-                  </div>
+                  </form>
                   </div>
                 </div>
               </div>
