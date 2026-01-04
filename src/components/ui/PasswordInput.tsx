@@ -6,21 +6,25 @@ interface PasswordInputProps {
   id: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
   placeholder?: string;
   label?: string;
   required?: boolean;
   disabled?: boolean;
   showStrengthMeter?: boolean;
-  passwordStrength?: any; // PasswordStrength type
+  passwordStrength?: unknown; // PasswordStrength type
   className?: string;
   showSuggestions?: boolean;
   onUseSuggestion?: (password: string) => void;
+  'aria-invalid'?: boolean;
+  'aria-describedby'?: string;
 }
 
 export default function PasswordInput({
   id,
   value,
   onChange,
+  onBlur,
   placeholder = 'Enter password',
   label,
   required = false,
@@ -29,7 +33,9 @@ export default function PasswordInput({
   passwordStrength,
   className = '',
   showSuggestions = false,
-  onUseSuggestion
+  onUseSuggestion,
+  'aria-invalid': ariaInvalid,
+  'aria-describedby': ariaDescribedBy
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showSuggestionsList, setShowSuggestionsList] = useState(false);
@@ -51,11 +57,14 @@ export default function PasswordInput({
           type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           required={required}
           disabled={disabled}
           className="password-input-field"
           autoComplete="new-password"
+          {...(ariaInvalid ? { 'aria-invalid': true } : {})}
+          aria-describedby={ariaDescribedBy}
         />
         <div className="password-input-actions">
           {showSuggestions && (
@@ -87,7 +96,8 @@ export default function PasswordInput({
       )}
       {showStrengthMeter && passwordStrength && (
         <div className="password-strength-container">
-          {/* This will be rendered by the parent component */}
+          {/* Password strength meter is rendered by the parent component */}
+          {null}
         </div>
       )}
     </div>
