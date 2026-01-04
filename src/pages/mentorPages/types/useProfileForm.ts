@@ -10,6 +10,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     aboutMe: '',
     phone: '',
     age: '',
+    birthYear: '',
     degree: '',
     educationLevel: '',
     county: '',
@@ -41,6 +42,10 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     // if (!profileForm.aboutMe.trim()) errors.email = 'About Me is required'; // TODO: Uncomment if About Me becomes required
     if (!profileForm.phone.trim()) errors.phone = 'Phone number is required';
     if (!profileForm.age.trim()) errors.age = 'Age is required';
+    // Birth year is only required for mentors (for verification)
+    if (selectedRole === MENTOR && !profileForm.birthYear?.trim()) {
+      errors.birthYear = 'Year of birth is required for mentors';
+    }
     if (!profileForm.county.trim()) errors.county = 'County is required';
     if (!profileForm.howDidYouHearAboutUs.trim()) errors.howDidYouHearAboutUs = 'Please tell us how you found out about us';
     
@@ -176,6 +181,10 @@ export const useProfileForm = (selectedRole: UserType | null) => {
     if (!profileForm.email.trim()) missingFields.push('Email');
     if (!profileForm.phone.trim()) missingFields.push('Phone Number');
     if (!profileForm.age.trim()) missingFields.push('Age');
+    // Birth year is only required for mentors
+    if (selectedRole === MENTOR && !profileForm.birthYear?.trim()) {
+      missingFields.push('Year of Birth');
+    }
     if (!profileForm.county.trim()) missingFields.push('County');
     if (!profileForm.howDidYouHearAboutUs.trim()) missingFields.push('How did you find out about us?');
     if (!profileForm.degree.trim()) missingFields.push('Degree/Qualification');
@@ -263,6 +272,7 @@ export const useProfileForm = (selectedRole: UserType | null) => {
       aboutMe: '',
       phone: '',
       age: '',
+      birthYear: '',
       degree: '',
       educationLevel: '',
       county: '',

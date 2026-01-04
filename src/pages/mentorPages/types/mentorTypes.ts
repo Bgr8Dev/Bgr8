@@ -12,6 +12,7 @@ export interface ProfileFormData {
   aboutMe: string;
   phone: string;
   age: string;
+  birthYear?: string; // Date of birth (year only) - required for mentors for verification
   degree: string;
   educationLevel: string;
   county: string;
