@@ -7,6 +7,7 @@ import { createUserProfile, UserProfile } from '../../utils/userProfile';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
+import PasswordInput from '../../components/ui/PasswordInput';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -74,6 +75,10 @@ interface FirebaseErrorWithCode extends Error {
 
 
 
+// Auto-save key for localStorage
+const FORM_DRAFT_KEY = 'auth_form_draft';
+const FORM_DRAFT_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
 export default function SignInPage() {
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
@@ -88,6 +93,10 @@ export default function SignInPage() {
   const [error, setError] = useState('');
   const [isBlocked, setIsBlocked] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   // Handle URL parameters to set initial tab
