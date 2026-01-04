@@ -30,7 +30,6 @@ export default function PasswordInput({
   required = false,
   disabled = false,
   showStrengthMeter = false,
-  passwordStrength,
   className = '',
   showSuggestions = false,
   onUseSuggestion,

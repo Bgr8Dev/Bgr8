@@ -59,14 +59,14 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   // Local form state for editing
   const [localFormData, setLocalFormData] = useState<ProfileFormData>({
     ...profile,
-    howDidYouHearAboutUs: (profile as any).howDidYouHearAboutUs || ''
+    howDidYouHearAboutUs: typeof profile.howDidYouHearAboutUs === 'string' ? profile.howDidYouHearAboutUs : ''
   });
 
   // Sync local form data with profile prop when it changes
   useEffect(() => {
     setLocalFormData({
       ...profile,
-      howDidYouHearAboutUs: (profile as any).howDidYouHearAboutUs || ''
+      howDidYouHearAboutUs: typeof profile.howDidYouHearAboutUs === 'string' ? profile.howDidYouHearAboutUs : ''
     });
   }, [profile]);
 
