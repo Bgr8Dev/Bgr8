@@ -14,19 +14,19 @@ A comprehensive checklist of email use cases tailored for Bgr8's mentorship plat
 ## 👤 User Registration & Account Management
 
 ### Initial Registration & Sign Up
-- [ ] Registration welcome email
-- [ ] Sign up confirmation email
-- [ ] Email verification request
-- [ ] Email verification success
-- [ ] Email verification failed/expired
-- [ ] Account created confirmation
-- [ ] First login welcome email
-- [ ] Profile setup reminder (if incomplete)
+- [x] Registration welcome email
+- [x] Sign up confirmation email
+- [x] Email verification request
+- [x] Email verification success
+- [x] Email verification failed/expired
+- [x] Account created confirmation
+- [x] First login welcome email
+- [x] Profile setup reminder (if incomplete)
 
 ### Account Management
-- [ ] Password reset request
-- [ ] Password reset success
-- [ ] Password changed confirmation
+- [x] Password reset request
+- [x] Password reset success
+- [x] Password changed confirmation
 - [ ] Email address changed notification
 - [ ] Email address change verification
 - [ ] Profile updated confirmation
@@ -50,18 +50,18 @@ A comprehensive checklist of email use cases tailored for Bgr8's mentorship plat
 - [ ] Mentor profile creation started
 - [ ] Mentor profile saved as draft
 - [ ] Mentor profile completion reminder
-- [ ] Mentor profile created successfully
-- [ ] Mentor profile submitted for verification
+- [x] Mentor profile created successfully
+- [x] Mentor profile submitted for verification
 
 ### Mentor Profile Verification
-- [ ] Mentor profile sent for verification (to admin/vetting officer)
-- [ ] Mentor profile verification pending (to mentor)
-- [ ] Mentor profile verified successfully
-- [ ] Mentor profile verification approved
-- [ ] Mentor profile verification rejected
+- [x] Mentor profile sent for verification (to admin/vetting officer)
+- [x] Mentor profile verification pending (to mentor)
+- [x] Mentor profile verified successfully
+- [x] Mentor profile verification approved
+- [x] Mentor profile verification rejected
 - [ ] Mentor profile verification failed (with reasons)
-- [ ] Mentor profile needs revision/updates
-- [ ] Mentor profile re-submission after rejection
+- [x] Mentor profile needs revision/updates
+- [x] Mentor profile re-submission after rejection
 
 ### Mentor Profile Updates
 - [ ] Mentor profile updated notification
@@ -70,7 +70,7 @@ A comprehensive checklist of email use cases tailored for Bgr8's mentorship plat
 - [ ] Mentor profile changes rejected
 
 ### Mentor Onboarding
-- [ ] Welcome email for new mentors
+- [x] Welcome email for new mentors
 - [ ] Mentor onboarding guide
 - [ ] Mentor best practices
 - [ ] Mentor resources and training materials
@@ -85,10 +85,10 @@ A comprehensive checklist of email use cases tailored for Bgr8's mentorship plat
 - [ ] Mentee profile creation started
 - [ ] Mentee profile saved as draft
 - [ ] Mentee profile completion reminder
-- [ ] Mentee profile created successfully
+- [x] Mentee profile created successfully
 
 ### Mentee Onboarding
-- [ ] Welcome email for new mentees
+- [x] Welcome email for new mentees
 - [ ] Mentee onboarding guide
 - [ ] How to find a mentor guide
 - [ ] Mentee expectations and tips
@@ -109,13 +109,13 @@ A comprehensive checklist of email use cases tailored for Bgr8's mentorship plat
 - [ ] Rematch suggestion
 
 ### Session Management
-- [ ] Session booking confirmation
+- [x] Session booking confirmation
 - [ ] Session booking request (to mentor)
 - [ ] Session booking accepted
 - [ ] Session booking declined
 - [ ] Session booking cancelled
-- [ ] Session reminder (24 hours before)
-- [ ] Session reminder (1 hour before)
+- [x] Session reminder (24 hours before)
+- [x] Session reminder (1 hour before)
 - [ ] Session rescheduled notification
 - [ ] Session completed confirmation
 - [ ] Session no-show notification
