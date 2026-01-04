@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   FaDownload, 
   FaSync, 
@@ -6,7 +7,11 @@ import {
   FaTrash,
   FaCheck,
   FaTimes,
-  FaInfoCircle
+  FaInfoCircle,
+  FaSearch,
+  FaPlus,
+  FaEdit,
+  FaCopy
 } from 'react-icons/fa';
 import { EmailService, EmailTemplate } from '../../../services/emailService';
 import { 
@@ -18,9 +23,20 @@ import './EmailTemplateManager.css';
 
 interface TemplateManagerProps {
   onClose?: () => void;
+  // TemplatesTab functionality
+  onLoadTemplate?: (template: EmailTemplate) => void;
+  onCreateTemplate?: () => void;
+  onEditTemplate?: (template: EmailTemplate) => void;
+  onDeleteTemplate?: (templateId: string) => void;
 }
 
-export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }) => {
+export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ 
+  onClose,
+  onLoadTemplate,
+  onCreateTemplate,
+  onEditTemplate,
+  onDeleteTemplate
+}) => {
   const [builtInTemplates, setBuiltInTemplates] = useState<Array<{ key: string; template: typeof EmailTemplates[string] }>>([]);
   const [firebaseTemplates, setFirebaseTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +44,9 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<{ subject: string; content: string } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [activeView, setActiveView] = useState<'built-in' | 'firebase'>('firebase');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [testVariables, setTestVariables] = useState<Record<string, string>>({
     firstName: 'John',
     lastName: 'Doe',
@@ -41,6 +60,17 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
   useEffect(() => {
     loadTemplates();
   }, []);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showPreview) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [showPreview]);
 
   const loadTemplates = async () => {
     try {
@@ -133,11 +163,29 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
   };
 
   const previewTemplate = (templateKey: string) => {
-    const rendered = renderEmailTemplate(templateKey, testVariables);
-    if (rendered) {
-      setPreviewData(rendered);
-      setSelectedTemplate(templateKey);
-      setShowPreview(true);
+    try {
+      loggers.email.log(`Previewing template: ${templateKey}`);
+      loggers.email.log(`Test variables:`, testVariables);
+      
+      const rendered = renderEmailTemplate(templateKey, testVariables);
+      
+      if (rendered) {
+        loggers.email.log(`Template rendered successfully:`, {
+          subject: rendered.subject,
+          contentLength: rendered.content.length
+        });
+        setPreviewData(rendered);
+        setSelectedTemplate(templateKey);
+        setShowPreview(true);
+      } else {
+        const errorMsg = `Template "${templateKey}" not found or could not be rendered.`;
+        loggers.email.error(errorMsg);
+        alert(errorMsg);
+      }
+    } catch (error) {
+      const errorMsg = `Error previewing template: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      loggers.error.error('Error previewing template:', error);
+      alert(errorMsg);
     }
   };
 
@@ -227,12 +275,156 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
         </div>
 
         <div className="template-manager-tabs">
-          <div className="template-tab active">Built-in Templates</div>
+          <button
+            className={`template-tab ${activeView === 'firebase' ? 'active' : ''}`}
+            onClick={() => setActiveView('firebase')}
+          >
+            Firebase Templates ({firebaseTemplates.length})
+          </button>
+          <button
+            className={`template-tab ${activeView === 'built-in' ? 'active' : ''}`}
+            onClick={() => setActiveView('built-in')}
+          >
+            Built-in Templates ({builtInTemplates.length})
+          </button>
         </div>
 
+        {/* Search and Filter Controls - Only show for Firebase templates */}
+        {activeView === 'firebase' && (
+          <div className="template-manager-filters">
+            <div className="template-search-box">
+              <FaSearch />
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="template-category-filter"
+            >
+              <option value="all">All Categories</option>
+              <option value="announcement">Announcements</option>
+              <option value="newsletter">Newsletters</option>
+              <option value="notification">Notifications</option>
+              <option value="invitation">Invitations</option>
+              <option value="reminder">Reminders</option>
+              <option value="custom">Custom</option>
+            </select>
+            {onCreateTemplate && (
+              <button
+                className="btn-create-template"
+                onClick={onCreateTemplate}
+              >
+                <FaPlus /> Create Template
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="template-manager-section">
-          <div className="template-list">
-            {builtInTemplates.map(({ key, template }) => {
+          {activeView === 'firebase' ? (
+            <div className="template-list">
+              {(() => {
+                const filteredTemplates = firebaseTemplates.filter(template => {
+                  const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                       template.subject.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+                  return matchesSearch && matchesCategory;
+                });
+
+                if (filteredTemplates.length === 0) {
+                  return (
+                    <div className="template-empty-state">
+                      <p>No templates found. {onCreateTemplate && 'Create your first template!'}</p>
+                    </div>
+                  );
+                }
+
+                return filteredTemplates.map(template => (
+                  <div key={template.id} className="template-item firebase-template">
+                    <div className="template-item-header">
+                      <div className="template-item-info">
+                        <h3>{template.name}</h3>
+                        <span className="template-category-badge">{template.category}</span>
+                      </div>
+                      <div className="template-item-status">
+                        <span className="status-badge synced">
+                          <FaCheck /> Firebase
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="template-item-details">
+                      <div className="template-detail">
+                        <strong>Subject:</strong> {template.subject}
+                      </div>
+                      <div className="template-detail">
+                        <strong>Preview:</strong>
+                        <div className="template-preview-text">
+                          {template.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
+                        </div>
+                      </div>
+                      <div className="template-detail">
+                        <strong>Updated:</strong> {template.updatedAt.toLocaleDateString()}
+                      </div>
+                    </div>
+
+                    <div className="template-item-actions">
+                      {onLoadTemplate && (
+                        <button
+                          className="btn-action btn-load"
+                          onClick={() => onLoadTemplate(template)}
+                          title="Use Template"
+                        >
+                          <FaCopy /> Use
+                        </button>
+                      )}
+                      <button
+                        className="btn-action btn-preview"
+                        onClick={() => {
+                          // Convert Firebase template to preview format
+                          const rendered = {
+                            subject: template.subject,
+                            content: template.content
+                          };
+                          setPreviewData(rendered);
+                          setSelectedTemplate(template.id);
+                          setShowPreview(true);
+                        }}
+                        title="Preview Template"
+                      >
+                        <FaEye /> Preview
+                      </button>
+                      {onEditTemplate && (
+                        <button
+                          className="btn-action btn-edit"
+                          onClick={() => onEditTemplate(template)}
+                          title="Edit Template"
+                        >
+                          <FaEdit /> Edit
+                        </button>
+                      )}
+                      {onDeleteTemplate && (
+                        <button
+                          className="btn-action btn-delete"
+                          onClick={() => onDeleteTemplate(template.id)}
+                          title="Delete Template"
+                        >
+                          <FaTrash /> Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          ) : (
+            <div className="template-list">
+              {builtInTemplates.map(({ key, template }) => {
               const inFirebase = isTemplateInFirebase(key);
               const firebaseId = getFirebaseTemplateId(key);
               
@@ -318,13 +510,21 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
                 </div>
               );
             })}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Preview Modal */}
-        {showPreview && previewData && (
-          <div className="template-preview-modal">
-            <div className="template-preview-content">
+        {/* Preview Modal - Using Portal to render at document root */}
+        {showPreview && previewData && typeof document !== 'undefined' && createPortal(
+          <div 
+            className="template-preview-modal"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowPreview(false);
+              }
+            }}
+          >
+            <div className="template-preview-content" onClick={(e) => e.stopPropagation()}>
               <div className="template-preview-header">
                 <h3>Template Preview: {selectedTemplate}</h3>
                 <button onClick={() => setShowPreview(false)} title="Close Preview">
@@ -335,19 +535,28 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
               <div className="template-preview-variables">
                 <h4>Test Variables</h4>
                 <div className="variables-input">
-                  {Object.keys(testVariables).map(key => (
-                    <div key={key} className="variable-input-group">
-                      <label>{key}:</label>
-                      <input
-                        type="text"
-                        value={testVariables[key]}
-                        onChange={(e) => setTestVariables(prev => ({
-                          ...prev,
-                          [key]: e.target.value
-                        }))}
-                      />
-                    </div>
-                  ))}
+                  {selectedTemplate && (() => {
+                    const template = EmailTemplates[selectedTemplate];
+                    const usedVariables = template?.content.match(/\{\{(\w+)\}\}/g)?.map(match => 
+                      match.replace(/[{}]/g, '')
+                    ) || [];
+                    const allVariables = new Set([...usedVariables, ...Object.keys(testVariables)]);
+                    
+                    return Array.from(allVariables).map(key => (
+                      <div key={key} className="variable-input-group">
+                        <label>{key}:</label>
+                        <input
+                          type="text"
+                          value={testVariables[key] || ''}
+                          onChange={(e) => setTestVariables(prev => ({
+                            ...prev,
+                            [key]: e.target.value
+                          }))}
+                          placeholder={`Enter ${key}...`}
+                        />
+                      </div>
+                    ));
+                  })()}
                 </div>
                 <button
                   className="btn-refresh-preview"
@@ -362,13 +571,22 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({ onClose }
                 <div className="preview-subject">
                   <strong>Subject:</strong> {previewData.subject}
                 </div>
-                <div 
-                  className="preview-content"
-                  dangerouslySetInnerHTML={{ __html: previewData.content }}
-                />
+                {previewData.content ? (
+                  <div 
+                    className="preview-content"
+                    dangerouslySetInnerHTML={{ __html: previewData.content }}
+                  />
+                ) : (
+                  <div className="preview-content">
+                    <p style={{ color: '#ef4444', padding: '2rem' }}>
+                      Error: Preview content is empty. Please check the template.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>

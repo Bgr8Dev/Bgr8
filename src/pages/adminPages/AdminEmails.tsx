@@ -11,7 +11,6 @@ import { loggers } from '../../utils/logger';
 import EmailHeader from '../../components/admin/emails/EmailHeader';
 import EmailTabs from '../../components/admin/emails/EmailTabs';
 import ComposeTab from '../../components/admin/emails/ComposeTab';
-import TemplatesTab from '../../components/admin/emails/TemplatesTab';
 import SentTab from '../../components/admin/emails/SentTab';
 import DraftsTab from '../../components/admin/emails/DraftsTab';
 import AnalyticsTab from '../../components/admin/emails/AnalyticsTab';
@@ -27,7 +26,7 @@ import '../../components/admin/emails/RecipientSelector.css';
 
 const AdminEmails: React.FC = () => {
   const { userProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'use-cases' | 'template-manager' | 'developer'>('compose');
+  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'use-cases' | 'developer'>('compose');
   const [currentDraft, setCurrentDraft] = useState<Partial<EmailDraft>>({
     subject: '',
     content: '',
@@ -48,8 +47,6 @@ const AdminEmails: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateForm, setTemplateForm] = useState<Partial<EmailTemplate>>({});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -868,12 +865,8 @@ const AdminEmails: React.FC = () => {
         )}
 
         {activeTab === 'templates' && (
-          <TemplatesTab
-            templates={templates}
-            searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            onSearchChange={setSearchTerm}
-            onCategoryChange={setSelectedCategory}
+          <EmailTemplateManager
+            onLoadTemplate={handleLoadTemplate}
             onCreateTemplate={() => {
               setTemplateForm({});
               setSelectedTemplate(null);
@@ -881,7 +874,6 @@ const AdminEmails: React.FC = () => {
             }}
             onEditTemplate={handleEditTemplate}
             onDeleteTemplate={handleDeleteTemplate}
-            onLoadTemplate={handleLoadTemplate}
           />
         )}
 
@@ -906,10 +898,6 @@ const AdminEmails: React.FC = () => {
 
         {activeTab === 'use-cases' && (
           <EmailUseCasesTab />
-        )}
-
-        {activeTab === 'template-manager' && (
-          <EmailTemplateManager />
         )}
 
         {activeTab === 'developer' && (

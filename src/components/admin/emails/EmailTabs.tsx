@@ -79,14 +79,6 @@ export const EmailTabs: React.FC<EmailTabsProps> = ({
         <div className="email-tab-indicator"></div>
       </button>
       <button 
-        className={`email-emails-tab ${activeTab === 'template-manager' ? 'active' : ''}`}
-        onClick={() => onTabChange('template-manager')}
-      >
-        <FaCog />
-        <span>Template Manager</span>
-        <div className="email-tab-indicator"></div>
-      </button>
-      <button 
         className={`email-emails-tab ${activeTab === 'developer' ? 'active' : ''}`}
         onClick={() => onTabChange('developer')}
       >
