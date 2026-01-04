@@ -115,6 +115,8 @@
   transition: all 0.2s ease;
   font-size: 0.875rem;
   position: relative;
+  flex-shrink: 0; /* Prevents button from shrinking */
+  white-space: nowrap; /* Prevents text wrapping */
 }
 
 .recipient-filter-toggle-btn:hover {
@@ -341,11 +343,14 @@
   gap: 1rem;
   margin-bottom: 2rem;
   align-items: center;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
 .recipient-search-box {
   position: relative;
   flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
 }
 
 .recipient-search-icon {
@@ -368,6 +373,7 @@
   color: #ffffff;
   font-size: 1rem;
   transition: all 0.3s ease;
+  box-sizing: border-box; /* Ensures padding is included in width */
 }
 
 .recipient-search-input:focus {
@@ -395,6 +401,7 @@
   transition: all 0.2s ease;
   white-space: nowrap;
   font-size: 0.875rem;
+  flex-shrink: 0; /* Prevents button from shrinking */
 }
 
 .recipient-add-btn:hover {
@@ -928,6 +935,17 @@
   .recipient-search-section {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .recipient-search-box {
+    width: 100%;
+  }
+  
+  .recipient-filter-toggle-btn,
+  .recipient-add-btn {
+    width: 100%;
+    justify-content: center;
   }
   
   .recipient-footer-actions {
