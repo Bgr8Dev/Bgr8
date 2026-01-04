@@ -101,6 +101,48 @@ const emailLimiter = rateLimit({
 
 app.use('/api/', limiter);
 
+// API Key Authentication Middleware
+const authenticateApiKey = (req, res, next) => {
+  // Skip authentication for health check endpoint
+  if (req.path === '/health' || req.path === '/api/health') {
+    return next();
+  }
+
+  const apiKey = req.headers['authorization']?.replace('Bearer ', '') || req.headers['x-api-key'];
+  const expectedApiKey = process.env.API_KEY;
+
+  // If API_KEY is not set in environment, allow all requests (for development)
+  if (!expectedApiKey || expectedApiKey === 'your_secure_api_key_here') {
+    console.warn('⚠️  API_KEY not configured - allowing all requests (not secure for production!)');
+    return next();
+  }
+
+  if (!apiKey) {
+    return res.status(401).json({
+      success: false,
+      error: 'API key required. Include it in Authorization header as "Bearer <key>" or X-API-Key header.'
+    });
+  }
+
+  if (apiKey !== expectedApiKey) {
+    console.warn(`⚠️  Invalid API key attempt from ${req.ip}`);
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid API key'
+    });
+  }
+
+  next();
+};
+
+// Apply API key authentication to all API routes except health check
+app.use('/api/', (req, res, next) => {
+  if (req.path === '/health') {
+    return next();
+  }
+  authenticateApiKey(req, res, next);
+});
+
 // Validation schemas
 const emailSchema = Joi.object({
   to: Joi.array().items(Joi.string().email()).min(1).required(),
