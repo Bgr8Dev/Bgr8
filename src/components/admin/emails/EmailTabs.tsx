@@ -6,8 +6,7 @@ import {
   FaSave, 
   FaChartLine, 
   FaRocket,
-  FaCheckSquare,
-  FaCog
+  FaCheckSquare
 } from 'react-icons/fa';
 
 interface EmailTabsProps {

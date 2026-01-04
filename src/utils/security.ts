@@ -369,7 +369,7 @@ export const validateName = (
   if (allowUnicode) {
     // Allow Unicode letter characters, spaces, hyphens, apostrophes, and periods
     // This regex allows most international name characters
-    const unicodeNamePattern = /^[\p{L}\s'\-\.]+$/u;
+    const unicodeNamePattern = /^[\p{L}\s'\-.]+$/u;
     if (!unicodeNamePattern.test(normalized)) {
       return {
         isValid: false,
@@ -378,7 +378,7 @@ export const validateName = (
     }
   } else {
     // ASCII-only validation
-    const asciiPattern = /^[a-zA-Z\s'\-\.]+$/;
+    const asciiPattern = /^[a-zA-Z\s'-.]+$/;
     if (!asciiPattern.test(normalized)) {
       return {
         isValid: false,
