@@ -399,32 +399,11 @@ export const useMentorData = () => {
       await setDoc(profileRef, finalProfile);
       
       // If this is a mentor profile, create initial verification data
+      // This will also send the mentor profile submitted email
       if (profileData.isMentor && profileData.type === 'mentor') {
         const { createInitialVerification } = await import('../../../services/verificationService');
         await createInitialVerification(user.uid);
-        
-        // Send mentor profile created email
-        try {
-          const { getUserProfile } = await import('../../../utils/userProfile');
-          const { sendMentorProfileCreatedEmail } = await import('../../../services/emailHelpers');
-          const userProfile = await getUserProfile(user.uid);
-          
-          if (userProfile && user.email) {
-            sendMentorProfileCreatedEmail(user.email, userProfile.firstName)
-              .then(result => {
-                if (result.success) {
-                  loggers.email.log(`Mentor profile created email sent to ${user.email}`);
-                } else {
-                  loggers.email.error(`Failed to send mentor profile email: ${result.error}`);
-                }
-              })
-              .catch(error => {
-                loggers.email.error('Error sending mentor profile email:', error);
-              });
-          }
-        } catch (emailError) {
-          loggers.email.error('Error in mentor profile email integration:', emailError);
-        }
+        // Email is sent by createInitialVerification (sendMentorProfileSubmittedEmail)
       } else if (profileData.type === 'mentee') {
         // Send mentee profile created email
         try {
