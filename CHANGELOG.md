@@ -7,6 +7,219 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > 🎉 Major cleanup and refocus: bgr8 Platform is now dedicated solely to BGr8 and the MentorAlgorithm.
 
+## [v0.11.0] - 2026-01-04
+
+### ✨ Minor Release
+### ✨ Added New features and enhancements
+-  Add package-lock.json for GitHub Actions compatibility
+- ✨ Implement email configuration and API service integration
+- ✨ Add email server configuration and implementation
+- ✨ Enhance AdminEmails styles with new warning message and UI improvements
+- ✨ Add comprehensive email service setup and configuration documentation
+- ✨ Add README documentation for Bgr8 Email Server
+- ✨ Add codebase analysis report for Bgr8Website
+- ✨ Implement recipient deletion and keyboard shortcuts in RecipientSelector
+- ✨ Add notification system to RecipientSelector for user feedback
+- ✨ Enhance AdminEmails with Developer Tools and Testing Features
+- ✨ Introduce new email management components and enhance AdminEmails layout
+- ✨ Implement Email Preview Modal in ComposeTab
+- ✨ Add comprehensive GitHub workflows for project management, testing, security, and deployment
+- ✨ Add comprehensive coding standards and guidelines for project development
+- ✨ Implement Banner System for Admin Portal
+- ✨ Expand Banner Management with Home and Mentor Area Features
+- ✨ Add Mentee Progress and Resources Library Widgets
+- ✨ Enhance Dashboard and Integration Features
+- ✨ Implement Visibility Management System
+- ✨ Complete Visibility System Implementation
+- Add an optional aboutMe field to Mentor registration and remove "Bio"
+- Add comprehensive overview of email-related logic in the codebase with detailed documentation on services, UI components, and configuration
+- Update BGr8 page header and subtitle for clarity and impact; add fade-in animation effects to enhance user experience.
+- Enhance BGr8 page with new mentorship offerings, updated mission statement, and improved event section; add tooltip definitions for mentor and mentee roles, and refine animations for better user engagement.
+- Add development notes for Bgr8, covering profile features, Cal.com integration, verification processes, onboarding, messaging, privacy, UI updates, and homepage content revisions.
+- Add ProfilePicture component for user avatars, enhancing profile image handling across various components. Implement image compression for uploads and improve profile picture display logic in Profile, MentorCard, MatchesSection, and ProfileViewModal. Update styles for consistent avatar presentation.
+- Restrict sidebar and search features to mentees in MentorPage component, ensuring a tailored user experience. Update conditional rendering for sidebar toggle, search container, and profile type legend to only display for users with 'mentee' profile type.
+- Add color scheme guidelines to ensure consistent use of CSS variables across the project. Outline critical rules, available color categories, and enforcement measures to prevent hardcoded color values.
+- Implement user role and verification status fetching in HamburgerMenu and Navbar components. Enhance user interface to display status tags for mentors and mentees, including styling updates for improved visibility and consistency across components.
+- Update mentor verification process to automatically approve new mentors and adjust verification steps. Refactor status handling in AdminMentorVerification component, ensuring consistent use of 'final_review' step. Enhance UI for status and step changes with new buttons and styles.
+- Add messaging functionality with Firestore rules and MessagingWidget component updates
+- Add GDPR introductory message banner to MessagingWidget component
+- Add 'How did you find out about us?' field to ProfileRegistrationForm
+- Implement user role and verification status fetching in BGr8 component
+- Add mentor and mentee count fetching in BGr8 component
+- Add Cal.com Webhook Setup Guide and Firebase Integration
+- Add Cal.com Setup Modal for Mentor Dashboard
+- Update index.html to include additional localhost and production URLs for enhanced development and deployment flexibility
+- Add Cal.com API Key Input and Booking Status Features
+- Add development scripts and dependencies for Cal.com server integration
+- Add centralized console logging configuration and utility
+- Implement error handling improvements for Sentry integration
+- Implement matching functionality and UI enhancements for mentor-mentee interactions
+- Enhance mentor management and messaging features
+- Add cursor rules and console logging guidelines documentation
+- Add analytics log suppression utility
+- Enhance messaging and booking features with logging improvements
+- Add delete button styles for MessagingWidget component
+- Implement message deletion and export functionality in MessagingWidget
+- Implement Booking Completion Service for Automatic Tracking and Dashboard Integration
+- Implement Cal.com Booking Synchronization in MenteeDashboard
+- Implement CORS Configuration for Enhanced Security and Flexibility
+- Add Zoho OAuth Authorization URL Generator Script
+- Add Email Implementation Summary, Use Cases Checklist, and Implementation Guide
+- Add Use Cases and Template Manager Tabs to EmailTabs Component
+- Add Email Template Manager and Use Cases Tab Components
+- Enhance Email Use Cases and Templates with New Features
+- Implement User Deletion Functionality in Role Management Component
+- Add Authentication Requirements Checklist Document
+- Add Password Input Component with Styling and Suggestions
+- Add Common Passwords and Password Suggestions Utilities
+- Add Field-Level Validation Styles and Progress Indicators for Authentication Forms
+- Implement Real-Time Password Matching and Feedback in Authentication Forms
+- Implement Mentor/Mentee Status Display in User Management
+- Add Email Verification Flow and UI Enhancements
+- Add User Deletion Endpoint and Enhance Role Management Logging
+- Add API Key Authentication Middleware and Initialize Email Service
+- Add Email Deliverability Guide and Enhance Email Server Configuration
+- Enhance Authentication Requirements and Implement Backend Security Features
+- Update package-lock.json and README.md to Enhance Project Dependencies and Features
+
+### 🐛 Fixed Bug fixes and improvements
+- Fix deployment workflow and resolve linter errors
+- 🔒 Update Security Workflow for Enhanced Error Handling
+- ♿ Enhance Accessibility Workflow with Non-Blocking Error Handling
+- Enhance accessibility testing workflow with improved server readiness and error handling
+- Enhance performance testing workflows with improved error handling and server readiness checks
+- Potential fix for code scanning alert no. 58: Useless conditional
+- Potential fix for code scanning alert no. 57: Unused variable, import, function or class
+- Fix graphical errors in edit profile
+- Refactor components to use logger utility for improved error handling and debugging
+- Enhance Zoho API Testing with Comprehensive Error Handling and Logging
+- Enhance Zoho Email API Integration with Region-Specific Logic and Improved Error Handling
+- Enhance SMTP Configuration and Error Handling in Email Server
+- Refactor SMTP Email Sending Logic and Enhance Error Handling
+- Enhance Email Server Configuration and Error Handling
+
+### 📚 Documentation Documentation updates
+- 🗑️ Remove outdated documentation files for Admin Portal, Quick Reference, and Professionalization Roadmap
+- 🗑️ Remove outdated documentation files related to email service setup and styles
+- Updated readme
+- Update Authentication Requirements and Introduce Data Validation Security Documentation
+
+### 🎨 Changed Code style and formatting changes
+- ✨ Update AdminEmails and RichTextEditor styles for improved UI consistency
+- ✨ Refactor Rich Text Editor styles for improved scoping and organization
+- ✨ Enhance Rich Text Editor with cursor position preservation and style improvements
+- ✨ Refactor RoleSelection component and styles for improved clarity and consistency
+- ✨ Refactor UserRoleBadge component styles for improved clarity and consistency
+- ✨ Refactor RoleManagement component and styles for improved clarity and consistency
+- ✨ Refactor RoleManagementModal styles and structure for enhanced clarity and user experience
+- ✨ Update AdminEmails.css to enhance email preview styles
+- ✨ Refactor RoleManagement styles for improved aesthetics and responsiveness
+- ✨ Enhance AdminEmails functionality and styles
+- ✨ Introduce comprehensive coding standards and guidelines for project development
+- ✨ Update AmbassadorPage Styles for Improved Readability
+- Refactor MentorModal, MentorProfile, MenteeDashboard, MentorDashboard, and ProfileViewModal components to remove email and phone display fields. Update MentorProfile to conditionally render editable fields for email and phone during editing mode. Enhance user interface consistency by streamlining profile information presentation.
+- Enhance Cal.com booking integration and UI updates
+- Enhance Mentee and Mentor Dashboards with Booking Synchronization and UI Improvements
+- Enhance Mentee Booking History and Dashboard with Robust Logging and UI Improvements
+- Update Booking Analytics and UI Enhancements
+- Refactor BookingAnalytics Component to Remove Revenue Calculations and Update UI
+- Update Zoho API Test Response Messages for Clarity and SMTP Guidance
+- Refactor Email Template Manager and Update UI Components
+- Refactor Auth Pages to Remove Logo Elements and Enhance CSS Styles
+- Refactor PasswordInput Component and Update Styles for Enhanced Usability
+- Update Auth Link Button Styles for Improved Consistency and Usability
+
+### 🔧 Changed Code refactoring and restructuring
+- ✨ Refactor RichTextEditor key handling for improved shortcut functionality
+- ✨ Refactor Banner System and Introduce Element Banners
+- ✨ Refactor MentorHeader to Use getName Utility
+- ✨ Refactor Mentor Management Booking Deletion to Handle Batching
+- Refactor ProfileEditModal to use local form state for input handling and update hobbies selection component
+- Refactor hobbies, industries, and skills constants for improved structure and clarity; replaced hobbiesByCategory with a flattened hobbies list, removed 'Locomotive' from industries, and streamlined skillsByCategory by removing redundant entries.
+- Refactor hobby selection components to utilize a flattened hobbies list, replacing previous category-based structure across MentorProfile, MentorProgram, MobileProfileEditModal, and ProfileRegistrationForm for improved consistency and clarity.
+- Refactor authentication page layouts for improved structure and styling
+- Refactor profile edit modals to synchronize local form changes
+- Refactor Cal.com API integration to use production server only
+- Refactor Booking Analytics and Mentor Management for Cal.com Integration
+- Refactor Firebase Analytics logging to use logger utility
+- Refactor MentorPage to Use Logger Utility for Enhanced Logging
+- Refactor Mentor and Mentee Dashboards for Booking Synchronization and Cleanup
+- Refactor MentorModal and MentorProfile Components, Update Logger Utility Usage
+- Refactor Email Components and Enhance Logging Practices
+- Refactor MentorManagement Component to Remove Unused Code and Enhance Logging
+- Refactor Authentication Pages to Enhance Name Validation and Password Input
+- Refactor EmailTabs Component and Update Regex Patterns for Name Validation
+- Refactor Email Verification Service and Validation Logic
+- Refactor Email Verification Logic for Improved Clarity and Functionality
+- Refactor Mentor Profile Email Logic and Improve Verification Process
+- Refactor SignInPage and Improve Device Fingerprinting Logic
+- Update TypeScript Configuration and Refactor Password Input and Profile Edit Modals
+
+### 🚀 Performance Performance improvements
+- Enhance performance workflow with improved server readiness checks and Lighthouse configurations
+
+### 🧪 Testing Test additions and improvements
+- ✨ Update Banner Management Tests and Admin Pages
+- ✨ Update AdminBannerTest for Improved Instruction Clarity
+- Update Zoho API Integration with Region-Specific Endpoints and Configuration
+
+### 🔧 Changed Maintenance tasks and chores
+- ✨ Update email configuration and API service for production readiness
+- ✨ Update env.local.example with production and development configurations
+- ✨ Enhance email API and Zoho Mail service with improved type definitions and data structures
+- This isnt working yet but im going to bed and dont want people fucking with it
+- Update AdminEmails tab change handler for type safety
+- Enhance type safety in email components
+- ✨ Enhance SentTab with Search, Filter, and Sort Functionality
+- 🔧 Update HamburgerMenu to redirect registration link with query parameter
+- ✨ Integrate BannerWrapper Across Multiple Components
+- ✨ Introduce Messaging Widget for Enhanced Communication
+- ✨ Enhance Banner System with Developer Mode
+- ✨ Update TypeScript Configuration and DeveloperTab Component
+- Saving
+- Saving
+- Working
+- Saving
+- Lint plez
+- Lint
+- Bigger buttons
+- Enhance mentee identification logic in Cal.com webhook handler
+- Enhance meeting URL extraction logic in CalComModal
+- Enhance Google Analytics log suppression in index.html
+- Enhance CalComModal with API Key Check and Improved Booking Polling
+- Enhance useMentorData with Timestamp Handling and Logging Improvements
+- Enhance Mentor Management with Booking Analytics and Improved Logging
+- Update Email Configuration for Consistent Live Server Usage and Logging
+- Enhance SMTP Email Configuration and Logging Practices
+- Enhance Zoho Email API Integration and Logging Practices
+- Update Email Use Cases Checklist with Completed Items
+- Enhance Recipient Selector Component with User Filtering and Improved Logging
+- Enhance Recipient Selector CSS for Improved Layout and Usability
+- Update .gitignore to Include Password-Related Files for Tracking
+- Enhance SignInPage with Auto-Save Draft and Real-Time Validation
+- Update Password History Service to Use Timestamp.now() for Password History Entries
+- Enhance Verification Service with Notification Emails for Vetting Officers
+- Enhance Profile Registration Form with Birth Year Field for Mentors
+
+### 🛡️ Security Security improvements
+- Enhance security audit process in workflows
+- Enhance security update PR workflow with dynamic date generation
+- Security
+- Update AuthPages.css for improved responsiveness and styling
+- Enhance Password Security Utilities with Common Password Check and Profanity Filter
+- Enhance Email Validation and User Feedback in Authentication Forms
+
+### 🗑️ Removed Removed features and cleanup
+- Apply updates, make css more compatible, remove dead code
+- Remove GitHub Pages deployment workflow from CI/CD configuration
+
+### 📦 Changed Dependency updates
+- ✨ Initialize email server with package.json and package-lock.json
+
+**Total Changes:** 184 commits
+**Code Changes:** +80,274 insertions, -12,621 deletions
+
+---
 ## [v0.10.0] - 2025-10-08
 
 ### ✨ Minor Release
@@ -1175,6 +1388,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📋 Release Links
 
+[v0.11.0]: https://github.com/Hum2a/B8/releases/tag/v0.11.0
 [v0.10.0]: https://github.com/Hum2a/B8/releases/tag/v0.10.0
 [v0.10.0-Solar-Storm]: https://github.com/Hum2a/B8/releases/tag/v0.10.0-Solar-Storm
 [v0.9.0]: https://github.com/Hum2a/B8/releases/tag/v0.9.0
