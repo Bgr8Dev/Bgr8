@@ -12,6 +12,9 @@ import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
+import { getDeviceFingerprint, storeDeviceFingerprint } from '../../utils/deviceFingerprint';
+import { generateHoneypotField, validateHoneypot, HoneypotValidationResult } from '../../utils/honeypot';
+import { initializeRecaptcha, executeRecaptcha } from '../../utils/recaptcha';
 import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
 import MobileSignInPage from './MobileSignInPage';
 import { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } from '../../services/emailHelpers';
@@ -102,6 +105,19 @@ export default function SignInPage() {
   const [emailValidation, setEmailValidation] = useState<EmailValidationResult | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const navigate = useNavigate();
+  
+  // Honeypot field for anti-bot protection
+  const [honeypotField] = useState(() => generateHoneypotField());
+  const [honeypotValue, setHoneypotValue] = useState('');
+  
+  // Initialize device fingerprinting and reCAPTCHA on mount
+  useEffect(() => {
+    // Store device fingerprint on mount
+    storeDeviceFingerprint();
+    
+    // Initialize reCAPTCHA (optional - won't break if not configured)
+    initializeRecaptcha();
+  }, []);
 
   // Handle URL parameters to set initial tab
   useEffect(() => {
@@ -420,6 +436,15 @@ export default function SignInPage() {
     setError('');
     setSuccessMessage('');
     setIsLoading(true);
+    
+    // Check honeypot field (anti-bot protection)
+    const honeypotCheck = validateHoneypot({ [honeypotField.name]: honeypotValue }, honeypotField.name);
+    if (honeypotCheck.isBot) {
+      loggers.auth.warn('Bot detected: honeypot field was filled');
+      setError('Invalid submission detected. Please try again.');
+      setIsLoading(false);
+      return;
+    }
 
     // Mark all fields as touched
     const allFields = isSignIn 
@@ -472,11 +497,23 @@ export default function SignInPage() {
       return;
     }
 
-    // Check rate limiting for sign-in
+    // Check rate limiting for sign-in (email-based)
     if (isSignIn && !checkRateLimit(formData.email)) {
       setIsBlocked(true);
       setError('Too many login attempts. Please try again in 15 minutes.');
       return;
+    }
+    
+    // Get device fingerprint for tracking
+    const deviceFingerprint = getDeviceFingerprint();
+    
+    // Execute reCAPTCHA (optional - won't block if not configured)
+    let recaptchaToken = '';
+    try {
+      recaptchaToken = await executeRecaptcha(isSignIn ? 'signin' : 'register');
+    } catch (recaptchaError) {
+      loggers.auth.warn('reCAPTCHA execution failed (may not be configured):', recaptchaError);
+      // Don't block if reCAPTCHA fails - it's optional
     }
     
     try {
@@ -1029,6 +1066,14 @@ export default function SignInPage() {
                         />
                       </div>
                     )}
+                    
+                    {/* Honeypot field (hidden from users, bots will fill it) */}
+                    <input
+                      type="text"
+                      {...honeypotField.props}
+                      value={honeypotValue}
+                      onChange={(e) => setHoneypotValue(e.target.value)}
+                    />
                     
                     <button 
                       type="submit" 

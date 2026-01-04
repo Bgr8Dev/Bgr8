@@ -81,10 +81,10 @@ This document outlines all requirements for a professional-grade email and passw
 - ✅ Brute force protection
 - ✅ Rate limiting on sign-in attempts
 - ⚠️ Session management (Firebase handles, but should review)
-- ❌ **IP-based rate limiting** (limit attempts per IP)
-- ❌ **Device fingerprinting** (track suspicious devices)
-- ❌ **CAPTCHA integration** (reCAPTCHA v3 or hCaptcha)
-- ❌ **Honeypot fields** (anti-bot protection)
+- ⚠️ **IP-based rate limiting** (service created, requires backend API for IP addresses)
+- ✅ **Device fingerprinting** (track suspicious devices - fully implemented)
+- ⚠️ **CAPTCHA integration** (reCAPTCHA v3 utility created, requires configuration and backend verification)
+- ✅ **Honeypot fields** (anti-bot protection - fully implemented)
 
 ### Password Security
 - ✅ Password strength validation

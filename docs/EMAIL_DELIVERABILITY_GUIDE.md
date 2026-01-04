@@ -35,16 +35,23 @@ TTL: 3600
 **Purpose**: Cryptographically signs emails to prove they're from your domain.
 
 **Steps:**
-1. Log into your Zoho Mail account
-2. Go to **Settings** → **Mail** → **Email Authentication**
-3. Find your **DKIM Public Key** (it will look like a long string)
-4. Add a TXT record:
-   ```
-   Type: TXT
-   Name: zmail._domainkey (or similar - Zoho will tell you the exact name)
-   Value: [paste the DKIM public key from Zoho]
-   TTL: 3600
-   ```
+
+For Zoho Mail, DKIM is typically set up automatically when you add your domain. However, you may need to verify it:
+
+**Option 1: Check Zoho Mail Admin Console (if you have admin access)**
+1. Log into your Zoho Mail Admin Console (admin.zoho.com or admin.zoho.eu)
+2. Go to **Mail Administration** → **Domains** → Select your domain
+3. Look for **Email Authentication** or **DNS Settings**
+4. You should see DKIM information there
+
+**Option 2: Zoho automatically configures DKIM**
+Zoho Mail usually sets up DKIM automatically. You can verify it's working by:
+1. Sending a test email
+2. Checking the email headers in Gmail/Outlook
+3. Looking for "dkim=pass" in the headers
+
+**If you need to manually set up DKIM:**
+Contact Zoho Mail support or check your domain's DNS records - Zoho may have already added the DKIM record when you added your domain to Zoho Mail.
 
 #### DMARC (Domain-based Message Authentication) Record
 
@@ -164,12 +171,32 @@ The email server has been updated to include:
 
 ### 9. Zoho-Specific Settings
 
-**In Zoho Mail:**
-1. Go to **Settings** → **Mail** → **Email Authentication**
-2. Enable **SPF** (should auto-detect if DNS is correct)
-3. Enable **DKIM** (add the DNS record first)
-4. Enable **DMARC** (add the DNS record first)
-5. Verify all show as "Active" or "Verified"
+**For Zoho Mail:**
+
+Zoho Mail automatically handles most email authentication when you add your domain. However, you need to ensure your DNS records are correct:
+
+**What Zoho Does Automatically:**
+- DKIM signing (usually automatic)
+- SPF validation (checks your DNS record)
+
+**What You Need to Do:**
+1. Add SPF record to your DNS (see Step 1 above)
+2. Add DMARC record to your DNS (see Step 1 above)
+3. Verify DKIM is working (Zoho usually sets this up automatically)
+
+**Verify Your Setup:**
+1. Send a test email to yourself (preferably Gmail)
+2. Open the email and click "Show original" or "View source"
+3. Look for these headers:
+   - `SPF: PASS` (or `SPF: SOFTFAIL` initially is okay)
+   - `DKIM: PASS`
+   - `DMARC: PASS` (if you've set up DMARC)
+
+**Zoho Mail Admin Console (Optional):**
+If you have admin access:
+1. Go to admin.zoho.com (or admin.zoho.eu for EU)
+2. Navigate to **Mail Administration** → **Domains**
+3. Check your domain status and DNS records
 
 ### 10. Ongoing Maintenance
 
@@ -182,16 +209,23 @@ The email server has been updated to include:
 
 ## Quick Checklist
 
-- [ ] SPF record added to DNS
-- [ ] DKIM record added to DNS (from Zoho)
-- [ ] DMARC record added to DNS
-- [ ] DNS records verified (24-48 hours after adding)
-- [ ] Zoho Mail authentication settings verified
+**DNS Records (Most Important):**
+- [ ] SPF record added to DNS (`v=spf1 include:zoho.eu ~all` for EU)
+- [ ] DMARC record added to DNS (`v=DMARC1; p=none; rua=mailto:info@bgr8.uk`)
+- [ ] DNS records verified using mxtoolbox.com (24-48 hours after adding)
+- [ ] DKIM verified (check email headers for "dkim=pass" - Zoho usually handles this automatically)
+
+**Testing:**
 - [ ] Test email sent and checked in inbox (not spam)
+- [ ] Email headers checked (SPF, DKIM, DMARC should all show PASS)
 - [ ] Mail-tester.com score checked (aim for 8+)
+- [ ] Tested with multiple email providers (Gmail, Outlook, etc.)
+
+**Email Configuration:**
 - [ ] Email server updated with proper headers
 - [ ] Plain text version included in emails
 - [ ] Reply-To header configured
+- [ ] Using domain email address (info@bgr8.uk, not Gmail/Yahoo)
 
 ## Additional Resources
 
