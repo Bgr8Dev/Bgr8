@@ -10,7 +10,7 @@ import Footer from '../../components/ui/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
+import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
 import MobileSignInPage from './MobileSignInPage';
 import { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } from '../../services/emailHelpers';
 import { loggers } from '../../utils/logger';
@@ -127,9 +127,27 @@ export default function SignInPage() {
       return true;
     } else {
       // Registration validation
-      if (!validateUserInput(formData.firstName) || !validateUserInput(formData.lastName)) {
-        setError('Invalid characters in name fields');
+      // Validate first name
+      const firstNameValidation = validateFirstName(formData.firstName);
+      if (!firstNameValidation.isValid) {
+        setError(firstNameValidation.error || 'Invalid first name');
         return false;
+      }
+
+      // Validate last name
+      const lastNameValidation = validateLastName(formData.lastName);
+      if (!lastNameValidation.isValid) {
+        setError(lastNameValidation.error || 'Invalid last name');
+        return false;
+      }
+
+      // Update form data with normalized names if needed
+      if (firstNameValidation.normalized || lastNameValidation.normalized) {
+        setFormData({
+          ...formData,
+          firstName: firstNameValidation.normalized || formData.firstName,
+          lastName: lastNameValidation.normalized || formData.lastName
+        });
       }
 
       if (!validatePassword(formData.password)) {
@@ -472,15 +490,19 @@ export default function SignInPage() {
                     {!isSignIn && (
                       <>
                         <div className="auth-input-group">
-                          <label htmlFor="password">Password</label>
-                          <input
+                          <PasswordInput
                             id="password"
-                            type="password"
-                            placeholder="Create a password"
+                            label="Password"
                             value={formData.password}
                             onChange={handlePasswordChange}
+                            placeholder="Create a password"
                             required
                             disabled={isBlocked}
+                            showSuggestions={true}
+                            onUseSuggestion={(suggestedPassword) => {
+                              setFormData({...formData, password: suggestedPassword});
+                              updatePasswordRequirements(suggestedPassword);
+                            }}
                           />
                           {passwordStrength && (
                             <SimplePasswordStrengthMeter 
@@ -490,13 +512,12 @@ export default function SignInPage() {
                         </div>
                         
                         <div className="auth-input-group">
-                          <label htmlFor="confirmPassword">Confirm Password</label>
-                          <input
+                          <PasswordInput
                             id="confirmPassword"
-                            type="password"
-                            placeholder="Confirm your password"
+                            label="Confirm Password"
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                            placeholder="Confirm your password"
                             required
                             disabled={isBlocked}
                           />
@@ -508,13 +529,12 @@ export default function SignInPage() {
                     
                     {isSignIn && (
                       <div className="auth-input-group">
-                        <label htmlFor="password">Password</label>
-                        <input
+                        <PasswordInput
                           id="password"
-                          type="password"
-                          placeholder="Enter your password"
+                          label="Password"
                           value={formData.password}
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          placeholder="Enter your password"
                           required
                           disabled={isBlocked}
                         />

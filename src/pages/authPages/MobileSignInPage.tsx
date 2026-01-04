@@ -6,9 +6,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { createUserProfile, UserProfile } from '../../utils/userProfile';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
+import PasswordInput from '../../components/ui/PasswordInput';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/MobileAuthPages.css';
-import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
+import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
 // import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 
 // Simple inline PasswordStrengthMeter component
@@ -114,9 +115,27 @@ export default function MobileSignInPage() {
       return true;
     } else {
       // Registration validation
-      if (!validateUserInput(formData.firstName) || !validateUserInput(formData.lastName)) {
-        setError('Invalid characters in name fields');
+      // Validate first name
+      const firstNameValidation = validateFirstName(formData.firstName);
+      if (!firstNameValidation.isValid) {
+        setError(firstNameValidation.error || 'Invalid first name');
         return false;
+      }
+
+      // Validate last name
+      const lastNameValidation = validateLastName(formData.lastName);
+      if (!lastNameValidation.isValid) {
+        setError(lastNameValidation.error || 'Invalid last name');
+        return false;
+      }
+
+      // Update form data with normalized names if needed
+      if (firstNameValidation.normalized || lastNameValidation.normalized) {
+        setFormData({
+          ...formData,
+          firstName: firstNameValidation.normalized || formData.firstName,
+          lastName: lastNameValidation.normalized || formData.lastName
+        });
       }
 
       if (!validatePassword(formData.password)) {
@@ -440,15 +459,19 @@ export default function MobileSignInPage() {
               {!isSignIn && (
                 <>
                   <div className="mobile-auth-input-group">
-                    <label htmlFor="mobile-password">Password</label>
-                    <input
+                    <PasswordInput
                       id="mobile-password"
-                      type="password"
-                      placeholder="Create a password"
+                      label="Password"
                       value={formData.password}
                       onChange={handlePasswordChange}
+                      placeholder="Create a password"
                       required
                       disabled={isBlocked}
+                      showSuggestions={true}
+                      onUseSuggestion={(suggestedPassword) => {
+                        setFormData({...formData, password: suggestedPassword});
+                        updatePasswordRequirements(suggestedPassword);
+                      }}
                     />
                     {passwordStrength && (
                       <SimplePasswordStrengthMeter 
@@ -458,13 +481,12 @@ export default function MobileSignInPage() {
                   </div>
                   
                   <div className="mobile-auth-input-group">
-                    <label htmlFor="mobile-confirmPassword">Confirm Password</label>
-                    <input
+                    <PasswordInput
                       id="mobile-confirmPassword"
-                      type="password"
-                      placeholder="Confirm your password"
+                      label="Confirm Password"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      placeholder="Confirm your password"
                       required
                       disabled={isBlocked}
                     />
@@ -474,13 +496,12 @@ export default function MobileSignInPage() {
               
               {isSignIn && (
                 <div className="mobile-auth-input-group">
-                  <label htmlFor="mobile-signin-password">Password</label>
-                  <input
+                  <PasswordInput
                     id="mobile-signin-password"
-                    type="password"
-                    placeholder="Enter your password"
+                    label="Password"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    placeholder="Enter your password"
                     required
                     disabled={isBlocked}
                   />
