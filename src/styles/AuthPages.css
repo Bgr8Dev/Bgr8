@@ -311,20 +311,22 @@
 
 /* Auth Link Button */
 .auth-link-btn {
-  background: none;
+  background: none !important;
   border: none;
-  color: var(--accent);
-  text-decoration: none;
-  cursor: pointer;
-  font-weight: 500;
-  transition: color 0.3s ease;
-  padding: 0;
-  font-size: inherit;
+  color: var(--accent) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  font-weight: 400 !important;
+  transition: color 0.2s ease, text-decoration 0.2s ease !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  margin-left: 4px !important;
 }
 
 .auth-link-btn:hover {
-  color: var(--accent-dark);
-  text-decoration: underline;
+  color: var(--accent-dark) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
 }
 
 /* Legacy styles for backward compatibility */
@@ -482,7 +484,7 @@
   color: var(--input-text, var(--text));
 }
 
-.auth-form button {
+.auth-form button:not(.auth-link-btn) {
   padding: 0.75rem;
   background: var(--button-primary-bg);
   color: var(--button-primary-text);
@@ -493,7 +495,7 @@
   transition: all 0.3s ease;
 }
 
-.auth-form button:hover {
+.auth-form button:not(.auth-link-btn):hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.2));
   background: var(--button-primary-hover-bg);
