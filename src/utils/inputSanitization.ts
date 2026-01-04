@@ -1,0 +1,341 @@
+/**
+ * Input Sanitization Utilities
+ * 
+ * Provides comprehensive input sanitization for XSS prevention and data validation
+ */
+
+/**
+ * Sanitize HTML content to prevent XSS attacks
+ * Removes dangerous HTML tags and attributes
+ */
+export function sanitizeHtml(input: string): string {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
+
+  // Remove script tags and their content
+  let sanitized = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  
+  // Remove event handlers (onclick, onerror, etc.)
+  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+  sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
+  
+  // Remove javascript: and data: URLs
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  sanitized = sanitized.replace(/data:text\/html/gi, '');
+  sanitized = sanitized.replace(/data:image\/svg\+xml/gi, '');
+  
+  // Remove dangerous attributes
+  sanitized = sanitized.replace(/\s*style\s*=\s*["'][^"']*expression\s*\([^"']*["']/gi, '');
+  
+  // Remove iframe, embed, object tags
+  sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  sanitized = sanitized.replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '');
+  sanitized = sanitized.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+  
+  return sanitized.trim();
+}
+
+/**
+ * Escape HTML special characters
+ * Converts HTML entities to their encoded equivalents
+ */
+export function escapeHtml(input: string): string {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
+
+  const htmlEscapeMap: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '/': '&#x2F;'
+  };
+
+  return input.replace(/[&<>"'/]/g, (char) => htmlEscapeMap[char] || char);
+}
+
+/**
+ * Sanitize plain text input
+ * Removes or escapes dangerous characters for text fields
+ */
+export function sanitizeText(input: string, options: {
+  maxLength?: number;
+  allowNewlines?: boolean;
+  allowSpecialChars?: boolean;
+} = {}): string {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
+
+  const {
+    maxLength = 10000,
+    allowNewlines = false,
+    allowSpecialChars = true
+  } = options;
+
+  let sanitized = input.trim();
+
+  // Remove control characters (except newlines if allowed)
+  if (allowNewlines) {
+    sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  } else {
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+  }
+
+  // Remove HTML tags if present (for text fields)
+  sanitized = sanitized.replace(/<[^>]*>/g, '');
+
+  // Remove dangerous patterns
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  sanitized = sanitized.replace(/data:/gi, '');
+  sanitized = sanitized.replace(/vbscript:/gi, '');
+  
+  // Remove or escape dangerous characters if not allowed
+  if (!allowSpecialChars) {
+    // Only allow alphanumeric, spaces, and basic punctuation
+    sanitized = sanitized.replace(/[^a-zA-Z0-9\s.,!?\-_()]/g, '');
+  } else {
+    // Escape HTML special characters
+    sanitized = escapeHtml(sanitized);
+  }
+
+  // Limit length
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength);
+  }
+
+  return sanitized;
+}
+
+/**
+ * Sanitize URL input
+ * Validates and sanitizes URL strings
+ */
+export function sanitizeUrl(input: string, allowedProtocols: string[] = ['http', 'https']): string | null {
+  if (!input || typeof input !== 'string') {
+    return null;
+  }
+
+  const trimmed = input.trim();
+
+  // Remove dangerous protocols
+  const dangerousPatterns = /^(javascript|data|vbscript|file|about):/i;
+  if (dangerousPatterns.test(trimmed)) {
+    return null;
+  }
+
+  // Validate protocol
+  try {
+    const url = new URL(trimmed);
+    if (!allowedProtocols.includes(url.protocol.replace(':', '').toLowerCase())) {
+      return null;
+    }
+    return url.toString();
+  } catch {
+    // If not a valid URL, return null
+    return null;
+  }
+}
+
+/**
+ * Sanitize email input
+ * Validates and sanitizes email addresses
+ */
+export function sanitizeEmail(input: string): string | null {
+  if (!input || typeof input !== 'string') {
+    return null;
+  }
+
+  const trimmed = input.trim().toLowerCase();
+
+  // Basic email validation
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(trimmed)) {
+    return null;
+  }
+
+  // Remove dangerous characters
+  const sanitized = trimmed.replace(/[<>'"&]/g, '');
+
+  // Check length (reasonable limit for email)
+  if (sanitized.length > 254) {
+    return null;
+  }
+
+  return sanitized;
+}
+
+/**
+ * Sanitize numeric input
+ * Validates and sanitizes numeric values
+ */
+export function sanitizeNumber(
+  input: string | number,
+  options: {
+    min?: number;
+    max?: number;
+    allowDecimals?: boolean;
+    allowNegative?: boolean;
+  } = {}
+): number | null {
+  if (input === null || input === undefined) {
+    return null;
+  }
+
+  const {
+    min,
+    max,
+    allowDecimals = true,
+    allowNegative = false
+  } = options;
+
+  let num: number;
+
+  if (typeof input === 'number') {
+    num = input;
+  } else if (typeof input === 'string') {
+    // Remove any non-numeric characters (except decimal point and minus sign)
+    let cleaned = input.trim();
+    if (!allowDecimals) {
+      cleaned = cleaned.replace(/[^\d-]/g, '');
+    } else {
+      cleaned = cleaned.replace(/[^\d.-]/g, '');
+    }
+
+    num = parseFloat(cleaned);
+    if (isNaN(num)) {
+      return null;
+    }
+  } else {
+    return null;
+  }
+
+  // Check if negative is allowed
+  if (!allowNegative && num < 0) {
+    return null;
+  }
+
+  // Check bounds
+  if (min !== undefined && num < min) {
+    return null;
+  }
+  if (max !== undefined && num > max) {
+    return null;
+  }
+
+  return num;
+}
+
+/**
+ * Deep sanitize object
+ * Recursively sanitizes all string values in an object
+ */
+export function sanitizeObject<T extends Record<string, unknown>>(
+  obj: T,
+  options: {
+    sanitizeHtml?: boolean;
+    maxStringLength?: number;
+  } = {}
+): T {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj;
+  }
+
+  const {
+    sanitizeHtml: shouldSanitizeHtml = false,
+    maxStringLength = 10000
+  } = options;
+
+  const sanitized = {} as T;
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'string') {
+      sanitized[key as keyof T] = (shouldSanitizeHtml 
+        ? sanitizeHtml(value) 
+        : sanitizeText(value, { maxLength: maxStringLength })
+      ) as T[keyof T];
+    } else if (Array.isArray(value)) {
+      sanitized[key as keyof T] = value.map(item => 
+        typeof item === 'string' 
+          ? (shouldSanitizeHtml ? sanitizeHtml(item) : sanitizeText(item, { maxLength: maxStringLength }))
+          : typeof item === 'object' && item !== null
+          ? sanitizeObject(item as Record<string, unknown>, options)
+          : item
+      ) as T[keyof T];
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key as keyof T] = sanitizeObject(value as Record<string, unknown>, options) as T[keyof T];
+    } else {
+      sanitized[key as keyof T] = value;
+    }
+  }
+
+  return sanitized;
+}
+
+/**
+ * Validate and sanitize user input
+ * Main entry point for input sanitization
+ */
+export function sanitizeInput(
+  input: unknown,
+  type: 'text' | 'html' | 'email' | 'url' | 'number' = 'text',
+  options: Record<string, unknown> = {}
+): unknown {
+  if (input === null || input === undefined) {
+    return null;
+  }
+
+  if (typeof input === 'string') {
+    switch (type) {
+      case 'html':
+        return sanitizeHtml(input);
+      case 'email':
+        return sanitizeEmail(input);
+      case 'url':
+        return sanitizeUrl(input, options.allowedProtocols as string[]);
+      case 'number':
+        return sanitizeNumber(input, options as {
+          min?: number;
+          max?: number;
+          allowDecimals?: boolean;
+          allowNegative?: boolean;
+        });
+      case 'text':
+      default:
+        return sanitizeText(input, options as {
+          maxLength?: number;
+          allowNewlines?: boolean;
+          allowSpecialChars?: boolean;
+        });
+    }
+  }
+
+  if (typeof input === 'number') {
+    if (type === 'number') {
+      return sanitizeNumber(input, options as {
+        min?: number;
+        max?: number;
+        allowDecimals?: boolean;
+        allowNegative?: boolean;
+      });
+    }
+    return input;
+  }
+
+  if (typeof input === 'object' && !Array.isArray(input)) {
+    return sanitizeObject(input as Record<string, unknown>, options as {
+      sanitizeHtml?: boolean;
+      maxStringLength?: number;
+    });
+  }
+
+  if (Array.isArray(input)) {
+    return input.map(item => sanitizeInput(item, type, options));
+  }
+
+  return input;
+}
+
