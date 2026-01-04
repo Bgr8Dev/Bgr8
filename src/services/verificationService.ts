@@ -82,6 +82,29 @@ export class VerificationService {
       updatedAt: serverTimestamp()
     });
 
+    // Send profile submitted email
+    try {
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendMentorProfileSubmittedEmail } = await import('./emailHelpers');
+      const userProfile = await getUserProfile(mentorUid);
+      
+      if (userProfile && userProfile.email) {
+        sendMentorProfileSubmittedEmail(userProfile.email, userProfile.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Mentor profile submitted email sent to ${userProfile.email}`);
+            } else {
+              loggers.email.error(`Failed to send profile submitted email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending profile submitted email:', error);
+          });
+      }
+    } catch (emailError) {
+      loggers.email.error('Error in profile submitted email integration:', emailError);
+    }
+
     return verificationData;
   }
 
@@ -552,6 +575,29 @@ export class VerificationService {
       reviewedBy,
       notes
     );
+    
+    // Send verification success email
+    try {
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendMentorProfileVerifiedEmail } = await import('./emailHelpers');
+      const userProfile = await getUserProfile(mentorUid);
+      
+      if (userProfile && userProfile.email) {
+        sendMentorProfileVerifiedEmail(userProfile.email, userProfile.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Mentor profile verified email sent to ${userProfile.email}`);
+            } else {
+              loggers.email.error(`Failed to send verification email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending verification email:', error);
+          });
+      }
+    } catch (emailError) {
+      loggers.email.error('Error in verification email integration:', emailError);
+    }
   }
 
   /**
@@ -571,6 +617,33 @@ export class VerificationService {
       notes,
       reason
     );
+    
+    // Send rejection email
+    try {
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendMentorProfileRejectedEmail } = await import('./emailHelpers');
+      const userProfile = await getUserProfile(mentorUid);
+      
+      if (userProfile && userProfile.email) {
+        sendMentorProfileRejectedEmail(
+          userProfile.email, 
+          userProfile.firstName, 
+          reason || 'Profile did not meet verification requirements.'
+        )
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Mentor profile rejected email sent to ${userProfile.email}`);
+            } else {
+              loggers.email.error(`Failed to send rejection email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending rejection email:', error);
+          });
+      }
+    } catch (emailError) {
+      loggers.email.error('Error in rejection email integration:', emailError);
+    }
   }
 
   /**

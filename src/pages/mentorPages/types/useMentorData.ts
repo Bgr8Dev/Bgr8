@@ -402,6 +402,52 @@ export const useMentorData = () => {
       if (profileData.isMentor && profileData.type === 'mentor') {
         const { createInitialVerification } = await import('../../../services/verificationService');
         await createInitialVerification(user.uid);
+        
+        // Send mentor profile created email
+        try {
+          const { getUserProfile } = await import('../../../utils/userProfile');
+          const { sendMentorProfileCreatedEmail } = await import('../../../services/emailHelpers');
+          const userProfile = await getUserProfile(user.uid);
+          
+          if (userProfile && user.email) {
+            sendMentorProfileCreatedEmail(user.email, userProfile.firstName)
+              .then(result => {
+                if (result.success) {
+                  loggers.email.log(`Mentor profile created email sent to ${user.email}`);
+                } else {
+                  loggers.email.error(`Failed to send mentor profile email: ${result.error}`);
+                }
+              })
+              .catch(error => {
+                loggers.email.error('Error sending mentor profile email:', error);
+              });
+          }
+        } catch (emailError) {
+          loggers.email.error('Error in mentor profile email integration:', emailError);
+        }
+      } else if (profileData.type === 'mentee') {
+        // Send mentee profile created email
+        try {
+          const { getUserProfile } = await import('../../../utils/userProfile');
+          const { sendMenteeProfileCreatedEmail } = await import('../../../services/emailHelpers');
+          const userProfile = await getUserProfile(user.uid);
+          
+          if (userProfile && user.email) {
+            sendMenteeProfileCreatedEmail(user.email, userProfile.firstName)
+              .then(result => {
+                if (result.success) {
+                  loggers.email.log(`Mentee profile created email sent to ${user.email}`);
+                } else {
+                  loggers.email.error(`Failed to send mentee profile email: ${result.error}`);
+                }
+              })
+              .catch(error => {
+                loggers.email.error('Error sending mentee profile email:', error);
+              });
+          }
+        } catch (emailError) {
+          loggers.email.error('Error in mentee profile email integration:', emailError);
+        }
       }
       
       // Refresh currentUserProfile from Firestore instead of setting locally

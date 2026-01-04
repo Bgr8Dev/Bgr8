@@ -12,6 +12,8 @@ import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
 import MobileSignInPage from './MobileSignInPage';
+import { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } from '../../services/emailHelpers';
+import { loggers } from '../../utils/logger';
 // import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 
 // Simple inline PasswordStrengthMeter component
@@ -222,6 +224,31 @@ export default function SignInPage() {
 
         // Add initial password to history
         await PasswordHistoryService.addPasswordToHistory(userCredential.user.uid, formData.password);
+
+        // Send welcome emails (non-blocking - don't fail registration if email fails)
+        sendRegistrationWelcomeEmail(formData.email, formData.firstName, formData.lastName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Welcome email sent to ${formData.email}`);
+            } else {
+              loggers.email.error(`Failed to send welcome email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending welcome email:', error);
+          });
+
+        sendAccountCreatedEmail(formData.email, formData.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Account created email sent to ${formData.email}`);
+            } else {
+              loggers.email.error(`Failed to send account created email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending account created email:', error);
+          });
 
         updateLastActivity(); // Set initial session timestamp
         navigate('/'); // Redirect to home page

@@ -212,6 +212,34 @@ export default function MobileSignInPage() {
         // Add initial password to history
         await PasswordHistoryService.addPasswordToHistory(userCredential.user.uid, formData.password);
 
+        // Send welcome emails (non-blocking - don't fail registration if email fails)
+        const { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } = await import('../../services/emailHelpers');
+        const { loggers } = await import('../../utils/logger');
+        
+        sendRegistrationWelcomeEmail(formData.email, formData.firstName, formData.lastName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Welcome email sent to ${formData.email}`);
+            } else {
+              loggers.email.error(`Failed to send welcome email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending welcome email:', error);
+          });
+
+        sendAccountCreatedEmail(formData.email, formData.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Account created email sent to ${formData.email}`);
+            } else {
+              loggers.email.error(`Failed to send account created email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending account created email:', error);
+          });
+
         updateLastActivity(); // Set initial session timestamp
         navigate('/'); // Redirect to home page
       }

@@ -16,6 +16,8 @@ import SentTab from '../../components/admin/emails/SentTab';
 import DraftsTab from '../../components/admin/emails/DraftsTab';
 import AnalyticsTab from '../../components/admin/emails/AnalyticsTab';
 import DeveloperTab from '../../components/admin/emails/DeveloperTab';
+import EmailUseCasesTab from '../../components/admin/emails/EmailUseCasesTab';
+import EmailTemplateManager from '../../components/admin/emails/EmailTemplateManager';
 import TemplateModal from '../../components/admin/emails/TemplateModal';
 
 // Import styles
@@ -25,7 +27,7 @@ import '../../components/admin/emails/RecipientSelector.css';
 
 const AdminEmails: React.FC = () => {
   const { userProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'developer'>('compose');
+  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'use-cases' | 'template-manager' | 'developer'>('compose');
   const [currentDraft, setCurrentDraft] = useState<Partial<EmailDraft>>({
     subject: '',
     content: '',
@@ -900,6 +902,14 @@ const AdminEmails: React.FC = () => {
 
         {activeTab === 'analytics' && (
           <AnalyticsTab analytics={analytics} />
+        )}
+
+        {activeTab === 'use-cases' && (
+          <EmailUseCasesTab />
+        )}
+
+        {activeTab === 'template-manager' && (
+          <EmailTemplateManager />
         )}
 
         {activeTab === 'developer' && (
