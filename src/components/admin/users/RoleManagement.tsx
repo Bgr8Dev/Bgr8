@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { firestore } from '../../../firebase/firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp, deleteDoc, where, writeBatch, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../../hooks/useAuth';
 import { hasRole } from '../../../utils/userProfile';
+import { loggers } from '../../../utils/logger';
+import { PasswordHistoryService } from '../../../services/passwordHistoryService';
 import { 
   FaUsers, 
   FaChartBar, 
@@ -18,7 +20,8 @@ import {
   FaHandshake,
   FaCalendar,
   FaBug,
-  FaLock
+  FaLock,
+  FaTrash
 } from 'react-icons/fa';
 import RoleManagementModal from './RoleManagementModal';
 import './RoleManagement.css';
@@ -158,9 +161,15 @@ export default function RoleManagement() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [pulsingRole, setPulsingRole] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Check if user has permission to manage roles
   const canManageRoles = hasRole(userProfile, 'admin') || hasRole(userProfile, 'developer');
+  // Check if user is a developer (only developers can delete users)
+  const isDeveloper = hasRole(userProfile, 'developer');
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -232,7 +241,7 @@ export default function RoleManagement() {
       setUsers(userData);
       setUserStats(stats);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      loggers.error.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
@@ -318,7 +327,311 @@ export default function RoleManagement() {
         return newStats;
       });
     } catch (error) {
-      console.error('Error updating user role:', error);
+      loggers.error.error('Error updating user role:', error);
+    }
+  };
+
+  const handleDeleteUser = async (user: UserData) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setDeletingUser(true);
+    setDeleteStatus(null);
+    const userId = userToDelete.uid;
+
+    try {
+      loggers.log.log(`Starting deletion of user ${userId} (${userToDelete.email})`);
+
+      // Prevent deleting yourself
+      if (userProfile?.uid === userId) {
+        setDeleteStatus({ type: 'error', message: 'You cannot delete your own account.' });
+        setDeletingUser(false);
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+        return;
+      }
+
+      // Prevent deleting protected users
+      if (userToDelete.isProtected) {
+        setDeleteStatus({ type: 'error', message: 'Protected accounts cannot be deleted.' });
+        setDeletingUser(false);
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+        return;
+      }
+
+      const batch = writeBatch(firestore);
+      let deletedCount = 0;
+
+      // 1. Delete all bookings where user is mentor or mentee
+      const mentorBookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('mentorId', '==', userId)
+      );
+      const menteeBookingsQuery = query(
+        collection(firestore, 'bookings'),
+        where('menteeId', '==', userId)
+      );
+      
+      const [mentorBookingsSnapshot, menteeBookingsSnapshot] = await Promise.all([
+        getDocs(mentorBookingsQuery),
+        getDocs(menteeBookingsQuery)
+      ]);
+
+      mentorBookingsSnapshot.forEach((bookingDoc) => {
+        batch.delete(bookingDoc.ref);
+        deletedCount++;
+      });
+      menteeBookingsSnapshot.forEach((bookingDoc) => {
+        batch.delete(bookingDoc.ref);
+        deletedCount++;
+      });
+
+      loggers.log.log(`Found ${mentorBookingsSnapshot.size + menteeBookingsSnapshot.size} bookings to delete`);
+
+      // 2. Delete all sessions where user is mentor or mentee
+      const mentorSessionsQuery = query(
+        collection(firestore, 'sessions'),
+        where('mentorId', '==', userId)
+      );
+      const menteeSessionsQuery = query(
+        collection(firestore, 'sessions'),
+        where('menteeId', '==', userId)
+      );
+
+      const [mentorSessionsSnapshot, menteeSessionsSnapshot] = await Promise.all([
+        getDocs(mentorSessionsQuery),
+        getDocs(menteeSessionsQuery)
+      ]);
+
+      // Delete session feedback subcollections
+      for (const sessionDoc of [...mentorSessionsSnapshot.docs, ...menteeSessionsSnapshot.docs]) {
+        try {
+          const feedbackRef = collection(firestore, 'sessions', sessionDoc.id, 'feedback');
+          const feedbackSnapshot = await getDocs(feedbackRef);
+          
+          for (const feedbackDoc of feedbackSnapshot.docs) {
+            // Delete feedback questions subcollection
+            try {
+              const questionsRef = collection(firestore, 'sessions', sessionDoc.id, 'feedback', feedbackDoc.id, 'questions');
+              const questionsSnapshot = await getDocs(questionsRef);
+              questionsSnapshot.forEach((questionDoc) => {
+                batch.delete(questionDoc.ref);
+              });
+            } catch (error) {
+              loggers.error.error(`Error deleting questions for feedback ${feedbackDoc.id}:`, error);
+            }
+            batch.delete(feedbackDoc.ref);
+          }
+        } catch (error) {
+          loggers.error.error(`Error deleting feedback for session ${sessionDoc.id}:`, error);
+        }
+        batch.delete(sessionDoc.ref);
+        deletedCount++;
+      }
+
+      loggers.log.log(`Found ${mentorSessionsSnapshot.size + menteeSessionsSnapshot.size} sessions to delete`);
+
+      // 3. Delete all feedback where user is the submitter, mentor, or mentee
+      const feedbackAsSubmitterQuery = query(
+        collection(firestore, 'feedback'),
+        where('submittedBy', '==', userId)
+      );
+      const feedbackAsMentorQuery = query(
+        collection(firestore, 'feedback'),
+        where('mentorId', '==', userId)
+      );
+      const feedbackAsMenteeQuery = query(
+        collection(firestore, 'feedback'),
+        where('menteeId', '==', userId)
+      );
+
+      const [submitterFeedback, mentorFeedback, menteeFeedback] = await Promise.all([
+        getDocs(feedbackAsSubmitterQuery),
+        getDocs(feedbackAsMentorQuery),
+        getDocs(feedbackAsMenteeQuery)
+      ]);
+
+      // Combine and deduplicate feedback documents
+      const feedbackDocs = new Map();
+      [...submitterFeedback.docs, ...mentorFeedback.docs, ...menteeFeedback.docs].forEach((doc) => {
+        feedbackDocs.set(doc.id, doc);
+      });
+
+      feedbackDocs.forEach((feedbackDoc) => {
+        batch.delete(feedbackDoc.ref);
+        deletedCount++;
+      });
+
+      loggers.log.log(`Found ${feedbackDocs.size} feedback documents to delete`);
+
+      // 4. Delete all messages and conversations where user is a participant
+      const messagesAsSenderQuery = query(
+        collection(firestore, 'messages'),
+        where('senderId', '==', userId)
+      );
+      const messagesAsRecipientQuery = query(
+        collection(firestore, 'messages'),
+        where('recipientId', '==', userId)
+      );
+
+      const [senderMessages, recipientMessages] = await Promise.all([
+        getDocs(messagesAsSenderQuery),
+        getDocs(messagesAsRecipientQuery)
+      ]);
+
+      // Combine and deduplicate messages
+      const messageDocs = new Map();
+      [...senderMessages.docs, ...recipientMessages.docs].forEach((doc) => {
+        messageDocs.set(doc.id, doc);
+      });
+
+      messageDocs.forEach((messageDoc) => {
+        batch.delete(messageDoc.ref);
+        deletedCount++;
+      });
+
+      loggers.log.log(`Found ${messageDocs.size} messages to delete`);
+
+      // Delete conversations where user is a participant
+      const conversationsAsParticipant1Query = query(
+        collection(firestore, 'conversations'),
+        where('participant1Id', '==', userId)
+      );
+      const conversationsAsParticipant2Query = query(
+        collection(firestore, 'conversations'),
+        where('participant2Id', '==', userId)
+      );
+
+      const [participant1Convs, participant2Convs] = await Promise.all([
+        getDocs(conversationsAsParticipant1Query),
+        getDocs(conversationsAsParticipant2Query)
+      ]);
+
+      // Combine and deduplicate conversations
+      const conversationDocs = new Map();
+      [...participant1Convs.docs, ...participant2Convs.docs].forEach((doc) => {
+        conversationDocs.set(doc.id, doc);
+      });
+
+      conversationDocs.forEach((conversationDoc) => {
+        batch.delete(conversationDoc.ref);
+        deletedCount++;
+      });
+
+      loggers.log.log(`Found ${conversationDocs.size} conversations to delete`);
+
+      // 5. Delete enquiries created by the user (if userId field exists)
+      try {
+        const enquiriesQuery = query(
+          collection(firestore, 'enquiries'),
+          where('userId', '==', userId)
+        );
+        const enquiriesSnapshot = await getDocs(enquiriesQuery);
+        enquiriesSnapshot.forEach((enquiryDoc) => {
+          batch.delete(enquiryDoc.ref);
+          deletedCount++;
+        });
+        loggers.log.log(`Found ${enquiriesSnapshot.size} enquiries to delete`);
+      } catch (error) {
+        loggers.error.error('Error deleting enquiries (field may not exist):', error);
+      }
+
+      // 6. Delete ambassador applications by the user
+      try {
+        const ambassadorAppsQuery = query(
+          collection(firestore, 'ambassadorApplications'),
+          where('userId', '==', userId)
+        );
+        const ambassadorAppsSnapshot = await getDocs(ambassadorAppsQuery);
+        ambassadorAppsSnapshot.forEach((appDoc) => {
+          batch.delete(appDoc.ref);
+          deletedCount++;
+        });
+        loggers.log.log(`Found ${ambassadorAppsSnapshot.size} ambassador applications to delete`);
+      } catch (error) {
+        loggers.error.error('Error deleting ambassador applications (field may not exist):', error);
+      }
+
+      // 7. Delete user subcollections (mentorProgram, availabilities, etc.)
+      try {
+        // Delete mentorProgram/profile if it exists
+        const mentorProfileRef = doc(firestore, 'users', userId, 'mentorProgram', 'profile');
+        const mentorProfileDoc = await getDoc(mentorProfileRef);
+        if (mentorProfileDoc.exists()) {
+          batch.delete(mentorProfileRef);
+          deletedCount++;
+        }
+
+        // Delete availabilities/default if it exists
+        const availabilitiesRef = doc(firestore, 'users', userId, 'availabilities', 'default');
+        const availabilitiesDoc = await getDoc(availabilitiesRef);
+        if (availabilitiesDoc.exists()) {
+          batch.delete(availabilitiesRef);
+          deletedCount++;
+        }
+      } catch (error) {
+        loggers.error.error('Error deleting user subcollections:', error);
+      }
+
+      // 8. Delete password history if it exists
+      try {
+        await PasswordHistoryService.clearPasswordHistory(userId);
+        loggers.log.log('Password history cleared');
+      } catch (error) {
+        loggers.error.error('Error clearing password history (may not exist):', error);
+      }
+
+      // 9. Commit batch deletions
+      await batch.commit();
+      loggers.log.log(`Batch deletion committed: ${deletedCount} documents deleted`);
+
+      // 10. Finally, delete the main user document
+      await deleteDoc(doc(firestore, 'users', userId));
+      loggers.log.log('User document deleted');
+
+      // Update local state
+      setUsers(prev => prev.filter(u => u.uid !== userId));
+      
+      // Update stats
+      setUserStats(prevStats => ({
+        ...prevStats,
+        total: prevStats.total - 1,
+        // Decrement role counts if user had those roles
+        admins: userToDelete.roles.admin ? prevStats.admins - 1 : prevStats.admins,
+        developers: userToDelete.roles.developer ? prevStats.developers - 1 : prevStats.developers,
+        committee: userToDelete.roles.committee ? prevStats.committee - 1 : prevStats.committee,
+        audit: userToDelete.roles.audit ? prevStats.audit - 1 : prevStats.audit,
+        marketing: userToDelete.roles.marketing ? prevStats.marketing - 1 : prevStats.marketing,
+        'vetting-officer': userToDelete.roles['vetting-officer'] ? prevStats['vetting-officer'] - 1 : prevStats['vetting-officer'],
+        'social-media': userToDelete.roles['social-media'] ? prevStats['social-media'] - 1 : prevStats['social-media'],
+        outreach: userToDelete.roles.outreach ? prevStats.outreach - 1 : prevStats.outreach,
+        events: userToDelete.roles.events ? prevStats.events - 1 : prevStats.events,
+        tester: userToDelete.roles.tester ? prevStats.tester - 1 : prevStats.tester
+      }));
+
+      setDeleteStatus({ 
+        type: 'success', 
+        message: `User ${userToDelete.firstName} ${userToDelete.lastName} and all related data (${deletedCount + 1} items) have been deleted successfully.` 
+      });
+      
+      // Clear status after 5 seconds
+      setTimeout(() => setDeleteStatus(null), 5000);
+
+    } catch (error) {
+      loggers.error.error('Error deleting user:', error);
+      setDeleteStatus({ 
+        type: 'error', 
+        message: `Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      });
+    } finally {
+      setDeletingUser(false);
+      setShowDeleteModal(false);
+      setUserToDelete(null);
     }
   };
 
@@ -541,21 +854,32 @@ export default function RoleManagement() {
                         <span className="rm-no-roles-small">No roles</span>
                       )}
                     </div>
-                    <button
-                      className={`rm-manage-roles-btn ${user.isProtected ? 'disabled' : ''}`}
-                      onClick={() => {
-                        if (user.isProtected) {
-                          alert('This account is protected and cannot have its roles modified.');
-                          return;
-                        }
-                        setSelectedUser(user);
-                        setShowRoleModal(true);
-                      }}
-                      disabled={user.isProtected}
-                      title={user.isProtected ? 'Protected Account - Roles cannot be modified' : 'Manage user roles'}
-                    >
-                      {user.isProtected ? 'Protected' : 'Manage Roles'}
-                    </button>
+                    <div className="rm-action-buttons">
+                      <button
+                        className={`rm-manage-roles-btn ${user.isProtected ? 'disabled' : ''}`}
+                        onClick={() => {
+                          if (user.isProtected) {
+                            alert('This account is protected and cannot have its roles modified.');
+                            return;
+                          }
+                          setSelectedUser(user);
+                          setShowRoleModal(true);
+                        }}
+                        disabled={user.isProtected}
+                        title={user.isProtected ? 'Protected Account - Roles cannot be modified' : 'Manage user roles'}
+                      >
+                        {user.isProtected ? 'Protected' : 'Manage Roles'}
+                      </button>
+                      {isDeveloper && !user.isProtected && user.uid !== userProfile?.uid && (
+                        <button
+                          className="rm-delete-user-btn"
+                          onClick={() => handleDeleteUser(user)}
+                          title="Delete user and all related data (Developer only)"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -569,6 +893,62 @@ export default function RoleManagement() {
           <FaUsers className="rm-no-users-icon" />
           <h3>No users found</h3>
           <p>Try adjusting your search or filter criteria</p>
+        </div>
+      )}
+
+      {/* Delete Status Message */}
+      {deleteStatus && (
+        <div className={`rm-delete-status ${deleteStatus.type}`}>
+          {deleteStatus.message}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && userToDelete && (
+        <div className="rm-delete-modal-overlay" onClick={() => !deletingUser && setShowDeleteModal(false)}>
+          <div className="rm-delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="rm-delete-modal-header">
+              <FaTrash className="rm-delete-modal-icon" />
+              <h2>Delete User</h2>
+            </div>
+            <div className="rm-delete-modal-content">
+              <p className="rm-delete-warning">
+                <strong>Warning:</strong> This action cannot be undone. This will permanently delete:
+              </p>
+              <ul className="rm-delete-list">
+                <li>The user account: <strong>{userToDelete.firstName} {userToDelete.lastName} ({userToDelete.email})</strong></li>
+                <li>All bookings where the user is a mentor or mentee</li>
+                <li>All sessions and session feedback</li>
+                <li>All feedback submissions</li>
+                <li>All messages and conversations</li>
+                <li>All enquiries and ambassador applications</li>
+                <li>All user subcollections (mentorProgram, availabilities, etc.)</li>
+                <li>Password history</li>
+              </ul>
+              <p className="rm-delete-confirm">
+                Are you sure you want to delete this user and all related data?
+              </p>
+            </div>
+            <div className="rm-delete-modal-actions">
+              <button
+                className="rm-delete-cancel-btn"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setUserToDelete(null);
+                }}
+                disabled={deletingUser}
+              >
+                Cancel
+              </button>
+              <button
+                className="rm-delete-confirm-btn"
+                onClick={confirmDeleteUser}
+                disabled={deletingUser}
+              >
+                {deletingUser ? 'Deleting...' : 'Delete User'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
