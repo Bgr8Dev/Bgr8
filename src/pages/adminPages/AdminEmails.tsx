@@ -5,16 +5,18 @@ import { useAuth } from '../../hooks/useAuth';
 import RecipientSelector from '../../components/admin/emails/RecipientSelector';
 import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
 import BannerWrapper from '../../components/ui/BannerWrapper';
+import { loggers } from '../../utils/logger';
 
 // Import the new components
 import EmailHeader from '../../components/admin/emails/EmailHeader';
 import EmailTabs from '../../components/admin/emails/EmailTabs';
 import ComposeTab from '../../components/admin/emails/ComposeTab';
-import TemplatesTab from '../../components/admin/emails/TemplatesTab';
 import SentTab from '../../components/admin/emails/SentTab';
 import DraftsTab from '../../components/admin/emails/DraftsTab';
 import AnalyticsTab from '../../components/admin/emails/AnalyticsTab';
 import DeveloperTab from '../../components/admin/emails/DeveloperTab';
+import EmailUseCasesTab from '../../components/admin/emails/EmailUseCasesTab';
+import EmailTemplateManager from '../../components/admin/emails/EmailTemplateManager';
 import TemplateModal from '../../components/admin/emails/TemplateModal';
 
 // Import styles
@@ -24,7 +26,7 @@ import '../../components/admin/emails/RecipientSelector.css';
 
 const AdminEmails: React.FC = () => {
   const { userProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'developer'>('compose');
+  const [activeTab, setActiveTab] = useState<'compose' | 'templates' | 'sent' | 'drafts' | 'analytics' | 'use-cases' | 'developer'>('compose');
   const [currentDraft, setCurrentDraft] = useState<Partial<EmailDraft>>({
     subject: '',
     content: '',
@@ -45,8 +47,6 @@ const AdminEmails: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateForm, setTemplateForm] = useState<Partial<EmailTemplate>>({});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -186,27 +186,107 @@ const AdminEmails: React.FC = () => {
   const testZohoSetup = async () => {
     try {
       updateTestStatus('zoho', 'testing', 'Testing Zoho API setup...');
+      loggers.email.log('🔍 Testing Zoho API setup...');
+      
       const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${emailConfig.apiKey}` },
       });
 
+      loggers.email.log('📡 Zoho test response status:', response.status, response.statusText);
+
       if (response.ok) {
         const data = await response.json();
+        loggers.email.log('📦 Zoho test response data:', data);
+        
         if (data.success) {
           updateTestStatus('zoho', 'success', 'Zoho API is working!');
           showNotification('success', `Zoho API is working! ${data.message}`);
         } else {
-          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}`);
-          showNotification('error', `Zoho API issue: ${data.message}`);
+          // Parse error details if available
+          let parsedError = null;
+          let errorCode = null;
+          
+          if (data.error) {
+            try {
+              if (typeof data.error === 'string') {
+                parsedError = JSON.parse(data.error);
+              } else {
+                parsedError = data.error;
+              }
+              
+              if (parsedError?.data?.errorCode) {
+                errorCode = parsedError.data.errorCode;
+              }
+            } catch {
+              // Error is not JSON, keep as string
+            }
+          }
+          
+          // Build detailed error message
+          let errorMessage = data.message || 'Zoho API access failed';
+          
+          if (errorCode) {
+            errorMessage += ` (Error Code: ${errorCode})`;
+          }
+          
+          // Include parsed error details in logs
+          loggers.email.error('❌ Zoho API test failed:', {
+            message: data.message,
+            errorCode: errorCode,
+            error: data.error,
+            parsedError: parsedError,
+            status: data.status,
+            statusText: data.statusText,
+            nextSteps: data.nextSteps
+          });
+          
+          // Log next steps prominently
+          if (data.nextSteps && Array.isArray(data.nextSteps) && data.nextSteps.length > 0) {
+            loggers.email.warn('📋 Zoho API - Next Steps to Fix:');
+            data.nextSteps.forEach((step: string) => {
+              loggers.email.warn(`   ${step}`);
+            });
+            
+            // Build a more detailed notification message with next steps
+            const stepsSummary = data.nextSteps.slice(0, 2).join(' | ');
+            errorMessage += ` - ${stepsSummary}`;
+          }
+          
+          updateTestStatus('zoho', 'error', `Zoho API issue: ${data.message}${errorCode ? ` (${errorCode})` : ''}`);
+          showNotification('error', errorMessage);
         }
       } else {
-        updateTestStatus('zoho', 'error', `Test failed: ${response.status} ${response.statusText}`);
-        showNotification('error', `Zoho test failed: ${response.status} ${response.statusText}`);
+        // Try to parse error response
+        let errorDetails = `${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          loggers.email.error('❌ Zoho test HTTP error:', errorData);
+          if (errorData.error) {
+            errorDetails = errorData.error;
+          } else if (errorData.message) {
+            errorDetails = errorData.message;
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, try text
+          loggers.email.warn('⚠️ Failed to parse error as JSON, trying text:', parseError);
+          try {
+            const errorText = await response.text();
+            loggers.email.error('❌ Zoho test error text:', errorText);
+            errorDetails = errorText || errorDetails;
+          } catch (textError) {
+            loggers.email.error('❌ Failed to parse error response:', textError);
+          }
+        }
+        
+        updateTestStatus('zoho', 'error', `Test failed: ${errorDetails}`);
+        showNotification('error', `Zoho test failed: ${errorDetails}`);
       }
     } catch (error) {
-      updateTestStatus('zoho', 'error', `Test failed: ${error}`);
-      showNotification('error', `Failed to test Zoho: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      loggers.email.error('❌ Zoho test exception:', error);
+      updateTestStatus('zoho', 'error', `Test failed: ${errorMessage}`);
+      showNotification('error', `Failed to test Zoho: ${errorMessage}`);
     }
   };
 
@@ -409,8 +489,30 @@ const AdminEmails: React.FC = () => {
     }
   };
 
+  // Helper function to check if HTML content has actual text
+  const hasTextContent = (html: string | undefined): boolean => {
+    if (!html) return false;
+    // Create a temporary div to parse HTML and extract text
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    // Check if there's actual text (not just whitespace)
+    return textContent.trim().length > 0;
+  };
+
+  // Handle draft changes - merge updates with existing state
+  const handleDraftChange = useCallback((updates: Partial<EmailDraft>) => {
+    setCurrentDraft(prev => ({
+      ...prev,
+      ...updates
+    }));
+  }, []);
+
   const handleSaveDraft = async () => {
-    if (!currentDraft.subject || !currentDraft.content) {
+    const subject = currentDraft.subject?.trim() || '';
+    const hasContent = hasTextContent(currentDraft.content);
+    
+    if (!subject || !hasContent) {
       showNotification('error', 'Please fill in subject and content');
       return;
     }
@@ -440,7 +542,7 @@ const AdminEmails: React.FC = () => {
       
       showNotification('success', 'Draft saved successfully!');
     } catch (error) {
-      console.error('Error saving draft:', error);
+      loggers.error.error('Error saving draft:', error);
       showNotification('error', 'Failed to save draft');
     } finally {
       setIsSaving(false);
@@ -448,7 +550,10 @@ const AdminEmails: React.FC = () => {
   };
 
   const handleSendEmail = async () => {
-    if (!currentDraft.subject || !currentDraft.content) {
+    const subject = currentDraft.subject?.trim() || '';
+    const hasContent = hasTextContent(currentDraft.content);
+    
+    if (!subject || !hasContent) {
       showNotification('error', 'Please fill in subject and content');
       return;
     }
@@ -575,7 +680,7 @@ const AdminEmails: React.FC = () => {
 
   const handleRecipientSelection = async (selectedRecipientIds: string[]) => {
     try {
-      console.log('🔍 Selected recipient IDs:', selectedRecipientIds);
+      loggers.email.log('🔍 Selected recipient IDs:', selectedRecipientIds);
       
       if (selectedRecipientIds.length === 0) {
         return;
@@ -591,20 +696,44 @@ const AdminEmails: React.FC = () => {
       }
       
       if (selectedEmails.length > 0) {
-        setCurrentDraft(prev => ({
-          ...prev,
-          recipients: [...(prev.recipients || []), ...selectedEmails]
-        }));
+        // Filter out duplicates
+        setCurrentDraft(prev => {
+          const existingEmails = prev.recipients || [];
+          const newEmails = selectedEmails.filter(email => !existingEmails.includes(email));
+          return {
+            ...prev,
+            recipients: [...existingEmails, ...newEmails]
+          };
+        });
         
         setShowRecipientSelector(false);
-        showNotification('success', `${selectedEmails.length} recipients added`);
+        showNotification('success', `${selectedEmails.length} recipient${selectedEmails.length !== 1 ? 's' : ''} added`);
       } else {
         showNotification('error', 'No valid recipients found');
       }
     } catch (error) {
-      console.error('Error fetching recipient emails:', error);
+      loggers.error.error('Error fetching recipient emails:', error);
       showNotification('error', 'Failed to load recipient emails');
     }
+  };
+
+  const handleUserEmailsSelected = (selectedEmails: string[]) => {
+    if (selectedEmails.length === 0) {
+      return;
+    }
+
+    // Filter out duplicates
+    setCurrentDraft(prev => {
+      const existingEmails = prev.recipients || [];
+      const newEmails = selectedEmails.filter(email => !existingEmails.includes(email));
+      return {
+        ...prev,
+        recipients: [...existingEmails, ...newEmails]
+      };
+    });
+    
+    setShowRecipientSelector(false);
+    showNotification('success', `${selectedEmails.length} user${selectedEmails.length !== 1 ? 's' : ''} added`);
   };
 
   const handleBulkImport = () => {
@@ -741,7 +870,7 @@ const AdminEmails: React.FC = () => {
             bulkEmailInput={bulkEmailInput}
             isSaving={isSaving}
             isSending={isSending}
-            onDraftChange={setCurrentDraft}
+            onDraftChange={handleDraftChange}
             onSaveDraft={handleSaveDraft}
             onSendEmail={handleSendEmail}
             onTogglePreview={() => setShowPreview(!showPreview)}
@@ -760,12 +889,8 @@ const AdminEmails: React.FC = () => {
         )}
 
         {activeTab === 'templates' && (
-          <TemplatesTab
-            templates={templates}
-            searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            onSearchChange={setSearchTerm}
-            onCategoryChange={setSelectedCategory}
+          <EmailTemplateManager
+            onLoadTemplate={handleLoadTemplate}
             onCreateTemplate={() => {
               setTemplateForm({});
               setSelectedTemplate(null);
@@ -773,7 +898,6 @@ const AdminEmails: React.FC = () => {
             }}
             onEditTemplate={handleEditTemplate}
             onDeleteTemplate={handleDeleteTemplate}
-            onLoadTemplate={handleLoadTemplate}
           />
         )}
 
@@ -794,6 +918,10 @@ const AdminEmails: React.FC = () => {
 
         {activeTab === 'analytics' && (
           <AnalyticsTab analytics={analytics} />
+        )}
+
+        {activeTab === 'use-cases' && (
+          <EmailUseCasesTab />
         )}
 
         {activeTab === 'developer' && (
@@ -827,6 +955,7 @@ const AdminEmails: React.FC = () => {
         <RecipientSelector
           selectedRecipients={[]}
           onRecipientsChange={handleRecipientSelection}
+          onUserEmailsSelected={handleUserEmailsSelected}
           onClose={() => setShowRecipientSelector(false)}
         />
       )}

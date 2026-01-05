@@ -4,6 +4,7 @@ import BGr8 from '../pages/businessPages/BGr8';
 import NotFound from '../pages/NotFound';
 import SignInPage from '../pages/authPages/SignInPage';
 import ForgotPasswordPage from '../pages/authPages/ForgotPasswordPage';
+import EmailVerificationPage from '../pages/authPages/EmailVerificationPage';
 import { useAuth } from '../hooks/useAuth';
 import Profile from '../pages/utilPages/Profile';
 import Settings from '../pages/utilPages/Settings';
@@ -43,6 +44,7 @@ export default function Navigation() {
       />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/verify-email" element={<EmailVerificationPage />} />
       <Route 
         path="/profile" 
         element={

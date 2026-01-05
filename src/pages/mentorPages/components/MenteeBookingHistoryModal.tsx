@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../firebase/firebase';
 import { Booking } from '../../../types/bookings';
 import { MentorMenteeProfile } from '../types';
+import { loggers } from '../../../utils/logger';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface MenteeBookingHistoryModalProps {
   isOpen: boolean;
@@ -15,43 +17,137 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
   onClose,
   currentUserProfile
 }) => {
+  const { currentUser } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('all');
 
-  // Fetch mentee's booking history from Firebase
+  // Fetch mentee's booking history from Firestore using robust matching
   useEffect(() => {
-    if (!isOpen || !currentUserProfile?.uid) return;
+    if (!isOpen || !currentUserProfile?.uid || !currentUser?.uid) return;
 
     const fetchBookings = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const bookingsRef = collection(firestore, 'bookings');
-        const q = query(
-          bookingsRef,
-          where('menteeId', '==', currentUserProfile.uid),
-          orderBy('sessionDate', 'desc')
-        );
+        const userEmail = currentUser.email || '';
+        const userDisplayName = currentUser.displayName || '';
+        const userNameParts = userDisplayName.toLowerCase().split(' ').filter(p => p.length > 0);
+        
+        loggers.booking.log(`🔍 Modal: Fetching bookings for mentee: ${currentUser.uid}, email: ${userEmail}, name: ${userDisplayName}`);
 
-        const querySnapshot = await getDocs(q);
-        const fetchedBookings: Booking[] = [];
-
-        querySnapshot.forEach((doc) => {
+        // Get all bookings and filter in memory (same robust method as dashboard)
+        const allBookingsQuery = query(collection(firestore, 'bookings'));
+        const allBookingsSnapshot = await getDocs(allBookingsQuery);
+        
+        loggers.booking.log(`📊 Modal: Total bookings in database: ${allBookingsSnapshot.docs.length}`);
+        
+        const matchedBookings: Booking[] = [];
+        const matchReasons: string[] = [];
+        
+        allBookingsSnapshot.docs.forEach(doc => {
           const data = doc.data();
-          fetchedBookings.push({
-            id: doc.id,
-            ...data,
-            sessionDate: data.sessionDate || data.day ? Timestamp.fromDate(new Date(data.sessionDate || data.day)) : undefined,
-            createdAt: data.createdAt || Timestamp.now()
-          } as Booking);
+          let isMatch = false;
+          let matchReason = '';
+          
+          // Check 1: menteeId matches
+          if (data.menteeId === currentUser.uid) {
+            isMatch = true;
+            matchReason = 'menteeId';
+          }
+          // Check 2: menteeEmail matches
+          else if (userEmail && data.menteeEmail === userEmail) {
+            isMatch = true;
+            matchReason = 'menteeEmail';
+          }
+          // Check 3: Check calComAttendees array
+          else if (Array.isArray(data.calComAttendees) && data.calComAttendees.length > 0) {
+            const attendeeMatch = data.calComAttendees.some((attendee: { 
+              email?: string; 
+              name?: string; 
+              id?: number | string;
+              user?: { 
+                email?: string; 
+                name?: string; 
+              };
+            }) => {
+              // Match by email
+              if (userEmail && attendee.email && attendee.email.toLowerCase() === userEmail.toLowerCase()) {
+                matchReason = 'calComAttendees.email';
+                return true;
+              }
+              // Match by attendee.user.email (nested email)
+              if (userEmail && attendee.user?.email && attendee.user.email.toLowerCase() === userEmail.toLowerCase()) {
+                matchReason = 'calComAttendees.user.email';
+                return true;
+              }
+              // Match by name (if display name matches)
+              if (userDisplayName && attendee.name) {
+                const attendeeNameLower = attendee.name.toLowerCase();
+                const userDisplayNameLower = userDisplayName.toLowerCase();
+                // Exact match
+                if (attendeeNameLower === userDisplayNameLower) {
+                  matchReason = 'calComAttendees.name';
+                  return true;
+                }
+                // Partial match (check if all name parts are present)
+                if (userNameParts.length > 0) {
+                  const attendeeNameParts = attendeeNameLower.split(' ').filter((p: string) => p.length > 0);
+                  const allPartsMatch = userNameParts.every(part => 
+                    attendeeNameParts.some((ap: string) => ap.includes(part) || part.includes(ap))
+                  );
+                  if (allPartsMatch && attendeeNameParts.length === userNameParts.length) {
+                    matchReason = 'calComAttendees.name.partial';
+                    return true;
+                  }
+                }
+              }
+              // Match by attendee.user.name (nested name)
+              if (userDisplayName && attendee.user?.name) {
+                const attendeeUserNameLower = attendee.user.name.toLowerCase();
+                const userDisplayNameLower = userDisplayName.toLowerCase();
+                if (attendeeUserNameLower === userDisplayNameLower) {
+                  matchReason = 'calComAttendees.user.name';
+                  return true;
+                }
+              }
+              return false;
+            });
+            
+            if (attendeeMatch) {
+              isMatch = true;
+            }
+          }
+          
+          if (isMatch) {
+            const bookingData: Booking = {
+              id: doc.id,
+              ...data,
+              sessionDate: data.sessionDate || (data.day ? Timestamp.fromDate(new Date(data.day)) : undefined),
+              createdAt: data.createdAt || Timestamp.now()
+            } as Booking;
+            matchedBookings.push(bookingData);
+            matchReasons.push(`${doc.id}: ${matchReason}`);
+          }
+        });
+        
+        loggers.booking.log(`📊 Modal: Found ${matchedBookings.length} matching bookings`);
+        if (matchedBookings.length > 0) {
+          loggers.booking.debug('Modal: Match reasons:', matchReasons.slice(0, 5)); // Log first 5
+        }
+
+        // Sort by session date (most recent first)
+        matchedBookings.sort((a, b) => {
+          const dateA = a.sessionDate?.toMillis() || 0;
+          const dateB = b.sessionDate?.toMillis() || 0;
+          return dateB - dateA;
         });
 
-        setBookings(fetchedBookings);
-      } catch (err) {
-        console.error('Error fetching bookings:', err);
+        setBookings(matchedBookings);
+      } catch (err: unknown) {
+        loggers.booking.error('Error fetching bookings in modal:', err);
         setError('Failed to load booking history. Please try again.');
       } finally {
         setLoading(false);
@@ -59,7 +155,7 @@ export const MenteeBookingHistoryModal: React.FC<MenteeBookingHistoryModalProps>
     };
 
     fetchBookings();
-  }, [isOpen, currentUserProfile?.uid]);
+  }, [isOpen, currentUserProfile?.uid, currentUser?.uid, currentUser?.email, currentUser?.displayName]);
 
   // Filter bookings based on status
   const filteredBookings = bookings.filter(booking => {

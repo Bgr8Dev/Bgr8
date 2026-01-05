@@ -5,6 +5,7 @@ import { collection, query, where, getDocs, Timestamp, doc, updateDoc, deleteDoc
 import { FaCheck, FaTimes, FaSearch, FaFileExport, FaCalendarAlt, FaExternalLinkAlt, FaComments } from 'react-icons/fa';
 import { CalComService, CalComBookingResponse } from '../CalCom/calComService';
 import { Booking } from '../../../../types/bookings';
+import { loggers } from '../../../../utils/logger';
 import '../MentorProgram.css';
 
 // Simple Modal component
@@ -100,11 +101,11 @@ export default function MentorBookings() {
   useEffect(() => {
     const fetchBookings = async () => {
       if (!currentUser) {
-        console.log('[CalCom DEBUG] No currentUser, skipping bookings fetch.');
+        loggers.booking.debug('No currentUser, skipping bookings fetch.');
         return;
       }
       try {
-        console.log('[CalCom DEBUG] Current user:', currentUser);
+        loggers.booking.debug('Current user:', currentUser);
         const results: Booking[] = [];
         
         // Fetch Firestore bookings where user is either mentor or mentee
@@ -140,9 +141,9 @@ export default function MentorBookings() {
 
         // Fetch Cal.com bookings if user is a mentor
         try {
-          console.log('[CalCom DEBUG] Attempting to fetch Cal.com bookings for UID:', currentUser.uid);
+          loggers.booking.debug('Attempting to fetch Cal.com bookings for UID:', currentUser.uid);
           const calComBookings = await CalComService.getBookings(currentUser.uid);
-          console.log('[CalCom DEBUG] Raw Cal.com bookings response:', calComBookings);
+          loggers.booking.debug('Raw Cal.com bookings response:', calComBookings);
           const calComBookingsFormatted = calComBookings.map((calBooking: CalComBookingResponse) => {
             const startDate = new Date(calBooking.startTime);
             const endDate = new Date(calBooking.endTime);
@@ -174,20 +175,20 @@ export default function MentorBookings() {
               calComEventType: calBooking.eventType,
               calComAttendees: calBooking.attendees
             } as Booking;
-            console.log('[CalCom DEBUG] Formatted Cal.com booking:', formatted);
+            loggers.booking.debug('Formatted Cal.com booking:', formatted);
             return formatted;
           });
           
           results.push(...calComBookingsFormatted);
-          console.log('[CalCom DEBUG] All bookings after merging Cal.com:', results);
+          loggers.booking.debug('All bookings after merging Cal.com:', results);
         } catch (calComError) {
-          console.error('[CalCom DEBUG] No Cal.com bookings found or error fetching:', calComError);
+          loggers.booking.warn('No Cal.com bookings found or error fetching:', calComError);
         }
         
         setBookings(results);
-        console.log('[CalCom DEBUG] Final bookings set in state:', results);
+        loggers.booking.debug('Final bookings set in state:', results);
       } catch (err) {
-        console.error('[CalCom DEBUG] Error fetching bookings:', err);
+        loggers.booking.error('Error fetching bookings:', err);
       }
     };
     fetchBookings();
@@ -241,7 +242,7 @@ export default function MentorBookings() {
       setModalType('success');
       setModalOpen(true);
     } catch (err) {
-      console.error('Error confirming booking:', err);
+      loggers.booking.error('Error confirming booking:', err);
       setModalMessage('Failed to confirm booking. Please try again.');
       setModalType('error');
       setModalOpen(true);
@@ -270,7 +271,7 @@ export default function MentorBookings() {
       setModalType('success');
       setModalOpen(true);
     } catch (err) {
-      console.error('Error cancelling booking:', err);
+      loggers.booking.error('Error cancelling booking:', err);
       setModalMessage('Failed to cancel booking. Please try again.');
       setModalType('error');
       setModalOpen(true);

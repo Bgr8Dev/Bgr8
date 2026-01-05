@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { firestore } from '../../../firebase/firebase';
-import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, updateDoc, doc, orderBy, Timestamp, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../../hooks/useAuth';
 import { hasRole } from '../../../utils/userProfile';
 import { 
@@ -46,6 +46,7 @@ interface UserData {
   isProtected?: boolean;
   dateCreated: Timestamp;
   lastLogin?: Date;
+  mentorMenteeStatus?: 'mentor' | 'mentee' | null;
   [key: string]: unknown;
 }
 
@@ -190,8 +191,10 @@ export default function MobileRoleManagement() {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      querySnapshot.forEach((doc) => {
-        const user = doc.data() as UserData;
+      // Fetch all users and their mentor/mentee status
+      for (const userDoc of querySnapshot.docs) {
+        const user = userDoc.data() as UserData;
+        user.uid = userDoc.id;
         
         // Ensure roles object exists with default values
         if (!user.roles) {
@@ -210,6 +213,27 @@ export default function MobileRoleManagement() {
           };
         }
 
+        // Check mentor/mentee status by fetching mentorProgram/profile
+        try {
+          const mentorProgramDoc = await getDoc(doc(firestore, 'users', userDoc.id, 'mentorProgram', 'profile'));
+          if (mentorProgramDoc.exists()) {
+            const profileData = mentorProgramDoc.data();
+            // Determine status - check isMentor, isMentee, and type fields
+            if (profileData.isMentor === true || profileData.type?.toLowerCase() === 'mentor') {
+              user.mentorMenteeStatus = 'mentor';
+            } else if (profileData.isMentee === true || profileData.type?.toLowerCase() === 'mentee') {
+              user.mentorMenteeStatus = 'mentee';
+            } else {
+              user.mentorMenteeStatus = null;
+            }
+          } else {
+            user.mentorMenteeStatus = null;
+          }
+        } catch {
+          // If error fetching mentorProgram profile, set status to null
+          user.mentorMenteeStatus = null;
+        }
+
         userData.push(user);
         stats.total++;
 
@@ -224,7 +248,7 @@ export default function MobileRoleManagement() {
         if (user.dateCreated && user.dateCreated.toDate() > thirtyDaysAgo) {
           stats.newThisMonth++;
         }
-      });
+      }
 
       setUsers(userData);
       setUserStats(stats);
@@ -431,6 +455,21 @@ export default function MobileRoleManagement() {
                   )}
                 </h4>
                 <p className="user-email">{user.email}</p>
+                <div className="user-mentor-mentee-status">
+                  {user.mentorMenteeStatus === 'mentor' && (
+                    <span className="mobile-mentor-mentee-badge mobile-mentor-badge" title="Mentor">
+                      Mentor
+                    </span>
+                  )}
+                  {user.mentorMenteeStatus === 'mentee' && (
+                    <span className="mobile-mentor-mentee-badge mobile-mentee-badge" title="Mentee">
+                      Mentee
+                    </span>
+                  )}
+                  {!user.mentorMenteeStatus && (
+                    <span className="mobile-no-mentor-mentee">-</span>
+                  )}
+                </div>
                 <p className="user-date">
                   Joined: {user.dateCreated?.toDate().toLocaleDateString()}
                 </p>

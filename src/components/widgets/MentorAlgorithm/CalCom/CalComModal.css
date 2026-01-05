@@ -201,4 +201,106 @@
   .calcom-iframe {
     height: 350px;
   }
+}
+
+/* Booking Status Styles */
+.calcom-booking-status {
+  margin-top: 20px;
+  padding: 16px;
+  text-align: center;
+  background-color: var(--gray-50, #f9fafb);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200, #e5e7eb);
+}
+
+.calcom-booking-note {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.calcom-verify-booking-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent, #ffb3b3);
+  color: var(--text-dark, #181818);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.calcom-verify-booking-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--accent-hover, #ff9999);
+}
+
+.calcom-verify-booking-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.calcom-verify-booking-btn .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.calcom-booking-status-content {
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.calcom-status-checking,
+.calcom-status-success,
+.calcom-status-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.calcom-status-checking svg,
+.calcom-status-success svg {
+  font-size: 2.5rem;
+  color: var(--accent, #ffb3b3);
+}
+
+.calcom-status-success svg {
+  color: var(--success, #10b981);
+}
+
+.calcom-status-error svg {
+  color: var(--error, #ef4444);
+}
+
+.calcom-status-checking p,
+.calcom-status-success p,
+.calcom-status-error p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.calcom-status-note {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 400;
+  margin-top: 8px;
+  line-height: 1.5;
 } 

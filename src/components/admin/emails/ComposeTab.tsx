@@ -88,7 +88,7 @@ export const ComposeTab: React.FC<ComposeTabProps> = ({
               <input
                 type="text"
                 placeholder="Email subject..."
-                value={currentDraft.subject}
+                value={currentDraft.subject || ''}
                 onChange={(e) => onDraftChange({ subject: e.target.value })}
                 className="email-subject-input"
               />

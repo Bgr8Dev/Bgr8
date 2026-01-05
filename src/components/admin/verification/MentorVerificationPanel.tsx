@@ -121,7 +121,7 @@ export const MentorVerificationPanel: React.FC = () => {
           await VerificationService.suspendMentor(mentorUid, currentUser, reason, notes);
           break;
         case 'move_to_review':
-          await VerificationService.moveToUnderReview(mentorUid, currentUser, 'document_review', notes);
+          await VerificationService.moveToUnderReview(mentorUid, currentUser, 'final_review', notes);
           break;
       }
       

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useIsMobile } from '../../../../hooks/useIsMobile';
-import { doc, getDoc, collection, addDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, Timestamp } from 'firebase/firestore';
 import { firestore } from '../../../../firebase/firebase';
 import { FaClock, FaTimes, FaCalendarAlt, FaExternalLinkAlt, FaListUl, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { getName, MentorMenteeProfile } from '../algorithm/matchUsers';
 import { CalComService, CalComEventType, CalComTokenManager } from '../CalCom/calComService';
-import { Booking } from '../../../../types/bookings';
 import { SessionsService } from '../../../../services/sessionsService';
 import BannerWrapper from '../../../../components/ui/BannerWrapper';
+import { loggers } from '../../../../utils/logger';
 import '../MentorProgram.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -49,7 +49,6 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [sessionDate, setSessionDate] = useState<string>('');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(null);
-  const [bookingMethod, setBookingMethod] = useState<'internal' | 'calcom'>('internal');
   
   // Mobile-specific state
   const [currentStep, setCurrentStep] = useState<'event-types' | 'calendar' | 'summary'>('event-types');
@@ -78,7 +77,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           setAvailability(availabilityDoc.data() as MentorAvailability);
         }
       } catch (error) {
-        console.error('Error loading availability:', error);
+        loggers.booking.error('Error loading availability:', error);
       }
     };
 
@@ -110,7 +109,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
               const eventTypes = await CalComService.getEventTypes(mentor.uid);
               setCalComEventTypes(eventTypes);
             } catch (eventTypesError) {
-              console.error('Error fetching Cal.com event types:', eventTypesError);
+              loggers.booking.error('Error fetching Cal.com event types:', eventTypesError);
               // Don't show error to user, just disable Cal.com option
             } finally {
               setLoadingEventTypes(false);
@@ -118,7 +117,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           }
         } catch (err) {
           setError('Failed to load mentor data');
-          console.error('Error fetching mentor data:', err);
+          loggers.booking.error('Error fetching mentor data:', err);
         } finally {
           setLoading(false);
         }
@@ -169,28 +168,27 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
   };
 
   const handleBooking = async () => {
-    console.log('=== BOOKING BUTTON CLICKED ===');
-    console.log('Current user:', currentUser);
-    console.log('Selected slot:', selectedSlot);
-    console.log('Session date:', sessionDate);
-    console.log('Booking method:', bookingMethod);
-    console.log('Selected event type:', selectedEventType);
-    console.log('=============================');
+    loggers.booking.log('=== BOOKING BUTTON CLICKED ===');
+    loggers.booking.log('Current user:', currentUser);
+    loggers.booking.log('Selected slot:', selectedSlot);
+    loggers.booking.log('Session date:', sessionDate);
+    loggers.booking.log('Selected event type:', selectedEventType);
+    loggers.booking.log('=============================');
     
     if (!currentUser || !selectedSlot || !sessionDate) {
-      console.error('Missing required data for booking:', { currentUser, selectedSlot, sessionDate });
+      loggers.booking.error('Missing required data for booking:', { currentUser, selectedSlot, sessionDate });
       setError('Missing required data for booking. Please try again.');
       return;
     }
     
     // Validate Cal.com booking requirements
-    if (bookingMethod === 'calcom' && !selectedEventType) {
-      setError('Please select a session type for Cal.com booking.');
+    if (!selectedEventType) {
+      setError('Please select a session type before booking.');
       return;
     }
 
     // Debug log
-    console.log('mentor.email:', mentor.email, 'currentUser.email:', currentUser.email);
+    loggers.booking.log('mentor.email:', mentor.email, 'currentUser.email:', currentUser.email);
 
     let mentorEmail = mentor.email;
     let menteeEmail = currentUser.email;
@@ -204,7 +202,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           mentorEmail = mentorData.email || '';
         }
       } catch (err) {
-        console.error('Error fetching mentor profile for email fallback:', err);
+        loggers.booking.error('Error fetching mentor profile for email fallback:', err);
       }
     }
 
@@ -217,12 +215,12 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
           menteeEmail = menteeData.email || '';
         }
       } catch (err) {
-        console.error('Error fetching mentee profile for email fallback:', err);
+        loggers.booking.error('Error fetching mentee profile for email fallback:', err);
       }
     }
 
     // Final debug log
-    console.log('Final mentorEmail:', mentorEmail, 'Final menteeEmail:', menteeEmail);
+    loggers.booking.log('Final mentorEmail:', mentorEmail, 'Final menteeEmail:', menteeEmail);
 
     if (!mentorEmail || !menteeEmail) {
       setError('Mentor or mentee email is missing. Cannot create booking.');
@@ -235,19 +233,14 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
     setSuccess(null);
 
     try {
-      if (bookingMethod === 'calcom' && mentor.calCom && hasCalComApiKey && selectedEventType) {
-        // Use Cal.com booking
-        try {
-          await createCalComBooking();
-        } catch (calComError) {
-          console.error('Cal.com booking failed, falling back to internal booking:', calComError);
-          // Fallback to internal booking if Cal.com fails
-          await createInternalBooking();
-        }
-      } else {
-        // Use internal booking system
-        await createInternalBooking();
+      // Always use Cal.com booking (internal booking system removed)
+      if (!mentor.calCom || !hasCalComApiKey) {
+        throw new Error('This mentor has not set up Cal.com integration yet. Please contact them directly.');
       }
+      
+      // selectedEventType is already validated above, but included here for type safety
+      // The check above ensures we never reach this point without a selectedEventType
+      await createCalComBooking();
       
       // Close modal after a short delay
       setTimeout(() => {
@@ -255,8 +248,8 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
         setSuccess(null);
       }, 2000);
     } catch (err) {
-      setError('Failed to create booking. Please try again.');
-      console.error('Error creating booking:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create booking. Please try again.');
+      loggers.booking.error('Error creating booking:', err);
     } finally {
       setBooking(false);
     }
@@ -357,101 +350,13 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
 
       await SessionsService.createSession(sessionData);
     } catch (sessionError) {
-      console.error('Failed to create session:', sessionError);
+      loggers.booking.error('Failed to create session:', sessionError);
       // Don't fail the booking if session creation fails
     }
     
     setSuccess(`Booking created successfully! Check your email for confirmation. Booking ID: ${calComBooking.id}`);
   };
 
-  const createInternalBooking = async () => {
-    if (!currentUser || !selectedSlot) return;
-
-    let mentorEmail = mentor.email;
-    let menteeEmail = currentUser.email;
-
-    // Fetch emails if missing
-    if (!mentorEmail && mentor.uid) {
-      const mentorDoc = await getDoc(doc(firestore, 'users', mentor.uid, 'mentorProgram', 'profile'));
-      if (mentorDoc.exists()) {
-        const mentorData = mentorDoc.data();
-        mentorEmail = mentorData.email || '';
-      }
-    }
-
-    if (!menteeEmail && currentUser.uid) {
-      const menteeDoc = await getDoc(doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile'));
-      if (menteeDoc.exists()) {
-        const menteeData = menteeDoc.data();
-        menteeEmail = menteeData.email || '';
-      }
-    }
-
-    const bookingData: Omit<Booking, 'id'> = {
-      mentorId: mentor.uid,
-      menteeId: currentUser.uid,
-      mentorName: String(mentor.name || 'Unknown'),
-      menteeName: currentUser.displayName || (menteeEmail || 'Unknown'),
-      mentorEmail: mentorEmail || '',
-      menteeEmail: menteeEmail || '',
-      day: selectedSlot!.day,
-      startTime: selectedSlot!.startTime,
-      endTime: selectedSlot!.endTime,
-      status: 'pending',
-      createdAt: Timestamp.fromDate(new Date()),
-      sessionDate: sessionDate ? Timestamp.fromDate(new Date(sessionDate)) : Timestamp.fromDate(new Date())
-    };
-
-    await addDoc(collection(firestore, 'bookings'), bookingData);
-
-    // Create a session from the internal booking
-    try {
-      const sessionData = {
-        bookingId: '', // Internal bookings don't have external IDs yet
-        mentorId: mentor.uid,
-        menteeId: currentUser.uid,
-        sessionDate: Timestamp.fromDate(sessionDate ? new Date(sessionDate) : new Date()),
-        startTime: Timestamp.fromDate(sessionDate ? new Date(sessionDate) : new Date()),
-        endTime: Timestamp.fromDate(sessionDate ? new Date(sessionDate) : new Date()),
-        sessionLink: '', // Will be added when meeting link is provided
-        sessionLocation: 'TBD', // To be determined
-        status: 'scheduled' as const,
-        feedbackSubmitted_mentor: false,
-        feedbackSubmitted_mentee: false
-      };
-
-      await SessionsService.createSession(sessionData);
-    } catch (sessionError) {
-      console.error('Failed to create session:', sessionError);
-      // Don't fail the booking if session creation fails
-    }
-
-    // Update mentor's availability
-    const availabilityRef = doc(firestore, 'users', mentor.uid, 'availabilities', 'default');
-    const availabilitySnap = await getDoc(availabilityRef);
-    if (availabilitySnap.exists()) {
-      const availabilityData = availabilitySnap.data();
-      if (availabilityData && Array.isArray(availabilityData.timeSlots)) {
-        const updatedSlots = availabilityData.timeSlots.map((slot: TimeSlot) => {
-          if (
-            slot.id === selectedSlot!.id &&
-            slot.day === selectedSlot!.day &&
-            slot.startTime === selectedSlot!.startTime &&
-            slot.endTime === selectedSlot!.endTime
-          ) {
-            return { ...slot, isAvailable: false };
-          }
-          return slot;
-        });
-        await setDoc(availabilityRef, {
-          ...availabilityData,
-          timeSlots: updatedSlots,
-          lastUpdated: new Date()
-        });
-      }
-    }
-    setSuccess('Booking request sent successfully! The mentor will confirm your session.');
-  };
 
   if (!open) return null;
 
@@ -499,9 +404,7 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                   <h4 className="booking-modal-event-types h4">
                     <FaListUl className="booking-modal-event-types-icon" />
                     Select Session Type
-                    {bookingMethod === 'calcom' && (
-                      <span className="booking-modal-event-types-required"> *Required</span>
-                    )}
+                    <span className="booking-modal-event-types-required"> *Required</span>
                   </h4>
                   {loadingEventTypes ? (
                     <div className="booking-modal-event-types-loading">
@@ -617,49 +520,24 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
                     )}
                   </div>
 
-                  {/* Booking Method Selection */}
+                  {/* Cal.com Booking Info */}
                   {mentor.calCom && hasCalComApiKey && (
-                    <div className="booking-modal-method-selection">
-                      <h5>Booking Method</h5>
-                      <div className="booking-modal-method-options">
-                        <label className="booking-modal-method-option">
-                          <input
-                            type="radio"
-                            name="bookingMethod"
-                            value="internal"
-                            checked={bookingMethod === 'internal'}
-                            onChange={(e) => setBookingMethod(e.target.value as 'internal' | 'calcom')}
-                          />
-                          <span className="booking-modal-method-label">
-                            <FaClock className="booking-modal-slot-icon" />
-                            Internal Booking
-                          </span>
-                        </label>
-                        <label className="booking-modal-method-option">
-                          <input
-                            type="radio"
-                            name="bookingMethod"
-                            value="calcom"
-                            checked={bookingMethod === 'calcom'}
-                            onChange={(e) => setBookingMethod(e.target.value as 'internal' | 'calcom')}
-                          />
-                          <span className="booking-modal-method-label">
-                            <FaCalendarAlt className="booking-modal-slot-icon" />
-                            Cal.com Booking
-                            {mentor.calCom && (
-                              <a
-                                href={mentor.calCom}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="booking-modal-calcom-link"
-                                title="View Cal.com profile"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <FaExternalLinkAlt size={12} />
-                              </a>
-                            )}
-                          </span>
-                        </label>
+                    <div className="booking-modal-calcom-info">
+                      <div className="booking-modal-calcom-badge">
+                        <FaCalendarAlt className="booking-modal-slot-icon" />
+                        <span>Cal.com Booking</span>
+                        {mentor.calCom && (
+                          <a
+                            href={mentor.calCom}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="booking-modal-calcom-link"
+                            title="View Cal.com profile"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FaExternalLinkAlt size={12} />
+                          </a>
+                        )}
                       </div>
                     </div>
                   )}

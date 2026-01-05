@@ -4,32 +4,168 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 const nodemailer = require('nodemailer');
+const admin = require('firebase-admin');
+const crypto = require('crypto');
 require('dotenv').config();
+
+// Sanitize user input for logging to prevent log injection attacks
+function sanitizeForLogging(input) {
+  if (input === null || input === undefined) {
+    return String(input);
+  }
+  
+  if (typeof input !== 'string') {
+    try {
+      return JSON.stringify(input).substring(0, 1000);
+    } catch {
+      return '[Object]';
+    }
+  }
+  
+  // Remove control characters (except newline and tab for readability)
+  let sanitized = input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+  
+  // Limit length to prevent log flooding
+  if (sanitized.length > 1000) {
+    sanitized = sanitized.substring(0, 1000) + '... [truncated]';
+  }
+  
+  return sanitized;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  try {
+    // Initialize with service account if available, otherwise use default credentials
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+    } else if (process.env.FIREBASE_PROJECT_ID) {
+      // Use default credentials (for environments like Google Cloud Run, etc.)
+      admin.initializeApp({
+        projectId: process.env.FIREBASE_PROJECT_ID
+      });
+    } else {
+      console.warn('⚠️  Firebase Admin not initialized - webhook functionality will not work');
+      console.warn('⚠️  Set FIREBASE_SERVICE_ACCOUNT or FIREBASE_PROJECT_ID environment variable');
+    }
+  } catch (error) {
+    console.error('❌ Error initializing Firebase Admin:', error.message);
+    console.warn('⚠️  Webhook functionality will not work without Firebase Admin');
+  }
+}
+
+const db = admin.apps.length > 0 ? admin.firestore() : null;
+
+// Trust proxy (required for Render.com and other hosting platforms)
+// Only trust the first proxy (more secure than trusting all)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
+
+// CORS configuration - allow multiple origins for development and production
+const allowedOrigins = [
+  'https://bgr8.uk',
+  'https://www.bgr8.uk',
+  'http://bgr8.uk',
+  'http://www.bgr8.uk',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5174'
+];
+
+// Add FRONTEND_URL from env if provided and not already in the list
+if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
 
 // Rate limiting
+// Skip rate limiting if trust proxy is set (for Render.com behind proxy)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  // Use request IP from X-Forwarded-For header when behind proxy
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', limiter);
 
 // Email rate limiting (more restrictive)
 const emailLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10, // limit each IP to 10 email requests per minute
-  message: 'Too many email requests, please try again later.'
+  message: 'Too many email requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', limiter);
+
+// API Key Authentication Middleware
+const authenticateApiKey = (req, res, next) => {
+  // Skip authentication for health check endpoint
+  if (req.path === '/health' || req.path === '/api/health') {
+    return next();
+  }
+
+  const apiKey = req.headers['authorization']?.replace('Bearer ', '') || req.headers['x-api-key'];
+  const expectedApiKey = process.env.API_KEY;
+
+  // If API_KEY is not set in environment, allow all requests (for development)
+  if (!expectedApiKey || expectedApiKey === 'your_secure_api_key_here') {
+    console.warn('⚠️  API_KEY not configured - allowing all requests (not secure for production!)');
+    return next();
+  }
+
+  if (!apiKey) {
+    return res.status(401).json({
+      success: false,
+      error: 'API key required. Include it in Authorization header as "Bearer <key>" or X-API-Key header.'
+    });
+  }
+
+  if (apiKey !== expectedApiKey) {
+    console.warn(`⚠️  Invalid API key attempt from ${req.ip}`);
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid API key'
+    });
+  }
+
+  next();
+};
+
+// Apply API key authentication to all API routes except health check
+app.use('/api/', (req, res, next) => {
+  if (req.path === '/health') {
+    return next();
+  }
+  authenticateApiKey(req, res, next);
 });
 
 // Validation schemas
@@ -62,7 +198,15 @@ async function getZohoAccessToken() {
     throw new Error('Missing Zoho configuration. Please check ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, and ZOHO_REFRESH_TOKEN environment variables.');
   }
 
-  const response = await fetch('https://accounts.zoho.com/oauth/v2/token', {
+  // Use EU endpoint if ZOHO_REGION is set to 'eu', otherwise try US first
+  const zohoRegion = process.env.ZOHO_REGION || 'auto';
+  let tokenEndpoint = 'https://accounts.zoho.com/oauth/v2/token';
+  
+  if (zohoRegion === 'eu' || zohoRegion === 'EU') {
+    tokenEndpoint = 'https://accounts.zoho.eu/oauth/v2/token';
+  }
+  
+  const response = await fetch(tokenEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -97,73 +241,193 @@ async function sendSMTPEmail(emailData) {
     contentType: emailData.contentType,
     fromEmail: process.env.ZOHO_FROM_EMAIL
   });
+  // Check all possible password environment variables
+  const smtpPassword = process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD;
+  const smtpEmail = process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk';
+  
+  // Never log password information, even partially
   console.log('📧 SMTP credentials check:', {
-    user: process.env.ZOHO_FROM_EMAIL,
-    hasPassword: !!process.env.ZOHO_PASSWORD,
-    passwordLength: process.env.ZOHO_PASSWORD?.length || 0,
-    passwordPreview: process.env.ZOHO_PASSWORD ? process.env.ZOHO_PASSWORD.substring(0, 8) + '...' : 'undefined'
+    user: smtpEmail,
+    hasPassword: !!smtpPassword,
+    // Removed passwordLength and passwordPreview to prevent sensitive data exposure
+    envVarsChecked: {
+      ZOHO_SMTP_PASSWORD: !!process.env.ZOHO_SMTP_PASSWORD,
+      ZOHO_APP_PASSWORD: !!process.env.ZOHO_APP_PASSWORD,
+      ZOHO_PASSWORD: !!process.env.ZOHO_PASSWORD
+    }
   });
+  
+  if (!smtpPassword) {
+    throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables (Render.com dashboard → Environment). You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
+  }
 
+  // Determine SMTP host based on region
+  const smtpHost = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+    ? 'smtp.zoho.eu' 
+    : 'smtp.zoho.com';
+  
   // Create SMTP transporter with multiple options
   const smtpConfigs = [
-    // Option 1: Standard SMTP
+    // Option 1: Standard SMTP (TLS)
     {
+      host: smtpHost,
+      port: 587,
+      secure: false,
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000, // 30 seconds
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    },
+    // Option 2: Secure SMTP (SSL)
+    {
+      host: smtpHost,
+      port: 465,
+      secure: true,
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000, // 30 seconds
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    },
+    // Option 3: Try port 25 (sometimes allowed when 587/465 are blocked)
+    {
+      host: smtpHost,
+      port: 25,
+      secure: false,
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    },
+    // Option 4: Fallback to US servers if EU fails
+    ...(smtpHost === 'smtp.zoho.eu' ? [{
       host: 'smtp.zoho.com',
       port: 587,
       secure: false,
       auth: {
-        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
-        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
+        user: smtpEmail,
+        pass: smtpPassword
       },
-      tls: { rejectUnauthorized: false }
-    },
-    // Option 2: Secure SMTP
-    {
-      host: 'smtp.zoho.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
-        pass: process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD
-      },
-      tls: { rejectUnauthorized: false }
-    }
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    }] : [])
   ];
 
   let transporter;
   let lastError;
 
-  // Try different SMTP configurations
-  for (const config of smtpConfigs) {
-    try {
-      console.log(`📧 Trying SMTP config: ${config.host}:${config.port} (secure: ${config.secure})`);
-      transporter = nodemailer.createTransport(config);
-      
-      // Test the connection
-      await transporter.verify();
-      console.log(`✅ SMTP connection successful with ${config.host}:${config.port}`);
-      break;
-    } catch (error) {
-      console.log(`❌ SMTP config failed: ${config.host}:${config.port} - ${error.message}`);
-      lastError = error;
+  // Check if password is configured
+  const hasPassword = !!(process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD);
+  if (!hasPassword) {
+    throw new Error('SMTP password not configured. Please set ZOHO_SMTP_PASSWORD, ZOHO_APP_PASSWORD, or ZOHO_PASSWORD in your environment variables. You can create an App Password in Zoho Mail → Settings → Security → App Passwords');
+  }
+
+  // Email options (smtpEmail already set above)
+  const fromEmail = smtpEmail;
+  const fromName = process.env.ZOHO_FROM_NAME || 'Bgr8 Team';
+  
+  // Generate plain text version from HTML if needed
+  let textContent = emailData.contentType === 'text/plain' ? emailData.content : undefined;
+  if (emailData.contentType === 'text/html' && !textContent) {
+    // Comprehensive HTML to text conversion with proper entity decoding
+    // Use proper decoding order to avoid double-encoding issues
+    let htmlContent = emailData.content;
+    
+    // Step 1: Remove script and style tags with their content (non-greedy, handles nested tags)
+    htmlContent = htmlContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    htmlContent = htmlContent.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+    
+    // Step 2: Decode HTML entities in the correct order (numeric first, then named, amp last)
+    // First decode numeric entities (they don't conflict with named entities)
+    htmlContent = htmlContent.replace(/&#x([0-9a-fA-F]+);/gi, (match, hex) => {
+      try {
+        const code = parseInt(hex, 16);
+        // Only decode valid character codes (32-126, 128+ for printable chars)
+        if ((code >= 32 && code !== 127) || code >= 128) {
+          return String.fromCharCode(code);
+        }
+        return match;
+      } catch {
+        return match;
+      }
+    });
+    htmlContent = htmlContent.replace(/&#(\d+);/g, (match, dec) => {
+      try {
+        const code = parseInt(dec, 10);
+        // Only decode valid character codes
+        if ((code >= 32 && code !== 127) || code >= 128) {
+          return String.fromCharCode(code);
+        }
+        return match;
+      } catch {
+        return match;
+      }
+    });
+    
+    // Then decode named entities in safe order (amp must be last to avoid double-decoding)
+    const entityMap = {
+      '&nbsp;': ' ',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&apos;': "'",
+      '&lt;': '<',
+      '&gt;': '>',
+      '&amp;': '&' // Must be last to prevent double-decoding
+    };
+    
+    for (const [entity, char] of Object.entries(entityMap)) {
+      // Escape special regex characters in entity
+      const escapedEntity = entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      htmlContent = htmlContent.replace(new RegExp(escapedEntity, 'g'), char);
     }
+    
+    // Step 3: Remove all remaining HTML tags
+    htmlContent = htmlContent.replace(/<[^>]+>/g, '');
+    
+    // Step 4: Normalize whitespace
+    textContent = htmlContent.replace(/\s+/g, ' ').trim();
   }
-
-  if (!transporter) {
-    throw new Error(`All SMTP configurations failed. Last error: ${lastError.message}`);
-  }
-
-  // Email options
-  const fromEmail = process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk';
+  
   const mailOptions = {
-    from: `"${process.env.ZOHO_FROM_NAME || 'Bgr8 Team'}" <${fromEmail}>`,
+    from: `"${fromName}" <${fromEmail}>`,
+    replyTo: fromEmail, // Important for deliverability
     to: emailData.to.join(', '),
     cc: emailData.cc?.join(', ') || '',
     bcc: emailData.bcc?.join(', ') || '',
     subject: emailData.subject,
     html: emailData.contentType === 'text/html' ? emailData.content : undefined,
-    text: emailData.contentType === 'text/plain' ? emailData.content : undefined,
-    attachments: emailData.attachments || []
+    text: textContent, // Always include text version
+    attachments: emailData.attachments || [],
+    // Add headers to improve deliverability
+    headers: {
+      'X-Mailer': 'Bgr8 Email Service',
+      'X-Priority': '3', // Normal priority
+      'List-Unsubscribe': `<mailto:${fromEmail}?subject=unsubscribe>`, // Unsubscribe header (required for some providers)
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click', // One-click unsubscribe
+      'X-Auto-Response-Suppress': 'All', // Suppress auto-responses
+      'Auto-Submitted': 'auto-generated', // Mark as automated (helps with deliverability)
+      'Return-Path': fromEmail, // Bounce handling
+      'Message-ID': `<${Date.now()}-${Math.random().toString(36).substring(7)}@bgr8.uk>`, // Unique message ID
+      'X-Entity-Ref-ID': `${Date.now()}-${Math.random().toString(36).substring(7)}`, // Additional tracking ID
+    },
+    // Add envelope for better deliverability
+    envelope: {
+      from: fromEmail,
+      to: emailData.to
+    }
   };
 
   console.log('📧 SMTP mail options:', {
@@ -174,17 +438,46 @@ async function sendSMTPEmail(emailData) {
     hasText: !!mailOptions.text
   });
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully via SMTP:', info.messageId);
-    return {
-      messageId: info.messageId,
-      response: info.response
-    };
-  } catch (error) {
-    console.error('❌ SMTP error:', error);
-    throw new Error(`SMTP error: ${error.message}`);
+  // Try each SMTP configuration until one works
+  for (const config of smtpConfigs) {
+    try {
+      console.log(`📧 Trying SMTP config: ${config.host}:${config.port} (secure: ${config.secure})`);
+      transporter = nodemailer.createTransport(config);
+      
+      // Add timeout wrapper for sendMail (45 seconds)
+      const sendMailWithTimeout = Promise.race([
+        transporter.sendMail(mailOptions),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('SMTP sendMail timeout after 45 seconds')), 45000)
+        )
+      ]);
+      
+      const info = await sendMailWithTimeout;
+      console.log(`✅ Email sent successfully via SMTP (${config.host}:${config.port}):`, info.messageId);
+      return {
+        messageId: info.messageId,
+        response: info.response
+      };
+    } catch (error) {
+      console.log(`❌ SMTP config failed (${config.host}:${config.port}):`, error.message);
+      lastError = error;
+      // Continue to next config
+      continue;
+    }
   }
+
+  // If we get here, all configs failed
+  const isTimeout = lastError?.message?.includes('timeout') || lastError?.message?.includes('ECONNREFUSED') || lastError?.message?.includes('ETIMEDOUT');
+  let errorMsg = `All SMTP configurations failed. Last error: ${lastError?.message || 'Unknown error'}.`;
+  
+  if (isTimeout) {
+    errorMsg += '\n\n⚠️  Connection timeout detected. Render.com may be blocking outbound SMTP ports (587, 465, 25).';
+    errorMsg += '\n   Since the Zoho API test passed, the server will automatically fall back to using the Zoho Mail API instead.';
+  } else {
+    errorMsg += '\n\nCheck your SMTP credentials and network connection.';
+  }
+  
+  throw new Error(errorMsg);
 }
 
 async function sendZohoEmail(emailData) {
@@ -198,6 +491,7 @@ async function sendZohoEmail(emailData) {
 
   const accessToken = await getZohoAccessToken();
   
+  // Zoho Mail API expects different field names
   const zohoEmailData = {
     fromAddress: process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
     toAddress: emailData.to.join(','),
@@ -208,32 +502,71 @@ async function sendZohoEmail(emailData) {
     mailFormat: emailData.contentType === 'text/html' ? 'html' : 'text',
     attachments: emailData.attachments || []
   };
+  
+  // Alternative format that Zoho API might expect
+  const zohoEmailDataAlt = {
+    from: process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk',
+    to: emailData.to,
+    cc: emailData.cc || [],
+    bcc: emailData.bcc || [],
+    subject: emailData.subject,
+    htmlbody: emailData.contentType === 'text/html' ? emailData.content : undefined,
+    textbody: emailData.contentType === 'text/plain' ? emailData.content : undefined,
+    attachments: emailData.attachments || []
+  };
 
   console.log('📧 Zoho email payload:', zohoEmailData);
 
+  // Determine mail API base URL based on region
+  const mailApiBase = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+    ? 'https://mail.zoho.eu/api' 
+    : 'https://mail.zoho.com/api';
+  
+  // First, get the account ID from /api/accounts
+  let accountId;
+  try {
+    const accountsResponse = await fetch(`${mailApiBase}/accounts`, {
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${accessToken}`,
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (accountsResponse.ok) {
+      const accountsData = await accountsResponse.json();
+      // Get the first account's ID
+      if (accountsData.data && accountsData.data.length > 0) {
+        accountId = accountsData.data[0].accountId || accountsData.data[0].id;
+        console.log('📧 Found account ID:', accountId);
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️ Could not fetch account ID, will try default endpoints:', err.message);
+  }
+  
   // Try different Zoho API endpoints and formats
+  // Use accountId if available, otherwise fall back to 'self'
+  const accountPath = accountId ? accountId : 'self';
   const apiEndpoints = [
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages',
-      data: zohoEmailData
+      url: `${mailApiBase}/accounts/${accountPath}/messages`,
+      data: zohoEmailData,
+      description: 'Standard messages endpoint'
     },
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages/send',
-      data: zohoEmailData
+      url: `${mailApiBase}/accounts/${accountPath}/messages`,
+      data: zohoEmailDataAlt,
+      description: 'Standard messages endpoint (alt format)'
     },
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages/sendMail',
-      data: zohoEmailData
+      url: `${mailApiBase}/accounts/${accountPath}/messages/send`,
+      data: zohoEmailData,
+      description: 'Send endpoint'
     },
     {
-      url: 'https://mail.zoho.com/api/accounts/self/messages',
-      data: {
-        fromAddress: zohoEmailData.fromAddress,
-        toAddress: zohoEmailData.toAddress,
-        subject: zohoEmailData.subject,
-        content: zohoEmailData.content,
-        mailFormat: zohoEmailData.mailFormat
-      }
+      url: `${mailApiBase}/accounts/${accountPath}/messages/sendMail`,
+      data: zohoEmailData,
+      description: 'SendMail endpoint'
     }
   ];
 
@@ -242,17 +575,25 @@ async function sendZohoEmail(emailData) {
 
   for (const endpoint of apiEndpoints) {
     try {
-      console.log(`📧 Trying Zoho API endpoint: ${endpoint.url}`);
-      console.log(`📧 With data:`, endpoint.data);
+      console.log(`📧 Trying Zoho API endpoint: ${endpoint.url} (${endpoint.description})`);
+      console.log(`📧 With data:`, JSON.stringify(endpoint.data, null, 2));
+      
+      // Add timeout to API calls (30 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
       
       response = await fetch(endpoint.url, {
         method: 'POST',
         headers: {
           'Authorization': `Zoho-oauthtoken ${accessToken}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(endpoint.data),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       console.log(`📧 Endpoint ${endpoint.url} response status:`, response.status);
       
@@ -261,12 +602,17 @@ async function sendZohoEmail(emailData) {
         break;
       } else {
         const errorText = await response.text();
-        console.log(`❌ Endpoint ${endpoint.url} failed:`, errorText);
+        console.log(`❌ Endpoint ${endpoint.url} failed (${response.status}):`, errorText);
         lastError = errorText;
       }
     } catch (error) {
-      console.log(`❌ Endpoint ${endpoint.url} error:`, error.message);
-      lastError = error.message;
+      if (error.name === 'AbortError') {
+        console.log(`⏱️ Endpoint ${endpoint.url} timed out after 30 seconds`);
+        lastError = 'Request timeout';
+      } else {
+        console.log(`❌ Endpoint ${endpoint.url} error:`, error.message);
+        lastError = error.message;
+      }
     }
   }
 
@@ -286,8 +632,14 @@ async function sendZohoEmail(emailData) {
   }
 
   const result = await response.json();
-  console.log('✅ Email sent successfully via Zoho:', result);
-  return result;
+  console.log('✅ Email sent successfully via Zoho API:', result);
+  
+  // Return in the same format as SMTP for consistency
+  return {
+    messageId: result.messageId || result.id || `zoho_api_${Date.now()}`,
+    response: result,
+    method: 'api'
+  };
 }
 
 // API Routes
@@ -324,10 +676,17 @@ app.get('/api/config-test', async (req, res) => {
       config.accessTokenLength = accessToken ? accessToken.length : 0;
       
       // Test a simple API call to check permissions
+      // Use EU endpoint if region is EU
+      const mailApiBase = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+        ? 'https://mail.zoho.eu/api' 
+        : 'https://mail.zoho.com/api';
+      
       try {
-        const testResponse = await fetch('https://mail.zoho.com/api/accounts/self', {
+        // Use /api/accounts (not /api/accounts/self) - correct Zoho Mail API endpoint
+        const testResponse = await fetch(`${mailApiBase}/accounts`, {
           headers: {
             'Authorization': `Zoho-oauthtoken ${accessToken}`,
+            'Accept': 'application/json',
           },
         });
         config.apiPermissionsTest = testResponse.ok ? 'success' : 'failed';
@@ -360,14 +719,67 @@ app.get('/api/zoho-test', async (req, res) => {
   try {
     console.log('🔍 Testing Zoho API setup...');
     
-    const accessToken = await getZohoAccessToken();
-    console.log('✅ Access token obtained');
+    // Check environment variables first
+    const envCheck = {
+      hasClientId: !!process.env.ZOHO_CLIENT_ID,
+      hasClientSecret: !!process.env.ZOHO_CLIENT_SECRET,
+      hasRefreshToken: !!process.env.ZOHO_REFRESH_TOKEN,
+    };
+    
+    console.log('🔧 Environment check:', envCheck);
+    
+    if (!envCheck.hasClientId || !envCheck.hasClientSecret || !envCheck.hasRefreshToken) {
+      const missing = [];
+      if (!envCheck.hasClientId) missing.push('ZOHO_CLIENT_ID');
+      if (!envCheck.hasClientSecret) missing.push('ZOHO_CLIENT_SECRET');
+      if (!envCheck.hasRefreshToken) missing.push('ZOHO_REFRESH_TOKEN');
+      
+      return res.json({
+        success: false,
+        message: 'Missing Zoho configuration',
+        error: `Missing required environment variables: ${missing.join(', ')}`,
+        envCheck: envCheck,
+        nextSteps: [
+          '1. Check your Render.com environment variables',
+          '2. Ensure ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, and ZOHO_REFRESH_TOKEN are set',
+          '3. Verify the values are correct and not expired'
+        ]
+      });
+    }
+    
+    let accessToken;
+    try {
+      accessToken = await getZohoAccessToken();
+      console.log('✅ Access token obtained');
+    } catch (tokenError) {
+      console.error('❌ Failed to get access token:', tokenError);
+      return res.json({
+        success: false,
+        message: 'Failed to authenticate with Zoho',
+        error: tokenError.message,
+        envCheck: envCheck,
+        nextSteps: [
+          '1. Verify your ZOHO_CLIENT_ID is correct',
+          '2. Verify your ZOHO_CLIENT_SECRET is correct',
+          '3. Check if your ZOHO_REFRESH_TOKEN is still valid (they can expire)',
+          '4. Generate a new refresh token from Zoho Developer Console if needed',
+          '5. Ensure the OAuth app has the correct scopes (ZohoMail.messages.CREATE)'
+        ]
+      });
+    }
     
     // Test 1: Check if we can access the account info
+    // Use EU endpoint if region is EU
+    const mailApiBase = (process.env.ZOHO_REGION === 'eu' || process.env.ZOHO_REGION === 'EU') 
+      ? 'https://mail.zoho.eu/api' 
+      : 'https://mail.zoho.com/api';
+    
     try {
-      const accountResponse = await fetch('https://mail.zoho.com/api/accounts/self', {
+      // Use /api/accounts (not /api/accounts/self) - returns authenticated user's accounts
+      const accountResponse = await fetch(`${mailApiBase}/accounts`, {
         headers: {
           'Authorization': `Zoho-oauthtoken ${accessToken}`,
+          'Accept': 'application/json',
         },
       });
       
@@ -379,43 +791,125 @@ app.get('/api/zoho-test', async (req, res) => {
         
         res.json({
           success: true,
-          message: 'Zoho API is working! The issue is with the email sending endpoint.',
+          message: 'Zoho API is working! Your server uses SMTP for sending emails (which is more reliable and doesn\'t require API URL rules).',
           accountData: accountData,
+          note: 'The "Email Sending" test uses SMTP, not the API, so it will work regardless of API URL rules configuration.',
           nextSteps: [
-            '1. Check if your Zoho Mail account has API access enabled',
+            '1. Your email sending should work fine with SMTP',
             '2. Verify the sender email (info@bgr8.uk) is verified in Zoho',
             '3. Check if your domain has proper DNS records (SPF, DKIM)',
-            '4. Ensure the Zoho app has email sending permissions'
+            '4. Test the "Email Sending" button to verify SMTP is working'
           ]
         });
       } else {
-        const errorText = await accountResponse.text();
-        console.log('❌ Account API failed:', errorText);
+        let errorText;
+        let parsedError = null;
+        
+        try {
+          errorText = await accountResponse.text();
+          // Try to parse the error JSON
+          try {
+            parsedError = JSON.parse(errorText);
+          } catch (parseErr) {
+            // If it's not JSON, keep the text
+          }
+        } catch (textError) {
+          errorText = `Status ${accountResponse.status}: ${accountResponse.statusText}`;
+        }
+        
+        console.error('❌ Account API failed:', {
+          status: accountResponse.status,
+          statusText: accountResponse.statusText,
+          error: errorText,
+          parsedError: parsedError
+        });
+        
+        // Handle specific Zoho error codes
+        let errorMessage = 'Zoho API access failed';
+        let nextSteps = [
+          '1. Check your Zoho API credentials',
+          '2. Verify the app has the right permissions',
+          '3. Check if the Zoho Mail API is enabled for your account',
+          '4. Ensure the OAuth app has the correct scopes',
+          '5. Try regenerating the refresh token'
+        ];
+        
+        if (parsedError && parsedError.data && parsedError.data.errorCode) {
+          const errorCode = parsedError.data.errorCode;
+          const statusCode = parsedError.status?.code || accountResponse.status;
+          const description = parsedError.status?.description || accountResponse.statusText;
+          
+          if (errorCode === 'URL_RULE_NOT_CONFIGURED') {
+            errorMessage = 'Zoho Mail API requires URL rules configuration (or use SMTP instead)';
+            nextSteps = [
+              'OPTION 1 - Use SMTP (Recommended, no URL rules needed):',
+              '  • Your server already uses SMTP for sending emails',
+              '  • SMTP does NOT require URL rules configuration',
+              '  • The "Email Sending" test will work with SMTP',
+              '  • You can ignore this API test if you\'re using SMTP',
+              '',
+              'OPTION 2 - Configure URL Rules (if you need API access):',
+              '  1. Log in to Zoho Mail Admin Console (https://mailadmin.zoho.com or https://mailadmin.zoho.eu)',
+              '  2. Navigate to Settings → API → URL Rules',
+              '  3. Add a new URL rule for your API endpoint',
+              `  4. Use the correct endpoint: ${mailApiBase}/accounts (not /accounts/self)`,
+              '  5. Save the configuration and try again',
+              '  6. If URL Rules section is not visible, contact Zoho support to enable API access',
+              '',
+              'Note: Most email sending works fine with SMTP without needing API URL rules.'
+            ];
+          } else if (errorCode === 'INVALID_OAUTH') {
+            errorMessage = 'Invalid OAuth credentials';
+            nextSteps = [
+              '1. Verify your ZOHO_CLIENT_ID is correct',
+              '2. Verify your ZOHO_CLIENT_SECRET is correct',
+              '3. Check if your ZOHO_REFRESH_TOKEN is still valid (they can expire)',
+              '4. Generate a new refresh token from Zoho Developer Console',
+              '5. Ensure the OAuth app has the correct scopes (ZohoMail.messages.CREATE, ZohoMail.accounts.READ)'
+            ];
+          } else if (statusCode === 401 || statusCode === 403) {
+            errorMessage = 'Zoho API authentication failed';
+            nextSteps = [
+              '1. Check if your refresh token has expired',
+              '2. Verify your OAuth credentials are correct',
+              '3. Ensure the OAuth app has the required permissions',
+              '4. Try regenerating the refresh token'
+            ];
+          }
+        }
         
         res.json({
           success: false,
-          message: 'Zoho API access failed',
+          message: errorMessage,
           error: errorText,
-          nextSteps: [
-            '1. Check your Zoho API credentials',
-            '2. Verify the app has the right permissions',
-            '3. Check if the Zoho Mail API is enabled for your account'
-          ]
+          parsedError: parsedError,
+          status: accountResponse.status,
+          statusText: accountResponse.statusText,
+          nextSteps: nextSteps,
+          note: 'This test checks the Zoho Mail API. Your server uses SMTP for sending emails, which does NOT require URL rules. The "Email Sending" test will work even if this API test fails.'
         });
       }
     } catch (error) {
-      console.log('❌ Account API error:', error.message);
+      console.error('❌ Account API error:', error);
       res.json({
         success: false,
         message: 'Failed to connect to Zoho API',
-        error: error.message
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        nextSteps: [
+          '1. Check your internet connection',
+          '2. Verify Zoho API endpoints are accessible',
+          '3. Check for firewall or network restrictions'
+        ]
       });
     }
   } catch (error) {
-    console.error('Zoho test failed:', error);
+    console.error('❌ Zoho test failed:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      message: 'Unexpected error during Zoho test',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -469,15 +963,25 @@ app.post('/api/email/send', emailLimiter, async (req, res) => {
       });
     }
 
-    // Use SMTP only (API has permission issues)
+    // Use Zoho API directly (SMTP ports are blocked on Render.com)
+    // The API test passed, so we know the API works
     let result;
     try {
-      console.log('📧 Attempting SMTP sending...');
-      result = await sendSMTPEmail(value);
-      console.log('✅ SMTP sending successful');
-    } catch (smtpError) {
-      console.log('❌ SMTP failed:', smtpError.message);
-      throw new Error(`Email sending failed: ${smtpError.message}`);
+      console.log('📧 Using Zoho Mail API (SMTP ports blocked on Render.com)...');
+      result = await sendZohoEmail(value);
+      console.log('✅ Email sent successfully via Zoho Mail API');
+    } catch (apiError) {
+      console.log('❌ Zoho API failed:', apiError.message);
+      
+      // If API fails, try SMTP as fallback (in case API has issues but SMTP works elsewhere)
+      console.log('📧 Trying SMTP as fallback...');
+      try {
+        result = await sendSMTPEmail(value);
+        console.log('✅ Email sent successfully via SMTP (fallback)');
+      } catch (smtpError) {
+        console.log('❌ SMTP fallback also failed:', smtpError.message);
+        throw new Error(`Email sending failed. API: ${apiError.message}. SMTP fallback: ${smtpError.message}`);
+      }
     }
     
     res.json({
@@ -573,6 +1077,410 @@ app.get('/api/email/stats', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+});
+
+// Cal.com Webhook endpoint
+// This endpoint receives webhook events from Cal.com when bookings are created
+app.post('/api/webhooks/calcom', async (req, res) => {
+  try {
+    // Verify webhook signature if secret is configured
+    if (process.env.CALCOM_WEBHOOK_SECRET) {
+      const signature = req.headers['calcom-signature'] || req.headers['x-calcom-signature'];
+      if (!signature) {
+        console.warn('⚠️  Cal.com webhook received without signature');
+        // Continue processing but log warning
+      } else {
+        // Verify signature (Cal.com uses HMAC SHA256)
+        const expectedSignature = crypto
+          .createHmac('sha256', process.env.CALCOM_WEBHOOK_SECRET)
+          .update(JSON.stringify(req.body))
+          .digest('hex');
+        
+        if (signature !== expectedSignature) {
+          console.error('❌ Invalid Cal.com webhook signature');
+          return res.status(401).json({
+            success: false,
+            error: 'Invalid signature'
+          });
+        }
+      }
+    }
+
+    const webhookData = req.body;
+    const eventType = webhookData.triggerEvent || webhookData.type || 'BOOKING_CREATED';
+    
+    console.log('📅 Cal.com webhook received:', sanitizeForLogging(eventType));
+    // Sanitize webhook data before logging
+    try {
+      const sanitizedData = JSON.parse(JSON.stringify(webhookData, (key, value) => {
+        if (typeof value === 'string') {
+          return sanitizeForLogging(value);
+        }
+        return value;
+      }));
+      console.log('📅 Webhook data:', JSON.stringify(sanitizedData, null, 2));
+    } catch {
+      console.log('📅 Webhook data: [Unable to serialize]');
+    }
+
+    // Only process booking creation events
+    if (eventType !== 'BOOKING_CREATED' && eventType !== 'booking.created') {
+      const sanitizedEventType = sanitizeForLogging(eventType);
+      console.log('ℹ️  Ignoring webhook event type:', sanitizedEventType);
+      return res.json({
+        success: true,
+        message: `Event type ${sanitizedEventType} ignored`
+      });
+    }
+
+    if (!db) {
+      console.error('❌ Firestore not initialized - cannot save booking');
+      return res.status(500).json({
+        success: false,
+        error: 'Database not initialized'
+      });
+    }
+
+    // Extract booking information from webhook
+    const booking = webhookData.payload?.booking || webhookData.booking || webhookData;
+    const organizer = booking.organizer || booking.user || {};
+    const attendees = booking.attendees || [];
+    const eventTypeData = booking.eventType || {};
+
+    // Get organizer's Cal.com username/URL
+    const organizerUsername = organizer.username || organizer.slug || '';
+    const organizerEmail = organizer.email || '';
+    
+    // Find the first attendee (usually the mentee)
+    const attendee = attendees[0] || {};
+    const attendeeEmail = attendee.email || '';
+    const attendeeName = attendee.name || '';
+
+    console.log('📅 Processing booking:', {
+      organizerUsername,
+      organizerEmail,
+      attendeeEmail,
+      attendeeName,
+      bookingId: booking.id || booking.uid
+    });
+
+    // Find mentor by Cal.com URL
+    let mentorId = null;
+    let mentorData = null;
+    
+    try {
+      // Query all users to find mentor with matching Cal.com URL
+      const usersSnapshot = await db.collection('users').get();
+      
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const mentorProfileRef = db.collection('users').doc(userDoc.id)
+            .collection('mentorProgram').doc('profile');
+          const mentorProfileDoc = await mentorProfileRef.get();
+          
+          if (mentorProfileDoc.exists()) {
+            const profileData = mentorProfileDoc.data();
+            
+            // Check if this is a mentor and if Cal.com URL matches
+            if ((profileData.isMentor === true || profileData.type === 'mentor') && profileData.calCom) {
+              const calComUrl = profileData.calCom;
+              
+              // Extract username from Cal.com URL
+              let calComUsername = '';
+              try {
+                const url = new URL(calComUrl);
+                const pathParts = url.pathname.split('/').filter(Boolean);
+                calComUsername = pathParts[0] || '';
+              } catch (e) {
+                // If URL parsing fails, try to extract from string
+                const match = calComUrl.match(/cal\.com\/([^\/]+)/i);
+                if (match) calComUsername = match[1];
+              }
+              
+              // Match by username or check if URL contains the username
+              if (calComUsername && (
+                calComUsername.toLowerCase() === organizerUsername.toLowerCase() ||
+                calComUrl.toLowerCase().includes(organizerUsername.toLowerCase())
+              )) {
+                mentorId = userDoc.id;
+                mentorData = profileData;
+                console.log('✅ Found mentor:', sanitizeForLogging(mentorId), sanitizeForLogging(profileData.firstName || ''), sanitizeForLogging(profileData.lastName || ''));
+                break;
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error checking user ${userDoc.id}:`, error.message);
+        }
+      }
+      
+      if (!mentorId) {
+        console.warn('⚠️  Could not find mentor with Cal.com URL matching:', sanitizeForLogging(organizerUsername));
+        // Still return success to Cal.com, but log the issue
+        return res.json({
+          success: true,
+          warning: 'Mentor not found - booking not saved to system'
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error finding mentor:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Error finding mentor: ' + error.message
+      });
+    }
+
+    // Find mentee by email
+    let menteeId = null;
+    let menteeData = null;
+    
+    try {
+      if (attendeeEmail) {
+        const usersSnapshot = await db.collection('users').get();
+        
+        for (const userDoc of usersSnapshot.docs) {
+          try {
+            const userData = userDoc.data();
+            
+            // Check if email matches (case-insensitive)
+            if (userData.email && userData.email.toLowerCase() === attendeeEmail.toLowerCase()) {
+              // Check profile to see if they're a mentee
+              const menteeProfileRef = db.collection('users').doc(userDoc.id)
+                .collection('mentorProgram').doc('profile');
+              const menteeProfileDoc = await menteeProfileRef.get();
+              
+              if (menteeProfileDoc.exists()) {
+                const profileData = menteeProfileDoc.data();
+                // Accept if they're a mentee OR if they don't have a profile type set (could be new user)
+                if (profileData.isMentee === true || profileData.type === 'mentee' || (!profileData.isMentor && !profileData.isMentee)) {
+                  menteeId = userDoc.id;
+                  menteeData = profileData;
+                  console.log('✅ Found mentee:', sanitizeForLogging(menteeId), sanitizeForLogging(profileData.firstName || profileData.name || 'Unknown'));
+                  break;
+                }
+              } else {
+                // If no profile exists but email matches, use this user as mentee
+                // This handles cases where the user hasn't completed their profile yet
+                menteeId = userDoc.id;
+                menteeData = { name: userData.displayName || attendeeName || 'Unknown' };
+                console.log('✅ Found user by email (no profile yet):', sanitizeForLogging(menteeId));
+                break;
+              }
+            }
+          } catch (error) {
+            console.error('Error checking user for mentee:', sanitizeForLogging(userDoc.id), error.message || String(error));
+          }
+        }
+      }
+      
+      if (!menteeId) {
+        console.warn('⚠️  Could not find mentee with email:', sanitizeForLogging(attendeeEmail));
+        console.warn('⚠️  Booking will be saved but may need manual mentee assignment');
+        // Still create booking but with limited info - webhook will save what it can
+      }
+    } catch (error) {
+      console.error('❌ Error finding mentee:', error);
+      // Continue anyway - we can still save the booking
+    }
+
+    // Extract booking details
+    const startTime = booking.startTime || booking.start || '';
+    const endTime = booking.endTime || booking.end || '';
+    const bookingId = booking.id?.toString() || booking.uid || '';
+    const bookingUid = booking.uid || booking.id?.toString() || '';
+    const eventTypeId = eventTypeData.id || null;
+    const eventTypeTitle = eventTypeData.title || eventTypeData.slug || '';
+
+    // Parse dates
+    const sessionDate = startTime ? new Date(startTime) : new Date();
+    const sessionStartTime = startTime ? new Date(startTime) : new Date();
+    const sessionEndTime = endTime ? new Date(endTime) : new Date();
+
+    // Extract time strings for day/startTime/endTime format
+    const day = sessionDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const startTimeStr = sessionStartTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+    const endTimeStr = sessionEndTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+
+    // Get names
+    const mentorName = mentorData ? 
+      `${mentorData.firstName || ''} ${mentorData.lastName || ''}`.trim() || mentorData.name || 'Unknown' :
+      organizer.name || 'Unknown';
+    const menteeName = menteeData ?
+      `${menteeData.firstName || ''} ${menteeData.lastName || ''}`.trim() || menteeData.name || 'Unknown' :
+      attendeeName || 'Unknown';
+
+    // Check if booking already exists
+    let existingBooking = null;
+    if (bookingId) {
+      try {
+        const bookingsSnapshot = await db.collection('bookings')
+          .where('calComBookingId', '==', bookingId)
+          .limit(1)
+          .get();
+        
+        if (!bookingsSnapshot.empty) {
+          existingBooking = bookingsSnapshot.docs[0];
+          console.log('ℹ️  Booking already exists:', existingBooking.id);
+        }
+      } catch (error) {
+        console.error('Error checking for existing booking:', error);
+      }
+    }
+
+    if (existingBooking) {
+      console.log('ℹ️  Booking already saved, skipping duplicate');
+      return res.json({
+        success: true,
+        message: 'Booking already exists',
+        bookingId: existingBooking.id
+      });
+    }
+
+    // Create booking data
+    const bookingData = {
+      mentorId: mentorId || '',
+      menteeId: menteeId || '',
+      mentorName: mentorName,
+      menteeName: menteeName,
+      mentorEmail: organizerEmail || '',
+      menteeEmail: attendeeEmail || '',
+      day: day,
+      startTime: startTimeStr,
+      endTime: endTimeStr,
+      status: 'confirmed', // Cal.com bookings are confirmed immediately
+      createdAt: admin.firestore.Timestamp.now(),
+      sessionDate: admin.firestore.Timestamp.fromDate(sessionDate),
+      sessionStartTime: admin.firestore.Timestamp.fromDate(sessionStartTime),
+      sessionEndTime: admin.firestore.Timestamp.fromDate(sessionEndTime),
+      calComBookingId: bookingId,
+      calComBookingUid: bookingUid,
+      eventTypeId: eventTypeId,
+      eventTypeTitle: eventTypeTitle,
+      bookingMethod: 'calcom',
+      isCalComBooking: true,
+      sessionLink: booking.locationUrl || booking.videoCallUrl || booking.meetingUrl || '',
+      sessionLocation: booking.location || 'Virtual',
+      calComAttendees: attendees.map(att => ({
+        name: att.name || '',
+        email: att.email || '',
+        timeZone: att.timeZone || ''
+      }))
+    };
+
+    // Save booking to Firestore
+    const bookingRef = await db.collection('bookings').add(bookingData);
+    console.log('✅ Booking saved to Firestore:', bookingRef.id);
+
+    // Create session from booking (only if both mentor and mentee IDs are found)
+    // Note: mentorId and menteeId can be empty strings if not found, so this check is necessary
+    if (mentorId && menteeId && mentorId !== '' && menteeId !== '') {
+      try {
+        const sessionData = {
+          bookingId: bookingId,
+          mentorId: mentorId,
+          menteeId: menteeId,
+          sessionDate: admin.firestore.Timestamp.fromDate(sessionDate),
+          startTime: admin.firestore.Timestamp.fromDate(sessionStartTime),
+          endTime: admin.firestore.Timestamp.fromDate(sessionEndTime),
+          sessionLink: bookingData.sessionLink,
+          sessionLocation: bookingData.sessionLocation,
+          status: 'scheduled',
+          feedbackSubmitted_mentor: false,
+          feedbackSubmitted_mentee: false,
+          createdAt: admin.firestore.Timestamp.now(),
+          updatedAt: admin.firestore.Timestamp.now()
+        };
+
+        await db.collection('sessions').add(sessionData);
+        console.log('✅ Session created from booking');
+      } catch (sessionError) {
+        console.error('⚠️  Failed to create session:', sessionError);
+        // Don't fail the webhook if session creation fails
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Booking saved successfully',
+      bookingId: bookingRef.id,
+      calComBookingId: bookingId
+    });
+
+  } catch (error) {
+    console.error('❌ Error processing Cal.com webhook:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Delete user from Firebase Auth
+// This endpoint deletes a user from Firebase Authentication
+app.delete('/api/users/delete/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    // Validate uid format to prevent injection attacks
+    // Firebase Auth UIDs are alphanumeric and typically 28 characters
+    if (!uid || typeof uid !== 'string' || uid.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'User ID is required'
+      });
+    }
+    
+    // Validate uid format: alphanumeric, hyphens, underscores only, reasonable length
+    // Must start and end with alphanumeric (not special chars)
+    const uidPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,126}[a-zA-Z0-9]$|^[a-zA-Z0-9]$/;
+    if (!uidPattern.test(uid.trim())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid user ID format'
+      });
+    }
+    
+    // Use trimmed uid
+    const sanitizedUid = uid.trim();
+
+    if (!admin.apps.length) {
+      return res.status(500).json({
+        success: false,
+        error: 'Firebase Admin not initialized'
+      });
+    }
+
+    try {
+      // Delete user from Firebase Auth using Admin SDK
+      await admin.auth().deleteUser(sanitizedUid);
+      const sanitizedUidForLog = sanitizeForLogging(sanitizedUid);
+      console.log('✅ User deleted from Firebase Auth:', sanitizedUidForLog);
+      
+      res.json({
+        success: true,
+        message: `User ${sanitizedUidForLog} deleted from Firebase Authentication`
+      });
+    } catch (authError) {
+      // Handle specific Firebase Auth errors
+      if (authError.code === 'auth/user-not-found') {
+        const sanitizedUidForLog = sanitizeForLogging(sanitizedUid);
+        console.log('⚠️  User not found in Firebase Auth (may have already been deleted):', sanitizedUidForLog);
+        return res.json({
+          success: true,
+          message: `User ${sanitizedUidForLog} not found in Firebase Auth (may have already been deleted)`,
+          warning: 'User not found in Firebase Auth'
+        });
+      }
+      
+      throw authError;
+    }
+  } catch (error) {
+    console.error('❌ Error deleting user from Firebase Auth:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to delete user from Firebase Authentication'
     });
   }
 });

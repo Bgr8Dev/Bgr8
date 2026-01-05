@@ -1,0 +1,215 @@
+# Cursor Rules for Bgr8 Website
+
+## Console Logging Guidelines
+
+### ⚠️ CRITICAL: Always Use Logger Utility Instead of Direct Console Calls
+
+**NEVER use direct console calls:**
+- ❌ `console.log()`
+- ❌ `console.error()`
+- ❌ `console.warn()`
+- ❌ `console.info()`
+- ❌ `console.debug()`
+
+**ALWAYS use the logger utility:**
+- ✅ `loggers.category.log()`
+- ✅ `loggers.category.error()`
+- ✅ `loggers.category.warn()`
+- ✅ `loggers.category.info()`
+- ✅ `loggers.category.debug()`
+
+### Import Statement
+
+When creating new files that need logging, always import the logger:
+
+```typescript
+import { loggers } from '../utils/logger';
+// or
+import { loggers } from '../../utils/logger';
+// Adjust path based on file location
+```
+
+### Available Logger Categories
+
+Use the appropriate category logger based on context:
+
+- **`loggers.booking`** - For booking/Cal.com related logs
+- **`loggers.analytics`** - For Google Analytics, tracking, etc. (disabled by default)
+- **`loggers.firebase`** - For Firebase operations
+- **`loggers.api`** - For API calls and responses
+- **`loggers.auth`** - For authentication-related logs
+- **`loggers.email`** - For email service logs
+- **`loggers.config`** - For configuration logs
+- **`loggers.error`** - For general error logs
+- **`loggers.warn`** - For general warning logs
+- **`loggers.info`** - For general info logs
+- **`loggers.debug`** - For debug logs
+- **`loggers.log`** - For general logs
+- **`logger`** - Default logger (category: 'other')
+
+### Examples
+
+**Booking-related logs:**
+```typescript
+import { loggers } from '../utils/logger';
+
+loggers.booking.log('Booking created successfully');
+loggers.booking.error('Error creating booking:', error);
+loggers.booking.warn('Booking status is pending');
+```
+
+**API-related logs:**
+```typescript
+import { loggers } from '../utils/logger';
+
+loggers.api.log('API request:', requestData);
+loggers.api.error('API error:', error);
+```
+
+**Analytics logs (can be disabled separately):**
+```typescript
+import { loggers } from '../utils/logger';
+
+loggers.analytics.log('User clicked button');
+loggers.analytics.info('Page view tracked');
+```
+
+**Firebase operations:**
+```typescript
+import { loggers } from '../utils/logger';
+
+loggers.firebase.log('Firebase operation started');
+loggers.firebase.error('Firebase error:', error);
+```
+
+### Creating Custom Category Loggers
+
+If you need a custom category:
+
+```typescript
+import { createLogger } from '../utils/logger';
+
+const customLogger = createLogger('other');
+customLogger.log('Custom log message');
+```
+
+### Configuration
+
+Logging behavior is controlled via environment variables in `.env.local`:
+
+```env
+# Master switch for all console logs
+VITE_CONSOLE_LOGS_ENABLED=true
+
+# Enable logs in development (default: true)
+VITE_CONSOLE_LOGS_DEV=true
+
+# Enable logs in production (default: false)
+VITE_CONSOLE_LOGS_PROD=false
+
+# Enable analytics logs specifically (default: false)
+VITE_CONSOLE_LOGS_ANALYTICS=false
+```
+
+### Runtime Configuration
+
+You can also configure logging programmatically:
+
+```typescript
+import { setConsoleConfig } from '../config/consoleConfig';
+
+setConsoleConfig({
+  enabled: true,
+  enableInProduction: false,
+  categories: {
+    analytics: false,  // Disable analytics logs
+    error: true,      // Always show errors
+    warn: true,       // Always show warnings
+  }
+});
+```
+
+### Best Practices
+
+1. **Use category-specific loggers** for better control:
+   ```typescript
+   loggers.api.log('API call')  // ✅ Good
+   logger.log('API call')       // ⚠️ Less specific
+   ```
+
+2. **Always use loggers for new code** instead of direct console calls
+
+3. **Use appropriate log levels**:
+   - `error()` for errors
+   - `warn()` for warnings
+   - `log()` for general information
+   - `debug()` for detailed debugging
+
+4. **Keep analytics logs separate** so they can be easily disabled
+
+5. **Don't log sensitive information** even if logs are disabled
+
+### Migration Checklist
+
+When creating or editing files:
+
+- [ ] Import logger utility: `import { loggers } from '../utils/logger';`
+- [ ] Replace all `console.log()` with appropriate `loggers.category.log()`
+- [ ] Replace all `console.error()` with appropriate `loggers.category.error()`
+- [ ] Replace all `console.warn()` with appropriate `loggers.category.warn()`
+- [ ] Replace all `console.info()` with appropriate `loggers.category.info()`
+- [ ] Replace all `console.debug()` with appropriate `loggers.category.debug()`
+- [ ] Use the most specific category logger available
+- [ ] For analytics/tracking, use `loggers.analytics.*`
+
+### Documentation
+
+For complete documentation, see: `src/config/README_CONSOLE_LOGS.md`
+
+---
+
+## General Code Style Guidelines
+
+### TypeScript
+
+- Use TypeScript for all new files
+- Define proper types and interfaces
+- Avoid `any` types - use `unknown` and type guards when needed
+- Use strict null checks
+
+### React Components
+
+- Use functional components with hooks
+- Use TypeScript interfaces for props
+- Follow the existing component structure patterns
+- Use proper error boundaries where needed
+
+### File Organization
+
+- Services go in `src/services/`
+- Components go in `src/components/`
+- Pages go in `src/pages/`
+- Utils go in `src/utils/`
+- Types go in `src/types/`
+- Config goes in `src/config/`
+
+### Imports
+
+- Group imports: external libraries, then internal modules
+- Use absolute imports when possible (configured in tsconfig)
+- Remove unused imports
+
+### Error Handling
+
+- Always handle errors gracefully
+- Use try-catch blocks for async operations
+- Provide meaningful error messages
+- Log errors using `loggers.error.error()` or category-specific error loggers
+
+### Performance
+
+- Use React.memo() for expensive components
+- Use useMemo() and useCallback() appropriately
+- Avoid unnecessary re-renders
+- Lazy load heavy components when possible
+

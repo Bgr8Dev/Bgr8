@@ -88,10 +88,11 @@ export class PasswordHistoryService {
       const currentHistory = await this.getPasswordHistory(userId);
       
       // Create new entry
+      // Note: Cannot use serverTimestamp() inside arrays, so we use Timestamp.now()
       const newEntry: PasswordHistoryEntry = {
         passwordHash: newPasswordHash,
         createdAt: now,
-        createdAtTimestamp: serverTimestamp()
+        createdAtTimestamp: Timestamp.now()
       };
 
       if (currentHistory) {
@@ -131,13 +132,11 @@ export class PasswordHistoryService {
           maxHistorySize: this.MAX_HISTORY_SIZE
         };
 
+        // Use Timestamp.now() for array entries (serverTimestamp() not supported in arrays)
         await setDoc(docRef, {
           ...newHistoryDoc,
           lastPasswordChangeTimestamp: serverTimestamp(),
-          passwordHistory: [{
-            ...newEntry,
-            createdAtTimestamp: serverTimestamp()
-          }]
+          passwordHistory: [newEntry] // newEntry already has Timestamp.now() for createdAtTimestamp
         });
       }
 

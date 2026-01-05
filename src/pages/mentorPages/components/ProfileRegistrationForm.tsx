@@ -38,7 +38,7 @@ const MissingFieldsModal: React.FC<{
   if (!isOpen) return null;
 
   const getFieldSection = (fieldName: string): string => {
-    const personalFields = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Age', 'County'];
+    const personalFields = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Age', 'County', 'How did you find out about us?'];
     const educationFields = ['Degree/Qualification', 'Education Level', 'Profession', 'LinkedIn Profile'];
     const skillsFields = ['Skills', 'Industries', 'Hobbies & Interests'];
     const additionalFields = ['Ethnicity', 'Religion'];
@@ -203,11 +203,6 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     // Generate random LinkedIn URL
     const randomLinkedin = `https://linkedin.com/in/${randomFirstName.toLowerCase()}-${randomLastName.toLowerCase()}`;
     
-    // Generate random Cal.com URL (for mentors only)
-    const randomCalCom = selectedRole === MENTOR 
-      ? `https://cal.com/${randomFirstName.toLowerCase()}-${randomLastName.toLowerCase()}`
-      : '';
-    
     return {
       firstName: randomFirstName,
       lastName: randomLastName,
@@ -221,13 +216,14 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       profession: randomProfession,
       pastProfessions: randomPastProfessions,
       linkedin: randomLinkedin,
-      calCom: randomCalCom,
+      calCom: '',
       skills: randomSkills,
       industries: randomIndustries,
       hobbies: randomHobbies,
       lookingFor: randomLookingFor,
       ethnicity: randomEthnicity,
-      religion: randomReligion
+      religion: randomReligion,
+      howDidYouHearAboutUs: 'recommended'
     };
   };
 
@@ -270,6 +266,7 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       aboutMe: 'Tell us a little bit about yourself',
       phone: 'Your phone number helps mentors/mentees contact you for sessions',
       age: `Mentees must be between 16-19 years old. Mentors must be 18 or older`,
+      birthYear: 'Required for mentor verification. Enter the year you were born (e.g. 1990)',
       degree: selectedRole === MENTOR 
         ? 'Tell us about your highest qualification or what you\'re currently studying'
         : 'Tell us about your current education level and what you\'re studying',
@@ -288,7 +285,8 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       hobbies: 'Your interests help create better matches and conversation starters',
       ethnicity: 'This helps us create diverse and inclusive mentoring relationships',
       religion: 'This helps us respect your beliefs when making matches',
-      lookingFor: 'What specific skills or knowledge are you looking to gain?'
+      lookingFor: 'What specific skills or knowledge are you looking to gain?',
+      howDidYouHearAboutUs: 'Help us understand how you discovered our mentoring platform'
     };
     return tooltips[fieldName] || '';
   };
@@ -536,12 +534,14 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
     if (!profileForm.phone) requiredFields.push('Phone Number');
     if (!profileForm.age) requiredFields.push('Age');
     if (!profileForm.county) requiredFields.push('County');
+    if (!profileForm.howDidYouHearAboutUs) requiredFields.push('How did you find out about us?');
 
     if (selectedRole === MENTOR) {
       if (!profileForm.degree) requiredFields.push('Degree/Qualification');
       if (!profileForm.educationLevel) requiredFields.push('Education Level');
       if (!profileForm.profession) requiredFields.push('Current Profession');
       if (!profileForm.linkedin) requiredFields.push('LinkedIn Profile');
+      if (!profileForm.birthYear) requiredFields.push('Year of Birth');
       // Cal.com is optional for mentors, so not included in required fields
     } else { // MENTEE
       if (!profileForm.degree) requiredFields.push('Degree/Qualification');
@@ -577,7 +577,9 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
       'About Me': 'aboutMe',
       'Phone Number': 'phone',
       'Age': 'age',
+      'Year of Birth': 'birthYear',
       'County': 'county',
+      'How did you find out about us?': 'howDidYouHearAboutUs',
       'Degree/Qualification': 'degree',
       'Education Level': 'educationLevel',
       'Current Profession': 'profession',
@@ -798,26 +800,106 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
                 <div className="validation-error">{validationErrors.age}</div>
               )}
             </div>
+            {selectedRole === MENTOR && (
+              <div className="input-group">
+                <label htmlFor="birthYear" className="field-label">
+                  Year of Birth *
+                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('birthYear')} />
+                </label>
+                <input
+                  type="number"
+                  id="birthYear"
+                  name="birthYear"
+                  value={profileForm.birthYear || ''}
+                  onChange={onFormChange}
+                  className={validationErrors.birthYear ? 'error' : ''}
+                  placeholder="e.g. 1990"
+                  min={1900}
+                  max={new Date().getFullYear() - 18}
+                  data-tooltip={getFieldTooltip('birthYear')}
+                />
+                {validationErrors.birthYear && (
+                  <div className="validation-error">{validationErrors.birthYear}</div>
+                )}
+              </div>
+            )}
+            {selectedRole !== MENTOR && (
+              <div className="input-group">
+                <label htmlFor="county" className="field-label">
+                  County/Location *
+                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('county')} />
+                </label>
+                <select
+                  id="county"
+                  name="county"
+                  value={profileForm.county}
+                  onChange={onFormChange}
+                  className={validationErrors.county ? 'error' : ''}
+                  data-tooltip={getFieldTooltip('county')}
+                >
+                  <option value="">Select your county</option>
+                  {ukCounties.map(county => (
+                    <option key={county} value={county}>{county}</option>
+                  ))}
+                </select>
+                {validationErrors.county && (
+                  <div className="validation-error">{validationErrors.county}</div>
+                )}
+              </div>
+            )}
+          </div>
+          {selectedRole === MENTOR && (
+            <div className="prf-form-row">
+              <div className="input-group">
+                <label htmlFor="county" className="field-label">
+                  County/Location *
+                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('county')} />
+                </label>
+                <select
+                  id="county"
+                  name="county"
+                  value={profileForm.county}
+                  onChange={onFormChange}
+                  className={validationErrors.county ? 'error' : ''}
+                  data-tooltip={getFieldTooltip('county')}
+                >
+                  <option value="">Select your county</option>
+                  {ukCounties.map(county => (
+                    <option key={county} value={county}>{county}</option>
+                  ))}
+                </select>
+                {validationErrors.county && (
+                  <div className="validation-error">{validationErrors.county}</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="prf-form-row">
             <div className="input-group">
-              <label htmlFor="county" className="field-label">
-                County/Location *
-                <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('county')} />
+              <label htmlFor="howDidYouHearAboutUs" className="field-label">
+                How did you find out about us? *
+                <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('howDidYouHearAboutUs')} />
               </label>
               <select
-                id="county"
-                name="county"
-                value={profileForm.county}
+                id="howDidYouHearAboutUs"
+                name="howDidYouHearAboutUs"
+                value={profileForm.howDidYouHearAboutUs}
                 onChange={onFormChange}
-                className={validationErrors.county ? 'error' : ''}
-                data-tooltip={getFieldTooltip('county')}
+                className={validationErrors.howDidYouHearAboutUs ? 'error' : ''}
+                data-tooltip={getFieldTooltip('howDidYouHearAboutUs')}
               >
-                <option value="">Select your county</option>
-                {ukCounties.map(county => (
-                  <option key={county} value={county}>{county}</option>
-                ))}
+                <option value="">Select an option</option>
+                <option value="recommended">Recommended by a friend/family</option>
+                <option value="google">Google search</option>
+                <option value="social-media">Social media (Instagram, Facebook, Twitter, etc.)</option>
+                <option value="advert">Advertisement</option>
+                <option value="school-college">School or College</option>
+                <option value="event">Event or workshop</option>
+                <option value="other">Other</option>
               </select>
-              {validationErrors.county && (
-                <div className="validation-error">{validationErrors.county}</div>
+              {validationErrors.howDidYouHearAboutUs && (
+                <div className="validation-error">{validationErrors.howDidYouHearAboutUs}</div>
               )}
             </div>
           </div>
@@ -913,26 +995,6 @@ export const ProfileRegistrationForm: React.FC<ProfileRegistrationFormProps> = (
               )}
             </div>
           </div>
-
-          {selectedRole === MENTOR && (
-            <div className="prf-form-row">
-              <div className="input-group">
-                <label htmlFor="calCom" className="field-label">
-                  Cal.com Public Page Link
-                  <FaInfoCircle className="info-icon" data-tooltip={getFieldTooltip('calCom')} />
-                </label>
-                <input
-                  type="url"
-                  id="calCom"
-                  name="calCom"
-                  value={profileForm.calCom}
-                  onChange={onFormChange}
-                  placeholder="https://cal.com/yourusername"
-                  data-tooltip={getFieldTooltip('calCom')}
-                />
-              </div>
-            </div>
-          )}
 
           {/* Past Professions - Only for Mentors */}
           {selectedRole === MENTOR && (

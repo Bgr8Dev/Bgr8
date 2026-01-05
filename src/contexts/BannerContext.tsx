@@ -188,6 +188,7 @@ export const BannerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useBanner = () => {
   const context = useContext(BannerContext);
   if (context === undefined) {

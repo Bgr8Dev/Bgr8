@@ -54,11 +54,17 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
   const isDeveloper = hasRole(userProfile, 'developer');
   
   // Local form state for editing
-  const [localFormData, setLocalFormData] = useState<ProfileFormData>(profile);
+  const [localFormData, setLocalFormData] = useState<ProfileFormData>({
+    ...profile,
+    howDidYouHearAboutUs: typeof profile.howDidYouHearAboutUs === 'string' ? profile.howDidYouHearAboutUs : ''
+  });
 
   // Sync local form data with profile prop when it changes
   useEffect(() => {
-    setLocalFormData(profile);
+    setLocalFormData({
+      ...profile,
+      howDidYouHearAboutUs: typeof profile.howDidYouHearAboutUs === 'string' ? profile.howDidYouHearAboutUs : ''
+    });
   }, [profile]);
 
   if (!isOpen) return null;
@@ -129,6 +135,14 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
       lookingFor: 'What specific skills or knowledge are you looking to gain?'
     };
     return tooltips[fieldName] || '';
+  };
+
+  // Helper function to handle local form changes
+  const handleLocalFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setLocalFormData(prev => ({ ...prev, [name]: value }));
+    // Also call the parent handler to keep parent state in sync
+    onFormChange(e);
   };
 
   const handleLocalArrayChange = (field: keyof ProfileFormData, value: string[]) => {
@@ -451,9 +465,9 @@ export const MobileProfileEditModal: React.FC<MobileProfileEditModalProps> = ({
             <textarea
               id="aboutMe"
               name="aboutMe"
-              value={profile.aboutMe || ''}
-              onChange={onFormChange}
-              placeholder="Tell us about yourself, your background, and what you’re looking for..."
+              value={localFormData.aboutMe || ''}
+              onChange={handleLocalFormChange}
+              placeholder="Tell us about yourself, your background, and what you're looking for..."
               rows={5}
               maxLength={800}
               className={validationErrors.aboutMe ? 'error' : ''}

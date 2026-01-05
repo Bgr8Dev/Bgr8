@@ -5,6 +5,8 @@
  * It communicates with the backend to send emails using Zoho Mail.
  */
 
+import { loggers } from '../utils/logger';
+
 export interface EmailApiConfig {
   apiBaseUrl: string;
   apiKey: string;
@@ -53,7 +55,7 @@ export class EmailApiService {
    */
   static initialize(config: EmailApiConfig): void {
     this.config = config;
-    console.log('🚀 Email API Service initialized with config:', {
+    loggers.email.log('🚀 Email API Service initialized with config:', {
       apiBaseUrl: config.apiBaseUrl,
       apiKey: config.apiKey ? '***configured***' : 'NOT CONFIGURED'
     });
@@ -72,7 +74,7 @@ export class EmailApiService {
 
     try {
       const healthUrl = `${this.config.apiBaseUrl}/api/health`;
-      console.log('🏥 Testing email server connection:', healthUrl);
+      loggers.email.log('🏥 Testing email server connection:', healthUrl);
       
       const response = await fetch(healthUrl, {
         method: 'GET',
@@ -85,17 +87,17 @@ export class EmailApiService {
       });
 
       if (response.ok) {
-        console.log('✅ Email server is running and accessible');
+        loggers.email.log('✅ Email server is running and accessible');
         return { success: true };
       } else {
-        console.log('❌ Email server responded with error:', response.status, response.statusText);
+        loggers.email.warn('❌ Email server responded with error:', response.status, response.statusText);
         return { 
           success: false, 
           error: `Server responded with ${response.status}: ${response.statusText}` 
         };
       }
     } catch (error) {
-      console.log('❌ Email server connection failed:', error);
+      loggers.email.error('❌ Email server connection failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Connection failed'
@@ -136,8 +138,8 @@ export class EmailApiService {
       }
 
       const apiUrl = `${this.config.apiBaseUrl}/api/email/send`;
-      console.log('🔗 Attempting to send email to:', apiUrl);
-      console.log('📧 Email message:', message);
+      loggers.email.log('🔗 Attempting to send email to:', apiUrl);
+      loggers.email.log('📧 Email message:', message);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -147,7 +149,8 @@ export class EmailApiService {
         },
         body: JSON.stringify(message),
         // Add timeout and credentials for production
-        signal: AbortSignal.timeout(30000), // 30 second timeout
+        // Increased timeout for SMTP which can take longer
+        signal: AbortSignal.timeout(60000), // 60 second timeout (SMTP can be slow)
         mode: 'cors', // Ensure CORS is handled properly
         credentials: 'omit', // Don't send cookies
       });
@@ -160,7 +163,7 @@ export class EmailApiService {
           errorData = { message: 'Failed to parse error response' };
         }
         
-        console.error('❌ Email API Error Details:', {
+        loggers.email.error('❌ Email API Error Details:', {
           status: response.status,
           statusText: response.statusText,
           errorData,
@@ -180,7 +183,7 @@ export class EmailApiService {
       };
 
     } catch (error) {
-      console.error('Error sending email via API:', error);
+      loggers.email.error('Error sending email via API:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send email'
@@ -221,7 +224,7 @@ export class EmailApiService {
       return result.results || [];
 
     } catch (error) {
-      console.error('Error sending bulk emails via API:', error);
+      loggers.email.error('Error sending bulk emails via API:', error);
       return messages.map(() => ({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send bulk emails'
@@ -258,7 +261,7 @@ export class EmailApiService {
       return { success: result.success, error: result.error };
 
     } catch (error) {
-      console.error('Error testing email configuration:', error);
+      loggers.email.error('Error testing email configuration:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to test configuration'
@@ -294,7 +297,7 @@ export class EmailApiService {
       return { success: true, data: result };
 
     } catch (error) {
-      console.error('Error getting email stats:', error);
+      loggers.email.error('Error getting email stats:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get email stats'

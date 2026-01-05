@@ -5,7 +5,8 @@ import {
   FaPaperPlane, 
   FaSave, 
   FaChartLine, 
-  FaRocket
+  FaRocket,
+  FaCheckSquare
 } from 'react-icons/fa';
 
 interface EmailTabsProps {
@@ -66,6 +67,14 @@ export const EmailTabs: React.FC<EmailTabsProps> = ({
       >
         <FaChartLine />
         <span>Analytics</span>
+        <div className="email-tab-indicator"></div>
+      </button>
+      <button 
+        className={`email-emails-tab ${activeTab === 'use-cases' ? 'active' : ''}`}
+        onClick={() => onTabChange('use-cases')}
+      >
+        <FaCheckSquare />
+        <span>Use Cases</span>
         <div className="email-tab-indicator"></div>
       </button>
       <button 

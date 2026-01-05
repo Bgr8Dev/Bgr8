@@ -4,6 +4,13 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { logEmulatorConnection } from "./emulatorUtils";
+import { loggers } from "../utils/logger";
+
+// Extend Window interface for global properties
+interface WindowWithGtag extends Window {
+  gtag?: (...args: unknown[]) => void;
+  loggers?: typeof loggers;
+}
 
 // Firebase configuration - use minimal config for emulators in dev
 const getFirebaseConfig = () => {
@@ -124,19 +131,46 @@ export let analytics: Analytics | null = null;
 const initAnalytics = async () => {
   // Skip analytics initialization when using emulators
   if (import.meta.env.VITE_USE_EMULATORS === 'true') {
-    console.log("Analytics disabled - using emulators");
+    // Use logger if available, otherwise console
+    if (typeof window !== 'undefined' && (window as WindowWithGtag).loggers?.analytics) {
+      (window as WindowWithGtag).loggers!.analytics.log("Analytics disabled - using emulators");
+    } else {
+      console.log("Analytics disabled - using emulators");
+    }
     return;
   }
   
   try {
     if (await isSupported()) {
       analytics = getAnalytics(app);
-      console.log("Firebase Analytics initialized");
+      
+      // Disable Google Analytics debug mode
+      if (typeof window !== 'undefined' && (window as WindowWithGtag).gtag) {
+        // Configure to disable debug mode
+        (window as WindowWithGtag).gtag!('config', import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, {
+          debug_mode: false
+        });
+      }
+      
+      // Use logger if available, otherwise console
+      if (typeof window !== 'undefined' && (window as WindowWithGtag).loggers?.analytics) {
+        (window as WindowWithGtag).loggers!.analytics.log("Firebase Analytics initialized");
+      } else {
+        console.log("Firebase Analytics initialized");
+      }
     } else {
-      console.log("Firebase Analytics not supported in this environment");
+      if (typeof window !== 'undefined' && (window as WindowWithGtag).loggers?.analytics) {
+        (window as WindowWithGtag).loggers!.analytics.log("Firebase Analytics not supported in this environment");
+      } else {
+        console.log("Firebase Analytics not supported in this environment");
+      }
     }
   } catch (error) {
-    console.warn("Firebase Analytics initialization failed:", error);
+    if (typeof window !== 'undefined' && (window as WindowWithGtag).loggers?.analytics) {
+      (window as WindowWithGtag).loggers!.analytics.warn("Firebase Analytics initialization failed:", error);
+    } else {
+      console.warn("Firebase Analytics initialization failed:", error);
+    }
   }
 };
 initAnalytics();
@@ -149,8 +183,29 @@ export const logAnalyticsEvent = (
   if (analytics) {
     try {
       logEvent(analytics, eventName, eventParams);
+      
+      // Log to analytics logger if enabled
+      if (typeof window !== 'undefined') {
+        // Import logger dynamically to avoid circular dependencies
+        import('../utils/logger').then(({ loggers }) => {
+          if (loggers.analytics) {
+            loggers.analytics.log(`Analytics event: ${eventName}`, eventParams);
+          }
+        }).catch(() => {
+          // Logger not available, skip
+        });
+      }
     } catch (error) {
-      console.warn(`Failed to log analytics event '${eventName}':`, error);
+      // Use logger if available, otherwise console
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ loggers }) => {
+          loggers.analytics.warn(`Failed to log analytics event '${eventName}':`, error);
+        }).catch(() => {
+          console.warn(`Failed to log analytics event '${eventName}':`, error);
+        });
+      } else {
+        console.warn(`Failed to log analytics event '${eventName}':`, error);
+      }
     }
   }
 }; 

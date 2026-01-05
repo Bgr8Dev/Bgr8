@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { doc, updateDoc, Timestamp } from 'firebase/firestore';
-import { firestore } from '../../firebase/firebase';
-import { FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { doc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { firestore, storage } from '../../firebase/firebase';
+import { FaTimes, FaEye, FaEyeSlash, FaGraduationCap, FaUpload, FaSpinner } from 'react-icons/fa';
+import { compressImage, formatFileSize } from '../../utils/imageCompression';
 import '../../styles/Overlay.css';
 
 // Comprehensive list of ethnicities
@@ -54,10 +56,12 @@ const nationalityOptions = [
 ];
 
 export default function Profile() {
-  const { userProfile, changePassword } = useAuth();
+  const { userProfile, currentUser, changePassword } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [userRole, setUserRole] = useState<'mentor' | 'mentee' | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [passwordFormData, setPasswordFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -84,6 +88,32 @@ export default function Profile() {
   const [showSecondNationality, setShowSecondNationality] = useState(
     formData.nationality === 'Dual Nationality'
   );
+
+  // Fetch user role from mentorProgram profile
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!currentUser?.uid) return;
+      
+      try {
+        const mentorProgramDoc = await getDoc(
+          doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile')
+        );
+        
+        if (mentorProgramDoc.exists()) {
+          const profileData = mentorProgramDoc.data();
+          if (profileData.isMentor === true) {
+            setUserRole('mentor');
+          } else if (profileData.isMentee === true) {
+            setUserRole('mentee');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+
+    fetchUserRole();
+  }, [currentUser]);
 
   // Update second nationality visibility when nationality changes
   const handleNationalityChange = (value: string) => {
@@ -184,6 +214,95 @@ export default function Profile() {
       setShowNewPassword(!showNewPassword);
     } else {
       setShowConfirmPassword(!showConfirmPassword);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userProfile?.uid) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      let fileToUpload = file;
+      const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+
+      // Compress image if it's too large
+      if (file.size > maxSizeBytes) {
+        console.log(`Original file size: ${formatFileSize(file.size)}. Compressing...`);
+        fileToUpload = await compressImage(file, maxSizeBytes);
+        console.log(`Compressed file size: ${formatFileSize(fileToUpload.size)}`);
+      }
+
+      // Create a unique filename
+      const timestamp = Date.now();
+      const fileExtension = fileToUpload.name.split('.').pop() || 'jpg';
+      const fileName = `profile_${userProfile.uid}_${timestamp}.${fileExtension}`;
+      const storageRef = ref(storage, `profilePictures/${fileName}`);
+
+      // Upload file
+      await uploadBytes(storageRef, fileToUpload);
+      
+      // Get download URL
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Update user profile with photo URL
+      const userRef = doc(firestore, 'users', userProfile.uid);
+      await updateDoc(userRef, {
+        photoURL: downloadURL,
+        lastUpdated: new Date()
+      });
+
+      // Update local state (this will trigger a re-render if userProfile is reactive)
+      window.location.reload(); // Simple refresh to update the profile
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      alert('Failed to upload photo. Please try again.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const renderProfilePlaceholder = () => {
+    if (userRole === 'mentor') {
+      // Orange circle for mentor
+      return (
+        <div 
+          className="profile-photo-placeholder profile-photo-placeholder-mentor"
+          style={{
+            background: 'var(--mentor)',
+            borderColor: 'var(--mentor)',
+            boxShadow: '0 0 15px rgba(224, 106, 92, 0.5)'
+          }}
+        />
+      );
+    } else if (userRole === 'mentee') {
+      // Graduation cap with teal circle for mentee
+      return (
+        <div 
+          className="profile-photo-placeholder profile-photo-placeholder-mentee"
+          style={{
+            background: 'var(--mentee)',
+            borderColor: 'var(--mentee)',
+            boxShadow: '0 0 15px rgba(29, 213, 209, 0.5)',
+            color: 'white'
+          }}
+        >
+          <FaGraduationCap size={48} />
+        </div>
+      );
+    } else {
+      // Default placeholder (first initial)
+      return (
+        <div className="profile-photo-placeholder">
+          {userProfile?.firstName?.charAt(0)}
+        </div>
+      );
     }
   };
 
@@ -421,15 +540,101 @@ export default function Profile() {
         ) : (
           <div className="profile-info">
             <div className="profile-header">
-              {userProfile?.photoURL ? (
-                <img src={userProfile.photoURL} alt="Profile" className="profile-photo" />
-              ) : (
-                <div className="profile-photo-placeholder">
-                  {userProfile?.firstName?.charAt(0)}
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                {userProfile?.photoURL ? (
+                  <img src={userProfile.photoURL} alt="Profile" className="profile-photo" />
+                ) : (
+                  renderProfilePlaceholder()
+                )}
+                <label 
+                  htmlFor="photo-upload"
+                  style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    right: '0',
+                    background: 'var(--accent)',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '36px',
+                    height: '36px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    border: '2px solid white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  title="Upload profile picture"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.background = 'var(--accent-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.background = 'var(--accent)';
+                  }}
+                >
+                  {uploadingPhoto ? (
+                    <FaSpinner className="fa-spin" size={16} />
+                  ) : (
+                    <FaUpload size={14} />
+                  )}
+                </label>
+                <input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  style={{ display: 'none' }}
+                  disabled={uploadingPhoto}
+                />
+              </div>
+              <h3>{userProfile?.displayName}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <p>{userProfile?.email}</p>
+                {userProfile?.emailVerified ? (
+                  <span 
+                    style={{ 
+                      color: '#198754', 
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
+                    title="Email verified"
+                  >
+                    ✓ Verified
+                  </span>
+                ) : (
+                  <span 
+                    style={{ 
+                      color: '#dc3545', 
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
+                    title="Email not verified"
+                  >
+                    ⚠ Not Verified
+                  </span>
+                )}
+              </div>
+              {!userProfile?.emailVerified && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <Link 
+                    to="/verify-email?prompt=true" 
+                    style={{ 
+                      color: '#3b9ff2', 
+                      textDecoration: 'underline',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    Verify your email address
+                  </Link>
                 </div>
               )}
-              <h3>{userProfile?.displayName}</h3>
-              <p>{userProfile?.email}</p>
             </div>
 
             <div className="profile-details">

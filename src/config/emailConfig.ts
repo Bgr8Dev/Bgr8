@@ -6,6 +6,8 @@
  * The frontend only needs the API URL and API key to communicate with the backend.
  */
 
+import { loggers } from '../utils/logger';
+
 export interface EmailConfig {
   apiBaseUrl: string;
   apiKey: string;
@@ -14,13 +16,13 @@ export interface EmailConfig {
 // Frontend email configuration
 export const emailConfig: EmailConfig = {
   // Backend API configuration (only these are needed in frontend)
-  apiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL || 
-    (import.meta.env.PROD ? 'https://bgr8-email-server.onrender.com' : 'http://localhost:3001'),
+  // Always use the live email server - can be overridden via VITE_EMAIL_API_BASE_URL env var if needed
+  apiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL || 'https://bgr8-email-server.onrender.com',
   apiKey: import.meta.env.VITE_EMAIL_API_KEY || 'your_api_key_here',
 };
 
-// Debug logging
-console.log('🔧 Email Config Debug:', {
+// Debug logging (using logger utility - respects console config)
+loggers.config.log('🔧 Email Config Debug:', {
   env: import.meta.env.MODE,
   isProd: import.meta.env.PROD,
   viteEmailApiBaseUrl: import.meta.env.VITE_EMAIL_API_BASE_URL,
@@ -30,21 +32,11 @@ console.log('🔧 Email Config Debug:', {
   isLocalhost: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 });
 
-// Override for localhost development
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  console.log('🏠 Localhost detected - forcing local email server URL');
-  emailConfig.apiBaseUrl = 'http://localhost:3001';
-} else if (window.location.hostname.includes('dev') || window.location.hostname.includes('local')) {
-  console.log('🏠 Development environment detected - forcing local email server URL');
-  emailConfig.apiBaseUrl = 'http://localhost:3001';
-}
-
-// Manual override for development (uncomment to force localhost)
-// emailConfig.apiBaseUrl = 'http://localhost:3001';
-// console.log('🔧 Manual override: Forcing localhost email server');
+// Note: Always using live email server (https://bgr8-email-server.onrender.com)
+// To use localhost for development, set VITE_EMAIL_API_BASE_URL=http://localhost:3001 in .env.local
 
 // Final debug log
-console.log('🎯 Final Email Config:', {
+loggers.config.log('🎯 Final Email Config:', {
   apiBaseUrl: emailConfig.apiBaseUrl,
   apiKey: emailConfig.apiKey ? '***configured***' : 'NOT CONFIGURED'
 });

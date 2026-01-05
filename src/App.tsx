@@ -1,5 +1,5 @@
 // src/App.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { BigTextProvider, useBigText } from './contexts/BigTextContext';
@@ -13,6 +13,8 @@ import './styles/bigText.css';
 import './styles/tooltip.css';
 import AnnouncementBanner from './components/announcements/AnnouncementBanner';
 import { useIsMobile } from './hooks/useIsMobile';
+import { EmailService } from './services/emailService';
+import { emailConfig } from './config/emailConfig';
 
 // Inner component to access location and mobile hook
 function AppContent() {
@@ -45,6 +47,14 @@ function AppContent() {
 }
 
 function App() {
+  // Initialize Email API service globally on app startup
+  useEffect(() => {
+    EmailService.initializeEmailApi({
+      apiBaseUrl: emailConfig.apiBaseUrl,
+      apiKey: emailConfig.apiKey
+    });
+  }, []);
+
   return (
       <Router>
         <AuthProvider>

@@ -266,6 +266,12 @@
   font-size: 14px;
 }
 
+.mobile-google-sign-in-container {
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
 .mobile-google-sign-in {
   width: 100%;
   padding: 14px 16px;
@@ -280,6 +286,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin: 0;
 }
 
 .mobile-google-sign-in:hover:not(:disabled) {
@@ -296,9 +303,17 @@
   box-shadow: none;
 }
 
+.mobile-auth-links-container {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gray-200, #e5e7eb);
+}
+
 .mobile-auth-links {
-  margin-top: 25px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .mobile-auth-links a {

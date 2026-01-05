@@ -188,6 +188,53 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
+    // Messaging system
+    match /messages/{messageId} {
+      // Users can only read messages they are part of (sender or recipient)
+      allow read: if isAuthenticated() && 
+        (resource.data.senderId == request.auth.uid || 
+         resource.data.recipientId == request.auth.uid);
+      
+      // Users can only create messages where they are the sender
+      allow create: if isAuthenticated() && 
+        request.resource.data.senderId == request.auth.uid;
+      
+      // Users can only update their own messages (e.g., mark as read)
+      allow update: if isAuthenticated() && 
+        (resource.data.senderId == request.auth.uid || 
+         resource.data.recipientId == request.auth.uid) &&
+        // Only allow updating read/delivered status, not content
+        request.resource.data.content == resource.data.content &&
+        request.resource.data.senderId == resource.data.senderId &&
+        request.resource.data.recipientId == resource.data.recipientId;
+      
+      // Only admins can delete messages
+      allow delete: if isAdmin();
+    }
+    
+    match /conversations/{conversationId} {
+      // Users can only read conversations they are part of
+      allow read: if isAuthenticated() && 
+        (resource.data.participant1Id == request.auth.uid || 
+         resource.data.participant2Id == request.auth.uid);
+      
+      // Users can create conversations where they are a participant
+      allow create: if isAuthenticated() && 
+        (request.resource.data.participant1Id == request.auth.uid || 
+         request.resource.data.participant2Id == request.auth.uid);
+      
+      // Users can only update their own conversation metadata (pinned, archived, unread count)
+      allow update: if isAuthenticated() && 
+        (resource.data.participant1Id == request.auth.uid || 
+         resource.data.participant2Id == request.auth.uid) &&
+        // Ensure participants don't change
+        request.resource.data.participant1Id == resource.data.participant1Id &&
+        request.resource.data.participant2Id == resource.data.participant2Id;
+      
+      // Only admins can delete conversations
+      allow delete: if isAdmin();
+    }
+    
     // Development rules (remove in production)
     match /{document=**} {
       allow read, write: if true;

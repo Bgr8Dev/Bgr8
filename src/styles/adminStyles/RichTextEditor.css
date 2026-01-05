@@ -1,13 +1,13 @@
-/* Rich Text Editor Styles - Clean Rebuild */
+/* Rich Text Editor Styles - Professional & Subtle */
 .rich-text-editor {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .rich-text-editor.fullscreen {
@@ -25,12 +25,12 @@
 .rich-text-editor .rich-text-toolbar {
   display: flex !important;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  gap: 0.375rem;
+  padding: 0.875rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   visibility: visible !important;
   opacity: 1 !important;
 }
@@ -38,8 +38,8 @@
 .rich-text-editor .toolbar-group {
   display: flex !important;
   gap: 0.25rem;
-  padding-right: 1rem;
-  border-right: 1px solid rgba(59, 130, 246, 0.2);
+  padding-right: 0.875rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   visibility: visible !important;
   opacity: 1 !important;
 }
@@ -52,17 +52,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1e293b;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .rich-text-editor .toolbar-btn::before {
@@ -72,7 +73,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%);
+  background: rgba(255, 255, 255, 0.08);
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -82,18 +83,17 @@
 }
 
 .rich-text-editor .toolbar-btn:hover {
-  border-color: #3b82f6;
-  color: #1e293b;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* React Icons SVG handling - Scoped to Rich Text Editor */
 .rich-text-editor .toolbar-btn svg {
   width: 16px !important;
   height: 16px !important;
-  fill: #1e293b !important;
-  color: #1e293b !important;
+  fill: #cbd5e1 !important;
+  color: #cbd5e1 !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -102,8 +102,8 @@
 }
 
 .rich-text-editor .toolbar-btn:hover svg {
-  fill: #1e293b !important;
-  color: #1e293b !important;
+  fill: #f1f5f9 !important;
+  color: #f1f5f9 !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -113,7 +113,7 @@
 .rich-text-editor .toolbar-btn i,
 .rich-text-editor .toolbar-btn .fa,
 .rich-text-editor .toolbar-btn [class*="fa-"] {
-  color: #1e293b !important;
+  color: #cbd5e1 !important;
   font-size: 16px !important;
   display: block !important;
   visibility: visible !important;
@@ -125,7 +125,7 @@
 .rich-text-editor .toolbar-btn:hover i,
 .rich-text-editor .toolbar-btn:hover .fa,
 .rich-text-editor .toolbar-btn:hover [class*="fa-"] {
-  color: #1e293b !important;
+  color: #f1f5f9 !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -136,13 +136,13 @@
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  color: #1e293b !important;
-  fill: #1e293b !important;
+  color: #cbd5e1 !important;
+  fill: #cbd5e1 !important;
 }
 
 .rich-text-editor .toolbar-btn:hover > * {
-  color: #1e293b !important;
-  fill: #1e293b !important;
+  color: #f1f5f9 !important;
+  fill: #f1f5f9 !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;

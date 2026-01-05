@@ -34,8 +34,9 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
     const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
     const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
     const pendingBookings = bookings.filter(b => b.status === 'pending').length;
-    const calComBookings = bookings.filter(b => b.isCalComBooking).length;
-    const internalBookings = bookings.filter(b => !b.isCalComBooking).length;
+    // Only count Cal.com bookings (internal booking system removed)
+    const calComBookings = bookings.filter(b => b.isCalComBooking);
+    const calComBookingsCount = calComBookings.length;
 
     // Calculate completion rate
     const completionRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
@@ -113,8 +114,7 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
       confirmedBookings,
       cancelledBookings,
       pendingBookings,
-      calComBookings,
-      internalBookings,
+      calComBookings: calComBookingsCount,
       completionRate,
       avgDuration,
       totalRevenue,
@@ -259,15 +259,6 @@ export default function BookingAnalytics({ bookings }: BookingAnalyticsProps) {
                   <div style={{ width: `${(analytics.calComBookings / analytics.totalBookings) * 100}%`, height: '100%', background: '#00eaff' }}></div>
                 </div>
                 <span style={{ fontWeight: 600 }}>{analytics.calComBookings}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Internal Bookings</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 60, height: 8, background: '#333', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{ width: `${(analytics.internalBookings / analytics.totalBookings) * 100}%`, height: '100%', background: '#ff6b35' }}></div>
-                </div>
-                <span style={{ fontWeight: 600 }}>{analytics.internalBookings}</span>
               </div>
             </div>
           </div>

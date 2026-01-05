@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { firestore } from '../../../firebase/firebase';
 import { collection, getDocs, query, where, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { CalComService } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
+import { CalComService, CalComTokenManager } from '../../../components/widgets/MentorAlgorithm/CalCom/calComService';
 import { getBestMatchesForUser, MatchResult, calculateMatchScore } from '../../../components/widgets/MentorAlgorithm/algorithm/matchUsers';
+import { loggers } from '../../../utils/logger';
 import { 
   MentorMenteeProfile, 
   MentorAvailability,
@@ -55,7 +56,7 @@ export const useMentorData = () => {
         }
       } as ProfileWithMatchData;
     } catch (error) {
-      console.error('Error calculating match score for profile:', profile.uid, error);
+      loggers.error.error('Error calculating match score for profile:', profile.uid, error);
       return profile as ProfileWithMatchData;
     }
   };
@@ -88,16 +89,16 @@ export const useMentorData = () => {
 
     try {
       // Don't set loading state - load matches silently in background
-      console.log('Finding matches for user:', currentUser.uid);
-      console.log('Current user profile:', currentUserProfile);
+      loggers.log.log('Finding matches for user:', currentUser.uid);
+      loggers.log.log('Current user profile:', currentUserProfile);
       
       const matches = await getBestMatchesForUser(currentUser.uid);
-      console.log('Algorithm found matches:', matches);
+      loggers.log.log('Algorithm found matches:', matches);
       
       setBestMatches(matches);
       return matches;
     } catch (err) {
-      console.error('Error finding matches:', err);
+      loggers.error.error('Error finding matches:', err);
       setError('Failed to find matches');
       return [];
     }
@@ -120,13 +121,13 @@ export const useMentorData = () => {
         setHasProfile(true);
         
         // Automatically find matches when profile is first loaded
-        console.log('MentorPage: Profile found, automatically finding matches...');
+        loggers.log.log('MentorPage: Profile found, automatically finding matches...');
         setTimeout(() => findMatches(), 1000); // Small delay to ensure state is set
       } else {
         setHasProfile(false);
       }
     } catch (error) {
-      console.error('Error checking user profile:', error);
+      loggers.error.error('Error checking user profile:', error);
       setError('Failed to check user profile');
     } finally {
       setLoading(false);
@@ -146,8 +147,8 @@ export const useMentorData = () => {
 
   const fetchProfiles = async (userType?: string) => {
     try {
-      console.log('MentorPage: Starting to fetch profiles...');
-      console.log('MentorPage: Current user type:', userType || currentUserProfile?.type);
+      loggers.log.log('MentorPage: Starting to fetch profiles...');
+      loggers.log.log('MentorPage: Current user type:', userType || currentUserProfile?.type);
       setError(null);
       
       if (!firestore) {
@@ -158,13 +159,13 @@ export const useMentorData = () => {
       const targetType = userType || currentUserProfile?.type;
       
       if (!targetType) {
-        console.log('MentorPage: No user type available, skipping profile fetch');
+        loggers.log.log('MentorPage: No user type available, skipping profile fetch');
         return;
       }
-
+      
       // Normalize the type to lowercase for consistent comparison
       const normalizedTargetType = typeof targetType === 'string' ? targetType.toLowerCase() : targetType.toString().toLowerCase();
-      console.log('MentorPage: Normalized target type:', normalizedTargetType);
+      loggers.log.log('MentorPage: Normalized target type:', normalizedTargetType);
 
       const profilesData: MentorMenteeProfile[] = [];
       
@@ -193,14 +194,14 @@ export const useMentorData = () => {
             }
           }
         } catch (error) {
-          console.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
+          loggers.error.error(`Error fetching mentor program for user ${userDoc.id}:`, error);
         }
       }
       
       // Fetch from appropriate generated collection based on current user's role
       try {
         const collectionName = normalizedTargetType === 'mentee' ? 'Generated Mentors' : 'Generated Mentees';
-        console.log('MentorPage: Fetching from collection:', collectionName);
+        loggers.log.log('MentorPage: Fetching from collection:', collectionName);
         const generatedQuery = query(collection(firestore, collectionName));
         const generatedSnapshot = await getDocs(generatedQuery);
         
@@ -214,10 +215,10 @@ export const useMentorData = () => {
           } as MentorMenteeProfile);
         });
       } catch (error) {
-        console.error('Error fetching generated profiles:', error);
+        loggers.error.error('Error fetching generated profiles:', error);
       }
       
-      console.log('MentorPage: Found profiles:', profilesData.length, profilesData);
+      loggers.log.log('MentorPage: Found profiles:', profilesData.length, profilesData);
       
       setMentors(await calculateAllProfileMatches(profilesData));
       setFilteredMentors(await calculateAllProfileMatches(profilesData));
@@ -226,17 +227,27 @@ export const useMentorData = () => {
       
       // Automatically find matches after profiles are loaded
       if (currentUser && currentUserProfile) {
-        console.log('MentorPage: Automatically finding matches after profile fetch...');
+        loggers.log.log('MentorPage: Automatically finding matches after profile fetch...');
         await findMatches();
       }
     } catch (error) {
-      console.error('MentorPage: Error fetching mentors:', error);
+      loggers.error.error('MentorPage: Error fetching mentors:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch mentors');
     }
   };
 
   const checkMentorAvailability = async (mentor: MentorMenteeProfile) => {
-    if (!mentor.calCom) return false;
+    // Return early if mentor doesn't have Cal.com URL
+    if (!mentor.calCom) {
+      return { available: false, nextSlot: 'No availability' };
+    }
+    
+    // Check if mentor has Cal.com API key before attempting to fetch availability
+    const hasApiKey = await CalComTokenManager.hasApiKey(mentor.uid);
+    if (!hasApiKey) {
+      // Silently skip mentors without API keys - this is expected for mentors who haven't completed setup
+      return { available: false, nextSlot: 'No availability' };
+    }
     
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -265,7 +276,11 @@ export const useMentorData = () => {
       
       return { available: hasAvailabilityToday, nextSlot };
     } catch (error) {
-      console.error('Error checking availability for mentor:', mentor.uid, error);
+      // Only log actual errors (not missing API key errors, which we already handled)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (!errorMessage.includes('No Cal.com API key')) {
+        loggers.error.error('Error checking availability for mentor:', mentor.uid, error);
+      }
       return { available: false, nextSlot: 'Unable to check' };
     }
   };
@@ -283,7 +298,7 @@ export const useMentorData = () => {
         }));
       }
     } catch (error) {
-      console.error('Error fetching enhanced availability:', error);
+      loggers.error.error('Error fetching enhanced availability:', error);
     }
   };
 
@@ -296,21 +311,48 @@ export const useMentorData = () => {
       const bookingsSnapshot = await getDocs(bookingsQuery);
       const bookings = bookingsSnapshot.docs.map(doc => {
         const data = doc.data();
+        
+        // Handle Timestamp conversion for sessionDate
+        let sessionDate: string = '';
+        if (data.sessionDate) {
+          if (data.sessionDate.toDate && typeof data.sessionDate.toDate === 'function') {
+            // It's a Firestore Timestamp
+            sessionDate = data.sessionDate.toDate().toISOString();
+          } else if (data.sessionDate instanceof Date) {
+            sessionDate = data.sessionDate.toISOString();
+          } else if (typeof data.sessionDate === 'string') {
+            sessionDate = data.sessionDate;
+          } else if (data.sessionDate.seconds) {
+            // Timestamp object with seconds property
+            sessionDate = new Date(data.sessionDate.seconds * 1000).toISOString();
+          }
+        } else if (data.day) {
+          // Fallback to day field if sessionDate is missing
+          sessionDate = new Date(data.day).toISOString();
+        }
+        
         return {
           id: doc.id,
           menteeName: data.menteeName || 'Unknown',
-          sessionDate: data.sessionDate || '',
+          sessionDate: sessionDate,
           startTime: data.startTime || '',
-          status: data.status || 'unknown'
+          status: data.status || 'pending',
+          endTime: data.endTime || '',
+          mentorId: data.mentorId || mentorId,
+          menteeId: data.menteeId || '',
+          sessionLink: data.sessionLink || data.meetLink || '',
+          isCalComBooking: data.isCalComBooking || false
         };
       });
+      
+      loggers.log.log(`📋 Fetched ${bookings.length} bookings for mentor ${mentorId}`);
       
       setMentorBookings(prev => ({
         ...prev,
         [mentorId]: bookings
       }));
     } catch (error) {
-      console.error('Error fetching mentor bookings:', error);
+      loggers.error.error('Error fetching mentor bookings:', error);
     }
   };
 
@@ -320,10 +362,27 @@ export const useMentorData = () => {
       const user = currentUser;
       if (!user) throw new Error('No authenticated user');
 
-      // Remove undefined values to prevent Firebase errors
-      const cleanProfileData = Object.fromEntries(
-        Object.entries(profileData).filter(([_, value]) => value !== undefined)
-      ) as Partial<MentorMenteeProfile>;
+      // Recursively remove undefined values to prevent Firebase errors
+      const removeUndefined = (obj: unknown): unknown => {
+        if (obj === null || obj === undefined) {
+          return null;
+        }
+        if (Array.isArray(obj)) {
+          return obj.map(removeUndefined).filter(item => item !== undefined);
+        }
+        if (typeof obj === 'object') {
+          const cleaned: Record<string, unknown> = {};
+          for (const [key, value] of Object.entries(obj)) {
+            if (value !== undefined) {
+              cleaned[key] = removeUndefined(value);
+            }
+          }
+          return cleaned;
+        }
+        return obj;
+      };
+
+      const cleanProfileData = removeUndefined(profileData) as Partial<MentorMenteeProfile>;
 
       const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
       const newProfile = {
@@ -334,12 +393,40 @@ export const useMentorData = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      await setDoc(profileRef, newProfile);
+      // Final cleanup to ensure no undefined values
+      const finalProfile = removeUndefined(newProfile);
+
+      await setDoc(profileRef, finalProfile);
       
       // If this is a mentor profile, create initial verification data
+      // This will also send the mentor profile submitted email
       if (profileData.isMentor && profileData.type === 'mentor') {
         const { createInitialVerification } = await import('../../../services/verificationService');
         await createInitialVerification(user.uid);
+        // Email is sent by createInitialVerification (sendMentorProfileSubmittedEmail)
+      } else if (profileData.type === 'mentee') {
+        // Send mentee profile created email
+        try {
+          const { getUserProfile } = await import('../../../utils/userProfile');
+          const { sendMenteeProfileCreatedEmail } = await import('../../../services/emailHelpers');
+          const userProfile = await getUserProfile(user.uid);
+          
+          if (userProfile && user.email) {
+            sendMenteeProfileCreatedEmail(user.email, userProfile.firstName)
+              .then(result => {
+                if (result.success) {
+                  loggers.email.log(`Mentee profile created email sent to ${user.email}`);
+                } else {
+                  loggers.email.error(`Failed to send mentee profile email: ${result.error}`);
+                }
+              })
+              .catch(error => {
+                loggers.email.error('Error sending mentee profile email:', error);
+              });
+          }
+        } catch (emailError) {
+          loggers.email.error('Error in mentee profile email integration:', emailError);
+        }
       }
       
       // Refresh currentUserProfile from Firestore instead of setting locally
@@ -352,7 +439,7 @@ export const useMentorData = () => {
       }
       return true;
     } catch (error) {
-      console.error('Error creating profile:', error);
+      loggers.error.error('Error creating profile:', error);
       setError('Failed to create profile');
       return false;
     } finally {
@@ -368,7 +455,7 @@ export const useMentorData = () => {
 
       // Remove undefined values to prevent Firebase errors
       const cleanProfileData = Object.fromEntries(
-        Object.entries(profileData).filter(([_, value]) => value !== undefined)
+        Object.entries(profileData).filter(([, value]) => value !== undefined)
       ) as Partial<MentorMenteeProfile>;
 
       const profileRef = doc(firestore, 'users', user.uid, 'mentorProgram', 'profile');
@@ -392,7 +479,7 @@ export const useMentorData = () => {
       }
       return true;
     } catch (error) {
-      console.error('Error updating profile:', error);
+      loggers.error.error('Error updating profile:', error);
       setError('Failed to update profile');
       return false;
     } finally {
@@ -410,14 +497,14 @@ export const useMentorData = () => {
       setBestMatches([]);
       return true;
     } catch (err) {
-      console.error('Error deleting profile:', err);
+      loggers.error.error('Error deleting profile:', err);
       setError('Failed to delete profile');
       return false;
     }
   };
 
   useEffect(() => {
-    console.log('useMentorData: Component mounted, checking profile...');
+    loggers.log.log('useMentorData: Component mounted, checking profile...');
     setProfilesLoaded(false); // Reset when user changes
     checkUserProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -425,7 +512,7 @@ export const useMentorData = () => {
 
   useEffect(() => {
     if (hasProfile && currentUser && currentUserProfile?.type && typeof currentUserProfile.type === 'string' && !profilesLoaded) {
-      console.log('useMentorData: Fetching profiles for user type:', currentUserProfile.type);
+      loggers.log.log('useMentorData: Fetching profiles for user type:', currentUserProfile.type);
       fetchProfiles(currentUserProfile.type);
       setProfilesLoaded(true);
     }

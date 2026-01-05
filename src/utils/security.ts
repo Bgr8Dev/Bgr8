@@ -11,7 +11,9 @@ export interface PasswordStrength {
     specialChar: boolean;
     noCommonPatterns: boolean;
     noUserInfo: boolean;
+    notCommonPassword: boolean;
   };
+  isCommonPassword?: boolean;
 }
 
 export const calculatePasswordStrength = (password: string, userInfo?: { firstName?: string; lastName?: string; email?: string }): PasswordStrength => {
@@ -58,6 +60,13 @@ export const calculatePasswordStrength = (password: string, userInfo?: { firstNa
     feedback.push('Avoid using personal information in your password');
   }
 
+  // Common password check (0-10 points penalty if common)
+  const notCommon = !isCommonPassword(password);
+  if (!notCommon) {
+    score -= 20; // Heavy penalty for common passwords
+    feedback.push('This password is commonly used and easily guessed. Please choose something more unique.');
+  }
+
   // Entropy bonus (0-10 points)
   const uniqueChars = new Set(password).size;
   const entropyBonus = Math.min(uniqueChars * 0.5, 10);
@@ -91,8 +100,10 @@ export const calculatePasswordStrength = (password: string, userInfo?: { firstNa
       numbers: hasNumbers,
       specialChar: hasSpecialChar,
       noCommonPatterns,
-      noUserInfo
-    }
+      noUserInfo,
+      notCommonPassword: notCommon
+    },
+    isCommonPassword: !notCommon
   };
 };
 
@@ -120,6 +131,9 @@ const containsUserInfo = (password: string, userInfo?: { firstName?: string; las
   return checks.some(info => info && lowerPassword.includes(info));
 };
 
+// Import common password checker
+import { isCommonPassword } from './commonPasswords';
+
 export const validatePassword = (password: string): boolean => {
   const strength = calculatePasswordStrength(password);
   return strength.requirements.length &&
@@ -127,6 +141,7 @@ export const validatePassword = (password: string): boolean => {
          strength.requirements.lowercase &&
          strength.requirements.numbers &&
          strength.requirements.specialChar &&
+         strength.requirements.notCommonPassword &&
          strength.score >= 60; // Minimum acceptable score
 };
 
@@ -218,6 +233,202 @@ export const validateUserInput = (input: string): boolean => {
   const maxLength = 1000;
   const dangerousPatterns = /[<>]/;
   return input.length < maxLength && !dangerousPatterns.test(input);
+};
+
+// Name validation result interface
+export interface NameValidationResult {
+  isValid: boolean;
+  error?: string;
+  normalized?: string;
+}
+
+// Profanity filter - basic list of common profane words
+// Note: This is a basic implementation. For production, consider using a more comprehensive library
+const PROFANITY_WORDS = [
+  // Common profane words (lowercase for case-insensitive matching)
+  'damn', 'hell', 'crap', 'ass', 'bitch', 'bastard', 'fuck', 'shit', 'piss',
+  // Add more as needed - keeping list minimal for basic filtering
+];
+
+/**
+ * Check if a string contains profanity
+ * @param text - The text to check
+ * @param caseSensitive - Whether to perform case-sensitive matching (default: false)
+ * @returns true if profanity is detected, false otherwise
+ */
+export const containsProfanity = (text: string, caseSensitive: boolean = false): boolean => {
+  if (!text || text.trim().length === 0) return false;
+  
+  const normalizedText = caseSensitive ? text : text.toLowerCase();
+  const normalizedWords = caseSensitive ? PROFANITY_WORDS : PROFANITY_WORDS.map(w => w.toLowerCase());
+  
+  // Check for whole word matches (with word boundaries)
+  const words = normalizedText.split(/\s+/);
+  for (const word of words) {
+    // Remove punctuation for matching
+    const cleanWord = word.replace(/[^\w]/g, '');
+    if (normalizedWords.includes(cleanWord)) {
+      return true;
+    }
+  }
+  
+  // Also check if any profanity word appears as a substring (for obfuscation attempts)
+  for (const profanity of normalizedWords) {
+    if (normalizedText.includes(profanity)) {
+      return true;
+    }
+  }
+  
+  return false;
+};
+
+/**
+ * Normalize Unicode characters in a name
+ * This handles Unicode normalization (NFD to NFC) and removes potentially problematic characters
+ * @param name - The name to normalize
+ * @returns The normalized name
+ */
+export const normalizeUnicodeName = (name: string): string => {
+  if (!name) return '';
+  
+  // Normalize Unicode characters (NFD to NFC)
+  // This combines decomposed characters (e.g., é = e + ´) into composed form
+  let normalized = name.normalize('NFC');
+  
+  // Remove zero-width characters and other invisible characters
+  normalized = normalized.replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '');
+  
+  // Trim whitespace
+  normalized = normalized.trim();
+  
+  return normalized;
+};
+
+/**
+ * Validate a name field with character limits, Unicode handling, and optional profanity filtering
+ * @param name - The name to validate
+ * @param options - Validation options
+ * @returns Validation result with error message if invalid
+ */
+export const validateName = (
+  name: string,
+  options: {
+    maxLength?: number;
+    minLength?: number;
+    allowUnicode?: boolean;
+    checkProfanity?: boolean;
+    fieldName?: string;
+  } = {}
+): NameValidationResult => {
+  const {
+    maxLength = 50,
+    minLength = 1,
+    allowUnicode = true,
+    checkProfanity = true,
+    fieldName = 'Name'
+  } = options;
+
+  // Check if name is provided
+  if (!name || name.trim().length === 0) {
+    return {
+      isValid: false,
+      error: `${fieldName} is required`
+    };
+  }
+
+  // Normalize Unicode characters
+  const normalized = normalizeUnicodeName(name);
+
+  // Check minimum length
+  if (normalized.length < minLength) {
+    return {
+      isValid: false,
+      error: `${fieldName} must be at least ${minLength} character${minLength !== 1 ? 's' : ''} long`
+    };
+  }
+
+  // Check maximum length (using normalized length for accurate character count)
+  if (normalized.length > maxLength) {
+    return {
+      isValid: false,
+      error: `${fieldName} must be no more than ${maxLength} characters long`
+    };
+  }
+
+  // Check for dangerous characters (XSS prevention)
+  const dangerousPatterns = /[<>]/;
+  if (dangerousPatterns.test(normalized)) {
+    return {
+      isValid: false,
+      error: `${fieldName} contains invalid characters`
+    };
+  }
+
+  // Unicode validation - allow Unicode letters, spaces, hyphens, and apostrophes
+  // This includes accented characters, Cyrillic, Arabic, Chinese, etc.
+  if (allowUnicode) {
+    // Allow Unicode letter characters, spaces, hyphens, apostrophes, and periods
+    // This regex allows most international name characters
+    const unicodeNamePattern = /^[\p{L}\s'\-.]+$/u;
+    if (!unicodeNamePattern.test(normalized)) {
+      return {
+        isValid: false,
+        error: `${fieldName} contains invalid characters. Only letters, spaces, hyphens, apostrophes, and periods are allowed`
+      };
+    }
+  } else {
+    // ASCII-only validation
+    const asciiPattern = /^[a-zA-Z\s'-.]+$/;
+    if (!asciiPattern.test(normalized)) {
+      return {
+        isValid: false,
+        error: `${fieldName} can only contain letters, spaces, hyphens, apostrophes, and periods`
+      };
+    }
+  }
+
+  // Profanity check (optional)
+  if (checkProfanity && containsProfanity(normalized)) {
+    return {
+      isValid: false,
+      error: `${fieldName} contains inappropriate language`
+    };
+  }
+
+  return {
+    isValid: true,
+    normalized
+  };
+};
+
+/**
+ * Validate first name with standard settings
+ * @param firstName - The first name to validate
+ * @returns Validation result
+ */
+export const validateFirstName = (firstName: string): NameValidationResult => {
+  return validateName(firstName, {
+    maxLength: 50,
+    minLength: 1,
+    allowUnicode: true,
+    checkProfanity: true,
+    fieldName: 'First name'
+  });
+};
+
+/**
+ * Validate last name with standard settings
+ * @param lastName - The last name to validate
+ * @returns Validation result
+ */
+export const validateLastName = (lastName: string): NameValidationResult => {
+  return validateName(lastName, {
+    maxLength: 50,
+    minLength: 1,
+    allowUnicode: true,
+    checkProfanity: true,
+    fieldName: 'Last name'
+  });
 };
 
 // Session management

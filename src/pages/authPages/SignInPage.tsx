@@ -7,11 +7,19 @@ import { createUserProfile, UserProfile } from '../../utils/userProfile';
 import Navbar from '../../components/ui/Navbar';
 import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import Footer from '../../components/ui/Footer';
+import PasswordInput from '../../components/ui/PasswordInput';
 import { FcGoogle } from 'react-icons/fc';
 import '../../styles/AuthPages.css';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { checkRateLimit, updateLastActivity, handleError, validatePassword, validateUserInput, calculatePasswordStrength, PasswordStrength, clearRateLimit } from '../../utils/security';
+import { checkRateLimit, updateLastActivity, handleError, validatePassword, calculatePasswordStrength, PasswordStrength, clearRateLimit, validateFirstName, validateLastName } from '../../utils/security';
+import { getDeviceFingerprint, storeDeviceFingerprint } from '../../utils/deviceFingerprint';
+import { generateHoneypotField, validateHoneypot } from '../../utils/honeypot';
+import { initializeRecaptcha, executeRecaptcha } from '../../utils/recaptcha';
+import { validateEmail, validateEmailFormat, checkEmailAvailability, EmailValidationResult } from '../../utils/emailValidation';
 import MobileSignInPage from './MobileSignInPage';
+import { sendRegistrationWelcomeEmail, sendAccountCreatedEmail } from '../../services/emailHelpers';
+import { sendVerificationEmail } from '../../services/emailVerificationService';
+import { loggers } from '../../utils/logger';
 // import PasswordStrengthMeter from '../../components/ui/PasswordStrengthMeter';
 
 // Simple inline PasswordStrengthMeter component
@@ -72,6 +80,10 @@ interface FirebaseErrorWithCode extends Error {
 
 
 
+// Auto-save key for localStorage
+const FORM_DRAFT_KEY = 'auth_form_draft';
+const FORM_DRAFT_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
 export default function SignInPage() {
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
@@ -86,7 +98,26 @@ export default function SignInPage() {
   const [error, setError] = useState('');
   const [isBlocked, setIsBlocked] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [emailValidation, setEmailValidation] = useState<EmailValidationResult | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const navigate = useNavigate();
+  
+  // Honeypot field for anti-bot protection
+  const [honeypotField] = useState(() => generateHoneypotField());
+  const [honeypotValue, setHoneypotValue] = useState('');
+  
+  // Initialize device fingerprinting and reCAPTCHA on mount
+  useEffect(() => {
+    // Store device fingerprint on mount
+    storeDeviceFingerprint();
+    
+    // Initialize reCAPTCHA (optional - won't break if not configured)
+    initializeRecaptcha();
+  }, []);
 
   // Handle URL parameters to set initial tab
   useEffect(() => {
@@ -97,6 +128,244 @@ export default function SignInPage() {
       setIsSignIn(true);
     }
   }, [searchParams]);
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    if (!isSignIn) {
+      try {
+        const draftData = localStorage.getItem(FORM_DRAFT_KEY);
+        if (draftData) {
+          const { data, timestamp } = JSON.parse(draftData);
+          // Check if draft is still valid (not expired)
+          if (Date.now() - timestamp < FORM_DRAFT_EXPIRY) {
+            setFormData(data);
+            // Show a notification that draft was restored
+            setSuccessMessage('Draft restored from previous session');
+            setTimeout(() => setSuccessMessage(''), 3000);
+          } else {
+            localStorage.removeItem(FORM_DRAFT_KEY);
+          }
+        }
+      } catch (err) {
+        loggers.error.error('Error loading form draft:', err);
+      }
+    }
+  }, [isSignIn]);
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (!isSignIn && (formData.firstName || formData.lastName || formData.email)) {
+      const draftData = {
+        data: formData,
+        timestamp: Date.now()
+      };
+      try {
+        localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify(draftData));
+      } catch (err) {
+        loggers.error.error('Error saving form draft:', err);
+      }
+    }
+  }, [formData, isSignIn]);
+
+  // Clear draft on successful registration
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(FORM_DRAFT_KEY);
+    } catch (err) {
+      loggers.error.error('Error clearing form draft:', err);
+    }
+  };
+
+  // Calculate form completion progress (for registration)
+  const calculateProgress = (): number => {
+    if (isSignIn) return 0;
+    
+    const fields = [
+      formData.firstName,
+      formData.lastName,
+      formData.email,
+      formData.password,
+      formData.confirmPassword
+    ];
+    
+    const filledFields = fields.filter(field => field.trim().length > 0).length;
+    const validFields = Object.keys(fieldErrors).filter(key => !fieldErrors[key]).length;
+    
+    // Base progress on filled fields (60%) and valid fields (40%)
+    const fillProgress = (filledFields / fields.length) * 60;
+    const validationProgress = (validFields / fields.length) * 40;
+    
+    return Math.min(100, fillProgress + validationProgress);
+  };
+
+  // Real-time field validation
+  const validateField = (fieldName: string, value: string): string => {
+    switch (fieldName) {
+      case 'firstName': {
+        if (!value.trim()) return 'First name is required';
+        const firstNameValidation = validateFirstName(value);
+        return firstNameValidation.isValid ? '' : (firstNameValidation.error || '');
+      }
+      case 'lastName': {
+        if (!value.trim()) return 'Last name is required';
+        const lastNameValidation = validateLastName(value);
+        return lastNameValidation.isValid ? '' : (lastNameValidation.error || '');
+      }
+      case 'email': {
+        if (!value.trim()) return 'Email is required';
+        // Use quick format validation for real-time feedback
+        const formatResult = validateEmailFormat(value);
+        if (!formatResult.isValid) {
+          return formatResult.error || 'Please enter a valid email address';
+        }
+        return '';
+      }
+      case 'password': {
+        if (!value) return 'Password is required';
+        if (!validatePassword(value)) return 'Password does not meet security requirements';
+        return '';
+      }
+      case 'confirmPassword': {
+        if (!value) return 'Please confirm your password';
+        if (value !== formData.password) return 'Passwords do not match';
+        return '';
+      }
+      default:
+        return '';
+    }
+  };
+
+  // Handle field blur (mark as touched and validate)
+  const handleFieldBlur = async (fieldName: string) => {
+    setTouchedFields(prev => new Set(Array.from(prev).concat(fieldName)));
+    const value = formData[fieldName as keyof typeof formData];
+    
+    // Special handling for email - comprehensive validation
+    if (fieldName === 'email' && value.trim()) {
+      setIsCheckingEmail(true);
+      try {
+        const result = await validateEmail(value, {
+          checkAvailability: !isSignIn, // Only check availability for registration
+          checkDisposable: true,
+          checkTypo: true,
+          normalize: true
+        });
+        
+        setEmailValidation(result);
+        
+        if (!result.isValid) {
+          setFieldErrors(prev => ({ ...prev, [fieldName]: result.error || 'Invalid email' }));
+        } else if (result.normalized && result.normalized !== value) {
+          // Auto-correct email if normalization changed it
+          setFormData(prev => ({ ...prev, [fieldName]: result.normalized || value }));
+        }
+      } catch (error) {
+        loggers.error.error('Error validating email:', error);
+        const formatResult = validateEmailFormat(value);
+        setEmailValidation(formatResult);
+        if (!formatResult.isValid) {
+          setFieldErrors(prev => ({ ...prev, [fieldName]: formatResult.error || 'Invalid email' }));
+        }
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    } else {
+      const error = validateField(fieldName, value);
+      setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    }
+  };
+
+  // Handle field change with real-time validation
+  const handleFieldChange = (fieldName: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    
+    // Clear error when user starts typing
+    if (fieldErrors[fieldName]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+    
+    // Special handling for email field - real-time validation
+    if (fieldName === 'email') {
+      setEmailValidation(null);
+      // Debounce email validation
+      const timeoutId = setTimeout(async () => {
+        if (value.trim()) {
+          const formatResult = validateEmailFormat(value);
+          setEmailValidation(formatResult);
+          
+          // If format is valid and field is touched, check availability (only for registration)
+          if (formatResult.isValid && touchedFields.has('email') && !isSignIn) {
+            setIsCheckingEmail(true);
+            try {
+              const availabilityResult = await checkEmailAvailability(value);
+              if (!availabilityResult.available) {
+                setEmailValidation({
+                  ...formatResult,
+                  isValid: false,
+                  error: availabilityResult.error || 'Email already in use'
+                });
+                setFieldErrors(prev => ({ ...prev, email: availabilityResult.error || 'Email already in use' }));
+              }
+            } catch (error) {
+              loggers.error.error('Error checking email availability:', error);
+            } finally {
+              setIsCheckingEmail(false);
+            }
+          }
+        }
+      }, 500); // 500ms debounce
+      
+      return () => clearTimeout(timeoutId);
+    }
+    
+    // Real-time password matching validation
+    if (fieldName === 'password' || fieldName === 'confirmPassword') {
+      // If confirmPassword field has been touched or has a value, check match immediately
+      if (fieldName === 'password') {
+        // When password changes, re-validate confirmPassword if it has a value
+        if (formData.confirmPassword) {
+          const confirmError = formData.confirmPassword !== value 
+            ? 'Passwords do not match' 
+            : '';
+          setFieldErrors(prev => {
+            if (confirmError) {
+              return { ...prev, confirmPassword: confirmError };
+            } else {
+              const newErrors = { ...prev };
+              delete newErrors.confirmPassword;
+              return newErrors;
+            }
+          });
+        }
+      } else if (fieldName === 'confirmPassword') {
+        // When confirmPassword changes, check if it matches password immediately
+        const passwordMatch = value === formData.password;
+        if (value && !passwordMatch) {
+          setFieldErrors(prev => ({
+            ...prev,
+            confirmPassword: 'Passwords do not match'
+          }));
+        } else if (value && passwordMatch) {
+          // Clear error if passwords match
+          setFieldErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors.confirmPassword;
+            return newErrors;
+          });
+        }
+      }
+    }
+    
+    // Validate if field has been touched
+    if (touchedFields.has(fieldName)) {
+      const error = validateField(fieldName, value);
+      setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    }
+  };
 
   // Render mobile version if on mobile device
   if (isMobile) {
@@ -125,9 +394,27 @@ export default function SignInPage() {
       return true;
     } else {
       // Registration validation
-      if (!validateUserInput(formData.firstName) || !validateUserInput(formData.lastName)) {
-        setError('Invalid characters in name fields');
+      // Validate first name
+      const firstNameValidation = validateFirstName(formData.firstName);
+      if (!firstNameValidation.isValid) {
+        setError(firstNameValidation.error || 'Invalid first name');
         return false;
+      }
+
+      // Validate last name
+      const lastNameValidation = validateLastName(formData.lastName);
+      if (!lastNameValidation.isValid) {
+        setError(lastNameValidation.error || 'Invalid last name');
+        return false;
+      }
+
+      // Update form data with normalized names if needed
+      if (firstNameValidation.normalized || lastNameValidation.normalized) {
+        setFormData({
+          ...formData,
+          firstName: firstNameValidation.normalized || formData.firstName,
+          lastName: lastNameValidation.normalized || formData.lastName
+        });
       }
 
       if (!validatePassword(formData.password)) {
@@ -147,16 +434,87 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (!validateForm()) {
+    setSuccessMessage('');
+    setIsLoading(true);
+    
+    // Check honeypot field (anti-bot protection)
+    const honeypotCheck = validateHoneypot({ [honeypotField.name]: honeypotValue }, honeypotField.name);
+    if (honeypotCheck.isBot) {
+      loggers.auth.warn('Bot detected: honeypot field was filled');
+      setError('Invalid submission detected. Please try again.');
+      setIsLoading(false);
       return;
     }
 
-    // Check rate limiting for sign-in
+    // Mark all fields as touched
+    const allFields = isSignIn 
+      ? ['email', 'password']
+      : ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
+    allFields.forEach(field => setTouchedFields(prev => new Set(Array.from(prev).concat(field))));
+
+    // Validate all fields
+    const errors: Record<string, string> = {};
+    
+    // Special handling for email - comprehensive validation
+    if (formData.email.trim()) {
+      try {
+        const emailResult = await validateEmail(formData.email, {
+          checkAvailability: !isSignIn,
+          checkDisposable: true,
+          checkTypo: true,
+          normalize: true
+        });
+        
+        if (!emailResult.isValid) {
+          errors.email = emailResult.error || 'Invalid email address';
+        } else if (emailResult.normalized && emailResult.normalized !== formData.email) {
+          // Update email with normalized version
+          setFormData(prev => ({ ...prev, email: emailResult.normalized || prev.email }));
+        }
+      } catch (error) {
+        loggers.error.error('Error validating email on submit:', error);
+        const formatResult = validateEmailFormat(formData.email);
+        if (!formatResult.isValid) {
+          errors.email = formatResult.error || 'Invalid email address';
+        }
+      }
+    } else {
+      errors.email = 'Email is required';
+    }
+    
+    // Validate other fields
+    allFields.forEach(field => {
+      if (field === 'email') return; // Already handled above
+      const value = formData[field as keyof typeof formData];
+      const error = validateField(field, value);
+      if (error) errors[field] = error;
+    });
+    
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0 || !validateForm()) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Check rate limiting for sign-in (email-based)
     if (isSignIn && !checkRateLimit(formData.email)) {
       setIsBlocked(true);
       setError('Too many login attempts. Please try again in 15 minutes.');
       return;
+    }
+    
+    // Get device fingerprint for tracking (for future use with IP rate limiting)
+    // Device fingerprint will be used when backend API is implemented
+    getDeviceFingerprint();
+    
+    // Execute reCAPTCHA (optional - won't block if not configured)
+    // Token will be sent to backend for verification when API is implemented
+    try {
+      await executeRecaptcha(isSignIn ? 'signin' : 'register');
+    } catch (recaptchaError) {
+      loggers.auth.warn('reCAPTCHA execution failed (may not be configured):', recaptchaError);
+      // Don't block if reCAPTCHA fails - it's optional
     }
     
     try {
@@ -197,6 +555,7 @@ export default function SignInPage() {
         ]);
         
         updateLastActivity(); // Set initial session timestamp
+        setIsLoading(false);
         navigate('/');
       } else {
         // Registration logic
@@ -223,8 +582,64 @@ export default function SignInPage() {
         // Add initial password to history
         await PasswordHistoryService.addPasswordToHistory(userCredential.user.uid, formData.password);
 
-        updateLastActivity(); // Set initial session timestamp
-        navigate('/'); // Redirect to home page
+        // Clear draft on successful registration
+        clearDraft();
+
+        // Send verification email (mandatory)
+        const verificationResult = await sendVerificationEmail(
+          userCredential.user.uid,
+          formData.email,
+          formData.firstName
+        );
+
+        if (!verificationResult.success) {
+          loggers.email.error(`Failed to send verification email: ${verificationResult.error}`);
+          // Still allow registration, but show warning
+          setError('Account created, but verification email could not be sent. Please check your email or contact support.');
+        }
+
+        // Send welcome emails (non-blocking - don't fail registration if email fails)
+        sendRegistrationWelcomeEmail(formData.email, formData.firstName, formData.lastName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Welcome email sent to ${formData.email}`);
+            } else {
+              loggers.email.error(`Failed to send welcome email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending welcome email:', error);
+          });
+
+        sendAccountCreatedEmail(formData.email, formData.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Account created email sent to ${formData.email}`);
+            } else {
+              loggers.email.error(`Failed to send account created email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending account created email:', error);
+          });
+
+        // Show success message with verification prompt
+        setIsLoading(false);
+        if (verificationResult.success) {
+          setSuccessMessage(`Account created successfully! Please check your email to verify your account.`);
+          // Redirect to verification prompt page after 3 seconds
+          setTimeout(() => {
+            updateLastActivity();
+            navigate('/verify-email?prompt=true');
+          }, 3000);
+        } else {
+          setSuccessMessage(`Account created successfully! Welcome, ${formData.firstName}!`);
+          // Still redirect but show warning
+          setTimeout(() => {
+            updateLastActivity();
+            navigate('/');
+          }, 2000);
+        }
       }
     } catch (err: unknown) {
       const firebaseError = err as FirebaseErrorWithCode;
@@ -258,36 +673,47 @@ export default function SignInPage() {
         }
 
         switch (firebaseError.code) {
-          case 'auth/user-not-found':
+          case 'auth/user-not-found': {
             setError('No account found with this email');
             break;
-          case 'auth/wrong-password':
+          }
+          case 'auth/wrong-password': {
             setError('Incorrect password');
             break;
-          case 'auth/invalid-email':
+          }
+          case 'auth/invalid-email': {
             setError('Invalid email address');
             break;
-          default:
+          }
+          default: {
             errorMessage = handleError(firebaseError);
             setError(errorMessage);
+            break;
+          }
         }
       } else {
         switch (firebaseError.code) {
-          case 'auth/email-already-in-use':
+          case 'auth/email-already-in-use': {
             setError('An account with this email already exists');
             break;
-          case 'auth/weak-password':
+          }
+          case 'auth/weak-password': {
             setError('Password is too weak');
             break;
-          case 'auth/invalid-email':
+          }
+          case 'auth/invalid-email': {
             setError('Invalid email address');
             break;
-          default:
+          }
+          default: {
             errorMessage = handleError(firebaseError);
             setError(errorMessage);
+            break;
+          }
         }
       }
       console.error('Authentication error:', err);
+      setIsLoading(false);
     }
   };
 
@@ -340,12 +766,6 @@ export default function SignInPage() {
             <div className="signin-hero-content">
               {/* Left Content */}
               <div className="signin-hero-text">
-                <div className="signin-logo">
-                  <span className="signin-logo-slash">/</span>
-                  <span className="signin-logo-b">B</span>
-                  <span className="signin-logo-gr">gr</span>
-                  <span className="signin-logo-eight">8</span>
-                </div>
                 <h1>Welcome Back</h1>
                 <p className="signin-hero-subtitle">
                   Connect with mentors and mentees to create positive change in your community. 
@@ -395,72 +815,202 @@ export default function SignInPage() {
                   </div>
                   
                   <div className="signin-form-content" key={isSignIn ? 'signin' : 'register'}>
-                    {error && <div className="auth-error">{error}</div>}
+                    {error && (
+                      <div className="auth-error" role="alert" aria-live="polite">
+                        {error}
+                      </div>
+                    )}
+                    {successMessage && (
+                      <div className="auth-success" role="alert" aria-live="polite">
+                        {successMessage}
+                      </div>
+                    )}
                     {isBlocked && (
-                      <div className="auth-warning">
+                      <div className="auth-warning" role="alert" aria-live="polite">
                         Account temporarily blocked due to too many login attempts.
                         Please try again later or reset your password.
                       </div>
                     )}
                     
-                    <form onSubmit={handleSubmit} className="auth-form">
+                    {/* Progress Indicator for Registration */}
+                    {!isSignIn && (() => {
+                      const progressValue = Math.round(calculateProgress());
+                      const progressProps = {
+                        'aria-valuenow': progressValue,
+                        'aria-valuemin': 0,
+                        'aria-valuemax': 100
+                      };
+                      return (
+                        <div 
+                          className="form-progress-container" 
+                          role="progressbar" 
+                          {...progressProps}
+                          aria-label="Form completion progress"
+                        >
+                          <div className="form-progress-label">
+                            <span>Form Progress</span>
+                            <span>{progressValue}%</span>
+                          </div>
+                          <div className="form-progress-bar">
+                            <div 
+                              className="form-progress-fill" 
+                              style={{ width: `${progressValue}%` }}
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    
+                    <form 
+                      onSubmit={handleSubmit} 
+                      className="auth-form"
+                      aria-label={isSignIn ? 'Sign in form' : 'Registration form'}
+                      noValidate
+                    >
                     {!isSignIn && (
                       <div className="form-group">
                         <div className="auth-input-group">
-                          <label htmlFor="firstName">First Name</label>
+                          <label htmlFor="firstName">
+                            First Name
+                            <span className="required-indicator" aria-label="required">*</span>
+                          </label>
                           <input
                             id="firstName"
                             type="text"
                             placeholder="Enter your first name"
                             value={formData.firstName}
-                            onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                            onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                            onBlur={() => handleFieldBlur('firstName')}
                             required
                             maxLength={50}
-                            disabled={isBlocked}
+                            disabled={isBlocked || isLoading}
+                            aria-required="true"
+                            {...(fieldErrors.firstName ? { 'aria-invalid': true } : {})}
+                            aria-describedby={fieldErrors.firstName ? 'firstName-error' : undefined}
+                            autoComplete="given-name"
                           />
+                          {fieldErrors.firstName && (
+                            <span id="firstName-error" className="field-error" role="alert">
+                              {fieldErrors.firstName}
+                            </span>
+                          )}
                         </div>
                         <div className="auth-input-group">
-                          <label htmlFor="lastName">Last Name</label>
+                          <label htmlFor="lastName">
+                            Last Name
+                            <span className="required-indicator" aria-label="required">*</span>
+                          </label>
                           <input
                             id="lastName"
                             type="text"
                             placeholder="Enter your last name"
                             value={formData.lastName}
-                            onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                            onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                            onBlur={() => handleFieldBlur('lastName')}
                             required
                             maxLength={50}
-                            disabled={isBlocked}
+                            disabled={isBlocked || isLoading}
+                            aria-required="true"
+                            {...(fieldErrors.lastName ? { 'aria-invalid': true } : {})}
+                            aria-describedby={fieldErrors.lastName ? 'lastName-error' : undefined}
+                            autoComplete="family-name"
                           />
+                          {fieldErrors.lastName && (
+                            <span id="lastName-error" className="field-error" role="alert">
+                              {fieldErrors.lastName}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}
                     
                     <div className="auth-input-group">
-                      <label htmlFor="email">Email Address</label>
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        required
-                        disabled={isBlocked}
-                      />
+                      <label htmlFor="email">
+                        Email Address
+                        <span className="required-indicator" aria-label="required">*</span>
+                      </label>
+                      <div className="email-input-wrapper">
+                        <input
+                          id="email"
+                          type="email"
+                          placeholder="Enter your email"
+                          value={formData.email}
+                          onChange={(e) => handleFieldChange('email', e.target.value)}
+                          onBlur={() => handleFieldBlur('email')}
+                          required
+                          disabled={isBlocked || isLoading}
+                          aria-required="true"
+                          {...(fieldErrors.email ? { 'aria-invalid': true } : {})}
+                          aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+                          autoComplete="email"
+                        />
+                        {isCheckingEmail && (
+                          <span className="email-checking-indicator" aria-label="Checking email availability">
+                            <span className="spinner-small" aria-hidden="true" />
+                          </span>
+                        )}
+                      </div>
+                      {fieldErrors.email && (
+                        <span id="email-error" className="field-error" role="alert">
+                          {fieldErrors.email}
+                        </span>
+                      )}
+                      {emailValidation && emailValidation.suggestions && emailValidation.suggestions.length > 0 && (
+                        <div className="email-suggestions" role="alert">
+                          <strong>Did you mean?</strong>
+                          {emailValidation.suggestions.map((suggestion, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              className="email-suggestion-link"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, email: suggestion }));
+                                handleFieldChange('email', suggestion);
+                                handleFieldBlur('email');
+                              }}
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {emailValidation && emailValidation.isValid && !isSignIn && !isCheckingEmail && (
+                        <span className="email-valid-indicator" role="status" aria-live="polite">
+                          ✓ Email is available
+                        </span>
+                      )}
                     </div>
 
                     {!isSignIn && (
                       <>
                         <div className="auth-input-group">
-                          <label htmlFor="password">Password</label>
-                          <input
+                          <PasswordInput
                             id="password"
-                            type="password"
-                            placeholder="Create a password"
+                            label="Password"
                             value={formData.password}
-                            onChange={handlePasswordChange}
+                            onChange={(e) => {
+                              handlePasswordChange(e);
+                              handleFieldChange('password', e.target.value);
+                            }}
+                            onBlur={() => handleFieldBlur('password')}
+                            placeholder="Create a password"
                             required
-                            disabled={isBlocked}
+                            disabled={isBlocked || isLoading}
+                            showSuggestions={true}
+                            onUseSuggestion={(suggestedPassword) => {
+                              setFormData({...formData, password: suggestedPassword});
+                              updatePasswordRequirements(suggestedPassword);
+                              handleFieldChange('password', suggestedPassword);
+                            }}
+                            {...(fieldErrors.password ? { 'aria-invalid': true } : {})}
+                            aria-describedby={fieldErrors.password ? 'password-error' : undefined}
                           />
+                          {fieldErrors.password && (
+                            <span id="password-error" className="field-error" role="alert">
+                              {fieldErrors.password}
+                            </span>
+                          )}
                           {passwordStrength && (
                             <SimplePasswordStrengthMeter 
                               strength={passwordStrength}
@@ -469,16 +1019,35 @@ export default function SignInPage() {
                         </div>
                         
                         <div className="auth-input-group">
-                          <label htmlFor="confirmPassword">Confirm Password</label>
-                          <input
+                          <PasswordInput
                             id="confirmPassword"
-                            type="password"
-                            placeholder="Confirm your password"
+                            label="Confirm Password"
                             value={formData.confirmPassword}
-                            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                            onChange={(e) => handleFieldChange('confirmPassword', e.target.value)}
+                            onBlur={() => handleFieldBlur('confirmPassword')}
+                            placeholder="Confirm your password"
                             required
-                            disabled={isBlocked}
+                            disabled={isBlocked || isLoading}
+                            {...(fieldErrors.confirmPassword ? { 'aria-invalid': true } : {})}
+                            aria-describedby={
+                              fieldErrors.confirmPassword 
+                                ? 'confirmPassword-error' 
+                                : (formData.confirmPassword && formData.confirmPassword === formData.password && formData.password ? 'confirmPassword-success' : undefined)
+                            }
                           />
+                          {fieldErrors.confirmPassword && (
+                            <span id="confirmPassword-error" className="field-error" role="alert">
+                              {fieldErrors.confirmPassword}
+                            </span>
+                          )}
+                          {formData.confirmPassword && 
+                           formData.confirmPassword === formData.password && 
+                           !fieldErrors.confirmPassword && 
+                           formData.password && (
+                            <span id="confirmPassword-success" className="password-match-indicator" role="status" aria-live="polite">
+                              ✓ Passwords match
+                            </span>
+                          )}
                         </div>
                         
 
@@ -487,53 +1056,79 @@ export default function SignInPage() {
                     
                     {isSignIn && (
                       <div className="auth-input-group">
-                        <label htmlFor="password">Password</label>
-                        <input
+                        <PasswordInput
                           id="password"
-                          type="password"
-                          placeholder="Enter your password"
+                          label="Password"
                           value={formData.password}
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          placeholder="Enter your password"
                           required
                           disabled={isBlocked}
                         />
                       </div>
                     )}
                     
-                    <button type="submit" disabled={isBlocked} className="signin-submit-btn">
-                      {isSignIn ? 'Sign In' : 'Create Account'}
+                    {/* Honeypot field (hidden from users, bots will fill it) */}
+                    <input
+                      type="text"
+                      {...honeypotField.props}
+                      value={honeypotValue}
+                      onChange={(e) => setHoneypotValue(e.target.value)}
+                    />
+                    
+                    <button 
+                      type="submit" 
+                      disabled={isBlocked || isLoading} 
+                      className="signin-submit-btn"
+                      {...(isLoading ? { 'aria-busy': true } : {})}
+                    >
+                      {isLoading ? (
+                        <>
+                          <span className="spinner" aria-hidden="true" />
+                          {isSignIn ? 'Signing In...' : 'Creating Account...'}
+                        </>
+                      ) : (
+                        isSignIn ? 'Sign In' : 'Create Account'
+                      )}
                     </button>
 
                     <div className="auth-divider">
                       <span>or</span>
                     </div>
                     
-                    <button 
-                      type="button" 
-                      onClick={handleGoogleSignIn} 
-                      className="google-sign-in"
-                      disabled={isBlocked}
-                    >
-                      <FcGoogle size={20} />
-                      {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
-                    </button>
-                  </form>
-                  
-                  <div className="auth-links">
-                    {isSignIn && <Link to="/forgot-password">Forgot Password?</Link>}
-                    {isSignIn && (
-                      <p>
-                        Don't have an account? 
+                    <div className="auth-actions-row">
+                      <div className="google-sign-in-container">
                         <button 
                           type="button" 
-                          className="auth-link-btn"
-                          onClick={() => setIsSignIn(false)}
+                          onClick={handleGoogleSignIn} 
+                          className="google-sign-in"
+                          disabled={isBlocked || isLoading}
+                          aria-label={isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
                         >
-                          Register
+                          <FcGoogle size={20} aria-hidden="true" />
+                          {isSignIn ? 'Sign in with Google' : 'Sign up with Google'}
                         </button>
-                      </p>
-                    )}
-                  </div>
+                      </div>
+                      
+                      {isSignIn && (
+                        <div className="auth-links-container">
+                          <div className="auth-links">
+                            <Link to="/forgot-password">Forgot Password?</Link>
+                            <p>
+                              Don't have an account? 
+                              <button 
+                                type="button" 
+                                className="auth-link-btn"
+                                onClick={() => setIsSignIn(false)}
+                              >
+                                Register
+                              </button>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </form>
                   </div>
                 </div>
               </div>

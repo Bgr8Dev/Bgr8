@@ -12,6 +12,9 @@ export interface UserProfile {
   phoneNumber?: string;
   dateCreated: Date;
   lastUpdated: Date;
+  // Email Verification
+  emailVerified?: boolean;
+  emailVerifiedAt?: Date;
   // Role-based access control
   roles: {
     admin: boolean;
@@ -172,6 +175,7 @@ export const createUserProfile = async (
     displayName: `${firstName} ${lastName}`,
     dateCreated: new Date(),
     lastUpdated: new Date(),
+    emailVerified: false, // Email verification required
     roles: {
       admin: false,
       developer: false,

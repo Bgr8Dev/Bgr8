@@ -183,7 +183,6 @@
   border: 3px solid var(--accent);
   box-shadow: 0 0 15px rgba(59, 167, 242, 0.5);
   transition: all 0.3s ease;
-  animation: rotateSlow 20s linear infinite;
 }
 
 .profile-photo:hover {

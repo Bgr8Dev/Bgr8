@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaEnvelope, FaPhone, FaLinkedin, FaVideo } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaTimes, FaUser, FaGraduationCap, FaIndustry, FaHeart, FaInfoCircle, FaMapMarkerAlt, FaLinkedin, FaVideo, FaCheck, FaComments } from 'react-icons/fa';
 import { MentorMenteeProfile } from '../types/mentorTypes';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
+import { useAuth } from '../../../hooks/useAuth';
+import { MatchesService } from '../../../services/matchesService';
 import '../styles/ProfileViewModal.css';
 
 interface ProfileViewModalProps {
@@ -8,15 +11,64 @@ interface ProfileViewModalProps {
   profile: MentorMenteeProfile;
   onClose: () => void;
   currentUserRole?: 'mentor' | 'mentee';
+  onBooking?: (profile: MentorMenteeProfile) => void;
+  onCalCom?: (profile: MentorMenteeProfile) => void;
 }
 
 export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
   isOpen,
   profile,
   onClose,
-  currentUserRole
+  currentUserRole,
+  onCalCom
 }) => {
+  const { currentUser } = useAuth();
   const [activeSection, setActiveSection] = useState('personal');
+  const [isMatched, setIsMatched] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
+
+  // Check if already matched
+  useEffect(() => {
+    const checkMatch = async () => {
+      if (!currentUser || !profile.uid) return;
+      try {
+        const matched = await MatchesService.areMatched(currentUser.uid, profile.uid);
+        setIsMatched(matched);
+      } catch (error) {
+        console.error('Error checking match status:', error);
+      }
+    };
+    if (isOpen) {
+      checkMatch();
+    }
+  }, [currentUser, profile.uid, isOpen]);
+
+  // Handle match button click
+  const handleMatch = async () => {
+    if (!currentUser || !profile.uid || isMatching || isMatched) return;
+
+    setIsMatching(true);
+    try {
+      await MatchesService.createMatch(currentUser.uid, profile.uid);
+      setIsMatched(true);
+    } catch (error) {
+      console.error('Error creating match:', error);
+      alert('Failed to create match. Please try again.');
+    } finally {
+      setIsMatching(false);
+    }
+  };
+
+  // Handle message button click
+  const handleMessage = () => {
+    if (!isMatched || !profile.uid) return;
+    
+    // Open messaging widget with this user
+    const event = new CustomEvent('openMessaging', {
+      detail: { userId: profile.uid }
+    });
+    window.dispatchEvent(event);
+  };
 
   if (!isOpen) return null;
 
@@ -36,14 +88,21 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
     return currentUserRole === 'mentee' ? 'Mentor' : 'Mentee';
   };
 
-  const getProfileImageSrc = () => {
-    if (Array.isArray(profile.profilePicture)) {
-      return profile.profilePicture[0] || `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+  // Determine role from profile
+  const getRole = (): 'mentor' | 'mentee' | null => {
+    if (profile.isMentor === true) {
+      return 'mentor';
     }
-    if (typeof profile.profilePicture === 'string') {
-      return profile.profilePicture;
+    if (profile.isMentee === true) {
+      return 'mentee';
     }
-    return `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+    if (typeof profile.type === 'string' && profile.type.toLowerCase() === 'mentor') {
+      return 'mentor';
+    }
+    if (typeof profile.type === 'string' && profile.type.toLowerCase() === 'mentee') {
+      return 'mentee';
+    }
+    return null;
   };
 
   const renderPersonalInformation = () => (
@@ -55,7 +114,12 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
       <div className="pvm-section-content">
         <div className="pvm-profile-header">
           <div className="pvm-avatar">
-            <img src={getProfileImageSrc()} alt={getDisplayName()} />
+            <ProfilePicture
+              src={typeof profile.profilePicture === 'string' || Array.isArray(profile.profilePicture) ? profile.profilePicture : null}
+              alt={getDisplayName()}
+              role={getRole()}
+              size={120}
+            />
             {profile.isGenerated && (
               <div className="pvm-generated-badge" title="Generated Profile">
                 🎲 Generated
@@ -72,16 +136,56 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="pvm-action-buttons">
+          {!isMatched && currentUserRole === 'mentee' && (
+            <button 
+              className="pvm-action-button match-button"
+              onClick={handleMatch}
+              disabled={isMatching}
+              title="Match with this mentor to start messaging"
+            >
+              <FaHeart />
+              {isMatching ? 'Matching...' : 'Match'}
+            </button>
+          )}
+          
+          {isMatched && (
+            <button 
+              className="pvm-action-button matched-button"
+              disabled
+              title="You are matched with this user"
+            >
+              <FaCheck />
+              Matched
+            </button>
+          )}
+
+          {isMatched && (
+            <button 
+              className="pvm-action-button message-button"
+              onClick={handleMessage}
+              title={currentUserRole === 'mentee' ? 'Message this mentor' : 'Message this mentee'}
+            >
+              <FaComments />
+              {currentUserRole === 'mentee' ? 'Message Mentor' : 'Message Mentee'}
+            </button>
+          )}
+
+          {onCalCom && profile.calCom && (
+            <button 
+              className="pvm-action-button calcom-button"
+              onClick={() => onCalCom(profile)}
+              title={currentUserRole === 'mentee' ? 'Schedule a video call' : 'Schedule a video call with this mentee'}
+            >
+              <FaVideo />
+              {currentUserRole === 'mentee' ? 'Schedule Call' : 'Video Call'}
+            </button>
+          )}
+        </div>
         
         <div className="pvm-info-grid">
-          <div className="pvm-info-item">
-            <FaEnvelope className="pvm-info-icon" />
-            <span>{profile.email || 'Not provided'}</span>
-          </div>
-          <div className="pvm-info-item">
-            <FaPhone className="pvm-info-icon" />
-            <span>{profile.phone || 'Not provided'}</span>
-          </div>
           <div className="pvm-info-item">
             <FaMapMarkerAlt className="pvm-info-icon" />
             <span>{profile.county || 'Location not specified'}</span>

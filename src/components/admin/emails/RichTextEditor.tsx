@@ -420,6 +420,23 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   // Handle key down
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Handle Enter key separately (works with or without Ctrl/Cmd)
+    if (e.key === 'Enter') {
+      // If Ctrl/Cmd+Enter, insert paragraph
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          execCommand('insertHTML', '<br>');
+        } else {
+          execCommand('insertHTML', '<p></p>');
+        }
+        return;
+      }
+      // For normal Enter, allow default behavior (contentEditable handles it)
+      // Don't prevent default - let the browser handle line breaks naturally
+      return;
+    }
+
     // Handle shortcuts only for specific Ctrl/Cmd combinations
     if (e.ctrlKey || e.metaKey) {
       switch (e.key) {
@@ -463,21 +480,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           e.preventDefault();
           setShowLinkDialog(true);
           break;
-        case 'Enter':
-          e.preventDefault();
-          if (e.shiftKey) {
-            execCommand('insertHTML', '<br>');
-          } else {
-            execCommand('insertHTML', '<p></p>');
-          }
-          break;
         // Allow all other keys to work normally (including Space, letters, numbers, etc.)
         default:
           // Don't prevent default for normal typing keys
           break;
       }
     }
-    // For non-Ctrl/Cmd keys, allow normal behavior (including Space, Enter, etc.)
+    // For non-Ctrl/Cmd keys, allow normal behavior (including Space, etc.)
   }, [execCommand, onSave, undo, redo]);
 
   // Insert emoji
@@ -822,16 +831,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </div>
           <div className="dialog-content">
             <input
-              type="url"
+              type="text"
               placeholder="Link URL (e.g., https://example.com)"
-              className="link-url-input"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
             />
             <input
               type="text"
               placeholder="Link Text (optional)"
-              className="link-text-input"
               value={linkText}
               onChange={(e) => setLinkText(e.target.value)}
             />
@@ -1005,14 +1012,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               placeholder="Search for..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
             />
             <input
               type="text"
               placeholder="Replace with..."
               value={replaceTerm}
               onChange={(e) => setReplaceTerm(e.target.value)}
-              className="replace-input"
             />
             <div className="dialog-actions">
               <button onClick={() => setShowSearchReplace(false)}>Cancel</button>

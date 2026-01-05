@@ -19,6 +19,7 @@ import {
   deleteObject
 } from 'firebase/storage';
 import { firestore, storage } from '../firebase/firebase';
+import { loggers } from '../utils/logger';
 import {
   FeedbackTicket,
   FeedbackComment,
@@ -55,7 +56,7 @@ export class FeedbackService {
         return 1;
       }
     } catch (error) {
-      console.error('Error getting next ticket ID:', error);
+      loggers.error.error('Error getting next ticket ID:', error);
       throw new Error('Failed to generate ticket ID');
     }
   }
@@ -116,7 +117,7 @@ export class FeedbackService {
       
       return await Promise.all(uploadPromises);
     } catch (error) {
-      console.error('Error uploading files:', error);
+      loggers.error.error('Error uploading files:', error);
       throw new Error('Failed to upload files');
     }
   }

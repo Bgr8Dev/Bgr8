@@ -39,6 +39,11 @@ npm start
 - `POST /api/email/send-bulk` - Send multiple emails
 - `GET /api/email/stats` - Get email statistics
 
+### Webhooks
+- `POST /api/webhooks/calcom` - Cal.com webhook endpoint for booking events
+  - Automatically saves bookings made through embedded Cal.com iframe to Firestore
+  - See [CALCOM_WEBHOOK_SETUP.md](./CALCOM_WEBHOOK_SETUP.md) for detailed setup instructions
+
 ## Zoho Mail Setup
 
 1. Go to [Zoho Developer Console](https://api-console.zoho.com/)
@@ -67,3 +72,8 @@ npm start
 | `ZOHO_REFRESH_TOKEN` | Zoho OAuth2 refresh token | Yes |
 | `ZOHO_FROM_EMAIL` | Default from email | No (default: info@bgr8.uk) |
 | `ZOHO_FROM_NAME` | Default from name | No (default: Bgr8 Team) |
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase service account JSON (for webhooks) | No* |
+| `FIREBASE_PROJECT_ID` | Firebase project ID (alternative to service account) | No* |
+| `CALCOM_WEBHOOK_SECRET` | Secret for verifying Cal.com webhook signatures | No (recommended) |
+
+\* Required for Cal.com webhook functionality. See [CALCOM_WEBHOOK_SETUP.md](./CALCOM_WEBHOOK_SETUP.md) for details.

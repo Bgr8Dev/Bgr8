@@ -1,8 +1,11 @@
-import React from 'react';
-import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaStar, FaVideo, FaCheckCircle, FaGraduationCap, FaIndustry, FaClock, FaHeart, FaCheck, FaComments } from 'react-icons/fa';
 import { MentorMenteeProfile, MentorAvailability } from '../types/mentorTypes';
 import MatchStrengthDisplay from '../../../components/widgets/MentorAlgorithm/MatchStrengthDisplay';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
+import { useAuth } from '../../../hooks/useAuth';
+import { MatchesService } from '../../../services/matchesService';
 import '../styles/MentorCard.css';
 
 interface MentorCardProps {
@@ -10,9 +13,8 @@ interface MentorCardProps {
   mentorAvailability: MentorAvailability;
   currentUserRole?: 'mentor' | 'mentee';
   onProfileClick: (mentor: MentorMenteeProfile) => void;
-  onBooking: (mentor: MentorMenteeProfile) => void;
   onCalCom: (mentor: MentorMenteeProfile) => void;
-  matchScore?: number; // Add match score prop
+  matchScore?: number;
 }
 
 export const MentorCard: React.FC<MentorCardProps> = ({
@@ -20,10 +22,43 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   mentorAvailability,
   currentUserRole,
   onProfileClick,
-  onBooking,
   onCalCom,
   matchScore
 }) => {
+  const { currentUser } = useAuth();
+  const [isMatched, setIsMatched] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
+
+  // Check if already matched
+  useEffect(() => {
+    const checkMatch = async () => {
+      if (!currentUser || !mentor.uid) return;
+      try {
+        const matched = await MatchesService.areMatched(currentUser.uid, mentor.uid);
+        setIsMatched(matched);
+      } catch (error) {
+        console.error('Error checking match status:', error);
+      }
+    };
+    checkMatch();
+  }, [currentUser, mentor.uid]);
+
+  // Handle match button click
+  const handleMatchClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUser || !mentor.uid || isMatching || isMatched) return;
+
+    setIsMatching(true);
+    try {
+      await MatchesService.createMatch(currentUser.uid, mentor.uid);
+      setIsMatched(true);
+    } catch (error) {
+      console.error('Error creating match:', error);
+      alert('Failed to create match. Please try again.');
+    } finally {
+      setIsMatching(false);
+    }
+  };
   // Helper function to get the best available name
   const getDisplayName = () => {
     // First try to construct from firstName + lastName
@@ -51,27 +86,40 @@ export const MentorCard: React.FC<MentorCardProps> = ({
     onProfileClick(mentor);
   };
 
-  // Handle booking button click
-  const handleBookingClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onBooking(mentor);
-  };
-
   // Handle Cal.com button click
   const handleCalComClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onCalCom(mentor);
   };
 
+  // Handle message button click
+  const handleMessageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isMatched || !mentor.uid) return;
+    
+    // Open messaging widget with this user
+    const event = new CustomEvent('openMessaging', {
+      detail: { userId: mentor.uid }
+    });
+    window.dispatchEvent(event);
+  };
 
-  const getProfileImageSrc = () => {
-    if (Array.isArray(mentor.profilePicture)) {
-      return mentor.profilePicture[0] || `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+
+  // Determine role from mentor profile
+  const getRole = (): 'mentor' | 'mentee' | null => {
+    if (mentor.isMentor === true) {
+      return 'mentor';
     }
-    if (typeof mentor.profilePicture === 'string') {
-      return mentor.profilePicture;
+    if (mentor.isMentee === true) {
+      return 'mentee';
     }
-    return `https://ui-avatars.com/api/?name=${getDisplayName()}&background=random`;
+    if (typeof mentor.type === 'string' && mentor.type.toLowerCase() === 'mentor') {
+      return 'mentor';
+    }
+    if (typeof mentor.type === 'string' && mentor.type.toLowerCase() === 'mentee') {
+      return 'mentee';
+    }
+    return null;
   };
 
   return (
@@ -82,9 +130,12 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       >
       <div className="mc-mentor-card-header">
         <div className="mc-mentor-avatar">
-          <img 
-            src={getProfileImageSrc()}
+          <ProfilePicture
+            src={typeof mentor.profilePicture === 'string' || Array.isArray(mentor.profilePicture) ? mentor.profilePicture : null}
             alt={getDisplayName()}
+            role={getRole()}
+            size={80}
+            className="mc-mentor-avatar-img"
           />
         </div>
         
@@ -197,23 +248,50 @@ export const MentorCard: React.FC<MentorCardProps> = ({
       </div>
 
       <div className="mc-mentor-actions" onClick={(e) => e.stopPropagation()}>
-        <button 
-          className="mc-action-button primary"
-          onClick={handleBookingClick}
-          title={
-            currentUserRole === 'mentee' 
-              ? "Book a mentoring session with this mentor"
-              : "Connect with this mentee"
-          }
-          data-tooltip={
-            currentUserRole === 'mentee' 
-              ? "Book a mentoring session with this mentor"
-              : "Connect with this mentee"
-          }
-        >
-          <FaCalendarAlt />
-          {currentUserRole === 'mentee' ? 'Book Session' : 'Connect'}
-        </button>
+        {!isMatched && currentUserRole === 'mentee' && (
+          <button 
+            className="mc-action-button match-button"
+            onClick={handleMatchClick}
+            disabled={isMatching}
+            title="Match with this mentor to start messaging"
+            data-tooltip="Match with this mentor to start messaging"
+          >
+            <FaHeart />
+            {isMatching ? 'Matching...' : 'Match'}
+          </button>
+        )}
+        
+        {isMatched && (
+          <button 
+            className="mc-action-button matched-button"
+            disabled
+            title="You are matched with this user"
+            data-tooltip="You are matched with this user"
+          >
+            <FaCheck />
+            Matched
+          </button>
+        )}
+
+        {isMatched && (
+          <button 
+            className="mc-action-button primary"
+            onClick={handleMessageClick}
+            title={
+              currentUserRole === 'mentee' 
+                ? "Message this mentor"
+                : "Message this mentee"
+            }
+            data-tooltip={
+              currentUserRole === 'mentee' 
+                ? "Message this mentor"
+                : "Message this mentee"
+            }
+          >
+            <FaComments />
+            {currentUserRole === 'mentee' ? 'Message Mentor' : 'Message Mentee'}
+          </button>
+        )}
         
         {mentor.calCom && (
           <button 

@@ -1,14 +1,16 @@
-import React from 'react';
-import { FaVideo, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaVideo, FaMapMarkerAlt, FaGraduationCap, FaHeart, FaCheck, FaComments } from 'react-icons/fa';
+import { ProfilePicture } from '../../../components/ui/ProfilePicture';
 import { MentorMenteeProfile, MatchResult } from '../types/mentorTypes';
 import BannerWrapper from '../../../components/ui/BannerWrapper';
+import { useAuth } from '../../../hooks/useAuth';
+import { MatchesService } from '../../../services/matchesService';
 import '../styles/MatchesSection.css';
 
 interface MatchesSectionProps {
   bestMatches: MatchResult[];
   currentUserProfile: MentorMenteeProfile | null;
   onProfileClick: (profile: MentorMenteeProfile) => void;
-  onBooking: (profile: MentorMenteeProfile) => void;
   onCalCom: (profile: MentorMenteeProfile) => void;
 }
 
@@ -16,9 +18,65 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
   bestMatches,
   currentUserProfile,
   onProfileClick,
-  onBooking,
   onCalCom
 }) => {
+  const { currentUser } = useAuth();
+  const [matchedUserIds, setMatchedUserIds] = useState<Set<string>>(new Set());
+  const [matchingUserIds, setMatchingUserIds] = useState<Set<string>>(new Set());
+
+  // Check match status for all matches
+  useEffect(() => {
+    const checkMatches = async () => {
+      if (!currentUser) return;
+      
+      const matched = new Set<string>();
+      for (const match of bestMatches) {
+        if (match.user.uid) {
+          try {
+            const isMatched = await MatchesService.areMatched(currentUser.uid, match.user.uid);
+            if (isMatched) {
+              matched.add(match.user.uid);
+            }
+          } catch (error) {
+            console.error('Error checking match status:', error);
+          }
+        }
+      }
+      setMatchedUserIds(matched);
+    };
+
+    checkMatches();
+  }, [currentUser, bestMatches]);
+
+  const handleMatch = async (profile: MentorMenteeProfile) => {
+    if (!currentUser || !profile.uid || matchingUserIds.has(profile.uid) || matchedUserIds.has(profile.uid)) return;
+
+    setMatchingUserIds(prev => new Set(prev).add(profile.uid));
+    try {
+      await MatchesService.createMatch(currentUser.uid, profile.uid);
+      setMatchedUserIds(prev => new Set(prev).add(profile.uid));
+    } catch (error) {
+      console.error('Error creating match:', error);
+      alert('Failed to create match. Please try again.');
+    } finally {
+      setMatchingUserIds(prev => {
+        const next = new Set(prev);
+        next.delete(profile.uid);
+        return next;
+      });
+    }
+  };
+
+  const handleMessage = (profile: MentorMenteeProfile) => {
+    if (!profile.uid) return;
+    
+    // Open messaging widget with this user
+    const event = new CustomEvent('openMessaging', {
+      detail: { userId: profile.uid }
+    });
+    window.dispatchEvent(event);
+  };
+
   if (!currentUserProfile || bestMatches.length === 0) {
     return null;
   }
@@ -78,14 +136,21 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
           <div key={index} className="ms-match-card">
             <div className="ms-match-header">
               <div className="ms-match-avatar">
-                <img 
-                  src={Array.isArray(match.user.profilePicture) 
-                    ? match.user.profilePicture[0] || `https://ui-avatars.com/api/?name=${match.user.firstName || 'User'}&background=random`
-                    : typeof match.user.profilePicture === 'string' 
-                      ? match.user.profilePicture 
-                      : `https://ui-avatars.com/api/?name=${match.user.firstName || 'User'}&background=random`
-                  }
+                <ProfilePicture
+                  src={typeof match.user.profilePicture === 'string' || Array.isArray(match.user.profilePicture) ? match.user.profilePicture : null}
                   alt={match.user.firstName || 'User'}
+                  role={
+                    match.user.isMentor === true
+                      ? 'mentor'
+                      : match.user.isMentee === true
+                      ? 'mentee'
+                      : typeof match.user.type === 'string' && match.user.type.toLowerCase() === 'mentor'
+                      ? 'mentor'
+                      : typeof match.user.type === 'string' && match.user.type.toLowerCase() === 'mentee'
+                      ? 'mentee'
+                      : null
+                  }
+                  size={80}
                 />
               </div>
               <div className="ms-match-info">
@@ -139,6 +204,29 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
             </div>
 
             <div className="ms-match-actions">
+              {!matchedUserIds.has(match.user.uid || '') && currentUserProfile?.type === 'mentee' && (
+                <button 
+                  className="ms-action-button match-button"
+                  onClick={() => handleMatch(match.user)}
+                  disabled={matchingUserIds.has(match.user.uid || '')}
+                  title="Match with this mentor to start messaging"
+                >
+                  <FaHeart />
+                  {matchingUserIds.has(match.user.uid || '') ? 'Matching...' : 'Match'}
+                </button>
+              )}
+              
+              {matchedUserIds.has(match.user.uid || '') && (
+                <button 
+                  className="ms-action-button matched-button"
+                  disabled
+                  title="You are matched with this user"
+                >
+                  <FaCheck />
+                  Matched
+                </button>
+              )}
+
               <button 
                 className="ms-action-button primary"
                 onClick={() => onProfileClick(match.user)}
@@ -146,17 +234,20 @@ export const MatchesSection: React.FC<MatchesSectionProps> = ({
               >
                 View Full Profile
               </button>
-              <button 
-                className="ms-action-button secondary"
-                onClick={() => onBooking(match.user)}
-                title={
-                  currentUserProfile?.type === 'mentee' 
-                    ? 'Book a mentoring session' 
-                    : 'Connect with this mentee'
-                }
-              >
-                {currentUserProfile?.type === 'mentee' ? 'Book Session' : 'Connect'}
-              </button>
+              {matchedUserIds.has(match.user.uid || '') && (
+                <button 
+                  className="ms-action-button secondary"
+                  onClick={() => handleMessage(match.user)}
+                  title={
+                    currentUserProfile?.type === 'mentee' 
+                      ? 'Message this mentor' 
+                      : 'Message this mentee'
+                  }
+                >
+                  <FaComments />
+                  {currentUserProfile?.type === 'mentee' ? 'Message Mentor' : 'Message Mentee'}
+                </button>
+              )}
               {match.user.calCom && (
                 <button 
                   className="ms-action-button tertiary"

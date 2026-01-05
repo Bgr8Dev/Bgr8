@@ -1,0 +1,66 @@
+# Color Scheme Guidelines
+
+## IMPORTANT: Follow the Color Schematic from index.css
+
+**All Cursor agents MUST strictly adhere to the color scheme defined in `src/index.css`.**
+
+### Reference File
+The authoritative color scheme is defined in `src/index.css` in the `:root` CSS custom properties.
+
+### Critical Rules
+
+1. **Always use CSS custom properties (variables)** from `src/index.css` instead of hardcoded color values
+2. **Reference colors using `var(--color-name)`** syntax (e.g., `var(--background)`, `var(--mentor)`, `var(--accent)`)
+3. **Never create new color values** without first checking if an appropriate variable exists in `src/index.css`
+4. **Do not hardcode hex, rgb, or hsl color values** - always use the CSS variables from `src/index.css`
+
+### Available Color Categories
+
+The color scheme in `src/index.css` includes:
+
+- **Base Colors**: `--background`, `--text`, `--mentor`, `--mentee`, `--accent`
+- **Extended Palette**: Gray scale (`--gray-50` through `--gray-900`), `--white`, `--black`
+- **Mentor/Mentee Variations**: Light, dark, and hover variants for mentor and mentee colors
+- **Accent Variations**: Light, dark, and hover variants for accent colors
+- **Status Colors**: Success, warning, error, and info colors with their light/dark variants
+- **Button Styles**: Comprehensive button styling variables for primary, secondary, success, warning, error, cancel, save, submit, ghost, mentor, and mentee button types
+- **Form Elements**: Input and form validation color variables
+- **Link Styles**: Link color variables for different states
+
+### When Adding New Styles
+
+1. Check `src/index.css` first to see if a suitable color variable already exists
+2. If a specific color is needed that doesn't exist, consider whether it should be added to `src/index.css` for consistency
+3. Always prefer semantic color names (e.g., `--mentor`, `--success`) over generic ones
+4. Use the existing button, form, and link color variables rather than creating new styles from base colors
+
+### Example Usage
+
+**Correct:**
+```css
+.button {
+  background-color: var(--accent);
+  color: var(--white);
+}
+
+.button:hover {
+  background-color: var(--accent-hover);
+}
+
+.mentor-button {
+  background-color: var(--button-mentor-bg);
+  color: var(--button-mentor-text);
+}
+```
+
+**Incorrect:**
+```css
+.button {
+  background-color: #3ba7f2; /* DON'T hardcode colors */
+  color: #ffffff; /* DON'T hardcode colors */
+}
+```
+
+### Enforcement
+
+Any code that introduces hardcoded color values instead of using the CSS variables from `src/index.css` should be refactored to use the proper variables.

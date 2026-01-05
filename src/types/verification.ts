@@ -15,8 +15,6 @@ export type VerificationStatus =
 
 export type VerificationStep = 
   | 'profile_submitted'     // Initial profile submission
-  | 'document_review'       // Reviewing submitted documents
-  | 'background_check'      // Background verification
   | 'interview_scheduled'   // Interview with admin
   | 'interview_completed'   // Interview finished
   | 'final_review'         // Final admin decision

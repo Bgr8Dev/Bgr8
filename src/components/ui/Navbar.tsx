@@ -1,15 +1,27 @@
 // src/components/Navbar.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../../firebase/firebase';
+import { auth, firestore } from '../../firebase/firebase';
 import { signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../hooks/useAuth';
 import { hasRole } from '../../utils/userProfile';
 import '../../styles/Navbar.css';
 import logo from '../../assets/Bgr8_logo.png';
 
+interface MentorMenteeProfile {
+  isMentor?: boolean;
+  isMentee?: boolean;
+  type?: string;
+  verification?: {
+    status?: string;
+  };
+}
+
 export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userRole, setUserRole] = useState<'mentor' | 'mentee' | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
 
@@ -23,6 +35,57 @@ export default function Navbar() {
       console.error('Error signing out:', error);
     }
   };
+
+  // Fetch user role and verification status from mentorProgram profile
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!currentUser?.uid) return;
+      
+      try {
+        const mentorProgramDoc = await getDoc(
+          doc(firestore, 'users', currentUser.uid, 'mentorProgram', 'profile')
+        );
+        
+        if (mentorProgramDoc.exists()) {
+          const profileData = mentorProgramDoc.data() as MentorMenteeProfile;
+          if (profileData.isMentor === true || profileData.type?.toLowerCase() === 'mentor') {
+            setUserRole('mentor');
+            setVerificationStatus(profileData.verification?.status || null);
+          } else if (profileData.isMentee === true || profileData.type?.toLowerCase() === 'mentee') {
+            setUserRole('mentee');
+            setVerificationStatus(null);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+
+    fetchUserRole();
+  }, [currentUser]);
+
+  // Get profile picture: use uploaded photo if available, otherwise use Google photo
+  const getProfilePicture = () => {
+    return userProfile?.photoURL || currentUser?.photoURL || null;
+  };
+
+  const profilePicture = getProfilePicture();
+
+  // Get status tag based on role and verification
+  const getStatusTag = () => {
+    if (userRole === 'mentor') {
+      if (verificationStatus === 'approved') {
+        return { text: 'Verified Mentor', color: 'var(--success)', className: 'status-tag-verified' };
+      } else {
+        return { text: 'Unverified Mentor', color: '#fca5a5', className: 'status-tag-unverified' };
+      }
+    } else if (userRole === 'mentee') {
+      return { text: 'Mentee', color: 'var(--mentee)', className: 'status-tag-mentee' };
+    }
+    return null;
+  };
+
+  const statusTag = getStatusTag();
 
   return (
     <header className="header">
@@ -48,9 +111,9 @@ export default function Navbar() {
               aria-haspopup="true"
               aria-label="User menu"
             >
-              {currentUser.photoURL ? (
+              {profilePicture ? (
                 <img 
-                  src={currentUser.photoURL} 
+                  src={profilePicture} 
                   alt={`${currentUser.displayName || 'User'} profile`}
                   className="user-avatar"
                 />
@@ -59,7 +122,24 @@ export default function Navbar() {
                   {currentUser.displayName?.charAt(0) || currentUser.email?.charAt(0)}
                 </div>
               )}
-              <span>Hello, {currentUser.displayName || 'User'}</span>
+              <div className="user-menu-info">
+                <span className="user-name">{currentUser.displayName || 'User'}</span>
+                {statusTag && (
+                  <span 
+                    className={`user-status-tag ${statusTag.className}`}
+                    style={{ 
+                      backgroundColor: statusTag.color,
+                      color: 'white',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '0.875rem',
+                      fontWeight: '600'
+                    }}
+                  >
+                    {statusTag.text}
+                  </span>
+                )}
+              </div>
             </button>
             
             {showUserMenu && (

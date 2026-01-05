@@ -234,19 +234,7 @@ export default function MentorProgram() {
       }
     }
 
-    // Cal.com validation for mentors
-    if (selectedRole === MENTOR) {
-      if (!form.calCom || form.calCom.trim() === '') {
-        setError('Cal.com URL is required for mentors.');
-        setLoading(false);
-        return;
-      }
-      if (!form.calCom.match(/^https?:\/\/.*\.cal\.com\/.*$/)) {
-        setError('Please enter a valid Cal.com URL (e.g. https://yourname.cal.com/30min).');
-        setLoading(false);
-        return;
-      }
-    }
+    // Cal.com is no longer required during sign-up - it will be set up after verification
 
     if (!currentUser) {
       setError('No user logged in');

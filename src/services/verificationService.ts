@@ -25,6 +25,7 @@ import {
   VerificationHistory,
   canAccessPlatform
 } from '../types/verification';
+import { loggers } from '../utils/logger';
 
 export interface MentorProfile {
   uid: string;
@@ -57,6 +58,7 @@ export interface MentorProfile {
 export class VerificationService {
   /**
    * Creates initial verification data for a new mentor
+   * Mentors start with pending status and require manual verification
    */
   static async createInitialVerification(mentorUid: string): Promise<VerificationData> {
     const verificationData: VerificationData = {
@@ -79,6 +81,82 @@ export class VerificationService {
       verification: verificationData,
       updatedAt: serverTimestamp()
     });
+
+    // Send profile submitted email to mentor
+    try {
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendMentorProfileSubmittedEmail } = await import('./emailHelpers');
+      const userProfile = await getUserProfile(mentorUid);
+      
+      if (userProfile && userProfile.email) {
+        sendMentorProfileSubmittedEmail(userProfile.email, userProfile.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Mentor profile submitted email sent to ${userProfile.email}`);
+            } else {
+              loggers.email.error(`Failed to send profile submitted email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending profile submitted email:', error);
+          });
+      }
+    } catch (emailError) {
+      loggers.email.error('Error in profile submitted email integration:', emailError);
+    }
+
+    // Send notification email to all Vetting Officers
+    try {
+      const { getUsersByRole } = await import('../utils/getUsersByRole');
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendAdminNewMentorSubmissionEmail } = await import('./emailHelpers');
+      
+      const mentorProfile = await getUserProfile(mentorUid);
+      const profileDataDoc = await getDoc(profileRef);
+      const profileData = profileDataDoc.exists() ? profileDataDoc.data() : null;
+      
+      if (mentorProfile && mentorProfile.email) {
+        const vettingOfficers = await getUsersByRole('vetting-officer');
+        const mentorName = mentorProfile.firstName ? `${mentorProfile.firstName} ${mentorProfile.lastName || ''}`.trim() : mentorProfile.email;
+        const mentorEmail = mentorProfile.email;
+        const mentorExpertise = profileData?.profession || profileData?.degree || 'Not specified';
+        const submissionDate = new Date().toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+        const profileUrl = `https://bgr8.uk/admin/mentor-verification?mentor=${mentorUid}`;
+        
+        // Send email to each vetting officer
+        const emailPromises = vettingOfficers.map(vettingOfficer => {
+          if (vettingOfficer.email) {
+            return sendAdminNewMentorSubmissionEmail(
+              vettingOfficer.email,
+              mentorName,
+              mentorEmail,
+              mentorExpertise,
+              submissionDate,
+              profileUrl
+            ).then(result => {
+              if (result.success) {
+                loggers.email.log(`Mentor submission notification sent to vetting officer: ${vettingOfficer.email}`);
+              } else {
+                loggers.email.error(`Failed to send notification to vetting officer ${vettingOfficer.email}: ${result.error}`);
+              }
+            }).catch(error => {
+              loggers.email.error(`Error sending notification to vetting officer ${vettingOfficer.email}:`, error);
+            });
+          }
+          return Promise.resolve();
+        });
+        
+        await Promise.all(emailPromises);
+        loggers.email.log(`Sent mentor submission notifications to ${vettingOfficers.length} vetting officer(s)`);
+      }
+    } catch (emailError) {
+      loggers.email.error('Error sending notifications to vetting officers:', emailError);
+      // Don't fail the verification creation if email fails
+    }
 
     return verificationData;
   }
@@ -147,10 +225,10 @@ export class VerificationService {
         null
     };
 
-    console.log('Original verification data:', currentVerification);
-    console.log('Safe verification data:', safeVerification);
-    console.log('Safe verification keys:', Object.keys(safeVerification));
-    console.log('Safe verification values:', Object.values(safeVerification));
+    loggers.config.debug('Original verification data:', currentVerification);
+    loggers.config.debug('Safe verification data:', safeVerification);
+    loggers.config.debug('Safe verification keys:', Object.keys(safeVerification));
+    loggers.config.debug('Safe verification values:', Object.values(safeVerification));
 
     // Create new history entry
     const historyEntry: VerificationHistory = {
@@ -221,7 +299,7 @@ export class VerificationService {
     };
 
     const cleanedVerification = cleanVerification(updatedVerification);
-    console.log('Cleaned verification object:', cleanedVerification);
+    loggers.config.debug('Cleaned verification object:', cleanedVerification);
 
     // Prepare update data, ensuring no undefined values
     const updateData: Record<string, unknown> = {
@@ -236,10 +314,10 @@ export class VerificationService {
       }
     });
 
-    console.log('Updated verification object:', updatedVerification);
-    console.log('Updated verification keys:', Object.keys(updatedVerification));
-    console.log('Updated verification values:', Object.values(updatedVerification));
-    console.log('Updating verification with data:', updateData);
+    loggers.config.debug('Updated verification object:', updatedVerification);
+    loggers.config.debug('Updated verification keys:', Object.keys(updatedVerification));
+    loggers.config.debug('Updated verification values:', Object.values(updatedVerification));
+    loggers.config.debug('Updating verification with data:', updateData);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await updateDoc(profileRef, updateData as { [x: string]: any });
   }
@@ -308,14 +386,14 @@ export class VerificationService {
             }
           }
         } catch (error) {
-          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          loggers.warn.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
           // Continue with other users
         }
       }
       
       return mentors;
     } catch (error) {
-      console.error('Error fetching mentors by verification status:', error);
+      loggers.error.error('Error fetching mentors by verification status:', error);
       return [];
     }
   }
@@ -368,14 +446,14 @@ export class VerificationService {
             }
           }
         } catch (error) {
-          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          loggers.warn.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
           // Continue with other users
         }
       }
       
       return mentors;
     } catch (error) {
-      console.error('Error fetching all mentors:', error);
+      loggers.error.error('Error fetching all mentors:', error);
       return [];
     }
   }
@@ -429,14 +507,14 @@ export class VerificationService {
             }
           }
         } catch (error) {
-          console.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
+          loggers.warn.warn(`Error checking mentor profile for user ${userDoc.id}:`, error);
           // Continue with other users
         }
       }
       
       return mentors;
     } catch (error) {
-      console.error('Error fetching pending mentors:', error);
+      loggers.error.error('Error fetching pending mentors:', error);
       return [];
     }
   }
@@ -490,7 +568,7 @@ export class VerificationService {
 
       return stats;
     } catch (error) {
-      console.error('Error calculating verification stats:', error);
+      loggers.error.error('Error calculating verification stats:', error);
       return {
         total: 0,
         pending: 0,
@@ -550,6 +628,29 @@ export class VerificationService {
       reviewedBy,
       notes
     );
+    
+    // Send verification success email
+    try {
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendMentorProfileVerifiedEmail } = await import('./emailHelpers');
+      const userProfile = await getUserProfile(mentorUid);
+      
+      if (userProfile && userProfile.email) {
+        sendMentorProfileVerifiedEmail(userProfile.email, userProfile.firstName)
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Mentor profile verified email sent to ${userProfile.email}`);
+            } else {
+              loggers.email.error(`Failed to send verification email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending verification email:', error);
+          });
+      }
+    } catch (emailError) {
+      loggers.email.error('Error in verification email integration:', emailError);
+    }
   }
 
   /**
@@ -569,6 +670,33 @@ export class VerificationService {
       notes,
       reason
     );
+    
+    // Send rejection email
+    try {
+      const { getUserProfile } = await import('../utils/userProfile');
+      const { sendMentorProfileRejectedEmail } = await import('./emailHelpers');
+      const userProfile = await getUserProfile(mentorUid);
+      
+      if (userProfile && userProfile.email) {
+        sendMentorProfileRejectedEmail(
+          userProfile.email, 
+          userProfile.firstName, 
+          reason || 'Profile did not meet verification requirements.'
+        )
+          .then(result => {
+            if (result.success) {
+              loggers.email.log(`Mentor profile rejected email sent to ${userProfile.email}`);
+            } else {
+              loggers.email.error(`Failed to send rejection email: ${result.error}`);
+            }
+          })
+          .catch(error => {
+            loggers.email.error('Error sending rejection email:', error);
+          });
+      }
+    } catch (emailError) {
+      loggers.email.error('Error in rejection email integration:', emailError);
+    }
   }
 
   /**
@@ -615,7 +743,7 @@ export class VerificationService {
   static async moveToUnderReview(
     mentorUid: string, 
     reviewedBy: string, 
-    step: VerificationStep = 'document_review',
+    step: VerificationStep = 'final_review',
     notes?: string
   ): Promise<void> {
     await VerificationService.updateVerificationStatus(
