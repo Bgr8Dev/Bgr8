@@ -41,9 +41,34 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
   const [urlCopied, setUrlCopied] = useState(false);
 
   const validateCalComUrl = (url: string): boolean => {
-    // Validate Cal.com URL format
-    const calComPattern = /^https?:\/\/(.*\.)?cal\.com\/[^/]+/i;
-    return calComPattern.test(url);
+    // Validate Cal.com URL format with strict hostname validation
+    // Only allow cal.com and cal.dev domains, with optional subdomains
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+      
+      // Strict validation: must be cal.com or cal.dev (or subdomain)
+      // Examples: cal.com, www.cal.com, username.cal.com, cal.dev
+      const allowedHosts = /^(?:[a-z0-9-]+\.)?(?:cal\.com|cal\.dev)$/;
+      
+      if (!allowedHosts.test(hostname)) {
+        return false;
+      }
+      
+      // Must use http or https
+      if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+        return false;
+      }
+      
+      // Pathname should not be empty
+      if (!urlObj.pathname || urlObj.pathname === '/') {
+        return false;
+      }
+      
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const extractUsernameFromUrl = (url: string): string | null => {
@@ -53,10 +78,15 @@ const CalComSetupModal: React.FC<CalComSetupModalProps> = ({ isOpen, onComplete 
       if (pathParts.length > 0) {
         return pathParts[0];
       }
-      // Check for subdomain format (username.cal.com)
-      const hostname = urlObj.hostname;
-      if (hostname.includes('.cal.com')) {
-        return hostname.split('.cal.com')[0];
+      // Check for subdomain format (username.cal.com or username.cal.dev)
+      const hostname = urlObj.hostname.toLowerCase();
+      const calComMatch = hostname.match(/^([a-z0-9-]+)\.cal\.com$/);
+      const calDevMatch = hostname.match(/^([a-z0-9-]+)\.cal\.dev$/);
+      if (calComMatch) {
+        return calComMatch[1];
+      }
+      if (calDevMatch) {
+        return calDevMatch[1];
       }
       return null;
     } catch {

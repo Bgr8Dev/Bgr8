@@ -8,6 +8,31 @@ const admin = require('firebase-admin');
 const crypto = require('crypto');
 require('dotenv').config();
 
+// Sanitize user input for logging to prevent log injection attacks
+function sanitizeForLogging(input) {
+  if (input === null || input === undefined) {
+    return String(input);
+  }
+  
+  if (typeof input !== 'string') {
+    try {
+      return JSON.stringify(input).substring(0, 1000);
+    } catch {
+      return '[Object]';
+    }
+  }
+  
+  // Remove control characters (except newline and tab for readability)
+  let sanitized = input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+  
+  // Limit length to prevent log flooding
+  if (sanitized.length > 1000) {
+    sanitized = sanitized.substring(0, 1000) + '... [truncated]';
+  }
+  
+  return sanitized;
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -220,11 +245,12 @@ async function sendSMTPEmail(emailData) {
   const smtpPassword = process.env.ZOHO_SMTP_PASSWORD || process.env.ZOHO_APP_PASSWORD || process.env.ZOHO_PASSWORD;
   const smtpEmail = process.env.ZOHO_SMTP_EMAIL || process.env.ZOHO_FROM_EMAIL || 'info@bgr8.uk';
   
+  // Never log password information, even partially
   console.log('📧 SMTP credentials check:', {
     user: smtpEmail,
     hasPassword: !!smtpPassword,
     passwordLength: smtpPassword?.length || 0,
-    passwordPreview: smtpPassword ? smtpPassword.substring(0, 8) + '...' : 'undefined',
+    // Removed passwordPreview to prevent sensitive data exposure
     envVarsChecked: {
       ZOHO_SMTP_PASSWORD: !!process.env.ZOHO_SMTP_PASSWORD,
       ZOHO_APP_PASSWORD: !!process.env.ZOHO_APP_PASSWORD,
@@ -317,19 +343,45 @@ async function sendSMTPEmail(emailData) {
   // Generate plain text version from HTML if needed
   let textContent = emailData.contentType === 'text/plain' ? emailData.content : undefined;
   if (emailData.contentType === 'text/html' && !textContent) {
-    // Simple HTML to text conversion (remove HTML tags)
-    textContent = emailData.content
-      .replace(/<style[^>]*>.*?<\/style>/gis, '')
-      .replace(/<script[^>]*>.*?<\/script>/gis, '')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ')
-      .trim();
+    // Comprehensive HTML to text conversion with proper entity decoding
+    // First decode entities, then strip tags to avoid double-encoding
+    let htmlContent = emailData.content;
+    
+    // Remove script and style tags with content first (multiline, case-insensitive)
+    htmlContent = htmlContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    htmlContent = htmlContent.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+    
+    // Decode HTML entities before removing tags (prevents double-encoding)
+    htmlContent = htmlContent.replace(/&nbsp;/g, ' ');
+    htmlContent = htmlContent.replace(/&amp;/g, '&');
+    htmlContent = htmlContent.replace(/&lt;/g, '<');
+    htmlContent = htmlContent.replace(/&gt;/g, '>');
+    htmlContent = htmlContent.replace(/&quot;/g, '"');
+    htmlContent = htmlContent.replace(/&#39;/g, "'");
+    htmlContent = htmlContent.replace(/&apos;/g, "'");
+    htmlContent = htmlContent.replace(/&#x27;/g, "'");
+    htmlContent = htmlContent.replace(/&#x2F;/g, '/');
+    // Decode numeric entities
+    htmlContent = htmlContent.replace(/&#(\d+);/g, (match, dec) => {
+      try {
+        return String.fromCharCode(parseInt(dec, 10));
+      } catch {
+        return match;
+      }
+    });
+    htmlContent = htmlContent.replace(/&#x([0-9a-fA-F]+);/gi, (match, hex) => {
+      try {
+        return String.fromCharCode(parseInt(hex, 16));
+      } catch {
+        return match;
+      }
+    });
+    
+    // Now remove all HTML tags
+    htmlContent = htmlContent.replace(/<[^>]+>/g, '');
+    
+    // Normalize whitespace
+    textContent = htmlContent.replace(/\s+/g, ' ').trim();
   }
   
   const mailOptions = {
@@ -1042,12 +1094,23 @@ app.post('/api/webhooks/calcom', async (req, res) => {
     const webhookData = req.body;
     const eventType = webhookData.triggerEvent || webhookData.type || 'BOOKING_CREATED';
     
-    console.log('📅 Cal.com webhook received:', eventType);
-    console.log('📅 Webhook data:', JSON.stringify(webhookData, null, 2));
+    console.log('📅 Cal.com webhook received:', sanitizeForLogging(eventType));
+    // Sanitize webhook data before logging
+    try {
+      const sanitizedData = JSON.parse(JSON.stringify(webhookData, (key, value) => {
+        if (typeof value === 'string') {
+          return sanitizeForLogging(value);
+        }
+        return value;
+      }));
+      console.log('📅 Webhook data:', JSON.stringify(sanitizedData, null, 2));
+    } catch {
+      console.log('📅 Webhook data: [Unable to serialize]');
+    }
 
     // Only process booking creation events
     if (eventType !== 'BOOKING_CREATED' && eventType !== 'booking.created') {
-      console.log(`ℹ️  Ignoring webhook event type: ${eventType}`);
+      console.log(`ℹ️  Ignoring webhook event type: ${sanitizeForLogging(eventType)}`);
       return res.json({
         success: true,
         message: `Event type ${eventType} ignored`
@@ -1136,7 +1199,7 @@ app.post('/api/webhooks/calcom', async (req, res) => {
       }
       
       if (!mentorId) {
-        console.warn('⚠️  Could not find mentor with Cal.com URL matching:', organizerUsername);
+        console.warn('⚠️  Could not find mentor with Cal.com URL matching:', sanitizeForLogging(organizerUsername));
         // Still return success to Cal.com, but log the issue
         return res.json({
           success: true,
@@ -1195,7 +1258,7 @@ app.post('/api/webhooks/calcom', async (req, res) => {
       }
       
       if (!menteeId) {
-        console.warn('⚠️  Could not find mentee with email:', attendeeEmail);
+        console.warn('⚠️  Could not find mentee with email:', sanitizeForLogging(attendeeEmail));
         console.warn('⚠️  Booking will be saved but may need manual mentee assignment');
         // Still create booking but with limited info - webhook will save what it can
       }
@@ -1341,10 +1404,20 @@ app.delete('/api/users/delete/:uid', async (req, res) => {
   try {
     const { uid } = req.params;
 
-    if (!uid) {
+    // Validate uid format to prevent injection attacks
+    // Firebase Auth UIDs are alphanumeric and typically 28 characters
+    if (!uid || typeof uid !== 'string') {
       return res.status(400).json({
         success: false,
         error: 'User ID is required'
+      });
+    }
+    
+    // Validate uid format: alphanumeric, hyphens, underscores only, reasonable length
+    if (!/^[a-zA-Z0-9_-]{1,128}$/.test(uid)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid user ID format'
       });
     }
 
@@ -1358,7 +1431,7 @@ app.delete('/api/users/delete/:uid', async (req, res) => {
     try {
       // Delete user from Firebase Auth using Admin SDK
       await admin.auth().deleteUser(uid);
-      console.log(`✅ User ${uid} deleted from Firebase Auth`);
+      console.log(`✅ User ${sanitizeForLogging(uid)} deleted from Firebase Auth`);
       
       res.json({
         success: true,
@@ -1367,7 +1440,7 @@ app.delete('/api/users/delete/:uid', async (req, res) => {
     } catch (authError) {
       // Handle specific Firebase Auth errors
       if (authError.code === 'auth/user-not-found') {
-        console.log(`⚠️  User ${uid} not found in Firebase Auth (may have already been deleted)`);
+        console.log(`⚠️  User ${sanitizeForLogging(uid)} not found in Firebase Auth (may have already been deleted)`);
         return res.json({
           success: true,
           message: `User ${uid} not found in Firebase Auth (may have already been deleted)`,

@@ -334,124 +334,144 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
     if (!open || !mentor) return;
 
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from Cal.com domain
-      if (event.origin.includes('cal.com') || event.origin.includes('cal.dev')) {
-        const messageData = event.data;
-        const messageType = messageData?.type || messageData?.fullType || '';
+      // Strict origin validation - only accept messages from legitimate Cal.com domains
+      // Must be exact match: https://cal.com, https://*.cal.com, https://cal.dev, or https://*.cal.dev
+      let isValidOrigin = false;
+      try {
+        const originUrl = new URL(event.origin);
+        const hostname = originUrl.hostname.toLowerCase();
         
-        loggers.booking.log('📨 Received message from Cal.com iframe:', {
-          type: messageType,
-          originator: messageData?.originator,
-          data: messageData?.data
+        // Validate hostname matches cal.com or cal.dev pattern
+        const allowedHostPattern = /^(?:[a-z0-9-]+\.)?(?:cal\.com|cal\.dev)$/;
+        if (allowedHostPattern.test(hostname) && (originUrl.protocol === 'https:' || (originUrl.protocol === 'http:' && originUrl.hostname.includes('localhost')))) {
+          isValidOrigin = true;
+        }
+      } catch {
+        // Invalid origin format
+        isValidOrigin = false;
+      }
+      
+      if (!isValidOrigin) {
+        loggers.booking.warn('⚠️  Rejected message from invalid origin:', event.origin);
+        return;
+      }
+      
+      // Origin is valid, process the message
+      const messageData = event.data;
+      const messageType = messageData?.type || messageData?.fullType || '';
+      
+      loggers.booking.log('📨 Received message from Cal.com iframe:', {
+        type: messageType,
+        originator: messageData?.originator,
+        data: messageData?.data
+      });
+      
+      // Check if it's a booking success event (Cal.com sends bookingSuccessful and bookingSuccessfulV2)
+      const isBookingSuccess = 
+        messageType === 'bookingSuccessful' ||
+        messageType === 'bookingSuccessfulV2' ||
+        messageType === 'CAL::bookingSuccessful' ||
+        messageType === 'CAL::bookingSuccessfulV2' ||
+        messageData?.type === 'bookingConfirmed' ||
+        messageData?.event === 'bookingConfirmed' ||
+        messageData?.bookingId ||
+        (messageData?.data && (messageData.data.bookingId || messageData.data.booking));
+      
+      if (isBookingSuccess) {
+        loggers.booking.log('✅ Booking success event detected from iframe!', {
+          messageType,
+          hasBookingData: !!(messageData?.data?.booking || messageData?.data?.bookingId),
+          bookingId: messageData?.data?.bookingId || messageData?.data?.booking?.id || messageData?.bookingId
         });
         
-        // Check if it's a booking success event (Cal.com sends bookingSuccessful and bookingSuccessfulV2)
-        const isBookingSuccess = 
-          messageType === 'bookingSuccessful' ||
-          messageType === 'bookingSuccessfulV2' ||
-          messageType === 'CAL::bookingSuccessful' ||
-          messageType === 'CAL::bookingSuccessfulV2' ||
-          messageData?.type === 'bookingConfirmed' ||
-          messageData?.event === 'bookingConfirmed' ||
-          messageData?.bookingId ||
-          (messageData?.data && (messageData.data.bookingId || messageData.data.booking));
+        // Extract booking ID from the message if available
+        const bookingIdFromMessage = 
+          messageData?.data?.bookingId || 
+          messageData?.data?.booking?.id || 
+          messageData?.data?.booking?.uid ||
+          messageData?.bookingId;
         
-        if (isBookingSuccess) {
-          loggers.booking.log('✅ Booking success event detected from iframe!', {
-            messageType,
-            hasBookingData: !!(messageData?.data?.booking || messageData?.data?.bookingId),
-            bookingId: messageData?.data?.bookingId || messageData?.data?.booking?.id || messageData?.bookingId
-          });
+        // Trigger immediate check for new bookings after a short delay
+        // This ensures the booking is fully processed by Cal.com's API
+        setTimeout(async () => {
+          const mentorId = String(mentor.uid || mentor.id || '');
+          if (!mentorId || hasApiKey === false) {
+            loggers.booking.warn('⚠️ Cannot check bookings: missing mentorId or API key');
+            return;
+          }
           
-          // Extract booking ID from the message if available
-          const bookingIdFromMessage = 
-            messageData?.data?.bookingId || 
-            messageData?.data?.booking?.id || 
-            messageData?.data?.booking?.uid ||
-            messageData?.bookingId;
-          
-          // Trigger immediate check for new bookings after a short delay
-          // This ensures the booking is fully processed by Cal.com's API
-          setTimeout(async () => {
-            const mentorId = String(mentor.uid || mentor.id || '');
-            if (!mentorId || hasApiKey === false) {
-              loggers.booking.warn('⚠️ Cannot check bookings: missing mentorId or API key');
-              return;
+          try {
+            loggers.booking.log('🔍 Checking for new bookings after success event...');
+            
+            // Fetch recent bookings (last 5 minutes to catch the new one)
+            const calComBookings = await CalComService.getBookings(
+              mentorId,
+              new Date(Date.now() - 5 * 60 * 1000).toISOString(), // Last 5 minutes
+              new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // Next 30 days
+            );
+            
+            loggers.booking.log(`📋 Found ${calComBookings.length} bookings to check after success event`);
+            
+            let newBookingFound = false;
+            
+            for (const calBooking of calComBookings) {
+              const bookingId = calBooking.id?.toString() || calBooking.uid;
+              if (!bookingId) {
+                loggers.booking.warn('⚠️ Booking missing ID, skipping:', calBooking);
+                continue;
+              }
+              
+              // If we have a booking ID from the message, prioritize checking that one
+              if (bookingIdFromMessage && bookingId !== bookingIdFromMessage.toString()) {
+                continue; // Skip if we're looking for a specific booking
+              }
+              
+              // Skip if we've already processed this booking
+              if (lastCheckedBookingsRef.current.has(bookingId)) {
+                loggers.booking.log(`⏭️ Booking ${bookingId} already processed, skipping`);
+                continue;
+              }
+              
+              // Check if booking already exists in Firestore
+              const existingQuery = query(
+                collection(firestore, 'bookings'),
+                where('calComBookingId', '==', bookingId)
+              );
+              const existingSnapshot = await getDocs(existingQuery);
+              
+              if (existingSnapshot.empty) {
+                loggers.booking.log('🆕 New booking detected from iframe event, saving to Firebase...', {
+                  bookingId,
+                  startTime: calBooking.startTime,
+                  status: calBooking.status
+                });
+                
+                try {
+                  await saveBookingToFirebase(calBooking, mentor);
+                  lastCheckedBookingsRef.current.add(bookingId);
+                  newBookingFound = true;
+                  loggers.booking.log('✅ Booking saved successfully to Firebase!', { bookingId });
+                  
+                  // Show success message to user
+                  setBookingStatus('saved');
+                  setBookingMessage('Your booking has been saved successfully!');
+                  setShowBookingStatus(true);
+                } catch (saveError) {
+                  loggers.booking.error('❌ Error saving booking to Firebase:', saveError);
+                }
+              } else {
+                loggers.booking.log(`✓ Booking ${bookingId} already exists in Firestore`);
+                lastCheckedBookingsRef.current.add(bookingId);
+              }
             }
             
-            try {
-              loggers.booking.log('🔍 Checking for new bookings after success event...');
-              
-              // Fetch recent bookings (last 5 minutes to catch the new one)
-              const calComBookings = await CalComService.getBookings(
-                mentorId,
-                new Date(Date.now() - 5 * 60 * 1000).toISOString(), // Last 5 minutes
-                new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // Next 30 days
-              );
-              
-              loggers.booking.log(`📋 Found ${calComBookings.length} bookings to check after success event`);
-              
-              let newBookingFound = false;
-              
-              for (const calBooking of calComBookings) {
-                const bookingId = calBooking.id?.toString() || calBooking.uid;
-                if (!bookingId) {
-                  loggers.booking.warn('⚠️ Booking missing ID, skipping:', calBooking);
-                  continue;
-                }
-                
-                // If we have a booking ID from the message, prioritize checking that one
-                if (bookingIdFromMessage && bookingId !== bookingIdFromMessage.toString()) {
-                  continue; // Skip if we're looking for a specific booking
-                }
-                
-                // Skip if we've already processed this booking
-                if (lastCheckedBookingsRef.current.has(bookingId)) {
-                  loggers.booking.log(`⏭️ Booking ${bookingId} already processed, skipping`);
-                  continue;
-                }
-                
-                // Check if booking already exists in Firestore
-                const existingQuery = query(
-                  collection(firestore, 'bookings'),
-                  where('calComBookingId', '==', bookingId)
-                );
-                const existingSnapshot = await getDocs(existingQuery);
-                
-                if (existingSnapshot.empty) {
-                  loggers.booking.log('🆕 New booking detected from iframe event, saving to Firebase...', {
-                    bookingId,
-                    startTime: calBooking.startTime,
-                    status: calBooking.status
-                  });
-                  
-                  try {
-                    await saveBookingToFirebase(calBooking, mentor);
-                    lastCheckedBookingsRef.current.add(bookingId);
-                    newBookingFound = true;
-                    loggers.booking.log('✅ Booking saved successfully to Firebase!', { bookingId });
-                    
-                    // Show success message to user
-                    setBookingStatus('saved');
-                    setBookingMessage('Your booking has been saved successfully!');
-                    setShowBookingStatus(true);
-                  } catch (saveError) {
-                    loggers.booking.error('❌ Error saving booking to Firebase:', saveError);
-                  }
-                } else {
-                  loggers.booking.log(`✓ Booking ${bookingId} already exists in Firestore`);
-                  lastCheckedBookingsRef.current.add(bookingId);
-                }
-              }
-              
-              if (!newBookingFound && bookingIdFromMessage) {
-                loggers.booking.warn('⚠️ Booking success event received but booking not found in API response yet. It may appear in the next poll.');
-              }
-            } catch (error) {
-              loggers.booking.error('Error checking bookings after iframe event:', error);
+            if (!newBookingFound && bookingIdFromMessage) {
+              loggers.booking.warn('⚠️ Booking success event received but booking not found in API response yet. It may appear in the next poll.');
             }
-          }, 3000); // Wait 3 seconds for booking to be processed by Cal.com API
-        }
+          } catch (error) {
+            loggers.booking.error('Error checking bookings after iframe event:', error);
+          }
+        }, 3000); // Wait 3 seconds for booking to be processed by Cal.com API
       }
     };
     

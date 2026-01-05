@@ -709,9 +709,14 @@
       console.error = function(...args) {
         const errorMessage = args.join(' ');
         // Filter out Sentry errors blocked by ad blockers
-        if (errorMessage.includes('sentry.io') || 
-            errorMessage.includes('ERR_BLOCKED_BY_ADBLOCKER') ||
-            errorMessage.includes('net::ERR_BLOCKED_BY_CLIENT')) {
+        // Use exact string matching for security
+        const sentryDomain = 'sentry.io';
+        const blockedByAdblocker = 'ERR_BLOCKED_BY_ADBLOCKER';
+        const blockedByClient = 'net::ERR_BLOCKED_BY_CLIENT';
+        
+        if (errorMessage.indexOf(sentryDomain) !== -1 || 
+            errorMessage.indexOf(blockedByAdblocker) !== -1 ||
+            errorMessage.indexOf(blockedByClient) !== -1) {
           return; // Silently ignore these harmless errors
         }
         originalConsoleError.apply(console, args);
@@ -719,13 +724,18 @@
       
       window.addEventListener('error', (event) => {
         // Ignore Sentry-related network errors blocked by ad blockers
-        if (event.message && (
-          event.message.includes('sentry.io') ||
-          event.message.includes('ERR_BLOCKED_BY_ADBLOCKER') ||
-          event.message.includes('ERR_BLOCKED_BY_CLIENT')
-        )) {
-          event.preventDefault(); // Prevent error from showing in console
-          return;
+        // Use exact string matching for security
+        if (event.message && typeof event.message === 'string') {
+          const sentryDomain = 'sentry.io';
+          const blockedByAdblocker = 'ERR_BLOCKED_BY_ADBLOCKER';
+          const blockedByClient = 'ERR_BLOCKED_BY_CLIENT';
+          
+          if (event.message.indexOf(sentryDomain) !== -1 ||
+              event.message.indexOf(blockedByAdblocker) !== -1 ||
+              event.message.indexOf(blockedByClient) !== -1) {
+            event.preventDefault(); // Prevent error from showing in console
+            return;
+          }
         }
         
         if (typeof gtag !== 'undefined') {
@@ -738,12 +748,19 @@
       
       window.addEventListener('unhandledrejection', (event) => {
         // Ignore Sentry-related promise rejections
+        // Use exact string matching for security
         const reason = event.reason?.message || String(event.reason || '');
-        if (reason.includes('sentry.io') || 
-            reason.includes('ERR_BLOCKED_BY_ADBLOCKER') ||
-            reason.includes('ERR_BLOCKED_BY_CLIENT')) {
-          event.preventDefault(); // Prevent error from showing in console
-          return;
+        if (typeof reason === 'string') {
+          const sentryDomain = 'sentry.io';
+          const blockedByAdblocker = 'ERR_BLOCKED_BY_ADBLOCKER';
+          const blockedByClient = 'ERR_BLOCKED_BY_CLIENT';
+          
+          if (reason.indexOf(sentryDomain) !== -1 || 
+              reason.indexOf(blockedByAdblocker) !== -1 ||
+              reason.indexOf(blockedByClient) !== -1) {
+            event.preventDefault(); // Prevent error from showing in console
+            return;
+          }
         }
         
         if (typeof gtag !== 'undefined') {

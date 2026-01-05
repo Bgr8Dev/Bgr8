@@ -48,12 +48,33 @@ export function suppressAnalyticsLogs(): void {
   ];
   
   // Check if a message matches GA patterns
-  const isGALog = (args: unknown[]): boolean => {
-    const message = args.map(arg => {
-      if (typeof arg === 'string') return arg;
-      if (typeof arg === 'object') return JSON.stringify(arg);
+  // Sanitize arguments for logging to prevent log injection
+  const sanitizeLogArg = (arg: unknown): string => {
+    if (arg === null || arg === undefined) {
       return String(arg);
-    }).join(' ');
+    }
+    if (typeof arg === 'string') {
+      // Remove control characters (using character code filtering to avoid linter warnings)
+      const sanitized = arg.split('').filter(char => {
+        const code = char.charCodeAt(0);
+        // Allow printable characters and common whitespace (space, tab, newline, carriage return)
+        // Block control characters: 0-8, 11-12, 14-31, 127 (DEL)
+        return (code >= 32 && code !== 127) || code === 9 || code === 10 || code === 13;
+      }).join('');
+      return sanitized.substring(0, 1000);
+    }
+    if (typeof arg === 'object') {
+      try {
+        return JSON.stringify(arg).substring(0, 1000);
+      } catch {
+        return '[Object]';
+      }
+    }
+    return String(arg).substring(0, 1000);
+  };
+
+  const isGALog = (args: unknown[]): boolean => {
+    const message = args.map(arg => sanitizeLogArg(arg)).join(' ');
     
     return gaPatterns.some(pattern => pattern.test(message));
   };

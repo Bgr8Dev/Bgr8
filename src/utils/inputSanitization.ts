@@ -348,3 +348,115 @@ export function sanitizeInput(
   return input;
 }
 
+/**
+ * Convert HTML to plain text by stripping all tags and decoding entities
+ * This is a more comprehensive version that handles nested tags and entities properly
+ */
+export function htmlToText(input: string): string {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
+
+  let text = input;
+  
+  // First, decode HTML entities to prevent double-encoding issues
+  // Use a temporary DOM element for proper entity decoding
+  const htmlEntityMap: Record<string, string> = {
+    '&nbsp;': ' ',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&#x27;': "'",
+    '&#x2F;': '/',
+    '&#x60;': '`',
+    '&#x3D;': '=',
+    '&apos;': "'"
+  };
+  
+  // Decode named entities
+  for (const [entity, char] of Object.entries(htmlEntityMap)) {
+    text = text.replace(new RegExp(entity, 'gi'), char);
+  }
+  
+  // Decode numeric entities (&#123; and &#x1A;)
+  text = text.replace(/&#(\d+);/g, (match, dec) => {
+    return String.fromCharCode(parseInt(dec, 10));
+  });
+  text = text.replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => {
+    return String.fromCharCode(parseInt(hex, 16));
+  });
+  
+  // Remove script and style tags with their content (case-insensitive, multiline)
+  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  
+  // Remove all other HTML tags
+  text = text.replace(/<[^>]+>/g, '');
+  
+  // Normalize whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+  
+  return text;
+}
+
+/**
+ * Validate origin against allowed origins (exact match)
+ * Returns true if origin is in the allowed list
+ */
+export function validateOrigin(origin: string, allowedOrigins: string[]): boolean {
+  if (!origin || typeof origin !== 'string') {
+    return false;
+  }
+  
+  try {
+    // Parse the origin to ensure it's valid
+    const url = new URL(origin);
+    const normalizedOrigin = url.origin;
+    
+    // Check for exact match in allowed origins
+    return allowedOrigins.some(allowed => {
+      try {
+        const allowedUrl = new URL(allowed);
+        return allowedUrl.origin === normalizedOrigin;
+      } catch {
+        // If allowed is not a full URL, do exact string match
+        return allowed === normalizedOrigin;
+      }
+    });
+  } catch {
+    // Invalid origin format
+    return false;
+  }
+}
+
+/**
+ * Sanitize string for logging to prevent log injection
+ * Removes control characters and escapes special characters
+ */
+export function sanitizeForLogging(input: unknown): string {
+  if (input === null || input === undefined) {
+    return String(input);
+  }
+  
+  if (typeof input !== 'string') {
+    // Convert to JSON for complex objects, but limit depth to prevent DoS
+    try {
+      return JSON.stringify(input).substring(0, 1000);
+    } catch {
+      return '[Object]';
+    }
+  }
+  
+  // Remove control characters (except newline and tab for readability)
+  let sanitized = input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+  
+  // Limit length to prevent log flooding
+  if (sanitized.length > 1000) {
+    sanitized = sanitized.substring(0, 1000) + '... [truncated]';
+  }
+  
+  return sanitized;
+}
+

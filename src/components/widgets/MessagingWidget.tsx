@@ -94,9 +94,8 @@ const MessagingWidget: React.FC = () => {
           };
         }
         
-        if (conversation) {
-          setSelectedConversation(conversation);
-        }
+        // conversation is guaranteed to be truthy here (either found or created above)
+        setSelectedConversation(conversation);
       } catch (err) {
         loggers.error.error('Error opening conversation:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to open conversation';
@@ -514,14 +513,13 @@ const MessagingWidget: React.FC = () => {
                 </div>
 
                 {/* GDPR Introductory Message Banner */}
-                {selectedConversation && (
-                  <div className="gdpr-intro-banner">
-                    <FaInfoCircle />
-                    <p>
-                      <strong>Privacy Notice:</strong> {GDPR_INTRO_MESSAGE}
-                    </p>
-                  </div>
-                )}
+                {/* selectedConversation is guaranteed to be truthy in this view block */}
+                <div className="gdpr-intro-banner">
+                  <FaInfoCircle />
+                  <p>
+                    <strong>Privacy Notice:</strong> {GDPR_INTRO_MESSAGE}
+                  </p>
+                </div>
 
                 <div className="messages-container">
                   <div className="messages-list">
