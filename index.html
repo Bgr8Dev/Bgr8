@@ -714,9 +714,13 @@
         const blockedByAdblocker = 'ERR_BLOCKED_BY_ADBLOCKER';
         const blockedByClient = 'net::ERR_BLOCKED_BY_CLIENT';
         
-        if (errorMessage.indexOf(sentryDomain) !== -1 || 
-            errorMessage.indexOf(blockedByAdblocker) !== -1 ||
-            errorMessage.indexOf(blockedByClient) !== -1) {
+        // Use strict equality checks after splitting to avoid substring matching issues
+        const errorParts = errorMessage.split(/\s+/);
+        const hasSentryDomain = errorParts.some(part => part === sentryDomain || part.endsWith('.' + sentryDomain));
+        const hasBlockedByAdblocker = errorParts.some(part => part === blockedByAdblocker);
+        const hasBlockedByClient = errorParts.some(part => part === blockedByClient || part.includes(blockedByClient));
+        
+        if (hasSentryDomain || hasBlockedByAdblocker || hasBlockedByClient) {
           return; // Silently ignore these harmless errors
         }
         originalConsoleError.apply(console, args);
@@ -730,9 +734,13 @@
           const blockedByAdblocker = 'ERR_BLOCKED_BY_ADBLOCKER';
           const blockedByClient = 'ERR_BLOCKED_BY_CLIENT';
           
-          if (event.message.indexOf(sentryDomain) !== -1 ||
-              event.message.indexOf(blockedByAdblocker) !== -1 ||
-              event.message.indexOf(blockedByClient) !== -1) {
+          // Use strict matching to avoid substring issues
+          const messageParts = event.message.split(/\s+/);
+          const hasSentryDomain = messageParts.some(part => part === sentryDomain || part.endsWith('.' + sentryDomain));
+          const hasBlockedByAdblocker = messageParts.some(part => part === blockedByAdblocker);
+          const hasBlockedByClient = messageParts.some(part => part === blockedByClient || part.includes(blockedByClient));
+          
+          if (hasSentryDomain || hasBlockedByAdblocker || hasBlockedByClient) {
             event.preventDefault(); // Prevent error from showing in console
             return;
           }
@@ -755,9 +763,13 @@
           const blockedByAdblocker = 'ERR_BLOCKED_BY_ADBLOCKER';
           const blockedByClient = 'ERR_BLOCKED_BY_CLIENT';
           
-          if (reason.indexOf(sentryDomain) !== -1 || 
-              reason.indexOf(blockedByAdblocker) !== -1 ||
-              reason.indexOf(blockedByClient) !== -1) {
+          // Use strict matching to avoid substring issues
+          const reasonParts = reason.split(/\s+/);
+          const hasSentryDomain = reasonParts.some(part => part === sentryDomain || part.endsWith('.' + sentryDomain));
+          const hasBlockedByAdblocker = reasonParts.some(part => part === blockedByAdblocker);
+          const hasBlockedByClient = reasonParts.some(part => part === blockedByClient || part.includes(blockedByClient));
+          
+          if (hasSentryDomain || hasBlockedByAdblocker || hasBlockedByClient) {
             event.preventDefault(); // Prevent error from showing in console
             return;
           }

@@ -249,8 +249,7 @@ async function sendSMTPEmail(emailData) {
   console.log('📧 SMTP credentials check:', {
     user: smtpEmail,
     hasPassword: !!smtpPassword,
-    passwordLength: smtpPassword?.length || 0,
-    // Removed passwordPreview to prevent sensitive data exposure
+    // Removed passwordLength and passwordPreview to prevent sensitive data exposure
     envVarsChecked: {
       ZOHO_SMTP_PASSWORD: !!process.env.ZOHO_SMTP_PASSWORD,
       ZOHO_APP_PASSWORD: !!process.env.ZOHO_APP_PASSWORD,
@@ -344,43 +343,61 @@ async function sendSMTPEmail(emailData) {
   let textContent = emailData.contentType === 'text/plain' ? emailData.content : undefined;
   if (emailData.contentType === 'text/html' && !textContent) {
     // Comprehensive HTML to text conversion with proper entity decoding
-    // First decode entities, then strip tags to avoid double-encoding
+    // Use proper decoding order to avoid double-encoding issues
     let htmlContent = emailData.content;
     
-    // Remove script and style tags with content first (multiline, case-insensitive)
+    // Step 1: Remove script and style tags with their content (non-greedy, handles nested tags)
     htmlContent = htmlContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
     htmlContent = htmlContent.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
     
-    // Decode HTML entities before removing tags (prevents double-encoding)
-    htmlContent = htmlContent.replace(/&nbsp;/g, ' ');
-    htmlContent = htmlContent.replace(/&amp;/g, '&');
-    htmlContent = htmlContent.replace(/&lt;/g, '<');
-    htmlContent = htmlContent.replace(/&gt;/g, '>');
-    htmlContent = htmlContent.replace(/&quot;/g, '"');
-    htmlContent = htmlContent.replace(/&#39;/g, "'");
-    htmlContent = htmlContent.replace(/&apos;/g, "'");
-    htmlContent = htmlContent.replace(/&#x27;/g, "'");
-    htmlContent = htmlContent.replace(/&#x2F;/g, '/');
-    // Decode numeric entities
-    htmlContent = htmlContent.replace(/&#(\d+);/g, (match, dec) => {
-      try {
-        return String.fromCharCode(parseInt(dec, 10));
-      } catch {
-        return match;
-      }
-    });
+    // Step 2: Decode HTML entities in the correct order (numeric first, then named, amp last)
+    // First decode numeric entities (they don't conflict with named entities)
     htmlContent = htmlContent.replace(/&#x([0-9a-fA-F]+);/gi, (match, hex) => {
       try {
-        return String.fromCharCode(parseInt(hex, 16));
+        const code = parseInt(hex, 16);
+        // Only decode valid character codes (32-126, 128+ for printable chars)
+        if ((code >= 32 && code !== 127) || code >= 128) {
+          return String.fromCharCode(code);
+        }
+        return match;
+      } catch {
+        return match;
+      }
+    });
+    htmlContent = htmlContent.replace(/&#(\d+);/g, (match, dec) => {
+      try {
+        const code = parseInt(dec, 10);
+        // Only decode valid character codes
+        if ((code >= 32 && code !== 127) || code >= 128) {
+          return String.fromCharCode(code);
+        }
+        return match;
       } catch {
         return match;
       }
     });
     
-    // Now remove all HTML tags
+    // Then decode named entities in safe order (amp must be last to avoid double-decoding)
+    const entityMap = {
+      '&nbsp;': ' ',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&apos;': "'",
+      '&lt;': '<',
+      '&gt;': '>',
+      '&amp;': '&' // Must be last to prevent double-decoding
+    };
+    
+    for (const [entity, char] of Object.entries(entityMap)) {
+      // Escape special regex characters in entity
+      const escapedEntity = entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      htmlContent = htmlContent.replace(new RegExp(escapedEntity, 'g'), char);
+    }
+    
+    // Step 3: Remove all remaining HTML tags
     htmlContent = htmlContent.replace(/<[^>]+>/g, '');
     
-    // Normalize whitespace
+    // Step 4: Normalize whitespace
     textContent = htmlContent.replace(/\s+/g, ' ').trim();
   }
   
@@ -1110,10 +1127,11 @@ app.post('/api/webhooks/calcom', async (req, res) => {
 
     // Only process booking creation events
     if (eventType !== 'BOOKING_CREATED' && eventType !== 'booking.created') {
-      console.log(`ℹ️  Ignoring webhook event type: ${sanitizeForLogging(eventType)}`);
+      const sanitizedEventType = sanitizeForLogging(eventType);
+      console.log('ℹ️  Ignoring webhook event type:', sanitizedEventType);
       return res.json({
         success: true,
-        message: `Event type ${eventType} ignored`
+        message: `Event type ${sanitizedEventType} ignored`
       });
     }
 
@@ -1188,7 +1206,7 @@ app.post('/api/webhooks/calcom', async (req, res) => {
               )) {
                 mentorId = userDoc.id;
                 mentorData = profileData;
-                console.log('✅ Found mentor:', mentorId, profileData.firstName, profileData.lastName);
+                console.log('✅ Found mentor:', sanitizeForLogging(mentorId), sanitizeForLogging(profileData.firstName || ''), sanitizeForLogging(profileData.lastName || ''));
                 break;
               }
             }
@@ -1239,7 +1257,7 @@ app.post('/api/webhooks/calcom', async (req, res) => {
                 if (profileData.isMentee === true || profileData.type === 'mentee' || (!profileData.isMentor && !profileData.isMentee)) {
                   menteeId = userDoc.id;
                   menteeData = profileData;
-                  console.log('✅ Found mentee:', menteeId, profileData.firstName || profileData.name || 'Unknown');
+                  console.log('✅ Found mentee:', sanitizeForLogging(menteeId), sanitizeForLogging(profileData.firstName || profileData.name || 'Unknown'));
                   break;
                 }
               } else {
@@ -1247,12 +1265,12 @@ app.post('/api/webhooks/calcom', async (req, res) => {
                 // This handles cases where the user hasn't completed their profile yet
                 menteeId = userDoc.id;
                 menteeData = { name: userData.displayName || attendeeName || 'Unknown' };
-                console.log('✅ Found user by email (no profile yet):', menteeId);
+                console.log('✅ Found user by email (no profile yet):', sanitizeForLogging(menteeId));
                 break;
               }
             }
           } catch (error) {
-            console.error(`Error checking user ${userDoc.id} for mentee:`, error.message);
+            console.error('Error checking user for mentee:', sanitizeForLogging(userDoc.id), error.message || String(error));
           }
         }
       }
@@ -1355,8 +1373,9 @@ app.post('/api/webhooks/calcom', async (req, res) => {
     const bookingRef = await db.collection('bookings').add(bookingData);
     console.log('✅ Booking saved to Firestore:', bookingRef.id);
 
-    // Create session from booking
-    if (mentorId && menteeId) {
+    // Create session from booking (only if both mentor and mentee IDs are found)
+    // Note: mentorId and menteeId can be empty strings if not found, so this check is necessary
+    if (mentorId && menteeId && mentorId !== '' && menteeId !== '') {
       try {
         const sessionData = {
           bookingId: bookingId,
@@ -1406,7 +1425,7 @@ app.delete('/api/users/delete/:uid', async (req, res) => {
 
     // Validate uid format to prevent injection attacks
     // Firebase Auth UIDs are alphanumeric and typically 28 characters
-    if (!uid || typeof uid !== 'string') {
+    if (!uid || typeof uid !== 'string' || uid.trim().length === 0) {
       return res.status(400).json({
         success: false,
         error: 'User ID is required'
@@ -1414,12 +1433,17 @@ app.delete('/api/users/delete/:uid', async (req, res) => {
     }
     
     // Validate uid format: alphanumeric, hyphens, underscores only, reasonable length
-    if (!/^[a-zA-Z0-9_-]{1,128}$/.test(uid)) {
+    // Must start and end with alphanumeric (not special chars)
+    const uidPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,126}[a-zA-Z0-9]$|^[a-zA-Z0-9]$/;
+    if (!uidPattern.test(uid.trim())) {
       return res.status(400).json({
         success: false,
         error: 'Invalid user ID format'
       });
     }
+    
+    // Use trimmed uid
+    const sanitizedUid = uid.trim();
 
     if (!admin.apps.length) {
       return res.status(500).json({
@@ -1430,20 +1454,22 @@ app.delete('/api/users/delete/:uid', async (req, res) => {
 
     try {
       // Delete user from Firebase Auth using Admin SDK
-      await admin.auth().deleteUser(uid);
-      console.log(`✅ User ${sanitizeForLogging(uid)} deleted from Firebase Auth`);
+      await admin.auth().deleteUser(sanitizedUid);
+      const sanitizedUidForLog = sanitizeForLogging(sanitizedUid);
+      console.log('✅ User deleted from Firebase Auth:', sanitizedUidForLog);
       
       res.json({
         success: true,
-        message: `User ${uid} deleted from Firebase Authentication`
+        message: `User ${sanitizedUidForLog} deleted from Firebase Authentication`
       });
     } catch (authError) {
       // Handle specific Firebase Auth errors
       if (authError.code === 'auth/user-not-found') {
-        console.log(`⚠️  User ${sanitizeForLogging(uid)} not found in Firebase Auth (may have already been deleted)`);
+        const sanitizedUidForLog = sanitizeForLogging(sanitizedUid);
+        console.log('⚠️  User not found in Firebase Auth (may have already been deleted):', sanitizedUidForLog);
         return res.json({
           success: true,
-          message: `User ${uid} not found in Firebase Auth (may have already been deleted)`,
+          message: `User ${sanitizedUidForLog} not found in Firebase Auth (may have already been deleted)`,
           warning: 'User not found in Firebase Auth'
         });
       }

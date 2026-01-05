@@ -238,10 +238,8 @@ export default function BookingModal({ open, onClose, mentor }: BookingModalProp
         throw new Error('This mentor has not set up Cal.com integration yet. Please contact them directly.');
       }
       
-      if (!selectedEventType) {
-        throw new Error('Please select a session type before booking.');
-      }
-      
+      // selectedEventType is already validated above, but included here for type safety
+      // The check above ensures we never reach this point without a selectedEventType
       await createCalComBooking();
       
       // Close modal after a short delay

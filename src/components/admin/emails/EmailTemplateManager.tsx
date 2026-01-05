@@ -18,6 +18,7 @@ import {
   EmailTemplates, 
   renderEmailTemplate 
 } from '../../../services/emailTemplates';
+import { htmlToText } from '../../../utils/inputSanitization';
 import { loggers } from '../../../utils/logger';
 import './EmailTemplateManager.css';
 
@@ -366,24 +367,8 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({
                         <strong>Preview:</strong>
                         <div className="template-preview-text">
                           {(() => {
-                            // Properly strip HTML tags and decode entities
-                            const text = template.content
-                              .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                              .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-                              .replace(/<[^>]+>/g, '')
-                              .replace(/&nbsp;/g, ' ')
-                              .replace(/&amp;/g, '&')
-                              .replace(/&lt;/g, '<')
-                              .replace(/&gt;/g, '>')
-                              .replace(/&quot;/g, '"')
-                              .replace(/&#39;/g, "'")
-                              .replace(/&apos;/g, "'")
-                              .replace(/&#x27;/g, "'")
-                              .replace(/&#x2F;/g, '/')
-                              .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(parseInt(dec, 10)))
-                              .replace(/&#x([0-9a-fA-F]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
-                              .replace(/\s+/g, ' ')
-                              .trim();
+                            // Use proper HTML to text conversion function
+                            const text = htmlToText(template.content);
                             return text.substring(0, 150) + (text.length > 150 ? '...' : '');
                           })()}
                         </div>

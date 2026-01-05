@@ -352,7 +352,9 @@ const CalComModal: React.FC<CalComModalProps> = ({ open, onClose, mentor }) => {
       }
       
       if (!isValidOrigin) {
-        loggers.booking.warn('⚠️  Rejected message from invalid origin:', event.origin);
+        // Sanitize origin before logging to prevent log injection
+        const sanitizedOrigin = typeof event.origin === 'string' ? event.origin.substring(0, 100).replace(/[\x00-\x1F\x7F]/g, '') : '[invalid]';
+        loggers.booking.warn('⚠️  Rejected message from invalid origin:', sanitizedOrigin);
         return;
       }
       
