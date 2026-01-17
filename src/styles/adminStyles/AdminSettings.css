@@ -507,3 +507,153 @@
   color: #991b1b;
   border: 1px solid #ef4444;
 }
+
+/* Connection Logs Styles */
+.connection-logs {
+  margin-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+  padding-top: 1rem;
+}
+
+.logs-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.logs-toggle:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.logs-content {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.logs-content h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.test-stages {
+  margin-bottom: 1rem;
+}
+
+.test-stage {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--gray-300);
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.test-stage-pending {
+  border-left-color: var(--gray-400);
+  opacity: 0.6;
+}
+
+.test-stage-running {
+  border-left-color: var(--info);
+  background: var(--badge-info-bg);
+}
+
+.test-stage-success {
+  border-left-color: var(--success);
+  background: var(--badge-success-bg);
+}
+
+.test-stage-error {
+  border-left-color: var(--error);
+  background: var(--badge-error-bg);
+}
+
+.stage-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.stage-message {
+  font-size: 0.8rem;
+  color: var(--gray-700);
+}
+
+.stage-data {
+  margin-top: 0.5rem;
+}
+
+.stage-data summary {
+  font-size: 0.8rem;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.stage-data summary:hover {
+  text-decoration: underline;
+}
+
+.stage-data pre {
+  margin: 0.5rem 0 0 0;
+  padding: 0.5rem;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  overflow-x: auto;
+  color: var(--text);
+}
+
+.response-data,
+.error-details {
+  margin-top: 1rem;
+}
+
+.response-data pre,
+.error-details pre {
+  margin: 0.5rem 0 0 0;
+  padding: 0.75rem;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  overflow-x: auto;
+  color: var(--text);
+  border: 1px solid var(--gray-200);
+}
+
+.error-details {
+  border-top: 1px solid var(--error);
+  padding-top: 0.75rem;
+}
+
+.error-details h4 {
+  color: var(--error);
+}
+
+.error-details pre {
+  background: var(--badge-error-bg);
+  border-color: var(--error);
+  color: var(--error);
+}
