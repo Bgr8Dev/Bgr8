@@ -1,0 +1,13 @@
+version: "2"
+authtoken: ${NGROK_AUTHTOKEN}
+
+tunnels:
+  frontend:
+    addr: 5173
+    proto: http
+  email:
+    addr: 3001
+    proto: http
+  calcom:
+    addr: 4000
+    proto: http

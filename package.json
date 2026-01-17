@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "dev:all": "concurrently \"npm run dev\" \"npm run calcom:server\"",
+    "email:server": "npm --prefix email-server run dev",
+    "dev:stack": "concurrently \"npm run dev\" \"npm run calcom:server\" \"npm run email:server\"",
     "calcom:server": "node B8-Calcom-Server/calComServer.mjs",
     "build": "npm install --legacy-peer-deps && vite build",
     "lint": "eslint .",

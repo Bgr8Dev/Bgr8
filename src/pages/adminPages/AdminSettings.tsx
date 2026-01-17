@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle, FaFlag, FaEye } from 'react-icons/fa';
+import { FaCog, FaShieldAlt, FaSync, FaExclamationTriangle, FaFlag, FaEye, FaServer } from 'react-icons/fa';
 import PagePermissionsManager from '../../components/admin/settings/PagePermissionsManager';
 import BlueLocked from '../../components/admin/settings/BlueLocked';
 import BannerManagement from '../../components/admin/settings/BannerManagement';
 import VisibilityManagement from '../../components/admin/settings/VisibilityManagement';
+import ServerConnectionTests from '../../components/admin/settings/ServerConnectionTests';
 import BannerWrapper from '../../components/ui/BannerWrapper';
 import { PagePermissionsService } from '../../services/pagePermissionsService';
+import { loggers } from '../../utils/logger';
 import '../../styles/adminStyles/AdminSettings.css';
 
 export function AdminSettings() {
-  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'banners' | 'visibility'>('permissions');
+  const [activeTab, setActiveTab] = useState<'permissions' | 'general' | 'banners' | 'visibility' | 'connections'>('permissions');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
@@ -20,7 +22,7 @@ export function AdminSettings() {
       await PagePermissionsService.forceUpdatePermissions();
       setUpdateMessage('Page permissions updated successfully! All new pages have been added to Firebase.');
     } catch (error) {
-      console.error('Error updating permissions:', error);
+      loggers.error.error('Error updating permissions:', error);
       setUpdateMessage('Failed to update page permissions. Please try again.');
     } finally {
       setIsUpdating(false);
@@ -63,6 +65,13 @@ export function AdminSettings() {
         >
           <FaEye />
           Visibility Control
+        </button>
+        <button
+          className={`admin-settings-tab ${activeTab === 'connections' ? 'active' : ''}`}
+          onClick={() => setActiveTab('connections')}
+        >
+          <FaServer />
+          Connection Tests
         </button>
       </div>
 
@@ -111,6 +120,11 @@ export function AdminSettings() {
               {activeTab === 'visibility' && (
                 <div className="admin-settings-visibility">
                   <VisibilityManagement />
+                </div>
+              )}
+              {activeTab === 'connections' && (
+                <div className="admin-settings-connections">
+                  <ServerConnectionTests />
                 </div>
               )}
             </div>
