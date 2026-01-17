@@ -1,17 +1,13 @@
-import { firestore } from '../../../../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { auth } from '../../../../firebase/firebase';
 import { loggers } from '../../../../utils/logger';
 
 // Always use production Cal.com proxy server
-const CALCOM_API_BASE = 'https://bgr8-cal-server.onrender.com';
+const CALCOM_SERVER_BASE = import.meta.env.VITE_CALCOM_SERVER_BASE_URL || 'https://bgr8-cal-server.onrender.com';
 
-// Interface for Cal.com API key storage
-export interface CalComApiKeyData {
+// Interface for Cal.com token status (never expose API key)
+export interface CalComTokenInfo {
   mentorUid: string;
-  apiKey: string;
   calComUsername: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
 }
 
 // Interface for Cal.com booking creation
@@ -134,25 +130,70 @@ export interface CalComEventTypeWithAvailability extends CalComEventType {
   schedule?: CalComSchedule;
 }
 
-// Secure API key storage functions
-export class CalComTokenManager {
-  private static readonly COLLECTION_NAME = 'calcomTokens';
+const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  const token = await user.getIdToken();
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
 
-  // Store a mentor's Cal.com API key securely
+const callCalcomServer = async <T>(
+  path: string,
+  body?: Record<string, unknown>,
+  method: 'POST' | 'GET' | 'DELETE' = 'POST'
+): Promise<T> => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${CALCOM_SERVER_BASE}${path}`, {
+    method,
+    headers,
+    body: method === 'GET' ? undefined : JSON.stringify(body || {}),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const errorMessage = (data as { error?: string }).error || `${response.status} ${response.statusText}`;
+    throw new Error(errorMessage);
+  }
+  return data as T;
+};
+
+const callCalcomServerWithQuery = async <T>(
+  path: string,
+  query: Record<string, string | undefined>
+): Promise<T> => {
+  const headers = await getAuthHeaders();
+  const url = new URL(`${CALCOM_SERVER_BASE}${path}`);
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) {
+      url.searchParams.append(key, value);
+    }
+  });
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const errorMessage = (data as { error?: string }).error || `${response.status} ${response.statusText}`;
+    throw new Error(errorMessage);
+  }
+  return data as T;
+};
+
+// Secure API key storage functions (server-side only)
+export class CalComTokenManager {
+  // Store a mentor's Cal.com API key securely (server-side)
   static async storeApiKey(
     mentorUid: string,
     apiKey: string,
     calComUsername: string
   ): Promise<void> {
     try {
-      const apiKeyData: CalComApiKeyData = {
-        mentorUid,
-        apiKey,
-        calComUsername,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      };
-      await setDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), apiKeyData);
+      await callCalcomServer('/tokens', { apiKey, calComUsername });
       loggers.booking.log(`Cal.com API key stored for mentor: ${mentorUid}`);
     } catch (error) {
       loggers.booking.error('Error storing Cal.com API key:', error);
@@ -160,16 +201,22 @@ export class CalComTokenManager {
     }
   }
 
-  // Retrieve a mentor's Cal.com API key
-  static async getApiKeyData(mentorUid: string): Promise<CalComApiKeyData | null> {
+  // Retrieve a mentor's Cal.com token info (never returns apiKey)
+  static async getApiKeyData(mentorUid: string): Promise<CalComTokenInfo | null> {
     try {
-      const apiKeyDoc = await getDoc(doc(firestore, this.COLLECTION_NAME, mentorUid));
-      if (!apiKeyDoc.exists()) {
+      const data = await callCalcomServerWithQuery<{ connected: boolean; calComUsername?: string }>(
+        '/tokens/status',
+        { mentorUid }
+      );
+      if (!data.connected) {
         return null;
       }
-      return apiKeyDoc.data() as CalComApiKeyData;
+      return {
+        mentorUid,
+        calComUsername: data.calComUsername || ''
+      };
     } catch (error) {
-      loggers.booking.error('Error retrieving Cal.com API key:', error);
+      loggers.booking.error('Error retrieving Cal.com token info:', error);
       return null;
     }
   }
@@ -177,13 +224,11 @@ export class CalComTokenManager {
   // Update API key (if needed)
   static async updateApiKey(
     mentorUid: string,
-    apiKey: string
+    apiKey: string,
+    calComUsername: string
   ): Promise<void> {
     try {
-      await updateDoc(doc(firestore, this.COLLECTION_NAME, mentorUid), {
-        apiKey,
-        updatedAt: Timestamp.now()
-      });
+      await callCalcomServer('/tokens', { apiKey, calComUsername });
       loggers.booking.log(`Cal.com API key updated for mentor: ${mentorUid}`);
     } catch (error) {
       loggers.booking.error('Error updating Cal.com API key:', error);
@@ -194,7 +239,7 @@ export class CalComTokenManager {
   // Remove a mentor's Cal.com API key
   static async removeApiKey(mentorUid: string): Promise<void> {
     try {
-      await deleteDoc(doc(firestore, this.COLLECTION_NAME, mentorUid));
+      await callCalcomServer('/tokens', { mentorUid }, 'DELETE');
       loggers.booking.log(`Cal.com API key removed for mentor: ${mentorUid}`);
     } catch (error) {
       loggers.booking.error('Error removing Cal.com API key:', error);
@@ -211,28 +256,12 @@ export class CalComTokenManager {
 
 // Cal.com API service
 export class CalComService {
-  private static async getApiKey(mentorUid: string): Promise<{ apiKey: string; calComUsername: string }> {
-    const apiKeyData = await CalComTokenManager.getApiKeyData(mentorUid);
-    if (!apiKeyData) {
-      throw new Error('No Cal.com API key found for this mentor');
-    }
-    return { apiKey: apiKeyData.apiKey, calComUsername: apiKeyData.calComUsername };
-  }
-
   // Get mentor's event types
   static async getEventTypes(mentorUid: string): Promise<CalComEventType[]> {
     try {
-      const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      const url = `${CALCOM_API_BASE}/event-types?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const data = await callCalcomServer<{ event_types?: CalComEventType[] }>('/calcom/event-types', {
+        mentorUid
       });
-      if (!response.ok) {
-        throw new Error(`Cal.com API error: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
       return data.event_types || [];
     } catch (error) {
       loggers.booking.error('Error fetching Cal.com event types:', error);
@@ -246,23 +275,13 @@ export class CalComService {
     bookingRequest: CalComBookingRequest
   ): Promise<CalComBookingResponse> {
     try {
-      const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      const response = await fetch(`${CALCOM_API_BASE}/bookings`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...bookingRequest,
-          username: calComUsername
-        })
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Cal.com booking failed: ${response.status} ${response.statusText} - ${errorData.message || ''}`);
+      const data = await callCalcomServer<{ booking?: CalComBookingResponse; message?: string }>(
+        '/calcom/bookings',
+        { mentorUid, bookingRequest }
+      );
+      if (!data.booking) {
+        throw new Error(data.message || 'Cal.com booking failed');
       }
-      const data = await response.json();
       return data.booking;
     } catch (error) {
       loggers.booking.error('Error creating Cal.com booking:', error);
@@ -277,18 +296,7 @@ export class CalComService {
     reason?: string
   ): Promise<void> {
     try {
-      const { apiKey } = await this.getApiKey(mentorUid);
-      const response = await fetch(`${CALCOM_API_BASE}/bookings/${bookingId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ reason })
-      });
-      if (!response.ok) {
-        throw new Error(`Cal.com cancellation failed: ${response.status} ${response.statusText}`);
-      }
+      await callCalcomServer('/calcom/bookings/cancel', { mentorUid, bookingId, reason });
     } catch (error) {
       loggers.booking.error('Error canceling Cal.com booking:', error);
       throw error;
@@ -302,75 +310,11 @@ export class CalComService {
     endTime?: string
   ): Promise<CalComBookingResponse[]> {
     try {
-      const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      
-      // Cal.com API v2 uses different parameter names - try both formats
-      // Format 1: With date range parameters
-      let url = `${CALCOM_API_BASE}/bookings?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
-      if (startTime) {
-        // Try different parameter names that Cal.com might accept
-        url += `&startTime=${encodeURIComponent(startTime)}`;
-        url += `&start=${encodeURIComponent(startTime)}`;
-      }
-      if (endTime) {
-        url += `&endTime=${encodeURIComponent(endTime)}`;
-        url += `&end=${encodeURIComponent(endTime)}`;
-      }
-      
-      loggers.booking.log('📡 Fetching Cal.com bookings:', {
-        url: url.replace(apiKey, '***'),
+      const data = await callCalcomServer<Record<string, unknown>>('/calcom/bookings/list', {
+        mentorUid,
         startTime,
-        endTime,
-        username: calComUsername
+        endTime
       });
-      
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      loggers.booking.log('📡 Cal.com API response status:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        loggers.booking.error('❌ Cal.com API error response:', errorText);
-        
-        // If date parameters cause issues, try without them
-        if (response.status === 400 && (startTime || endTime)) {
-          loggers.booking.warn('⚠️ Date parameters may not be supported, trying without date filter...');
-          const fallbackUrl = `${CALCOM_API_BASE}/bookings?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
-          const fallbackResponse = await fetch(fallbackUrl, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json();
-            loggers.booking.log('✅ Fallback request succeeded, filtering bookings by date range in code');
-            
-            // Filter bookings by date range manually
-            let bookings = this.parseBookingsResponse(fallbackData);
-            if (startTime || endTime) {
-              const start = startTime ? new Date(startTime) : null;
-              const end = endTime ? new Date(endTime) : null;
-              bookings = bookings.filter(booking => {
-                const bookingStart = new Date(booking.startTime);
-                if (start && bookingStart < start) return false;
-                if (end && bookingStart > end) return false;
-                return true;
-              });
-            }
-            loggers.booking.log(`📋 Filtered to ${bookings.length} bookings within date range`);
-            return bookings;
-          }
-        }
-        
-        throw new Error(`Cal.com API error: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
       const bookings = this.parseBookingsResponse(data);
       
       loggers.booking.log(`📋 Parsed ${bookings.length} bookings from Cal.com API`);
@@ -452,28 +396,18 @@ export class CalComService {
     dateTo: string
   ): Promise<CalComAvailability[]> {
     try {
-      const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      
       // First, get the mentor's event types to understand their schedules
       const eventTypes = await this.getEventTypes(mentorUid);
       
       // Get availability for each event type
       const availabilityPromises = eventTypes.map(async (eventType) => {
         try {
-          const url = `${CALCOM_API_BASE}/availability?username=${calComUsername}&dateFrom=${dateFrom}&dateTo=${dateTo}&eventTypeId=${eventType.id}&apiKey=${encodeURIComponent(apiKey)}`;
-          
-          const response = await fetch(url, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
+          const data = await callCalcomServer<CalComAvailabilityResponse>('/calcom/availability', {
+            mentorUid,
+            dateFrom,
+            dateTo,
+            eventTypeId: eventType.id
           });
-          
-          if (!response.ok) {
-            loggers.booking.warn(`Failed to get availability for event type ${eventType.id}: ${response.status}`);
-            return null;
-          }
-          
-          const data: CalComAvailabilityResponse = await response.json();
           
           // Convert busy times to availability slots
           const availability = this.convertBusyTimesToAvailability(
@@ -501,20 +435,9 @@ export class CalComService {
   // Get mentor's schedules
   static async getSchedules(mentorUid: string): Promise<CalComSchedule[]> {
     try {
-      const { apiKey, calComUsername } = await this.getApiKey(mentorUid);
-      const url = `${CALCOM_API_BASE}/schedules?username=${calComUsername}&apiKey=${encodeURIComponent(apiKey)}`;
-      
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const data = await callCalcomServer<{ schedules?: CalComSchedule[] }>('/calcom/schedules', {
+        mentorUid
       });
-      
-      if (!response.ok) {
-        throw new Error(`Cal.com API error: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
       return data.schedules || [];
     } catch (error) {
       loggers.booking.error('Error fetching Cal.com schedules:', error);

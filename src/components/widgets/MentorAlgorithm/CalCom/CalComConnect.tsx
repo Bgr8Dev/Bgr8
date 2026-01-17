@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FaCalendarAlt, FaKey, FaUnlink, FaCheckCircle, FaExclamationTriangle, FaSpinner, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../../../hooks/useAuth';
 import { CalComTokenManager, CalComService, CalComUtils } from './calComService';
+import { loggers } from '../../../../utils/logger';
 import './CalComModal.css';
 
 interface CalComConnectProps {
@@ -36,7 +37,7 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
         }
       }
     } catch (error) {
-      console.error('Error checking connection status:', error);
+      loggers.booking.error('Error checking connection status:', error);
     }
   }, [currentUser]);
   
@@ -84,7 +85,7 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
         onSuccess();
       }
     } catch (error) {
-      console.error('Error connecting Cal.com account:', error);
+      loggers.booking.error('Error connecting Cal.com account:', error);
       setError(error instanceof Error ? error.message : 'Failed to connect Cal.com account');
     } finally {
       setIsLoading(false);
@@ -101,7 +102,7 @@ const CalComConnect: React.FC<CalComConnectProps> = ({ open, onClose, onSuccess 
       setTokenInfo(null);
       setSuccess('Cal.com account disconnected successfully');
     } catch (error) {
-      console.error('Error disconnecting Cal.com account:', error);
+      loggers.booking.error('Error disconnecting Cal.com account:', error);
       setError('Failed to disconnect Cal.com account');
     } finally {
       setIsLoading(false);
