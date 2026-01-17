@@ -8,7 +8,18 @@
 import { auth } from '../firebase/firebase';
 import { loggers } from '../utils/logger';
 
-const FIREBASE_SERVER_URL = import.meta.env.VITE_FIREBASE_SERVER_URL || 'http://localhost:4001';
+// Auto-detect Firebase server URL based on environment
+// Uses production URL in production builds, localhost in development
+const isProduction = import.meta.env.PROD;
+const isLocalhost = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+);
+
+const FIREBASE_SERVER_URL = import.meta.env.VITE_FIREBASE_SERVER_URL || 
+  (isProduction && !isLocalhost 
+    ? 'https://bgr8-firebase-server.onrender.com'
+    : 'http://localhost:4001');
 
 class FirebaseApiError extends Error {
   constructor(
