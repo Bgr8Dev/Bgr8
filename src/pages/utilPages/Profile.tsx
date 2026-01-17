@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { doc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
@@ -56,7 +56,7 @@ const nationalityOptions = [
 ];
 
 export default function Profile() {
-  const { userProfile, currentUser, changePassword } = useAuth();
+  const { userProfile, currentUser, changePassword, verifyCurrentPassword } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -72,6 +72,9 @@ export default function Profile() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [currentPasswordStatus, setCurrentPasswordStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [currentPasswordStatusMessage, setCurrentPasswordStatusMessage] = useState('');
+  const currentPasswordCheckId = useRef(0);
   const [formData, setFormData] = useState({
     firstName: userProfile?.firstName || '',
     lastName: userProfile?.lastName || '',
@@ -88,6 +91,7 @@ export default function Profile() {
   const [showSecondNationality, setShowSecondNationality] = useState(
     formData.nationality === 'Dual Nationality'
   );
+  const specialCharacterPattern = /[^A-Za-z0-9\s]/;
 
   // Fetch user role from mentorProgram profile
   useEffect(() => {
@@ -177,7 +181,7 @@ export default function Profile() {
       return;
     }
 
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(passwordFormData.newPassword)) {
+    if (!specialCharacterPattern.test(passwordFormData.newPassword)) {
       setPasswordError('New password must contain at least one special character');
       return;
     }
@@ -191,6 +195,8 @@ export default function Profile() {
         newPassword: '',
         confirmPassword: ''
       });
+      setCurrentPasswordStatus('idle');
+      setCurrentPasswordStatusMessage('');
       setPasswordSuccess('Password changed successfully');
       
       // Hide success message after 3 seconds
@@ -204,6 +210,31 @@ export default function Profile() {
       } else {
         setPasswordError('An error occurred while changing your password');
       }
+    }
+  };
+
+  const handleCurrentPasswordCheck = async () => {
+    const passwordToCheck = passwordFormData.currentPassword;
+    if (!passwordToCheck) {
+      setCurrentPasswordStatus('idle');
+      setCurrentPasswordStatusMessage('');
+      return;
+    }
+
+    const checkId = currentPasswordCheckId.current + 1;
+    currentPasswordCheckId.current = checkId;
+    setCurrentPasswordStatus('checking');
+    setCurrentPasswordStatusMessage('Checking current password...');
+
+    const result = await verifyCurrentPassword(passwordToCheck);
+    if (currentPasswordCheckId.current !== checkId) return;
+
+    if (result.isValid) {
+      setCurrentPasswordStatus('valid');
+      setCurrentPasswordStatusMessage('Current password confirmed');
+    } else {
+      setCurrentPasswordStatus('invalid');
+      setCurrentPasswordStatusMessage(result.message || 'Current password is incorrect');
     }
   };
 
@@ -451,10 +482,26 @@ export default function Profile() {
                 <input
                   type={showCurrentPassword ? "text" : "password"}
                   value={passwordFormData.currentPassword}
-                  onChange={(e) => setPasswordFormData({
-                    ...passwordFormData, 
-                    currentPassword: e.target.value
-                  })}
+                  onChange={(e) => {
+                    setPasswordFormData({
+                      ...passwordFormData, 
+                      currentPassword: e.target.value
+                    });
+                    if (currentPasswordStatus !== 'idle') {
+                      setCurrentPasswordStatus('idle');
+                      setCurrentPasswordStatusMessage('');
+                    }
+                  }}
+                  onBlur={handleCurrentPasswordCheck}
+                  className={
+                    currentPasswordStatus === 'valid'
+                      ? 'is-valid'
+                      : currentPasswordStatus === 'invalid'
+                        ? 'is-invalid'
+                        : currentPasswordStatus === 'checking'
+                          ? 'is-checking'
+                          : ''
+                  }
                   required
                 />
                 <button 
@@ -466,6 +513,15 @@ export default function Profile() {
                   {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {currentPasswordStatus !== 'idle' && (
+                <div
+                  className={`password-status ${currentPasswordStatus}`}
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {currentPasswordStatusMessage}
+                </div>
+              )}
             </div>
             
             <div className="form-group password-field">
@@ -526,7 +582,7 @@ export default function Profile() {
                 <li className={/[0-9]/.test(passwordFormData.newPassword) ? 'valid' : ''}>
                   At least one number
                 </li>
-                <li className={/[!@#$%^&*(),.?":{}|<>]/.test(passwordFormData.newPassword) ? 'valid' : ''}>
+                <li className={specialCharacterPattern.test(passwordFormData.newPassword) ? 'valid' : ''}>
                   At least one special character
                 </li>
               </ul>

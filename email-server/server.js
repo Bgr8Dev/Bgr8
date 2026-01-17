@@ -6,6 +6,7 @@ const Joi = require('joi');
 const nodemailer = require('nodemailer');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
+const fs = require('fs');
 require('dotenv').config();
 
 // Sanitize user input for logging to prevent log injection attacks
@@ -40,7 +41,14 @@ const PORT = process.env.PORT || 3001;
 if (!admin.apps.length) {
   try {
     // Initialize with service account if available, otherwise use default credentials
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_FILE) {
+      const filePath = process.env.FIREBASE_SERVICE_ACCOUNT_FILE;
+      const fileContents = fs.readFileSync(filePath, 'utf8');
+      const serviceAccount = JSON.parse(fileContents);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+    } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
@@ -52,7 +60,7 @@ if (!admin.apps.length) {
       });
     } else {
       console.warn('⚠️  Firebase Admin not initialized - webhook functionality will not work');
-      console.warn('⚠️  Set FIREBASE_SERVICE_ACCOUNT or FIREBASE_PROJECT_ID environment variable');
+      console.warn('⚠️  Set FIREBASE_SERVICE_ACCOUNT_FILE, FIREBASE_SERVICE_ACCOUNT or FIREBASE_PROJECT_ID');
     }
   } catch (error) {
     console.error('❌ Error initializing Firebase Admin:', error.message);

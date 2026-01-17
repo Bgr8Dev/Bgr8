@@ -217,8 +217,8 @@
   background: linear-gradient(90deg, var(--text), var(--accent), var(--text));
   background-size: 200% auto;
   color: var(--text);
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shine 3s linear infinite;
 }
@@ -511,6 +511,38 @@
 .password-input-container input {
   width: 100%;
   padding-right: 40px;
+}
+
+.password-input-container input.is-valid {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.password-input-container input.is-invalid {
+  border-color: var(--error);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.password-input-container input.is-checking {
+  border-color: var(--gray-400);
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+}
+
+.password-status {
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+
+.password-status.valid {
+  color: var(--success);
+}
+
+.password-status.invalid {
+  color: var(--error);
+}
+
+.password-status.checking {
+  color: var(--gray-500);
 }
 
 .toggle-password-visibility {

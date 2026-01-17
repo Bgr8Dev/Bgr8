@@ -115,6 +115,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const verifyCurrentPassword = async (currentPassword: string) => {
+    if (!currentUser || !currentUser.email) {
+      return { isValid: false, message: 'No authenticated user found' };
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(
+        currentUser.email,
+        currentPassword
+      );
+
+      await reauthenticateWithCredential(currentUser, credential);
+      return { isValid: true };
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error) {
+        const firebaseError = error as { code: string, message?: string };
+
+        if (firebaseError.code === 'auth/wrong-password') {
+          return { isValid: false, message: 'Current password is incorrect' };
+        }
+
+        if (firebaseError.code === 'auth/requires-recent-login') {
+          return { isValid: false, message: 'Please sign in again to verify your password' };
+        }
+
+        return { isValid: false, message: firebaseError.message || 'Failed to verify password' };
+      }
+
+      return { isValid: false, message: 'Failed to verify password' };
+    }
+  };
+
   const resetPassword = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
     logAnalyticsEvent('password_reset_email_sent', { email });
@@ -125,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userProfile,
     loading,
     changePassword,
+    verifyCurrentPassword,
     resetPassword
   };
 

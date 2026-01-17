@@ -7,6 +7,7 @@ export interface AuthContextType {
   userProfile: UserProfile | null;
   loading: boolean;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  verifyCurrentPassword: (currentPassword: string) => Promise<{ isValid: boolean; message?: string }>;
   resetPassword: (email: string) => Promise<void>;
 }
 
@@ -15,5 +16,6 @@ export const AuthContext = createContext<AuthContextType>({
   userProfile: null,
   loading: true,
   changePassword: async () => {},
+  verifyCurrentPassword: async () => ({ isValid: false, message: 'Not initialized' }),
   resetPassword: async () => {}
 }); 
