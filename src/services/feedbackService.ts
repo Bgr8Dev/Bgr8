@@ -20,6 +20,7 @@ import {
 } from 'firebase/storage';
 import { firestore, storage } from '../firebase/firebase';
 import { loggers } from '../utils/logger';
+import { malwareScanService } from './malwareScanService';
 import {
   FeedbackTicket,
   FeedbackComment,
@@ -83,6 +84,31 @@ export class FeedbackService {
         
         if (!allowedTypes.includes(file.type)) {
           throw new Error(`File type "${file.type}" is not allowed for "${file.name}".`);
+        }
+      }
+
+      // Scan files for malware before upload
+      if (malwareScanService.isEnabled()) {
+        try {
+          const scanResults = await malwareScanService.scanFiles(files, {
+            enableScanning: true,
+            useHashOnly: true // Use hash lookup for faster scanning
+          });
+
+          // Validate scan results - will throw if malicious files found
+          malwareScanService.validateScanResults(scanResults, files.map(f => f.name));
+
+          // Log successful scan
+          loggers.security.info('Malware scan completed successfully for feedback attachments', {
+            ticketId,
+            fileCount: files.length
+          });
+        } catch (scanError) {
+          loggers.security.error('Malware detected in file upload', {
+            ticketId,
+            error: scanError instanceof Error ? scanError.message : 'Unknown error'
+          });
+          throw scanError; // Re-throw to prevent upload
         }
       }
 

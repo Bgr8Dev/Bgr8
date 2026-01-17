@@ -6,6 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { firestore, storage } from '../../firebase/firebase';
 import { FaTimes, FaEye, FaEyeSlash, FaGraduationCap, FaUpload, FaSpinner } from 'react-icons/fa';
 import { compressImage, formatFileSize } from '../../utils/imageCompression';
+import { malwareScanService } from '../../services/malwareScanService';
 import '../../styles/Overlay.css';
 
 // Comprehensive list of ethnicities
@@ -268,6 +269,27 @@ export default function Profile() {
         console.log(`Original file size: ${formatFileSize(file.size)}. Compressing...`);
         fileToUpload = await compressImage(file, maxSizeBytes);
         console.log(`Compressed file size: ${formatFileSize(fileToUpload.size)}`);
+      }
+
+      // Scan file for malware before upload
+      if (malwareScanService.isEnabled()) {
+        try {
+          const scanResult = await malwareScanService.scanFile(fileToUpload, {
+            enableScanning: true,
+            useHashOnly: true
+          });
+
+          if (scanResult.isMalicious) {
+            throw new Error(scanResult.details || 'Malware detected in file. File has been blocked for security reasons.');
+          }
+        } catch (scanError) {
+          if (scanError instanceof Error && scanError.message.includes('Malware detected')) {
+            alert(scanError.message);
+            return;
+          }
+          alert('Malware detected in file. File has been blocked for security reasons.');
+          return;
+        }
       }
 
       // Create a unique filename

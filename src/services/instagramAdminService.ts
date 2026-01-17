@@ -19,6 +19,7 @@ import {
   deleteObject 
 } from 'firebase/storage';
 import { firestore, storage } from '../firebase/firebase';
+import { malwareScanService } from './malwareScanService';
 
 export interface InstagramAdminPost {
   id?: string;
@@ -54,12 +55,32 @@ class InstagramAdminService {
    */
   async uploadImage(file: File, path: string): Promise<string> {
     try {
+      // Scan file for malware before upload
+      if (malwareScanService.isEnabled()) {
+        try {
+          const scanResult = await malwareScanService.scanFile(file, {
+            enableScanning: true,
+            useHashOnly: true
+          });
+
+          if (scanResult.isMalicious) {
+            throw new Error(scanResult.details || 'Malware detected in file. File has been blocked for security reasons.');
+          }
+        } catch (scanError) {
+          // Re-throw with proper error message
+          if (scanError instanceof Error && scanError.message.includes('Malware detected')) {
+            throw scanError;
+          }
+          throw new Error('Malware detected in file. File has been blocked for security reasons.');
+        }
+      }
+
       const storageRef = ref(storage, `${this.storageBucket}/${path}`);
       const snapshot = await uploadBytes(storageRef, file);
       return await getDownloadURL(snapshot.ref);
     } catch (error) {
       console.error('Error uploading image:', error);
-      throw new Error('Failed to upload image');
+      throw error; // Re-throw to preserve malware detection errors
     }
   }
 

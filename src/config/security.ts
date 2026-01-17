@@ -40,6 +40,16 @@ export const FILE_UPLOAD = {
   SCAN_TIMEOUT: 30 * 1000 // 30 seconds
 };
 
+// Malware scanning settings
+export const MALWARE_SCAN = {
+  ENABLED: true, // Enable/disable malware scanning
+  USE_HASH_ONLY: true, // Use hash lookup instead of file upload (faster, uses less API quota)
+  SCAN_TIMEOUT: 30 * 1000, // 30 seconds timeout for scans
+  MAX_SCAN_SIZE: 32 * 1024 * 1024, // 32MB - VirusTotal's maximum file size
+  FAIL_OPEN_ON_ERROR: true, // If true, allow uploads if scan fails (recommended for production)
+  PROVIDER: 'virustotal' // Current provider: 'virustotal' | 'clamav' (future)
+};
+
 // Content Security Policy
 export const CSP_CONFIG = {
   'default-src': ["'self'"],
@@ -142,6 +152,8 @@ export const ERROR_MESSAGES = {
   SESSION_EXPIRED: 'Your session has expired. Please sign in again.',
   UNAUTHORIZED: 'You are not authorized to perform this action.',
   FILE_UPLOAD_FAILED: 'File upload failed. Please ensure the file meets our security requirements.',
+  MALWARE_DETECTED: 'Malware detected in file. File has been blocked for security reasons.',
+  MALWARE_SCAN_FAILED: 'Unable to scan file for malware. Please try again later.',
   INVALID_REQUEST: 'Invalid request. Please try again.',
   SERVER_ERROR: 'An unexpected error occurred. Please try again later.',
   RATE_LIMIT_EXCEEDED: 'Too many requests. Please try again later.',

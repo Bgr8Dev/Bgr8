@@ -3,6 +3,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { firestore, storage, auth } from '../../firebase/firebase';
 import { useAuth } from '../../hooks/useAuth';
+import { malwareScanService } from '../../services/malwareScanService';
 import { FaBriefcase, FaUsers, FaRocket, FaFileAlt, FaChevronDown, FaCode, FaVideo, FaUserTie, FaHandshake, FaCheck } from 'react-icons/fa';
 import '../../styles/components/JoinOurTeam.css';
 
@@ -147,6 +148,27 @@ export default function JoinOurTeam({ className = '' }: JoinOurTeamProps) {
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       if (!allowedTypes.includes(cvFile.type)) {
         throw new Error('File must be a PDF or Word document');
+      }
+
+      // Scan file for malware before upload
+      if (malwareScanService.isEnabled()) {
+        try {
+          const scanResult = await malwareScanService.scanFile(cvFile, {
+            enableScanning: true,
+            useHashOnly: true
+          });
+
+          if (scanResult.isMalicious) {
+            throw new Error(scanResult.details || 'Malware detected in file. File has been blocked for security reasons.');
+          }
+        } catch (scanError) {
+          // If it's already an Error with our message, re-throw it
+          if (scanError instanceof Error && scanError.message.includes('Malware detected')) {
+            throw scanError;
+          }
+          // Otherwise, re-throw with a generic message
+          throw new Error('Malware detected in file. File has been blocked for security reasons.');
+        }
       }
 
       // Generate a unique filename
