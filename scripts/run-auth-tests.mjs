@@ -16,7 +16,7 @@ if (missing.length > 0) {
 const runGetToken = () =>
   new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['scripts/get-id-token.mjs'], {
-      env: process.env,
+      env: { ...process.env, CALLED_FROM_SCRIPT: 'true' },
       stdio: ['ignore', 'pipe', 'pipe']
     });
 
@@ -36,9 +36,29 @@ const runGetToken = () =>
         reject(new Error(stderr || `Token helper exited with code ${code}`));
         return;
       }
-      const token = stdout.trim();
-      if (!token) {
-        reject(new Error('Token helper returned an empty token.'));
+      // Clean the token - get the last line (token should be on its own line)
+      // Split by newlines and filter out empty lines
+      const lines = stdout.split(/\r?\n/).filter(line => line.trim().length > 0);
+      // JWT tokens are typically very long (500+ chars) and contain only base64url characters
+      // Find the line that looks like a JWT token (contains dots and is long)
+      let token = lines.find(line => {
+        const trimmed = line.trim();
+        // JWT format: header.payload.signature (3 parts separated by dots)
+        return trimmed.includes('.') && 
+               trimmed.length > 100 && 
+               /^[A-Za-z0-9_\-=.]+$/.test(trimmed);
+      });
+      
+      // Fallback: if no token found, use the last non-empty line
+      if (!token && lines.length > 0) {
+        token = lines[lines.length - 1].trim();
+      }
+      
+      // Final cleanup: trim whitespace only
+      token = token?.trim();
+      
+      if (!token || token.length < 100) {
+        reject(new Error(`Token helper returned an invalid token. Expected JWT, got: ${token?.substring(0, 50) || 'empty'}`));
         return;
       }
       resolve(token);
@@ -58,7 +78,8 @@ const runTests = (token, testFiles) =>
     const env = {
       ...process.env,
       EMAIL_SERVER_AUTH_TOKEN: token,
-      CALCOM_SERVER_AUTH_TOKEN: token
+      CALCOM_SERVER_AUTH_TOKEN: token,
+      FIREBASE_SERVER_AUTH_TOKEN: token
     };
 
     const child = spawn(process.execPath, ['--test', ...testFiles], {
