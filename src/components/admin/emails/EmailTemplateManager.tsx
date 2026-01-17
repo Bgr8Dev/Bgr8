@@ -18,7 +18,7 @@ import {
   EmailTemplates, 
   renderEmailTemplate 
 } from '../../../services/emailTemplates';
-import { htmlToText } from '../../../utils/inputSanitization';
+import { htmlToText, sanitizeHtml } from '../../../utils/inputSanitization';
 import { loggers } from '../../../utils/logger';
 import './EmailTemplateManager.css';
 
@@ -579,7 +579,7 @@ export const EmailTemplateManager: React.FC<TemplateManagerProps> = ({
                 {previewData.content ? (
                   <div 
                     className="preview-content"
-                    dangerouslySetInnerHTML={{ __html: previewData.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewData.content) }}
                   />
                 ) : (
                   <div className="preview-content">

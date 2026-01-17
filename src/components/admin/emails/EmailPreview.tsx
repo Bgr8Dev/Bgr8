@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaTimes, FaEye, FaPaperPlane, FaCalendarAlt, FaUsers } from 'react-icons/fa';
+import { sanitizeHtml } from '../../../utils/inputSanitization';
 
 interface EmailPreviewProps {
   isOpen: boolean;
@@ -175,7 +176,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({
                 <div 
                   className="email-preview-html-content"
                   dangerouslySetInnerHTML={{ 
-                    __html: content.replace(/\n/g, '<br>') 
+                    __html: sanitizeHtml(content.replace(/\n/g, '<br>'))
                   }} 
                 />
               ) : (

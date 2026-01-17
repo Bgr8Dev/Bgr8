@@ -22,6 +22,7 @@ import {
   FaChevronDown,
   FaChevronUp
 } from 'react-icons/fa';
+import { sanitizeHtml } from '../../../utils/inputSanitization';
 import './MobileAdminEmails.css';
 
 interface EmailTemplate {
@@ -442,7 +443,7 @@ export function MobileAdminEmails() {
                   </div>
                   <div className="preview-body">
                     {currentDraft.content ? (
-                      <div dangerouslySetInnerHTML={{ __html: currentDraft.content.replace(/\n/g, '<br>') }} />
+                      <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(currentDraft.content.replace(/\n/g, '<br>')) }} />
                     ) : (
                       <p>No content yet</p>
                     )}

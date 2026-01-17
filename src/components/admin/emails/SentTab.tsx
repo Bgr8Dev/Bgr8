@@ -14,6 +14,7 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import { SentEmail } from '../../../services/emailService';
+import { sanitizeHtml } from '../../../utils/inputSanitization';
 
 interface SentTabProps {
   sentEmails: SentEmail[];
@@ -333,7 +334,7 @@ export const SentTab: React.FC<SentTabProps> = ({
                 <div className="email-sent-preview">
                   {email.content ? (
                     <div dangerouslySetInnerHTML={{ 
-                      __html: email.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' 
+                      __html: sanitizeHtml(email.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...')
                     }} />
                   ) : (
                     <p>No content preview available</p>

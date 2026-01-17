@@ -38,6 +38,38 @@ export default function AdminPortal() {
       navigate('/');
       return;
     }
+
+    // Prevent caching of admin portal pages
+    // Add no-cache meta tags
+    const metaNoCache = document.createElement('meta');
+    metaNoCache.httpEquiv = 'Cache-Control';
+    metaNoCache.content = 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+    document.head.appendChild(metaNoCache);
+
+    const metaPragma = document.createElement('meta');
+    metaPragma.httpEquiv = 'Pragma';
+    metaPragma.content = 'no-cache';
+    document.head.appendChild(metaPragma);
+
+    const metaExpires = document.createElement('meta');
+    metaExpires.httpEquiv = 'Expires';
+    metaExpires.content = '0';
+    document.head.appendChild(metaExpires);
+
+    // Also set cache-control headers via document property
+    if (document.documentElement) {
+      document.documentElement.setAttribute('data-cache-control', 'no-cache');
+    }
+
+    // Cleanup: remove meta tags when component unmounts
+    return () => {
+      const noCacheMeta = document.querySelector('meta[http-equiv="Cache-Control"]');
+      const pragmaMeta = document.querySelector('meta[http-equiv="Pragma"]');
+      const expiresMeta = document.querySelector('meta[http-equiv="Expires"]');
+      if (noCacheMeta) noCacheMeta.remove();
+      if (pragmaMeta) pragmaMeta.remove();
+      if (expiresMeta) expiresMeta.remove();
+    };
   }, [userProfile, navigate]);
 
   useEffect(() => {

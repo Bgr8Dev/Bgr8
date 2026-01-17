@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { firestore } from '../../../firebase/firebase';
 import { Session } from '../../../types/sessions';
-import { SessionsService } from '../../../services/sessionsService';
+import { FirebaseApiService } from '../../../services/firebaseApiService';
 import { Timestamp } from 'firebase/firestore';
 import { FaSearch, FaFilter } from 'react-icons/fa';
+import { useAuth } from '../../../hooks/useAuth';
+import { hasRole } from '../../../utils/userProfile';
 import './SessionsManagement.css';
 
 export const SessionsManagement: React.FC = () => {
+  const { userProfile } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,25 +16,36 @@ export const SessionsManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    loadSessions();
-  }, []);
+    // Only load sessions if user is authenticated and has admin role
+    if (userProfile && hasRole(userProfile, 'admin')) {
+      loadSessions();
+    } else {
+      setError('Admin access required');
+      setLoading(false);
+    }
+  }, [userProfile]);
 
   const loadSessions = async () => {
+    // Double-check authentication before making API call
+    if (!userProfile || !hasRole(userProfile, 'admin')) {
+      setError('Admin access required');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      const sessionsQuery = query(
-        collection(firestore, 'sessions'),
-        orderBy('sessionDate', 'desc')
-      );
+      // Use authenticated API service instead of direct Firestore access
+      // This ensures proper authentication and authorization checks
+      const sessionsData = await FirebaseApiService.getSessions();
       
-      const sessionsSnapshot = await getDocs(sessionsQuery);
-      const sessionsData: Session[] = [];
+      // Convert API response to Session[] format
+      const formattedSessions: Session[] = sessionsData.map((session: any) => ({
+        id: session.id,
+        ...session
+      })) as Session[];
       
-      sessionsSnapshot.forEach(doc => {
-        sessionsData.push({ id: doc.id, ...doc.data() } as Session);
-      });
-      
-      setSessions(sessionsData);
+      setSessions(formattedSessions);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load sessions');
     } finally {
