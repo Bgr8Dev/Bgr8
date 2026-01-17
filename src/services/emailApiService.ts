@@ -5,11 +5,11 @@
  * It communicates with the backend to send emails using Zoho Mail.
  */
 
+import { auth } from '../firebase/firebase';
 import { loggers } from '../utils/logger';
 
 export interface EmailApiConfig {
   apiBaseUrl: string;
-  apiKey: string;
 }
 
 export interface EmailApiMessage {
@@ -50,6 +50,22 @@ export interface EmailApiResponse {
 export class EmailApiService {
   private static config: EmailApiConfig | null = null;
 
+  private static async getAuthHeaders(): Promise<Record<string, string>> {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    const token = await user.getIdToken();
+    return { Authorization: `Bearer ${token}` };
+  }
+
+  private static ensureConfig(): EmailApiConfig {
+    if (!this.config) {
+      throw new Error('Email API not initialized');
+    }
+    return this.config;
+  }
+
   /**
    * Initialize Email API configuration
    */
@@ -57,31 +73,34 @@ export class EmailApiService {
     this.config = config;
     loggers.email.log('🚀 Email API Service initialized with config:', {
       apiBaseUrl: config.apiBaseUrl,
-      apiKey: config.apiKey ? '***configured***' : 'NOT CONFIGURED'
     });
+  }
+
+  /**
+   * Fetch helper with Firebase auth
+   */
+  static async fetchWithAuth(path: string, init: RequestInit = {}): Promise<Response> {
+    const config = this.ensureConfig();
+    const authHeaders = await this.getAuthHeaders();
+    const headers = {
+      ...(init.headers || {}),
+      ...authHeaders
+    } as Record<string, string>;
+    return fetch(`${config.apiBaseUrl}${path}`, { ...init, headers });
   }
 
   /**
    * Test connection to email API server
    */
   static async testConnection(): Promise<{ success: boolean; error?: string }> {
-    if (!this.config) {
-      return {
-        success: false,
-        error: 'Email API not initialized'
-      };
-    }
-
     try {
-      const healthUrl = `${this.config.apiBaseUrl}/api/health`;
+      const config = this.ensureConfig();
+      const healthUrl = `${config.apiBaseUrl}/api/health`;
       loggers.email.log('🏥 Testing email server connection:', healthUrl);
       
-      const response = await fetch(healthUrl, {
+      const response = await this.fetchWithAuth('/api/health', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-        },
-        signal: AbortSignal.timeout(5000), // 5 second timeout for health check
+        signal: AbortSignal.timeout(5000),
         mode: 'cors',
         credentials: 'omit',
       });
@@ -109,13 +128,6 @@ export class EmailApiService {
    * Send email through backend API
    */
   static async sendEmail(message: EmailApiMessage): Promise<EmailApiResponse> {
-    if (!this.config) {
-      return {
-        success: false,
-        error: 'Email API not initialized'
-      };
-    }
-
     try {
       // Validate email message
       if (!message.to || message.to.length === 0) {
@@ -137,15 +149,17 @@ export class EmailApiService {
         throw new Error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
       }
 
-      const apiUrl = `${this.config.apiBaseUrl}/api/email/send`;
+      const config = this.ensureConfig();
+      const apiUrl = `${config.apiBaseUrl}/api/email/send`;
       loggers.email.log('🔗 Attempting to send email to:', apiUrl);
       loggers.email.log('📧 Email message:', message);
       
+      const authHeaders = await this.getAuthHeaders();
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          ...authHeaders,
         },
         body: JSON.stringify(message),
         // Add timeout and credentials for production
@@ -195,19 +209,14 @@ export class EmailApiService {
    * Send bulk emails through backend API
    */
   static async sendBulkEmail(messages: EmailApiMessage[]): Promise<EmailApiResponse[]> {
-    if (!this.config) {
-      return messages.map(() => ({
-        success: false,
-        error: 'Email API not initialized'
-      }));
-    }
-
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}/api/email/send-bulk`, {
+      const config = this.ensureConfig();
+      const authHeaders = await this.getAuthHeaders();
+      const response = await fetch(`${config.apiBaseUrl}/api/email/send-bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          ...authHeaders,
         },
         body: JSON.stringify({ messages }),
         signal: AbortSignal.timeout(60000), // 60 second timeout for bulk
@@ -236,16 +245,14 @@ export class EmailApiService {
    * Test email configuration
    */
   static async testConfiguration(): Promise<{ success: boolean; error?: string }> {
-    if (!this.config) {
-      return { success: false, error: 'Email API not initialized' };
-    }
-
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}/api/email/test`, {
+      const config = this.ensureConfig();
+      const authHeaders = await this.getAuthHeaders();
+      const response = await fetch(`${config.apiBaseUrl}/api/email/test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          ...authHeaders,
         },
         signal: AbortSignal.timeout(15000), // 15 second timeout for test
         mode: 'cors',
@@ -273,15 +280,13 @@ export class EmailApiService {
    * Get email statistics
    */
   static async getEmailStats(): Promise<{ success: boolean; data?: EmailStats; error?: string }> {
-    if (!this.config) {
-      return { success: false, error: 'Email API not initialized' };
-    }
-
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}/api/email/stats`, {
+      const config = this.ensureConfig();
+      const authHeaders = await this.getAuthHeaders();
+      const response = await fetch(`${config.apiBaseUrl}/api/email/stats`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          ...authHeaders,
         },
         signal: AbortSignal.timeout(10000), // 10 second timeout for stats
         mode: 'cors',

@@ -126,47 +126,60 @@ const emailLimiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// API Key Authentication Middleware
-const authenticateApiKey = (req, res, next) => {
+// Firebase Authentication Middleware (admin-only)
+const getBearerToken = (req) => {
+  const header = req.headers['authorization'] || '';
+  if (!header.startsWith('Bearer ')) return null;
+  return header.slice('Bearer '.length);
+};
+
+const authenticateFirebaseAdmin = async (req, res, next) => {
   // Skip authentication for health check endpoint
   if (req.path === '/health' || req.path === '/api/health') {
     return next();
   }
 
-  const apiKey = req.headers['authorization']?.replace('Bearer ', '') || req.headers['x-api-key'];
-  const expectedApiKey = process.env.API_KEY;
-
-  // If API_KEY is not set in environment, allow all requests (for development)
-  if (!expectedApiKey || expectedApiKey === 'your_secure_api_key_here') {
-    console.warn('⚠️  API_KEY not configured - allowing all requests (not secure for production!)');
-    return next();
+  if (!admin.apps.length || !db) {
+    return res.status(500).json({
+      success: false,
+      error: 'Firebase Admin not initialized on server.'
+    });
   }
 
-  if (!apiKey) {
+  const token = getBearerToken(req);
+  if (!token) {
     return res.status(401).json({
       success: false,
-      error: 'API key required. Include it in Authorization header as "Bearer <key>" or X-API-Key header.'
+      error: 'Authorization token required.'
     });
   }
 
-  if (apiKey !== expectedApiKey) {
-    console.warn(`⚠️  Invalid API key attempt from ${req.ip}`);
-    return res.status(403).json({
-      success: false,
-      error: 'Invalid API key'
-    });
-  }
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    req.auth = { uid: decodedToken.uid, email: decodedToken.email };
 
-  next();
+    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+    if (!userDoc.exists) {
+      return res.status(403).json({ success: false, error: 'User profile not found.' });
+    }
+
+    const data = userDoc.data() || {};
+    const roles = data.roles || {};
+    const isAdmin = roles.admin === true || data.admin === true;
+
+    if (!isAdmin) {
+      return res.status(403).json({ success: false, error: 'Admin access required.' });
+    }
+
+    return next();
+  } catch (error) {
+    console.warn('⚠️  Firebase auth failed:', error?.message || error);
+    return res.status(401).json({ success: false, error: 'Invalid auth token.' });
+  }
 };
 
-// Apply API key authentication to all API routes except health check
-app.use('/api/', (req, res, next) => {
-  if (req.path === '/health') {
-    return next();
-  }
-  authenticateApiKey(req, res, next);
-});
+// Apply Firebase authentication to all API routes except health check
+app.use('/api/', authenticateFirebaseAdmin);
 
 // Validation schemas
 const emailSchema = Joi.object({

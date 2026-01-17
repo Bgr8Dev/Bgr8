@@ -48,7 +48,7 @@ This guide will help you set up Zoho Mail integration for the Bgr8 admin portal 
    cp env.example .env
    ```
 
-4. Update `.env` with your Zoho credentials:
+4. Update `.env` with your Zoho credentials and Firebase Admin:
    ```env
    # Server Configuration
    PORT=3001
@@ -62,8 +62,8 @@ This guide will help you set up Zoho Mail integration for the Bgr8 admin portal 
    ZOHO_FROM_EMAIL=info@bgr8.uk
    ZOHO_FROM_NAME=Bgr8 Team
 
-   # API Security
-   API_KEY=your_secure_random_api_key_here
+   # Firebase Admin
+   FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"..."}
    ```
 
 5. Start the email server:
@@ -80,10 +80,9 @@ This guide will help you set up Zoho Mail integration for the Bgr8 admin portal 
 1. Update your frontend environment variables:
    ```env
    VITE_EMAIL_API_BASE_URL=https://your-domain.com:3001
-   VITE_EMAIL_API_KEY=your_secure_random_api_key_here
    ```
 
-2. The frontend will automatically initialize the email service with these credentials.
+2. The frontend will automatically use Firebase Auth ID tokens for requests.
 
 ## Step 5: Test the Integration
 
@@ -107,7 +106,7 @@ This guide will help you set up Zoho Mail integration for the Bgr8 admin portal 
 
 ## Security Considerations
 
-1. **API Key**: Use a strong, random API key for authentication
+1. **Firebase Auth**: Only admin users can send email
 2. **HTTPS**: Always use HTTPS in production
 3. **Rate Limiting**: The server includes rate limiting to prevent abuse
 4. **Environment Variables**: Never commit `.env` files to version control
@@ -131,11 +130,15 @@ This guide will help you set up Zoho Mail integration for the Bgr8 admin portal 
 
 ### Testing API Endpoints
 
-You can test the email server directly:
+You can test the email server directly (requires Firebase ID token):
 
 ```bash
 # Health check
 curl https://your-domain.com:3001/api/health
+
+# Authenticated endpoint example
+curl -H "Authorization: Bearer FIREBASE_ID_TOKEN" \
+  https://your-domain.com:3001/api/email/stats
 
 # Test configuration
 curl -X POST https://your-domain.com:3001/api/email/test

@@ -50,8 +50,7 @@ function App() {
   // Initialize Email API service globally on app startup
   useEffect(() => {
     EmailService.initializeEmailApi({
-      apiBaseUrl: emailConfig.apiBaseUrl,
-      apiKey: emailConfig.apiKey
+      apiBaseUrl: emailConfig.apiBaseUrl
     });
   }, []);
 

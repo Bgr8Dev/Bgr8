@@ -300,7 +300,7 @@ Templates use a consistent HTML wrapper with:
 
 ### Email Not Sending
 - Check email service configuration
-- Verify API keys and credentials
+- Verify Firebase Admin credentials and Zoho secrets
 - Check email service logs
 - Verify recipient email addresses
 

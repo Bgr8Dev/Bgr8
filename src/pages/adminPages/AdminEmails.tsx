@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaSpinner, FaCheck, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import { EmailService, EmailTemplate, EmailDraft, SentEmail, RecipientGroup } from '../../services/emailService';
+import { EmailApiService } from '../../services/emailApiService';
 import { useAuth } from '../../hooks/useAuth';
 import RecipientSelector from '../../components/admin/emails/RecipientSelector';
 import { emailConfig, validateEmailConfig } from '../../config/emailConfig';
@@ -79,8 +80,7 @@ const AdminEmails: React.FC = () => {
   // Initialize email service
   useEffect(() => {
     EmailService.initializeEmailApi({
-      apiBaseUrl: emailConfig.apiBaseUrl,
-      apiKey: emailConfig.apiKey
+      apiBaseUrl: emailConfig.apiBaseUrl
     });
 
     const configValidation = validateEmailConfig();
@@ -159,9 +159,8 @@ const AdminEmails: React.FC = () => {
   const testEmailConfiguration = async () => {
     try {
       updateTestStatus('config', 'testing', 'Testing email configuration...');
-      const response = await fetch(`${emailConfig.apiBaseUrl}/api/config-test`, {
+      const response = await EmailApiService.fetchWithAuth('/api/config-test', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${emailConfig.apiKey}` },
       });
 
       if (response.ok) {
@@ -188,9 +187,8 @@ const AdminEmails: React.FC = () => {
       updateTestStatus('zoho', 'testing', 'Testing Zoho API setup...');
       loggers.email.log('🔍 Testing Zoho API setup...');
       
-      const response = await fetch(`${emailConfig.apiBaseUrl}/api/zoho-test`, {
+      const response = await EmailApiService.fetchWithAuth('/api/zoho-test', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${emailConfig.apiKey}` },
       });
 
       loggers.email.log('📡 Zoho test response status:', response.status, response.statusText);

@@ -115,7 +115,7 @@ export class EmailService {
   /**
    * Initialize email service with API configuration
    */
-  static initializeEmailApi(config: { apiBaseUrl: string; apiKey: string }): void {
+  static initializeEmailApi(config: { apiBaseUrl: string }): void {
     EmailApiService.initialize(config);
   }
 

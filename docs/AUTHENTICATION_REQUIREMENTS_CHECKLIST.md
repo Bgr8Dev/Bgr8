@@ -99,7 +99,7 @@ This document outlines all requirements for a professional-grade email and passw
 - ✅ **Backend validation** (server-side validation on email server API using Joi schemas)
 - ✅ **Input sanitization** (XSS prevention - utilities created in `src/utils/inputSanitization.ts`)
 - ✅ **SQL injection prevention** (not applicable - using Firestore NoSQL database, which is safe by design)
-- ✅ **CSRF protection** (handled by Firebase authentication and API key auth on email server)
+- ✅ **CSRF protection** (handled by Firebase authentication and ID token auth on email server)
 - ✅ **Request size limits** (prevent DoS attacks - 10MB body limit, 1MB email content limit on email server)
 
 ---

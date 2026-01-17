@@ -159,14 +159,14 @@ const sanitized = sanitizeInput(userInput, 'html');
 - Tokens are validated server-side by Firebase
 
 **Email Server API**:
-- Uses **API key authentication** instead of cookies
+- Uses **Firebase ID tokens** in Authorization header
 - CSRF attacks target cookie-based authentication
-- API keys in headers are not vulnerable to CSRF
+- Token-based headers are not vulnerable to CSRF
 - CORS protection limits cross-origin requests
 
 **Additional Protections**:
 - **CORS configuration** - Only allows specific origins
-- **API key authentication** - Required for all API endpoints
+- **Firebase Auth enforcement** - Required for all API endpoints
 - **Rate limiting** - Prevents abuse
 - **Same-origin policy** - Browser enforces for same-origin requests
 
@@ -265,7 +265,7 @@ const escaped = escapeHtml(html); // Should escape < and >
 ```bash
 # Test email API validation
 curl -X POST https://your-api.com/api/email/send \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer FIREBASE_ID_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "to": ["invalid-email"],  # Should fail validation
@@ -279,7 +279,7 @@ curl -X POST https://your-api.com/api/email/send \
 ```bash
 # Test with large payload (should fail)
 curl -X POST https://your-api.com/api/email/send \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer FIREBASE_ID_TOKEN" \
   -H "Content-Type: application/json" \
   -d @large-payload.json  # > 10MB file
 ```
