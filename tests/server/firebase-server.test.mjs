@@ -284,7 +284,7 @@ test('firebase-server handles malformed JSON', async (t) => {
 // ============================================================================
 
 test('firebase-server includes CORS headers', async () => {
-  const { response } = await fetch(`${baseUrl}/`, {
+  const response = await fetch(`${baseUrl}/`, {
     method: 'OPTIONS'
   });
   // CORS preflight should be handled
