@@ -10,7 +10,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.FIREBASE_SERVER_PORT || 4001;
 
-app.use(cors());
+// CORS configuration - allow all origins for now (can be restricted in production if needed)
+app.use(cors({
+  origin: true, // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json({ limit: '10mb' }));
 
 const hasFirebaseConfig = () =>

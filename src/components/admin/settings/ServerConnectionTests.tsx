@@ -271,13 +271,23 @@ export default function ServerConnectionTests() {
         const isNetworkError = fetchError instanceof Error && 
           (fetchError.message.includes('Failed to connect') || 
            fetchError.message.includes('Failed to fetch') ||
-           fetchError.message.includes('CORS'));
+           fetchError.message.includes('CORS') ||
+           fetchError.message.includes('network') ||
+           fetchError.name === 'TypeError');
         
         if (isNetworkError) {
           const isLocalhost = FIREBASE_SERVER_URL.includes('localhost') || FIREBASE_SERVER_URL.includes('127.0.0.1');
-          const helpfulMessage = isLocalhost
-            ? `Cannot connect to ${FIREBASE_SERVER_URL}. Make sure the Firebase server is running (npm run firebase:server).`
-            : `Cannot connect to ${FIREBASE_SERVER_URL}. This may be a CORS issue, network problem, or the server may be down. Check server logs.`;
+          const isProduction = FIREBASE_SERVER_URL.includes('onrender.com') || FIREBASE_SERVER_URL.includes('netlify.app');
+          const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
+          
+          let helpfulMessage;
+          if (isLocalhost) {
+            helpfulMessage = `Cannot connect to ${FIREBASE_SERVER_URL}. Make sure the Firebase server is running (npm run firebase:server).`;
+          } else if (isProduction && currentOrigin.includes('localhost')) {
+            helpfulMessage = `Cannot connect from localhost (${currentOrigin}) to production server (${FIREBASE_SERVER_URL}). This is likely a CORS issue. The production server may not allow requests from localhost origins.`;
+          } else {
+            helpfulMessage = `Cannot connect to ${FIREBASE_SERVER_URL}. Possible causes: CORS issue, network problem, server down, or firewall blocking. Check server logs and ensure CORS is configured to allow requests from ${currentOrigin}.`;
+          }
           
           stages[1].status = 'error';
           stages[1].message = helpfulMessage;
