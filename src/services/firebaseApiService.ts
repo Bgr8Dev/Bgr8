@@ -96,8 +96,51 @@ export class FirebaseApiService {
    * Health check
    */
   static async healthCheck(): Promise<{ status: string; service: string }> {
-    const response = await fetch(`${FIREBASE_SERVER_URL}/`);
-    return await response.json();
+    try {
+      // Create an AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      try {
+        // Health check does NOT require authentication
+        // Explicitly do NOT include Authorization header
+        const response = await fetch(`${FIREBASE_SERVER_URL}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Explicitly exclude Authorization header for health checks
+          },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          throw new Error(`Health check failed: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          throw new Error(`Request timeout: Server at ${FIREBASE_SERVER_URL} did not respond within 10 seconds`);
+        }
+        throw fetchError;
+      }
+    } catch (error) {
+      if (error instanceof TypeError && (error.message === 'Failed to fetch' || error.message.includes('fetch'))) {
+        // Network error - could be CORS, server down, or network issue
+        const isLocalhost = FIREBASE_SERVER_URL.includes('localhost') || FIREBASE_SERVER_URL.includes('127.0.0.1');
+        const errorMsg = isLocalhost
+          ? `Failed to connect to ${FIREBASE_SERVER_URL}. Is the server running? Try: npm run firebase:server`
+          : `Failed to connect to ${FIREBASE_SERVER_URL}. This could be a CORS issue, network problem, or the server may be down.`;
+        throw new Error(errorMsg);
+      }
+      throw error;
+    }
   }
 
   // ============================================================================
