@@ -41,16 +41,24 @@ const getBearerToken = (req) => {
 };
 
 const authenticateRequest = async (req, res, next) => {
+  // Skip auth for health check endpoint
+  if (req.path === '/' || req.path === '') {
+    return next();
+  }
+
   try {
     const token = getBearerToken(req);
-    if (!token) {
+    if (!token || token.trim() === '') {
       return res.status(401).json({ error: 'Missing auth token' });
     }
     const decodedToken = await admin.auth().verifyIdToken(token);
     req.auth = { uid: decodedToken.uid, email: decodedToken.email };
     return next();
   } catch (error) {
-    serverLogger.warn('Auth token verification failed.', error);
+    // Only log auth failures for non-health-check routes
+    if (req.path !== '/' && req.path !== '') {
+      serverLogger.warn('Auth token verification failed.', error);
+    }
     return res.status(401).json({ error: 'Invalid auth token' });
   }
 };
@@ -85,8 +93,10 @@ const checkPermission = async (req, targetUid) => {
   return false;
 };
 
-// Health check endpoint
+// Health check endpoint (no auth required)
+// This must be defined before any middleware that might interfere
 app.get('/', (_req, res) => {
+  // Explicitly skip auth for health checks
   res.json({ status: 'ok', service: 'firebase-server' });
 });
 
