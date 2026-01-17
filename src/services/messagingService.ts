@@ -11,21 +11,18 @@
 import {
   collection,
   doc,
-  addDoc,
-  setDoc,
   getDoc,
   getDocs,
   query,
   where,
   limit,
-  updateDoc,
-  serverTimestamp,
   Timestamp,
   onSnapshot,
   Unsubscribe,
   writeBatch
 } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
+import { FirebaseApiService } from './firebaseApiService';
 import { getBestMatchesForUser } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { MentorMenteeProfile } from '../components/widgets/MentorAlgorithm/algorithm/matchUsers';
 import { loggers } from '../utils/logger';
@@ -114,57 +111,23 @@ export class MessagingService {
   /**
    * Get or create a conversation between two users
    * Public method to allow external components to get/create conversations
+   * Note: currentUserId is kept for interface compatibility but not used (server gets it from auth token)
    */
   static async getOrCreateConversation(
     currentUserId: string,
     otherUserId: string
   ): Promise<string> {
-    const conversationId = this.getConversationId(currentUserId, otherUserId);
-    const conversationRef = doc(firestore, this.CONVERSATIONS_COLLECTION, conversationId);
-
-    const conversationDoc = await getDoc(conversationRef);
-
-    if (!conversationDoc.exists()) {
-      // Get user profiles for names
-      const [currentUserProfile, otherUserProfile] = await Promise.all([
-        getDoc(doc(firestore, 'users', currentUserId, 'mentorProgram', 'profile')),
-        getDoc(doc(firestore, 'users', otherUserId, 'mentorProgram', 'profile'))
-      ]);
-
-      const currentUserData = currentUserProfile.data() as MentorMenteeProfile | undefined;
-      const otherUserData = otherUserProfile.data() as MentorMenteeProfile | undefined;
-
-      const currentUserName = currentUserData 
-        ? `${currentUserData.firstName} ${currentUserData.lastName}`
-        : 'User';
-      const otherUserName = otherUserData
-        ? `${otherUserData.firstName} ${otherUserData.lastName}`
-        : 'User';
-
-      // Create conversation document with both participants using conversationId as document ID
-      const conversationRef = doc(firestore, this.CONVERSATIONS_COLLECTION, conversationId);
-      await setDoc(conversationRef, {
-        participant1Id: currentUserId,
-        participant1Name: currentUserName,
-        participant2Id: otherUserId,
-        participant2Name: otherUserName,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        lastMessage: null,
-        unreadCount_participant1: 0,
-        unreadCount_participant2: 0,
-        isPinned_participant1: false,
-        isPinned_participant2: false,
-        isArchived_participant1: false,
-        isArchived_participant2: false
-      });
+    try {
+      return await FirebaseApiService.getOrCreateConversation(otherUserId);
+    } catch (error) {
+      loggers.error.error('Error getting/creating conversation:', error);
+      throw error;
     }
-
-    return conversationId;
   }
 
   /**
    * Send a message to another user (only if matched)
+   * Note: senderId is kept for interface compatibility but not used (server gets it from auth token)
    */
   static async sendMessage(
     senderId: string,
@@ -179,228 +142,123 @@ export class MessagingService {
       throw new Error('You can only message users you are matched with');
     }
 
-    // Get user profiles for names
-    const [senderProfile, recipientProfile] = await Promise.all([
-      getDoc(doc(firestore, 'users', senderId, 'mentorProgram', 'profile')),
-      getDoc(doc(firestore, 'users', recipientId, 'mentorProgram', 'profile'))
-    ]);
-
-    const senderData = senderProfile.data() as MentorMenteeProfile | undefined;
-    const recipientData = recipientProfile.data() as MentorMenteeProfile | undefined;
-
-    const senderName = senderData
-      ? `${senderData.firstName} ${senderData.lastName}`
-      : 'User';
-    const recipientName = recipientData
-      ? `${recipientData.firstName} ${recipientData.lastName}`
-      : 'User';
-
-    // Get or create conversation
-    const conversationId = await this.getOrCreateConversation(senderId, recipientId);
-
-    // Create message
-    const messageRef = await addDoc(collection(firestore, this.MESSAGES_COLLECTION), {
-      conversationId,
-      senderId,
-      senderName,
-      recipientId,
-      recipientName,
-      content,
-      timestamp: serverTimestamp(),
-      isRead: false,
-      isDelivered: false,
-      type,
-      attachments: attachments || []
-    });
-
-    // Update match's last message timestamp (if matched)
     try {
-      const { MatchesService } = await import('./matchesService');
-      await MatchesService.updateLastMessageAt(senderId, recipientId);
-      // Increment unread count for recipient
-      await MatchesService.incrementUnreadCount(recipientId, senderId);
+      const messageId = await FirebaseApiService.sendMessage(
+        recipientId,
+        content,
+        type,
+        attachments
+      );
+
+      // Update match's last message timestamp (if matched)
+      try {
+        const { MatchesService } = await import('./matchesService');
+        await MatchesService.updateLastMessageAt(senderId, recipientId);
+        // Increment unread count for recipient
+        await MatchesService.incrementUnreadCount(recipientId, senderId);
+      } catch (error) {
+        loggers.error.error('Error updating match timestamp:', error);
+        // Don't fail the message send if this fails
+      }
+
+      return messageId;
     } catch (error) {
-      loggers.error.error('Error updating match timestamp:', error);
-      // Don't fail the message send if this fails
+      loggers.error.error('Error sending message:', error);
+      throw error;
     }
-
-    // Update conversation with last message
-    const conversationRef = doc(firestore, this.CONVERSATIONS_COLLECTION, conversationId);
-    const conversationDoc = await getDoc(conversationRef);
-    
-    if (conversationDoc.exists()) {
-      const conversationData = conversationDoc.data();
-      const isParticipant1 = conversationData.participant1Id === senderId;
-      const unreadField = isParticipant1 ? 'unreadCount_participant2' : 'unreadCount_participant1';
-      const currentUnread = conversationData[unreadField] || 0;
-      
-      await updateDoc(conversationRef, {
-        lastMessage: {
-          id: messageRef.id,
-          content,
-          timestamp: serverTimestamp(),
-          senderId,
-          senderName
-        },
-        updatedAt: serverTimestamp(),
-        [unreadField]: currentUnread + 1
-      });
-    }
-
-    return messageRef.id;
   }
 
   /**
    * Get all conversations for a user
+   * Note: userId is kept for interface compatibility but not used (server gets it from auth token)
    */
   static async getConversations(userId: string): Promise<Conversation[]> {
-    // Get all conversations where user is a participant
-    const conversationsQuery = query(
-      collection(firestore, this.CONVERSATIONS_COLLECTION),
-      where('participant1Id', '==', userId)
-    );
-    
-    const conversationsQuery2 = query(
-      collection(firestore, this.CONVERSATIONS_COLLECTION),
-      where('participant2Id', '==', userId)
-    );
+    try {
+      const conversationsData = await FirebaseApiService.getConversations();
+      
+      return conversationsData.map((convData: any) => {
+        const createdAt = convData.createdAt instanceof Date
+          ? Timestamp.fromDate(convData.createdAt)
+          : convData.createdAt || Timestamp.now();
+        
+        const updatedAt = convData.updatedAt instanceof Date
+          ? Timestamp.fromDate(convData.updatedAt)
+          : convData.updatedAt || Timestamp.now();
 
-    const [snapshot1, snapshot2] = await Promise.all([
-      getDocs(conversationsQuery),
-      getDocs(conversationsQuery2)
-    ]);
+        // Convert lastMessage timestamp if present
+        let lastMessage: Message | null = null;
+        if (convData.lastMessage) {
+          const msgTimestamp = convData.lastMessage.timestamp instanceof Date
+            ? Timestamp.fromDate(convData.lastMessage.timestamp)
+            : convData.lastMessage.timestamp;
+          
+          lastMessage = {
+            id: convData.lastMessage.id,
+            conversationId: convData.id,
+            senderId: convData.lastMessage.senderId,
+            senderName: convData.lastMessage.senderName,
+            recipientId: convData.lastMessage.recipientId || convData.participantId,
+            recipientName: convData.lastMessage.recipientName || convData.participantName,
+            content: convData.lastMessage.content,
+            timestamp: msgTimestamp,
+            isRead: convData.lastMessage.isRead || false,
+            isDelivered: true,
+            type: convData.lastMessage.type || 'text'
+          };
+        }
 
-    const conversations: Conversation[] = [];
-
-    // Process conversations where user is participant1
-    snapshot1.forEach(doc => {
-      const data = doc.data();
-      const otherUserId = data.participant2Id;
-      const otherUserName = data.participant2Name;
-      const unreadCount = data.unreadCount_participant1 || 0;
-      const isPinned = data.isPinned_participant1 || false;
-      const isArchived = data.isArchived_participant1 || false;
-
-      conversations.push({
-        id: doc.id,
-        participantId: otherUserId,
-        participantName: otherUserName,
-        lastMessage: data.lastMessage ? {
-          id: data.lastMessage.id,
-          conversationId: doc.id,
-          senderId: data.lastMessage.senderId,
-          senderName: data.lastMessage.senderName,
-          recipientId: data.lastMessage.senderId === userId ? otherUserId : userId,
-          recipientName: data.lastMessage.senderId === userId ? otherUserName : data.lastMessage.senderName,
-          content: data.lastMessage.content,
-          timestamp: data.lastMessage.timestamp,
-          isRead: data.lastMessage.senderId === userId,
-          isDelivered: true,
-          type: 'text'
-        } : null,
-        unreadCount,
-        isOnline: false, // TODO: Implement online status
-        isPinned,
-        isArchived,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt
+        return {
+          id: convData.id,
+          participantId: convData.participantId,
+          participantName: convData.participantName,
+          participantAvatar: convData.participantAvatar,
+          lastMessage,
+          unreadCount: convData.unreadCount || 0,
+          isOnline: convData.isOnline || false,
+          isPinned: convData.isPinned || false,
+          isArchived: convData.isArchived || false,
+          createdAt,
+          updatedAt
+        } as Conversation;
       });
-    });
-
-    // Process conversations where user is participant2
-    snapshot2.forEach(doc => {
-      const data = doc.data();
-      const otherUserId = data.participant1Id;
-      const otherUserName = data.participant1Name;
-      const unreadCount = data.unreadCount_participant2 || 0;
-      const isPinned = data.isPinned_participant2 || false;
-      const isArchived = data.isArchived_participant2 || false;
-
-      conversations.push({
-        id: doc.id,
-        participantId: otherUserId,
-        participantName: otherUserName,
-        lastMessage: data.lastMessage ? {
-          id: data.lastMessage.id,
-          conversationId: doc.id,
-          senderId: data.lastMessage.senderId,
-          senderName: data.lastMessage.senderName,
-          recipientId: data.lastMessage.senderId === userId ? otherUserId : userId,
-          recipientName: data.lastMessage.senderId === userId ? otherUserName : data.lastMessage.senderName,
-          content: data.lastMessage.content,
-          timestamp: data.lastMessage.timestamp,
-          isRead: data.lastMessage.senderId === userId,
-          isDelivered: true,
-          type: 'text'
-        } : null,
-        unreadCount,
-        isOnline: false, // TODO: Implement online status
-        isPinned,
-        isArchived,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt
-      });
-    });
-
-    // Sort by updatedAt descending
-    conversations.sort((a, b) => {
-      const aTime = a.updatedAt instanceof Timestamp ? a.updatedAt.toMillis() : new Date(a.updatedAt).getTime();
-      const bTime = b.updatedAt instanceof Timestamp ? b.updatedAt.toMillis() : new Date(b.updatedAt).getTime();
-      return bTime - aTime;
-    });
-
-    return conversations;
+    } catch (error) {
+      loggers.error.error('Error getting conversations:', error);
+      return [];
+    }
   }
 
   /**
    * Get messages for a conversation
-   * Note: We query without orderBy to avoid index requirements, then sort in memory
    */
   static async getMessages(conversationId: string, limitCount: number = 50): Promise<Message[]> {
-    const messagesQuery = query(
-      collection(firestore, this.MESSAGES_COLLECTION),
-      where('conversationId', '==', conversationId)
-    );
+    try {
+      const messagesData = await FirebaseApiService.getMessages(conversationId, limitCount);
+      
+      return messagesData.map((msgData: any) => {
+        const timestamp = msgData.timestamp instanceof Date
+          ? Timestamp.fromDate(msgData.timestamp)
+          : msgData.timestamp || Timestamp.now();
 
-    const snapshot = await getDocs(messagesQuery);
-    const messages: Message[] = [];
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      messages.push({
-        id: doc.id,
-        conversationId: data.conversationId,
-        senderId: data.senderId,
-        senderName: data.senderName,
-        senderAvatar: data.senderAvatar,
-        recipientId: data.recipientId,
-        recipientName: data.recipientName,
-        content: data.content,
-        timestamp: data.timestamp,
-        isRead: data.isRead || false,
-        isDelivered: data.isDelivered || false,
-        type: data.type || 'text',
-        attachments: data.attachments || []
+        return {
+          id: msgData.id,
+          conversationId: msgData.conversationId,
+          senderId: msgData.senderId,
+          senderName: msgData.senderName,
+          senderAvatar: msgData.senderAvatar,
+          recipientId: msgData.recipientId,
+          recipientName: msgData.recipientName,
+          content: msgData.content,
+          timestamp,
+          isRead: msgData.isRead || false,
+          isDelivered: msgData.isDelivered || false,
+          type: msgData.type || 'text',
+          attachments: msgData.attachments || []
+        } as Message;
       });
-    });
-
-    // Sort by timestamp in descending order (most recent first), then reverse for chronological
-    messages.sort((a, b) => {
-      const dateA = a.timestamp instanceof Timestamp 
-        ? a.timestamp.toMillis() 
-        : a.timestamp instanceof Date 
-        ? a.timestamp.getTime() 
-        : new Date(a.timestamp).getTime();
-      const dateB = b.timestamp instanceof Timestamp 
-        ? b.timestamp.toMillis() 
-        : b.timestamp instanceof Date 
-        ? b.timestamp.getTime() 
-        : new Date(b.timestamp).getTime();
-      return dateB - dateA; // Descending order (most recent first)
-    });
-
-    // Limit and reverse to get chronological order (oldest first)
-    return messages.slice(0, limitCount).reverse();
+    } catch (error) {
+      loggers.error.error('Error getting messages:', error);
+      return [];
+    }
   }
 
   /**
@@ -465,32 +323,12 @@ export class MessagingService {
    * Mark messages as read
    */
   static async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
-    const messagesQuery = query(
-      collection(firestore, this.MESSAGES_COLLECTION),
-      where('conversationId', '==', conversationId),
-      where('recipientId', '==', userId),
-      where('isRead', '==', false)
-    );
-
-    const snapshot = await getDocs(messagesQuery);
-    const batch = writeBatch(firestore);
-
-    snapshot.forEach(doc => {
-      batch.update(doc.ref, { isRead: true });
-    });
-
-    await batch.commit();
-
-    // Update conversation unread count
-    const conversationRef = doc(firestore, this.CONVERSATIONS_COLLECTION, conversationId);
-    const conversationDoc = await getDoc(conversationRef);
-    
-    if (conversationDoc.exists()) {
-      const data = conversationDoc.data();
-      const isParticipant1 = data.participant1Id === userId;
-      await updateDoc(conversationRef, {
-        [`unreadCount_${isParticipant1 ? 'participant1' : 'participant2'}`]: 0
-      });
+    try {
+      // The server handles marking messages as read and updating conversation unread count
+      await FirebaseApiService.markMessagesAsRead(conversationId);
+    } catch (error) {
+      loggers.error.error('Error marking messages as read:', error);
+      throw error;
     }
   }
 

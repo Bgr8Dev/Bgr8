@@ -1,0 +1,20 @@
+{
+  "name": "firebase-server",
+  "version": "1.0.0",
+  "description": "Firebase proxy server for secure Firestore operations",
+  "main": "firebaseServer.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node firebaseServer.mjs",
+    "dev": "node --watch firebaseServer.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.0.0"
+  }
+}
